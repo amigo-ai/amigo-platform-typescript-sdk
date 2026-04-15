@@ -3,6 +3,7 @@ import type {
   AgentVersion,
   CreateAgentRequest,
   UpdateAgentRequest,
+  CreateAgentVersionRequest,
   PaginatedResponse,
 } from '../types/api.js'
 import type { AgentId } from '../core/branded-types.js'
@@ -11,12 +12,9 @@ import type { ListParams } from '../core/utils.js'
 
 export interface ListAgentsParams extends ListParams {
   search?: string
-  is_active?: boolean
 }
 
-export interface ListAgentVersionsParams extends ListParams {
-  version?: number
-}
+export interface ListAgentVersionsParams extends ListParams {}
 
 /**
  * Manage agents — the AI personas that handle calls and interactions.
@@ -54,11 +52,6 @@ export class AgentsResource extends WorkspaceScopedResource {
     return this.fetch<void>(`/agents/${agentId}`, { method: 'DELETE' })
   }
 
-  /** Create a new version snapshot of the agent's current config */
-  async createVersion(agentId: AgentId | string): Promise<AgentVersion> {
-    return this.fetch<AgentVersion>(`/agents/${agentId}/versions`, { method: 'POST' })
-  }
-
   /** List all versions of an agent */
   async listVersions(
     agentId: AgentId | string,
@@ -69,8 +62,16 @@ export class AgentsResource extends WorkspaceScopedResource {
     )
   }
 
-  /** Get a specific version of an agent */
-  async getVersion(agentId: AgentId | string, version: number): Promise<AgentVersion> {
+  /** Get a specific version of an agent — pass `"latest"` to get the most recent */
+  async getVersion(agentId: AgentId | string, version: number | 'latest'): Promise<AgentVersion> {
     return this.fetch<AgentVersion>(`/agents/${agentId}/versions/${version}`)
+  }
+
+  /** Create a new version of an agent */
+  async createVersion(agentId: AgentId | string, body: CreateAgentVersionRequest): Promise<AgentVersion> {
+    return this.fetch<AgentVersion>(`/agents/${agentId}/versions`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
   }
 }

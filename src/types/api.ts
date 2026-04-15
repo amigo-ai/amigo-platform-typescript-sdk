@@ -98,12 +98,8 @@ export interface Agent {
   id: string
   workspace_id: string
   name: string
-  description: string | null
-  persona_id: string | null
-  skill_ids: string[]
-  model: string
-  version: number
-  is_active: boolean
+  description: string
+  latest_version: number | null
   created_at: string
   updated_at: string
 }
@@ -111,25 +107,57 @@ export interface Agent {
 export interface CreateAgentRequest {
   name: string
   description?: string
-  persona_id?: string
-  skill_ids?: string[]
-  model?: string
 }
 
 export interface UpdateAgentRequest {
-  name?: string
-  description?: string
-  persona_id?: string
-  skill_ids?: string[]
-  model?: string
-  is_active?: boolean
+  name?: string | null
+  description?: string | null
+}
+
+export interface AgentIdentity {
+  name: string
+  role: string
+  developed_by: string
+  default_spoken_language: string
+  relationship_to_developer: {
+    ownership: string
+    type: string
+    conversation_visibility: string
+    thought_visibility: string
+  }
+}
+
+export interface AgentVoiceConfig {
+  voice_id: string
+  stability?: number
+  similarity_boost?: number
+  style?: number
 }
 
 export interface AgentVersion {
+  id: string
+  workspace_id: string
   agent_id: string
   version: number
-  config_snapshot: Record<string, unknown>
+  name: string
+  initials: string
+  identity: AgentIdentity
+  voice_config: AgentVoiceConfig | null
+  background: string
+  behaviors: string[]
+  communication_patterns: string[]
   created_at: string
+  updated_at: string
+}
+
+export interface CreateAgentVersionRequest {
+  name: string
+  initials?: string
+  identity: AgentIdentity
+  voice_config?: AgentVoiceConfig | null
+  background?: string
+  behaviors?: string[]
+  communication_patterns?: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -660,47 +688,69 @@ export interface OperatorDashboard {
 // Simulations
 // ---------------------------------------------------------------------------
 
-export interface SimulationRun {
-  id: string
-  workspace_id: string
-  name: string
-  status: 'pending' | 'running' | 'completed' | 'failed'
-  config: Record<string, unknown>
-  results: Record<string, unknown> | null
-  started_at: string | null
-  completed_at: string | null
-  created_at: string
+export interface SimulationConversationTurn {
+  role: string
+  text: string
+  emotion: string | null
 }
 
-export interface CreateSimulationRunRequest {
+export interface SimulationState {
   name: string
-  config: Record<string, unknown>
+  type: string
+  objective: string
+  actions: Record<string, unknown>[]
+  exit_conditions: Record<string, unknown>[]
+  action_guidelines: string[]
+  boundary_constraints: string[]
+  guardrails: Record<string, unknown>[]
+  tools: string[]
+}
+
+export interface SimulationSnapshot {
+  current_state: SimulationState
+  reachable_states: Record<string, unknown>[]
+  conversation_history: SimulationConversationTurn[]
+  states_visited: string[]
+  state_transitions: string[][]
+  total_turns: number
+  tools_called: string[]
+  terminal_reached: boolean
+  terminal_state: string | null
 }
 
 export interface SimulationSession {
-  id: string
-  workspace_id: string
-  agent_id: string
-  status: 'active' | 'completed' | 'abandoned'
-  messages: SimulationMessage[]
-  created_at: string
-  updated_at: string
+  session_id: string
+  greeting: string
+  is_terminal: boolean
+  snapshot: SimulationSnapshot
 }
 
-export interface SimulationMessage {
-  role: 'user' | 'agent'
-  content: string
-  created_at: string
+export interface SimulationStepObservation {
+  state_before: string
+  state_after: string
+  state_changed: boolean
+  agent_text: string
+  is_terminal: boolean
+  tools_called: string[]
+  empathy_tier: number
+  has_pause: boolean
+}
+
+export interface SimulationStepResponse {
+  observation: SimulationStepObservation
+  snapshot: SimulationSnapshot
 }
 
 export interface CreateSimulationSessionRequest {
-  agent_id: string
-  initial_message?: string
+  service_id: string
+  branch_name?: string
 }
 
 export interface StepSimulationSessionRequest {
   session_id: string
-  message: string
+  caller_text: string
+  emotion?: string
+  valence?: number
 }
 
 // ---------------------------------------------------------------------------

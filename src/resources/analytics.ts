@@ -69,10 +69,11 @@ export interface DataQualityMetrics {
 }
 
 export interface AnalyticsQueryParams {
+  /** Shorthand period, e.g. "7d", "30d" */
+  period?: string
   start_date?: string
   end_date?: string
   agent_id?: string
-  granularity?: 'hour' | 'day' | 'week' | 'month'
 }
 
 export interface AdvancedCallStats {
@@ -95,8 +96,8 @@ export interface CallComparison {
  * Endpoint paths match the developer console API client exactly.
  */
 export class AnalyticsResource extends WorkspaceScopedResource {
-  /** High-level dashboard summary with sparklines */
-  async getDashboard(params?: AnalyticsQueryParams): Promise<AnalyticsDashboard> {
+  /** High-level dashboard summary — pass `days` (default: 7) for the lookback window */
+  async getDashboard(params?: { days?: number }): Promise<AnalyticsDashboard> {
     return this.fetch<AnalyticsDashboard>(`/analytics/dashboard${buildQuery(params)}`)
   }
 
@@ -152,10 +153,11 @@ export class AnalyticsResource extends WorkspaceScopedResource {
 
   /** Compare two time periods side by side */
   async compareCallPeriods(params: {
-    period_a_start: string
-    period_a_end: string
-    period_b_start: string
-    period_b_end: string
+    current_from: string
+    current_to: string
+    previous_from: string
+    previous_to: string
+    service_id?: string
   }): Promise<CallComparison> {
     return this.fetch<CallComparison>(`/analytics/calls/comparison${buildQuery(params)}`)
   }

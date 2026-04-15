@@ -4,6 +4,50 @@ import { setupServer } from 'msw/node'
 import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import { fixtures, TEST_API_KEY, TEST_WORKSPACE_ID, WS_BASE } from '../test-helpers.js'
+import type { CreateAgentVersionRequest } from '../../src/types/api.js'
+
+const AGENT_VERSION_FIXTURE = {
+  id: 'av-00000000-0000-0000-0000-000000000001',
+  workspace_id: TEST_WORKSPACE_ID,
+  agent_id: fixtures.agent().id,
+  version: 2,
+  name: 'My Agent v2',
+  initials: 'MA',
+  identity: {
+    name: 'My Agent',
+    role: 'Assistant',
+    developed_by: 'Acme',
+    default_spoken_language: 'en',
+    relationship_to_developer: {
+      ownership: 'Acme',
+      type: 'assistant',
+      conversation_visibility: 'public',
+      thought_visibility: 'private',
+    },
+  },
+  voice_config: null,
+  background: '',
+  behaviors: [],
+  communication_patterns: [],
+  created_at: '2026-01-02T00:00:00Z',
+  updated_at: '2026-01-02T00:00:00Z',
+}
+
+const CREATE_VERSION_BODY: CreateAgentVersionRequest = {
+  name: 'My Agent v2',
+  identity: {
+    name: 'My Agent',
+    role: 'Assistant',
+    developed_by: 'Acme',
+    default_spoken_language: 'en',
+    relationship_to_developer: {
+      ownership: 'Acme',
+      type: 'assistant',
+      conversation_visibility: 'public',
+      thought_visibility: 'private',
+    },
+  },
+}
 
 const server = setupServer(
   http.get(`${WS_BASE}/agents`, () =>
@@ -28,12 +72,7 @@ const server = setupServer(
   }),
   http.delete(`${WS_BASE}/agents/:agentId`, () => new HttpResponse(null, { status: 204 })),
   http.post(`${WS_BASE}/agents/:agentId/versions`, () =>
-    HttpResponse.json({
-      agent_id: fixtures.agent().id,
-      version: 2,
-      config_snapshot: {},
-      created_at: '2026-01-02T00:00:00Z',
-    }),
+    HttpResponse.json(AGENT_VERSION_FIXTURE),
   ),
 )
 
@@ -52,7 +91,7 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent', async () => {
-    const result = await client.agents.create({ name: 'My Agent', model: 'claude-sonnet-4-6' })
+    const result = await client.agents.create({ name: 'My Agent' })
     expect(result.name).toBe('My Agent')
   })
 
@@ -75,8 +114,9 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent version', async () => {
-    const result = await client.agents.createVersion(fixtures.agent().id)
+    const result = await client.agents.createVersion(fixtures.agent().id, CREATE_VERSION_BODY)
     expect(result.version).toBe(2)
     expect(result.agent_id).toBe(fixtures.agent().id)
+    expect(result.identity.name).toBe('My Agent')
   })
 })

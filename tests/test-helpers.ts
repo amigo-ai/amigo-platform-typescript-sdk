@@ -1,6 +1,6 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { setupServer } from 'msw/node'
-import type { Agent, Skill, Trigger, Entity, PaginatedResponse } from '../src/types/api.js'
+import type { Agent, Skill, Entity, PaginatedResponse } from '../src/types/api.js'
 
 export const TEST_API_KEY = 'test-api-key-abc123'
 export const TEST_WORKSPACE_ID = 'ws-test-00000000-0000-0000-0000-000000000001'
@@ -15,11 +15,7 @@ export const fixtures = {
     workspace_id: TEST_WORKSPACE_ID,
     name: 'Test Agent',
     description: 'A test agent',
-    persona_id: null,
-    skill_ids: [],
-    model: 'claude-sonnet-4-6',
-    version: 1,
-    is_active: true,
+    latest_version: 1,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
   }),
@@ -39,24 +35,6 @@ export const fixtures = {
     static_tools: [],
     version: 1,
     enabled: true,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  }),
-
-  trigger: (): Trigger => ({
-    id: 'trigger-00000000-0000-0000-0000-000000000001',
-    workspace_id: TEST_WORKSPACE_ID,
-    name: 'Test Trigger',
-    description: null,
-    event_type: null,
-    event_filter: null,
-    action_id: 'skill-00000000-0000-0000-0000-000000000001',
-    input_template: {},
-    schedule: '0 13 * * 1-5',
-    timezone: 'America/New_York',
-    is_active: true,
-    next_fire_at: '2026-04-16T17:00:00Z',
-    last_fired_at: null,
     created_at: '2026-01-01T00:00:00Z',
     updated_at: '2026-01-01T00:00:00Z',
   }),

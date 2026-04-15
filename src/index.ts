@@ -247,7 +247,6 @@ export type {
 } from './resources/world.js'
 
 export type {
-  SimulationTurn,
   SimulationIntelligence,
 } from './resources/simulations.js'
 
@@ -287,8 +286,11 @@ export type {
   AuthMeResponse,
   Agent,
   AgentVersion,
+  AgentIdentity,
+  AgentVoiceConfig,
   CreateAgentRequest,
   UpdateAgentRequest,
+  CreateAgentVersionRequest,
   Skill,
   ExecutionTier,
   CreateSkillRequest,
@@ -327,6 +329,9 @@ export type {
   DailyAnalyticsEntry,
   AgentPerformance,
   SimulationSession,
+  SimulationSnapshot,
+  SimulationStepResponse,
+  SimulationStepObservation,
   CreateSimulationSessionRequest,
   UsageSummary,
   Invoice,
