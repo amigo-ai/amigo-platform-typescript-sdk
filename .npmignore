@@ -1,0 +1,13 @@
+src/
+tests/
+scripts/
+examples/
+*.config.ts
+*.config.js
+tsconfig*.json
+.eslintrc*
+eslint.config*
+.prettierrc*
+.husky/
+coverage/
+node_modules/
