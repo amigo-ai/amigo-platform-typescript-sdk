@@ -21,28 +21,24 @@ const client = new AmigoClient({
 // List agents
 const { items: agents } = await client.agents.list()
 
-// Create a trigger
-const trigger = await client.triggers.create({
-  name: 'Daily Outreach',
-  action_id: 'skill-id',
-  schedule: '0 13 * * 1-5',
-  timezone: 'America/New_York',
-})
-
 // Emit a world event
 await client.world.emitEvent({
   entity_id: 'entity-id',
   event_type: 'appointment_scheduled',
   data: { appointment_id: 'appt-001' },
 })
+
+// Get call analytics for the last 30 days
+const stats = await client.analytics.getCalls({ period: '30d' })
+console.log(stats.total_calls, stats.avg_duration_seconds)
 ```
 
 ## Configuration
 
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
-| `apiKey` | `string` | Yes | Your Platform API key (create at workspace settings) |
-| `workspaceId` | `string` | Yes | Your workspace ID (all resource operations are scoped to this) |
+| `apiKey` | `string` | Yes | Your Platform API key — create one at Workspace Settings > API Keys |
+| `workspaceId` | `string` | Yes | Your workspace ID — all resource operations are scoped to this |
 | `baseUrl` | `string` | No | Override the API base URL (default: `https://api.platform.amigo.ai`) |
 | `retry` | `RetryOptions` | No | Retry configuration for transient failures |
 
@@ -55,54 +51,45 @@ const client = new AmigoClient({
   retry: {
     maxAttempts: 3,    // Total attempts including first. Default: 3
     baseDelayMs: 250,  // Base delay for exponential backoff. Default: 250
-    maxDelayMs: 30000, // Max delay cap. Default: 30_000
+    maxDelayMs: 30000, // Cap on delay. Default: 30_000
   },
 })
 ```
 
-GET requests are retried on 408, 429, 500, 502, 503, 504. POST requests are only retried on 429 with a `Retry-After` header (idempotency concern). Backoff uses full jitter to avoid thundering herds.
+GET requests are retried on 408, 429, 500, 502, 503, 504. POST requests are only retried on 429 with a `Retry-After` header. Backoff uses full jitter.
 
 ## Resources
-
-### Workspaces
-
-```typescript
-const workspace = await client.workspaces.get('workspace-id')
-const { items } = await client.workspaces.list()
-await client.workspaces.update('workspace-id', { name: 'New Name' })
-```
-
-### API Keys
-
-```typescript
-// Check current key info
-const me = await client.apiKeys.me()
-
-// Create a key with limited permissions
-const key = await client.apiKeys.create({
-  name: 'App Key',
-  duration_days: 30,
-  role: 'member',
-})
-console.log(key.api_key) // Only shown once — store it securely
-
-// Rotate a key
-const rotated = await client.apiKeys.rotate(key.key_id)
-```
 
 ### Agents
 
 ```typescript
+// Create an agent
 const agent = await client.agents.create({
   name: 'Patient Intake Agent',
-  model: 'claude-sonnet-4-6',
-  skill_ids: ['skill-id-1', 'skill-id-2'],
+  description: 'Handles inbound scheduling calls',
 })
 
-// Create a version snapshot before modifying
-await client.agents.createVersion(agent.id)
+// Create a version (the versioned config object)
+const version = await client.agents.createVersion(agent.id, {
+  name: 'v1',
+  identity: {
+    name: 'Alex',
+    role: 'Scheduling Coordinator',
+    developed_by: 'Acme Health',
+    default_spoken_language: 'en',
+    relationship_to_developer: {
+      ownership: 'Acme Health',
+      type: 'assistant',
+      conversation_visibility: 'public',
+      thought_visibility: 'private',
+    },
+  },
+})
 
-const { items: agents } = await client.agents.list({ is_active: true })
+// Get the latest version
+const latest = await client.agents.getVersion(agent.id, 'latest')
+
+const { items: agents } = await client.agents.list({ search: 'intake' })
 ```
 
 ### Skills
@@ -130,37 +117,29 @@ const result = await client.skills.test(skill.id, {
 console.log(result.success, result.output)
 ```
 
-### Triggers
+### Services
+
+Services wire together an agent + context graph + phone channel.
 
 ```typescript
-// Create a scheduled trigger (cron)
-const trigger = await client.triggers.create({
-  name: 'Daily Outreach',
-  action_id: 'skill-id',
-  schedule: '0 13 * * 1-5',  // Weekdays at 1 PM ET
-  timezone: 'America/New_York',
-  input_template: { lookback_hours: 24 },
-})
-
-// Fire immediately (for testing)
-const run = await client.triggers.fire(trigger.id)
-
-// Pause / resume
-await client.triggers.pause(trigger.id)
-await client.triggers.resume(trigger.id)
+const { items: services } = await client.services.list()
+const service = await client.services.get('service-id')
+console.log(service.agent_name, service.channel_type, service.version_sets)
 ```
 
 ### World Model
+
+The world model tracks entities (patients, contacts, appointments) and the events that flow through them.
 
 ```typescript
 // Create an entity
 const patient = await client.world.createEntity({
   entity_type: 'patient',
   canonical_id: 'MRN-12345',
-  properties: { name: 'Jane Doe', phone: '+15555550123' },
+  display_name: 'Jane Doe',
 })
 
-// Emit events
+// Emit an event
 await client.world.emitEvent({
   entity_id: patient.id,
   event_type: 'call_completed',
@@ -170,52 +149,117 @@ await client.world.emitEvent({
 // Query timeline
 const timeline = await client.world.getTimeline(patient.id)
 
-// Find duplicate/similar entities
-const similar = await client.world.getSimilar(patient.id)
+// Search entities
+const results = await client.world.search('Jane Doe', { entity_type: 'patient' })
+
+// View sync status from connectors
+const syncStatus = await client.world.getSyncStatusBySink()
 ```
 
 ### Calls
 
+Calls are read-only — they are created by the voice pipeline.
+
 ```typescript
 const { items: calls } = await client.calls.list({
   direction: 'inbound',
-  start_date: '2026-04-01',
-  end_date: '2026-04-15',
+  service_id: 'service-id',
 })
 
-const detail = await client.calls.get(calls[0].id)
+// Get full detail with transcript and intelligence
+const detail = await client.calls.get(calls[0].call_sid)
 console.log(detail.intelligence?.summary)
 console.log(detail.transcript)
+
+// Analytics benchmarks
+const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 ```
 
 ### Analytics
 
 ```typescript
-const summary = await client.analytics.getSummary({
-  start_date: '2026-04-01',
-  end_date: '2026-04-15',
-})
-console.log(summary.total_calls, summary.conversion_rate)
+// Dashboard KPIs with period-over-period deltas
+const dashboard = await client.analytics.getDashboard({ days: 7 })
+console.log(dashboard.call_volume.value, dashboard.call_volume.delta_pct)
+console.log(dashboard.avg_quality.value)
 
-const daily = await client.analytics.getDaily({ granularity: 'day' })
-const agentPerf = await client.analytics.getAgentPerformance()
+// Call volume time series
+const calls = await client.analytics.getCalls({ period: '30d' })
+console.log(calls.total_calls, calls.calls_by_date)
+
+// Per-agent performance
+const { agents } = await client.analytics.getAgents({ period: '7d' })
+
+// Compare two periods
+const comparison = await client.analytics.compareCallPeriods({
+  current_from: '2026-04-01',
+  current_to: '2026-04-15',
+  previous_from: '2026-03-15',
+  previous_to: '2026-03-31',
+})
+```
+
+### Agent Memory
+
+Agent Memory tracks structured long-term facts about entities across conversations.
+
+```typescript
+// Get all dimension scores for an entity
+const dims = await client.memory.getEntityDimensions('entity-id')
+console.log(dims.dimensions) // preferences, health_history, etc.
+
+// Get individual facts for a dimension
+const facts = await client.memory.getEntityFacts('entity-id', { dimension: 'preferences' })
+
+// Workspace-level memory health
+const analytics = await client.memory.getAnalytics()
+console.log(analytics.coverage_rate, analytics.total_facts)
 ```
 
 ### Integrations
 
 ```typescript
-const integration = await client.integrations.create({
-  name: 'Epic EHR',
-  type: 'epic',
-  config: { base_url: 'https://fhir.epic.com', client_id: '...' },
-})
+const { items: integrations } = await client.integrations.list({ enabled: true })
 
-// Test the connection
-const test = await client.integrations.test(integration.id)
-console.log(test.success, test.latency_ms)
+// Test a specific endpoint
+const result = await client.integrations.testEndpoint(
+  'integration-id',
+  'geocode',
+  { textQuery: '123 Main St, Springfield' },
+)
+```
 
-// Trigger a manual sync
-await client.integrations.sync(integration.id)
+### Data Sources
+
+```typescript
+const { items: sources } = await client.dataSources.list()
+const source = await client.dataSources.get('source-id')
+console.log(source.source_type, source.health_status, source.last_sync_at)
+```
+
+### Settings
+
+```typescript
+// Voice
+const voice = await client.settings.voice.get()
+await client.settings.voice.update({ voice_id: 'new-voice-id', speed: 1.1 })
+
+// Retention
+const retention = await client.settings.retention.get()
+await client.settings.retention.update({ call_recordings_days: 90 })
+
+// Memory dimensions
+const memory = await client.settings.memory.get()
+console.log(memory.dimensions) // list of configured memory dimensions
+```
+
+### Billing
+
+```typescript
+const usage = await client.billing.getUsage()
+console.log(usage.meters, usage.total_events)
+
+const { items: invoices } = await client.billing.listInvoices()
 ```
 
 ## Pagination
@@ -279,25 +323,6 @@ try {
 
 ```javascript
 const { AmigoClient } = require('@amigo-ai/platform-sdk')
-```
-
-## Generating types from the OpenAPI spec
-
-The SDK ships with manually-authored types in `src/types/api.ts`. To regenerate them from the live spec:
-
-```bash
-npx openapi-typescript https://api.platform.amigo.ai/v1/openapi.json -o src/types/api.ts
-```
-
-## Development
-
-```bash
-npm install
-npm run build       # build ESM + CJS
-npm test            # unit tests (mocked)
-npm run test:dist   # verify built artifacts
-npm run lint
-npm run typecheck
 ```
 
 ## License
