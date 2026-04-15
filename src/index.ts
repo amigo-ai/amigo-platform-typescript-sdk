@@ -274,7 +274,7 @@ export { paginate } from './core/utils.js'
 export type { PaginatedList, ListParams } from './core/utils.js'
 export type { RetryOptions } from './core/retry.js'
 
-// Resource-specific types (new resources)
+// Resource-specific types
 export type {
   Recording,
   ListRecordingsParams,
@@ -312,6 +312,54 @@ export type {
 
 export type { UpdateFunctionRequest } from './resources/functions.js'
 export type { UpdateDataSourceRequest } from './resources/data-sources.js'
+
+export type {
+  ContextGraphVersion,
+} from './resources/context-graphs.js'
+
+export type {
+  EntityRelationship,
+  EntityGraph,
+  EntityProvenance,
+  EntityLineage,
+  SyncEvent,
+  SyncStatusBySink,
+  SourceBreakdown,
+  EntityStats,
+  SearchEntitiesParams,
+} from './resources/world.js'
+
+export type {
+  SimulationTurn,
+  SimulationIntelligence,
+  CoverageGraph,
+  CoverageGraphPath,
+  ScoreSessionRequest,
+  CreateCoverageSessionRequest,
+} from './resources/simulations.js'
+
+export type {
+  OperatorPerformance,
+  Escalation,
+  EscalationStats,
+  OperatorBriefing,
+  WrapUpRequest,
+  OperatorAuditEntry,
+} from './resources/operators.js'
+
+export type {
+  AnalyticsDashboard,
+  CallAnalytics,
+  AgentAnalytics,
+  CallQualityMetrics,
+  EmotionTrends,
+  LatencyMetrics,
+  ToolPerformance,
+  DataQualityMetrics,
+  AdvancedCallStats,
+  CallComparison,
+  AnalyticsQueryParams,
+} from './resources/analytics.js'
 
 // API types
 export type {

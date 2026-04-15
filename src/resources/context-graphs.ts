@@ -12,6 +12,13 @@ export interface ListContextGraphsParams extends ListParams {
   search?: string
 }
 
+export interface ContextGraphVersion {
+  context_graph_id: string
+  version: number
+  schema_snapshot: Record<string, unknown>
+  created_at: string
+}
+
 /**
  * Manage context graphs — structured conversation flow definitions (HSM).
  * Context graphs define the states, transitions, and conditions that
@@ -45,5 +52,27 @@ export class ContextGraphsResource extends WorkspaceScopedResource {
 
   async delete(contextGraphId: ContextGraphId | string): Promise<void> {
     return this.fetch<void>(`/context-graphs/${contextGraphId}`, { method: 'DELETE' })
+  }
+
+  /** Create a version snapshot of the current context graph */
+  async createVersion(contextGraphId: ContextGraphId | string): Promise<ContextGraphVersion> {
+    return this.fetch<ContextGraphVersion>(`/context-graphs/${contextGraphId}/versions`, {
+      method: 'POST',
+    })
+  }
+
+  /** List all versions of a context graph */
+  async listVersions(
+    contextGraphId: ContextGraphId | string,
+    params?: ListParams,
+  ): Promise<PaginatedResponse<ContextGraphVersion>> {
+    return this.fetch<PaginatedResponse<ContextGraphVersion>>(
+      `/context-graphs/${contextGraphId}/versions${buildQuery(params)}`,
+    )
+  }
+
+  /** Get a specific version */
+  async getVersion(contextGraphId: ContextGraphId | string, version: number): Promise<ContextGraphVersion> {
+    return this.fetch<ContextGraphVersion>(`/context-graphs/${contextGraphId}/versions/${version}`)
   }
 }
