@@ -1,53 +1,104 @@
 import { WorkspaceScopedResource } from './base.js'
 
+// ---------------------------------------------------------------------------
+// Voice settings
+// ---------------------------------------------------------------------------
+
 export interface VoiceSettings {
-  default_voice_id: string | null
-  speech_rate: number | null
-  filler_words_enabled: boolean
-  interruption_sensitivity: 'low' | 'medium' | 'high'
-  silence_timeout_seconds: number
+  voice_id: string | null
+  speed: number | null
+  tone: string | null
+  volume: number | null
+  language: string | null
+  keyterms: string[]
+  sensitive_topics: string[]
+  correction_categories: string[]
+  pronunciation_dict_id: string | null
+  post_call_analysis_enabled: boolean
+  transcript_correction_enabled: boolean
 }
 
-export interface BrandingSettings {
+// ---------------------------------------------------------------------------
+// Branding settings
+// ---------------------------------------------------------------------------
+
+export interface BrandingConfig {
   display_name: string | null
   logo_url: string | null
   primary_color: string | null
   support_email: string | null
 }
 
+export interface BrandingSettings {
+  branding: BrandingConfig
+}
+
+// ---------------------------------------------------------------------------
+// Outreach settings
+// ---------------------------------------------------------------------------
+
+export interface OutreachRule {
+  name: string
+  condition: Record<string, unknown>
+  actions: Record<string, unknown>[]
+}
+
 export interface OutreachSettings {
-  max_attempts: number
-  attempt_interval_hours: number
-  allowed_call_windows: Array<{ day: string; start: string; end: string }>
-  timezone: string
-  opt_out_message: string | null
+  rules: OutreachRule[]
+  data_templates: Record<string, unknown>[]
+}
+
+// ---------------------------------------------------------------------------
+// Memory settings
+// ---------------------------------------------------------------------------
+
+export interface MemoryDimensionConfig {
+  name: string
+  enabled: boolean
+  weight: number
+  extraction_mode: string
 }
 
 export interface MemorySettings {
-  retention_days: number
-  entity_types_enabled: string[]
-  auto_merge_enabled: boolean
-  confidence_threshold: number
+  dimensions: MemoryDimensionConfig[]
+  backfill_requested: boolean
 }
+
+// ---------------------------------------------------------------------------
+// Security settings
+// ---------------------------------------------------------------------------
 
 export interface SecuritySettings {
-  require_mfa: boolean
-  allowed_ip_ranges: string[]
-  session_timeout_minutes: number
-  api_key_max_duration_days: number
+  voice_auth_enabled: boolean
 }
 
+// ---------------------------------------------------------------------------
+// Retention settings
+// ---------------------------------------------------------------------------
+
 export interface RetentionSettings {
-  call_recording_days: number
-  transcript_days: number
-  event_days: number
-  audit_log_days: number
+  call_recordings_days: number | null
+  call_transcripts_days: number | null
+  phi_data_days: number | null
+  world_events_days: number | null
+  audit_log_days: number | null
+  legal_hold: boolean
+  legal_hold_reason: string | null
+}
+
+// ---------------------------------------------------------------------------
+// Workflow settings
+// ---------------------------------------------------------------------------
+
+export interface WorkflowConfig {
+  name: string
+  trigger: Record<string, unknown>
+  actions: Record<string, unknown>[]
+  enabled: boolean
 }
 
 export interface WorkflowSettings {
-  auto_assign_enabled: boolean
-  default_queue: string | null
-  routing_rules: Array<{ condition: Record<string, unknown>; queue: string }>
+  workflows: WorkflowConfig[]
 }
 
 /**

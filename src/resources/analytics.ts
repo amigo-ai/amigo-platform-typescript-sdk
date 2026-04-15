@@ -1,71 +1,13 @@
 import { WorkspaceScopedResource, buildQuery } from './base.js'
 
-export interface AnalyticsDashboard {
-  total_calls: number
-  total_duration_seconds: number
-  answer_rate: number
-  conversion_rate: number
-  avg_sentiment_score: number | null
-  period_start: string
-  period_end: string
-  sparklines: Record<string, number[]>
-}
+// ---------------------------------------------------------------------------
+// Shared
+// ---------------------------------------------------------------------------
 
-export interface CallAnalytics {
-  calls: number
-  duration_seconds: number
-  inbound: number
-  outbound: number
-  answer_rate: number
-  avg_duration_seconds: number
-  by_day: Array<{ date: string; count: number; duration_seconds: number }>
-}
-
-export interface AgentAnalytics {
-  agent_id: string
-  agent_name: string
-  calls: number
-  avg_duration_seconds: number
-  conversion_rate: number
-  sentiment_score: number | null
-}
-
-export interface CallQualityMetrics {
-  avg_sentiment: number | null
-  positive_pct: number
-  negative_pct: number
-  neutral_pct: number
-  avg_transcription_confidence: number | null
-  flagged_calls: number
-}
-
-export interface EmotionTrends {
-  data: Array<{
-    date: string
-    emotions: Record<string, number>
-  }>
-}
-
-export interface LatencyMetrics {
-  avg_ttfb_ms: number
-  p50_ttfb_ms: number
-  p95_ttfb_ms: number
-  avg_response_ms: number
-  p95_response_ms: number
-}
-
-export interface ToolPerformance {
-  tool_name: string
-  call_count: number
-  success_rate: number
-  avg_latency_ms: number
-}
-
-export interface DataQualityMetrics {
-  completeness_score: number
-  duplicate_rate: number
-  missing_canonical_id_pct: number
-  stale_entities: number
+/** A metric value paired with its period-over-period change */
+export interface MetricWithDelta {
+  value: number | null
+  delta_pct: number | null
 }
 
 export interface AnalyticsQueryParams {
@@ -76,6 +18,114 @@ export interface AnalyticsQueryParams {
   agent_id?: string
 }
 
+// ---------------------------------------------------------------------------
+// Dashboard
+// ---------------------------------------------------------------------------
+
+export interface AnalyticsDashboard {
+  call_volume: MetricWithDelta
+  avg_quality: MetricWithDelta
+  avg_ttfb_ms: MetricWithDelta
+  escalation_rate: MetricWithDelta
+  tool_success_rate: MetricWithDelta
+  avg_duration_s: MetricWithDelta
+  period_days: number
+}
+
+// ---------------------------------------------------------------------------
+// Calls
+// ---------------------------------------------------------------------------
+
+export interface CallAnalytics {
+  workspace_id: string
+  period_start: string
+  period_end: string
+  total_calls: number
+  total_duration_seconds: number
+  avg_duration_seconds: number
+  calls_by_date: Array<{ date: string; count: number }>
+}
+
+// ---------------------------------------------------------------------------
+// Agents
+// ---------------------------------------------------------------------------
+
+export interface AgentAnalytics {
+  agent_id: string
+  agent_name: string
+  total_calls: number
+  completed_calls: number
+  avg_duration_seconds: number
+  completion_rate: number
+}
+
+export interface AgentAnalyticsResponse {
+  agents: AgentAnalytics[]
+  period: string
+}
+
+// ---------------------------------------------------------------------------
+// Call quality
+// ---------------------------------------------------------------------------
+
+export interface CallQualityMetrics {
+  avg_sentiment: number | null
+  positive_pct: number
+  negative_pct: number
+  neutral_pct: number
+  avg_transcription_confidence: number | null
+  flagged_calls: number
+}
+
+// ---------------------------------------------------------------------------
+// Emotion trends
+// ---------------------------------------------------------------------------
+
+export interface EmotionTrends {
+  data: Array<{
+    date: string
+    emotions: Record<string, number>
+  }>
+}
+
+// ---------------------------------------------------------------------------
+// Latency
+// ---------------------------------------------------------------------------
+
+export interface LatencyMetrics {
+  avg_ttfb_ms: number
+  p50_ttfb_ms: number
+  p95_ttfb_ms: number
+  avg_response_ms: number
+  p95_response_ms: number
+}
+
+// ---------------------------------------------------------------------------
+// Tool performance
+// ---------------------------------------------------------------------------
+
+export interface ToolPerformance {
+  tool_name: string
+  call_count: number
+  success_rate: number
+  avg_latency_ms: number
+}
+
+// ---------------------------------------------------------------------------
+// Data quality
+// ---------------------------------------------------------------------------
+
+export interface DataQualityMetrics {
+  completeness_score: number
+  duplicate_rate: number
+  missing_canonical_id_pct: number
+  stale_entities: number
+}
+
+// ---------------------------------------------------------------------------
+// Advanced call stats
+// ---------------------------------------------------------------------------
+
 export interface AdvancedCallStats {
   abandonment_rate: number
   transfer_rate: number
@@ -85,15 +135,22 @@ export interface AdvancedCallStats {
   by_day_of_week: Array<{ day: string; count: number }>
 }
 
+// ---------------------------------------------------------------------------
+// Comparison
+// ---------------------------------------------------------------------------
+
 export interface CallComparison {
   period_a: { start: string; end: string; calls: number; conversion_rate: number }
   period_b: { start: string; end: string; calls: number; conversion_rate: number }
   change_pct: Record<string, number>
 }
 
+// ---------------------------------------------------------------------------
+// Resource
+// ---------------------------------------------------------------------------
+
 /**
  * Analytics — aggregate metrics about calls, agents, quality, and usage.
- * Endpoint paths match the developer console API client exactly.
  */
 export class AnalyticsResource extends WorkspaceScopedResource {
   /** High-level dashboard summary — pass `days` (default: 7) for the lookback window */
@@ -107,8 +164,8 @@ export class AnalyticsResource extends WorkspaceScopedResource {
   }
 
   /** Per-agent performance breakdown */
-  async getAgents(params?: AnalyticsQueryParams): Promise<AgentAnalytics[]> {
-    return this.fetch<AgentAnalytics[]>(`/analytics/agents${buildQuery(params)}`)
+  async getAgents(params?: { period?: string }): Promise<AgentAnalyticsResponse> {
+    return this.fetch<AgentAnalyticsResponse>(`/analytics/agents${buildQuery(params)}`)
   }
 
   /** Call quality — sentiment, transcription confidence, flagged calls */
@@ -139,11 +196,6 @@ export class AnalyticsResource extends WorkspaceScopedResource {
   /** Usage summary — API requests, call minutes, storage */
   async getUsage(params?: AnalyticsQueryParams): Promise<Record<string, unknown>> {
     return this.fetch(`/analytics/usage${buildQuery(params)}`)
-  }
-
-  /** Operator performance as seen from the analytics layer */
-  async getOperatorPerformance(params?: AnalyticsQueryParams): Promise<Record<string, unknown>> {
-    return this.fetch(`/analytics/operator-performance${buildQuery(params)}`)
   }
 
   /** Advanced call statistics (abandonment, transfers, silence, hour-of-day) */

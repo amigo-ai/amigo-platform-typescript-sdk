@@ -221,11 +221,15 @@ export type { RetryOptions } from './core/retry.js'
 export type {
   VoiceSettings,
   BrandingSettings,
+  BrandingConfig,
   OutreachSettings,
+  OutreachRule,
   MemorySettings,
+  MemoryDimensionConfig,
   SecuritySettings,
   RetentionSettings,
   WorkflowSettings,
+  WorkflowConfig,
 } from './resources/settings.js'
 
 export type { UpdateDataSourceRequest } from './resources/data-sources.js'
@@ -251,9 +255,18 @@ export type {
 } from './resources/simulations.js'
 
 export type {
+  CallDetail,
+  CallIntelligence,
+  CallTranscriptSegment,
+  CallBenchmarks,
+} from './resources/calls.js'
+
+export type {
+  MetricWithDelta,
   AnalyticsDashboard,
   CallAnalytics,
   AgentAnalytics,
+  AgentAnalyticsResponse,
   CallQualityMetrics,
   EmotionTrends,
   LatencyMetrics,
@@ -314,20 +327,21 @@ export type {
   EmitEventRequest,
   MergeEntitiesRequest,
   Call,
-  CallDetail,
-  CallStatus,
   CallDirection,
-  CallIntelligence,
-  TranscriptSegment,
+  ListCallsParams,
   PhoneNumber,
+  PhoneNumberForwarding,
   ProvisionPhoneNumberRequest,
   UpdatePhoneNumberRequest,
   Integration,
+  IntegrationEndpoint,
   CreateIntegrationRequest,
   UpdateIntegrationRequest,
-  AnalyticsSummary,
-  DailyAnalyticsEntry,
   AgentPerformance,
+  UsageMeter,
+  ServiceVersionSet,
+  ServiceTag,
+  ServiceVoiceConfig,
   SimulationSession,
   SimulationSnapshot,
   SimulationStepResponse,

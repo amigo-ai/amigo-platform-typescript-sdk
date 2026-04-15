@@ -2,8 +2,6 @@ import type {
   Integration,
   CreateIntegrationRequest,
   UpdateIntegrationRequest,
-  IntegrationTestResponse,
-  IntegrationSyncResponse,
   PaginatedResponse,
 } from '../types/api.js'
 import type { IntegrationId } from '../core/branded-types.js'
@@ -11,8 +9,15 @@ import { WorkspaceScopedResource, buildQuery } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
 export interface ListIntegrationsParams extends ListParams {
-  type?: string
-  status?: string
+  protocol?: string
+  enabled?: boolean
+  search?: string
+}
+
+export interface IntegrationTestResult {
+  success: boolean
+  message: string
+  latency_ms: number
 }
 
 /**
@@ -51,17 +56,23 @@ export class IntegrationsResource extends WorkspaceScopedResource {
     return this.fetch<void>(`/integrations/${integrationId}`, { method: 'DELETE' })
   }
 
-  /** Test the integration connection — verifies credentials without syncing */
-  async test(integrationId: IntegrationId | string): Promise<IntegrationTestResponse> {
-    return this.fetch<IntegrationTestResponse>(`/integrations/${integrationId}/test`, {
-      method: 'POST',
-    })
+  /**
+   * Test a specific endpoint on an integration with given params.
+   * Used in the developer console to validate integration config.
+   */
+  async testEndpoint(
+    integrationId: IntegrationId | string,
+    endpointName: string,
+    params: Record<string, unknown>,
+  ): Promise<IntegrationTestResult> {
+    return this.fetch<IntegrationTestResult>(
+      `/integrations/${integrationId}/endpoints/${endpointName}/test`,
+      { method: 'POST', body: JSON.stringify({ params }) },
+    )
   }
 
-  /** Trigger a manual data sync for the integration */
-  async sync(integrationId: IntegrationId | string): Promise<IntegrationSyncResponse> {
-    return this.fetch<IntegrationSyncResponse>(`/integrations/${integrationId}/sync`, {
-      method: 'POST',
-    })
+  /** Check health of all integrations in the workspace */
+  async getHealthCheck(): Promise<Record<string, unknown>> {
+    return this.fetch<Record<string, unknown>>('/integrations/health-check')
   }
 }

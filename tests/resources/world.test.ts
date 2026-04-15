@@ -17,7 +17,7 @@ const server = setupServer(
   http.get(`${WS_BASE}/world/entities/:entityId`, () => HttpResponse.json(entity)),
   http.put(`${WS_BASE}/world/entities/:entityId`, async ({ request }) => {
     const body = (await request.json()) as Record<string, unknown>
-    return HttpResponse.json({ ...entity, properties: { ...entity.properties, ...(body['properties'] as object ?? {}) } })
+    return HttpResponse.json({ ...entity, display_name: (body['display_name'] as string) ?? entity.display_name })
   }),
   http.post(`${WS_BASE}/world/events`, () =>
     HttpResponse.json({
@@ -75,11 +75,11 @@ describe('WorldResource', () => {
     expect(result.canonical_id).toBe('MRN-12345')
   })
 
-  it('updates entity properties', async () => {
+  it('updates entity display name', async () => {
     const result = await client.world.updateEntity(entity.id, {
-      properties: { name: 'Jane Smith' },
+      display_name: 'Jane Smith',
     })
-    expect((result.properties as Record<string, unknown>)['name']).toBe('Jane Smith')
+    expect(result.display_name).toBe('Jane Smith')
   })
 
   it('emits an event', async () => {

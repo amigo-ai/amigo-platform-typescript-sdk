@@ -1,20 +1,37 @@
 import type {
   Call,
-  CallDetail,
-  CallVolumeResponse,
   ListCallsParams,
   PaginatedResponse,
 } from '../types/api.js'
-import type { CallId } from '../core/branded-types.js'
 import { WorkspaceScopedResource, buildQuery } from './base.js'
 
-export interface CallBenchmarksResponse {
-  avg_duration_seconds: number
-  p50_duration_seconds: number
-  p95_duration_seconds: number
-  answer_rate: number
+export interface CallIntelligence {
+  summary: string | null
+  sentiment: string | null
+  key_moments: Array<{ type: string; description: string; timestamp_s: number }>
+  action_items: string[]
+  outcomes: string[]
+}
+
+export interface CallTranscriptSegment {
+  speaker: 'agent' | 'customer'
+  text: string
+  start_seconds: number
+  end_seconds: number
+}
+
+export interface CallDetail extends Call {
+  intelligence: CallIntelligence | null
+  transcript: CallTranscriptSegment[]
+}
+
+export interface CallBenchmarks {
+  workspace_id: string
   period_start: string
   period_end: string
+  avg_duration_seconds: number
+  answer_rate: number | null
+  completion_rate: number | null
 }
 
 /**
@@ -24,31 +41,26 @@ export interface CallBenchmarksResponse {
 export class CallsResource extends WorkspaceScopedResource {
   /** List calls with optional filtering */
   async list(params?: ListCallsParams): Promise<PaginatedResponse<Call>> {
-    return this.fetch<PaginatedResponse<Call>>(`/calls${buildQuery(params as Record<string, unknown>)}`)
+    return this.fetch<PaginatedResponse<Call>>(`/calls/${buildQuery(params)}`)
   }
 
   /** Get full call detail including transcript and intelligence */
-  async get(callId: CallId | string): Promise<CallDetail> {
-    return this.fetch<CallDetail>(`/calls/${callId}`)
+  async get(callSid: string): Promise<CallDetail> {
+    return this.fetch<CallDetail>(`/calls/${callSid}`)
   }
 
-  /** Get AI intelligence for a call (summary, key moments, outcomes) */
-  async getIntelligence(callId: CallId | string): Promise<CallDetail['intelligence']> {
-    return this.fetch<CallDetail['intelligence']>(`/calls/${callId}/intelligence`)
-  }
-
-  /** Get call volume time series data */
-  async getVolume(params?: { start_date?: string; end_date?: string; granularity?: string }): Promise<CallVolumeResponse> {
-    return this.fetch<CallVolumeResponse>(`/calls/volume${buildQuery(params)}`)
+  /** Get AI intelligence for a call */
+  async getIntelligence(callSid: string): Promise<CallIntelligence> {
+    return this.fetch<CallIntelligence>(`/calls/${callSid}/intelligence`)
   }
 
   /** Get active intelligence across all in-progress calls */
-  async getActiveIntelligence(): Promise<Record<string, unknown>> {
-    return this.fetch<Record<string, unknown>>('/calls/active-intelligence')
+  async getActiveIntelligence(): Promise<Record<string, unknown>[]> {
+    return this.fetch<Record<string, unknown>[]>('/calls/active/intelligence')
   }
 
   /** Get performance benchmarks for a time period */
-  async getBenchmarks(params?: { start_date?: string; end_date?: string }): Promise<CallBenchmarksResponse> {
-    return this.fetch<CallBenchmarksResponse>(`/calls/benchmarks${buildQuery(params)}`)
+  async getBenchmarks(params?: { days?: number }): Promise<CallBenchmarks> {
+    return this.fetch<CallBenchmarks>(`/calls/benchmarks${buildQuery(params)}`)
   }
 }
