@@ -1,0 +1,49 @@
+import type {
+  ContextGraph,
+  CreateContextGraphRequest,
+  UpdateContextGraphRequest,
+  PaginatedResponse,
+} from '../types/api.js'
+import type { ContextGraphId } from '../core/branded-types.js'
+import { WorkspaceScopedResource, buildQuery } from './base.js'
+import type { ListParams } from '../core/utils.js'
+
+export interface ListContextGraphsParams extends ListParams {
+  search?: string
+}
+
+/**
+ * Manage context graphs — structured conversation flow definitions (HSM).
+ * Context graphs define the states, transitions, and conditions that
+ * govern how an agent moves through a conversation.
+ */
+export class ContextGraphsResource extends WorkspaceScopedResource {
+  async create(body: CreateContextGraphRequest): Promise<ContextGraph> {
+    return this.fetch<ContextGraph>('/context-graphs', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    })
+  }
+
+  async list(params?: ListContextGraphsParams): Promise<PaginatedResponse<ContextGraph>> {
+    return this.fetch<PaginatedResponse<ContextGraph>>(`/context-graphs${buildQuery(params)}`)
+  }
+
+  async get(contextGraphId: ContextGraphId | string): Promise<ContextGraph> {
+    return this.fetch<ContextGraph>(`/context-graphs/${contextGraphId}`)
+  }
+
+  async update(
+    contextGraphId: ContextGraphId | string,
+    body: UpdateContextGraphRequest,
+  ): Promise<ContextGraph> {
+    return this.fetch<ContextGraph>(`/context-graphs/${contextGraphId}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    })
+  }
+
+  async delete(contextGraphId: ContextGraphId | string): Promise<void> {
+    return this.fetch<void>(`/context-graphs/${contextGraphId}`, { method: 'DELETE' })
+  }
+}
