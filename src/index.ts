@@ -18,6 +18,7 @@
  */
 
 import { ConfigurationError } from './core/errors.js'
+import { createPlatformClient } from './core/openapi-client.js'
 import type { RetryOptions } from './core/retry.js'
 import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
@@ -39,82 +40,51 @@ import { MemoryResource } from './resources/memory.js'
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
 
 export interface AmigoClientConfig {
-  /**
-   * Your Amigo Platform API key.
-   * Create one at: Platform > Workspace Settings > API Keys
-   */
+  /** API key created via POST /v1/{workspace_id}/api-keys */
   apiKey: string
 
-  /**
-   * Your workspace ID. All resource operations are scoped to this workspace.
-   */
+  /** Workspace ID — all resource operations are scoped to this workspace */
   workspaceId: string
 
   /**
    * Override the base URL. Defaults to https://api.platform.amigo.ai
-   * Useful for pointing at a staging environment.
+   *
+   * For BFF proxy patterns (e.g., Next.js), point this at your proxy:
+   * ```ts
+   * new AmigoClient({ baseUrl: '/api/platform', ... })
+   * ```
    */
   baseUrl?: string
 
-  /**
-   * Retry configuration for failed requests.
-   * Applies exponential backoff with full jitter.
-   */
+  /** Retry configuration for failed requests */
   retry?: RetryOptions
+
+  /**
+   * Custom fetch implementation.
+   *
+   * Use for BFF proxy routing, server-side cookie forwarding,
+   * or test mocking. When provided, all HTTP requests flow
+   * through this function instead of globalThis.fetch.
+   */
+  fetch?: typeof globalThis.fetch
 }
 
-/**
- * The main entry point for the Amigo Platform SDK.
- *
- * Instantiate once and reuse across your application.
- */
 export class AmigoClient {
-  /** Workspace management */
   readonly workspaces: WorkspacesResource
-
-  /** API key management */
   readonly apiKeys: ApiKeysResource
-
-  /** Agent management — AI agents that handle calls */
   readonly agents: AgentsResource
-
-  /** Skill management — reusable AI capabilities */
   readonly skills: SkillsResource
-
-  /** Service management — external service configurations */
   readonly services: ServicesResource
-
-  /** Context graph management — conversation flow structures */
   readonly contextGraphs: ContextGraphsResource
-
-  /** Data source management — external data connections */
   readonly dataSources: DataSourcesResource
-
-  /** World model — entities, events, and timelines */
   readonly world: WorldResource
-
-  /** Call records and intelligence */
   readonly calls: CallsResource
-
-  /** Phone number provisioning and management */
   readonly phoneNumbers: PhoneNumbersResource
-
-  /** Integration management — EHR, CRM, and other external systems */
   readonly integrations: IntegrationsResource
-
-  /** Analytics — aggregate metrics about calls and conversions */
   readonly analytics: AnalyticsResource
-
-  /** Simulation runs and interactive testing sessions */
   readonly simulations: SimulationsResource
-
-  /** Workspace-level settings (voice, branding, security, outreach, etc.) */
   readonly settings: SettingsResource
-
-  /** Billing — usage summaries and invoices */
   readonly billing: BillingResource
-
-  /** Agent Memory — structured long-term memory for entities */
   readonly memory: MemoryResource
 
   constructor(config: AmigoClientConfig) {
@@ -127,28 +97,31 @@ export class AmigoClient {
 
     const baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '')
 
-    const rc = {
+    const client = createPlatformClient({
       apiKey: config.apiKey,
       baseUrl,
-      workspaceId: config.workspaceId,
-    }
+      retry: config.retry,
+      fetch: config.fetch,
+    })
 
-    this.workspaces = new WorkspacesResource({ apiKey: config.apiKey, baseUrl })
-    this.apiKeys = new ApiKeysResource(rc)
-    this.agents = new AgentsResource(rc)
-    this.skills = new SkillsResource(rc)
-    this.services = new ServicesResource(rc)
-    this.contextGraphs = new ContextGraphsResource(rc)
-    this.dataSources = new DataSourcesResource(rc)
-    this.world = new WorldResource(rc)
-    this.calls = new CallsResource(rc)
-    this.phoneNumbers = new PhoneNumbersResource(rc)
-    this.integrations = new IntegrationsResource(rc)
-    this.analytics = new AnalyticsResource(rc)
-    this.simulations = new SimulationsResource(rc)
-    this.settings = new SettingsResource(rc)
-    this.billing = new BillingResource(rc)
-    this.memory = new MemoryResource(rc)
+    const ws = config.workspaceId
+
+    this.workspaces = new WorkspacesResource(client, ws)
+    this.apiKeys = new ApiKeysResource(client, ws)
+    this.agents = new AgentsResource(client, ws)
+    this.skills = new SkillsResource(client, ws)
+    this.services = new ServicesResource(client, ws)
+    this.contextGraphs = new ContextGraphsResource(client, ws)
+    this.dataSources = new DataSourcesResource(client, ws)
+    this.world = new WorldResource(client, ws)
+    this.calls = new CallsResource(client, ws)
+    this.phoneNumbers = new PhoneNumbersResource(client, ws)
+    this.integrations = new IntegrationsResource(client, ws)
+    this.analytics = new AnalyticsResource(client, ws)
+    this.simulations = new SimulationsResource(client, ws)
+    this.settings = new SettingsResource(client, ws)
+    this.billing = new BillingResource(client, ws)
+    this.memory = new MemoryResource(client, ws)
   }
 }
 
@@ -156,7 +129,6 @@ export class AmigoClient {
 
 export type { AmigoClientConfig as AmigoConfig }
 
-// Errors
 export {
   AmigoError,
   BadRequestError,
@@ -177,7 +149,6 @@ export {
   isAuthenticationError,
 } from './core/errors.js'
 
-// Branded types
 export type {
   WorkspaceId,
   ApiKeyId,
@@ -212,142 +183,9 @@ export {
   dataSourceId,
 } from './core/branded-types.js'
 
-// Utilities
 export { paginate } from './core/utils.js'
 export type { PaginatedList, ListParams } from './core/utils.js'
 export type { RetryOptions } from './core/retry.js'
 
-// Resource-specific types
-export type {
-  VoiceSettings,
-  BrandingSettings,
-  BrandingConfig,
-  OutreachSettings,
-  OutreachRule,
-  MemorySettings,
-  MemoryDimensionConfig,
-  SecuritySettings,
-  RetentionSettings,
-  WorkflowSettings,
-  WorkflowConfig,
-} from './resources/settings.js'
-
-export type { UpdateDataSourceRequest } from './resources/data-sources.js'
-
-export type {
-  ContextGraphVersion,
-} from './resources/context-graphs.js'
-
-export type {
-  EntityRelationship,
-  EntityGraph,
-  EntityProvenance,
-  EntityLineage,
-  SyncEvent,
-  SyncStatusBySink,
-  SourceBreakdown,
-  EntityStats,
-  SearchEntitiesParams,
-} from './resources/world.js'
-
-export type {
-  SimulationIntelligence,
-} from './resources/simulations.js'
-
-export type {
-  CallDetail,
-  CallIntelligence,
-  CallTranscriptSegment,
-  CallBenchmarks,
-} from './resources/calls.js'
-
-export type {
-  MetricWithDelta,
-  AnalyticsDashboard,
-  CallAnalytics,
-  AgentAnalytics,
-  AgentAnalyticsResponse,
-  CallQualityMetrics,
-  EmotionTrends,
-  LatencyMetrics,
-  ToolPerformance,
-  DataQualityMetrics,
-  AdvancedCallStats,
-  CallComparison,
-  AnalyticsQueryParams,
-} from './resources/analytics.js'
-
-export type {
-  DimensionScore,
-  EntityDimensionsResponse,
-  MemoryFact,
-  EntityFactsResponse,
-  DimensionAnalytics,
-  MemoryAnalyticsResponse,
-} from './resources/memory.js'
-
-// API types
-export type {
-  Workspace,
-  CreateWorkspaceRequest,
-  UpdateWorkspaceRequest,
-  ApiKey,
-  ApiKeyRole,
-  CreateApiKeyRequest,
-  CreateApiKeyResponse,
-  RotateApiKeyResponse,
-  AuthMeResponse,
-  Agent,
-  AgentVersion,
-  AgentIdentity,
-  AgentVoiceConfig,
-  CreateAgentRequest,
-  UpdateAgentRequest,
-  CreateAgentVersionRequest,
-  Skill,
-  ExecutionTier,
-  CreateSkillRequest,
-  UpdateSkillRequest,
-  SkillTestRequest,
-  SkillTestResponse,
-  Service,
-  CreateServiceRequest,
-  UpdateServiceRequest,
-  ContextGraph,
-  CreateContextGraphRequest,
-  UpdateContextGraphRequest,
-  DataSource,
-  CreateDataSourceRequest,
-  Entity,
-  EntityType,
-  WorldEvent,
-  TimelineEntry,
-  CreateEntityRequest,
-  UpdateEntityRequest,
-  EmitEventRequest,
-  MergeEntitiesRequest,
-  Call,
-  CallDirection,
-  ListCallsParams,
-  PhoneNumber,
-  PhoneNumberForwarding,
-  ProvisionPhoneNumberRequest,
-  UpdatePhoneNumberRequest,
-  Integration,
-  IntegrationEndpoint,
-  CreateIntegrationRequest,
-  UpdateIntegrationRequest,
-  AgentPerformance,
-  UsageMeter,
-  ServiceVersionSet,
-  ServiceTag,
-  ServiceVoiceConfig,
-  SimulationSession,
-  SimulationSnapshot,
-  SimulationStepResponse,
-  SimulationStepObservation,
-  CreateSimulationSessionRequest,
-  UsageSummary,
-  Invoice,
-  PaginatedResponse,
-} from './types/api.js'
+// Generated OpenAPI types — consumers can import specific schemas
+export type { paths, components, operations } from './generated/api.js'

@@ -1,11 +1,6 @@
-import type {
-  Service,
-  CreateServiceRequest,
-  UpdateServiceRequest,
-  PaginatedResponse,
-} from '../types/api.js'
+import type { components } from '../generated/api.js'
 import type { ServiceId } from '../core/branded-types.js'
-import { WorkspaceScopedResource, buildQuery } from './base.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
 export interface ListServicesParams extends ListParams {
@@ -19,29 +14,43 @@ export interface ListServicesParams extends ListParams {
  * that skills can interact with via their tool definitions.
  */
 export class ServicesResource extends WorkspaceScopedResource {
-  async create(body: CreateServiceRequest): Promise<Service> {
-    return this.fetch<Service>('/services', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async create(body: components['schemas']['CreateServiceRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/services', {
+        params: { path: { workspace_id: this.workspaceId } },
+        body,
+      }),
+    )
   }
 
-  async list(params?: ListServicesParams): Promise<PaginatedResponse<Service>> {
-    return this.fetch<PaginatedResponse<Service>>(`/services${buildQuery(params)}`)
+  async list(params?: ListServicesParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/services', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
   }
 
-  async get(serviceId: ServiceId | string): Promise<Service> {
-    return this.fetch<Service>(`/services/${serviceId}`)
+  async get(serviceId: ServiceId | string) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/services/{service_id}', {
+        params: { path: { workspace_id: this.workspaceId, service_id: serviceId } },
+      }),
+    )
   }
 
-  async update(serviceId: ServiceId | string, body: UpdateServiceRequest): Promise<Service> {
-    return this.fetch<Service>(`/services/${serviceId}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    })
+  async update(serviceId: ServiceId | string, body: components['schemas']['UpdateServiceRequest']) {
+    return extractData(
+      await this.client.PUT('/v1/{workspace_id}/services/{service_id}', {
+        params: { path: { workspace_id: this.workspaceId, service_id: serviceId } },
+        body,
+      }),
+    )
   }
 
   async delete(serviceId: ServiceId | string): Promise<void> {
-    return this.fetch<void>(`/services/${serviceId}`, { method: 'DELETE' })
+    await this.client.DELETE('/v1/{workspace_id}/services/{service_id}', {
+      params: { path: { workspace_id: this.workspaceId, service_id: serviceId } },
+    })
   }
 }

@@ -1,11 +1,6 @@
-import type {
-  Integration,
-  CreateIntegrationRequest,
-  UpdateIntegrationRequest,
-  PaginatedResponse,
-} from '../types/api.js'
+import type { components } from '../generated/api.js'
 import type { IntegrationId } from '../core/branded-types.js'
-import { WorkspaceScopedResource, buildQuery } from './base.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
 export interface ListIntegrationsParams extends ListParams {
@@ -14,46 +9,57 @@ export interface ListIntegrationsParams extends ListParams {
   search?: string
 }
 
-export interface IntegrationTestResult {
-  success: boolean
-  message: string
-  latency_ms: number
-}
-
 /**
  * Manage integrations — connections to external systems (EHRs, CRMs, etc.).
  * Integrations power connector data acquisition and skill tool calls.
  */
 export class IntegrationsResource extends WorkspaceScopedResource {
   /** Create a new integration */
-  async create(body: CreateIntegrationRequest): Promise<Integration> {
-    return this.fetch<Integration>('/integrations', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async create(body: components['schemas']['CreateIntegrationRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/integrations', {
+        params: { path: { workspace_id: this.workspaceId } },
+        body,
+      }),
+    )
   }
 
   /** List integrations */
-  async list(params?: ListIntegrationsParams): Promise<PaginatedResponse<Integration>> {
-    return this.fetch<PaginatedResponse<Integration>>(`/integrations${buildQuery(params)}`)
+  async list(params?: ListIntegrationsParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/integrations', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
   }
 
   /** Get a single integration */
-  async get(integrationId: IntegrationId | string): Promise<Integration> {
-    return this.fetch<Integration>(`/integrations/${integrationId}`)
+  async get(integrationId: IntegrationId | string) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/integrations/{integration_id}', {
+        params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
+      }),
+    )
   }
 
   /** Update integration configuration */
-  async update(integrationId: IntegrationId | string, body: UpdateIntegrationRequest): Promise<Integration> {
-    return this.fetch<Integration>(`/integrations/${integrationId}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    })
+  async update(
+    integrationId: IntegrationId | string,
+    body: components['schemas']['UpdateIntegrationRequest'],
+  ) {
+    return extractData(
+      await this.client.PUT('/v1/{workspace_id}/integrations/{integration_id}', {
+        params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
+        body,
+      }),
+    )
   }
 
   /** Delete an integration */
   async delete(integrationId: IntegrationId | string): Promise<void> {
-    return this.fetch<void>(`/integrations/${integrationId}`, { method: 'DELETE' })
+    await this.client.DELETE('/v1/{workspace_id}/integrations/{integration_id}', {
+      params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
+    })
   }
 
   /**
@@ -63,16 +69,31 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   async testEndpoint(
     integrationId: IntegrationId | string,
     endpointName: string,
-    params: Record<string, unknown>,
-  ): Promise<IntegrationTestResult> {
-    return this.fetch<IntegrationTestResult>(
-      `/integrations/${integrationId}/endpoints/${endpointName}/test`,
-      { method: 'POST', body: JSON.stringify({ params }) },
+    body: components['schemas']['TestEndpointRequest'],
+  ) {
+    return extractData(
+      await this.client.POST(
+        '/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_name}/test',
+        {
+          params: {
+            path: {
+              workspace_id: this.workspaceId,
+              integration_id: integrationId,
+              endpoint_name: endpointName,
+            },
+          },
+          body,
+        },
+      ),
     )
   }
 
   /** Check health of all integrations in the workspace */
-  async getHealthCheck(): Promise<Record<string, unknown>> {
-    return this.fetch<Record<string, unknown>>('/integrations/health-check')
+  async getHealthCheck() {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/integrations/health-check', {
+        params: { path: { workspace_id: this.workspaceId } },
+      }),
+    )
   }
 }

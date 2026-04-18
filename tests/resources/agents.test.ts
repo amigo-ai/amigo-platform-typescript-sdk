@@ -1,15 +1,27 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { http, HttpResponse } from 'msw'
-import { setupServer } from 'msw/node'
+import { describe, it, expect } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
-import { fixtures, TEST_API_KEY, TEST_WORKSPACE_ID, WS_BASE } from '../test-helpers.js'
-import type { CreateAgentVersionRequest } from '../../src/types/api.js'
+import type { components } from '../../src/generated/api.js'
+
+type CreateAgentVersionRequest = components['schemas']['CreateAgentVersionRequest']
+
+const TEST_API_KEY = 'test-api-key-abc123'
+const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
+
+const AGENT_FIXTURE = {
+  id: 'agent-00000000-0000-0000-0000-000000000001',
+  workspace_id: TEST_WORKSPACE_ID,
+  name: 'Test Agent',
+  description: 'A test agent',
+  latest_version: 1,
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+}
 
 const AGENT_VERSION_FIXTURE = {
   id: 'av-00000000-0000-0000-0000-000000000001',
   workspace_id: TEST_WORKSPACE_ID,
-  agent_id: fixtures.agent().id,
+  agent_id: AGENT_FIXTURE.id,
   version: 2,
   name: 'My Agent v2',
   initials: 'MA',
@@ -33,54 +45,58 @@ const AGENT_VERSION_FIXTURE = {
   updated_at: '2026-01-02T00:00:00Z',
 }
 
-const CREATE_VERSION_BODY: CreateAgentVersionRequest = {
-  name: 'My Agent v2',
-  identity: {
-    name: 'My Agent',
-    role: 'Assistant',
-    developed_by: 'Acme',
-    default_spoken_language: 'en',
-    relationship_to_developer: {
-      ownership: 'Acme',
-      type: 'assistant',
-      conversation_visibility: 'public',
-      thought_visibility: 'private',
-    },
-  },
+function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    let url: string
+    let method: string
+    if (input instanceof Request) {
+      url = input.url
+      method = input.method.toUpperCase()
+    } else {
+      url = typeof input === 'string' ? input : input.toString()
+      method = (init?.method ?? 'GET').toUpperCase()
+    }
+    const pathname = new URL(url).pathname
+
+    for (const [pattern, handler] of Object.entries(routes)) {
+      const [pMethod, ...pPathParts] = pattern.split(' ')
+      const pPath = pPathParts.join(' ')
+      if (pMethod === method && pathname === pPath) {
+        return handler()
+      }
+    }
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+  }
 }
 
-const server = setupServer(
-  http.get(`${WS_BASE}/agents`, () =>
-    HttpResponse.json(fixtures.paginatedList([fixtures.agent()])),
-  ),
-  http.post(`${WS_BASE}/agents`, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>
-    return HttpResponse.json({ ...fixtures.agent(), name: body['name'] as string }, { status: 201 })
-  }),
-  http.get(`${WS_BASE}/agents/:agentId`, ({ params }) => {
-    if (params['agentId'] === 'not-found') {
-      return HttpResponse.json(
-        { error_code: 'not_found', message: 'Agent not found', detail: 'Agent not found', request_id: 'req-1' },
-        { status: 404 },
-      )
-    }
-    return HttpResponse.json(fixtures.agent())
-  }),
-  http.put(`${WS_BASE}/agents/:agentId`, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>
-    return HttpResponse.json({ ...fixtures.agent(), ...body })
-  }),
-  http.delete(`${WS_BASE}/agents/:agentId`, () => new HttpResponse(null, { status: 204 })),
-  http.post(`${WS_BASE}/agents/:agentId/versions`, () =>
-    HttpResponse.json(AGENT_VERSION_FIXTURE),
-  ),
-)
+const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
+const client = new AmigoClient({
+  apiKey: TEST_API_KEY,
+  workspaceId: TEST_WORKSPACE_ID,
+  fetch: mockFetch({
+    [`GET ${BASE}/agents`]: () =>
+      Response.json({ items: [AGENT_FIXTURE], has_more: false, continuation_token: null }),
 
-const client = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID })
+    [`POST ${BASE}/agents`]: () =>
+      Response.json({ ...AGENT_FIXTURE, name: 'My Agent' }, { status: 201 }),
+
+    [`GET ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
+      Response.json(AGENT_FIXTURE),
+
+    [`GET ${BASE}/agents/not-found`]: () =>
+      Response.json({ detail: 'Agent not found', error_code: 'not_found' }, { status: 404 }),
+
+    [`PUT ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
+      Response.json({ ...AGENT_FIXTURE, name: 'Updated Agent' }),
+
+    [`DELETE ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
+      new Response(null, { status: 204 }),
+
+    [`POST ${BASE}/agents/${AGENT_FIXTURE.id}/versions`]: () =>
+      Response.json(AGENT_VERSION_FIXTURE),
+  }),
+})
 
 describe('AgentsResource', () => {
   it('lists agents', async () => {
@@ -96,8 +112,8 @@ describe('AgentsResource', () => {
   })
 
   it('gets an agent by id', async () => {
-    const result = await client.agents.get(fixtures.agent().id)
-    expect(result.id).toBe(fixtures.agent().id)
+    const result = await client.agents.get(AGENT_FIXTURE.id)
+    expect(result.id).toBe(AGENT_FIXTURE.id)
   })
 
   it('throws NotFoundError for missing agent', async () => {
@@ -105,18 +121,32 @@ describe('AgentsResource', () => {
   })
 
   it('updates an agent', async () => {
-    const result = await client.agents.update(fixtures.agent().id, { name: 'Updated Agent' })
+    const result = await client.agents.update(AGENT_FIXTURE.id, { name: 'Updated Agent' })
     expect(result.name).toBe('Updated Agent')
   })
 
   it('deletes an agent', async () => {
-    await expect(client.agents.delete(fixtures.agent().id)).resolves.toBeUndefined()
+    await expect(client.agents.delete(AGENT_FIXTURE.id)).resolves.toBeUndefined()
   })
 
   it('creates an agent version', async () => {
-    const result = await client.agents.createVersion(fixtures.agent().id, CREATE_VERSION_BODY)
+    const body: CreateAgentVersionRequest = {
+      name: 'My Agent v2',
+      identity: {
+        name: 'My Agent',
+        role: 'Assistant',
+        developed_by: 'Acme',
+        default_spoken_language: 'en',
+        relationship_to_developer: {
+          ownership: 'Acme',
+          type: 'assistant',
+          conversation_visibility: 'public',
+          thought_visibility: 'private',
+        },
+      },
+    }
+    const result = await client.agents.createVersion(AGENT_FIXTURE.id, body)
     expect(result.version).toBe(2)
-    expect(result.agent_id).toBe(fixtures.agent().id)
-    expect(result.identity.name).toBe('My Agent')
+    expect(result.agent_id).toBe(AGENT_FIXTURE.id)
   })
 })

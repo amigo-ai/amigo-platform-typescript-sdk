@@ -1,99 +1,99 @@
-import { describe, it, expect, beforeAll, afterAll, afterEach } from 'vitest'
-import { http, HttpResponse } from 'msw'
-import { setupServer } from 'msw/node'
+import { describe, it, expect } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
-import { fixtures, TEST_API_KEY, TEST_WORKSPACE_ID, WS_BASE } from '../test-helpers.js'
 
-const entity = fixtures.entity()
+const TEST_API_KEY = 'test-api-key-abc123'
+const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
+const ENTITY_ID = 'entity-00000000-0000-0000-0000-000000000001'
 
-const server = setupServer(
-  http.post(`${WS_BASE}/world/entities`, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>
-    return HttpResponse.json({ ...entity, entity_type: body['entity_type'] as string }, { status: 201 })
+function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    let url: string
+    let method: string
+    if (input instanceof Request) {
+      url = input.url
+      method = input.method.toUpperCase()
+    } else {
+      url = typeof input === 'string' ? input : input.toString()
+      method = (init?.method ?? 'GET').toUpperCase()
+    }
+    const pathname = new URL(url).pathname
+    for (const [pattern, handler] of Object.entries(routes)) {
+      const [pMethod, ...pPathParts] = pattern.split(' ')
+      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+    }
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+  }
+}
+
+const BASE = `/v1/${TEST_WORKSPACE_ID}`
+
+const entityFixture = {
+  id: ENTITY_ID,
+  workspace_id: TEST_WORKSPACE_ID,
+  entity_type: 'patient',
+  display_name: 'Jane Doe',
+  canonical_id: 'MRN-12345',
+  created_at: '2026-01-01T00:00:00Z',
+  updated_at: '2026-01-01T00:00:00Z',
+}
+
+const client = new AmigoClient({
+  apiKey: TEST_API_KEY,
+  workspaceId: TEST_WORKSPACE_ID,
+  fetch: mockFetch({
+    [`GET ${BASE}/world/entities`]: () =>
+      Response.json({ entities: [entityFixture], has_more: false, next_offset: null, total: 1 }),
+
+    [`GET ${BASE}/world/entities/${ENTITY_ID}`]: () =>
+      Response.json(entityFixture),
+
+    [`GET ${BASE}/world/entities/${ENTITY_ID}/relationships`]: () =>
+      Response.json({ relationships: [] }),
+
+    [`GET ${BASE}/world/entities/${ENTITY_ID}/timeline`]: () =>
+      Response.json({
+        entity_id: ENTITY_ID,
+        events: [{ id: 'event-001', event_type: 'call_completed', domain: 'voice', source: 'voice-agent' }],
+        has_more: false,
+      }),
+
+    [`GET ${BASE}/world/entity-types`]: () =>
+      Response.json({ entity_types: [{ entity_type: 'patient', count: 150 }] }),
+
+    [`GET ${BASE}/world/entity-stats`]: () =>
+      Response.json({ total_entities: 150, total_events: 3000 }),
   }),
-  http.get(`${WS_BASE}/world/entities`, () =>
-    HttpResponse.json(fixtures.paginatedList([entity])),
-  ),
-  http.get(`${WS_BASE}/world/entities/:entityId`, () => HttpResponse.json(entity)),
-  http.put(`${WS_BASE}/world/entities/:entityId`, async ({ request }) => {
-    const body = (await request.json()) as Record<string, unknown>
-    return HttpResponse.json({ ...entity, display_name: (body['display_name'] as string) ?? entity.display_name })
-  }),
-  http.post(`${WS_BASE}/world/events`, () =>
-    HttpResponse.json({
-      id: 'event-001',
-      workspace_id: TEST_WORKSPACE_ID,
-      entity_id: entity.id,
-      event_type: 'call_completed',
-      source: 'voice-agent',
-      data: { duration: 120 },
-      confidence: 1.0,
-      derived_from: null,
-      created_at: '2026-04-15T13:00:00Z',
-    }),
-  ),
-  http.get(`${WS_BASE}/world/timeline/:entityId`, () =>
-    HttpResponse.json([
-      {
-        event: {
-          id: 'event-001',
-          workspace_id: TEST_WORKSPACE_ID,
-          entity_id: entity.id,
-          event_type: 'call_completed',
-          source: 'voice-agent',
-          data: {},
-          confidence: 1.0,
-          derived_from: null,
-          created_at: '2026-04-15T13:00:00Z',
-        },
-        entity_snapshot: entity,
-      },
-    ]),
-  ),
-)
-
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
-afterEach(() => server.resetHandlers())
-afterAll(() => server.close())
-
-const client = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID })
+})
 
 describe('WorldResource', () => {
-  it('creates an entity', async () => {
-    const result = await client.world.createEntity({ entity_type: 'patient', canonical_id: 'MRN-001' })
-    expect(result.entity_type).toBe('patient')
-  })
-
   it('lists entities', async () => {
     const result = await client.world.listEntities()
-    expect(result.items).toHaveLength(1)
-    expect(result.items[0]?.entity_type).toBe('patient')
+    expect(result.entities).toHaveLength(1)
+    expect(result.entities[0]?.entity_type).toBe('patient')
   })
 
   it('gets an entity', async () => {
-    const result = await client.world.getEntity(entity.id)
+    const result = await client.world.getEntity(ENTITY_ID)
     expect(result.canonical_id).toBe('MRN-12345')
   })
 
-  it('updates entity display name', async () => {
-    const result = await client.world.updateEntity(entity.id, {
-      display_name: 'Jane Smith',
-    })
-    expect(result.display_name).toBe('Jane Smith')
+  it('gets relationships', async () => {
+    const result = await client.world.getRelationships(ENTITY_ID)
+    expect(result.relationships).toHaveLength(0)
   })
 
-  it('emits an event', async () => {
-    const result = await client.world.emitEvent({
-      entity_id: entity.id,
-      event_type: 'call_completed',
-      data: { duration: 120 },
-    })
-    expect(result.event_type).toBe('call_completed')
+  it('gets timeline', async () => {
+    const result = await client.world.getTimeline(ENTITY_ID)
+    expect(result.events).toHaveLength(1)
   })
 
-  it('gets timeline for an entity', async () => {
-    const result = await client.world.getTimeline(entity.id)
-    expect(result).toHaveLength(1)
-    expect(result[0]?.event.event_type).toBe('call_completed')
+  it('lists entity types', async () => {
+    const result = await client.world.listEntityTypes()
+    expect(result.entity_types).toHaveLength(1)
+  })
+
+  it('gets entity stats', async () => {
+    const result = await client.world.getStats()
+    expect(result.total_entities).toBe(150)
   })
 })

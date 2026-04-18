@@ -100,7 +100,7 @@ export class NetworkError extends AmigoError {
   constructor(message: string, cause?: unknown) {
     super(message)
     if (cause !== undefined) {
-      ;(this as AmigoError & { cause: unknown }).cause = cause
+      Object.defineProperty(this, 'cause', { value: cause, writable: false, enumerable: true })
     }
   }
 }

@@ -38,7 +38,8 @@
   ],
   "scripts": {
     "clean": "rm -rf dist",
-    "build": "npm run clean && npm run esbuild && tsc --project tsconfig.build.json",
+    "gen-types": "node scripts/gen-types.mjs",
+    "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json",
     "esbuild": "node scripts/build.mjs",
     "lint": "eslint 'src/**/*.{ts,tsx}' --max-warnings 0",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
@@ -51,6 +52,7 @@
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm test"
   },
+  "sideEffects": false,
   "dependencies": {
     "openapi-fetch": "^0.14.0"
   },
@@ -65,10 +67,11 @@
     "husky": "^9.0.0",
     "lint-staged": "^15.0.0",
     "msw": "^2.0.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.0.0",
     "typescript": "^5.6.0",
     "typescript-eslint": "^8.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^4.1.4"
   },
   "lint-staged": {
     "*.ts": [

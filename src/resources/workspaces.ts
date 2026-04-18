@@ -1,72 +1,66 @@
-import type {
-  Workspace,
-  CreateWorkspaceRequest,
-  UpdateWorkspaceRequest,
-  PaginatedResponse,
-} from '../types/api.js'
+import type { components } from '../generated/api.js'
 import type { WorkspaceId } from '../core/branded-types.js'
-import { createApiError } from '../core/errors.js'
-import { buildQuery } from './base.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
-
-export interface WorkspacesConfig {
-  apiKey: string
-  baseUrl: string
-}
 
 /**
  * Manage Amigo Platform workspaces.
  * Workspaces are the top-level tenancy boundary for all resources.
+ *
+ * Note: list and create operate at account level (/v1/workspaces),
+ * while get, update, and archive operate on a specific workspace.
  */
-export class WorkspacesResource {
-  constructor(private readonly config: WorkspacesConfig) {}
-
-  private get headers(): Record<string, string> {
-    return {
-      Authorization: `Bearer ${this.config.apiKey}`,
-      'Content-Type': 'application/json',
-    }
-  }
-
-  private async request<T>(path: string, init: RequestInit = {}): Promise<T> {
-    const url = `${this.config.baseUrl}/v1/workspaces${path}`
-    const response = await globalThis.fetch(url, {
-      ...init,
-      headers: { ...this.headers, ...(init.headers as Record<string, string> | undefined) },
-    })
-    if (!response.ok) throw await createApiError(response)
-    if (response.status === 204) return undefined as T
-    return response.json() as Promise<T>
-  }
-
+export class WorkspacesResource extends WorkspaceScopedResource {
   /** Create a new workspace */
-  async create(body: CreateWorkspaceRequest): Promise<Workspace> {
-    return this.request<Workspace>('', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async create(body: components['schemas']['CreateWorkspaceRequest']) {
+    return extractData(
+      await this.client.POST('/v1/workspaces', {
+        body,
+      }),
+    )
   }
 
   /** List workspaces accessible to the current API key */
-  async list(params?: ListParams): Promise<PaginatedResponse<Workspace>> {
-    return this.request<PaginatedResponse<Workspace>>(buildQuery(params))
+  async list(params?: ListParams) {
+    return extractData(
+      await this.client.GET('/v1/workspaces', {
+        params: { query: params },
+      }),
+    )
   }
 
   /** Get a single workspace by ID */
-  async get(id: WorkspaceId | string): Promise<Workspace> {
-    return this.request<Workspace>(`/${id}`)
+  async get(id?: WorkspaceId | string) {
+    return extractData(
+      await this.client.GET('/v1/workspaces/{workspace_id}', {
+        params: { path: { workspace_id: id ?? this.workspaceId } },
+      }),
+    )
   }
 
   /** Update workspace metadata */
-  async update(id: WorkspaceId | string, body: UpdateWorkspaceRequest): Promise<Workspace> {
-    return this.request<Workspace>(`/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    })
+  async update(
+    body: components['schemas']['UpdateWorkspaceRequest'],
+    id?: WorkspaceId | string,
+  ) {
+    return extractData(
+      await this.client.PATCH('/v1/workspaces/{workspace_id}', {
+        params: { path: { workspace_id: id ?? this.workspaceId } },
+        body,
+      }),
+    )
   }
 
   /** Archive (soft-delete) a workspace */
-  async delete(id: WorkspaceId | string): Promise<void> {
-    return this.request<void>(`/${id}`, { method: 'DELETE' })
+  async archive(
+    body: components['schemas']['ArchiveWorkspaceRequest'],
+    id?: WorkspaceId | string,
+  ) {
+    return extractData(
+      await this.client.POST('/v1/workspaces/{workspace_id}/archive', {
+        params: { path: { workspace_id: id ?? this.workspaceId } },
+        body,
+      }),
+    )
   }
 }

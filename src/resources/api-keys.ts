@@ -1,15 +1,7 @@
-import type {
-  ApiKey,
-  CreateApiKeyRequest,
-  CreateApiKeyResponse,
-  RotateApiKeyResponse,
-  AuthMeResponse,
-  PaginatedResponse,
-} from '../types/api.js'
+import type { components } from '../generated/api.js'
 import type { ApiKeyId } from '../core/branded-types.js'
-import { WorkspaceScopedResource, buildQuery } from './base.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
-import { createApiError } from '../core/errors.js'
 
 /**
  * Manage API keys for a workspace.
@@ -22,38 +14,43 @@ export class ApiKeysResource extends WorkspaceScopedResource {
    * Get info about the currently authenticated API key.
    * Does not require a workspace ID in the path.
    */
-  async me(): Promise<AuthMeResponse> {
-    const url = `${this.config.baseUrl}/v1/auth/me`
-    const response = await globalThis.fetch(url, { headers: this.headers })
-    if (!response.ok) throw await createApiError(response)
-    return response.json() as Promise<AuthMeResponse>
+  async me() {
+    return extractData(await this.client.GET('/v1/auth/me', {}))
   }
 
   /** Create a new API key */
-  async create(body: CreateApiKeyRequest): Promise<CreateApiKeyResponse> {
-    return this.fetch<CreateApiKeyResponse>('/api-keys', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async create(body: components['schemas']['CreateApiKeyRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/api-keys', {
+        params: { path: { workspace_id: this.workspaceId } },
+        body,
+      }),
+    )
   }
 
   /** List API keys in the workspace */
-  async list(params?: ListParams): Promise<PaginatedResponse<ApiKey>> {
-    return this.fetch<PaginatedResponse<ApiKey>>(`/api-keys${buildQuery(params)}`)
-  }
-
-  /** Get a specific API key */
-  async get(keyId: ApiKeyId | string): Promise<ApiKey> {
-    return this.fetch<ApiKey>(`/api-keys/${keyId}`)
+  async list(params?: ListParams & { mine_only?: boolean }) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/api-keys', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
   }
 
   /** Revoke an API key */
   async revoke(keyId: ApiKeyId | string): Promise<void> {
-    return this.fetch<void>(`/api-keys/${keyId}`, { method: 'DELETE' })
+    await this.client.DELETE('/v1/{workspace_id}/api-keys/{key_id}', {
+      params: { path: { workspace_id: this.workspaceId, key_id: keyId } },
+    })
   }
 
   /** Rotate an API key — invalidates the old key and issues a new one */
-  async rotate(keyId: ApiKeyId | string): Promise<RotateApiKeyResponse> {
-    return this.fetch<RotateApiKeyResponse>(`/api-keys/${keyId}/rotate`, { method: 'POST' })
+  async rotate(keyId: ApiKeyId | string, body: components['schemas']['RotateApiKeyRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/api-keys/{key_id}/rotate', {
+        params: { path: { workspace_id: this.workspaceId, key_id: keyId } },
+        body,
+      }),
+    )
   }
 }

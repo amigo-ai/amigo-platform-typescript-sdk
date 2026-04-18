@@ -1,6 +1,6 @@
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import { setupServer } from 'msw/node'
-import type { Agent, Skill, Entity, PaginatedResponse } from '../src/types/api.js'
+type PaginatedResponse<T> = { items: T[]; has_more: boolean; continuation_token: number | null }
 
 export const TEST_API_KEY = 'test-api-key-abc123'
 export const TEST_WORKSPACE_ID = 'ws-test-00000000-0000-0000-0000-000000000001'
@@ -10,7 +10,7 @@ export const WS_BASE = `${BASE_URL}/v1/${TEST_WORKSPACE_ID}`
 // --- Fixtures ---
 
 export const fixtures = {
-  agent: (): Agent => ({
+  agent: () => ({
     id: 'agent-00000000-0000-0000-0000-000000000001',
     workspace_id: TEST_WORKSPACE_ID,
     name: 'Test Agent',
@@ -20,13 +20,13 @@ export const fixtures = {
     updated_at: '2026-01-01T00:00:00Z',
   }),
 
-  skill: (): Skill => ({
+  skill: () => ({
     id: 'skill-00000000-0000-0000-0000-000000000001',
     workspace_id: TEST_WORKSPACE_ID,
     slug: 'test-skill',
     name: 'Test Skill',
     description: 'A test skill',
-    system_prompt: null,
+    system_prompt: '',
     input_schema: { type: 'object', properties: {} },
     result_schema: null,
     model: 'claude-sonnet-4-6',
@@ -39,7 +39,7 @@ export const fixtures = {
     updated_at: '2026-01-01T00:00:00Z',
   }),
 
-  entity: (): Entity => ({
+  entity: () => ({
     id: 'entity-00000000-0000-0000-0000-000000000001',
     workspace_id: TEST_WORKSPACE_ID,
     entity_type: 'patient',

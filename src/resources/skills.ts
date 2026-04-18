@@ -1,13 +1,6 @@
-import type {
-  Skill,
-  CreateSkillRequest,
-  UpdateSkillRequest,
-  SkillTestRequest,
-  SkillTestResponse,
-  PaginatedResponse,
-} from '../types/api.js'
+import type { components } from '../generated/api.js'
 import type { SkillId } from '../core/branded-types.js'
-import { WorkspaceScopedResource, buildQuery } from './base.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
 export interface ListSkillsParams extends ListParams {
@@ -22,44 +15,60 @@ export interface ListSkillsParams extends ListParams {
  */
 export class SkillsResource extends WorkspaceScopedResource {
   /** Create a new skill */
-  async create(body: CreateSkillRequest): Promise<Skill> {
-    return this.fetch<Skill>('/skills', {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async create(body: components['schemas']['CreateSkillRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/skills', {
+        params: { path: { workspace_id: this.workspaceId } },
+        body,
+      }),
+    )
   }
 
   /** List skills in the workspace */
-  async list(params?: ListSkillsParams): Promise<PaginatedResponse<Skill>> {
-    return this.fetch<PaginatedResponse<Skill>>(`/skills${buildQuery(params)}`)
+  async list(params?: ListSkillsParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/skills', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
   }
 
   /** Get a single skill */
-  async get(skillId: SkillId | string): Promise<Skill> {
-    return this.fetch<Skill>(`/skills/${skillId}`)
+  async get(skillId: SkillId | string) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/skills/{skill_id}', {
+        params: { path: { workspace_id: this.workspaceId, skill_id: skillId } },
+      }),
+    )
   }
 
   /** Update a skill */
-  async update(skillId: SkillId | string, body: UpdateSkillRequest): Promise<Skill> {
-    return this.fetch<Skill>(`/skills/${skillId}`, {
-      method: 'PUT',
-      body: JSON.stringify(body),
-    })
+  async update(skillId: SkillId | string, body: components['schemas']['UpdateSkillRequest']) {
+    return extractData(
+      await this.client.PUT('/v1/{workspace_id}/skills/{skill_id}', {
+        params: { path: { workspace_id: this.workspaceId, skill_id: skillId } },
+        body,
+      }),
+    )
   }
 
   /** Delete a skill */
   async delete(skillId: SkillId | string): Promise<void> {
-    return this.fetch<void>(`/skills/${skillId}`, { method: 'DELETE' })
+    await this.client.DELETE('/v1/{workspace_id}/skills/{skill_id}', {
+      params: { path: { workspace_id: this.workspaceId, skill_id: skillId } },
+    })
   }
 
   /**
    * Test a skill with a sample input.
    * Executes the skill in a sandbox and returns the result.
    */
-  async test(skillId: SkillId | string, body: SkillTestRequest): Promise<SkillTestResponse> {
-    return this.fetch<SkillTestResponse>(`/skills/${skillId}/test`, {
-      method: 'POST',
-      body: JSON.stringify(body),
-    })
+  async test(skillId: SkillId | string, body: components['schemas']['TestSkillRequest']) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/skills/{skill_id}/test', {
+        params: { path: { workspace_id: this.workspaceId, skill_id: skillId } },
+        body,
+      }),
+    )
   }
 }
