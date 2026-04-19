@@ -159,6 +159,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       contents: read
       id-token: write
 
@@ -183,6 +184,18 @@ jobs:
         with:
           name: release-payload
           path: release-payload
+
+      - name: Validate release payload
+        run: |
+          if [ -z "${{ needs.prepare.outputs.tarball_file }}" ]; then
+            echo "::error::prepare job did not produce a tarball filename."
+            exit 1
+          fi
+
+          if [ ! -f "release-payload/${{ needs.prepare.outputs.tarball_file }}" ]; then
+            echo "::error::Expected tarball release-payload/${{ needs.prepare.outputs.tarball_file }} was not found."
+            exit 1
+          fi
 
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
@@ -319,10 +332,18 @@ jobs:
           - triggering sha: \`${GITHUB_SHA}\`
           - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
+          Possible partial states:
+          - npm package is already published, but the version-bump commit, tag, and GitHub Release are all missing.
+          - npm package is already published and the git tag exists, but the GitHub Release was not created.
+          - npm package is already published and the version-bump commit landed, but the tag or GitHub Release did not.
+
           Manual recovery is required before another release run:
-          1. Inspect whether \`${{ github.ref_name }}\` advanced after publish.
-          2. Recreate the version-bump commit, tag, and GitHub Release for the already-published package if needed.
-          3. Close or update this issue once the release metadata is consistent again.
+          1. Confirm the package version is already live on npm before taking any further release action.
+          2. Inspect whether \`${{ github.ref_name }}\` advanced after publish.
+          3. Check whether the version-bump commit landed on the branch.
+          4. Check whether tag \`v${{ needs.prepare.outputs.new_version }}\` exists remotely.
+          5. Recreate the missing commit, tag, and/or GitHub Release metadata for the already-published package as needed.
+          6. Close or update this issue once the release metadata is consistent again.
           EOF
           )
 
