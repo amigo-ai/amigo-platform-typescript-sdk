@@ -22,7 +22,7 @@
     "url": "https://github.com/amigo-ai/amigo-platform-typescript-sdk.git"
   },
   "license": "MIT",
-  "author": "Amigo AI",
+  "author": "Amigo Inc.",
   "type": "module",
   "exports": {
     ".": {
