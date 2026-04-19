@@ -1,5 +1,9 @@
 # @amigo-ai/platform-sdk
 
+[![npm version](https://img.shields.io/npm/v/@amigo-ai/platform-sdk.svg)](https://www.npmjs.com/package/@amigo-ai/platform-sdk)
+[![CI](https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 Official TypeScript SDK for the [Amigo Platform API](https://api.platform.amigo.ai/v1/docs).
 
 ## Installation
@@ -93,13 +97,15 @@ const latest = await client.agents.getVersion(agent.id, 'latest')
 const { items: agents } = await client.agents.list({ search: 'intake' })
 ```
 
-### Skills
+### Actions
+
+Actions are reusable agent capabilities (formerly "skills").
 
 ```typescript
-const skill = await client.skills.create({
+const action = await client.actions.create({
   slug: 'schedule-appointment',
   name: 'Schedule Appointment',
-  description: 'Books appointments in the EHR system',
+  description: 'Books appointments in the scheduling system',
   input_schema: {
     type: 'object',
     properties: {
@@ -112,10 +118,10 @@ const skill = await client.skills.create({
 })
 
 // Test with a sample input
-const result = await client.skills.test(skill.id, {
-  input: { patient_id: 'MRN-001', appointment_type: 'follow-up' },
+const result = await client.actions.test(action.id, {
+  input: { patient_id: 'ID-001', appointment_type: 'follow-up' },
 })
-console.log(result.success, result.output)
+console.log(result.result, result.duration_ms)
 ```
 
 ### Services

@@ -124,12 +124,4 @@ Response field removal, rename, or type change breaks this SDK and all consumers
 
 ## Cross-Repo Contract
 
-```
-platform-api Pydantic models
-       | make openapi
-openapi.json (committed, CI-checked by oasdiff)
-       | sdk-sync.yml (auto-PR on spec change)
-@amigo-ai/platform-sdk (npm, provenance-attested)
-       | npm dependency
-developer-console (TypeScript catches breaks at compile time)
-```
+The SDK types are generated from the committed OpenAPI spec. When the spec changes upstream, the `spec-sync` workflow auto-opens a PR with regenerated types. Breaking changes are detected by `oasdiff` CI in the API repo.

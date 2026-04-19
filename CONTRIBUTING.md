@@ -150,9 +150,6 @@ When the platform API spec changes on `main`, the `spec-sync.yml` workflow:
 2. Opens a PR with regenerated types
 3. Optionally auto-releases a minor version
 
-### Required Repository Secrets
+### Repository Secrets
 
-- `NPM_TOKEN` — npm automation token for publishing
-- `CODECOV_TOKEN` — Codecov upload token (optional)
-- `AMIGO_TEST_API_KEY` — API key for integration tests
-- `AMIGO_TEST_WORKSPACE_ID` — Workspace ID for integration tests
+Maintainers: see the internal runbook for CI secret configuration.

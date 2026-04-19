@@ -44,16 +44,18 @@
     "lint": "eslint 'src/**/*.{ts,tsx}' --max-warnings 0",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
     "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
-    "test": "vitest run tests/resources",
+    "test": "vitest run tests/resources tests/core",
     "test:dist": "vitest run tests/dist",
     "test:integration": "vitest run tests/integration",
     "test:all": "vitest run",
-    "test:watch": "vitest tests/resources",
+    "test:watch": "vitest tests/resources tests/core",
+    "test:coverage": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm test"
   },
   "sideEffects": false,
   "dependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.0.0-rc.16",
     "openapi-fetch": "^0.14.0"
   },
   "devDependencies": {
@@ -61,6 +63,7 @@
     "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
+    "@vitest/coverage-v8": "^4.1.4",
     "esbuild": "^0.24.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
