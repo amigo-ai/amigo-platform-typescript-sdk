@@ -22,6 +22,11 @@ You review `.github/workflows/**` and `scripts/**`.
   reviewed or tested.
 - Flag as **CONCERN** if shell or GH CLI usage relies on ambient state instead
   of explicit env/config where that makes behavior ambiguous.
+- Do **not** flag the intentional WIF degrade-to-comment pattern in
+  `.github/workflows/pr-review.yml` `jobs.review` when auth uses
+  `continue-on-error`, updates the `<!-- pr-review-auth-status -->` bot
+  comment, and cleans stale auth notes. That specific path is an accepted
+  availability tradeoff in this repo, not a silent failure.
 
 ## Output
 

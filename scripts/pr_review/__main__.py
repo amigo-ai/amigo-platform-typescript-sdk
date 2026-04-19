@@ -25,9 +25,10 @@ import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
-from anthropic import AsyncAnthropicVertex
-from anthropic.types import Message
+if TYPE_CHECKING:
+    from anthropic.types import Message
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / ".claude" / "agents"
@@ -47,7 +48,8 @@ MAX_ERROR_CHARS = 800
 ERROR_REDACTION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"(?i)(authorization:?\s*bearer\s+)[a-z0-9._~-]+"), r"\1[REDACTED]"),
     (re.compile(r"\bya29\.[A-Za-z0-9._-]+\b"), "[REDACTED_OAUTH_TOKEN]"),
-    (re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b"), "[REDACTED_JWT]"),
+    # Prefer over-matching to leaking JWTs embedded in other base64url-ish text.
+    (re.compile(r"eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+"), "[REDACTED_JWT]"),
     (re.compile(r"-----BEGIN[^-]+PRIVATE KEY-----[\s\S]+?-----END[^-]+PRIVATE KEY-----"), "[REDACTED_PRIVATE_KEY]"),
     (re.compile(r"\bAIza[0-9A-Za-z_-]{35,}\b"), "[REDACTED_GOOGLE_API_KEY]"),
 )
@@ -155,7 +157,7 @@ def format_error(exc: Exception) -> str:
 
 
 async def run_specialist(
-    client: AsyncAnthropicVertex,
+    client: Any,
     agent_name: str,
     diff: str,
     changed_files: list[str],
@@ -189,7 +191,7 @@ DIFF:
 {diff_block}
 """
     try:
-        response: Message = await client.messages.create(
+        response = await client.messages.create(
             model=model,
             max_tokens=max_tokens,
             system=system,
@@ -205,7 +207,7 @@ DIFF:
 
 
 async def run_orchestrator(
-    client: AsyncAnthropicVertex,
+    client: Any,
     specialist_findings: dict[str, str],
     pr_meta: dict,
     buckets: list[str],
@@ -233,7 +235,7 @@ but accurate: do not invent blockers, and do not soften real ones.
 
 {findings_block}
 """
-    response: Message = await client.messages.create(
+    response = await client.messages.create(
         model=model,
         max_tokens=ORCHESTRATOR_MAX_TOKENS,
         system=system,
@@ -286,23 +288,48 @@ def delete_comment(comment_id: str) -> None:
     )
 
 
-def post_comment(pr_number: str, body: str) -> None:
-    subprocess.run(["gh", "pr", "comment", pr_number, "--body", body], check=True)
+def post_comment(pr_number: str, body: str) -> str:
+    try:
+        raw = subprocess.check_output(
+            [
+                "gh",
+                "api",
+                "--method",
+                "POST",
+                f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{pr_number}/comments",
+                "-f",
+                f"body={body}",
+                "--jq",
+                ".id",
+            ],
+            text=True,
+            stderr=subprocess.PIPE,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Failed to post review comment: {format_error(exc)}") from exc
+    return raw.strip()
 
 
-def update_comment(comment_id: str, body: str) -> None:
-    subprocess.run(
-        [
-            "gh",
-            "api",
-            "--method",
-            "PATCH",
-            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
-            "-f",
-            f"body={body}",
-        ],
-        check=True,
-    )
+def update_comment(comment_id: str, body: str) -> str:
+    try:
+        raw = subprocess.check_output(
+            [
+                "gh",
+                "api",
+                "--method",
+                "PATCH",
+                f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
+                "-f",
+                f"body={body}",
+                "--jq",
+                ".id",
+            ],
+            text=True,
+            stderr=subprocess.PIPE,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Failed to update review comment: {format_error(exc)}") from exc
+    return raw.strip()
 
 
 def upsert_review_comment(pr_number: str, body: str) -> None:
@@ -310,12 +337,13 @@ def upsert_review_comment(pr_number: str, body: str) -> None:
     latest_comment_id = comment_ids[-1] if comment_ids else None
 
     if latest_comment_id:
-        update_comment(latest_comment_id, body)
+        confirmed_comment_id = str(update_comment(latest_comment_id, body))
     else:
-        post_comment(pr_number, body)
+        confirmed_comment_id = str(post_comment(pr_number, body))
 
     for comment_id in comment_ids[:-1]:
-        delete_comment(comment_id)
+        if comment_id != confirmed_comment_id:
+            delete_comment(comment_id)
 
 
 def compose_final_comment(report_markdown: str, buckets: list[str]) -> str:
@@ -387,6 +415,8 @@ async def review_pr(
             buckets=[],
         )
     else:
+        from anthropic import AsyncAnthropicVertex
+
         client = AsyncAnthropicVertex(project_id=vertex_project, region=vertex_region)
         tasks: list[asyncio.Task[tuple[str, str]]] = []
 

@@ -18,6 +18,12 @@ on:
         default: false
         type: boolean
 
+# Release operators:
+# - Configure `RELEASE_PUSH_TOKEN` when the target branch is protected.
+# - The token must be able to push the version-bump commit and tag after npm
+#   publish succeeds. Without it, protected-branch finalization is rejected
+#   before publish begins.
+
 permissions:
   actions: read
   contents: read
@@ -44,6 +50,32 @@ jobs:
           if [ "${{ github.ref_type }}" != "branch" ]; then
             echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
             exit 1
+          fi
+
+      - name: Validate finalize push credentials
+        if: ${{ !inputs.dry_run }}
+        env:
+          BRANCH_NAME: ${{ github.ref_name }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          # This preflight catches the common missing-token and repo-level
+          # permission cases before publish. It cannot prove branch-level bypass
+          # against rulesets or protected-branch push restrictions.
+          BRANCH_PROTECTED=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${BRANCH_NAME}" --jq '.protected')
+          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
+
+          if [ "$BRANCH_PROTECTED" = "true" ] && [ -z "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches. Branches protected only by rulesets are not detected by this check and still require the token."
+            exit 1
+          fi
+
+          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            CAN_PUSH=$(GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.permissions.push // false')
+            if [ "$CAN_PUSH" != "true" ]; then
+              echo "::error::RELEASE_PUSH_TOKEN lacks repository-level push permission for ${GITHUB_REPOSITORY}."
+              exit 1
+            fi
           fi
 
       - name: Checkout code
@@ -180,7 +212,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
+          if [ -z "${NODE_AUTH_TOKEN//[[:space:]]/}" ]; then
             echo "::error::NPM_TOKEN secret is not configured."
             exit 1
           fi
@@ -224,6 +256,11 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Validate npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm whoami --registry=https://registry.npmjs.org/
+
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -234,6 +271,8 @@ jobs:
           npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
 
   finalize:
+    # Keep `prepare` upstream of `finalize`: it performs the pre-publish
+    # credential checks that stop release finalization failures before publish.
     if: ${{ !inputs.dry_run }}
     needs: [prepare, publish]
     runs-on: ubuntu-latest
@@ -241,11 +280,29 @@ jobs:
       contents: write
 
     steps:
+      - name: Resolve finalize credentials
+        id: finalize_credentials
+        env:
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
+          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            echo "::add-mask::$RELEASE_PUSH_TOKEN_TRIMMED"
+            echo "checkout_token=$RELEASE_PUSH_TOKEN_TRIMMED" >> "$GITHUB_OUTPUT"
+            echo "has_release_push_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "checkout_token=${{ github.token }}" >> "$GITHUB_OUTPUT"
+            echo "has_release_push_token=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout triggering commit
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          # Check out the dispatch-time SHA so release finalization can compare
+          # against the exact commit that prepared and published the tarball.
           ref: ${{ github.sha }}
           fetch-depth: 0
+          token: ${{ steps.finalize_credentials.outputs.checkout_token }}
 
       - name: Configure git
         run: |
@@ -338,7 +395,13 @@ jobs:
   notify_finalize_failure:
     # `always()` is required so this recovery path still runs when `finalize`
     # fails; otherwise Actions would skip the notification by default.
-    if: ${{ !inputs.dry_run && always() && needs.finalize.result == 'failure' }}
+    if: >-
+      ${{
+        !inputs.dry_run &&
+        always() &&
+        needs.publish.result == 'success' &&
+        (needs.finalize.result == 'failure' || needs.finalize.result == 'skipped')
+      }}
     needs: [prepare, publish, finalize]
     runs-on: ubuntu-latest
     permissions:
