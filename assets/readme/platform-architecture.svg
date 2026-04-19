@@ -1,103 +1,120 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="480" viewBox="0 0 1200 480">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0.6" y2="1">
-      <stop offset="0%" stop-color="#083241"/>
-      <stop offset="100%" stop-color="#051A24"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#081E2A"/>
+      <stop offset="55%" stop-color="#0A2C3B"/>
+      <stop offset="100%" stop-color="#051822"/>
     </linearGradient>
-    <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="white" stop-opacity="0.1"/>
-      <stop offset="100%" stop-color="#999" stop-opacity="0.04"/>
+    <radialGradient id="glowLeft" cx="0.2" cy="0.22" r="0.7">
+      <stop offset="0%" stop-color="#26C6FF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#26C6FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowRight" cx="0.84" cy="0.16" r="0.55">
+      <stop offset="0%" stop-color="#7DE1B5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#7DE1B5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="panelStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#92B4C3" stop-opacity="0.06"/>
     </linearGradient>
-    <linearGradient id="strokeGradSubtle" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="white" stop-opacity="0.08"/>
-      <stop offset="100%" stop-color="#999" stop-opacity="0.03"/>
+    <linearGradient id="highlightStroke" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#82E4FF" stop-opacity="0.92"/>
+      <stop offset="100%" stop-color="#64AFFF" stop-opacity="0.56"/>
     </linearGradient>
-    <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
-      <path d="M 0 0.5 L 9 3.5 L 0 6.5" fill="none" stroke="white" stroke-width="1" opacity="0.2"/>
+    <linearGradient id="arrowStroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8EE4FF"/>
+      <stop offset="100%" stop-color="#7FC8FF"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 12 12" refX="10.5" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 12 6 L 0 12 z" fill="#8EE4FF"/>
     </marker>
   </defs>
 
-  <rect width="1200" height="480" fill="url(#bg)"/>
+  <rect width="1200" height="540" fill="url(#bg)"/>
+  <rect width="1200" height="540" fill="url(#glowLeft)"/>
+  <rect width="1200" height="540" fill="url(#glowRight)"/>
 
-  <!-- ====== PLATFORM SYSTEMS (top) ====== -->
-  <rect x="32" y="32" width="880" height="260" rx="10" fill="white" fill-opacity="0.03" stroke="url(#strokeGrad)" stroke-width="0.75"/>
-  <text x="60" y="60" font-family="'Diatype Mono', 'SF Mono', monospace" font-size="13" font-weight="500" fill="white" fill-opacity="0.55" letter-spacing="2">PLATFORM SYSTEMS</text>
+  <text x="68" y="62" font-family="'SFMono-Regular', Menlo, monospace" font-size="13" font-weight="600" fill="#BBD1DC" letter-spacing="2.4">PLATFORM CONTEXT</text>
+  <text x="68" y="98" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="30" font-weight="700" fill="white">How the TypeScript SDK fits into the stack</text>
+  <text x="68" y="126" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="15" fill="#A9C0CB">Your runtime calls the SDK, the SDK targets the workspace-scoped Platform API, and the API fronts the operational systems behind the product.</text>
 
-  <!-- Row 1 -->
-  <rect x="52" y="78" width="200" height="60" rx="8" fill="white" fill-opacity="0.1" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="152" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Agent Engine</text>
-  <text x="152" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Phone, text, simulation</text>
+  <rect x="60" y="152" width="246" height="208" rx="22" fill="white" fill-opacity="0.045" stroke="url(#panelStroke)" stroke-width="1"/>
+  <text x="88" y="184" font-family="'SFMono-Regular', Menlo, monospace" font-size="12" font-weight="600" fill="#B4C9D4" letter-spacing="2">YOUR RUNTIME</text>
 
-  <rect x="268" y="78" width="200" height="60" rx="8" fill="white" fill-opacity="0.1" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="368" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Clinical Copilot</text>
-  <text x="368" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">SOAP, ICD-10, CDS</text>
+  <rect x="82" y="206" width="202" height="42" rx="12" fill="#173E4D" fill-opacity="0.95" stroke="white" stroke-opacity="0.06"/>
+  <text x="183" y="231" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="white">Node servers</text>
 
-  <rect x="484" y="78" width="200" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="584" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Emotion Engine</text>
-  <text x="584" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Acoustic intelligence</text>
+  <rect x="82" y="260" width="202" height="42" rx="12" fill="#173E4D" fill-opacity="0.88" stroke="white" stroke-opacity="0.06"/>
+  <text x="183" y="285" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="white">Workers and jobs</text>
 
-  <rect x="700" y="78" width="192" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="796" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Connector Runner</text>
-  <text x="796" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">EHR, FHIR, CRM sync</text>
+  <rect x="82" y="314" width="202" height="42" rx="12" fill="#173E4D" fill-opacity="0.82" stroke="white" stroke-opacity="0.06"/>
+  <text x="183" y="339" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="white">Edge or BFF layers</text>
 
-  <!-- Row 2 -->
-  <rect x="52" y="152" width="200" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="152" y="177" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Operators</text>
-  <text x="152" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Monitoring, escalation</text>
+  <rect x="366" y="128" width="338" height="256" rx="24" fill="#0D3446" fill-opacity="0.9" stroke="url(#highlightStroke)" stroke-width="1.5"/>
+  <text x="394" y="162" font-family="'SFMono-Regular', Menlo, monospace" font-size="12" font-weight="600" fill="#BFEBFF" letter-spacing="2">SDK LAYER</text>
+  <text x="394" y="214" font-family="'SFMono-Regular', Menlo, monospace" font-size="28" font-weight="700" fill="white">@amigo-ai/platform-sdk</text>
+  <text x="394" y="245" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#C4D8E1">Typed workspace-scoped client for the Platform API.</text>
+  <text x="394" y="271" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#C4D8E1">It keeps auth, retries, webhooks, request control,</text>
+  <text x="394" y="295" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="16" fill="#C4D8E1">and generated types on the package surface.</text>
 
-  <rect x="268" y="152" width="200" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="368" y="177" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Metric Store</text>
-  <text x="368" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Config-driven analytics</text>
+  <rect x="394" y="321" width="114" height="30" rx="15" fill="#123D50" stroke="#7CCFFF" stroke-opacity="0.28"/>
+  <text x="451" y="340" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="600" fill="#DFF4FF">Typed surface</text>
+  <rect x="519" y="321" width="104" height="30" rx="15" fill="#123D50" stroke="#7CCFFF" stroke-opacity="0.22"/>
+  <text x="571" y="340" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="600" fill="#DFF4FF">ESM + CJS</text>
+  <rect x="394" y="360" width="110" height="30" rx="15" fill="#123D50" stroke="#7CCFFF" stroke-opacity="0.22"/>
+  <text x="449" y="379" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="600" fill="#DFF4FF">Webhooks</text>
+  <rect x="515" y="360" width="136" height="30" rx="15" fill="#123D50" stroke="#7CCFFF" stroke-opacity="0.22"/>
+  <text x="583" y="379" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="13" font-weight="600" fill="#DFF4FF">Request control</text>
 
-  <rect x="484" y="152" width="200" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="584" y="177" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Surfaces</text>
-  <text x="584" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Forms, data capture</text>
+  <rect x="764" y="110" width="376" height="296" rx="22" fill="white" fill-opacity="0.045" stroke="url(#panelStroke)" stroke-width="1"/>
+  <text x="792" y="142" font-family="'SFMono-Regular', Menlo, monospace" font-size="12" font-weight="600" fill="#B4C9D4" letter-spacing="2">PLATFORM API</text>
+  <text x="792" y="172" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="15" fill="#C0D4DE">Workspace-scoped REST resources exposed by the SDK.</text>
 
-  <rect x="700" y="152" width="192" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="796" y="177" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Outbound Dispatch</text>
-  <text x="796" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Campaigns, follow-ups</text>
+  <rect x="792" y="198" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.9" stroke="white" stroke-opacity="0.06"/>
+  <text x="866" y="222" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">Agents</text>
+  <text x="866" y="241" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Actions, skills, services</text>
 
-  <!-- Annotation: read + write -->
-  <text x="472" y="248" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="white" fill-opacity="0.5">read + write</text>
-  <line x1="390" y1="254" x2="390" y2="280" stroke="white" stroke-width="1" stroke-opacity="0.15" marker-end="url(#arrow)"/>
-  <line x1="555" y1="254" x2="555" y2="280" stroke="white" stroke-width="1" stroke-opacity="0.15" marker-end="url(#arrow)"/>
+  <rect x="962" y="198" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.86" stroke="white" stroke-opacity="0.06"/>
+  <text x="1036" y="222" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">Calls</text>
+  <text x="1036" y="241" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Voice, history, recordings</text>
 
-  <!-- ====== CLASSIC API (top right) ====== -->
-  <rect x="940" y="32" width="228" height="260" rx="10" fill="white" fill-opacity="0.03" stroke="url(#strokeGrad)" stroke-width="0.75"/>
-  <text x="968" y="60" font-family="'Diatype Mono', 'SF Mono', monospace" font-size="13" font-weight="500" fill="white" fill-opacity="0.55" letter-spacing="2">CLASSIC API</text>
+  <rect x="792" y="270" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.86" stroke="white" stroke-opacity="0.06"/>
+  <text x="866" y="294" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">World</text>
+  <text x="866" y="313" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Entities and events</text>
 
-  <rect x="960" y="78" width="188" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="1054" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Text Chat</text>
-  <text x="1054" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">WebSocket streaming</text>
+  <rect x="962" y="270" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.82" stroke="white" stroke-opacity="0.06"/>
+  <text x="1036" y="294" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">Analytics</text>
+  <text x="1036" y="313" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Dashboards and trends</text>
 
-  <rect x="960" y="152" width="188" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="1054" y="177" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">User Models</text>
-  <text x="1054" y="195" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Memory, personalization</text>
+  <rect x="792" y="342" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.82" stroke="white" stroke-opacity="0.06"/>
+  <text x="866" y="366" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">Webhooks</text>
+  <text x="866" y="385" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Signed inbound events</text>
 
-  <!-- Classic API annotation -->
-  <text x="1054" y="248" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="white" fill-opacity="0.5">read + write</text>
-  <line x1="1054" y1="254" x2="1054" y2="280" stroke="white" stroke-width="1" stroke-opacity="0.15" marker-end="url(#arrow)"/>
+  <rect x="962" y="342" width="148" height="54" rx="14" fill="#173E4D" fill-opacity="0.78" stroke="white" stroke-opacity="0.06"/>
+  <text x="1036" y="366" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="600" fill="white">Operations</text>
+  <text x="1036" y="385" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Operators, integrations, numbers</text>
 
-  <!-- ====== WORLD MODEL (bottom foundation) ====== -->
-  <rect x="32" y="290" width="1136" height="150" rx="10" fill="white" fill-opacity="0.05" stroke="url(#strokeGrad)" stroke-width="0.75"/>
-  <text x="60" y="318" font-family="'Diatype Mono', 'SF Mono', monospace" font-size="13" font-weight="500" fill="white" fill-opacity="0.55" letter-spacing="2">WORLD MODEL</text>
+  <path d="M 306 256 C 328 256 344 256 366 256" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <text x="334" y="232" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">typed requests</text>
 
-  <rect x="52" y="336" width="260" height="60" rx="8" fill="white" fill-opacity="0.1" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="182" y="361" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Event Store</text>
-  <text x="182" y="379" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Confidence-scored, immutable facts</text>
+  <path d="M 704 256 C 728 256 740 256 764 256" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <text x="734" y="232" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">workspace auth</text>
 
-  <rect x="332" y="336" width="260" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="462" y="361" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Entity Projections</text>
-  <text x="462" y="379" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Entity state from events</text>
+  <path d="M 952 406 C 952 420 952 430 952 446" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <text x="952" y="422" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">backed by platform systems</text>
 
-  <rect x="612" y="336" width="260" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="742" y="361" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Intelligence Projections</text>
-  <text x="742" y="379" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Memory, scheduling, clinical</text>
+  <rect x="60" y="448" width="1080" height="70" rx="20" fill="white" fill-opacity="0.05" stroke="url(#panelStroke)" stroke-width="1"/>
+  <text x="88" y="477" font-family="'SFMono-Regular', Menlo, monospace" font-size="12" font-weight="600" fill="#B4C9D4" letter-spacing="2">PLATFORM SYSTEMS</text>
 
-  <rect x="892" y="336" width="256" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="1020" y="361" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Vector Search</text>
-  <text x="1020" y="379" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Semantic queries</text>
+  <rect x="84" y="487" width="238" height="18" rx="9" fill="#173E4D" fill-opacity="0.84"/>
+  <text x="203" y="500" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" fill="#D6E7EE">Connectors and EHR sync</text>
 
-  <!-- Footer -->
-  <text x="600" y="462" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="500" fill="white" fill-opacity="0.55">All systems read from and write to the world model - confidence propagates through every projection level</text>
+  <rect x="350" y="487" width="222" height="18" rx="9" fill="#173E4D" fill-opacity="0.84"/>
+  <text x="461" y="500" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" fill="#D6E7EE">World model and projections</text>
+
+  <rect x="600" y="487" width="226" height="18" rx="9" fill="#173E4D" fill-opacity="0.84"/>
+  <text x="713" y="500" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" fill="#D6E7EE">Operators and outbound automation</text>
+
+  <rect x="854" y="487" width="262" height="18" rx="9" fill="#173E4D" fill-opacity="0.84"/>
+  <text x="985" y="500" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="11" font-weight="600" fill="#D6E7EE">Observability, analytics, and webhook delivery</text>
 </svg>

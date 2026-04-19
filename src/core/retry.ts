@@ -14,7 +14,10 @@ export interface RetryOptions {
 const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504])
 // POST is only retried on 429 with a Retry-After header (idempotency concern)
 const POST_RETRYABLE_STATUS_CODES = new Set([429])
-let jitterState = (Date.now() ^ 0x9e37_79b9) >>> 0
+let jitterCounter = 0
+type CryptoLike = {
+  getRandomValues<T extends Uint32Array>(array: T): T
+}
 
 export interface RetryContext {
   method: string
@@ -50,7 +53,7 @@ export function computeDelay(
 
   // Exponential backoff with full jitter: random value in [0, min(maxDelay, base * 2^attempt)]
   const exponential = Math.min(options.maxDelayMs, options.baseDelayMs * Math.pow(2, attempt))
-  return randomFraction() * exponential
+  return jitterFraction() * exponential
 }
 
 function parseRetryAfterHeader(header: string): number | undefined {
@@ -79,10 +82,34 @@ export function resolveRetryOptions(
   }
 }
 
-function randomFraction(): number {
-  // Retry jitter only needs to spread concurrent retries, not provide
-  // cryptographic randomness. Keep it runtime-portable across supported
-  // Node and web-standard environments without depending on global crypto.
-  jitterState = (Math.imul(jitterState, 1_664_525) + 1_013_904_223) >>> 0
-  return jitterState / 0x1_0000_0000
+function jitterFraction(): number {
+  const cryptoApi = getCryptoApi()
+  if (cryptoApi) {
+    const value = new Uint32Array(1)
+    cryptoApi.getRandomValues(value)
+    return (value[0] ?? 0) / 0x1_0000_0000
+  }
+
+  // Retry jitter is not a security primitive, but we still want a stable
+  // spread for runtimes that do not expose Web Crypto.
+  jitterCounter = (jitterCounter + 1) >>> 0
+  const mixed = mixUint32((Date.now() ^ Math.imul(jitterCounter, 0x9e37_79b9)) >>> 0)
+  return mixed / 0x1_0000_0000
+}
+
+function getCryptoApi(): CryptoLike | undefined {
+  const cryptoApi = globalThis.crypto as CryptoLike | undefined
+  if (cryptoApi && typeof cryptoApi.getRandomValues === 'function') {
+    return cryptoApi
+  }
+
+  return undefined
+}
+
+function mixUint32(value: number): number {
+  let mixed = (value ^ (value >>> 16)) >>> 0
+  mixed = Math.imul(mixed, 0x7feb_352d) >>> 0
+  mixed = (mixed ^ (mixed >>> 15)) >>> 0
+  mixed = Math.imul(mixed, 0x846c_a68b) >>> 0
+  return (mixed ^ (mixed >>> 16)) >>> 0
 }
