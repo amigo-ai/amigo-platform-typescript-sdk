@@ -7426,10 +7426,16 @@ export interface components {
             /** Id */
             id: string;
             identity: components["schemas"]["Identity"];
-            /** Initials */
-            initials: string;
-            /** Name */
-            name: string;
+            /**
+             * Initials
+             * @default
+             */
+            initials?: string;
+            /**
+             * Name
+             * @default
+             */
+            name?: string;
             /**
              * Updated At
              * Format: date-time
