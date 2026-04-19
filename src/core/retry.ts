@@ -14,6 +14,7 @@ export interface RetryOptions {
 const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504])
 // POST is only retried on 429 with a Retry-After header (idempotency concern)
 const POST_RETRYABLE_STATUS_CODES = new Set([429])
+let jitterState = (Date.now() ^ 0x9e37_79b9) >>> 0
 
 export interface RetryContext {
   method: string
@@ -79,7 +80,9 @@ export function resolveRetryOptions(
 }
 
 function randomFraction(): number {
-  const bytes = new Uint32Array(1)
-  crypto.getRandomValues(bytes)
-  return (bytes[0] ?? 0) / 0x1_0000_0000
+  // Retry jitter only needs to spread concurrent retries, not provide
+  // cryptographic randomness. Keep it runtime-portable across supported
+  // Node and web-standard environments without depending on global crypto.
+  jitterState = (Math.imul(jitterState, 1_664_525) + 1_013_904_223) >>> 0
+  return jitterState / 0x1_0000_0000
 }
