@@ -95,6 +95,18 @@ jobs:
             echo "Version updated: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
           fi
 
+      - name: Update CHANGELOG.md
+        if: ${{ !inputs.dry_run }}
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.version }}"
+          ENTRY=$(node scripts/release-history.mjs changelog --version "$NEW_VERSION")
+          if [ -f CHANGELOG.md ]; then
+            { head -1 CHANGELOG.md; echo ""; echo "$ENTRY"; tail -n +2 CHANGELOG.md; } > CHANGELOG.tmp
+            mv CHANGELOG.tmp CHANGELOG.md
+          else
+            { echo "# Changelog"; echo ""; echo "$ENTRY"; } > CHANGELOG.md
+          fi
+
       - name: Build package
         run: |
           rm -rf dist/
@@ -109,6 +121,13 @@ jobs:
           echo "Tarball created: $FILE"
           ls -la "$FILE"
 
+      - name: Commit version bump
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git add package.json package-lock.json CHANGELOG.md || true
+          git commit -m "v${{ steps.new_version.outputs.version }}"
+          git push origin HEAD
+
       - name: Publish to npm
         if: ${{ !inputs.dry_run }}
         env:
@@ -116,25 +135,6 @@ jobs:
         run: |
           FILE="${{ steps.pack.outputs.file }}"
           npm publish "$FILE" --provenance --access public
-
-      - name: Update CHANGELOG.md
-        if: ${{ !inputs.dry_run }}
-        run: |
-          NEW_VERSION="${{ steps.new_version.outputs.version }}"
-          ENTRY=$(node scripts/release-history.mjs changelog --version "$NEW_VERSION")
-          if [ -f CHANGELOG.md ]; then
-            { head -1 CHANGELOG.md; echo ""; echo "$ENTRY"; tail -n +2 CHANGELOG.md; } > CHANGELOG.tmp
-            mv CHANGELOG.tmp CHANGELOG.md
-          else
-            { echo "# Changelog"; echo ""; echo "$ENTRY"; } > CHANGELOG.md
-          fi
-
-      - name: Commit version bump
-        if: ${{ !inputs.dry_run }}
-        run: |
-          git add package.json package-lock.json CHANGELOG.md || true
-          git commit -m "v${{ steps.new_version.outputs.version }}"
-          git push origin HEAD
 
       - name: Build release notes
         if: ${{ !inputs.dry_run }}
