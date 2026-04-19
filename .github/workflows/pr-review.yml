@@ -109,20 +109,20 @@ jobs:
             gh pr comment "${{ github.event.pull_request.number }}" --body "$body"
           fi
 
-      - name: Clear stale WIF trust mismatch note
+      - name: Clear stale WIF auth comment
         if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          set -euo pipefail
           marker='<!-- pr-review-auth-status -->'
-          comment_id=$(
-            gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
-              --paginate \
-              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
-              | tail -n1
-          )
-
-          if [ -n "$comment_id" ]; then
-            gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
-          fi
+          gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+            --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
+            | while IFS= read -r comment_id; do
+                [ -n "$comment_id" ] || continue
+                gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
+              done
 
       - name: Install uv
         if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
