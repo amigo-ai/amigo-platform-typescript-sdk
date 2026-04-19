@@ -10,10 +10,13 @@ import {
   RateLimitError,
   ServerError,
   ConfigurationError,
+  NetworkError,
+  RequestTimeoutError,
   isAmigoError,
   isNotFoundError,
   isRateLimitError,
   isAuthenticationError,
+  isRequestTimeoutError,
   createApiError,
 } from '../../src/core/errors.js'
 
@@ -28,6 +31,7 @@ describe('Error hierarchy', () => {
     expect(new RateLimitError('rate')).toBeInstanceOf(AmigoError)
     expect(new ServerError('server')).toBeInstanceOf(AmigoError)
     expect(new ConfigurationError('config')).toBeInstanceOf(AmigoError)
+    expect(new RequestTimeoutError('timeout', 1000)).toBeInstanceOf(AmigoError)
   })
 
   it('sets correct status codes', () => {
@@ -78,21 +82,22 @@ describe('Type guards', () => {
     expect(isAuthenticationError(new AuthenticationError('x'))).toBe(true)
     expect(isAuthenticationError(new PermissionError('x'))).toBe(false)
   })
+
+  it('isRequestTimeoutError', () => {
+    expect(isRequestTimeoutError(new RequestTimeoutError('x', 1000))).toBe(true)
+    expect(isRequestTimeoutError(new NetworkError('x'))).toBe(false)
+  })
 })
 
 describe('ConfigurationError from AmigoClient', () => {
   it('throws on missing apiKey', async () => {
     const { AmigoClient } = await import('../../src/index.js')
-    expect(
-      () => new AmigoClient({ apiKey: '', workspaceId: 'ws-001' }),
-    ).toThrow(ConfigurationError)
+    expect(() => new AmigoClient({ apiKey: '', workspaceId: 'ws-001' })).toThrow(ConfigurationError)
   })
 
   it('throws on missing workspaceId', async () => {
     const { AmigoClient } = await import('../../src/index.js')
-    expect(
-      () => new AmigoClient({ apiKey: 'key', workspaceId: '' }),
-    ).toThrow(ConfigurationError)
+    expect(() => new AmigoClient({ apiKey: 'key', workspaceId: '' })).toThrow(ConfigurationError)
   })
 })
 

@@ -36,7 +36,11 @@ export function shouldRetry(ctx: RetryContext): boolean {
   return false
 }
 
-export function computeDelay(attempt: number, response: Response, options: Required<RetryOptions>): number {
+export function computeDelay(
+  attempt: number,
+  response: Response,
+  options: Required<RetryOptions>,
+): number {
   const retryAfterHeader = response.headers.get('Retry-After')
   if (retryAfterHeader) {
     const seconds = parseRetryAfterHeader(retryAfterHeader)
@@ -58,9 +62,17 @@ function parseRetryAfterHeader(header: string): number | undefined {
   return undefined
 }
 
-export function resolveRetryOptions(opts?: RetryOptions): Required<RetryOptions> {
+export function resolveRetryOptions(
+  opts?: RetryOptions,
+  maxRetries?: number,
+): Required<RetryOptions> {
+  const maxAttempts =
+    typeof maxRetries === 'number' && Number.isFinite(maxRetries)
+      ? Math.max(1, Math.floor(maxRetries) + 1)
+      : (opts?.maxAttempts ?? 3)
+
   return {
-    maxAttempts: opts?.maxAttempts ?? 3,
+    maxAttempts,
     baseDelayMs: opts?.baseDelayMs ?? 250,
     maxDelayMs: opts?.maxDelayMs ?? 30_000,
   }

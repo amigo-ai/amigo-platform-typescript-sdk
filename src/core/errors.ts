@@ -12,9 +12,18 @@ export interface ErrorContext {
 }
 
 const SENSITIVE_FIELDS = new Set([
-  'id_token', 'access_token', 'refresh_token', 'authorization',
-  'api_key', 'apikey', 'token', 'secret', 'password', 'x-api-key',
-  'cookie', 'set-cookie',
+  'id_token',
+  'access_token',
+  'refresh_token',
+  'authorization',
+  'api_key',
+  'apikey',
+  'token',
+  'secret',
+  'password',
+  'x-api-key',
+  'cookie',
+  'set-cookie',
 ])
 
 function sanitizeErrorContext(obj: unknown): unknown {
@@ -49,7 +58,9 @@ export class AmigoError extends Error {
     this.errorCode = ctx.errorCode
     this.requestId = ctx.requestId
     this.detail = ctx.detail
-    this.context = ctx.context ? (sanitizeErrorContext(ctx.context) as Record<string, unknown>) : undefined
+    this.context = ctx.context
+      ? (sanitizeErrorContext(ctx.context) as Record<string, unknown>)
+      : undefined
     Object.setPrototypeOf(this, new.target.prototype)
     if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, this.constructor)
@@ -143,6 +154,16 @@ export class NetworkError extends AmigoError {
     if (cause !== undefined) {
       Object.defineProperty(this, 'cause', { value: cause, writable: false, enumerable: true })
     }
+  }
+}
+
+/** Request timed out before receiving a response */
+export class RequestTimeoutError extends NetworkError {
+  readonly timeoutMs?: number
+
+  constructor(message: string, timeoutMs?: number, cause?: unknown) {
+    super(message, cause)
+    this.timeoutMs = timeoutMs
   }
 }
 
@@ -242,4 +263,8 @@ export function isRateLimitError(err: unknown): err is RateLimitError {
 
 export function isAuthenticationError(err: unknown): err is AuthenticationError {
   return err instanceof AuthenticationError
+}
+
+export function isRequestTimeoutError(err: unknown): err is RequestTimeoutError {
+  return err instanceof RequestTimeoutError
 }
