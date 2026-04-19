@@ -63,6 +63,24 @@ const client = new AmigoClient({
 
 GET requests are retried on 408, 429, 500, 502, 503, 504. POST requests are only retried on 429 with a `Retry-After` header. Backoff uses full jitter.
 
+## Generated Types
+
+The SDK ships with generated OpenAPI types and re-exports them for direct use:
+
+```typescript
+import type { components, operations, paths } from '@amigo-ai/platform-sdk'
+
+type Agent = components['schemas']['AgentResponse']
+type ListAgentsQuery =
+  operations['list_agents_v1__workspace_id__agents_get']['parameters']['query']
+```
+
+Public builds are generated from the committed [`openapi.json`](./openapi.json) snapshot in this repo so type output stays deterministic across machines and CI runs. When you need to refresh that snapshot, run:
+
+```bash
+npm run openapi:sync
+```
+
 ## Resources
 
 ### Agents
@@ -367,6 +385,44 @@ const dest = await client.webhookDestinations.create({
 const deliveries = await client.webhookDestinations.listDeliveries(dest.id)
 ```
 
+## Webhook Verification
+
+Use the raw request body when verifying webhook deliveries. Timestamped signatures are replay-protected by default.
+
+```typescript
+import {
+  parseWebhookEvent,
+  WebhookVerificationError,
+} from '@amigo-ai/platform-sdk'
+
+const body = await request.text()
+
+try {
+  const event = await parseWebhookEvent({
+    payload: body,
+    signature: request.headers.get('x-amigo-signature') ?? '',
+    timestamp: request.headers.get('x-amigo-timestamp') ?? undefined,
+    secret: process.env.AMIGO_WEBHOOK_SECRET!,
+  })
+
+  console.log(event.type, event.data)
+} catch (error) {
+  if (error instanceof WebhookVerificationError) {
+    console.error('Rejected webhook:', error.message)
+  } else {
+    throw error
+  }
+}
+```
+
+If your delivery channel only provides a legacy HMAC without a timestamp, the original helper signature still works:
+
+```typescript
+import { parseWebhookEvent } from '@amigo-ai/platform-sdk'
+
+const event = await parseWebhookEvent(rawBody, signature, secret)
+```
+
 ## BFF Proxy (Next.js)
 
 For frontend apps that use a Backend-for-Frontend proxy:
@@ -421,6 +477,8 @@ try {
   }
 }
 ```
+
+Webhook verification errors are separate from API transport errors and throw `WebhookVerificationError`.
 
 ### Error classes
 

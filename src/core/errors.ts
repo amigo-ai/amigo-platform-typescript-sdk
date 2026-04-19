@@ -174,9 +174,8 @@ interface ApiErrorBody {
 
 export async function createApiError(response: Response): Promise<AmigoError> {
   let body: ApiErrorBody = {}
-  let rawBody: string | undefined
   try {
-    rawBody = await response.text()
+    const rawBody = await response.text()
     body = JSON.parse(rawBody) as ApiErrorBody
   } catch {
     // ignore parse failure
@@ -185,7 +184,7 @@ export async function createApiError(response: Response): Promise<AmigoError> {
   const ctx: ErrorContext = {
     statusCode: response.status,
     errorCode: body.error_code,
-    requestId: body.request_id,
+    requestId: body.request_id ?? response.headers.get('x-request-id') ?? undefined,
     detail: body.detail,
     context: { url: response.url, response: body },
   }

@@ -14,6 +14,7 @@ import {
   isNotFoundError,
   isRateLimitError,
   isAuthenticationError,
+  createApiError,
 } from '../../src/core/errors.js'
 
 describe('Error hierarchy', () => {
@@ -92,5 +93,41 @@ describe('ConfigurationError from AmigoClient', () => {
     expect(
       () => new AmigoClient({ apiKey: 'key', workspaceId: '' }),
     ).toThrow(ConfigurationError)
+  })
+})
+
+describe('createApiError', () => {
+  it('uses x-request-id when the response body omits request_id', async () => {
+    const error = await createApiError(
+      new Response(JSON.stringify({ detail: 'Missing agent' }), {
+        status: 404,
+        headers: { 'x-request-id': 'req-header-123' },
+      }),
+    )
+
+    expect(error).toBeInstanceOf(NotFoundError)
+    expect(error.requestId).toBe('req-header-123')
+  })
+
+  it('redacts sensitive values from serialized context', async () => {
+    const error = await createApiError(
+      new Response(
+        JSON.stringify({
+          message: 'bad request',
+          access_token: 'secret-token',
+          nested: { api_key: 'secret-key' },
+        }),
+        { status: 400 },
+      ),
+    )
+
+    expect(error.toJSON()).toMatchObject({
+      context: {
+        response: {
+          access_token: '[REDACTED]',
+          nested: { api_key: '[REDACTED]' },
+        },
+      },
+    })
   })
 })

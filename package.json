@@ -2,6 +2,9 @@
   "name": "@amigo-ai/platform-sdk",
   "version": "0.3.0",
   "description": "Official TypeScript SDK for the Amigo Platform API",
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "amigo",
     "platform",
@@ -26,7 +29,8 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -37,21 +41,23 @@
     "LICENSE"
   ],
   "scripts": {
-    "clean": "rm -rf dist",
+    "clean": "node scripts/clean.mjs",
     "gen-types": "node scripts/gen-types.mjs",
+    "openapi:sync": "node scripts/sync-openapi.mjs",
     "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json",
     "esbuild": "node scripts/build.mjs",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --max-warnings 0",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --fix",
-    "format": "prettier --write 'src/**/*.ts' 'tests/**/*.ts'",
-    "test": "vitest run tests/resources tests/core",
-    "test:dist": "vitest run tests/dist",
-    "test:integration": "vitest run tests/integration",
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'scripts/**/*.{js,mjs}' --max-warnings 0",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'scripts/**/*.{js,mjs}' --fix",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "test": "vitest run --project unit",
+    "test:dist": "vitest run --project dist",
+    "test:integration": "vitest run --project integration",
     "test:all": "vitest run",
-    "test:watch": "vitest tests/resources tests/core",
-    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage --project unit",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test && npm run test:dist && npm run typecheck"
   },
   "sideEffects": false,
   "dependencies": {
@@ -76,8 +82,19 @@
     "vitest": "^3.2.4"
   },
   "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
+    "src/**/*.{ts,js,mjs}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "tests/**/*.ts": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "scripts/**/*.{js,mjs}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
       "prettier --write"
     ]
   },

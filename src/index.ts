@@ -230,8 +230,16 @@ export type { RetryOptions } from './core/retry.js'
 export { parseRateLimitHeaders } from './core/rate-limit.js'
 export type { RateLimitInfo } from './core/rate-limit.js'
 
-export { verifyWebhookSignature, parseWebhookEvent } from './core/webhooks.js'
-export type { WebhookEvent } from './core/webhooks.js'
+export {
+  verifyWebhookSignature,
+  parseWebhookEvent,
+  WebhookVerificationError,
+} from './core/webhooks.js'
+export type {
+  WebhookEvent,
+  WebhookVerificationOptions,
+  ParseWebhookEventOptions,
+} from './core/webhooks.js'
 
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'
