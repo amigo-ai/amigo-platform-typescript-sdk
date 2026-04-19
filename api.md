@@ -106,6 +106,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `update`
 - `delete`
+- `getReferences`
 - `test`
 
 ### `operators`
@@ -114,6 +115,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `listAutoPaging`
 - `create`
 - `get`
+- `update`
 - `getDashboard`
 - `getQueue`
 - `getEscalations`
@@ -189,6 +191,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getProvenance`
 - `getLineage`
 - `getMerged`
+- `getConnectors`
+- `getConnectorEntities`
+- `getConnectorResources`
 - `listEntityTypes`
 - `listDuplicates`
 - `search`
@@ -211,6 +216,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getIntelligence`
 - `getActiveIntelligence`
 - `getBenchmarks`
+- `getPhoneVolume`
 - `getTraceAnalysis`
 
 ### `phoneNumbers`
@@ -246,6 +252,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getToolPerformance`
 - `getDataQuality`
 - `getUsage`
+- `getEventBreakdown`
+- `getSafetyTrends`
+- `getOperatorPerformance`
 - `getAdvancedCallStats`
 - `compareCallPeriods`
 
@@ -272,6 +281,16 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `security.update`
 - `retention.get`
 - `retention.update`
+- `behaviors.get`
+- `behaviors.update`
+- `gapScanner.get`
+- `gapScanner.update`
+- `scribe.get`
+- `scribe.update`
+- `metrics.get`
+- `metrics.update`
+- `environments.get`
+- `environments.update`
 - `workflows.get`
 - `workflows.update`
 
