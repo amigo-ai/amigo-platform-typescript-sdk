@@ -11,6 +11,11 @@ import type { paths } from '../generated/api.js'
 import { createAuthMiddleware } from './auth.js'
 import { createApiError, NetworkError, RequestTimeoutError } from './errors.js'
 import { parseRateLimitHeaders } from './rate-limit.js'
+import {
+  stripRequestControls,
+  type AmigoRequestOptions,
+  type RequestControlOptions,
+} from './request-options.js'
 import { shouldRetry, computeDelay, resolveRetryOptions, type RetryOptions } from './retry.js'
 import { extractRequestId } from './utils.js'
 
@@ -56,77 +61,30 @@ export interface ClientConfig {
   fetch?: typeof globalThis.fetch
 }
 
+type RequestTransport = (input: Request) => Promise<Response>
+
+interface PlatformClientContext {
+  transport: RequestTransport
+  defaults: RequestControlOptions
+}
+
+const platformClientContext = new WeakMap<PlatformFetch, PlatformClientContext>()
+
 export function createPlatformClient(config: ClientConfig): PlatformFetch {
-  const baseFetch = config.fetch ?? globalThis.fetch
-
-  // Wrap fetch with retry logic
-  const retryingFetch: typeof globalThis.fetch = async (input, init) => {
-    const baseRequest = input instanceof Request ? input : new Request(input, init)
-    const method = baseRequest.method.toUpperCase()
-    const requestRetry = getRequestOption<RetryOptions>(baseRequest, 'retry')
-    const requestMaxRetries = getRequestOption<number>(baseRequest, 'maxRetries')
-    const retryOpts = resolveRetryOptions(
-      requestRetry ?? config.retry,
-      requestMaxRetries ?? config.maxRetries,
-    )
-    const timeoutMs = getRequestOption<number>(baseRequest, 'timeout') ?? config.timeout
-    const isIdempotent = method === 'GET' || method === 'HEAD' || method === 'OPTIONS'
-
-    for (let attempt = 0; attempt < retryOpts.maxAttempts; attempt++) {
-      let response: Response | undefined
-      let error: unknown
-      let timedOut = false
-
-      try {
-        const prepared = prepareRequestForAttempt(baseRequest, timeoutMs)
-
-        try {
-          response = await baseFetch(prepared.request, init)
-        } finally {
-          timedOut = prepared.timedOut
-          prepared.cleanup()
-        }
-      } catch (err) {
-        error = err
-      }
-
-      if (!error && response && response.ok) return response
-
-      const ctx = { method, attempt, response: response!, options: retryOpts }
-      const attemptsRemain = attempt + 1 < retryOpts.maxAttempts
-
-      if (error) {
-        if (timedOut) {
-          throw new RequestTimeoutError(`Request timed out after ${timeoutMs}ms`, timeoutMs, error)
-        }
-        if (isIdempotent && attemptsRemain) {
-          await sleep(computeDelay(attempt, new Response(), retryOpts))
-          continue
-        }
-        throw new NetworkError(
-          `Network error: ${error instanceof Error ? error.message : String(error)}`,
-          error,
-        )
-      }
-
-      if (response && attemptsRemain && shouldRetry(ctx)) {
-        const delay = computeDelay(attempt, response, retryOpts)
-        if (baseRequest.signal.aborted) return response
-        await sleep(delay)
-        continue
-      }
-
-      return response!
-    }
-
-    throw new NetworkError('Retry loop exhausted')
-  }
+  const transport = toRequestTransport(config.fetch ?? globalThis.fetch)
+  const defaults = {
+    retry: config.retry,
+    maxRetries: config.maxRetries,
+    timeout: config.timeout,
+  } satisfies RequestControlOptions
 
   const client = createClient<paths>({
     baseUrl: config.baseUrl,
-    fetch: retryingFetch,
+    fetch: createRetryingFetch(transport, defaults),
     headers: config.headers,
   })
+
+  platformClientContext.set(client, { transport, defaults })
 
   // Error middleware — convert HTTP errors to typed AmigoError subclasses
   const errorMiddleware: Middleware = {
@@ -173,13 +131,115 @@ export function createPlatformClient(config: ClientConfig): PlatformFetch {
   return client
 }
 
+export function applyPlatformRequestOptions<Operation>(
+  client: PlatformFetch,
+  init: AmigoRequestOptions<Operation> | undefined,
+): AmigoRequestOptions<Operation> | undefined {
+  if (!init) {
+    return undefined
+  }
+
+  const context = platformClientContext.get(client)
+  const stripped = stripRequestControls(init)
+
+  if (!context) {
+    return stripped as AmigoRequestOptions<Operation> | undefined
+  }
+
+  const overrideFetch = stripped?.fetch
+  const hasControlOverride =
+    overrideFetch !== undefined ||
+    init.timeout !== undefined ||
+    init.maxRetries !== undefined ||
+    init.retry !== undefined
+
+  if (!hasControlOverride) {
+    return stripped as AmigoRequestOptions<Operation> | undefined
+  }
+
+  const transport = toRequestTransport(
+    (overrideFetch ?? context.transport) as typeof globalThis.fetch,
+  )
+  const fetch = createRetryingFetch(transport, {
+    timeout: init.timeout ?? context.defaults.timeout,
+    maxRetries: init.maxRetries ?? context.defaults.maxRetries,
+    retry: init.retry ?? context.defaults.retry,
+  })
+
+  return {
+    ...stripped,
+    fetch,
+  } as AmigoRequestOptions<Operation>
+}
+
+function createRetryingFetch(
+  transport: RequestTransport,
+  defaults: RequestControlOptions,
+): typeof globalThis.fetch {
+  return async (input, init) => {
+    const baseRequest = input instanceof Request ? input : new Request(input, init)
+    const method = baseRequest.method.toUpperCase()
+    const retryOpts = resolveRetryOptions(defaults.retry, defaults.maxRetries)
+    const timeoutMs = defaults.timeout
+    const isIdempotent = method === 'GET' || method === 'HEAD' || method === 'OPTIONS'
+
+    for (let attempt = 0; attempt < retryOpts.maxAttempts; attempt++) {
+      let response: Response | undefined
+      let error: unknown
+      let timedOut = false
+
+      try {
+        const prepared = prepareRequestForAttempt(baseRequest, timeoutMs)
+
+        try {
+          response = await transport(prepared.request)
+        } finally {
+          timedOut = prepared.timedOut
+          prepared.cleanup()
+        }
+      } catch (err) {
+        error = err
+      }
+
+      if (!error && response && response.ok) return response
+
+      const ctx = { method, attempt, response: response!, options: retryOpts }
+      const attemptsRemain = attempt + 1 < retryOpts.maxAttempts
+
+      if (error) {
+        if (timedOut) {
+          throw new RequestTimeoutError(`Request timed out after ${timeoutMs}ms`, timeoutMs, error)
+        }
+        if (isIdempotent && attemptsRemain) {
+          await sleep(computeDelay(attempt, new Response(), retryOpts))
+          continue
+        }
+        throw new NetworkError(
+          `Network error: ${error instanceof Error ? error.message : String(error)}`,
+          error,
+        )
+      }
+
+      if (response && attemptsRemain && shouldRetry(ctx)) {
+        const delay = computeDelay(attempt, response, retryOpts)
+        if (baseRequest.signal.aborted) return response
+        await sleep(delay)
+        continue
+      }
+
+      return response!
+    }
+
+    throw new NetworkError('Retry loop exhausted')
+  }
+}
+
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
-function getRequestOption<T>(request: Request, key: string): T | undefined {
-  const value = (request as Request & Record<string, unknown>)[key]
-  return value as T | undefined
+function toRequestTransport(fetcher: typeof globalThis.fetch | RequestTransport): RequestTransport {
+  return async (input) => fetcher(input)
 }
 
 function prepareRequestForAttempt(

@@ -1,5 +1,8 @@
 const textEncoder = new TextEncoder()
 const MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000
+type WebCryptoLike = { subtle: NonNullable<typeof globalThis.crypto>['subtle'] }
+
+let webCryptoPromise: Promise<WebCryptoLike> | undefined
 
 export interface WebhookEvent<T = unknown> {
   id: string
@@ -172,6 +175,7 @@ async function signWebhookPayload(
   secret: string,
   timestamp?: string,
 ): Promise<Uint8Array> {
+  const crypto = await resolveWebCrypto()
   const key = await crypto.subtle.importKey(
     'raw',
     textEncoder.encode(secret),
@@ -186,6 +190,15 @@ async function signWebhookPayload(
 
   const mac = await crypto.subtle.sign('HMAC', key, toCryptoBuffer(message))
   return new Uint8Array(mac)
+}
+
+async function resolveWebCrypto(): Promise<WebCryptoLike> {
+  if (globalThis.crypto?.subtle) {
+    return globalThis.crypto
+  }
+
+  webCryptoPromise ??= import('node:crypto').then(({ webcrypto }) => webcrypto as WebCryptoLike)
+  return await webCryptoPromise
 }
 
 function normalizeSignature(signature: string): Uint8Array | undefined {

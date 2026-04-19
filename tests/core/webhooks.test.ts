@@ -7,8 +7,12 @@ import {
 
 const SECRET = 'test-secret-key'
 const BASE_TIME = Date.parse('2026-01-01T00:00:00Z')
+type WebCryptoLike = { subtle: NonNullable<typeof globalThis.crypto>['subtle'] }
+
+let webCryptoPromise: Promise<WebCryptoLike> | undefined
 
 async function sign(payload: string, secret: string, timestamp?: string): Promise<string> {
+  const crypto = await resolveWebCrypto()
   const encoder = new TextEncoder()
   const key = await crypto.subtle.importKey(
     'raw',
@@ -28,6 +32,15 @@ async function sign(payload: string, secret: string, timestamp?: string): Promis
     .join('')
 
   return `sha256=${hex}`
+}
+
+async function resolveWebCrypto(): Promise<WebCryptoLike> {
+  if (globalThis.crypto?.subtle) {
+    return globalThis.crypto
+  }
+
+  webCryptoPromise ??= import('node:crypto').then(({ webcrypto }) => webcrypto as WebCryptoLike)
+  return await webCryptoPromise
 }
 
 describe('verifyWebhookSignature', () => {

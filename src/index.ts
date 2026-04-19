@@ -17,14 +17,21 @@
  * ```
  */
 
-import type {
-  ClientPathsWithMethod,
-  FetchOptions,
-  HeadersOptions,
-  MethodResponse,
-} from 'openapi-fetch'
+import type { ClientPathsWithMethod, HeadersOptions, MethodResponse } from 'openapi-fetch'
 import { ConfigurationError } from './core/errors.js'
-import { createPlatformClient, type ClientHooks } from './core/openapi-client.js'
+import {
+  applyPlatformRequestOptions,
+  createPlatformClient,
+  type ClientHooks,
+  type PlatformFetch,
+} from './core/openapi-client.js'
+import {
+  mergeRequestOptions,
+  type AmigoRequestOptions,
+  type InitParam,
+  type OperationFor,
+  type ScopedRequestOptions,
+} from './core/request-options.js'
 import type { RetryOptions } from './core/retry.js'
 import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
@@ -53,33 +60,13 @@ import { WebhookDestinationsResource } from './resources/webhook-destinations.js
 import { SafetyResource } from './resources/safety.js'
 import { ComplianceResource } from './resources/compliance.js'
 import { FunctionsResource } from './resources/functions.js'
+import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { paths } from './generated/api.js'
 import { withResponse, type AmigoResponse } from './core/utils.js'
 
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
 
-type OperationFor<
-  Path extends keyof paths & string,
-  Method extends keyof paths[Path] & string,
-> = paths[Path][Method]
-
-type LowLevelParams<Operation> =
-  FetchOptions<Operation> extends { params: infer Params }
-    ? Params extends object
-      ? Omit<Params, 'path'> & {
-          path?: Params extends { path: infer PathParams }
-            ? Partial<PathParams & Record<string, unknown>>
-            : never
-        }
-      : never
-    : never
-
-export type AmigoRequestOptions<Operation = unknown> = Omit<FetchOptions<Operation>, 'params'> & {
-  params?: LowLevelParams<Operation>
-  timeout?: number
-  maxRetries?: number
-  retry?: RetryOptions
-}
+type Mutable<T> = { -readonly [K in keyof T]: T[K] }
 
 export interface AmigoClientConfig {
   /** API key created via POST /v1/{workspace_id}/api-keys */
@@ -124,37 +111,37 @@ export interface AmigoClientConfig {
 }
 
 export class AmigoClient {
-  readonly workspaceId: string
-  readonly baseUrl: string
-  readonly workspaces: WorkspacesResource
-  readonly apiKeys: ApiKeysResource
-  readonly agents: AgentsResource
+  readonly workspaceId!: string
+  readonly baseUrl!: string
+  readonly workspaces!: WorkspacesResource
+  readonly apiKeys!: ApiKeysResource
+  readonly agents!: AgentsResource
   /** @deprecated Use `actions` instead */
-  readonly skills: SkillsResource
-  readonly actions: ActionsResource
-  readonly operators: OperatorsResource
-  readonly triggers: TriggersResource
-  readonly services: ServicesResource
-  readonly contextGraphs: ContextGraphsResource
-  readonly dataSources: DataSourcesResource
-  readonly world: WorldResource
-  readonly calls: CallsResource
-  readonly phoneNumbers: PhoneNumbersResource
-  readonly integrations: IntegrationsResource
-  readonly analytics: AnalyticsResource
-  readonly simulations: SimulationsResource
-  readonly settings: SettingsResource
-  readonly billing: BillingResource
-  readonly memory: MemoryResource
-  readonly personas: PersonasResource
-  readonly reviewQueue: ReviewQueueResource
-  readonly recordings: RecordingsResource
-  readonly audit: AuditResource
-  readonly webhookDestinations: WebhookDestinationsResource
-  readonly safety: SafetyResource
-  readonly compliance: ComplianceResource
-  readonly functions: FunctionsResource
-  private readonly api
+  readonly skills!: SkillsResource
+  readonly actions!: ActionsResource
+  readonly operators!: OperatorsResource
+  readonly triggers!: TriggersResource
+  readonly services!: ServicesResource
+  readonly contextGraphs!: ContextGraphsResource
+  readonly dataSources!: DataSourcesResource
+  readonly world!: WorldResource
+  readonly calls!: CallsResource
+  readonly phoneNumbers!: PhoneNumbersResource
+  readonly integrations!: IntegrationsResource
+  readonly analytics!: AnalyticsResource
+  readonly simulations!: SimulationsResource
+  readonly settings!: SettingsResource
+  readonly billing!: BillingResource
+  readonly memory!: MemoryResource
+  readonly personas!: PersonasResource
+  readonly reviewQueue!: ReviewQueueResource
+  readonly recordings!: RecordingsResource
+  readonly audit!: AuditResource
+  readonly webhookDestinations!: WebhookDestinationsResource
+  readonly safety!: SafetyResource
+  readonly compliance!: ComplianceResource
+  readonly functions!: FunctionsResource
+  private readonly api!: PlatformFetch
 
   constructor(config: AmigoClientConfig) {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
@@ -177,101 +164,162 @@ export class AmigoClient {
       fetch: config.fetch,
     })
 
-    const ws = config.workspaceId
-    this.workspaceId = ws
-    this.baseUrl = baseUrl
-    this.api = client
+    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl)
+  }
 
-    this.workspaces = new WorkspacesResource(client, ws)
-    this.apiKeys = new ApiKeysResource(client, ws)
-    this.agents = new AgentsResource(client, ws)
-    this.skills = new SkillsResource(client, ws)
-    this.actions = new ActionsResource(client, ws)
-    this.operators = new OperatorsResource(client, ws)
-    this.triggers = new TriggersResource(client, ws)
-    this.services = new ServicesResource(client, ws)
-    this.contextGraphs = new ContextGraphsResource(client, ws)
-    this.dataSources = new DataSourcesResource(client, ws)
-    this.world = new WorldResource(client, ws)
-    this.calls = new CallsResource(client, ws)
-    this.phoneNumbers = new PhoneNumbersResource(client, ws)
-    this.integrations = new IntegrationsResource(client, ws)
-    this.analytics = new AnalyticsResource(client, ws)
-    this.simulations = new SimulationsResource(client, ws)
-    this.settings = new SettingsResource(client, ws)
-    this.billing = new BillingResource(client, ws)
-    this.memory = new MemoryResource(client, ws)
-    this.personas = new PersonasResource(client, ws)
-    this.reviewQueue = new ReviewQueueResource(client, ws)
-    this.recordings = new RecordingsResource(client, ws)
-    this.audit = new AuditResource(client, ws)
-    this.webhookDestinations = new WebhookDestinationsResource(client, ws)
-    this.safety = new SafetyResource(client, ws)
-    this.compliance = new ComplianceResource(client, ws)
-    this.functions = new FunctionsResource(client, ws)
+  withOptions(options: ScopedRequestOptions): AmigoClient {
+    return AmigoClient.fromPlatformClient(
+      scopePlatformClient(this.api, options),
+      this.workspaceId,
+      this.baseUrl,
+    )
   }
 
   async GET<Path extends ClientPathsWithMethod<typeof this.api, 'get'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'get'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'get'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'get', Path>>> {
-    return withResponse(
-      await this.api.GET(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'get', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'GET', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'get', Path>
+    >
   }
 
   async POST<Path extends ClientPathsWithMethod<typeof this.api, 'post'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'post'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'post'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'post', Path>>> {
-    return withResponse(
-      await this.api.POST(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'post', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'POST', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'post', Path>
+    >
   }
 
   async PUT<Path extends ClientPathsWithMethod<typeof this.api, 'put'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'put'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'put'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'put', Path>>> {
-    return withResponse(
-      await this.api.PUT(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'put', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'PUT', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'put', Path>
+    >
   }
 
   async PATCH<Path extends ClientPathsWithMethod<typeof this.api, 'patch'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'patch'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'patch'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'patch', Path>>> {
-    return withResponse(
-      await this.api.PATCH(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'patch', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'PATCH', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'patch', Path>
+    >
   }
 
   async DELETE<Path extends ClientPathsWithMethod<typeof this.api, 'delete'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'delete'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'delete'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'delete', Path>>> {
-    return withResponse(
-      await this.api.DELETE(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'delete', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'DELETE', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'delete', Path>
+    >
   }
 
   async HEAD<Path extends ClientPathsWithMethod<typeof this.api, 'head'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'head'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'head'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'head', Path>>> {
-    return withResponse(
-      await this.api.HEAD(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'head', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'HEAD', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'head', Path>
+    >
   }
 
   async OPTIONS<Path extends ClientPathsWithMethod<typeof this.api, 'options'>>(
     path: Path,
-    init?: AmigoRequestOptions<OperationFor<Path, 'options'>>,
+    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'options'>>>
   ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'options', Path>>> {
-    return withResponse(
-      await this.api.OPTIONS(path, withWorkspaceId(path, init, this.workspaceId) as never),
-    ) as AmigoResponse<MethodResponse<typeof this.api, 'options', Path>>
+    return withResponse(await this.resolveApiRequest(path, 'OPTIONS', init)) as AmigoResponse<
+      MethodResponse<typeof this.api, 'options', Path>
+    >
+  }
+
+  private static fromPlatformClient(
+    client: PlatformFetch,
+    workspaceId: string,
+    baseUrl: string,
+  ): AmigoClient {
+    const instance = Object.create(AmigoClient.prototype) as AmigoClient
+    AmigoClient.hydrate(instance, client, workspaceId, baseUrl)
+    return instance
+  }
+
+  private static hydrate(
+    target: AmigoClient,
+    client: PlatformFetch,
+    workspaceId: string,
+    baseUrl: string,
+  ): void {
+    const mutable = target as Mutable<AmigoClient>
+
+    mutable.workspaceId = workspaceId
+    mutable.baseUrl = baseUrl
+    ;(target as unknown as { api: PlatformFetch }).api = client
+
+    mutable.workspaces = new WorkspacesResource(client, workspaceId)
+    mutable.apiKeys = new ApiKeysResource(client, workspaceId)
+    mutable.agents = new AgentsResource(client, workspaceId)
+    mutable.skills = new SkillsResource(client, workspaceId)
+    mutable.actions = new ActionsResource(client, workspaceId)
+    mutable.operators = new OperatorsResource(client, workspaceId)
+    mutable.triggers = new TriggersResource(client, workspaceId)
+    mutable.services = new ServicesResource(client, workspaceId)
+    mutable.contextGraphs = new ContextGraphsResource(client, workspaceId)
+    mutable.dataSources = new DataSourcesResource(client, workspaceId)
+    mutable.world = new WorldResource(client, workspaceId)
+    mutable.calls = new CallsResource(client, workspaceId)
+    mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
+    mutable.integrations = new IntegrationsResource(client, workspaceId)
+    mutable.analytics = new AnalyticsResource(client, workspaceId)
+    mutable.simulations = new SimulationsResource(client, workspaceId)
+    mutable.settings = new SettingsResource(client, workspaceId)
+    mutable.billing = new BillingResource(client, workspaceId)
+    mutable.memory = new MemoryResource(client, workspaceId)
+    mutable.personas = new PersonasResource(client, workspaceId)
+    mutable.reviewQueue = new ReviewQueueResource(client, workspaceId)
+    mutable.recordings = new RecordingsResource(client, workspaceId)
+    mutable.audit = new AuditResource(client, workspaceId)
+    mutable.webhookDestinations = new WebhookDestinationsResource(client, workspaceId)
+    mutable.safety = new SafetyResource(client, workspaceId)
+    mutable.compliance = new ComplianceResource(client, workspaceId)
+    mutable.functions = new FunctionsResource(client, workspaceId)
+  }
+
+  private async resolveApiRequest<
+    Path extends keyof paths & string,
+    Method extends 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS',
+  >(
+    path: Path,
+    method: Method,
+    init: AmigoRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
+  ): Promise<{ data?: unknown; error?: unknown; response: Response }> {
+    const { baseClient, options } = resolveScopedPlatformClient(this.api)
+    const mergedInit = mergeRequestOptions(options, withWorkspaceId(path, init, this.workspaceId))
+    const requestInit = applyPlatformRequestOptions(
+      baseClient,
+      mergedInit as AmigoRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
+    )
+
+    switch (method) {
+      case 'GET':
+        return await baseClient.GET(path as never, requestInit as never)
+      case 'POST':
+        return await baseClient.POST(path as never, requestInit as never)
+      case 'PUT':
+        return await baseClient.PUT(path as never, requestInit as never)
+      case 'PATCH':
+        return await baseClient.PATCH(path as never, requestInit as never)
+      case 'DELETE':
+        return await baseClient.DELETE(path as never, requestInit as never)
+      case 'HEAD':
+        return await baseClient.HEAD(path as never, requestInit as never)
+      case 'OPTIONS':
+        return await baseClient.OPTIONS(path as never, requestInit as never)
+    }
   }
 }
 
@@ -351,6 +399,7 @@ export type {
   WithResponseMetadata,
   AmigoResponse,
 } from './core/utils.js'
+export type { AmigoRequestOptions, ScopedRequestOptions } from './core/request-options.js'
 export type { RetryOptions } from './core/retry.js'
 
 export { parseRateLimitHeaders } from './core/rate-limit.js'
@@ -396,8 +445,8 @@ function withWorkspaceId<Path extends keyof paths & string, Init>(
     params: {
       ...(current.params ?? {}),
       path: {
-        workspace_id: workspaceId,
         ...(current.params?.path ?? {}),
+        workspace_id: workspaceId,
       },
     },
   }

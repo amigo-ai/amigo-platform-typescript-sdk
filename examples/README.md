@@ -23,6 +23,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 
 - [examples/basic/list-agents.ts](./basic/list-agents.ts): list agents with the public client
 - [examples/analytics/dashboard.ts](./analytics/dashboard.ts): read dashboard and call analytics
+- [examples/advanced/scoped-request-control.ts](./advanced/scoped-request-control.ts): apply timeout, retry, and header overrides on the normal resource surface
 - [examples/advanced/request-control.ts](./advanced/request-control.ts): use low-level typed request helpers with timeout, retries, headers, and raw response access
 - [examples/world/search-entities.ts](./world/search-entities.ts): query entities and inspect timelines
 - [examples/webhooks/verify-webhook.ts](./webhooks/verify-webhook.ts): verify and parse a webhook delivery

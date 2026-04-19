@@ -105,11 +105,33 @@ Public builds are generated from the committed [`openapi.json`](./openapi.json) 
 npm run openapi:sync
 ```
 
-For a repo-local overview of the exported client surface, see [api.md](./api.md).
+For a repo-local overview of the exported client surface, see the generated [api.md](./api.md).
 
 ## Advanced request control
 
-Resource wrappers cover the common path. For lower-level control, use the built-in typed HTTP helpers. Workspace-scoped routes automatically receive your configured `workspaceId`.
+The normal resource surface supports scoped request overrides, so you can keep the ergonomic API while adding timeout, retry, and header controls:
+
+```typescript
+const agents = await client
+  .withOptions({
+    timeout: 5_000,
+    maxRetries: 1,
+    headers: { 'X-Debug-Trace': 'true' },
+  })
+  .agents.list({ limit: 10 })
+
+console.log(agents._request_id)
+console.log(agents.lastResponse.statusCode)
+console.log(agents.items)
+```
+
+You can scope options to a single resource as well:
+
+```typescript
+const agent = await client.agents.withOptions({ timeout: 2_000 }).get('agent-id')
+```
+
+For lower-level control, use the built-in typed HTTP helpers. Workspace-scoped routes automatically receive your configured `workspaceId`, and the configured value wins if `workspace_id` is provided manually.
 
 ```typescript
 const result = await client.GET('/v1/{workspace_id}/agents', {
@@ -133,6 +155,8 @@ Available helpers:
 - `client.DELETE(...)`
 - `client.HEAD(...)`
 - `client.OPTIONS(...)`
+- `client.withOptions(...)`
+- `client.<resource>.withOptions(...)`
 
 ### Response metadata
 

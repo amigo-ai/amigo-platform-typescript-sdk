@@ -110,6 +110,27 @@ describe('AmigoClient configuration', () => {
     expect(result.data.items).toHaveLength(1)
   })
 
+  it('uses the configured workspaceId when workspace path params are provided manually', async () => {
+    const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const request = input instanceof Request ? input : new Request(input, init)
+      expect(request.url).toBe('https://api.example.com/v1/ws-001/agents')
+      return Response.json(fixtures.paginatedList([]))
+    })
+
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: 'ws-001',
+      baseUrl: 'https://api.example.com',
+      fetch: mockFetch as typeof fetch,
+    })
+
+    await client.GET('/v1/{workspace_id}/agents', {
+      params: { path: { workspace_id: 'ws-other' } },
+    })
+
+    expect(mockFetch).toHaveBeenCalledOnce()
+  })
+
   it('supports default headers and request lifecycle hooks', async () => {
     const events: string[] = []
     const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
@@ -140,6 +161,29 @@ describe('AmigoClient configuration', () => {
     expect(events).toEqual(['request:GET:/v1/{workspace_id}/agents', 'response:200:req_hooks_123'])
   })
 
+  it('applies scoped request options on client and resource wrappers', async () => {
+    const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const request = input instanceof Request ? input : new Request(input, init)
+      expect(request.headers.get('X-Scoped-Client')).toBe('true')
+      expect(request.headers.get('X-Scoped-Resource')).toBe('true')
+      return Response.json(fixtures.paginatedList([fixtures.agent()]))
+    })
+
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: 'ws-001',
+      fetch: mockFetch as typeof fetch,
+    })
+
+    const scopedClient = client.withOptions({ headers: { 'X-Scoped-Client': 'true' } })
+    const result = await scopedClient.agents
+      .withOptions({ headers: { 'X-Scoped-Resource': 'true' } })
+      .list()
+
+    expect(result.items).toHaveLength(1)
+    expect(mockFetch).toHaveBeenCalledOnce()
+  })
+
   it('supports per-request retry overrides on low-level requests', async () => {
     let attempts = 0
     const mockFetch = vi.fn(async () => {
@@ -166,6 +210,41 @@ describe('AmigoClient configuration', () => {
     })
 
     expect(attempts).toBe(2)
+    expect(result.data.items).toHaveLength(1)
+  })
+
+  it('keeps retry handling when a low-level request provides a custom fetch', async () => {
+    const baseFetch = vi.fn(async () => {
+      throw new Error('base fetch should not be used')
+    })
+
+    let attempts = 0
+    const requestFetch = vi.fn(async () => {
+      attempts += 1
+      if (attempts === 1) {
+        return new Response(JSON.stringify({ detail: 'temporary error' }), {
+          status: 500,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+
+      return Response.json(fixtures.paginatedList([fixtures.agent()]))
+    })
+
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: 'ws-001',
+      retry: { maxAttempts: 1 },
+      fetch: baseFetch as typeof fetch,
+    })
+
+    const result = await client.GET('/v1/{workspace_id}/agents', {
+      fetch: requestFetch as typeof fetch,
+      maxRetries: 1,
+    })
+
+    expect(baseFetch).not.toHaveBeenCalled()
+    expect(requestFetch).toHaveBeenCalledTimes(2)
     expect(result.data.items).toHaveLength(1)
   })
 
