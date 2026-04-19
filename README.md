@@ -43,6 +43,7 @@ console.log(stats.total_calls, stats.avg_duration_seconds)
 
 - Product docs and API reference: [docs.amigo.ai](https://docs.amigo.ai/)
 - Repo-local SDK examples: [examples/README.md](./examples/README.md)
+- Repo-local API surface guide: [api.md](./api.md)
 
 The docs site remains the primary reference. The examples in this repo stay close to the package surface and are typechecked in CI to reduce drift.
 
@@ -54,6 +55,10 @@ The docs site remains the primary reference. The examples in this repo stay clos
 | `workspaceId` | `string`       | Yes      | Your workspace ID — all resource operations are scoped to this       |
 | `baseUrl`     | `string`       | No       | Override the API base URL (default: `https://api.platform.amigo.ai`) |
 | `retry`       | `RetryOptions` | No       | Retry configuration for transient failures                           |
+| `maxRetries`  | `number`       | No       | Convenience alias for retry count                                    |
+| `timeout`     | `number`       | No       | Default request timeout in milliseconds                              |
+| `headers`     | `HeadersInit`  | No       | Default headers added to every request                               |
+| `hooks`       | `ClientHooks`  | No       | Request/response lifecycle hooks for tracing or logging              |
 | `fetch`       | `typeof fetch` | No       | Custom fetch for BFF proxy, cookie forwarding, or test mocking       |
 
 ### Retry options
@@ -72,6 +77,17 @@ const client = new AmigoClient({
 
 GET requests are retried on 408, 429, 500, 502, 503, 504. POST requests are only retried on 429 with a `Retry-After` header. Backoff uses full jitter.
 
+### Runtime requirements
+
+The SDK is built around web-standard primitives. Use it in runtimes that provide:
+
+- `fetch`, `Request`, `Response`, `Headers`, `URL`
+- `AbortController`
+- `TextEncoder` / `TextDecoder`
+- `crypto.subtle` for webhook signature verification
+
+CI currently validates Node-based packaging and runtime behavior. Standards-based edge/server runtimes with the same APIs work well with the low-level request wrappers.
+
 ## Generated Types
 
 The SDK ships with generated OpenAPI types and re-exports them for direct use:
@@ -87,6 +103,76 @@ Public builds are generated from the committed [`openapi.json`](./openapi.json) 
 
 ```bash
 npm run openapi:sync
+```
+
+For a repo-local overview of the exported client surface, see [api.md](./api.md).
+
+## Advanced request control
+
+Resource wrappers cover the common path. For lower-level control, use the built-in typed HTTP helpers. Workspace-scoped routes automatically receive your configured `workspaceId`.
+
+```typescript
+const result = await client.GET('/v1/{workspace_id}/agents', {
+  params: { query: { limit: 10 } },
+  timeout: 5_000,
+  maxRetries: 1,
+  headers: { 'X-Debug-Trace': 'true' },
+})
+
+console.log(result.requestId)
+console.log(result.data.items)
+console.log(result.rateLimit.remaining)
+```
+
+Available helpers:
+
+- `client.GET(...)`
+- `client.POST(...)`
+- `client.PUT(...)`
+- `client.PATCH(...)`
+- `client.DELETE(...)`
+- `client.HEAD(...)`
+- `client.OPTIONS(...)`
+
+### Response metadata
+
+Object responses from resource methods include non-enumerable request metadata:
+
+```typescript
+const agent = await client.agents.get('agent-id')
+
+console.log(agent._request_id)
+console.log(agent.lastResponse.statusCode)
+console.log(agent.lastResponse.rateLimit.remaining)
+```
+
+Low-level request helpers return the raw `Response` alongside parsed data:
+
+```typescript
+const { data, response, requestId } = await client.GET('/v1/{workspace_id}/agents')
+
+console.log(requestId)
+console.log(response.headers.get('content-type'))
+console.log(data.items)
+```
+
+### Request hooks
+
+Use hooks for logging, tracing, and metrics without wrapping `fetch` yourself:
+
+```typescript
+const client = new AmigoClient({
+  apiKey: 'your-api-key',
+  workspaceId: 'your-workspace-id',
+  hooks: {
+    onRequest({ request, schemaPath }) {
+      console.log('request', request.method, schemaPath)
+    },
+    onResponse({ response, requestId }) {
+      console.log('response', response.status, requestId)
+    },
+  },
+})
 ```
 
 ## Resources
@@ -499,6 +585,7 @@ Webhook verification errors are separate from API transport errors and throw `We
 | `ServerError`         | 5xx         | Server-side error                       |
 | `ConfigurationError`  | —           | SDK misconfiguration at init time       |
 | `NetworkError`        | —           | Fetch/network failure                   |
+| `RequestTimeoutError` | —           | Request exceeded the configured timeout |
 
 ## CommonJS (CJS) usage
 

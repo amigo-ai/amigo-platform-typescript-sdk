@@ -37,6 +37,7 @@
   "types": "./dist/types/index.d.ts",
   "files": [
     "dist/",
+    "api.md",
     "README.md",
     "LICENSE"
   ],
