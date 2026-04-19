@@ -30,9 +30,9 @@ Typed from the committed `openapi.json` snapshot, validated on Node 18, 20, and 
 
 ## Platform context
 
-This SDK is the package surface for workspace-scoped Platform API operations: agents, actions, world model, calls, analytics, webhooks, and supporting resources.
+The SDK is the typed client boundary between your runtime and the workspace-scoped Platform API. The API then fronts the platform systems that power agents, actions, calls, analytics, world state, connectors, and webhooks.
 
-![Platform architecture overview](./assets/readme/platform-architecture.svg)
+![TypeScript SDK platform context](./assets/readme/platform-architecture.svg)
 
 ## Documentation
 

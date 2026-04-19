@@ -1,6 +1,6 @@
 # Changelog
 
-This changelog tracks user-facing changes to the published SDK. Entries are curated from the mainline release history so internal branch noise and version bump commits do not leak into the public record.
+This changelog tracks notable user-facing changes to the published SDK. Entries stay focused on package behavior, developer experience, and release hardening rather than internal branch noise.
 
 ## [0.4.3] - 2026-04-19
 
@@ -28,7 +28,7 @@ This changelog tracks user-facing changes to the published SDK. Entries are cura
 
 ## [0.4.0] - 2026-04-19
 
-### Improvements
+### Security
 
 - Harden release automation, spec sync, and package verification for published builds
 

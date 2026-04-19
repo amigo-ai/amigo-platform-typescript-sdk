@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   detect:
@@ -100,13 +101,3 @@ jobs:
           EOF
           )" \
             --base main
-
-  auto-release:
-    name: Auto-release (minor)
-    needs: detect
-    if: needs.detect.outputs.changed == 'true' && github.event.client_payload.auto_release == true
-    uses: ./.github/workflows/release.yml
-    with:
-      version_type: minor
-      dry_run: false
-    secrets: inherit

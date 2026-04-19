@@ -4,7 +4,36 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const SECTION_ORDER = ['Features', 'Improvements', 'Bug Fixes', 'Documentation', 'Maintenance']
+const SECTION_ORDER = ['Features', 'Security', 'Improvements', 'Bug Fixes', 'Documentation', 'Maintenance']
+const SECURITY_PATTERNS = [
+  /\bsecurity\b/i,
+  /\bvulnerability\b/i,
+  /\bdependabot\b/i,
+  /\badvisory\b/i,
+  /\bcode scanning\b/i,
+  /\bcode-scanning\b/i,
+  /\bGHSA-\w+/i,
+  /\bCVE-\d{4}-\d+\b/i,
+  /\bpin(?:ned|ning)? third-party action/i,
+]
+const TITLE_REWRITES = [
+  {
+    pattern: /^sync types from platform spec.*$/i,
+    replacement: 'Refresh generated SDK types from the committed Platform API spec',
+  },
+  {
+    pattern: /^sync api types from platform spec.*$/i,
+    replacement: 'Refresh generated SDK types from the committed Platform API spec',
+  },
+  {
+    pattern: /^stabilize node 18 retry jitter and refine readme graphic$/i,
+    replacement: 'Stabilize Node 18 retry handling and refine the README platform graphic',
+  },
+  {
+    pattern: /^polish repo presentation and close security findings$/i,
+    replacement: 'Polish the public repo surface and close security findings',
+  },
+]
 
 const [mode, ...args] = process.argv.slice(2)
 
@@ -132,18 +161,26 @@ function toEntry(commit) {
   )
 
   if (conventionalMatch) {
+    const normalizedTitle = normalizePublicTitle(conventionalMatch[3].trim())
+    const section = classifySection({
+      explicitType: conventionalMatch[1].toLowerCase(),
+      title: normalizedTitle,
+      body: commit.body,
+    })
+
     return {
       prNumber,
-      section: mapSection(conventionalMatch[1].toLowerCase()),
-      title: conventionalMatch[3].trim(),
+      section,
+      title: normalizedTitle,
       sha: commit.sha,
     }
   }
 
+  const normalizedTitle = normalizePublicTitle(title)
   return {
     prNumber,
-    section: 'Improvements',
-    title,
+    section: classifySection({ explicitType: null, title: normalizedTitle, body: commit.body }),
+    title: normalizedTitle,
     sha: commit.sha,
   }
 }
@@ -175,6 +212,35 @@ function mapSection(type) {
   }
 
   return 'Maintenance'
+}
+
+function classifySection({ explicitType, title, body }) {
+  if (matchesSecurity(title) || matchesSecurity(body)) {
+    return 'Security'
+  }
+
+  if (explicitType) {
+    return mapSection(explicitType)
+  }
+
+  return 'Improvements'
+}
+
+function matchesSecurity(value) {
+  return SECURITY_PATTERNS.some((pattern) => pattern.test(value))
+}
+
+function normalizePublicTitle(title) {
+  let normalizedTitle = title
+
+  for (const { pattern, replacement } of TITLE_REWRITES) {
+    if (pattern.test(normalizedTitle)) {
+      normalizedTitle = replacement
+      break
+    }
+  }
+
+  return normalizedTitle.replace(/\s+/g, ' ').trim()
 }
 
 function buildSections(entries) {
