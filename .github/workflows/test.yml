@@ -38,6 +38,9 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Typecheck examples
+        run: npm run typecheck:examples
+
       - name: Build
         run: npm run build
 
@@ -45,9 +48,12 @@ jobs:
         if: ${{ inputs.skip_codecov }}
         run: npm test -- --reporter=dot
 
-      - name: Run tests with coverage
+      - name: Run unit tests with coverage
         if: ${{ !inputs.skip_codecov }}
-        run: npx vitest run --coverage
+        run: npx vitest run --coverage --project unit --reporter=dot
+
+      - name: Run dist tests
+        run: npm run test:dist -- --reporter=dot
 
       - name: Upload coverage to Codecov
         if: ${{ !inputs.skip_codecov }}

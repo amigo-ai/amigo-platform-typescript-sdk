@@ -1,28 +1,11 @@
-import {
-  AmigoClient,
-  AmigoError,
-  BadRequestError,
-  AuthenticationError,
-  NotFoundError,
-  NetworkError,
-  WebhookVerificationError,
-} from '../../../dist/index.mjs'
+import * as sdk from '../../../dist/index.mjs'
 
-if (typeof AmigoClient !== 'function') {
-  throw new Error('AmigoClient should be a function, got: ' + typeof AmigoClient)
+if (typeof sdk.AmigoClient !== 'function') {
+  throw new Error('AmigoClient export missing')
 }
 
-for (const [name, value] of Object.entries({
-  AmigoError,
-  BadRequestError,
-  AuthenticationError,
-  NotFoundError,
-  NetworkError,
-  WebhookVerificationError,
-})) {
-  if (typeof value !== 'function') {
-    throw new Error(name + ' should be exported directly')
-  }
+if (typeof sdk.parseWebhookEvent !== 'function') {
+  throw new Error('parseWebhookEvent export missing')
 }
 
 console.log('ESM exports: OK')

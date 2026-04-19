@@ -21,6 +21,8 @@ Thank you for your interest in contributing to the Amigo Platform SDK! This guid
 ### Testing
 
 - **`npm test`** — Run unit tests (Vitest)
+- **`npm run test:dist`** — Verify the built ESM and CJS artifacts
+- **`npm run typecheck:examples`** — Typecheck the repo-local SDK examples
 - **`npx vitest run`** — Run all tests including core utilities
 - **`npx vitest run tests/integration/`** — Run integration tests (requires API credentials)
 
@@ -39,6 +41,7 @@ This project uses **Vitest** as the testing framework.
 ```
 tests/
 ├── core/           # Core utility tests (rate-limit, webhooks)
+├── dist/           # Built package compatibility tests (ESM + CJS)
 ├── integration/    # Integration tests (require real API credentials)
 └── resources/      # Per-resource unit tests
 ```
@@ -47,6 +50,8 @@ tests/
 
 ```bash
 npm test                              # Unit tests (fast)
+npm run test:dist                     # Dist compatibility tests (run after build)
+npm run typecheck:examples            # Validate repo-local examples
 npx vitest run                        # All tests
 npx vitest run tests/integration/     # Integration tests (needs env vars)
 npx vitest run --coverage             # With coverage report
@@ -103,7 +108,7 @@ scripts/
 1. **Start**: `npm install`
 2. **Write code**: Edit `src/resources/` or `src/core/`
 3. **Write tests**: Add tests in `tests/`
-4. **Validate**: `npm run lint && npm run typecheck && npm test && npm run build`
+4. **Validate**: `npm run lint && npm run typecheck && npm run typecheck:examples && npm test && npm run build && npm run test:dist`
 5. **Submit PR**: See Pull Request Guidelines below
 
 ## Adding a New Resource
@@ -120,11 +125,13 @@ scripts/
 ## Pull Request Guidelines
 
 1. Ensure all tests pass: `npm test`
-2. Lint your code: `npm run lint`
-3. Typecheck passes: `npm run typecheck`
-4. Build succeeds: `npm run build`
-5. Add tests for new functionality
-6. Update README if adding new resources or features
+2. Ensure dist tests pass: `npm run test:dist`
+3. Ensure examples stay valid: `npm run typecheck:examples`
+4. Lint your code: `npm run lint`
+5. Typecheck passes: `npm run typecheck`
+6. Build succeeds: `npm run build`
+7. Add tests for new functionality
+8. Update README if adding new resources or features
 
 ## Release Process
 
@@ -146,6 +153,7 @@ Go to **Actions → Release → Run workflow**, select the version type, and run
 ### Auto-Release (Spec Sync)
 
 When the platform API spec changes on `main`, the `spec-sync.yml` workflow:
+
 1. Detects spec differences
 2. Opens a PR with regenerated types
 3. Optionally auto-releases a minor version

@@ -23,29 +23,38 @@ const client = new AmigoClient({
 })
 
 // List agents
-const { items: agents } = await client.agents.list()
+const { items: agents } = await client.agents.list({ limit: 10 })
+console.log(agents.map((agent) => agent.name))
 
-// Emit a world event
-await client.world.emitEvent({
-  entity_id: 'entity-id',
-  event_type: 'appointment_scheduled',
-  data: { appointment_id: 'appt-001' },
+// Search entities in the world model
+const entityResults = await client.world.listEntities({
+  q: 'Jane Doe',
+  entity_type: ['patient'],
+  limit: 5,
 })
+console.log(entityResults.entities[0]?.display_name)
 
 // Get call analytics for the last 30 days
-const stats = await client.analytics.getCalls({ period: '30d' })
+const stats = await client.analytics.getCalls({ days: 30 })
 console.log(stats.total_calls, stats.avg_duration_seconds)
 ```
 
+## Examples and Docs
+
+- Product docs and API reference: [docs.amigo.ai](https://docs.amigo.ai/)
+- Repo-local SDK examples: [examples/README.md](./examples/README.md)
+
+The docs site remains the primary reference. The examples in this repo stay close to the package surface and are typechecked in CI to reduce drift.
+
 ## Configuration
 
-| Option | Type | Required | Description |
-|--------|------|----------|-------------|
-| `apiKey` | `string` | Yes | Your Platform API key — create one at Workspace Settings > API Keys |
-| `workspaceId` | `string` | Yes | Your workspace ID — all resource operations are scoped to this |
-| `baseUrl` | `string` | No | Override the API base URL (default: `https://api.platform.amigo.ai`) |
-| `retry` | `RetryOptions` | No | Retry configuration for transient failures |
-| `fetch` | `typeof fetch` | No | Custom fetch for BFF proxy, cookie forwarding, or test mocking |
+| Option        | Type           | Required | Description                                                          |
+| ------------- | -------------- | -------- | -------------------------------------------------------------------- |
+| `apiKey`      | `string`       | Yes      | Your Platform API key — create one at Workspace Settings > API Keys  |
+| `workspaceId` | `string`       | Yes      | Your workspace ID — all resource operations are scoped to this       |
+| `baseUrl`     | `string`       | No       | Override the API base URL (default: `https://api.platform.amigo.ai`) |
+| `retry`       | `RetryOptions` | No       | Retry configuration for transient failures                           |
+| `fetch`       | `typeof fetch` | No       | Custom fetch for BFF proxy, cookie forwarding, or test mocking       |
 
 ### Retry options
 
@@ -54,8 +63,8 @@ const client = new AmigoClient({
   apiKey: 'your-key',
   workspaceId: 'your-workspace-id',
   retry: {
-    maxAttempts: 3,    // Total attempts including first. Default: 3
-    baseDelayMs: 250,  // Base delay for exponential backoff. Default: 250
+    maxAttempts: 3, // Total attempts including first. Default: 3
+    baseDelayMs: 250, // Base delay for exponential backoff. Default: 250
     maxDelayMs: 30000, // Cap on delay. Default: 30_000
   },
 })
@@ -71,8 +80,7 @@ The SDK ships with generated OpenAPI types and re-exports them for direct use:
 import type { components, operations, paths } from '@amigo-ai/platform-sdk'
 
 type Agent = components['schemas']['AgentResponse']
-type ListAgentsQuery =
-  operations['list_agents_v1__workspace_id__agents_get']['parameters']['query']
+type ListAgentsQuery = operations['list_agents_v1__workspace_id__agents_get']['parameters']['query']
 ```
 
 Public builds are generated from the committed [`openapi.json`](./openapi.json) snapshot in this repo so type output stays deterministic across machines and CI runs. When you need to refresh that snapshot, run:
@@ -157,25 +165,27 @@ console.log(service.agent_name, service.channel_type, service.version_sets)
 The world model tracks entities (patients, contacts, appointments) and the events that flow through them.
 
 ```typescript
-// Create an entity
-const patient = await client.world.createEntity({
-  entity_type: 'patient',
-  canonical_id: 'MRN-12345',
-  display_name: 'Jane Doe',
+// Filter entities with simple list queries
+const patients = await client.world.listEntities({
+  q: 'Jane Doe',
+  entity_type: ['patient'],
+  limit: 10,
 })
+console.log(patients.entities.length)
 
-// Emit an event
-await client.world.emitEvent({
-  entity_id: patient.id,
-  event_type: 'call_completed',
-  data: { duration_seconds: 180, outcome: 'appointment_scheduled' },
-})
+// Get a single entity
+const patient = await client.world.getEntity('entity-id')
+console.log(patient.display_name, patient.entity_type)
 
 // Query timeline
-const timeline = await client.world.getTimeline(patient.id)
+const timeline = await client.world.getTimeline('entity-id', { limit: 20 })
 
-// Search entities
-const results = await client.world.search('Jane Doe', { entity_type: 'patient' })
+// Semantic search over the world model
+const results = await client.world.search({
+  q: 'Jane Doe',
+  entity_type: 'patient',
+  limit: 5,
+})
 
 // View sync status from connectors
 const syncStatus = await client.world.getSyncStatusBySink()
@@ -209,7 +219,7 @@ console.log(dashboard.call_volume.value, dashboard.call_volume.delta_pct)
 console.log(dashboard.avg_quality.value)
 
 // Call volume time series
-const calls = await client.analytics.getCalls({ period: '30d' })
+const calls = await client.analytics.getCalls({ days: 30, interval: '1d' })
 console.log(calls.total_calls, calls.calls_by_date)
 
 // Per-agent performance
@@ -247,11 +257,9 @@ console.log(analytics.coverage_rate, analytics.total_facts)
 const { items: integrations } = await client.integrations.list({ enabled: true })
 
 // Test a specific endpoint
-const result = await client.integrations.testEndpoint(
-  'integration-id',
-  'geocode',
-  { textQuery: '123 Main St, Springfield' },
-)
+const result = await client.integrations.testEndpoint('integration-id', 'geocode', {
+  textQuery: '123 Main St, Springfield',
+})
 ```
 
 ### Data Sources
@@ -390,10 +398,7 @@ const deliveries = await client.webhookDestinations.listDeliveries(dest.id)
 Use the raw request body when verifying webhook deliveries. Timestamped signatures are replay-protected by default.
 
 ```typescript
-import {
-  parseWebhookEvent,
-  WebhookVerificationError,
-} from '@amigo-ai/platform-sdk'
+import { parseWebhookEvent, WebhookVerificationError } from '@amigo-ai/platform-sdk'
 
 const body = await request.text()
 
@@ -482,18 +487,18 @@ Webhook verification errors are separate from API transport errors and throw `We
 
 ### Error classes
 
-| Class | HTTP Status | Description |
-|-------|-------------|-------------|
-| `BadRequestError` | 400 | Malformed request |
-| `AuthenticationError` | 401 | Invalid or expired API key |
-| `PermissionError` | 403 | Insufficient permissions |
-| `NotFoundError` | 404 | Resource does not exist |
-| `ConflictError` | 409 | Duplicate slug or version conflict |
-| `ValidationError` | 422 | Request body validation failure |
-| `RateLimitError` | 429 | Too many requests — check `.retryAfter` |
-| `ServerError` | 5xx | Server-side error |
-| `ConfigurationError` | — | SDK misconfiguration at init time |
-| `NetworkError` | — | Fetch/network failure |
+| Class                 | HTTP Status | Description                             |
+| --------------------- | ----------- | --------------------------------------- |
+| `BadRequestError`     | 400         | Malformed request                       |
+| `AuthenticationError` | 401         | Invalid or expired API key              |
+| `PermissionError`     | 403         | Insufficient permissions                |
+| `NotFoundError`       | 404         | Resource does not exist                 |
+| `ConflictError`       | 409         | Duplicate slug or version conflict      |
+| `ValidationError`     | 422         | Request body validation failure         |
+| `RateLimitError`      | 429         | Too many requests — check `.retryAfter` |
+| `ServerError`         | 5xx         | Server-side error                       |
+| `ConfigurationError`  | —           | SDK misconfiguration at init time       |
+| `NetworkError`        | —           | Fetch/network failure                   |
 
 ## CommonJS (CJS) usage
 

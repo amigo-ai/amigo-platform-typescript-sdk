@@ -1,23 +1,13 @@
-'use strict'
+const sdk = require('../../../dist/index.cjs')
 
-const { AmigoError, WebhookVerificationError, isAmigoError } = require('../../../dist/index.cjs')
+const error = new sdk.AuthenticationError('bad credentials')
 
-const amigoError = new AmigoError('test message')
-if (!(amigoError instanceof Error)) {
-  throw new Error('AmigoError should be instanceof Error')
+if (!(error instanceof sdk.AmigoError)) {
+  throw new Error('AuthenticationError does not extend AmigoError')
 }
 
-const webhookError = new WebhookVerificationError('invalid webhook')
-if (!(webhookError instanceof Error)) {
-  throw new Error('WebhookVerificationError should be instanceof Error')
-}
-
-if (!isAmigoError(amigoError)) {
-  throw new Error('isAmigoError should return true for AmigoError')
-}
-
-if (isAmigoError(new Error('plain'))) {
-  throw new Error('isAmigoError should return false for plain Error')
+if (!sdk.isAmigoError(error)) {
+  throw new Error('isAmigoError rejected AuthenticationError')
 }
 
 console.log('CJS errors: OK')

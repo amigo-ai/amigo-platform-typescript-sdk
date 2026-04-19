@@ -104,6 +104,12 @@ jobs:
           npm run build
           ls -la dist/
 
+      - name: Typecheck examples
+        run: npm run typecheck:examples
+
+      - name: Run dist tests
+        run: npm run test:dist -- --reporter=dot
+
       - name: Pack tarball
         id: pack
         run: |

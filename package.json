@@ -46,8 +46,8 @@
     "openapi:sync": "node scripts/sync-openapi.mjs",
     "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json",
     "esbuild": "node scripts/build.mjs",
-    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'scripts/**/*.{js,mjs}' --max-warnings 0",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'scripts/**/*.{js,mjs}' --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'examples/**/*.ts' 'scripts/**/*.{js,mjs}' --max-warnings 0",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'examples/**/*.ts' 'scripts/**/*.{js,mjs}' --fix",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run --project unit",
@@ -57,7 +57,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --project unit",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm test && npm run test:dist && npm run typecheck"
+    "typecheck:examples": "tsc --project examples/tsconfig.json --noEmit",
+    "prepublishOnly": "npm run build && npm test && npm run test:dist && npm run typecheck && npm run typecheck:examples"
   },
   "sideEffects": false,
   "dependencies": {
@@ -87,6 +88,10 @@
       "prettier --write"
     ],
     "tests/**/*.ts": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "examples/**/*.ts": [
       "eslint --fix --max-warnings 0",
       "prettier --write"
     ],
