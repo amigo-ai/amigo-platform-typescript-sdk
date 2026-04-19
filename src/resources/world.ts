@@ -102,6 +102,56 @@ export class WorldResource extends WorkspaceScopedResource {
     )
   }
 
+  // ---- Connectors ----
+
+  /** Get connected data sources overview with entity counts and sync status */
+  async getConnectors() {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/world/connectors', {
+        params: { path: { workspace_id: this.workspaceId } },
+      }),
+    )
+  }
+
+  /** List entities from a specific connector / data source */
+  async getConnectorEntities(
+    dataSourceId: string,
+    params?: {
+      entity_type?: string | null
+      q?: string | null
+      limit?: number
+      offset?: number
+    },
+  ) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/world/connectors/{data_source_id}/entities', {
+        params: {
+          path: { workspace_id: this.workspaceId, data_source_id: dataSourceId },
+          query: params,
+        },
+      }),
+    )
+  }
+
+  /** Search FHIR resources from a specific data source */
+  async getConnectorResources(
+    dataSourceId: string,
+    params: {
+      resource_type: string
+      _count?: number
+      _offset?: number
+    },
+  ) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/world/connectors/{data_source_id}/resources', {
+        params: {
+          path: { workspace_id: this.workspaceId, data_source_id: dataSourceId },
+          query: params,
+        },
+      }),
+    )
+  }
+
   // ---- Entity Types ----
 
   /** List registered entity types with counts and schemas */

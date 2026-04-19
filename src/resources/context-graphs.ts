@@ -100,8 +100,8 @@ export class ContextGraphsResource extends WorkspaceScopedResource {
     )
   }
 
-  /** Get a specific version */
-  async getVersion(contextGraphId: ContextGraphId | string, version: number) {
+  /** Get a specific version by number, or pass "latest" for the most recent */
+  async getVersion(contextGraphId: ContextGraphId | string, version: number | 'latest') {
     return extractData(
       await this.client.GET(
         '/v1/{workspace_id}/context-graphs/{context_graph_id}/versions/{version}',

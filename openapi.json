@@ -4676,6 +4676,43 @@
         "title": "ConnectorOverviewResponse",
         "type": "object"
       },
+      "ConnectorResourcesResponse": {
+        "description": "FHIR resources from a specific connected data source.",
+        "properties": {
+          "data_source_id": {
+            "description": "UUID of the connected data source",
+            "title": "Data Source Id",
+            "type": "string"
+          },
+          "entries": {
+            "description": "Raw FHIR resource JSON objects",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Entries",
+            "type": "array"
+          },
+          "resource_type": {
+            "description": "FHIR resource type (e.g. Patient, Condition, MedicationRequest)",
+            "title": "Resource Type",
+            "type": "string"
+          },
+          "total": {
+            "description": "Total number of matching resources",
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "resource_type",
+          "data_source_id",
+          "total",
+          "entries"
+        ],
+        "title": "ConnectorResourcesResponse",
+        "type": "object"
+      },
       "ConnectorSettingsRequest": {
         "description": "Request for PUT /v1/{ws}/settings/connectors.\n\nReplaces the entire connector list.",
         "properties": {
@@ -17841,6 +17878,125 @@
         "title": "OperatorPerformanceItem",
         "type": "object"
       },
+      "OperatorPerformanceResponse": {
+        "description": "Operator escalation performance and quality comparison over time.",
+        "properties": {
+          "summary": {
+            "$ref": "#/components/schemas/OperatorPerformanceSummary",
+            "description": "Aggregate operator performance metrics"
+          },
+          "trend": {
+            "description": "Time series of escalation counts per interval bucket",
+            "items": {
+              "$ref": "#/components/schemas/OperatorPerformanceTrendPoint"
+            },
+            "title": "Trend",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "trend"
+        ],
+        "title": "OperatorPerformanceResponse",
+        "type": "object"
+      },
+      "OperatorPerformanceSummary": {
+        "description": "Aggregate operator escalation stats for the period.",
+        "properties": {
+          "avg_escalated_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average duration in seconds of escalated calls",
+            "title": "Avg Escalated Duration Seconds"
+          },
+          "avg_escalated_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average quality score of escalated calls",
+            "title": "Avg Escalated Quality Score"
+          },
+          "avg_non_escalated_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average quality score of non-escalated calls",
+            "title": "Avg Non Escalated Quality Score"
+          },
+          "escalated_count": {
+            "description": "Number of calls escalated to an operator",
+            "title": "Escalated Count",
+            "type": "integer"
+          },
+          "escalation_rate": {
+            "description": "Fraction of calls that were escalated (0.0-1.0)",
+            "title": "Escalation Rate",
+            "type": "number"
+          },
+          "operator_handled_count": {
+            "description": "Number of calls where an operator was active",
+            "title": "Operator Handled Count",
+            "type": "integer"
+          },
+          "total_calls": {
+            "description": "Total number of calls in the period",
+            "title": "Total Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_calls",
+          "escalated_count",
+          "escalation_rate",
+          "operator_handled_count"
+        ],
+        "title": "OperatorPerformanceSummary",
+        "type": "object"
+      },
+      "OperatorPerformanceTrendPoint": {
+        "description": "Single time-bucket data point in the operator performance trend series.",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date string for the time bucket",
+            "title": "Date",
+            "type": "string"
+          },
+          "escalated_count": {
+            "description": "Escalated calls in this time bucket",
+            "title": "Escalated Count",
+            "type": "integer"
+          },
+          "total_calls": {
+            "description": "Total calls in this time bucket",
+            "title": "Total Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "total_calls",
+          "escalated_count"
+        ],
+        "title": "OperatorPerformanceTrendPoint",
+        "type": "object"
+      },
       "OperatorResponse": {
         "properties": {
           "active_call_sid": {
@@ -22608,6 +22764,110 @@
           }
         },
         "title": "SafetySummary",
+        "type": "object"
+      },
+      "SafetyTrendPoint": {
+        "description": "Single time-bucket data point in the safety trend series.",
+        "properties": {
+          "date": {
+            "description": "ISO 8601 date string for the time bucket",
+            "title": "Date",
+            "type": "string"
+          },
+          "escalated_count": {
+            "description": "Escalated calls in this time bucket",
+            "title": "Escalated Count",
+            "type": "integer"
+          },
+          "safety_flagged": {
+            "description": "Safety-flagged calls in this time bucket",
+            "title": "Safety Flagged",
+            "type": "integer"
+          },
+          "total_calls": {
+            "description": "Total calls in this time bucket",
+            "title": "Total Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "total_calls",
+          "escalated_count",
+          "safety_flagged"
+        ],
+        "title": "SafetyTrendPoint",
+        "type": "object"
+      },
+      "SafetyTrendsResponse": {
+        "description": "Safety and escalation trends \u2014 risk distribution, escalation rates, and time series.",
+        "properties": {
+          "risk_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "description": "Count of calls by risk level (e.g. high, medium, low)",
+            "title": "Risk Distribution",
+            "type": "object"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SafetyTrendsSummary",
+            "description": "Aggregate safety metrics for the full period"
+          },
+          "trend": {
+            "description": "Time series of safety metrics per interval bucket",
+            "items": {
+              "$ref": "#/components/schemas/SafetyTrendPoint"
+            },
+            "title": "Trend",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "risk_distribution",
+          "trend"
+        ],
+        "title": "SafetyTrendsResponse",
+        "type": "object"
+      },
+      "SafetyTrendsSummary": {
+        "description": "Aggregate safety and escalation counts for the period.",
+        "properties": {
+          "escalation_rate": {
+            "description": "Fraction of calls that were escalated (0.0-1.0)",
+            "title": "Escalation Rate",
+            "type": "number"
+          },
+          "total_calls": {
+            "description": "Total number of calls in the period",
+            "title": "Total Calls",
+            "type": "integer"
+          },
+          "total_escalations": {
+            "description": "Number of calls escalated to an operator",
+            "title": "Total Escalations",
+            "type": "integer"
+          },
+          "total_safety_flagged": {
+            "description": "Number of calls with a safety summary present",
+            "title": "Total Safety Flagged",
+            "type": "integer"
+          },
+          "total_safety_matches": {
+            "description": "Sum of safety match counts across all calls",
+            "title": "Total Safety Matches",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_calls",
+          "total_escalations",
+          "escalation_rate",
+          "total_safety_flagged",
+          "total_safety_matches"
+        ],
+        "title": "SafetyTrendsSummary",
         "type": "object"
       },
       "SampleFact": {
@@ -35580,9 +35840,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Operator-Performance",
-                  "type": "object"
+                  "$ref": "#/components/schemas/OperatorPerformanceResponse"
                 }
               }
             },
@@ -35696,9 +35954,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Safety-Trends",
-                  "type": "object"
+                  "$ref": "#/components/schemas/SafetyTrendsResponse"
                 }
               }
             },
@@ -54005,9 +54261,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Connector-Resources",
-                  "type": "object"
+                  "$ref": "#/components/schemas/ConnectorResourcesResponse"
                 }
               }
             },

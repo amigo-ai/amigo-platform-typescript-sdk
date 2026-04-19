@@ -31,6 +31,16 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
+  /** Update an operator (name, role, status, etc.) */
+  async update(operatorId: string, body: components['schemas']['UpdateOperatorRequest']) {
+    return extractData(
+      await this.client.PATCH('/v1/{workspace_id}/operators/{operator_id}', {
+        params: { path: { workspace_id: this.workspaceId, operator_id: operatorId } },
+        body,
+      }),
+    )
+  }
+
   async getDashboard() {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/operators/dashboard', {
