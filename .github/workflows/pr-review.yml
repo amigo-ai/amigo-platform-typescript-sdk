@@ -117,10 +117,7 @@ jobs:
           )
 
           comment_ids="$(matching_comment_ids "$marker")"
-          latest_comment_id=""
-          for comment_id in $comment_ids; do
-            latest_comment_id="$comment_id"
-          done
+          latest_comment_id=$(printf '%s\n' "$comment_ids" | awk 'NF' | sort -n | tail -n1)
 
           if [ -n "$latest_comment_id" ]; then
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$latest_comment_id" -f body="$body" >/dev/null
@@ -198,10 +195,7 @@ jobs:
           )
 
           comment_ids="$(matching_comment_ids "$marker")"
-          latest_comment_id=""
-          for comment_id in $comment_ids; do
-            latest_comment_id="$comment_id"
-          done
+          latest_comment_id=$(printf '%s\n' "$comment_ids" | awk 'NF' | sort -n | tail -n1)
 
           if [ -n "$latest_comment_id" ]; then
             gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$latest_comment_id" -f body="$body" >/dev/null

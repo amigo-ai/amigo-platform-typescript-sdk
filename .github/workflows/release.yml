@@ -124,7 +124,7 @@ jobs:
 
       - name: Upload release payload
         if: ${{ !inputs.dry_run }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
           name: release-payload
           path: |
@@ -136,7 +136,7 @@ jobs:
           retention-days: 30
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
           name: dist-${{ steps.new_version.outputs.version }}
           path: |
@@ -179,7 +179,7 @@ jobs:
           fi
 
       - name: Download release payload
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: release-payload
           path: release-payload
@@ -189,6 +189,15 @@ jobs:
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Validate npm credentials
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not configured."
+            exit 1
+          fi
 
       - name: Publish to npm
         env:
@@ -202,7 +211,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      issues: write
 
     steps:
       - name: Checkout triggering commit
@@ -216,22 +224,15 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Validate release target before finalize
+      - name: Validate release ref type
         run: |
           if [ "${{ github.ref_type }}" != "branch" ]; then
             echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
             exit 1
           fi
 
-          git fetch origin "${{ github.ref_name }}"
-          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
-          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
-            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
-            exit 1
-          fi
-
       - name: Download release payload
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: release-payload
           path: release-payload
@@ -243,17 +244,28 @@ jobs:
           cp release-payload/CHANGELOG.md CHANGELOG.md
           cp release-payload/release-notes.md release-notes.md
 
-      - name: Commit version bump
+      - name: Commit and push version bump
+        id: commit_push
         run: |
           git add package.json package-lock.json CHANGELOG.md
           if git diff --cached --quiet; then
             echo "::error::No release metadata changes were produced."
             exit 1
           fi
+
           git commit -m "v${{ needs.prepare.outputs.new_version }}"
-          git push --force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA} origin "HEAD:${{ github.ref_name }}"
+
+          git fetch origin "${{ github.ref_name }}"
+          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            exit 1
+          fi
+
+          git push "--force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA}" origin "HEAD:${{ github.ref_name }}"
 
       - name: Create and push tag
+        if: steps.commit_push.outcome == 'success'
         run: |
           git tag -a "v${{ needs.prepare.outputs.new_version }}" -m "Release v${{ needs.prepare.outputs.new_version }}"
           git push origin "v${{ needs.prepare.outputs.new_version }}"
@@ -272,8 +284,23 @@ jobs:
         if: always()
         run: rm -f release-notes.md || true
 
+      - name: Release Summary
+        run: |
+          echo "## Release Finalization" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ needs.prepare.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Published: npm" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"
+
+  notify_finalize_failure:
+    if: ${{ !inputs.dry_run && always() && needs.finalize.result == 'failure' }}
+    needs: [prepare, publish, finalize]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
       - name: Notify release finalization failure
-        if: failure()
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -296,23 +323,19 @@ jobs:
           EOF
           )
 
-          issue_number=$(
-            gh api "repos/${GITHUB_REPOSITORY}/issues" \
-              --paginate \
-              --jq ".[] | select(.pull_request | not) | select(.user.login == \"github-actions[bot]\" and .state == \"open\" and (.body | contains(\"${marker}\"))) | .number" \
-              | tail -n1
-          )
+          issue_numbers="$(gh api "repos/${GITHUB_REPOSITORY}/issues" \
+            --paginate \
+            --jq ".[] | select(.pull_request | not) | select(.user.login == \"github-actions[bot]\" and .state == \"open\" and (.body | contains(\"${marker}\"))) | .number")"
+          latest_issue_number=$(printf '%s\n' "$issue_numbers" | awk 'NF' | sort -n | tail -n1)
 
-          if [ -n "$issue_number" ]; then
-            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" -f title="$title" -f body="$body" >/dev/null
+          if [ -n "$latest_issue_number" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${latest_issue_number}" -f title="$title" -f body="$body" >/dev/null
           else
             gh api --method POST "repos/${GITHUB_REPOSITORY}/issues" -f title="$title" -f body="$body" >/dev/null
           fi
 
-      - name: Release Summary
-        run: |
-          echo "## Release Finalization" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: ${{ needs.prepare.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Published: npm" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n' "$issue_numbers" | awk 'NF' | sort -n | while read -r issue_number; do
+            if [ "$issue_number" != "$latest_issue_number" ]; then
+              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" -f state=closed >/dev/null
+            fi
+          done
