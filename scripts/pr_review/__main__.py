@@ -48,6 +48,7 @@ MAX_ERROR_CHARS = 800
 ERROR_REDACTION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"(?i)(authorization:?\s*bearer\s+)[a-z0-9._~-]+"), r"\1[REDACTED]"),
     (re.compile(r"\bya29\.[A-Za-z0-9._-]+\b"), "[REDACTED_OAUTH_TOKEN]"),
+    # Prefer over-matching to leaking JWTs embedded in other base64url-ish text.
     (re.compile(r"eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+"), "[REDACTED_JWT]"),
     (re.compile(r"-----BEGIN[^-]+PRIVATE KEY-----[\s\S]+?-----END[^-]+PRIVATE KEY-----"), "[REDACTED_PRIVATE_KEY]"),
     (re.compile(r"\bAIza[0-9A-Za-z_-]{35,}\b"), "[REDACTED_GOOGLE_API_KEY]"),
@@ -328,9 +329,9 @@ def upsert_review_comment(pr_number: str, body: str) -> None:
     latest_comment_id = comment_ids[-1] if comment_ids else None
 
     if latest_comment_id:
-        confirmed_comment_id = update_comment(latest_comment_id, body)
+        confirmed_comment_id = str(update_comment(latest_comment_id, body))
     else:
-        confirmed_comment_id = post_comment(pr_number, body)
+        confirmed_comment_id = str(post_comment(pr_number, body))
 
     for comment_id in comment_ids[:-1]:
         if comment_id != confirmed_comment_id:

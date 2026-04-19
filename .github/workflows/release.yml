@@ -55,20 +55,24 @@ jobs:
       - name: Validate finalize push credentials
         if: ${{ !inputs.dry_run }}
         env:
+          BRANCH_NAME: ${{ github.ref_name }}
           GH_TOKEN: ${{ github.token }}
           RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
         run: |
-          BRANCH_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${{ github.ref_name }}")
-          BRANCH_PROTECTED=$(printf '%s' "$BRANCH_JSON" | jq -r '.protected')
+          BRANCH_PROTECTED=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${BRANCH_NAME}" --jq '.protected')
           RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
 
           if [ "$BRANCH_PROTECTED" = "true" ] && [ -z "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            echo "::error::Branch ${{ github.ref_name }} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches."
+            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches."
             exit 1
           fi
 
           if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.full_name' >/dev/null
+            CAN_PUSH=$(GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.permissions.push // false')
+            if [ "$CAN_PUSH" != "true" ]; then
+              echo "::error::RELEASE_PUSH_TOKEN can read ${GITHUB_REPOSITORY} but cannot push to it."
+              exit 1
+            fi
           fi
 
       - name: Checkout code
@@ -278,19 +282,12 @@ jobs:
           # against the exact commit that prepared and published the tarball.
           ref: ${{ github.sha }}
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_PUSH_TOKEN != '' && secrets.RELEASE_PUSH_TOKEN || github.token }}
 
       - name: Configure git
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Configure git push credentials
-        env:
-          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
-        run: |
-          if [ -n "${RELEASE_PUSH_TOKEN//[[:space:]]/}" ]; then
-            git remote set-url origin "https://x-access-token:${RELEASE_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          fi
 
       - name: Validate release ref type
         run: |
@@ -382,10 +379,8 @@ jobs:
       ${{
         !inputs.dry_run &&
         always() &&
-        (
-          needs.finalize.result == 'failure' ||
-          (needs.publish.result == 'success' && needs.finalize.result == 'skipped')
-        )
+        needs.publish.result == 'success' &&
+        (needs.finalize.result == 'failure' || needs.finalize.result == 'skipped')
       }}
     needs: [prepare, publish, finalize]
     runs-on: ubuntu-latest
