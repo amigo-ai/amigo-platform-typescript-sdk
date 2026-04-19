@@ -20,10 +20,10 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
     paths:
-      - "src/**"
-      - "tests/**"
-      - "scripts/**"
-      - ".github/workflows/**"
+      - 'src/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
 
 concurrency:
   group: pr-review-${{ github.event.pull_request.number }}
@@ -69,7 +69,7 @@ jobs:
 
       - name: Authenticate to GCP (WIF)
         if: steps.guard.outputs.skip == 'false'
-        uses: google-github-actions/auth@v2
+        uses: google-github-actions/auth@c200f3691d83b41bf9bbd8638997a462592937ed # v2
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_REVIEW_SA }}
@@ -78,7 +78,7 @@ jobs:
 
       - name: Install uv
         if: steps.guard.outputs.skip == 'false'
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           enable-cache: true
 

@@ -1,10 +1,51 @@
-# @amigo-ai/platform-sdk
+<p align="center">
+  <img src="./assets/readme/amigo-banner.png" alt="Amigo banner" width="100%" />
+</p>
 
-[![npm version](https://img.shields.io/npm/v/@amigo-ai/platform-sdk.svg)](https://www.npmjs.com/package/@amigo-ai/platform-sdk)
-[![CI](https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg)](https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+<h1 align="center">@amigo-ai/platform-sdk</h1>
 
-Official TypeScript SDK for the [Amigo Platform API](https://api.platform.amigo.ai/v1/docs).
+<p align="center">Official TypeScript SDK for the <a href="https://api.platform.amigo.ai/v1/docs">Amigo Platform API</a>.</p>
+
+<p align="center">
+  <a href="https://docs.amigo.ai">Product Docs</a>
+  ·
+  <a href="https://docs.amigo.ai/developer-guide">Developer Guide</a>
+  ·
+  <a href="https://docs.amigo.ai/api-reference">API Reference</a>
+  ·
+  <a href="./examples/README.md">Examples</a>
+  ·
+  <a href="./api.md">API Surface</a>
+  ·
+  <a href="./CHANGELOG.md">Changelog</a>
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@amigo-ai/platform-sdk"><img src="https://img.shields.io/npm/v/@amigo-ai/platform-sdk.svg" alt="npm version" /></a>
+  <a href="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml"><img src="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
+</p>
+
+Typed from the committed `openapi.json` snapshot, validated on Node 18, 20, and 22, and tested as packaged ESM and CommonJS tarballs before release.
+
+## Platform context
+
+This SDK is the package surface for workspace-scoped Platform API operations: agents, actions, world model, calls, analytics, webhooks, and supporting resources.
+
+![Platform architecture overview](./assets/readme/platform-architecture.svg)
+
+## Documentation
+
+| Need                                        | Best entry point                                         |
+| ------------------------------------------- | -------------------------------------------------------- |
+| Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                  |
+| Tutorials and integration guidance          | [Developer Guide](https://docs.amigo.ai/developer-guide) |
+| Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)     |
+| Repo-local SDK examples                     | [examples/README.md](./examples/README.md)               |
+| Generated package surface                   | [api.md](./api.md)                                       |
+| Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                           |
+
+The docs site remains the primary reference. The repo-local examples stay close to the shipped package surface and are typechecked in CI to reduce drift.
 
 ## Installation
 
@@ -38,14 +79,6 @@ console.log(entityResults.entities[0]?.display_name)
 const stats = await client.analytics.getCalls({ days: 30 })
 console.log(stats.total_calls, stats.avg_duration_seconds)
 ```
-
-## Examples and Docs
-
-- Product docs and API reference: [docs.amigo.ai](https://docs.amigo.ai/)
-- Repo-local SDK examples: [examples/README.md](./examples/README.md)
-- Repo-local API surface guide: [api.md](./api.md)
-
-The docs site remains the primary reference. The examples in this repo stay close to the package surface and are typechecked in CI to reduce drift.
 
 ## Configuration
 

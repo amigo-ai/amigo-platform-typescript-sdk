@@ -2,11 +2,9 @@
  * Generate TypeScript types from the platform OpenAPI spec.
  *
  * Sources (in priority order):
- *   1. Explicit --spec path/to/spec.json
- *   2. Explicit --url https://...
- *   3. Committed repo snapshot: openapi.json
- *   4. Local sibling repo: ../platform/services/platform-api/openapi.json
- *   5. Live production API: https://api.platform.amigo.ai/v1/openapi.json
+ *   1. Explicit --spec path/to/spec.json within this repo or ../platform
+ *   2. Committed repo snapshot: openapi.json
+ *   3. Local sibling repo: ../platform/services/platform-api/openapi.json
  *
  * The default path is intentionally deterministic for public builds: if
  * `openapi.json` is committed in this repo, builds do not depend on local
@@ -15,14 +13,19 @@
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import openapiTS, { astToString } from 'openapi-typescript'
+import {
+  REPO_ROOT,
+  assertWithinRoots,
+  resolveAllowedFile,
+  resolveRepoPath,
+} from './lib/repo-paths.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const OUT_FILE = path.resolve(__dirname, '../src/generated/api.ts')
-const REPO_SPEC = path.resolve(__dirname, '../openapi.json')
-const SIBLING_SPEC = path.resolve(__dirname, '../../platform/services/platform-api/openapi.json')
-const DEFAULT_SPEC_URL = 'https://api.platform.amigo.ai/v1/openapi.json'
+const OUT_FILE = resolveRepoPath('src/generated/api.ts')
+const REPO_SPEC = resolveRepoPath('openapi.json')
+const PLATFORM_ROOT = path.resolve(REPO_ROOT, '../platform')
+const SIBLING_SPEC = path.resolve(PLATFORM_ROOT, 'services/platform-api/openapi.json')
+const ALLOWED_SPEC_ROOTS = [REPO_ROOT, PLATFORM_ROOT]
 
 const args = process.argv.slice(2)
 
@@ -33,17 +36,11 @@ function getArgValue(name) {
 
 function resolveSpecSource() {
   const specArg = getArgValue('--spec')
-  const urlArg = getArgValue('--url')
 
   if (specArg) {
-    const resolvedPath = path.resolve(specArg)
+    const resolvedPath = resolveAllowedFile(specArg, ALLOWED_SPEC_ROOTS, 'OpenAPI spec')
     console.log(`Using explicit spec: ${resolvedPath}`)
     return resolvedPath
-  }
-
-  if (urlArg) {
-    console.log(`Using explicit URL: ${urlArg}`)
-    return urlArg
   }
 
   if (fs.existsSync(REPO_SPEC)) {
@@ -52,30 +49,25 @@ function resolveSpecSource() {
   }
 
   if (fs.existsSync(SIBLING_SPEC)) {
-    console.log(`Committed spec not found, using sibling repo spec: ${SIBLING_SPEC}`)
-    return SIBLING_SPEC
+    const resolvedPath = assertWithinRoots(SIBLING_SPEC, ALLOWED_SPEC_ROOTS, 'OpenAPI spec')
+    console.log(`Committed spec not found, using sibling repo spec: ${resolvedPath}`)
+    return resolvedPath
   }
 
-  console.log(`Committed spec not found, using live API: ${DEFAULT_SPEC_URL}`)
-  return DEFAULT_SPEC_URL
+  throw new Error(
+    'No OpenAPI spec source found. Commit openapi.json or provide --spec within this repo or ../platform.',
+  )
 }
 
 async function loadSpec(specSource) {
-  if (specSource.startsWith('http')) {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 30_000)
-    try {
-      const response = await fetch(specSource, { signal: controller.signal })
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} ${response.statusText}`)
-      }
-      return await response.json()
-    } finally {
-      clearTimeout(timeout)
-    }
+  const raw = fs.readFileSync(specSource, 'utf-8')
+  const document = JSON.parse(raw)
+
+  if (!document || typeof document !== 'object' || typeof document.openapi !== 'string') {
+    throw new Error(`Invalid OpenAPI document: ${specSource}`)
   }
 
-  return JSON.parse(fs.readFileSync(specSource, 'utf-8'))
+  return document
 }
 
 function patchOpenApiDocument(input) {
@@ -130,7 +122,7 @@ function patchOpenApiDocument(input) {
 
       for (const paramName of templateParams) {
         const exists = operation.parameters.some(
-          (param) => param.name === paramName && param.in === 'path'
+          (param) => param.name === paramName && param.in === 'path',
         )
 
         if (!exists) {
@@ -157,6 +149,7 @@ const code = astToString(ast)
 
 const outDir = path.dirname(OUT_FILE)
 if (!fs.existsSync(outDir)) {
+  assertWithinRoots(outDir, [REPO_ROOT], 'generated types directory')
   fs.mkdirSync(outDir, { recursive: true })
 }
 

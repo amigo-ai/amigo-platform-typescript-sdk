@@ -49,7 +49,7 @@ export function computeDelay(
 
   // Exponential backoff with full jitter: random value in [0, min(maxDelay, base * 2^attempt)]
   const exponential = Math.min(options.maxDelayMs, options.baseDelayMs * Math.pow(2, attempt))
-  return Math.random() * exponential
+  return randomFraction() * exponential
 }
 
 function parseRetryAfterHeader(header: string): number | undefined {
@@ -76,4 +76,10 @@ export function resolveRetryOptions(
     baseDelayMs: opts?.baseDelayMs ?? 250,
     maxDelayMs: opts?.maxDelayMs ?? 30_000,
   }
+}
+
+function randomFraction(): number {
+  const bytes = new Uint32Array(1)
+  crypto.getRandomValues(bytes)
+  return (bytes[0] ?? 0) / 0x1_0000_0000
 }

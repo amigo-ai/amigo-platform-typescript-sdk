@@ -2,20 +2,23 @@
  * Refresh the committed OpenAPI snapshot at repo root.
  *
  * Sources (in priority order):
- *   1. Explicit --spec path/to/spec.json
- *   2. Explicit --url https://...
- *   3. Local sibling repo: ../platform/services/platform-api/openapi.json
- *   4. Live production API: https://api.platform.amigo.ai/v1/openapi.json
+ *   1. Explicit --spec path/to/spec.json within this repo or ../platform
+ *   2. Local sibling repo: ../platform/services/platform-api/openapi.json
  */
 
 import fs from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
+import {
+  REPO_ROOT,
+  assertWithinRoots,
+  resolveAllowedFile,
+  resolveRepoPath,
+} from './lib/repo-paths.mjs'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const OUT_FILE = path.resolve(__dirname, '../openapi.json')
-const SIBLING_SPEC = path.resolve(__dirname, '../../platform/services/platform-api/openapi.json')
-const DEFAULT_SPEC_URL = 'https://api.platform.amigo.ai/v1/openapi.json'
+const OUT_FILE = resolveRepoPath('openapi.json')
+const PLATFORM_ROOT = path.resolve(REPO_ROOT, '../platform')
+const SIBLING_SPEC = path.resolve(PLATFORM_ROOT, 'services/platform-api/openapi.json')
+const ALLOWED_SPEC_ROOTS = [REPO_ROOT, PLATFORM_ROOT]
 
 const args = process.argv.slice(2)
 
@@ -26,30 +29,29 @@ function getArgValue(name) {
 
 function resolveSpecSource() {
   const specArg = getArgValue('--spec')
-  const urlArg = getArgValue('--url')
 
-  if (specArg) return path.resolve(specArg)
-  if (urlArg) return urlArg
-  if (fs.existsSync(SIBLING_SPEC)) return SIBLING_SPEC
-  return DEFAULT_SPEC_URL
+  if (specArg) {
+    return resolveAllowedFile(specArg, ALLOWED_SPEC_ROOTS, 'OpenAPI spec')
+  }
+
+  if (fs.existsSync(SIBLING_SPEC)) {
+    return assertWithinRoots(SIBLING_SPEC, ALLOWED_SPEC_ROOTS, 'OpenAPI spec')
+  }
+
+  throw new Error(
+    'No OpenAPI spec source found. Provide --spec with a file inside this repo or ../platform/services/platform-api/openapi.json.',
+  )
 }
 
 async function loadSpec(specSource) {
-  if (specSource.startsWith('http')) {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 30_000)
-    try {
-      const response = await fetch(specSource, { signal: controller.signal })
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status} ${response.statusText}`)
-      }
-      return await response.json()
-    } finally {
-      clearTimeout(timeout)
-    }
+  const raw = fs.readFileSync(specSource, 'utf-8')
+  const document = JSON.parse(raw)
+
+  if (!document || typeof document !== 'object' || typeof document.openapi !== 'string') {
+    throw new Error(`Invalid OpenAPI document: ${specSource}`)
   }
 
-  return JSON.parse(fs.readFileSync(specSource, 'utf-8'))
+  return document
 }
 
 const specSource = resolveSpecSource()

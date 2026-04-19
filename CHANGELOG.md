@@ -1,66 +1,67 @@
 # Changelog
 
+This changelog tracks user-facing changes to the published SDK. Entries are curated from the mainline release history so internal branch noise and version bump commits do not leak into the public record.
+
 ## [0.4.3] - 2026-04-19
+
+### Improvements
+
+- Extend request overrides across the ergonomic resource surface with `withOptions(...)`
+- Preserve required non-workspace path parameters in low-level request helpers
+- Generate and validate `api.md` in CI
+- Validate Node 18, 20, and 22 along with packed tarball installs
 
 ## [0.4.2] - 2026-04-19
 
 ### Features
 
-- add advanced request controls and metadata (#3)
+- Add advanced request controls, typed low-level HTTP helpers, and response metadata
+- Document the advanced surface with repo-local examples and an API surface guide
 
 ## [0.4.1] - 2026-04-19
 
-### Features
+### Improvements
 
-- harden package verification and examples (#2)
+- Add repo-local examples and validate them in CI
+- Add ESM and CommonJS dist validation before release
+- Align README examples with the shipped client surface
 
 ## [0.4.0] - 2026-04-19
 
-### Features
+### Improvements
 
-- harden sdk release and verification surface (#1)
+- Harden release automation, spec sync, and package verification for published builds
 
 ## [0.3.0] - 2026-04-19
 
-### Features
+### Improvements
 
-- add coverage reporting, fix README badges, rebrand skills to actions in docs
-- Claude on Vertex AI code review — matches platform repo pattern
-- supreme grade repo — CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, PR review, CODEOWNERS
+- Add public repo governance and contributor standards
+- Add coverage reporting and tighten repo QA checks
+- Refresh README presentation and align terminology with the shipped actions surface
 
-### Chores
+### Maintenance
 
-- fix vitest/rollup native bindings, add .nvmrc + .npmrc, coverage reporting
+- Stabilize local toolchain defaults and native dependency resolution
 
 ## [0.2.1] - 2026-04-19
 
 ### Features
 
-- mature release process — OIDC publish, auto-changelog, spec-sync, integration tests
-- supreme grade SDK — tightened types, actions rebrand, maturity features
-- v0.2.0 — 94 tests, 24 resources, supreme-grade type safety
-- add error context sanitization, toJSON, and captureStackTrace
-- add 10 resource classes + regenerate types from tightened spec
-- rebuild SDK with openapi-fetch + codegen from committed spec
-- strip internal resources, add Agent Memory
-- add 10 customer-facing resources
+- Expand customer-facing resource coverage and align types to the validated Platform API surface
+- Rebuild the client on generated OpenAPI types with typed request middleware and custom fetch support
+- Add structured error context, serialization helpers, and webhook verification utilities
+- Mature the release process with spec sync, changelog generation, and integration test scaffolding
 
 ### Bug Fixes
 
-- use NPM_TOKEN for publish (OIDC Trusted Publisher requires package-level config)
-- remove environment constraint for OIDC publish (npm trusted publisher may not require it)
-- add workflow_call trigger to test.yml for reusable workflow
-- reconcile all types against real API (validated with live workspace)
-- align types and signatures with dev-console reality
-- align resources with dev-console API client
+- Align resources, request signatures, and generated types with the validated API surface
+- Fix workflow reuse and publish configuration edge cases discovered during release automation
 
 ### Documentation
 
-- add all 24 resources to README + BFF proxy section
+- Expand README coverage for the public resource surface and BFF proxy configuration
 
-### Chores
+### Maintenance
 
-- switch npm publish to OIDC Trusted Publisher (no token needed)
-- regenerate types — AgentVersionResponse defaults + E.164 validation
-- regenerate types from tightened platform-api spec
-- publish prep — LICENSE, clean README, clean build script
+- Tighten package metadata, generated types, and release packaging
