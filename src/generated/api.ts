@@ -7301,8 +7301,11 @@ export interface components {
              * @default
              */
             current_state?: string;
-            /** Direction */
-            direction: string;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound";
             /** Duration Seconds */
             duration_seconds: number;
             /**
@@ -8398,8 +8401,11 @@ export interface components {
             assigned_to: string;
             /** Id */
             id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "in_progress" | "completed" | "rejected";
         };
         /**
          * CoachingItem
@@ -8504,8 +8510,11 @@ export interface components {
         CommandCenterAlert: {
             /** Code */
             code: string;
-            /** Level */
-            level: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "error" | "warning" | "info";
             /** Message */
             message: string;
             /** Section */
@@ -12528,8 +12537,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Scan Status */
-            scan_status: string;
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "pending" | "clean" | "infected" | "error" | "skipped";
             /** Sha256 */
             sha256: string;
             /** Size Bytes */
@@ -13167,33 +13179,43 @@ export interface components {
             /**
              * Channel Scope
              * @default all
+             * @enum {string}
              */
-            channel_scope?: string;
+            channel_scope?: "all" | "voice" | "text";
             /** Description */
             description?: string | null;
             /**
              * Extraction Mode
              * @default static
+             * @enum {string}
              */
-            extraction_mode?: string;
+            extraction_mode?: "static" | "llm" | "hybrid";
             /** Key */
             key: string;
-            /** Metric Type */
-            metric_type: string;
+            /**
+             * Metric Type
+             * @enum {string}
+             */
+            metric_type: "count" | "sum" | "avg" | "ratio" | "rate" | "boolean" | "text";
             /**
              * Model Tier
              * @default free
+             * @enum {string}
              */
-            model_tier?: string;
+            model_tier?: "free" | "standard" | "premium";
             /** Name */
             name: string;
             /**
              * Period Granularity
              * @default daily
+             * @enum {string}
              */
-            period_granularity?: string;
-            /** Source */
-            source: string;
+            period_granularity?: "daily" | "weekly" | "monthly";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "events" | "calls" | "entities" | "computed";
             /** Unit */
             unit?: string | null;
         };
@@ -13417,8 +13439,11 @@ export interface components {
             event_count: number;
             /** Metric Key */
             metric_key: string;
-            /** Metric Type */
-            metric_type: string;
+            /**
+             * Metric Type
+             * @enum {string}
+             */
+            metric_type: "count" | "sum" | "avg" | "ratio" | "rate" | "boolean" | "text";
             /** Period End */
             period_end: string;
             /** Period Start */
@@ -14332,12 +14357,18 @@ export interface components {
             notes: string;
             /** Phone Number */
             phone_number: string;
-            /** Provider */
-            provider: string;
+            /**
+             * Provider
+             * @enum {string}
+             */
+            provider: "twilio" | "livekit";
             /** Provider Phone Sid */
             provider_phone_sid: string | null;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "inactive";
             /**
              * Updated At
              * Format: date-time
@@ -14351,8 +14382,9 @@ export interface components {
             /**
              * Connector Status
              * @default unavailable
+             * @enum {string}
              */
-            connector_status?: string;
+            connector_status?: "healthy" | "degraded" | "failing" | "unknown" | "unavailable";
             /**
              * Events Last Hour
              * @default 0
@@ -14717,8 +14749,11 @@ export interface components {
             call_sid: string;
             /** Call Start Iso */
             call_start_iso: string;
-            /** Direction */
-            direction: string;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound";
             /** Duration Seconds */
             duration_seconds: number;
             /** Inbound Format */
