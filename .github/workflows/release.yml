@@ -21,6 +21,11 @@ on:
 permissions:
   actions: read
   contents: read
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref_name || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
   prepare:
@@ -34,6 +39,13 @@ jobs:
       tarball_file: ${{ steps.pack.outputs.file }}
 
     steps:
+      - name: Validate release target before prepare
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -164,6 +176,15 @@ jobs:
       id-token: write
 
     steps:
+      - name: Validate npm credentials
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not configured."
+            exit 1
+          fi
+
       - name: Validate release target before publish
         env:
           GH_TOKEN: ${{ github.token }}
@@ -203,19 +224,13 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Validate npm credentials
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "::error::NPM_TOKEN secret is not configured."
-            exit 1
-          fi
-
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          # This guard is best-effort, not atomic with npm publish. Concurrency
+          # prevents overlapping release dispatches per ref, while finalize
+          # still uses force-with-lease as the authoritative CAS check.
           npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
 
   finalize:
@@ -321,6 +336,8 @@ jobs:
           echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"
 
   notify_finalize_failure:
+    # `always()` is required so this recovery path still runs when `finalize`
+    # fails; otherwise Actions would skip the notification by default.
     if: ${{ !inputs.dry_run && always() && needs.finalize.result == 'failure' }}
     needs: [prepare, publish, finalize]
     runs-on: ubuntu-latest

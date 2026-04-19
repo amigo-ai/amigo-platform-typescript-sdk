@@ -49,7 +49,7 @@ ERROR_REDACTION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"\bya29\.[A-Za-z0-9._-]+\b"), "[REDACTED_OAUTH_TOKEN]"),
     (re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b"), "[REDACTED_JWT]"),
     (re.compile(r"-----BEGIN[^-]+PRIVATE KEY-----[\s\S]+?-----END[^-]+PRIVATE KEY-----"), "[REDACTED_PRIVATE_KEY]"),
-    (re.compile(r"\bAIza[0-9A-Za-z_-]{35}\b"), "[REDACTED_GOOGLE_API_KEY]"),
+    (re.compile(r"\bAIza[0-9A-Za-z_-]{35,}\b"), "[REDACTED_GOOGLE_API_KEY]"),
 )
 
 
@@ -138,7 +138,15 @@ def changed_file_paths(pr_meta: dict) -> list[str]:
 
 
 def format_error(exc: Exception) -> str:
-    message = " ".join(f"{type(exc).__name__}: {exc}".split()).replace("`", "'")
+    detail = str(exc)
+    if isinstance(exc, subprocess.CalledProcessError):
+        stderr = (exc.stderr or "").strip()
+        stdout = (exc.stdout or "").strip()
+        if stderr:
+            detail = stderr
+        elif stdout:
+            detail = stdout
+    message = " ".join(f"{type(exc).__name__}: {detail}".split()).replace("`", "'")
     for pattern, replacement in ERROR_REDACTION_PATTERNS:
         message = pattern.sub(replacement, message)
     if len(message) <= MAX_ERROR_CHARS:
@@ -256,11 +264,13 @@ def find_prior_review_comments(pr_number: str) -> list[str]:
                 selector,
             ],
             text=True,
+            stderr=subprocess.PIPE,
         )
     except subprocess.CalledProcessError as exc:
-        print(f"Failed to fetch prior review comments: {format_error(exc)}", file=sys.stderr)
-        return []
-    return [line.strip() for line in raw.splitlines() if line.strip().isdigit()]
+        raise RuntimeError(
+            f"Failed to fetch prior review comments safely: {format_error(exc)}"
+        ) from exc
+    return sorted({line.strip() for line in raw.splitlines() if line.strip().isdigit()}, key=int)
 
 
 def delete_comment(comment_id: str) -> None:
