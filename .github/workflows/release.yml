@@ -112,8 +112,10 @@ jobs:
           echo "Tarball created: $FILE"
           ls -la "$FILE"
 
-      - name: Publish to npm (OIDC Trusted Publisher)
+      - name: Publish to npm
         if: ${{ !inputs.dry_run }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           FILE="${{ steps.pack.outputs.file }}"
           npm publish "$FILE" --provenance --access public
