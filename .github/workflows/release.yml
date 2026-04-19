@@ -20,24 +20,39 @@ on:
 
 permissions:
   actions: read
-  contents: write
+  contents: read
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref_name || github.run_id }}
+  cancel-in-progress: false
 
 jobs:
-  release:
+  prepare:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      contents: write
-      id-token: write
+      contents: read
+    outputs:
+      current_version: ${{ steps.current_version.outputs.version }}
+      new_version: ${{ steps.new_version.outputs.version }}
+      tarball_file: ${{ steps.pack.outputs.file }}
 
     steps:
+      - name: Validate release target before prepare
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -58,17 +73,18 @@ jobs:
             exit 1
           fi
 
-      - name: Configure git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Get current version
         id: current_version
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
           echo "Current version: $CURRENT_VERSION"
+
+      - name: Compute target version
+        id: new_version
+        run: |
+          NEW_VERSION=$(node -e 'const [version, type] = process.argv.slice(1); const parts = version.split(".").map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) throw new Error(`Invalid semver: ${version}`); const [major, minor, patch] = parts; const next = { patch: [major, minor, patch + 1], minor: [major, minor + 1, 0], major: [major + 1, 0, 0] }[type]; if (!next) throw new Error(`Unsupported version type: ${type}`); console.log(next.join("."));' "${{ steps.current_version.outputs.version }}" "${{ inputs.version_type }}")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Regenerate types from committed spec
         run: |
@@ -79,21 +95,11 @@ jobs:
       - name: Check generated API docs
         run: npm run docs:check
 
-      - name: Increment version
-        id: new_version
+      - name: Increment version in workspace
+        if: ${{ !inputs.dry_run }}
         run: |
-          echo "Incrementing ${{ inputs.version_type }} version..."
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            NEW_VERSION=$(npm version ${{ inputs.version_type }} --no-git-tag-version --dry-run)
-            NEW_VERSION=${NEW_VERSION#v}
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "(dry-run) Version would be: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
-          else
-            npm version ${{ inputs.version_type }} --no-git-tag-version
-            NEW_VERSION=$(node -p "require('./package.json').version")
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "Version updated: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
-          fi
+          npm version "${{ steps.new_version.outputs.version }}" --no-git-tag-version
+          echo "Prepared version: ${{ steps.current_version.outputs.version }} -> ${{ steps.new_version.outputs.version }}"
 
       - name: Update CHANGELOG.md
         if: ${{ !inputs.dry_run }}
@@ -117,57 +123,32 @@ jobs:
         id: pack
         run: |
           FILE=$(npm pack --silent)
-          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
           echo "Tarball created: $FILE"
           ls -la "$FILE"
 
-      - name: Commit version bump
-        if: ${{ !inputs.dry_run }}
-        run: |
-          git add package.json package-lock.json CHANGELOG.md || true
-          git commit -m "v${{ steps.new_version.outputs.version }}"
-          git push origin HEAD
-
-      - name: Publish to npm
-        if: ${{ !inputs.dry_run }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          FILE="${{ steps.pack.outputs.file }}"
-          npm publish "$FILE" --provenance --access public
-
       - name: Build release notes
-        if: ${{ !inputs.dry_run }}
         run: |
           node scripts/release-history.mjs release-notes \
             --version "${{ steps.new_version.outputs.version }}" \
             --repo "${GITHUB_REPOSITORY}" \
             > release-notes.md
 
-      - name: Create and push tag
+      - name: Upload release payload
         if: ${{ !inputs.dry_run }}
-        run: |
-          git tag -a "v${{ steps.new_version.outputs.version }}" -m "Release v${{ steps.new_version.outputs.version }}"
-          git push origin "v${{ steps.new_version.outputs.version }}"
-
-      - name: Create GitHub Release
-        if: ${{ !inputs.dry_run }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
-          tag_name: 'v${{ steps.new_version.outputs.version }}'
-          name: 'Release v${{ steps.new_version.outputs.version }}'
-          body_path: release-notes.md
-          draft: false
-          files: |
+          name: release-payload
+          path: |
+            CHANGELOG.md
+            package.json
+            package-lock.json
+            release-notes.md
             ${{ steps.pack.outputs.file }}
-
-      - name: Cleanup temp files
-        if: always()
-        run: rm -f release-notes.md || true
+          retention-days: 30
 
       - name: Upload build artifacts
-        if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
           name: dist-${{ steps.new_version.outputs.version }}
           path: |
@@ -177,9 +158,237 @@ jobs:
 
       - name: Release Summary
         run: |
-          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Version: ${{ steps.new_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Published: ${{ inputs.dry_run && 'skipped' || 'npm' }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ steps.new_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Prepared tarball: ${{ steps.pack.outputs.file }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Publish stage: ${{ inputs.dry_run && 'skipped' || 'pending' }}" >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    if: ${{ !inputs.dry_run }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Validate npm credentials
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NPM_TOKEN secret is not configured."
+            exit 1
+          fi
+
+      - name: Validate release target before publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
+          CURRENT_HEAD=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${{ github.ref_name }}" --jq '.object.sha')
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} before publish. Re-run the release from the latest commit."
+            exit 1
+          fi
+
+      - name: Download release payload
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-payload
+          path: release-payload
+
+      - name: Validate release payload
+        run: |
+          if [ -z "${{ needs.prepare.outputs.tarball_file }}" ]; then
+            echo "::error::prepare job did not produce a tarball filename."
+            exit 1
+          fi
+
+          if [ ! -f "release-payload/${{ needs.prepare.outputs.tarball_file }}" ]; then
+            echo "::error::Expected tarball release-payload/${{ needs.prepare.outputs.tarball_file }} was not found."
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # This guard is best-effort, not atomic with npm publish. Concurrency
+          # prevents overlapping release dispatches per ref, while finalize
+          # still uses force-with-lease as the authoritative CAS check.
+          npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
+
+  finalize:
+    if: ${{ !inputs.dry_run }}
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout triggering commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Validate release ref type
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
+      - name: Confirm branch has not moved before applying release metadata
+        run: |
+          # Best-effort fail-fast check. The commit/push step repeats this
+          # immediately before push, and force-with-lease remains the
+          # authoritative compare-and-swap guard.
+          git fetch origin "${{ github.ref_name }}"
+          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            exit 1
+          fi
+
+      - name: Download release payload
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          name: release-payload
+          path: release-payload
+
+      - name: Apply release metadata
+        run: |
+          cp release-payload/package.json package.json
+          cp release-payload/package-lock.json package-lock.json
+          cp release-payload/CHANGELOG.md CHANGELOG.md
+          cp release-payload/release-notes.md release-notes.md
+
+      - name: Commit and push version bump
+        id: commit_push
+        run: |
+          git add package.json package-lock.json CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "::error::No release metadata changes were produced."
+            exit 1
+          fi
+
+          git commit -m "v${{ needs.prepare.outputs.new_version }}"
+
+          git fetch origin "${{ github.ref_name }}"
+          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            exit 1
+          fi
+
+          git push "--force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA}" origin "HEAD:${{ github.ref_name }}"
+
+      - name: Create and push tag
+        id: push_tag
+        if: steps.commit_push.outcome == 'success'
+        run: |
+          git tag -a "v${{ needs.prepare.outputs.new_version }}" -m "Release v${{ needs.prepare.outputs.new_version }}"
+          git push origin "v${{ needs.prepare.outputs.new_version }}"
+
+      - name: Create GitHub Release
+        if: steps.push_tag.outcome == 'success'
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: 'v${{ needs.prepare.outputs.new_version }}'
+          name: 'Release v${{ needs.prepare.outputs.new_version }}'
+          body_path: release-notes.md
+          draft: false
+          files: |
+            release-payload/${{ needs.prepare.outputs.tarball_file }}
+
+      - name: Cleanup temp files
+        if: always()
+        run: rm -f release-notes.md || true
+
+      - name: Release Summary
+        run: |
+          echo "## Release Finalization" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ needs.prepare.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Published: npm" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"
+
+  notify_finalize_failure:
+    # `always()` is required so this recovery path still runs when `finalize`
+    # fails; otherwise Actions would skip the notification by default.
+    if: ${{ !inputs.dry_run && always() && needs.finalize.result == 'failure' }}
+    needs: [prepare, publish, finalize]
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Notify release finalization failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          marker='<!-- release-finalize-failure:v1 -->'
+          title="Release finalization failed for v${{ needs.prepare.outputs.new_version }}"
+          body=$(cat <<EOF
+          ${marker}
+          ⚠️ Release finalization failed after the npm publish stage completed.
+
+          Details:
+          - version: \`${{ needs.prepare.outputs.new_version }}\`
+          - branch: \`${{ github.ref_name }}\`
+          - triggering sha: \`${GITHUB_SHA}\`
+          - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Possible partial states:
+          - npm package is already published, but the version-bump commit, tag, and GitHub Release are all missing.
+          - npm package is already published and the git tag exists, but the GitHub Release was not created.
+          - npm package is already published and the version-bump commit landed, but the tag or GitHub Release did not.
+
+          Manual recovery is required before another release run:
+          1. Confirm the package version is already live on npm before taking any further release action.
+          2. Inspect whether \`${{ github.ref_name }}\` advanced after publish.
+          3. Check whether the version-bump commit landed on the branch.
+          4. Check whether tag \`v${{ needs.prepare.outputs.new_version }}\` exists remotely.
+          5. Recreate the missing commit, tag, and/or GitHub Release metadata for the already-published package as needed.
+          6. Close or update this issue once the release metadata is consistent again.
+          EOF
+          )
+
+          issue_numbers="$(gh api "repos/${GITHUB_REPOSITORY}/issues" \
+            --paginate \
+            --jq ".[] | select(.pull_request | not) | select(.user.login == \"github-actions[bot]\" and .state == \"open\" and (.body | contains(\"${marker}\"))) | .number")"
+          latest_issue_number=$(printf '%s\n' "$issue_numbers" | awk 'NF' | sort -n | tail -n1)
+
+          if [ -n "$latest_issue_number" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${latest_issue_number}" -f title="$title" -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues" -f title="$title" -f body="$body" >/dev/null
+          fi
+
+          printf '%s\n' "$issue_numbers" | awk 'NF' | sort -n | while read -r issue_number; do
+            if [ "$issue_number" != "$latest_issue_number" ]; then
+              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" -f state=closed >/dev/null
+            fi
+          done
