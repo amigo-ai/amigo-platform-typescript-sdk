@@ -47,19 +47,22 @@
     "openapi:sync": "node scripts/sync-openapi.mjs",
     "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json",
     "esbuild": "node scripts/build.mjs",
+    "docs:api": "node scripts/gen-api-docs.mjs",
+    "docs:check": "node scripts/gen-api-docs.mjs --check",
     "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'examples/**/*.ts' 'scripts/**/*.{js,mjs}' --max-warnings 0",
     "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' 'examples/**/*.ts' 'scripts/**/*.{js,mjs}' --fix",
     "format": "prettier --check .",
     "format:write": "prettier --write .",
     "test": "vitest run --project unit",
     "test:dist": "vitest run --project dist",
+    "test:tarball": "node scripts/test-tarball.mjs",
     "test:integration": "vitest run --project integration",
     "test:all": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage --project unit",
     "typecheck": "tsc --noEmit",
     "typecheck:examples": "tsc --project examples/tsconfig.json --noEmit",
-    "prepublishOnly": "npm run build && npm test && npm run test:dist && npm run typecheck && npm run typecheck:examples"
+    "prepublishOnly": "npm run docs:check && npm run build && npm test && npm run test:dist && npm run test:tarball && npm run typecheck && npm run typecheck:examples"
   },
   "sideEffects": false,
   "dependencies": {

@@ -6,17 +6,133 @@
  * flow through the middleware chain automatically.
  */
 
-import type { Client } from 'openapi-fetch'
-import type { paths } from '../generated/api.js'
+import type { Middleware } from 'openapi-fetch'
+import { applyPlatformRequestOptions, type PlatformFetch } from '../core/openapi-client.js'
+import {
+  mergeRequestOptions,
+  mergeScopedRequestOptions,
+  type ScopedRequestOptions,
+} from '../core/request-options.js'
 import { extractData } from '../core/utils.js'
 
-export type PlatformFetch = Client<paths>
+const scopedClientState = new WeakMap<
+  PlatformFetch,
+  { baseClient: PlatformFetch; options: ScopedRequestOptions }
+>()
 
 export abstract class WorkspaceScopedResource {
   constructor(
     protected readonly client: PlatformFetch,
     protected readonly workspaceId: string,
   ) {}
+
+  withOptions(options: ScopedRequestOptions): this {
+    const ResourceCtor = this.constructor as new (
+      client: PlatformFetch,
+      workspaceId: string,
+    ) => this
+    return new ResourceCtor(scopePlatformClient(this.client, options), this.workspaceId)
+  }
+}
+
+export function scopePlatformClient(
+  client: PlatformFetch,
+  options: ScopedRequestOptions,
+): PlatformFetch {
+  const { baseClient, options: existingOptions } = resolveScopedPlatformClient(client)
+  const mergedOptions = mergeScopedRequestOptions(existingOptions, options)
+
+  const scopedClient = {
+    request: (method: string, path: string, init?: object) =>
+      baseClient.request(
+        method as never,
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    GET: (path: string, init?: object) =>
+      baseClient.GET(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    PUT: (path: string, init?: object) =>
+      baseClient.PUT(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    POST: (path: string, init?: object) =>
+      baseClient.POST(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    DELETE: (path: string, init?: object) =>
+      baseClient.DELETE(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    OPTIONS: (path: string, init?: object) =>
+      baseClient.OPTIONS(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    HEAD: (path: string, init?: object) =>
+      baseClient.HEAD(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    PATCH: (path: string, init?: object) =>
+      baseClient.PATCH(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    TRACE: (path: string, init?: object) =>
+      baseClient.TRACE(
+        path as never,
+        applyPlatformRequestOptions(
+          baseClient,
+          mergeRequestOptions(mergedOptions, init as never),
+        ) as never,
+      ),
+    use: (...middleware: Middleware[]) => baseClient.use(...middleware),
+    eject: (...middleware: Middleware[]) => baseClient.eject(...middleware),
+  } as PlatformFetch
+
+  scopedClientState.set(scopedClient, { baseClient, options: mergedOptions })
+  return scopedClient
+}
+
+export function resolveScopedPlatformClient(client: PlatformFetch): {
+  baseClient: PlatformFetch
+  options: ScopedRequestOptions | undefined
+} {
+  const existing = scopedClientState.get(client)
+  return {
+    baseClient: existing?.baseClient ?? client,
+    options: existing?.options,
+  }
 }
 
 export { extractData }

@@ -18,6 +18,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 20, 22]
 
     steps:
       - name: Checkout code
@@ -26,7 +30,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
       - name: Install dependencies
@@ -41,22 +45,28 @@ jobs:
       - name: Typecheck examples
         run: npm run typecheck:examples
 
+      - name: Check generated API docs
+        run: npm run docs:check
+
       - name: Build
         run: npm run build
 
       - name: Run unit tests (fast)
-        if: ${{ inputs.skip_codecov }}
+        if: ${{ inputs.skip_codecov || matrix.node-version != 22 }}
         run: npm test -- --reporter=dot
 
       - name: Run unit tests with coverage
-        if: ${{ !inputs.skip_codecov }}
+        if: ${{ !inputs.skip_codecov && matrix.node-version == 22 }}
         run: npx vitest run --coverage --project unit --reporter=dot
 
       - name: Run dist tests
         run: npm run test:dist -- --reporter=dot
 
+      - name: Run tarball smoke tests
+        run: npm run test:tarball
+
       - name: Upload coverage to Codecov
-        if: ${{ !inputs.skip_codecov }}
+        if: ${{ !inputs.skip_codecov && matrix.node-version == 22 }}
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
