@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.2] - 2026-04-19
+
+### Features
+
+- add advanced request controls and metadata (#3)
+
 ## [0.4.1] - 2026-04-19
 
 ### Features
