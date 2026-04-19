@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { components } from '../../src/generated/api.js'
 import { AmigoClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -59,15 +60,32 @@ const TOOL_PERFORMANCE_FIXTURE = {
 }
 
 const DATA_QUALITY_FIXTURE = {
-  confidence_by_source: {},
+  confidence_by_source: {
+    connector: [
+      { confidence_range: 'raw', count: 40 },
+      { confidence_range: 'verified', count: 60 },
+    ],
+    manual: [
+      { confidence_range: 'authoritative', count: 25 },
+    ],
+  },
   confidence_distribution: [
     { confidence_range: 'verified', count: 88 },
     { confidence_range: 'raw', count: 12 },
   ],
   period_start: '2026-01-01',
   period_end: '2026-01-07',
-  review_pipeline: {},
-}
+  review_pipeline: {
+    pending_reviews: 5,
+    approved_7d: 42,
+    rejected_7d: 3,
+  },
+  timeseries: [
+    { date: '2026-01-01', avg_confidence: 0.85, event_count: 100 },
+  ],
+  total_events: 100,
+  workspace_id: TEST_WORKSPACE_ID,
+} satisfies components['schemas']['DataQualityResponse']
 
 const USAGE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
@@ -233,6 +251,12 @@ describe('AnalyticsResource', () => {
     const result = await client.analytics.getDataQuality()
     expect(result.confidence_distribution).toHaveLength(2)
     expect(result.period_start).toBe('2026-01-01')
+    expect(Object.keys(result.confidence_by_source)).toEqual(['connector', 'manual'])
+    expect(result.review_pipeline).toEqual({
+      pending_reviews: 5,
+      approved_7d: 42,
+      rejected_7d: 3,
+    })
   })
 
   it('gets usage', async () => {
@@ -271,8 +295,10 @@ describe('AnalyticsResource', () => {
       previous_from: '2026-01-01',
       previous_to: '2026-01-07',
     })
-    expect(result.current).toBeDefined()
-    expect(result.previous).toBeDefined()
-    expect(result.delta).toBeDefined()
+    const typed = result as typeof COMPARISON_FIXTURE
+    expect(typed.workspace_id).toBe(TEST_WORKSPACE_ID)
+    expect(typed.current).toEqual({ total_calls: 150, avg_duration_seconds: 240 })
+    expect(typed.previous).toEqual({ total_calls: 120, avg_duration_seconds: 220 })
+    expect(typed.delta).toEqual({ total_calls: 30, avg_duration_seconds: 20 })
   })
 })

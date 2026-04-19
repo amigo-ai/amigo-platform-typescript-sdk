@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { components } from '../../src/generated/api.js'
 import { AmigoClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -12,7 +13,7 @@ const DASHBOARD_FIXTURE = {
   legal_hold: false,
   retention_days: 365,
   total_credentials: 8,
-}
+} satisfies components['schemas']['ComplianceDashboardResponse']
 
 const HIPAA_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
@@ -24,7 +25,7 @@ const HIPAA_FIXTURE = {
   encryption: { at_rest: true, in_transit: true },
   generated_at: '2026-01-15T00:00:00Z',
   retention_policy: { days: 365, enforced: true },
-}
+} satisfies components['schemas']['HipaaReportResponse']
 
 const ACCESS_REVIEW_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
@@ -34,7 +35,7 @@ const ACCESS_REVIEW_FIXTURE = {
   generated_at: '2026-01-10T00:00:00Z',
   jwt_credentials_note: 'JWT credentials are managed via identity service',
   total_credentials: 8,
-}
+} satisfies components['schemas']['AccessReviewResponse']
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
@@ -99,7 +100,7 @@ describe('ComplianceResource', () => {
     const result = await client.compliance.getAccessReview()
     expect(result.total_credentials).toBe(8)
     expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
-    expect(result.jwt_credentials_note).toBeDefined()
+    expect(result.jwt_credentials_note).toBe('JWT credentials are managed via identity service')
     expect(result.credentials).toHaveLength(1)
   })
 })

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { components } from '../../src/generated/api.js'
 import { AmigoClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -11,7 +12,7 @@ const URLS_FIXTURE = {
   inbound_url: 'https://recordings.example.com/rec-001-inbound.wav',
   outbound_url: 'https://recordings.example.com/rec-001-outbound.wav',
   metadata_url: 'https://recordings.example.com/rec-001-metadata.json',
-}
+} satisfies components['schemas']['RecordingUrlsResponse']
 
 const METADATA_FIXTURE = {
   call_sid: CALL_SID,
@@ -29,7 +30,7 @@ const METADATA_FIXTURE = {
   outbound_format: 'wav',
   outbound_sample_rate: 16000,
   outbound_size_bytes: 2960000,
-}
+} satisfies components['schemas']['RecordingMetadataResponse']
 
 const DOWNLOAD_FIXTURE = {
   data: 'binary-audio-content',
@@ -92,5 +93,7 @@ describe('RecordingsResource', () => {
     const result = await client.recordings.download(CALL_SID, 'recording.wav')
     // download returns `unknown` per the OpenAPI spec
     expect(result).toBeDefined()
+    expect(result).not.toBeNull()
+    expect(result).toEqual(DOWNLOAD_FIXTURE)
   })
 })

@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { components } from '../../src/generated/api.js'
 import { AmigoClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -21,12 +22,14 @@ const FUNCTION_FIXTURE = {
   created_at: '2026-01-01T00:00:00Z',
 }
 
+// error is `string | null` in the generated type (optional field); null represents
+// an explicit "no error" from the API, distinct from omission (undefined)
 const TEST_RESULT_FIXTURE = {
   function_name: FUNCTION_NAME,
   result: { bmi: 24.2, category: 'normal' },
   duration_ms: 45,
   error: null,
-}
+} satisfies components['schemas']['FunctionTestResponse']
 
 const CATALOG_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
@@ -44,7 +47,7 @@ const QUERY_RESULT_FIXTURE = {
   count: 2,
   duration_ms: 120,
   error: null,
-}
+} satisfies components['schemas']['QueryResponse']
 
 const SYNC_RESULT_FIXTURE = {
   count: 5,
