@@ -65,6 +65,15 @@ export class ActionsResource extends WorkspaceScopedResource {
     })
   }
 
+  /** Get all context graphs and services that reference this action */
+  async getReferences(actionId: ActionId | string) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/skills/{skill_id}/references', {
+        params: { path: { workspace_id: this.workspaceId, skill_id: actionId } },
+      }),
+    )
+  }
+
   /**
    * Test an action with a sample input.
    * Executes the action in a sandbox and returns the result.

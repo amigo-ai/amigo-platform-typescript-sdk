@@ -1,0 +1,254 @@
+import { describe, it, expect } from 'vitest'
+import { AmigoClient } from '../../src/index.js'
+
+const TEST_API_KEY = 'test-api-key-abc123'
+const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
+
+const DASHBOARD_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  total_calls: 150,
+  avg_duration_seconds: 240,
+  sentiment_score: 0.78,
+  period_days: 7,
+}
+
+const CALLS_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  total_calls: 150,
+  total_duration_seconds: 36000,
+  avg_duration_seconds: 240,
+  timeseries: [
+    { timestamp: '2026-01-01T00:00:00Z', calls: 20, duration_seconds: 4800 },
+  ],
+}
+
+const AGENTS_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  agents: [
+    { agent_id: 'agent-001', name: 'Scheduler', total_calls: 80, avg_duration_seconds: 200 },
+  ],
+}
+
+const CALL_QUALITY_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  avg_sentiment: 0.78,
+  avg_transcription_confidence: 0.92,
+  flagged_calls: 3,
+}
+
+const EMOTION_TRENDS_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  timeseries: [
+    { timestamp: '2026-01-01T00:00:00Z', positive: 0.6, neutral: 0.3, negative: 0.1 },
+  ],
+}
+
+const LATENCY_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  avg_ttfb_ms: 320,
+  avg_response_time_ms: 850,
+}
+
+const TOOL_PERFORMANCE_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  tools: [
+    { name: 'book_appointment', success_rate: 0.95, avg_latency_ms: 450 },
+  ],
+}
+
+const DATA_QUALITY_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  entity_completeness: 0.88,
+  duplicate_rate: 0.02,
+}
+
+const USAGE_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  api_requests: 25000,
+  call_minutes: 600,
+  storage_mb: 1024,
+}
+
+const EVENT_BREAKDOWN_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  event_types: [
+    { type: 'call.started', count: 150 },
+    { type: 'call.ended', count: 148 },
+  ],
+}
+
+const SAFETY_TRENDS_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  risk_distribution: { low: 120, medium: 25, high: 5 },
+  timeseries: [],
+}
+
+const OPERATOR_PERFORMANCE_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  operators: [
+    { operator_id: 'op-001', name: 'Dr. Smith', escalations_handled: 12, avg_response_time_seconds: 30 },
+  ],
+}
+
+const ADVANCED_CALL_STATS_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  abandonment_rate: 0.05,
+  transfer_rate: 0.12,
+  avg_silence_seconds: 3.2,
+}
+
+const COMPARISON_FIXTURE = {
+  workspace_id: TEST_WORKSPACE_ID,
+  current: { total_calls: 150, avg_duration_seconds: 240 },
+  previous: { total_calls: 120, avg_duration_seconds: 220 },
+  delta: { total_calls: 30, avg_duration_seconds: 20 },
+}
+
+function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+    let url: string
+    let method: string
+    if (input instanceof Request) {
+      url = input.url
+      method = input.method.toUpperCase()
+    } else {
+      url = typeof input === 'string' ? input : input.toString()
+      method = (init?.method ?? 'GET').toUpperCase()
+    }
+    const pathname = new URL(url).pathname
+    for (const [pattern, handler] of Object.entries(routes)) {
+      const [pMethod, ...pPathParts] = pattern.split(' ')
+      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+    }
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+  }
+}
+
+const BASE = `/v1/${TEST_WORKSPACE_ID}`
+
+const client = new AmigoClient({
+  apiKey: TEST_API_KEY,
+  workspaceId: TEST_WORKSPACE_ID,
+  fetch: mockFetch({
+    [`GET ${BASE}/analytics/dashboard`]: () => Response.json(DASHBOARD_FIXTURE),
+    [`GET ${BASE}/analytics/calls`]: () => Response.json(CALLS_FIXTURE),
+    [`GET ${BASE}/analytics/agents`]: () => Response.json(AGENTS_FIXTURE),
+    [`GET ${BASE}/analytics/call-quality`]: () => Response.json(CALL_QUALITY_FIXTURE),
+    [`GET ${BASE}/analytics/emotion-trends`]: () => Response.json(EMOTION_TRENDS_FIXTURE),
+    [`GET ${BASE}/analytics/latency`]: () => Response.json(LATENCY_FIXTURE),
+    [`GET ${BASE}/analytics/tool-performance`]: () => Response.json(TOOL_PERFORMANCE_FIXTURE),
+    [`GET ${BASE}/analytics/data-quality`]: () => Response.json(DATA_QUALITY_FIXTURE),
+    [`GET ${BASE}/analytics/usage`]: () => Response.json(USAGE_FIXTURE),
+    [`GET ${BASE}/analytics/events`]: () => Response.json(EVENT_BREAKDOWN_FIXTURE),
+    [`GET ${BASE}/analytics/safety-trends`]: () => Response.json(SAFETY_TRENDS_FIXTURE),
+    [`GET ${BASE}/analytics/operator-performance`]: () => Response.json(OPERATOR_PERFORMANCE_FIXTURE),
+    [`GET ${BASE}/analytics/calls/advanced`]: () => Response.json(ADVANCED_CALL_STATS_FIXTURE),
+    [`GET ${BASE}/analytics/calls/comparison`]: () => Response.json(COMPARISON_FIXTURE),
+  }),
+})
+
+describe('AnalyticsResource', () => {
+  it('gets the dashboard', async () => {
+    const result = await client.analytics.getDashboard()
+    expect(result.total_calls).toBe(150)
+    expect(result.period_days).toBe(7)
+  })
+
+  it('gets the dashboard with days param', async () => {
+    const result = await client.analytics.getDashboard({ days: 30 })
+    expect(result.total_calls).toBe(150)
+  })
+
+  it('gets call analytics', async () => {
+    const result = await client.analytics.getCalls()
+    expect(result.total_calls).toBe(150)
+    expect(result.timeseries).toHaveLength(1)
+  })
+
+  it('gets call analytics with filter params', async () => {
+    const result = await client.analytics.getCalls({
+      days: 14,
+      interval: '1d',
+      date_from: '2026-01-01',
+      date_to: '2026-01-14',
+    })
+    expect(result.total_calls).toBe(150)
+  })
+
+  it('gets agent analytics', async () => {
+    const result = await client.analytics.getAgents()
+    expect(result.agents).toHaveLength(1)
+    expect(result.agents[0]?.name).toBe('Scheduler')
+  })
+
+  it('gets call quality', async () => {
+    const result = await client.analytics.getCallQuality()
+    expect(result.avg_sentiment).toBe(0.78)
+    expect(result.flagged_calls).toBe(3)
+  })
+
+  it('gets emotion trends', async () => {
+    const result = await client.analytics.getEmotionTrends()
+    expect(result.timeseries).toHaveLength(1)
+    expect(result.timeseries[0]?.positive).toBe(0.6)
+  })
+
+  it('gets latency metrics', async () => {
+    const result = await client.analytics.getLatency()
+    expect(result.avg_ttfb_ms).toBe(320)
+    expect(result.avg_response_time_ms).toBe(850)
+  })
+
+  it('gets tool performance', async () => {
+    const result = await client.analytics.getToolPerformance()
+    expect(result.tools).toHaveLength(1)
+    expect(result.tools[0]?.success_rate).toBe(0.95)
+  })
+
+  it('gets data quality', async () => {
+    const result = await client.analytics.getDataQuality()
+    expect(result.entity_completeness).toBe(0.88)
+    expect(result.duplicate_rate).toBe(0.02)
+  })
+
+  it('gets usage', async () => {
+    const result = await client.analytics.getUsage()
+    expect(result.api_requests).toBe(25000)
+    expect(result.call_minutes).toBe(600)
+  })
+
+  it('gets event breakdown', async () => {
+    const result = await client.analytics.getEventBreakdown()
+    expect(result.event_types).toHaveLength(2)
+    expect(result.event_types[0]?.type).toBe('call.started')
+  })
+
+  it('gets safety trends', async () => {
+    const result = await client.analytics.getSafetyTrends()
+    expect(result.risk_distribution.high).toBe(5)
+  })
+
+  it('gets operator performance', async () => {
+    const result = await client.analytics.getOperatorPerformance()
+    expect(result.operators).toHaveLength(1)
+    expect(result.operators[0]?.escalations_handled).toBe(12)
+  })
+
+  it('gets advanced call stats', async () => {
+    const result = await client.analytics.getAdvancedCallStats()
+    expect(result.abandonment_rate).toBe(0.05)
+    expect(result.transfer_rate).toBe(0.12)
+  })
+
+  it('compares call periods', async () => {
+    const result = await client.analytics.compareCallPeriods({
+      current_from: '2026-01-08',
+      current_to: '2026-01-14',
+      previous_from: '2026-01-01',
+      previous_to: '2026-01-07',
+    })
+    expect(result.current.total_calls).toBe(150)
+    expect(result.previous.total_calls).toBe(120)
+    expect(result.delta.total_calls).toBe(30)
+  })
+})

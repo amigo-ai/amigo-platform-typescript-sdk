@@ -11,6 +11,8 @@ export interface ListCallsParams extends ListParams {
   min_duration?: number
   max_duration?: number
   search?: string
+  include_simulated?: boolean
+  service_id?: string
 }
 
 /**
@@ -62,6 +64,15 @@ export class CallsResource extends WorkspaceScopedResource {
   async getBenchmarks(params?: { days?: number }) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/calls/benchmarks', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
+  }
+
+  /** Get phone number call volume breakdown */
+  async getPhoneVolume(params?: { days?: number }) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/calls/phone-volume', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
     )

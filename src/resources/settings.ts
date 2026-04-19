@@ -104,6 +104,86 @@ export class SettingsResource extends WorkspaceScopedResource {
       ),
   }
 
+  readonly behaviors = {
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/settings/behaviors', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    update: async (body: components['schemas']['BehaviorSettingsRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/{workspace_id}/settings/behaviors', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
+
+  readonly gapScanner = {
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/settings/gap-scanner', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    update: async (body: components['schemas']['GapScannerSettingsRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/{workspace_id}/settings/gap-scanner', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
+
+  readonly scribe = {
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/settings/scribe', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    update: async (body: components['schemas']['ScribeSettingsRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/{workspace_id}/settings/scribe', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
+
+  readonly metrics = {
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/settings/metrics', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    update: async (body: components['schemas']['MetricSettingsRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/{workspace_id}/settings/metrics', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
+
+  readonly environments = {
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/settings/environments', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    update: async (body: components['schemas']['EnvironmentSettingsRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/{workspace_id}/settings/environments', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
+
   readonly workflows = {
     get: async () =>
       extractData(

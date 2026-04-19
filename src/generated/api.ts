@@ -9096,6 +9096,34 @@ export interface components {
             total_entities: number;
         };
         /**
+         * ConnectorResourcesResponse
+         * @description FHIR resources from a specific connected data source.
+         */
+        ConnectorResourcesResponse: {
+            /**
+             * Data Source Id
+             * @description UUID of the connected data source
+             */
+            data_source_id: string;
+            /**
+             * Entries
+             * @description Raw FHIR resource JSON objects
+             */
+            entries: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Resource Type
+             * @description FHIR resource type (e.g. Patient, Condition, MedicationRequest)
+             */
+            resource_type: string;
+            /**
+             * Total
+             * @description Total number of matching resources
+             */
+            total: number;
+        };
+        /**
          * ConnectorSettingsRequest
          * @description Request for PUT /v1/{ws}/settings/connectors.
          *
@@ -14551,6 +14579,81 @@ export interface components {
              */
             total_escalations_handled: number;
         };
+        /**
+         * OperatorPerformanceResponse
+         * @description Operator escalation performance and quality comparison over time.
+         */
+        OperatorPerformanceResponse: {
+            /** @description Aggregate operator performance metrics */
+            summary: components["schemas"]["OperatorPerformanceSummary"];
+            /**
+             * Trend
+             * @description Time series of escalation counts per interval bucket
+             */
+            trend: components["schemas"]["OperatorPerformanceTrendPoint"][];
+        };
+        /**
+         * OperatorPerformanceSummary
+         * @description Aggregate operator escalation stats for the period.
+         */
+        OperatorPerformanceSummary: {
+            /**
+             * Avg Escalated Duration Seconds
+             * @description Average duration in seconds of escalated calls
+             */
+            avg_escalated_duration_seconds?: number | null;
+            /**
+             * Avg Escalated Quality Score
+             * @description Average quality score of escalated calls
+             */
+            avg_escalated_quality_score?: number | null;
+            /**
+             * Avg Non Escalated Quality Score
+             * @description Average quality score of non-escalated calls
+             */
+            avg_non_escalated_quality_score?: number | null;
+            /**
+             * Escalated Count
+             * @description Number of calls escalated to an operator
+             */
+            escalated_count: number;
+            /**
+             * Escalation Rate
+             * @description Fraction of calls that were escalated (0.0-1.0)
+             */
+            escalation_rate: number;
+            /**
+             * Operator Handled Count
+             * @description Number of calls where an operator was active
+             */
+            operator_handled_count: number;
+            /**
+             * Total Calls
+             * @description Total number of calls in the period
+             */
+            total_calls: number;
+        };
+        /**
+         * OperatorPerformanceTrendPoint
+         * @description Single time-bucket data point in the operator performance trend series.
+         */
+        OperatorPerformanceTrendPoint: {
+            /**
+             * Date
+             * @description ISO 8601 date string for the time bucket
+             */
+            date: string;
+            /**
+             * Escalated Count
+             * @description Escalated calls in this time bucket
+             */
+            escalated_count: number;
+            /**
+             * Total Calls
+             * @description Total calls in this time bucket
+             */
+            total_calls: number;
+        };
         /** OperatorResponse */
         OperatorResponse: {
             /**
@@ -16426,6 +16529,83 @@ export interface components {
              * @default 0
              */
             match_count?: number;
+        };
+        /**
+         * SafetyTrendPoint
+         * @description Single time-bucket data point in the safety trend series.
+         */
+        SafetyTrendPoint: {
+            /**
+             * Date
+             * @description ISO 8601 date string for the time bucket
+             */
+            date: string;
+            /**
+             * Escalated Count
+             * @description Escalated calls in this time bucket
+             */
+            escalated_count: number;
+            /**
+             * Safety Flagged
+             * @description Safety-flagged calls in this time bucket
+             */
+            safety_flagged: number;
+            /**
+             * Total Calls
+             * @description Total calls in this time bucket
+             */
+            total_calls: number;
+        };
+        /**
+         * SafetyTrendsResponse
+         * @description Safety and escalation trends — risk distribution, escalation rates, and time series.
+         */
+        SafetyTrendsResponse: {
+            /**
+             * Risk Distribution
+             * @description Count of calls by risk level (e.g. high, medium, low)
+             */
+            risk_distribution: {
+                [key: string]: number;
+            };
+            /** @description Aggregate safety metrics for the full period */
+            summary: components["schemas"]["SafetyTrendsSummary"];
+            /**
+             * Trend
+             * @description Time series of safety metrics per interval bucket
+             */
+            trend: components["schemas"]["SafetyTrendPoint"][];
+        };
+        /**
+         * SafetyTrendsSummary
+         * @description Aggregate safety and escalation counts for the period.
+         */
+        SafetyTrendsSummary: {
+            /**
+             * Escalation Rate
+             * @description Fraction of calls that were escalated (0.0-1.0)
+             */
+            escalation_rate: number;
+            /**
+             * Total Calls
+             * @description Total number of calls in the period
+             */
+            total_calls: number;
+            /**
+             * Total Escalations
+             * @description Number of calls escalated to an operator
+             */
+            total_escalations: number;
+            /**
+             * Total Safety Flagged
+             * @description Number of calls with a safety summary present
+             */
+            total_safety_flagged: number;
+            /**
+             * Total Safety Matches
+             * @description Sum of safety match counts across all calls
+             */
+            total_safety_matches: number;
         };
         /**
          * SampleFact
@@ -22525,9 +22705,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["OperatorPerformanceResponse"];
                 };
             };
             /** @description Validation Error */
@@ -22571,9 +22749,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["SafetyTrendsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -35770,9 +35946,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["ConnectorResourcesResponse"];
                 };
             };
             /** @description Invalid data source ID or resource type. */
