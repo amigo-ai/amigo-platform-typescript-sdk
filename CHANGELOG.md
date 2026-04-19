@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.5] - 2026-04-19
+
+### Bug Fixes
+
+- restore README platform svg (#17)
+
 ## [0.4.4] - 2026-04-19
 
 ### Features
