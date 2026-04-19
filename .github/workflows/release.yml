@@ -265,14 +265,17 @@ jobs:
           git push "--force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA}" origin "HEAD:${{ github.ref_name }}"
 
       - name: Create and push tag
+        id: push_tag
         if: steps.commit_push.outcome == 'success'
         run: |
           git tag -a "v${{ needs.prepare.outputs.new_version }}" -m "Release v${{ needs.prepare.outputs.new_version }}"
           git push origin "v${{ needs.prepare.outputs.new_version }}"
 
       - name: Create GitHub Release
+        if: steps.push_tag.outcome == 'success'
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: 'v${{ needs.prepare.outputs.new_version }}'
           name: 'Release v${{ needs.prepare.outputs.new_version }}'
           body_path: release-notes.md

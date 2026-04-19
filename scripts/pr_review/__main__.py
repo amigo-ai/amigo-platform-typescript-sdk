@@ -192,7 +192,8 @@ DIFF:
         ).strip()
         return agent_name, text
     except Exception as exc:  # noqa: BLE001
-        return agent_name, f"{SPECIALIST_FAILURE_PREFIX}`{format_error(exc)}`"
+        print(f"Specialist {agent_name} failed: {format_error(exc)}", file=sys.stderr)
+        return agent_name, f"{SPECIALIST_FAILURE_PREFIX}`{type(exc).__name__}`"
 
 
 async def run_orchestrator(
@@ -323,6 +324,7 @@ def compose_orchestrator_failure_report(
     exc: Exception,
     specialist_findings: dict[str, str],
 ) -> str:
+    error_type = type(exc).__name__
     completed = sorted(
         agent for agent, text in specialist_findings.items() if not text.startswith(SPECIALIST_FAILURE_PREFIX)
     )
@@ -335,7 +337,7 @@ def compose_orchestrator_failure_report(
 - Automated review orchestration failed before the final consolidated report was produced.
 
 ### Concerns
-- `{format_error(exc)}`
+- `{error_type}` while consolidating specialist findings. Full error details were kept in the action logs rather than the PR comment.
 
 ### Suggestions
 - Inspect the GitHub Actions logs for the failing run and re-run the reviewer after fixing the underlying issue.
