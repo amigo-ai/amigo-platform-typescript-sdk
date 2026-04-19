@@ -1,20 +1,25 @@
 name: PR Review (Claude on Vertex)
 
-# Runs a focused SDK review (type safety, API contract, breaking changes)
-# on every PR using Claude on GCP Vertex AI. Posts a structured comment.
+# Runs SDK-specific specialist review agents on every opened / updated PR and
+# posts a consolidated review as a PR comment. Agents live in
+# `.claude/agents/`; orchestration is `scripts/pr_review/`.
 #
 # Auth:
-#   GCP Vertex AI via Workload Identity Federation (google-github-actions/auth@v2).
-#   Uses the same WIF pool + SA as the platform repo's review system.
+#   Uses GCP Vertex AI (AsyncAnthropicVertex). GCP auth comes from Workload
+#   Identity Federation via google-github-actions/auth; the review WIF pool +
+#   service account are provisioned in amigo-ai/platform-infra.
 #
-# Repo variables (set in Settings > Variables):
-#   vars.GCP_WIF_PROVIDER       full WIF provider resource name (required)
-#   vars.GCP_REVIEW_SA          SA email with roles/aiplatform.user (required)
-#   vars.VERTEX_PROJECT         GCP project (default: amigo-platform)
-#   vars.VERTEX_REGION          Claude region (default: global)
-#   vars.REVIEW_MODEL           Claude model (default: claude-sonnet-4-6)
+# Repo variables:
+#   vars.GCP_WIF_PROVIDER           full provider resource name (required)
+#   vars.GCP_REVIEW_SA              SA email with Vertex access (required)
+#   vars.VERTEX_PROJECT             GCP project (default: amigo-platform)
+#   vars.VERTEX_REGION              Claude region on Vertex (default: global)
+#   vars.REVIEW_MODEL               specialist model (default: claude-sonnet-4-6)
+#   vars.REVIEW_ORCHESTRATOR_MODEL  consolidator (default: claude-opus-4-6)
 #
-# Disable per-PR by including "[skip review]" in the PR title.
+# Disable per-PR by including "[skip review]" in the PR title. Drafts are
+# skipped. The orchestrator replaces its prior comment on re-runs so PRs don't
+# accumulate duplicate reviews.
 
 on:
   pull_request:
@@ -24,6 +29,12 @@ on:
       - 'tests/**'
       - 'scripts/**'
       - '.github/workflows/**'
+      - '.claude/agents/**'
+      - 'openapi.json'
+      - 'api.md'
+      - 'README.md'
+      - 'package.json'
+      - 'package-lock.json'
 
 concurrency:
   group: pr-review-${{ github.event.pull_request.number }}
@@ -40,22 +51,24 @@ jobs:
       !contains(github.event.pull_request.title, '[skip review]') &&
       !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_REPOSITORY: ${{ github.repository }}
+      PR_NUMBER: ${{ github.event.pull_request.number }}
       VERTEX_PROJECT: ${{ vars.VERTEX_PROJECT || 'amigo-platform' }}
       VERTEX_REGION: ${{ vars.VERTEX_REGION || 'global' }}
       REVIEW_MODEL: ${{ vars.REVIEW_MODEL || 'claude-sonnet-4-6' }}
+      REVIEW_ORCHESTRATOR_MODEL: ${{ vars.REVIEW_ORCHESTRATOR_MODEL || 'claude-opus-4-6' }}
     steps:
-      - name: Guard — skip if WIF not configured
+      - name: Guard — skip if WIF provider not configured
         id: guard
         env:
           GCP_WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
           GCP_REVIEW_SA: ${{ vars.GCP_REVIEW_SA }}
         run: |
           if [ -z "$GCP_WIF_PROVIDER" ] || [ -z "$GCP_REVIEW_SA" ]; then
-            echo "::warning::GCP_WIF_PROVIDER or GCP_REVIEW_SA not set — skipping Claude review. Set repo variables to enable."
+            echo "::warning::GCP_WIF_PROVIDER or GCP_REVIEW_SA not set — skipping review. Provision the CI WIF pool + SA in platform-infra and set the repo variables to enable."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
@@ -68,64 +81,31 @@ jobs:
           fetch-depth: 0
 
       - name: Authenticate to GCP (WIF)
-        id: auth
         if: steps.guard.outputs.skip == 'false'
-        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
-        continue-on-error: true
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_REVIEW_SA }}
           create_credentials_file: true
           export_environment_variables: true
 
-      - name: Report WIF trust mismatch
-        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'failure'
-        run: |
-          marker='<!-- pr-review-auth-status -->'
-          body=$(cat <<EOF
-          ${marker}
-          ⚠️ Claude review could not authenticate to GCP Vertex for \`${{ github.repository }}\`.
-
-          The configured Workload Identity Federation provider rejected this repo's GitHub OIDC token. In practice this means the provider or service-account trust in \`platform-infra/pr-review\` still only allows other repositories or workflow refs.
-
-          Expected trust inputs:
-          - repository: \`${{ github.repository }}\`
-          - workflow: \`${{ github.repository }}/.github/workflows/pr-review.yml\`
-
-          The SDK PR checks remain valid; only the external review integration is unavailable until the GCP trust policy is expanded.
-          EOF
-          )
-
-          comment_id=$(
-            gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
-              --paginate \
-              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
-              | tail -n1
-          )
-
-          if [ -n "$comment_id" ]; then
-            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -f body="$body" >/dev/null
-          else
-            gh pr comment "${{ github.event.pull_request.number }}" --body "$body"
-          fi
-
       - name: Install uv
-        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
-        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        if: steps.guard.outputs.skip == 'false'
+        uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
 
       - name: Run review
-        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        if: steps.guard.outputs.skip == 'false'
         run: |
           uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
-            python scripts/pr-review.py --pr "${{ github.event.pull_request.number }}" \
-              --model "$REVIEW_MODEL" \
+            python -m scripts.pr_review --pr "$PR_NUMBER" \
+              --specialist-model "$REVIEW_MODEL" \
+              --orchestrator-model "$REVIEW_ORCHESTRATOR_MODEL" \
               --vertex-project "$VERTEX_PROJECT" \
               --vertex-region "$VERTEX_REGION"
 
       - name: Fallback comment on failure
-        if: failure() && steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        if: failure() && steps.guard.outputs.skip == 'false'
         run: |
-          gh pr comment "${{ github.event.pull_request.number }}" \
-            --body "⚠️ Claude code review failed. See [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+          gh pr comment "$PR_NUMBER" --body "⚠️ Automated Claude (Vertex) SDK review failed to run. A human reviewer should review this PR before merge. See action logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
