@@ -22,6 +22,10 @@ You review `.github/workflows/**` and `scripts/**`.
   reviewed or tested.
 - Flag as **CONCERN** if shell or GH CLI usage relies on ambient state instead
   of explicit env/config where that makes behavior ambiguous.
+- Do **not** flag the repo's intentional WIF degrade-to-comment pattern as a
+  concern when auth uses `continue-on-error`, posts an explicit bot comment,
+  and cleans stale auth notes. In this repo that is an accepted availability
+  tradeoff, not a silent failure.
 
 ## Output
 

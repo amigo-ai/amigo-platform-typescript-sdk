@@ -18,6 +18,12 @@ on:
         default: false
         type: boolean
 
+# Release operators:
+# - Configure `RELEASE_PUSH_TOKEN` when the target branch is protected.
+# - The token must be able to push the version-bump commit and tag after npm
+#   publish succeeds. Without it, protected-branch finalization is rejected
+#   before publish begins.
+
 permissions:
   actions: read
   contents: read
@@ -44,6 +50,25 @@ jobs:
           if [ "${{ github.ref_type }}" != "branch" ]; then
             echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
             exit 1
+          fi
+
+      - name: Validate finalize push credentials
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          BRANCH_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${{ github.ref_name }}")
+          BRANCH_PROTECTED=$(printf '%s' "$BRANCH_JSON" | jq -r '.protected')
+          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
+
+          if [ "$BRANCH_PROTECTED" = "true" ] && [ -z "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            echo "::error::Branch ${{ github.ref_name }} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches."
+            exit 1
+          fi
+
+          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.full_name' >/dev/null
           fi
 
       - name: Checkout code
@@ -180,7 +205,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
+          if [ -z "${NODE_AUTH_TOKEN//[[:space:]]/}" ]; then
             echo "::error::NPM_TOKEN secret is not configured."
             exit 1
           fi
@@ -224,6 +249,11 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Validate npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm whoami --registry=https://registry.npmjs.org/
+
       - name: Publish to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -244,6 +274,8 @@ jobs:
       - name: Checkout triggering commit
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          # Check out the dispatch-time SHA so release finalization can compare
+          # against the exact commit that prepared and published the tarball.
           ref: ${{ github.sha }}
           fetch-depth: 0
 
@@ -251,6 +283,14 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Configure git push credentials
+        env:
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          if [ -n "${RELEASE_PUSH_TOKEN//[[:space:]]/}" ]; then
+            git remote set-url origin "https://x-access-token:${RELEASE_PUSH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          fi
 
       - name: Validate release ref type
         run: |
@@ -338,7 +378,15 @@ jobs:
   notify_finalize_failure:
     # `always()` is required so this recovery path still runs when `finalize`
     # fails; otherwise Actions would skip the notification by default.
-    if: ${{ !inputs.dry_run && always() && needs.finalize.result == 'failure' }}
+    if: >-
+      ${{
+        !inputs.dry_run &&
+        always() &&
+        (
+          needs.finalize.result == 'failure' ||
+          (needs.publish.result == 'success' && needs.finalize.result == 'skipped')
+        )
+      }}
     needs: [prepare, publish, finalize]
     runs-on: ubuntu-latest
     permissions:
