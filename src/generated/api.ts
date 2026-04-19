@@ -1592,6 +1592,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/causal/drivers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Drivers
+         * @description Ranked SPR drivers for one (outcome_family, outcome_key). Byar 1978 95% CI. SPR > 1 = feature value over-indexes for this outcome vs. the workspace baseline. Filter by feature_family (demographic|comorbidity) or feature_arity (1=univariate, 2=pairwise). min_support_only=true (default) hides observed < 5 rows. This is DESCRIPTIVE attribution — v2 causal (ITS + synthetic control) lands via the analytics.public.causal_attribution pipeline in Phase 5.
+         */
+        get: operations["list_drivers_v1__workspace_id__causal_drivers_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/command-center": {
         parameters: {
             query?: never;
@@ -2055,6 +2075,70 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/demo-pulse/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start synthetic event emission for an internal demo workspace
+         * @description Start a synthetic pulse on the workspace.
+         *
+         *     Guardrails: admin/owner role + workspace must be in the allowlist env.
+         *     Replaces any currently-running pulse on the same workspace.
+         */
+        post: operations["start-demo-pulse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/demo-pulse/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Inspect the active pulse on a workspace */
+        get: operations["get-demo-pulse-status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/demo-pulse/stop": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stop the synthetic pulse on a workspace
+         * @description Stop the pulse on this workspace.
+         *
+         *     ``body.task_id`` is optional; if provided, only that task is stopped (useful
+         *     for idempotence after a background race). Otherwise the workspace's
+         *     current task (if any) is stopped.
+         */
+        post: operations["stop-demo-pulse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/desktop-sessions": {
         parameters: {
             query?: never;
@@ -2134,6 +2218,30 @@ export interface paths {
         get: operations["get_session_status_v1__workspace_id__desktop_sessions__session_id__status_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/entities/{entity_id}/brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Latest Brief
+         * @description Return the latest Self-Image brief for the target entity (null shape if none).
+         */
+        get: operations["get_latest_brief_v1__workspace_id__entities__entity_id__brief_get"];
+        put?: never;
+        /**
+         * Generate Brief
+         * @description Generate a Self-Image brief for the target entity (PR1: patient only).
+         */
+        post: operations["generate_brief_v1__workspace_id__entities__entity_id__brief_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4622,6 +4730,40 @@ export interface paths {
          * @description Process a batch of transcript segments through the scribe engine.
          */
         post: operations["scribe-process-transcript"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/sensorium/connector-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Per-source event health for the workspace (last 24h) */
+        get: operations["get-sensorium-connector-health"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/sensorium/loop-latency": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sense→act latency distribution for the workspace */
+        get: operations["get-sensorium-loop-latency"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7257,32 +7399,32 @@ export interface components {
              * Call Sid
              * @description Twilio call SID
              */
-            call_sid: string | null;
+            call_sid?: string | null;
             /**
              * Caller Id
              * @description Caller phone number
              */
-            caller_id: string | null;
+            caller_id?: string | null;
             /**
              * Concept
              * @description Clinical concept that triggered escalation
              */
-            concept: string | null;
+            concept?: string | null;
             /**
              * Connected At
              * @description ISO-8601 timestamp when operator connected
              */
-            connected_at: string | null;
+            connected_at?: string | null;
             /**
              * Direction
              * @description Call direction
              */
-            direction?: ("inbound" | "outbound") | null;
+            direction?: ("inbound" | "outbound" | "playground" | "simulated") | null;
             /**
              * Escalation Id
              * @description Escalation event ID
              */
-            escalation_id: string | null;
+            escalation_id?: string | null;
             /**
              * Immediate
              * @description Whether the escalation requires immediate attention
@@ -7292,37 +7434,37 @@ export interface components {
              * Operator Entity Id
              * @description Entity ID of the connected operator
              */
-            operator_entity_id: string | null;
+            operator_entity_id?: string | null;
             /**
              * Operator Type
              * @description Required operator specialization
              */
-            operator_type: ("clinical" | "administrative" | "crisis_counselor") | null;
+            operator_type?: ("clinical" | "administrative" | "crisis_counselor") | null;
             /**
              * Phone Number
              * @description Service phone number
              */
-            phone_number: string | null;
+            phone_number?: string | null;
             /**
              * Regulatory Basis
              * @description Regulatory reason for escalation
              */
-            regulatory_basis: string | null;
+            regulatory_basis?: string | null;
             /**
              * Requested At
              * @description ISO-8601 timestamp when escalation was requested
              */
-            requested_at: string | null;
+            requested_at?: string | null;
             /**
              * Risk Score
              * @description Risk score 0.0 to 1.0
              */
-            risk_score: number | null;
+            risk_score?: number | null;
             /**
              * Started At
              * @description ISO-8601 timestamp when the call started
              */
-            started_at: string | null;
+            started_at?: string | null;
             /**
              * Status
              * @description Current escalation state
@@ -7333,17 +7475,17 @@ export interface components {
              * Trigger
              * @description What triggered the escalation
              */
-            trigger: string | null;
+            trigger?: string | null;
             /**
              * Trigger Source
              * @description Source system of the trigger
              */
-            trigger_source: string | null;
+            trigger_source?: string | null;
             /**
              * Wait Seconds
              * @description Seconds the caller waited for an operator
              */
-            wait_seconds: number | null;
+            wait_seconds?: number | null;
         };
         /** ActiveSession */
         ActiveSession: {
@@ -7356,11 +7498,8 @@ export interface components {
              * @default
              */
             current_state?: string;
-            /**
-             * Direction
-             * @enum {string}
-             */
-            direction: "inbound" | "outbound";
+            /** Direction */
+            direction: string;
             /** Duration Seconds */
             duration_seconds: number;
             /**
@@ -7484,16 +7623,10 @@ export interface components {
             /** Id */
             id: string;
             identity: components["schemas"]["Identity"];
-            /**
-             * Initials
-             * @default
-             */
-            initials?: string;
-            /**
-             * Name
-             * @default
-             */
-            name?: string;
+            /** Initials */
+            initials: string;
+            /** Name */
+            name: string;
             /**
              * Updated At
              * Format: date-time
@@ -8118,6 +8251,51 @@ export interface components {
             status: "running" | "completed" | "failed";
         };
         /**
+         * BriefResponse
+         * @description Wire shape for a Self-Image brief.
+         *
+         *     ``event_id`` is null when no brief has ever been generated for the
+         *     entity. All other fields are nullable in that case so the UI can
+         *     render a consistent empty state.
+         */
+        BriefResponse: {
+            /** Confidence */
+            confidence: number;
+            /** Content Json */
+            content_json: {
+                [key: string]: unknown;
+            } | null;
+            /** Content Md */
+            content_md?: string | null;
+            /** Event Count */
+            event_count: number;
+            /** Event Id */
+            event_id: string | null;
+            /** Evidence Event Ids */
+            evidence_event_ids?: string[];
+            /** Generated At */
+            generated_at: string | null;
+            /** Model Name */
+            model_name?: string | null;
+            /**
+             * Target Entity Id
+             * Format: uuid
+             */
+            target_entity_id: string;
+            /**
+             * Target Entity Type
+             * @constant
+             */
+            target_entity_type: "patient";
+            /**
+             * Truncated
+             * @default false
+             */
+            truncated?: boolean;
+            /** Version */
+            version?: string | null;
+        };
+        /**
          * BriefingRequest
          * @description Request for operator briefing on a specific call.
          */
@@ -8183,10 +8361,9 @@ export interface components {
             conversation_summary?: components["schemas"]["ConversationSummary"] | null;
             /**
              * Created At
-             * Format: date-time
              * @description When intelligence was computed
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Direction
              * @description Call direction
@@ -8243,27 +8420,42 @@ export interface components {
         };
         /** CallStatsResponse */
         CallStatsResponse: {
-            /** Avg Duration Seconds */
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration in seconds
+             */
             avg_duration_seconds: number;
-            /** Calls By Date */
-            calls_by_date: {
-                [key: string]: unknown;
-            }[];
+            /**
+             * Calls By Date
+             * @description Daily call volume breakdown
+             */
+            calls_by_date: components["schemas"]["DailyCallStat"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Calls */
+            /**
+             * Total Calls
+             * @description Total number of calls in the period
+             */
             total_calls: number;
-            /** Total Duration Seconds */
+            /**
+             * Total Duration Seconds
+             * @description Sum of all call durations in seconds
+             */
             total_duration_seconds: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** CallSummary */
@@ -8357,7 +8549,7 @@ export interface components {
              * Status
              * @description Call status
              */
-            status?: string | null;
+            status?: ("initiated" | "ringing" | "in-progress" | "completed" | "busy" | "no-answer" | "canceled" | "failed" | "unknown") | null;
             /**
              * Turns
              * @description Number of conversation turns
@@ -8546,11 +8738,8 @@ export interface components {
             assigned_to: string;
             /** Id */
             id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "pending" | "in_progress" | "completed" | "rejected";
+            /** Status */
+            status: string;
         };
         /**
          * CoachingItem
@@ -8655,11 +8844,8 @@ export interface components {
         CommandCenterAlert: {
             /** Code */
             code: string;
-            /**
-             * Level
-             * @enum {string}
-             */
-            level: "error" | "warning" | "info";
+            /** Level */
+            level: string;
             /** Message */
             message: string;
             /** Section */
@@ -8745,9 +8931,15 @@ export interface components {
         };
         /** ConfidenceBucket */
         ConfidenceBucket: {
-            /** Confidence Range */
+            /**
+             * Confidence Range
+             * @description Confidence level bucket label (e.g. 'raw', 'verified', 'authoritative')
+             */
             confidence_range: string;
-            /** Count */
+            /**
+             * Count
+             * @description Number of events in this confidence bucket
+             */
             count: number;
         };
         /** ConfigToPolicyRequest */
@@ -8807,6 +8999,45 @@ export interface components {
              * @enum {string}
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous" | "polling";
+        };
+        /** ConnectorHealthItem */
+        ConnectorHealthItem: {
+            /**
+             * Events Last 24H
+             * @description Events ingested in the last 24 hours (rolling, not calendar-day).
+             */
+            events_last_24h: number;
+            /** Events Last Hour */
+            events_last_hour: number;
+            /**
+             * Events Per Minute
+             * @description Mean events/min over the last hour (events_last_hour / 60).
+             */
+            events_per_minute: number;
+            /**
+             * Freshness
+             * @description fresh < 5min · stale 5-60min · quiet > 60min · never = no events in 24h
+             * @enum {string}
+             */
+            freshness: "fresh" | "stale" | "quiet" | "never";
+            /** Last Ingested At */
+            last_ingested_at: string | null;
+            /**
+             * Source
+             * @description Operator-defined source identifier as written to world.events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.
+             */
+            source: string;
+        };
+        /** ConnectorHealthResponse */
+        ConnectorHealthResponse: {
+            /**
+             * As Of
+             * Format: date-time
+             * @description Server clock at query time (UTC).
+             */
+            as_of: string;
+            /** Sources */
+            sources?: components["schemas"]["ConnectorHealthItem"][];
         };
         /** ConnectorHeartbeat */
         ConnectorHeartbeat: {
@@ -9847,10 +10078,9 @@ export interface components {
             } | null;
             /**
              * Created At
-             * Format: date-time
              * @description When the company was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Domain */
             domain?: string | null;
             /** Entity Id */
@@ -9913,10 +10143,9 @@ export interface components {
             confidence?: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the contact was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Email */
             email?: string | null;
             /** Entity Id */
@@ -9974,10 +10203,9 @@ export interface components {
             confidence?: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the contact was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Email */
             email?: string | null;
             /** Entity Id */
@@ -10030,10 +10258,9 @@ export interface components {
             close_date?: string | null;
             /**
              * Created At
-             * Format: date-time
              * @description When the deal was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Deal Type */
             deal_type?: string | null;
             /** Entity Id */
@@ -10194,6 +10421,27 @@ export interface components {
              * @description When the customer was last updated (ISO-8601)
              */
             updated_at: string | null;
+        };
+        /**
+         * DailyCallStat
+         * @description Per-day call volume and duration.
+         */
+        DailyCallStat: {
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration in seconds
+             */
+            avg_duration_seconds?: number | null;
+            /**
+             * Count
+             * @description Number of calls on this date
+             */
+            count: number;
+            /**
+             * Date
+             * @description Date string (YYYY-MM-DD)
+             */
+            date: string;
         };
         /**
          * DailyCallVolume
@@ -10378,33 +10626,53 @@ export interface components {
          * @description Data quality metrics — confidence distribution, review pipeline stats.
          */
         DataQualityResponse: {
-            /** Confidence By Source */
+            /**
+             * Confidence By Source
+             * @description Confidence distribution broken down by event source
+             */
             confidence_by_source: {
                 [key: string]: components["schemas"]["ConfidenceBucket"][];
             };
-            /** Confidence Distribution */
+            /**
+             * Confidence Distribution
+             * @description Overall confidence distribution across buckets
+             */
             confidence_distribution: components["schemas"]["ConfidenceBucket"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Review Pipeline */
+            /**
+             * Review Pipeline
+             * @description Review pipeline throughput statistics
+             */
             review_pipeline: {
                 [key: string]: unknown;
             };
-            /** Timeseries */
+            /**
+             * Timeseries
+             * @description Daily confidence averages and event counts
+             */
             timeseries: {
                 [key: string]: unknown;
             }[];
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** DataQueryResponse */
@@ -10699,10 +10967,9 @@ export interface components {
         DeliveryResponse: {
             /**
              * Created At
-             * Format: date-time
              * @description When the delivery event was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Data */
             data: {
                 [key: string]: unknown;
@@ -10716,6 +10983,63 @@ export interface components {
             event_id: string;
             /** Event Type */
             event_type: string;
+        };
+        /** DemoPulseStartRequest */
+        DemoPulseStartRequest: {
+            /**
+             * Duration Seconds
+             * @description How long to emit events before auto-terminating (max 3600).
+             * @default 600
+             */
+            duration_seconds?: number;
+            /**
+             * Events Per Minute
+             * @description Emission rate per minute, 1 to 120.
+             * @default 30
+             */
+            events_per_minute?: number;
+        };
+        /** DemoPulseStatusResponse */
+        DemoPulseStatusResponse: {
+            /** Tasks */
+            tasks: components["schemas"]["DemoPulseTaskResponse"][];
+        };
+        /** DemoPulseStopRequest */
+        DemoPulseStopRequest: {
+            /**
+             * Task Id
+             * @description Optional task_id to stop. When set, only a matching active task is stopped — useful for idempotent retries after a background race. Omit to stop whatever pulse is currently active on the workspace.
+             */
+            task_id?: string | null;
+        };
+        /** DemoPulseStopResponse */
+        DemoPulseStopResponse: {
+            /** Stopped */
+            stopped: boolean;
+            task?: components["schemas"]["DemoPulseTaskResponse"] | null;
+        };
+        /** DemoPulseTaskResponse */
+        DemoPulseTaskResponse: {
+            /** Active */
+            active: boolean;
+            /** Events Attempted */
+            events_attempted: number;
+            /** Events Per Minute */
+            events_per_minute: number;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Task Id */
+            task_id: string;
+            /** Workspace Id */
+            workspace_id: string;
         };
         DescriptionString: string;
         /**
@@ -10789,6 +11113,69 @@ export interface components {
         DisconnectResponse: {
             /** Ok */
             ok: boolean;
+        };
+        /**
+         * DriverRow
+         * @description One SPR row — generic (outcome, feature-tuple) grain.
+         */
+        DriverRow: {
+            /** As Of Date */
+            as_of_date?: string | null;
+            /** Expected */
+            expected?: number | null;
+            /** Feature Arity */
+            feature_arity: number;
+            /** Feature Family 1 */
+            feature_family_1: string;
+            /** Feature Family 2 */
+            feature_family_2?: string | null;
+            /** Feature Name 1 */
+            feature_name_1: string;
+            /** Feature Name 2 */
+            feature_name_2?: string | null;
+            /** Feature Population */
+            feature_population?: number | null;
+            /** Feature Value 1 */
+            feature_value_1: string;
+            /** Feature Value 2 */
+            feature_value_2?: string | null;
+            /** Min Support Met */
+            min_support_met: boolean;
+            /** Observed */
+            observed: number;
+            /** Outcome Code System */
+            outcome_code_system?: string | null;
+            /** Outcome Display */
+            outcome_display?: string | null;
+            /** Outcome Family */
+            outcome_family: string;
+            /** Outcome Key */
+            outcome_key: string;
+            /** Spr */
+            spr?: number | null;
+            /** Spr Ci Lower */
+            spr_ci_lower?: number | null;
+            /** Spr Ci Upper */
+            spr_ci_upper?: number | null;
+            /** Window Days */
+            window_days?: number | null;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** DriversResponse */
+        DriversResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["DriverRow"][];
+            /** Outcome Family */
+            outcome_family: string;
+            /** Outcome Key */
+            outcome_key: string;
+            /** Sort By */
+            sort_by: string;
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** EditSoapRequest */
         EditSoapRequest: {
@@ -11184,10 +11571,9 @@ export interface components {
             confidence?: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the event was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Data */
             data?: {
                 [key: string]: unknown;
@@ -11232,7 +11618,7 @@ export interface components {
             /** Sync Error */
             sync_error?: string | null;
             /** Sync Status */
-            sync_status?: string | null;
+            sync_status?: ("pending" | "synced" | "failed" | "processing") | null;
             /** Synced At */
             synced_at?: string | null;
         };
@@ -11256,10 +11642,9 @@ export interface components {
             confidence?: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the relationship was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Data */
             data?: {
                 [key: string]: unknown;
@@ -11629,10 +12014,9 @@ export interface components {
             confidence: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the event occurred
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Data
              * @description Event payload — shape varies by event_type
@@ -11652,10 +12036,9 @@ export interface components {
             id: string;
             /**
              * Ingested At
-             * Format: date-time
              * @description When the event was ingested
              */
-            ingested_at: string;
+            ingested_at?: string | null;
             /**
              * Source
              * @description System that emitted the event
@@ -11690,29 +12073,55 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * EventBreakdownItem
+         * @description Single row in an event breakdown aggregation.
+         */
+        EventBreakdownItem: {
+            /**
+             * Count
+             * @description Number of events for this key
+             */
+            count: number;
+            /**
+             * Key
+             * @description Grouping key (event type or source name)
+             */
+            key: string;
+        };
         /** EventBreakdownResponse */
         EventBreakdownResponse: {
-            /** By Source */
-            by_source: {
-                [key: string]: unknown;
-            }[];
-            /** By Type */
-            by_type: {
-                [key: string]: unknown;
-            }[];
+            /**
+             * By Source
+             * @description Event counts grouped by source
+             */
+            by_source: components["schemas"]["EventBreakdownItem"][];
+            /**
+             * By Type
+             * @description Event counts grouped by event type
+             */
+            by_type: components["schemas"]["EventBreakdownItem"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /**
@@ -11724,10 +12133,9 @@ export interface components {
             confidence: number;
             /**
              * Created At
-             * Format: date-time
              * @description When the event was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Data */
             data: {
                 [key: string]: unknown;
@@ -12880,11 +13288,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /**
-             * Scan Status
-             * @enum {string}
-             */
-            scan_status: "pending" | "clean" | "infected" | "error" | "skipped";
+            /** Scan Status */
+            scan_status: string;
             /** Sha256 */
             sha256: string;
             /** Size Bytes */
@@ -13484,6 +13889,54 @@ export interface components {
             /** Success */
             success: boolean;
         };
+        /** LoopLatencyPointItem */
+        LoopLatencyPointItem: {
+            /**
+             * Count
+             * @description Sensing→action pairs whose sensing event lands in this hour.
+             */
+            count: number;
+            /**
+             * Hour
+             * Format: date-time
+             * @description UTC hour bucket (truncated to the hour).
+             */
+            hour: string;
+            /**
+             * P50 Seconds
+             * @description Median latency for this hour; null if no pairs.
+             */
+            p50_seconds?: number | null;
+        };
+        /** LoopLatencyResponse */
+        LoopLatencyResponse: {
+            /**
+             * As Of
+             * Format: date-time
+             * @description Server clock at query time (UTC).
+             */
+            as_of: string;
+            /**
+             * Overall Count
+             * @description Total pairs across the window.
+             */
+            overall_count: number;
+            /**
+             * Overall P50 Seconds
+             * @description Median latency across the whole window; null if no pairs.
+             */
+            overall_p50_seconds?: number | null;
+            /** Sparkline */
+            sparkline?: components["schemas"]["LoopLatencyPointItem"][];
+            /**
+             * Truncated
+             * @description True when the underlying query hit the row cap; p50 is computed over the truncated sample.
+             * @default false
+             */
+            truncated?: boolean;
+            /** Window Hours */
+            window_hours: number;
+        };
         /** MarkSyncedRequest */
         MarkSyncedRequest: {
             /** Data Source Id */
@@ -13735,43 +14188,33 @@ export interface components {
             /**
              * Channel Scope
              * @default all
-             * @enum {string}
              */
-            channel_scope?: "all" | "voice" | "text";
+            channel_scope?: string;
             /** Description */
             description?: string | null;
             /**
              * Extraction Mode
              * @default static
-             * @enum {string}
              */
-            extraction_mode?: "static" | "llm" | "hybrid";
+            extraction_mode?: string;
             /** Key */
             key: string;
-            /**
-             * Metric Type
-             * @enum {string}
-             */
-            metric_type: "count" | "sum" | "avg" | "ratio" | "rate" | "boolean" | "text";
+            /** Metric Type */
+            metric_type: string;
             /**
              * Model Tier
              * @default free
-             * @enum {string}
              */
-            model_tier?: "free" | "standard" | "premium";
+            model_tier?: string;
             /** Name */
             name: string;
             /**
              * Period Granularity
              * @default daily
-             * @enum {string}
              */
-            period_granularity?: "daily" | "weekly" | "monthly";
-            /**
-             * Source
-             * @enum {string}
-             */
-            source: "events" | "calls" | "entities" | "computed";
+            period_granularity?: string;
+            /** Source */
+            source: string;
             /** Unit */
             unit?: string | null;
         };
@@ -13995,11 +14438,8 @@ export interface components {
             event_count: number;
             /** Metric Key */
             metric_key: string;
-            /**
-             * Metric Type
-             * @enum {string}
-             */
-            metric_type: "count" | "sum" | "avg" | "ratio" | "rate" | "boolean" | "text";
+            /** Metric Type */
+            metric_type: string;
             /** Period End */
             period_end: string;
             /** Period Start */
@@ -14088,12 +14528,12 @@ export interface components {
              * Last Call At
              * @description ISO-8601 timestamp of last call
              */
-            last_call_at: string | null;
+            last_call_at?: string | null;
             /**
              * Name
              * @description Display name
              */
-            name: string | null;
+            name?: string | null;
             /**
              * Operator Id
              * Format: uuid
@@ -14117,7 +14557,7 @@ export interface components {
              * Active Call Sid
              * @description Call SID if currently on a call
              */
-            active_call_sid: string | null;
+            active_call_sid?: string | null;
             /**
              * Avg Handle Time Seconds
              * @description Average escalation handle time in seconds
@@ -14131,15 +14571,14 @@ export interface components {
             connection_method: "browser" | "phone";
             /**
              * Created At
-             * Format: date-time
              * @description When the operator was created
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Email
              * @description Contact email
              */
-            email: string | null;
+            email?: string | null;
             /**
              * Id
              * Format: uuid
@@ -14149,22 +14588,22 @@ export interface components {
              * Last Call At
              * @description ISO-8601 timestamp of last call
              */
-            last_call_at: string | null;
+            last_call_at?: string | null;
             /**
              * Last Status Change
              * @description ISO-8601 timestamp of last status transition
              */
-            last_status_change: string | null;
+            last_status_change?: string | null;
             /**
              * Name
              * @description Display name
              */
-            name: string | null;
+            name?: string | null;
             /**
              * Phone Number
              * @description E.164 phone number for phone-based operators
              */
-            phone_number: string | null;
+            phone_number?: string | null;
             /**
              * Role
              * @description Permission role
@@ -14191,13 +14630,12 @@ export interface components {
              * Type
              * @description Operator specialization
              */
-            type: ("clinical" | "administrative" | "crisis_counselor") | null;
+            type?: ("clinical" | "administrative" | "crisis_counselor") | null;
             /**
              * Updated At
-             * Format: date-time
              * @description When the operator was last updated
              */
-            updated_at: string;
+            updated_at?: string | null;
             /**
              * Workspace Id
              * Format: uuid
@@ -14905,33 +15343,59 @@ export interface components {
         };
         /** PersonaResponse */
         PersonaResponse: {
-            /** Background */
+            /**
+             * Background
+             * @description Background context and instructions for the persona
+             */
             background: string;
-            /** Communication Style */
+            /**
+             * Communication Style
+             * @description Communication style configuration
+             */
             communication_style: {
                 [key: string]: unknown;
             };
             /**
              * Created At
              * Format: date-time
+             * @description When the persona was created
              */
             created_at: string;
-            /** Default Language */
+            /**
+             * Default Language
+             * @description ISO 639-3 language code (e.g. 'eng')
+             */
             default_language: string;
-            /** Developed By */
+            /**
+             * Developed By
+             * @description Organization or team that created this persona
+             */
             developed_by: string;
-            /** Id */
+            /**
+             * Id
+             * @description Unique persona identifier
+             */
             id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Display name of the persona
+             */
             name: string;
-            /** Role */
+            /**
+             * Role
+             * @description Role the persona embodies (e.g. 'Receptionist')
+             */
             role: string;
             /**
              * Updated At
              * Format: date-time
+             * @description When the persona was last updated
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this persona
+             */
             workspace_id: string;
         };
         /** PhoneNumberCallVolume */
@@ -15009,18 +15473,12 @@ export interface components {
             notes: string;
             /** Phone Number */
             phone_number: string;
-            /**
-             * Provider
-             * @enum {string}
-             */
-            provider: "twilio" | "livekit";
+            /** Provider */
+            provider: string;
             /** Provider Phone Sid */
             provider_phone_sid: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "inactive";
+            /** Status */
+            status: string;
             /**
              * Updated At
              * Format: date-time
@@ -15034,9 +15492,8 @@ export interface components {
             /**
              * Connector Status
              * @default unavailable
-             * @enum {string}
              */
-            connector_status?: "healthy" | "degraded" | "failing" | "unknown" | "unavailable";
+            connector_status?: string;
             /**
              * Events Last Hour
              * @default 0
@@ -15197,7 +15654,7 @@ export interface components {
              * @default inbound
              * @enum {string}
              */
-            direction?: "inbound" | "outbound";
+            direction?: "inbound" | "outbound" | "playground" | "simulated";
             /** Entity Name */
             entity_name?: string | null;
             /**
@@ -15417,38 +15874,81 @@ export interface components {
          * @description Call recording metadata.
          */
         RecordingMetadataResponse: {
-            /** Call End Iso */
+            /**
+             * Call End Iso
+             * @description Call end time as ISO-8601 string
+             */
             call_end_iso: string;
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string;
-            /** Call Start Iso */
+            /**
+             * Call Start Iso
+             * @description Call start time as ISO-8601 string
+             */
             call_start_iso: string;
             /**
              * Direction
+             * @description Call direction
              * @enum {string}
              */
             direction: "inbound" | "outbound";
-            /** Duration Seconds */
+            /**
+             * Duration Seconds
+             * @description Total call duration in seconds
+             */
             duration_seconds: number;
-            /** Inbound Format */
+            /**
+             * Inbound Format
+             * @description Audio format for the inbound (caller) channel
+             */
             inbound_format: string;
-            /** Inbound Sample Rate */
+            /**
+             * Inbound Sample Rate
+             * @description Sample rate in Hz for the inbound channel
+             */
             inbound_sample_rate: number;
-            /** Inbound Size Bytes */
+            /**
+             * Inbound Size Bytes
+             * @description Inbound audio file size in bytes
+             */
             inbound_size_bytes: number;
-            /** Media Start Epoch Ms */
+            /**
+             * Media Start Epoch Ms
+             * @description Media stream start time as Unix epoch milliseconds
+             */
             media_start_epoch_ms: number;
-            /** Outbound Format */
+            /**
+             * Outbound Format
+             * @description Audio format for the outbound (agent) channel
+             */
             outbound_format: string;
-            /** Outbound Sample Rate */
+            /**
+             * Outbound Sample Rate
+             * @description Sample rate in Hz for the outbound channel
+             */
             outbound_sample_rate: number;
-            /** Outbound Size Bytes */
+            /**
+             * Outbound Size Bytes
+             * @description Outbound audio file size in bytes
+             */
             outbound_size_bytes: number;
-            /** Service Id */
+            /**
+             * Service Id
+             * @description Service (agent) that handled the call
+             */
             service_id: string;
-            /** Tts Provider */
+            /**
+             * Tts Provider
+             * @description Text-to-speech provider used for the call
+             */
             tts_provider: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this recording
+             */
             workspace_id: string;
         };
         /**
@@ -15456,16 +15956,29 @@ export interface components {
          * @description Download paths for call recording playback.
          */
         RecordingUrlsResponse: {
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string;
-            /** Inbound Url */
+            /**
+             * Inbound Url
+             * @description Download URL for inbound (caller) audio
+             */
             inbound_url?: string | null;
-            /** Metadata Url */
+            /**
+             * Metadata Url
+             * @description Download URL for recording metadata JSON
+             */
             metadata_url?: string | null;
-            /** Outbound Url */
+            /**
+             * Outbound Url
+             * @description Download URL for outbound (agent) audio
+             */
             outbound_url?: string | null;
             /**
              * Status
+             * @description Recording availability status
              * @default available
              * @constant
              */
@@ -15690,10 +16203,9 @@ export interface components {
             completed_at: string | null;
             /**
              * Created At
-             * Format: date-time
              * @description When the review item was created
              */
-            created_at: string;
+            created_at?: string | null;
             entity?: components["schemas"]["EntitySummary"] | null;
             /** Entity Id */
             entity_id: string | null;
@@ -15853,25 +16365,49 @@ export interface components {
         };
         /** SafetyRuleResponse */
         SafetyRuleResponse: {
-            /** Agent Config */
+            /**
+             * Agent Config
+             * @description Agent triage configuration (model, timeout, action space)
+             */
             agent_config: {
                 [key: string]: unknown;
             };
-            /** Description */
+            /**
+             * Description
+             * @description Human-readable description of what the rule detects
+             */
             description: string;
-            /** Escalation */
+            /**
+             * Escalation
+             * @description Escalation configuration (operator type, reason, regulatory basis)
+             */
             escalation: {
                 [key: string]: unknown;
             };
-            /** Name */
+            /**
+             * Name
+             * @description Unique rule name within the template
+             */
             name: string;
-            /** Standalone Threshold */
+            /**
+             * Standalone Threshold
+             * @description Confidence threshold for triggering on a single turn
+             */
             standalone_threshold: number;
-            /** Tags */
+            /**
+             * Tags
+             * @description Classification tags for grouping and filtering
+             */
             tags: string[];
-            /** Threshold */
+            /**
+             * Threshold
+             * @description Confidence threshold for triggering in accumulated context
+             */
             threshold: number;
-            /** Triage Hints */
+            /**
+             * Triage Hints
+             * @description Hints for the triage model to identify this safety concern
+             */
             triage_hints: string[];
         };
         /**
@@ -16994,19 +17530,37 @@ export interface components {
         };
         /** SubToolLog */
         SubToolLog: {
-            /** Duration Ms */
+            /**
+             * Duration Ms
+             * @description Execution time in milliseconds
+             */
             duration_ms: number;
-            /** Input */
+            /**
+             * Input
+             * @description Input parameters passed to the tool
+             */
             input: {
                 [key: string]: unknown;
             };
-            /** Output */
+            /**
+             * Output
+             * @description Raw output returned by the tool
+             */
             output: string;
-            /** Round */
+            /**
+             * Round
+             * @description Agent reasoning round in which the tool was called
+             */
             round: number;
-            /** Succeeded */
+            /**
+             * Succeeded
+             * @description Whether the tool invocation succeeded
+             */
             succeeded: boolean;
-            /** Tool Name */
+            /**
+             * Tool Name
+             * @description Name of the tool that was invoked
+             */
             tool_name: string;
         };
         /** SubToolLogItem */
@@ -17249,10 +17803,9 @@ export interface components {
         SyncEventItem: {
             /**
              * Created At
-             * Format: date-time
              * @description When the event was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Data Source Id */
             data_source_id?: string | null;
             /** Display Name */
@@ -17278,8 +17831,11 @@ export interface components {
             source_system?: string | null;
             /** Sync Error */
             sync_error?: string | null;
-            /** Sync Status */
-            sync_status: string;
+            /**
+             * Sync Status
+             * @enum {string}
+             */
+            sync_status: "pending" | "synced" | "failed" | "processing";
             /** Synced At */
             synced_at?: string | null;
         };
@@ -17517,21 +18073,45 @@ export interface components {
         };
         /** TestSkillResponse */
         TestSkillResponse: {
-            /** Cached Tokens */
+            /**
+             * Cached Tokens
+             * @description Number of tokens served from cache
+             */
             cached_tokens: number;
-            /** Duration Ms */
+            /**
+             * Duration Ms
+             * @description Total execution time in milliseconds
+             */
             duration_ms: number;
-            /** Error */
+            /**
+             * Error
+             * @description Error message if the skill execution failed
+             */
             error?: string | null;
-            /** Input Tokens */
+            /**
+             * Input Tokens
+             * @description Number of input tokens consumed
+             */
             input_tokens: number;
-            /** Output Tokens */
+            /**
+             * Output Tokens
+             * @description Number of output tokens generated
+             */
             output_tokens: number;
-            /** Result */
+            /**
+             * Result
+             * @description Final result text produced by the skill
+             */
             result: string;
-            /** Rounds */
+            /**
+             * Rounds
+             * @description Number of agent reasoning rounds executed
+             */
             rounds: number;
-            /** Sub Tool Logs */
+            /**
+             * Sub Tool Logs
+             * @description Chronological log of tool invocations
+             */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
         };
         /** ThroughputBucket */
@@ -18071,25 +18651,24 @@ export interface components {
             action_id: string;
             /**
              * Created At
-             * Format: date-time
              * @description When the trigger was created
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Created By
              * @description Entity ID of the creator
              */
-            created_by: string | null;
+            created_by?: string | null;
             /**
              * Description
              * @description Human-readable description
              */
-            description: string | null;
+            description?: string | null;
             /**
              * Event Filter
              * @description JSONPath filter on event data
              */
-            event_filter: {
+            event_filter?: {
                 [key: string]: unknown;
             } | null;
             /**
@@ -18123,12 +18702,12 @@ export interface components {
              * Next Fire At
              * @description Next scheduled fire time
              */
-            next_fire_at: string | null;
+            next_fire_at?: string | null;
             /**
              * Schedule
              * @description Cron schedule expression (e.g. '0 9 * * 1-5')
              */
-            schedule: string | null;
+            schedule?: string | null;
             /**
              * Timezone
              * @description IANA timezone for schedule evaluation
@@ -18136,10 +18715,9 @@ export interface components {
             timezone: string;
             /**
              * Updated At
-             * Format: date-time
              * @description When the trigger was last updated
              */
-            updated_at: string;
+            updated_at?: string | null;
             /**
              * Workspace Id
              * Format: uuid
@@ -18150,10 +18728,9 @@ export interface components {
         TriggerRunResponse: {
             /**
              * Created At
-             * Format: date-time
              * @description When the run was created
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Data
              * @description Run result data
@@ -18165,7 +18742,7 @@ export interface components {
              * Effective At
              * @description When the run took effect
              */
-            effective_at: string | null;
+            effective_at?: string | null;
             /**
              * Event Id
              * Format: uuid
@@ -18669,37 +19246,61 @@ export interface components {
         };
         /** UsageBucket */
         UsageBucket: {
-            /** Avg Duration Seconds */
+            /**
+             * Avg Duration Seconds
+             * @description Average event duration in seconds
+             */
             avg_duration_seconds?: number | null;
-            /** Count */
+            /**
+             * Count
+             * @description Number of events in this bucket
+             */
             count: number;
             /**
              * Event Date
              * Format: date
+             * @description Date of the usage bucket
              */
             event_date: string;
-            /** Event Type */
+            /**
+             * Event Type
+             * @description World event type
+             */
             event_type: string;
-            /** Total Duration Seconds */
+            /**
+             * Total Duration Seconds
+             * @description Total event duration in seconds
+             */
             total_duration_seconds?: number | null;
         };
         /** UsageSummaryResponse */
         UsageSummaryResponse: {
-            /** Buckets */
+            /**
+             * Buckets
+             * @description Usage data grouped by event type and date
+             */
             buckets: components["schemas"]["UsageBucket"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** UsageTrendPoint */
@@ -18906,10 +19507,9 @@ export interface components {
             accepted_event_types: string[];
             /**
              * Created At
-             * Format: date-time
              * @description When the webhook destination was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Created By */
             created_by: string | null;
             /** Description */
@@ -18938,10 +19538,9 @@ export interface components {
             trigger_id: string;
             /**
              * Updated At
-             * Format: date-time
              * @description When the webhook destination was last updated
              */
-            updated_at: string;
+            updated_at?: string | null;
             /** Url */
             url: string;
             /**
@@ -18956,10 +19555,9 @@ export interface components {
             accepted_event_types: string[];
             /**
              * Created At
-             * Format: date-time
              * @description When the webhook destination was created
              */
-            created_at: string;
+            created_at?: string | null;
             /** Created By */
             created_by: string | null;
             /** Description */
@@ -18986,10 +19584,9 @@ export interface components {
             trigger_id: string;
             /**
              * Updated At
-             * Format: date-time
              * @description When the webhook destination was last updated
              */
-            updated_at: string;
+            updated_at?: string | null;
             /** Url */
             url: string;
             /**
@@ -19370,38 +19967,78 @@ export interface components {
         };
         /** AuditEventResponse */
         src__routes__audit__AuditEventResponse: {
-            /** Action */
+            /**
+             * Action
+             * @description Action that was performed (e.g. 'entity.read')
+             */
             action: string;
-            /** Actor Credential Id */
+            /**
+             * Actor Credential Id
+             * @description Credential ID used by the actor
+             */
             actor_credential_id?: string | null;
-            /** Actor Entity Id */
+            /**
+             * Actor Entity Id
+             * @description Entity ID of the actor who performed the action
+             */
             actor_entity_id?: string | null;
-            /** Id */
+            /**
+             * Id
+             * @description Unique audit event identifier
+             */
             id: string;
-            /** Ip Address */
+            /**
+             * Ip Address
+             * @description IP address of the actor
+             */
             ip_address?: string | null;
-            /** Metadata */
+            /**
+             * Metadata
+             * @description Additional event-specific metadata
+             */
             metadata?: {
                 [key: string]: unknown;
             } | null;
             /**
              * Phi Accessed
+             * @description Whether protected health information was accessed
              * @default false
              */
             phi_accessed?: boolean;
-            /** Resource Id */
+            /**
+             * Resource Id
+             * @description ID of the accessed resource
+             */
             resource_id?: string | null;
-            /** Resource Name */
+            /**
+             * Resource Name
+             * @description Human-readable name of the accessed resource
+             */
             resource_name?: string | null;
-            /** Resource Type */
+            /**
+             * Resource Type
+             * @description Type of resource that was accessed
+             */
             resource_type: string;
-            /** Service */
+            /**
+             * Service
+             * @description Service that produced the event
+             */
             service: string;
-            /** Timestamp */
+            /**
+             * Timestamp
+             * @description ISO-8601 timestamp of the event
+             */
             timestamp: string;
-            /** User Agent */
+            /**
+             * User Agent
+             * @description User-Agent header from the request
+             */
             user_agent?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this audit event
+             */
             workspace_id: string;
         };
         /** CreateSessionRequest */
@@ -19432,10 +20069,9 @@ export interface components {
         src__routes__operators_models__AuditEventResponse: {
             /**
              * Created At
-             * Format: date-time
              * @description When the event occurred
              */
-            created_at: string;
+            created_at?: string | null;
             /**
              * Data
              * @description Audit payload — shape varies by event_type
@@ -19455,10 +20091,9 @@ export interface components {
             id: string;
             /**
              * Ingested At
-             * Format: date-time
              * @description When the event was ingested
              */
-            ingested_at: string;
+            ingested_at?: string | null;
             /**
              * Source
              * @description System that emitted the event
@@ -23230,6 +23865,45 @@ export interface operations {
             };
         };
     };
+    list_drivers_v1__workspace_id__causal_drivers_get: {
+        parameters: {
+            query: {
+                outcome_family: "disease_incidence";
+                outcome_key: string;
+                feature_family?: ("demographic" | "comorbidity") | null;
+                feature_arity?: (1 | 2) | null;
+                min_support_only?: boolean;
+                sort_by?: "spr" | "observed" | "feature_population";
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DriversResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "get-command-center": {
         parameters: {
             query?: never;
@@ -24453,6 +25127,98 @@ export interface operations {
             };
         };
     };
+    "start-demo-pulse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoPulseStartRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoPulseTaskResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-demo-pulse-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoPulseStatusResponse"];
+                };
+            };
+        };
+    };
+    "stop-demo-pulse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DemoPulseStopRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DemoPulseStopResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_desktop_session_v1__workspace_id__desktop_sessions_post: {
         parameters: {
             query?: never;
@@ -24607,6 +25373,72 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SessionStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_latest_brief_v1__workspace_id__entities__entity_id__brief_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Target entity UUID */
+                entity_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    generate_brief_v1__workspace_id__entities__entity_id__brief_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Target entity UUID */
+                entity_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30012,6 +30844,62 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TranscriptProcessResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-sensorium-connector-health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConnectorHealthResponse"];
+                };
+            };
+        };
+    };
+    "get-sensorium-loop-latency": {
+        parameters: {
+            query?: {
+                /** @description Window size in hours (1-168). */
+                window_hours?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LoopLatencyResponse"];
                 };
             };
             /** @description Validation Error */
@@ -35918,7 +36806,7 @@ export interface operations {
     "world-sync-events": {
         parameters: {
             query: {
-                status: "pending" | "failed";
+                status: "pending" | "synced" | "failed" | "processing";
                 /** @description Filter events to a specific outbound data source. */
                 data_source_id?: string | null;
                 /** @description Filter events to a specific source system. */

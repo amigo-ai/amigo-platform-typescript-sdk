@@ -625,7 +625,9 @@
               {
                 "enum": [
                   "inbound",
-                  "outbound"
+                  "outbound",
+                  "playground",
+                  "simulated"
                 ],
                 "type": "string"
               },
@@ -794,23 +796,8 @@
         },
         "required": [
           "call_entity_id",
-          "call_sid",
-          "escalation_id",
           "status",
-          "trigger",
-          "trigger_source",
-          "concept",
-          "operator_type",
-          "regulatory_basis",
-          "immediate",
-          "risk_score",
-          "requested_at",
-          "connected_at",
-          "wait_seconds",
-          "operator_entity_id",
-          "caller_id",
-          "phone_number",
-          "started_at"
+          "immediate"
         ],
         "title": "ActiveEscalationItem",
         "type": "object"
@@ -831,10 +818,6 @@
             "type": "string"
           },
           "direction": {
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
             "title": "Direction",
             "type": "string"
           },
@@ -1153,12 +1136,10 @@
             "$ref": "#/components/schemas/Identity"
           },
           "initials": {
-            "default": "",
             "title": "Initials",
             "type": "string"
           },
           "name": {
-            "default": "",
             "title": "Name",
             "type": "string"
           },
@@ -1191,6 +1172,8 @@
           "workspace_id",
           "agent_id",
           "version",
+          "name",
+          "initials",
           "identity",
           "voice_config",
           "background",
@@ -2817,6 +2800,129 @@
         "title": "BridgeResponse",
         "type": "object"
       },
+      "BriefResponse": {
+        "description": "Wire shape for a Self-Image brief.\n\n``event_id`` is null when no brief has ever been generated for the\nentity. All other fields are nullable in that case so the UI can\nrender a consistent empty state.",
+        "properties": {
+          "confidence": {
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "content_json": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Json"
+          },
+          "content_md": {
+            "anyOf": [
+              {
+                "maxLength": 20000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Md"
+          },
+          "event_count": {
+            "minimum": 0.0,
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "evidence_event_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 500,
+            "title": "Evidence Event Ids",
+            "type": "array"
+          },
+          "generated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Generated At"
+          },
+          "model_name": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Name"
+          },
+          "target_entity_id": {
+            "format": "uuid",
+            "title": "Target Entity Id",
+            "type": "string"
+          },
+          "target_entity_type": {
+            "const": "patient",
+            "title": "Target Entity Type",
+            "type": "string"
+          },
+          "truncated": {
+            "default": false,
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          }
+        },
+        "required": [
+          "event_id",
+          "target_entity_id",
+          "target_entity_type",
+          "content_json",
+          "confidence",
+          "event_count",
+          "generated_at"
+        ],
+        "title": "BriefResponse",
+        "type": "object"
+      },
       "BriefingRequest": {
         "description": "Request for operator briefing on a specific call.",
         "properties": {
@@ -2940,10 +3046,17 @@
             "description": "Conversation flow metrics"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When intelligence was computed",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "direction": {
             "default": "inbound",
@@ -3074,8 +3187,7 @@
           }
         },
         "required": [
-          "call_id",
-          "created_at"
+          "call_id"
         ],
         "title": "CallIntelligenceDetail",
         "type": "object"
@@ -3120,36 +3232,42 @@
       "CallStatsResponse": {
         "properties": {
           "avg_duration_seconds": {
+            "description": "Average call duration in seconds",
             "title": "Avg Duration Seconds",
             "type": "number"
           },
           "calls_by_date": {
+            "description": "Daily call volume breakdown",
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/DailyCallStat"
             },
             "title": "Calls By Date",
             "type": "array"
           },
           "period_end": {
+            "description": "End of the reporting period",
             "format": "date",
             "title": "Period End",
             "type": "string"
           },
           "period_start": {
+            "description": "Start of the reporting period",
             "format": "date",
             "title": "Period Start",
             "type": "string"
           },
           "total_calls": {
+            "description": "Total number of calls in the period",
             "title": "Total Calls",
             "type": "integer"
           },
           "total_duration_seconds": {
+            "description": "Sum of all call durations in seconds",
             "title": "Total Duration Seconds",
             "type": "number"
           },
           "workspace_id": {
+            "description": "Workspace identifier",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -3389,6 +3507,17 @@
           "status": {
             "anyOf": [
               {
+                "enum": [
+                  "initiated",
+                  "ringing",
+                  "in-progress",
+                  "completed",
+                  "busy",
+                  "no-answer",
+                  "canceled",
+                  "failed",
+                  "unknown"
+                ],
                 "type": "string"
               },
               {
@@ -3682,12 +3811,6 @@
             "type": "string"
           },
           "status": {
-            "enum": [
-              "pending",
-              "in_progress",
-              "completed",
-              "rejected"
-            ],
             "title": "Status",
             "type": "string"
           }
@@ -4027,11 +4150,6 @@
             "type": "string"
           },
           "level": {
-            "enum": [
-              "error",
-              "warning",
-              "info"
-            ],
             "title": "Level",
             "type": "string"
           },
@@ -4189,10 +4307,12 @@
       "ConfidenceBucket": {
         "properties": {
           "confidence_range": {
+            "description": "Confidence level bucket label (e.g. 'raw', 'verified', 'authoritative')",
             "title": "Confidence Range",
             "type": "string"
           },
           "count": {
+            "description": "Number of events in this confidence bucket",
             "title": "Count",
             "type": "integer"
           }
@@ -4326,6 +4446,90 @@
           "source_type"
         ],
         "title": "ConnectorDef",
+        "type": "object"
+      },
+      "ConnectorHealthItem": {
+        "properties": {
+          "events_last_24h": {
+            "description": "Events ingested in the last 24 hours (rolling, not calendar-day).",
+            "minimum": 0.0,
+            "title": "Events Last 24H",
+            "type": "integer"
+          },
+          "events_last_hour": {
+            "minimum": 0.0,
+            "title": "Events Last Hour",
+            "type": "integer"
+          },
+          "events_per_minute": {
+            "description": "Mean events/min over the last hour (events_last_hour / 60).",
+            "minimum": 0.0,
+            "title": "Events Per Minute",
+            "type": "number"
+          },
+          "freshness": {
+            "description": "fresh < 5min \u00b7 stale 5-60min \u00b7 quiet > 60min \u00b7 never = no events in 24h",
+            "enum": [
+              "fresh",
+              "stale",
+              "quiet",
+              "never"
+            ],
+            "title": "Freshness",
+            "type": "string"
+          },
+          "last_ingested_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Ingested At"
+          },
+          "source": {
+            "description": "Operator-defined source identifier as written to world.events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "events_per_minute",
+          "events_last_hour",
+          "events_last_24h",
+          "last_ingested_at",
+          "freshness"
+        ],
+        "title": "ConnectorHealthItem",
+        "type": "object"
+      },
+      "ConnectorHealthResponse": {
+        "properties": {
+          "as_of": {
+            "description": "Server clock at query time (UTC).",
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ConnectorHealthItem"
+            },
+            "maxItems": 500,
+            "title": "Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "as_of"
+        ],
+        "title": "ConnectorHealthResponse",
         "type": "object"
       },
       "ConnectorHeartbeat": {
@@ -5173,7 +5377,6 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 50,
             "title": "Behaviors",
             "type": "array"
           },
@@ -5182,7 +5385,6 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 50,
             "title": "Communication Patterns",
             "type": "array"
           },
@@ -5790,7 +5992,6 @@
           "phone_number": {
             "anyOf": [
               {
-                "pattern": "^\\+[1-9]\\d{1,14}$",
                 "type": "string"
               },
               {
@@ -5813,7 +6014,6 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 50,
             "title": "Skills",
             "type": "array"
           },
@@ -6957,10 +7157,17 @@
             "title": "Address"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the company was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "domain": {
             "anyOf": [
@@ -7051,8 +7258,7 @@
           }
         },
         "required": [
-          "entity_id",
-          "created_at"
+          "entity_id"
         ],
         "title": "CrmCompanyResponse",
         "type": "object"
@@ -7153,10 +7359,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the contact was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "email": {
             "anyOf": [
@@ -7308,8 +7521,7 @@
           }
         },
         "required": [
-          "entity_id",
-          "created_at"
+          "entity_id"
         ],
         "title": "CrmContactDetailResponse",
         "type": "object"
@@ -7356,10 +7568,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the contact was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "email": {
             "anyOf": [
@@ -7494,8 +7713,7 @@
           }
         },
         "required": [
-          "entity_id",
-          "created_at"
+          "entity_id"
         ],
         "title": "CrmContactResponse",
         "type": "object"
@@ -7562,10 +7780,17 @@
             "title": "Close Date"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the deal was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "deal_type": {
             "anyOf": [
@@ -7645,8 +7870,7 @@
           }
         },
         "required": [
-          "entity_id",
-          "created_at"
+          "entity_id"
         ],
         "title": "CrmDealResponse",
         "type": "object"
@@ -7922,6 +8146,39 @@
           "updated_at"
         ],
         "title": "CustomerItem",
+        "type": "object"
+      },
+      "DailyCallStat": {
+        "description": "Per-day call volume and duration.",
+        "properties": {
+          "avg_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average call duration in seconds",
+            "title": "Avg Duration Seconds"
+          },
+          "count": {
+            "description": "Number of calls on this date",
+            "title": "Count",
+            "type": "integer"
+          },
+          "date": {
+            "description": "Date string (YYYY-MM-DD)",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "count"
+        ],
+        "title": "DailyCallStat",
         "type": "object"
       },
       "DailyCallVolume": {
@@ -8237,10 +8494,12 @@
               },
               "type": "array"
             },
+            "description": "Confidence distribution broken down by event source",
             "title": "Confidence By Source",
             "type": "object"
           },
           "confidence_distribution": {
+            "description": "Overall confidence distribution across buckets",
             "items": {
               "$ref": "#/components/schemas/ConfidenceBucket"
             },
@@ -8248,21 +8507,25 @@
             "type": "array"
           },
           "period_end": {
+            "description": "End of the reporting period",
             "format": "date",
             "title": "Period End",
             "type": "string"
           },
           "period_start": {
+            "description": "Start of the reporting period",
             "format": "date",
             "title": "Period Start",
             "type": "string"
           },
           "review_pipeline": {
             "additionalProperties": true,
+            "description": "Review pipeline throughput statistics",
             "title": "Review Pipeline",
             "type": "object"
           },
           "timeseries": {
+            "description": "Daily confidence averages and event counts",
             "items": {
               "additionalProperties": true,
               "type": "object"
@@ -8271,10 +8534,12 @@
             "type": "array"
           },
           "total_events": {
+            "description": "Total number of events in the period",
             "title": "Total Events",
             "type": "integer"
           },
           "workspace_id": {
+            "description": "Workspace identifier",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -9039,10 +9304,17 @@
       "DeliveryResponse": {
         "properties": {
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the delivery event was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -9075,10 +9347,134 @@
           "event_id",
           "event_type",
           "data",
-          "effective_at",
-          "created_at"
+          "effective_at"
         ],
         "title": "DeliveryResponse",
+        "type": "object"
+      },
+      "DemoPulseStartRequest": {
+        "properties": {
+          "duration_seconds": {
+            "default": 600,
+            "description": "How long to emit events before auto-terminating (max 3600).",
+            "maximum": 3600.0,
+            "minimum": 1.0,
+            "title": "Duration Seconds",
+            "type": "integer"
+          },
+          "events_per_minute": {
+            "default": 30,
+            "description": "Emission rate per minute, 1 to 120.",
+            "maximum": 120.0,
+            "minimum": 1.0,
+            "title": "Events Per Minute",
+            "type": "integer"
+          }
+        },
+        "title": "DemoPulseStartRequest",
+        "type": "object"
+      },
+      "DemoPulseStatusResponse": {
+        "properties": {
+          "tasks": {
+            "items": {
+              "$ref": "#/components/schemas/DemoPulseTaskResponse"
+            },
+            "title": "Tasks",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tasks"
+        ],
+        "title": "DemoPulseStatusResponse",
+        "type": "object"
+      },
+      "DemoPulseStopRequest": {
+        "properties": {
+          "task_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional task_id to stop. When set, only a matching active task is stopped \u2014 useful for idempotent retries after a background race. Omit to stop whatever pulse is currently active on the workspace.",
+            "title": "Task Id"
+          }
+        },
+        "title": "DemoPulseStopRequest",
+        "type": "object"
+      },
+      "DemoPulseStopResponse": {
+        "properties": {
+          "stopped": {
+            "title": "Stopped",
+            "type": "boolean"
+          },
+          "task": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DemoPulseTaskResponse"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "stopped"
+        ],
+        "title": "DemoPulseStopResponse",
+        "type": "object"
+      },
+      "DemoPulseTaskResponse": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "events_attempted": {
+            "title": "Events Attempted",
+            "type": "integer"
+          },
+          "events_per_minute": {
+            "title": "Events Per Minute",
+            "type": "integer"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "workspace_id",
+          "started_at",
+          "expires_at",
+          "events_per_minute",
+          "events_attempted",
+          "active"
+        ],
+        "title": "DemoPulseTaskResponse",
         "type": "object"
       },
       "DescriptionString": {
@@ -9283,6 +9679,234 @@
           "ok"
         ],
         "title": "DisconnectResponse",
+        "type": "object"
+      },
+      "DriverRow": {
+        "description": "One SPR row \u2014 generic (outcome, feature-tuple) grain.",
+        "properties": {
+          "as_of_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "As Of Date"
+          },
+          "expected": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected"
+          },
+          "feature_arity": {
+            "title": "Feature Arity",
+            "type": "integer"
+          },
+          "feature_family_1": {
+            "title": "Feature Family 1",
+            "type": "string"
+          },
+          "feature_family_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Family 2"
+          },
+          "feature_name_1": {
+            "title": "Feature Name 1",
+            "type": "string"
+          },
+          "feature_name_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Name 2"
+          },
+          "feature_population": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Population"
+          },
+          "feature_value_1": {
+            "title": "Feature Value 1",
+            "type": "string"
+          },
+          "feature_value_2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Value 2"
+          },
+          "min_support_met": {
+            "title": "Min Support Met",
+            "type": "boolean"
+          },
+          "observed": {
+            "title": "Observed",
+            "type": "integer"
+          },
+          "outcome_code_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Code System"
+          },
+          "outcome_display": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Display"
+          },
+          "outcome_family": {
+            "title": "Outcome Family",
+            "type": "string"
+          },
+          "outcome_key": {
+            "title": "Outcome Key",
+            "type": "string"
+          },
+          "spr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spr"
+          },
+          "spr_ci_lower": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spr Ci Lower"
+          },
+          "spr_ci_upper": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Spr Ci Upper"
+          },
+          "window_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window Days"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "outcome_family",
+          "outcome_key",
+          "feature_arity",
+          "feature_family_1",
+          "feature_name_1",
+          "feature_value_1",
+          "observed",
+          "min_support_met"
+        ],
+        "title": "DriverRow",
+        "type": "object"
+      },
+      "DriversResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DriverRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "outcome_family": {
+            "title": "Outcome Family",
+            "type": "string"
+          },
+          "outcome_key": {
+            "title": "Outcome Key",
+            "type": "string"
+          },
+          "sort_by": {
+            "title": "Sort By",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "outcome_family",
+          "outcome_key",
+          "sort_by",
+          "count",
+          "items"
+        ],
+        "title": "DriversResponse",
         "type": "object"
       },
       "EditSoapRequest": {
@@ -10244,10 +10868,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -10393,6 +11024,12 @@
           "sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "pending",
+                  "synced",
+                  "failed",
+                  "processing"
+                ],
                 "type": "string"
               },
               {
@@ -10417,8 +11054,7 @@
         "required": [
           "id",
           "domain",
-          "event_type",
-          "created_at"
+          "event_type"
         ],
         "title": "EntityEventResponse",
         "type": "object"
@@ -10468,10 +11104,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the relationship was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -10528,8 +11171,7 @@
           "source_entity_type",
           "target_entity_id",
           "target_entity_type",
-          "relationship",
-          "created_at"
+          "relationship"
         ],
         "title": "EntityRelationshipResponse",
         "type": "object"
@@ -11294,10 +11936,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event occurred",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -11316,10 +11965,17 @@
             "type": "string"
           },
           "ingested_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event was ingested",
-            "format": "date-time",
-            "title": "Ingested At",
-            "type": "string"
+            "title": "Ingested At"
           },
           "source": {
             "description": "System that emitted the event",
@@ -11338,9 +11994,7 @@
           "event_type",
           "data",
           "source",
-          "confidence",
-          "ingested_at",
-          "created_at"
+          "confidence"
         ],
         "title": "EscalationEventResponse",
         "type": "object"
@@ -11400,39 +12054,64 @@
         "title": "EscalationStatsResponse",
         "type": "object"
       },
+      "EventBreakdownItem": {
+        "description": "Single row in an event breakdown aggregation.",
+        "properties": {
+          "count": {
+            "description": "Number of events for this key",
+            "title": "Count",
+            "type": "integer"
+          },
+          "key": {
+            "description": "Grouping key (event type or source name)",
+            "title": "Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "count"
+        ],
+        "title": "EventBreakdownItem",
+        "type": "object"
+      },
       "EventBreakdownResponse": {
         "properties": {
           "by_source": {
+            "description": "Event counts grouped by source",
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/EventBreakdownItem"
             },
             "title": "By Source",
             "type": "array"
           },
           "by_type": {
+            "description": "Event counts grouped by event type",
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/EventBreakdownItem"
             },
             "title": "By Type",
             "type": "array"
           },
           "period_end": {
+            "description": "End of the reporting period",
             "format": "date",
             "title": "Period End",
             "type": "string"
           },
           "period_start": {
+            "description": "Start of the reporting period",
             "format": "date",
             "title": "Period Start",
             "type": "string"
           },
           "total_events": {
+            "description": "Total number of events in the period",
             "title": "Total Events",
             "type": "integer"
           },
           "workspace_id": {
+            "description": "Workspace identifier",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -11456,10 +12135,17 @@
             "type": "number"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -11527,8 +12213,7 @@
           "fhir_resource_id",
           "data",
           "confidence",
-          "review_status",
-          "created_at"
+          "review_status"
         ],
         "title": "EventSummary",
         "type": "object"
@@ -14611,13 +15296,6 @@
             "type": "string"
           },
           "scan_status": {
-            "enum": [
-              "pending",
-              "clean",
-              "infected",
-              "error",
-              "skipped"
-            ],
             "title": "Scan Status",
             "type": "string"
           },
@@ -15753,6 +16431,91 @@
         "title": "LeaveCallResponse",
         "type": "object"
       },
+      "LoopLatencyPointItem": {
+        "properties": {
+          "count": {
+            "description": "Sensing\u2192action pairs whose sensing event lands in this hour.",
+            "title": "Count",
+            "type": "integer"
+          },
+          "hour": {
+            "description": "UTC hour bucket (truncated to the hour).",
+            "format": "date-time",
+            "title": "Hour",
+            "type": "string"
+          },
+          "p50_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Median latency for this hour; null if no pairs.",
+            "title": "P50 Seconds"
+          }
+        },
+        "required": [
+          "hour",
+          "count"
+        ],
+        "title": "LoopLatencyPointItem",
+        "type": "object"
+      },
+      "LoopLatencyResponse": {
+        "properties": {
+          "as_of": {
+            "description": "Server clock at query time (UTC).",
+            "format": "date-time",
+            "title": "As Of",
+            "type": "string"
+          },
+          "overall_count": {
+            "description": "Total pairs across the window.",
+            "title": "Overall Count",
+            "type": "integer"
+          },
+          "overall_p50_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Median latency across the whole window; null if no pairs.",
+            "title": "Overall P50 Seconds"
+          },
+          "sparkline": {
+            "items": {
+              "$ref": "#/components/schemas/LoopLatencyPointItem"
+            },
+            "maxItems": 168,
+            "title": "Sparkline",
+            "type": "array"
+          },
+          "truncated": {
+            "default": false,
+            "description": "True when the underlying query hit the row cap; p50 is computed over the truncated sample.",
+            "title": "Truncated",
+            "type": "boolean"
+          },
+          "window_hours": {
+            "title": "Window Hours",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "as_of",
+          "window_hours",
+          "overall_count"
+        ],
+        "title": "LoopLatencyResponse",
+        "type": "object"
+      },
       "MarkSyncedRequest": {
         "properties": {
           "data_source_id": {
@@ -16280,11 +17043,6 @@
           },
           "channel_scope": {
             "default": "all",
-            "enum": [
-              "all",
-              "voice",
-              "text"
-            ],
             "title": "Channel Scope",
             "type": "string"
           },
@@ -16301,11 +17059,6 @@
           },
           "extraction_mode": {
             "default": "static",
-            "enum": [
-              "static",
-              "llm",
-              "hybrid"
-            ],
             "title": "Extraction Mode",
             "type": "string"
           },
@@ -16314,25 +17067,11 @@
             "type": "string"
           },
           "metric_type": {
-            "enum": [
-              "count",
-              "sum",
-              "avg",
-              "ratio",
-              "rate",
-              "boolean",
-              "text"
-            ],
             "title": "Metric Type",
             "type": "string"
           },
           "model_tier": {
             "default": "free",
-            "enum": [
-              "free",
-              "standard",
-              "premium"
-            ],
             "title": "Model Tier",
             "type": "string"
           },
@@ -16342,21 +17081,10 @@
           },
           "period_granularity": {
             "default": "daily",
-            "enum": [
-              "daily",
-              "weekly",
-              "monthly"
-            ],
             "title": "Period Granularity",
             "type": "string"
           },
           "source": {
-            "enum": [
-              "events",
-              "calls",
-              "entities",
-              "computed"
-            ],
             "title": "Source",
             "type": "string"
           },
@@ -16878,15 +17606,6 @@
             "type": "string"
           },
           "metric_type": {
-            "enum": [
-              "count",
-              "sum",
-              "avg",
-              "ratio",
-              "rate",
-              "boolean",
-              "text"
-            ],
             "title": "Metric Type",
             "type": "string"
           },
@@ -17115,11 +17834,9 @@
         },
         "required": [
           "operator_id",
-          "name",
           "status",
           "total_escalations_handled",
-          "avg_handle_time_seconds",
-          "last_call_at"
+          "avg_handle_time_seconds"
         ],
         "title": "OperatorPerformanceItem",
         "type": "object"
@@ -17153,10 +17870,17 @@
             "type": "string"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the operator was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "email": {
             "anyOf": [
@@ -17274,10 +17998,17 @@
             "title": "Type"
           },
           "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the operator was last updated",
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
+            "title": "Updated At"
           },
           "workspace_id": {
             "format": "uuid",
@@ -17288,21 +18019,12 @@
         "required": [
           "id",
           "workspace_id",
-          "name",
-          "email",
-          "type",
           "skills",
           "connection_method",
-          "phone_number",
           "role",
           "status",
-          "last_status_change",
-          "active_call_sid",
           "total_escalations_handled",
-          "avg_handle_time_seconds",
-          "last_call_at",
-          "created_at",
-          "updated_at"
+          "avg_handle_time_seconds"
         ],
         "title": "OperatorResponse",
         "type": "object"
@@ -19612,45 +20334,55 @@
       "PersonaResponse": {
         "properties": {
           "background": {
+            "description": "Background context and instructions for the persona",
             "title": "Background",
             "type": "string"
           },
           "communication_style": {
             "additionalProperties": true,
+            "description": "Communication style configuration",
             "title": "Communication Style",
             "type": "object"
           },
           "created_at": {
+            "description": "When the persona was created",
             "format": "date-time",
             "title": "Created At",
             "type": "string"
           },
           "default_language": {
+            "description": "ISO 639-3 language code (e.g. 'eng')",
             "title": "Default Language",
             "type": "string"
           },
           "developed_by": {
+            "description": "Organization or team that created this persona",
             "title": "Developed By",
             "type": "string"
           },
           "id": {
+            "description": "Unique persona identifier",
             "title": "Id",
             "type": "string"
           },
           "name": {
+            "description": "Display name of the persona",
             "title": "Name",
             "type": "string"
           },
           "role": {
+            "description": "Role the persona embodies (e.g. 'Receptionist')",
             "title": "Role",
             "type": "string"
           },
           "updated_at": {
+            "description": "When the persona was last updated",
             "format": "date-time",
             "title": "Updated At",
             "type": "string"
           },
           "workspace_id": {
+            "description": "Workspace that owns this persona",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -19830,10 +20562,6 @@
             "type": "string"
           },
           "provider": {
-            "enum": [
-              "twilio",
-              "livekit"
-            ],
             "title": "Provider",
             "type": "string"
           },
@@ -19849,10 +20577,6 @@
             "title": "Provider Phone Sid"
           },
           "status": {
-            "enum": [
-              "active",
-              "inactive"
-            ],
             "title": "Status",
             "type": "string"
           },
@@ -19888,13 +20612,6 @@
         "properties": {
           "connector_status": {
             "default": "unavailable",
-            "enum": [
-              "healthy",
-              "degraded",
-              "failing",
-              "unknown",
-              "unavailable"
-            ],
             "title": "Connector Status",
             "type": "string"
           },
@@ -20254,7 +20971,9 @@
             "description": "Call direction",
             "enum": [
               "inbound",
-              "outbound"
+              "outbound",
+              "playground",
+              "simulated"
             ],
             "title": "Direction",
             "type": "string"
@@ -20712,18 +21431,22 @@
         "description": "Call recording metadata.",
         "properties": {
           "call_end_iso": {
+            "description": "Call end time as ISO-8601 string",
             "title": "Call End Iso",
             "type": "string"
           },
           "call_sid": {
+            "description": "Twilio call SID",
             "title": "Call Sid",
             "type": "string"
           },
           "call_start_iso": {
+            "description": "Call start time as ISO-8601 string",
             "title": "Call Start Iso",
             "type": "string"
           },
           "direction": {
+            "description": "Call direction",
             "enum": [
               "inbound",
               "outbound"
@@ -20732,46 +21455,57 @@
             "type": "string"
           },
           "duration_seconds": {
+            "description": "Total call duration in seconds",
             "title": "Duration Seconds",
             "type": "number"
           },
           "inbound_format": {
+            "description": "Audio format for the inbound (caller) channel",
             "title": "Inbound Format",
             "type": "string"
           },
           "inbound_sample_rate": {
+            "description": "Sample rate in Hz for the inbound channel",
             "title": "Inbound Sample Rate",
             "type": "integer"
           },
           "inbound_size_bytes": {
+            "description": "Inbound audio file size in bytes",
             "title": "Inbound Size Bytes",
             "type": "integer"
           },
           "media_start_epoch_ms": {
+            "description": "Media stream start time as Unix epoch milliseconds",
             "title": "Media Start Epoch Ms",
             "type": "number"
           },
           "outbound_format": {
+            "description": "Audio format for the outbound (agent) channel",
             "title": "Outbound Format",
             "type": "string"
           },
           "outbound_sample_rate": {
+            "description": "Sample rate in Hz for the outbound channel",
             "title": "Outbound Sample Rate",
             "type": "integer"
           },
           "outbound_size_bytes": {
+            "description": "Outbound audio file size in bytes",
             "title": "Outbound Size Bytes",
             "type": "integer"
           },
           "service_id": {
+            "description": "Service (agent) that handled the call",
             "title": "Service Id",
             "type": "string"
           },
           "tts_provider": {
+            "description": "Text-to-speech provider used for the call",
             "title": "Tts Provider",
             "type": "string"
           },
           "workspace_id": {
+            "description": "Workspace that owns this recording",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -20800,6 +21534,7 @@
         "description": "Download paths for call recording playback.",
         "properties": {
           "call_sid": {
+            "description": "Twilio call SID",
             "title": "Call Sid",
             "type": "string"
           },
@@ -20812,6 +21547,7 @@
                 "type": "null"
               }
             ],
+            "description": "Download URL for inbound (caller) audio",
             "title": "Inbound Url"
           },
           "metadata_url": {
@@ -20823,6 +21559,7 @@
                 "type": "null"
               }
             ],
+            "description": "Download URL for recording metadata JSON",
             "title": "Metadata Url"
           },
           "outbound_url": {
@@ -20834,11 +21571,13 @@
                 "type": "null"
               }
             ],
+            "description": "Download URL for outbound (agent) audio",
             "title": "Outbound Url"
           },
           "status": {
             "const": "available",
             "default": "available",
+            "description": "Recording availability status",
             "title": "Status",
             "type": "string"
           }
@@ -21410,10 +22149,17 @@
             "title": "Completed At"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the review item was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "entity": {
             "anyOf": [
@@ -21523,7 +22269,6 @@
           "judge_analysis",
           "status",
           "assigned_to",
-          "created_at",
           "completed_at",
           "completed_action"
         ],
@@ -21784,27 +22529,33 @@
         "properties": {
           "agent_config": {
             "additionalProperties": true,
+            "description": "Agent triage configuration (model, timeout, action space)",
             "title": "Agent Config",
             "type": "object"
           },
           "description": {
+            "description": "Human-readable description of what the rule detects",
             "title": "Description",
             "type": "string"
           },
           "escalation": {
             "additionalProperties": true,
+            "description": "Escalation configuration (operator type, reason, regulatory basis)",
             "title": "Escalation",
             "type": "object"
           },
           "name": {
+            "description": "Unique rule name within the template",
             "title": "Name",
             "type": "string"
           },
           "standalone_threshold": {
+            "description": "Confidence threshold for triggering on a single turn",
             "title": "Standalone Threshold",
             "type": "number"
           },
           "tags": {
+            "description": "Classification tags for grouping and filtering",
             "items": {
               "type": "string"
             },
@@ -21812,10 +22563,12 @@
             "type": "array"
           },
           "threshold": {
+            "description": "Confidence threshold for triggering in accumulated context",
             "title": "Threshold",
             "type": "number"
           },
           "triage_hints": {
+            "description": "Hints for the triage model to identify this safety concern",
             "items": {
               "type": "string"
             },
@@ -24415,27 +25168,33 @@
       "SubToolLog": {
         "properties": {
           "duration_ms": {
+            "description": "Execution time in milliseconds",
             "title": "Duration Ms",
             "type": "number"
           },
           "input": {
             "additionalProperties": true,
+            "description": "Input parameters passed to the tool",
             "title": "Input",
             "type": "object"
           },
           "output": {
+            "description": "Raw output returned by the tool",
             "title": "Output",
             "type": "string"
           },
           "round": {
+            "description": "Agent reasoning round in which the tool was called",
             "title": "Round",
             "type": "integer"
           },
           "succeeded": {
+            "description": "Whether the tool invocation succeeded",
             "title": "Succeeded",
             "type": "boolean"
           },
           "tool_name": {
+            "description": "Name of the tool that was invoked",
             "title": "Tool Name",
             "type": "string"
           }
@@ -25114,10 +25873,17 @@
       "SyncEventItem": {
         "properties": {
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data_source_id": {
             "anyOf": [
@@ -25223,6 +25989,12 @@
             "title": "Sync Error"
           },
           "sync_status": {
+            "enum": [
+              "pending",
+              "synced",
+              "failed",
+              "processing"
+            ],
             "title": "Sync Status",
             "type": "string"
           },
@@ -25243,8 +26015,7 @@
           "event_id",
           "event_type",
           "source",
-          "sync_status",
-          "created_at"
+          "sync_status"
         ],
         "title": "SyncEventItem",
         "type": "object"
@@ -25867,10 +26638,12 @@
       "TestSkillResponse": {
         "properties": {
           "cached_tokens": {
+            "description": "Number of tokens served from cache",
             "title": "Cached Tokens",
             "type": "integer"
           },
           "duration_ms": {
+            "description": "Total execution time in milliseconds",
             "title": "Duration Ms",
             "type": "number"
           },
@@ -25883,25 +26656,31 @@
                 "type": "null"
               }
             ],
+            "description": "Error message if the skill execution failed",
             "title": "Error"
           },
           "input_tokens": {
+            "description": "Number of input tokens consumed",
             "title": "Input Tokens",
             "type": "integer"
           },
           "output_tokens": {
+            "description": "Number of output tokens generated",
             "title": "Output Tokens",
             "type": "integer"
           },
           "result": {
+            "description": "Final result text produced by the skill",
             "title": "Result",
             "type": "string"
           },
           "rounds": {
+            "description": "Number of agent reasoning rounds executed",
             "title": "Rounds",
             "type": "integer"
           },
           "sub_tool_logs": {
+            "description": "Chronological log of tool invocations",
             "items": {
               "$ref": "#/components/schemas/SubToolLog"
             },
@@ -26942,10 +27721,17 @@
             "type": "string"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the trigger was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "created_by": {
             "anyOf": [
@@ -27041,10 +27827,17 @@
             "type": "string"
           },
           "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the trigger was last updated",
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
+            "title": "Updated At"
           },
           "workspace_id": {
             "format": "uuid",
@@ -27056,18 +27849,11 @@
           "id",
           "workspace_id",
           "name",
-          "description",
           "event_type",
-          "event_filter",
           "action_id",
           "input_template",
-          "schedule",
           "timezone",
-          "next_fire_at",
-          "is_active",
-          "created_by",
-          "created_at",
-          "updated_at"
+          "is_active"
         ],
         "title": "TriggerResponse",
         "type": "object"
@@ -27075,10 +27861,17 @@
       "TriggerRunResponse": {
         "properties": {
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the run was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -27113,9 +27906,7 @@
         "required": [
           "event_id",
           "event_type",
-          "data",
-          "effective_at",
-          "created_at"
+          "data"
         ],
         "title": "TriggerRunResponse",
         "type": "object"
@@ -27977,7 +28768,6 @@
           "phone_number": {
             "anyOf": [
               {
-                "pattern": "^\\+[1-9]\\d{1,14}$",
                 "type": "string"
               },
               {
@@ -28008,7 +28798,6 @@
                 "items": {
                   "type": "string"
                 },
-                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -29392,18 +30181,22 @@
                 "type": "null"
               }
             ],
+            "description": "Average event duration in seconds",
             "title": "Avg Duration Seconds"
           },
           "count": {
+            "description": "Number of events in this bucket",
             "title": "Count",
             "type": "integer"
           },
           "event_date": {
+            "description": "Date of the usage bucket",
             "format": "date",
             "title": "Event Date",
             "type": "string"
           },
           "event_type": {
+            "description": "World event type",
             "title": "Event Type",
             "type": "string"
           },
@@ -29416,6 +30209,7 @@
                 "type": "null"
               }
             ],
+            "description": "Total event duration in seconds",
             "title": "Total Duration Seconds"
           }
         },
@@ -29430,6 +30224,7 @@
       "UsageSummaryResponse": {
         "properties": {
           "buckets": {
+            "description": "Usage data grouped by event type and date",
             "items": {
               "$ref": "#/components/schemas/UsageBucket"
             },
@@ -29437,20 +30232,24 @@
             "type": "array"
           },
           "period_end": {
+            "description": "End of the reporting period",
             "format": "date",
             "title": "Period End",
             "type": "string"
           },
           "period_start": {
+            "description": "Start of the reporting period",
             "format": "date",
             "title": "Period Start",
             "type": "string"
           },
           "total_events": {
+            "description": "Total number of events in the period",
             "title": "Total Events",
             "type": "integer"
           },
           "workspace_id": {
+            "description": "Workspace identifier",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -29986,10 +30785,17 @@
             "type": "array"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the webhook destination was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "created_by": {
             "anyOf": [
@@ -30052,10 +30858,17 @@
             "type": "string"
           },
           "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the webhook destination was last updated",
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
+            "title": "Updated At"
           },
           "url": {
             "title": "Url",
@@ -30079,8 +30892,6 @@
           "retry_attempts",
           "is_active",
           "created_by",
-          "created_at",
-          "updated_at",
           "secret"
         ],
         "title": "WebhookDestinationCreatedResponse",
@@ -30096,10 +30907,17 @@
             "type": "array"
           },
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the webhook destination was created",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "created_by": {
             "anyOf": [
@@ -30158,10 +30976,17 @@
             "type": "string"
           },
           "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the webhook destination was last updated",
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
+            "title": "Updated At"
           },
           "url": {
             "title": "Url",
@@ -30184,9 +31009,7 @@
           "accepted_event_types",
           "retry_attempts",
           "is_active",
-          "created_by",
-          "created_at",
-          "updated_at"
+          "created_by"
         ],
         "title": "WebhookDestinationResponse",
         "type": "object"
@@ -31058,6 +31881,7 @@
       "src__routes__audit__AuditEventResponse": {
         "properties": {
           "action": {
+            "description": "Action that was performed (e.g. 'entity.read')",
             "title": "Action",
             "type": "string"
           },
@@ -31070,6 +31894,7 @@
                 "type": "null"
               }
             ],
+            "description": "Credential ID used by the actor",
             "title": "Actor Credential Id"
           },
           "actor_entity_id": {
@@ -31081,9 +31906,11 @@
                 "type": "null"
               }
             ],
+            "description": "Entity ID of the actor who performed the action",
             "title": "Actor Entity Id"
           },
           "id": {
+            "description": "Unique audit event identifier",
             "title": "Id",
             "type": "string"
           },
@@ -31096,6 +31923,7 @@
                 "type": "null"
               }
             ],
+            "description": "IP address of the actor",
             "title": "Ip Address"
           },
           "metadata": {
@@ -31108,10 +31936,12 @@
                 "type": "null"
               }
             ],
+            "description": "Additional event-specific metadata",
             "title": "Metadata"
           },
           "phi_accessed": {
             "default": false,
+            "description": "Whether protected health information was accessed",
             "title": "Phi Accessed",
             "type": "boolean"
           },
@@ -31124,6 +31954,7 @@
                 "type": "null"
               }
             ],
+            "description": "ID of the accessed resource",
             "title": "Resource Id"
           },
           "resource_name": {
@@ -31135,17 +31966,21 @@
                 "type": "null"
               }
             ],
+            "description": "Human-readable name of the accessed resource",
             "title": "Resource Name"
           },
           "resource_type": {
+            "description": "Type of resource that was accessed",
             "title": "Resource Type",
             "type": "string"
           },
           "service": {
+            "description": "Service that produced the event",
             "title": "Service",
             "type": "string"
           },
           "timestamp": {
+            "description": "ISO-8601 timestamp of the event",
             "title": "Timestamp",
             "type": "string"
           },
@@ -31158,9 +31993,11 @@
                 "type": "null"
               }
             ],
+            "description": "User-Agent header from the request",
             "title": "User Agent"
           },
           "workspace_id": {
+            "description": "Workspace that owns this audit event",
             "title": "Workspace Id",
             "type": "string"
           }
@@ -31238,10 +32075,17 @@
       "src__routes__operators_models__AuditEventResponse": {
         "properties": {
           "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event occurred",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
+            "title": "Created At"
           },
           "data": {
             "additionalProperties": true,
@@ -31260,10 +32104,17 @@
             "type": "string"
           },
           "ingested_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "When the event was ingested",
-            "format": "date-time",
-            "title": "Ingested At",
-            "type": "string"
+            "title": "Ingested At"
           },
           "source": {
             "description": "System that emitted the event",
@@ -31281,9 +32132,7 @@
           "workspace_id",
           "event_type",
           "data",
-          "source",
-          "ingested_at",
-          "created_at"
+          "source"
         ],
         "title": "AuditEventResponse",
         "type": "object"
@@ -37162,6 +38011,138 @@
         ]
       }
     },
+    "/v1/{workspace_id}/causal/drivers": {
+      "get": {
+        "description": "Ranked SPR drivers for one (outcome_family, outcome_key). Byar 1978 95% CI. SPR > 1 = feature value over-indexes for this outcome vs. the workspace baseline. Filter by feature_family (demographic|comorbidity) or feature_arity (1=univariate, 2=pairwise). min_support_only=true (default) hides observed < 5 rows. This is DESCRIPTIVE attribution \u2014 v2 causal (ITS + synthetic control) lands via the analytics.public.causal_attribution pipeline in Phase 5.",
+        "operationId": "list_drivers_v1__workspace_id__causal_drivers_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome_family",
+            "required": true,
+            "schema": {
+              "const": "disease_incidence",
+              "title": "Outcome Family",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "outcome_key",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Outcome Key",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feature_family",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "demographic",
+                    "comorbidity"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Feature Family"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feature_arity",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    1,
+                    2
+                  ],
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Feature Arity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_support_only",
+            "required": false,
+            "schema": {
+              "default": true,
+              "title": "Min Support Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "spr",
+              "enum": [
+                "spr",
+                "observed",
+                "feature_population"
+              ],
+              "title": "Sort By",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriversResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Drivers",
+        "tags": [
+          "Causal Ledger"
+        ]
+      }
+    },
     "/v1/{workspace_id}/command-center": {
       "get": {
         "description": "Single-pane workspace health dashboard combining voice, pipeline, data quality, and identity metrics.",
@@ -38703,6 +39684,111 @@
         ]
       }
     },
+    "/v1/{workspace_id}/demo-pulse/start": {
+      "post": {
+        "description": "Start a synthetic pulse on the workspace.\n\nGuardrails: admin/owner role + workspace must be in the allowlist env.\nReplaces any currently-running pulse on the same workspace.",
+        "operationId": "start-demo-pulse",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoPulseStartRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoPulseTaskResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start synthetic event emission for an internal demo workspace",
+        "tags": [
+          "Demo Pulse"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/demo-pulse/status": {
+      "get": {
+        "operationId": "get-demo-pulse-status",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoPulseStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Inspect the active pulse on a workspace",
+        "tags": [
+          "Demo Pulse"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/demo-pulse/stop": {
+      "post": {
+        "description": "Stop the pulse on this workspace.\n\n``body.task_id`` is optional; if provided, only that task is stopped (useful\nfor idempotence after a background race). Otherwise the workspace's\ncurrent task (if any) is stopped.",
+        "operationId": "stop-demo-pulse",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DemoPulseStopRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoPulseStopResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Stop the synthetic pulse on a workspace",
+        "tags": [
+          "Demo Pulse"
+        ]
+      }
+    },
     "/v1/{workspace_id}/desktop-sessions": {
       "post": {
         "operationId": "create_desktop_session_v1__workspace_id__desktop_sessions_post",
@@ -38921,6 +40007,96 @@
         "summary": "Get Session Status",
         "tags": [
           "Desktop Sessions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/entities/{entity_id}/brief": {
+      "get": {
+        "description": "Return the latest Self-Image brief for the target entity (null shape if none).",
+        "operationId": "get_latest_brief_v1__workspace_id__entities__entity_id__brief_get",
+        "parameters": [
+          {
+            "description": "Target entity UUID",
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "description": "Target entity UUID",
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Latest Brief",
+        "tags": [
+          "Self-Image"
+        ]
+      },
+      "post": {
+        "description": "Generate a Self-Image brief for the target entity (PR1: patient only).",
+        "operationId": "generate_brief_v1__workspace_id__entities__entity_id__brief_post",
+        "parameters": [
+          {
+            "description": "Target entity UUID",
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "description": "Target entity UUID",
+              "format": "uuid",
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BriefResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate Brief",
+        "tags": [
+          "Self-Image"
         ]
       }
     },
@@ -47019,6 +48195,74 @@
         ]
       }
     },
+    "/v1/{workspace_id}/sensorium/connector-health": {
+      "get": {
+        "operationId": "get-sensorium-connector-health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorHealthResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Per-source event health for the workspace (last 24h)",
+        "tags": [
+          "Sensorium"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/sensorium/loop-latency": {
+      "get": {
+        "operationId": "get-sensorium-loop-latency",
+        "parameters": [
+          {
+            "description": "Window size in hours (1-168).",
+            "in": "query",
+            "name": "window_hours",
+            "required": false,
+            "schema": {
+              "default": 24,
+              "description": "Window size in hours (1-168).",
+              "maximum": 168,
+              "minimum": 1,
+              "title": "Window Hours",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoopLatencyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sense\u2192act latency distribution for the workspace",
+        "tags": [
+          "Sensorium"
+        ]
+      }
+    },
     "/v1/{workspace_id}/services": {
       "get": {
         "description": "List services in a workspace with pagination. Requires `Service.view` permission.",
@@ -54215,7 +55459,9 @@
             "schema": {
               "enum": [
                 "pending",
-                "failed"
+                "synced",
+                "failed",
+                "processing"
               ],
               "title": "Status",
               "type": "string"
