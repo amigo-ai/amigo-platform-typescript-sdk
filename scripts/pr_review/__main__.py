@@ -302,6 +302,7 @@ def post_comment(pr_number: str, body: str) -> str:
             ".id",
         ],
         text=True,
+        stderr=subprocess.PIPE,
     )
     return raw.strip()
 
@@ -320,6 +321,7 @@ def update_comment(comment_id: str, body: str) -> str:
             ".id",
         ],
         text=True,
+        stderr=subprocess.PIPE,
     )
     return raw.strip()
 

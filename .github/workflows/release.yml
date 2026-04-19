@@ -59,6 +59,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
         run: |
+          # This preflight catches the common missing-token and repo-level
+          # permission cases before publish. It cannot prove branch-level bypass
+          # against rulesets or protected-branch push restrictions.
           BRANCH_PROTECTED=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${BRANCH_NAME}" --jq '.protected')
           RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
 
@@ -70,7 +73,7 @@ jobs:
           if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
             CAN_PUSH=$(GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.permissions.push // false')
             if [ "$CAN_PUSH" != "true" ]; then
-              echo "::error::RELEASE_PUSH_TOKEN can read ${GITHUB_REPOSITORY} but cannot push to it."
+              echo "::error::RELEASE_PUSH_TOKEN lacks repository-level push permission for ${GITHUB_REPOSITORY}."
               exit 1
             fi
           fi
@@ -275,6 +278,20 @@ jobs:
       contents: write
 
     steps:
+      - name: Resolve finalize credentials
+        id: finalize_credentials
+        env:
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
+          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            echo "checkout_token=$RELEASE_PUSH_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "has_release_push_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "checkout_token=${{ github.token }}" >> "$GITHUB_OUTPUT"
+            echo "has_release_push_token=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout triggering commit
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -282,7 +299,7 @@ jobs:
           # against the exact commit that prepared and published the tarball.
           ref: ${{ github.sha }}
           fetch-depth: 0
-          token: ${{ secrets.RELEASE_PUSH_TOKEN != '' && secrets.RELEASE_PUSH_TOKEN || github.token }}
+          token: ${{ steps.finalize_credentials.outputs.checkout_token }}
 
       - name: Configure git
         run: |
