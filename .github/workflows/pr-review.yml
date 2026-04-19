@@ -1,4 +1,20 @@
-name: PR Review
+name: PR Review (Claude on Vertex)
+
+# Runs a focused SDK review (type safety, API contract, breaking changes)
+# on every PR using Claude on GCP Vertex AI. Posts a structured comment.
+#
+# Auth:
+#   GCP Vertex AI via Workload Identity Federation (google-github-actions/auth@v2).
+#   Uses the same WIF pool + SA as the platform repo's review system.
+#
+# Repo variables (set in Settings > Variables):
+#   vars.GCP_WIF_PROVIDER       full WIF provider resource name (required)
+#   vars.GCP_REVIEW_SA          SA email with roles/aiplatform.user (required)
+#   vars.VERTEX_PROJECT         GCP project (default: amigo-platform)
+#   vars.VERTEX_REGION          Claude region (default: global)
+#   vars.REVIEW_MODEL           Claude model (default: claude-sonnet-4-6)
+#
+# Disable per-PR by including "[skip review]" in the PR title.
 
 on:
   pull_request:
@@ -10,84 +26,73 @@ on:
       - ".github/workflows/**"
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: pr-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 permissions:
   contents: read
   pull-requests: write
+  id-token: write
 
 jobs:
   review:
-    name: Code Review
+    if: >-
+      !contains(github.event.pull_request.title, '[skip review]') &&
+      !github.event.pull_request.draft
     runs-on: ubuntu-latest
-    if: "!github.event.pull_request.draft && !contains(github.event.pull_request.title, '[skip review]')"
     timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      VERTEX_PROJECT: ${{ vars.VERTEX_PROJECT || 'amigo-platform' }}
+      VERTEX_REGION: ${{ vars.VERTEX_REGION || 'global' }}
+      REVIEW_MODEL: ${{ vars.REVIEW_MODEL || 'claude-sonnet-4-6' }}
     steps:
+      - name: Guard — skip if WIF not configured
+        id: guard
+        env:
+          GCP_WIF_PROVIDER: ${{ vars.GCP_WIF_PROVIDER }}
+          GCP_REVIEW_SA: ${{ vars.GCP_REVIEW_SA }}
+        run: |
+          if [ -z "$GCP_WIF_PROVIDER" ] || [ -z "$GCP_REVIEW_SA" ]; then
+            echo "::warning::GCP_WIF_PROVIDER or GCP_REVIEW_SA not set — skipping Claude review. Set repo variables to enable."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout
+        if: steps.guard.outputs.skip == 'false'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Authenticate to GCP (WIF)
+        if: steps.guard.outputs.skip == 'false'
+        uses: google-github-actions/auth@v2
         with:
-          node-version: 22
-          cache: npm
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_REVIEW_SA }}
+          create_credentials_file: true
+          export_environment_variables: true
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install uv
+        if: steps.guard.outputs.skip == 'false'
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
 
-      - name: Get diff
-        id: diff
+      - name: Run review
+        if: steps.guard.outputs.skip == 'false'
         run: |
-          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- src/ tests/ scripts/ .github/workflows/ | head -5000)
-          echo "has_diff=$( [ -n "$DIFF" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+          uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
+            python scripts/pr-review.py --pr "${{ github.event.pull_request.number }}" \
+              --model "$REVIEW_MODEL" \
+              --vertex-project "$VERTEX_PROJECT" \
+              --vertex-region "$VERTEX_REGION"
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
-        run: npm run lint
-
-      - name: Build
-        run: npm run build
-
-      - name: Test
-        run: npm test -- --reporter=dot
-
-      - name: Check spec freshness
+      - name: Fallback comment on failure
+        if: failure() && steps.guard.outputs.skip == 'false'
         run: |
-          npm run gen-types
-          if ! git diff --quiet src/generated/api.ts; then
-            echo "::warning::Generated types are out of date. Run 'npm run gen-types' and commit."
-          fi
-
-      - name: Post review status
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          {
-            echo "<!-- sdk-review-bot -->"
-            echo "## SDK Review"
-            echo ""
-            echo "| Check | Status |"
-            echo "|---|---|"
-            echo "| Typecheck | ${{ steps.*.outcome == 'failure' && 'Failed' || 'Passed' }} |"
-            echo "| Lint | Passed |"
-            echo "| Build | Passed |"
-            echo "| Tests | Passed |"
-            echo ""
-            echo "All automated checks passed."
-          } > /tmp/review-comment.md
-
-          EXISTING=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            --jq '[.[] | select(.body | contains("<!-- sdk-review-bot -->")) | .id] | first // empty' 2>/dev/null)
-
-          if [[ "$EXISTING" =~ ^[0-9]+$ ]]; then
-            gh api "repos/${{ github.repository }}/issues/comments/$EXISTING" \
-              -X PATCH -f body=@/tmp/review-comment.md
-          else
-            gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/review-comment.md
-          fi
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body "⚠️ Claude code review failed. See [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
