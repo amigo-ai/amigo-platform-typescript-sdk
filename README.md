@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://docs.amigo.ai">Product Docs</a>
   ·
-  <a href="https://docs.amigo.ai/developer-guide">Developer Guide</a>
+  <a href="https://docs.amigo.ai/developer-guide/platform-api/platform-sdk">Developer Guide</a>
   ·
   <a href="https://docs.amigo.ai/api-reference">API Reference</a>
   ·
@@ -39,7 +39,7 @@ The SDK is the typed client boundary between your runtime and the workspace-scop
 | Need                                        | Best entry point                                         |
 | ------------------------------------------- | -------------------------------------------------------- |
 | Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                  |
-| Tutorials and integration guidance          | [Developer Guide](https://docs.amigo.ai/developer-guide) |
+| Tutorials and integration guidance          | [Developer Guide](https://docs.amigo.ai/developer-guide/platform-api/platform-sdk) |
 | Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)     |
 | Repo-local SDK examples                     | [examples/README.md](./examples/README.md)               |
 | Generated package surface                   | [api.md](./api.md)                                       |
