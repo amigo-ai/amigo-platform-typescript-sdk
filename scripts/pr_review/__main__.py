@@ -20,6 +20,7 @@ import argparse
 import asyncio
 import json
 import os
+import re
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -32,6 +33,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 AGENTS_DIR = REPO_ROOT / ".claude" / "agents"
 
 COMMENT_MARKER = "<!-- sdk-review:v1 -->"
+SPECIALIST_FAILURE_PREFIX = "⚠️ Specialist failed: "
 
 DEFAULT_SPECIALIST_MODEL = os.environ.get("REVIEW_MODEL", "claude-sonnet-4-6")
 DEFAULT_ORCHESTRATOR_MODEL = os.environ.get("REVIEW_ORCHESTRATOR_MODEL", "claude-opus-4-6")
@@ -42,6 +44,11 @@ SPECIALIST_MAX_TOKENS = 4000
 ORCHESTRATOR_MAX_TOKENS = 7000
 MAX_DIFF_CHARS = 140_000
 MAX_ERROR_CHARS = 800
+ERROR_REDACTION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"(?i)(authorization:?\s*bearer\s+)[a-z0-9._~-]+"), r"\1[REDACTED]"),
+    (re.compile(r"\bya29\.[A-Za-z0-9._-]+\b"), "[REDACTED_OAUTH_TOKEN]"),
+    (re.compile(r"\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+\b"), "[REDACTED_JWT]"),
+)
 
 
 @dataclass(frozen=True)
@@ -130,6 +137,8 @@ def changed_file_paths(pr_meta: dict) -> list[str]:
 
 def format_error(exc: Exception) -> str:
     message = " ".join(f"{type(exc).__name__}: {exc}".split()).replace("`", "'")
+    for pattern, replacement in ERROR_REDACTION_PATTERNS:
+        message = pattern.sub(replacement, message)
     if len(message) <= MAX_ERROR_CHARS:
         return message
     return message[: MAX_ERROR_CHARS - 3] + "..."
@@ -181,7 +190,7 @@ DIFF:
         ).strip()
         return agent_name, text
     except Exception as exc:  # noqa: BLE001
-        return agent_name, f"⚠️ Specialist failed: `{format_error(exc)}`"
+        return agent_name, f"{SPECIALIST_FAILURE_PREFIX}`{format_error(exc)}`"
 
 
 async def run_orchestrator(
@@ -309,10 +318,10 @@ def compose_orchestrator_failure_report(
     specialist_findings: dict[str, str],
 ) -> str:
     completed = sorted(
-        agent for agent, text in specialist_findings.items() if not text.startswith("⚠️ Specialist failed:")
+        agent for agent, text in specialist_findings.items() if not text.startswith(SPECIALIST_FAILURE_PREFIX)
     )
     failed = sorted(
-        agent for agent, text in specialist_findings.items() if text.startswith("⚠️ Specialist failed:")
+        agent for agent, text in specialist_findings.items() if text.startswith(SPECIALIST_FAILURE_PREFIX)
     )
     completed_summary = ", ".join(f"`{agent}`" for agent in completed) if completed else "(none)"
     failed_summary = ", ".join(f"`{agent}`" for agent in failed) if failed else "(none)"

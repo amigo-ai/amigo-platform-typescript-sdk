@@ -68,6 +68,12 @@ jobs:
           echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
           echo "Current version: $CURRENT_VERSION"
 
+      - name: Compute target version
+        id: new_version
+        run: |
+          NEW_VERSION=$(node -e 'const [version, type] = process.argv.slice(1); const parts = version.split(".").map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) throw new Error(`Invalid semver: ${version}`); const [major, minor, patch] = parts; const next = { patch: [major, minor, patch + 1], minor: [major, minor + 1, 0], major: [major + 1, 0, 0] }[type]; if (!next) throw new Error(`Unsupported version type: ${type}`); console.log(next.join("."));' "${{ steps.current_version.outputs.version }}" "${{ inputs.version_type }}")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Regenerate types from committed spec
         run: |
           echo "Regenerating types from openapi.json..."
@@ -78,18 +84,13 @@ jobs:
         run: npm run docs:check
 
       - name: Increment version in workspace
-        id: new_version
+        if: ${{ !inputs.dry_run }}
         run: |
-          npm version ${{ inputs.version_type }} --no-git-tag-version
-          NEW_VERSION=$(node -p "require('./package.json').version")
-          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
-            echo "(dry-run) Prepared version: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
-          else
-            echo "Prepared version: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
-          fi
+          npm version "${{ steps.new_version.outputs.version }}" --no-git-tag-version
+          echo "Prepared version: ${{ steps.current_version.outputs.version }} -> ${{ steps.new_version.outputs.version }}"
 
       - name: Update CHANGELOG.md
+        if: ${{ !inputs.dry_run }}
         run: |
           NEW_VERSION="${{ steps.new_version.outputs.version }}"
           ENTRY=$(node scripts/release-history.mjs changelog --version "$NEW_VERSION")
@@ -122,6 +123,7 @@ jobs:
             > release-notes.md
 
       - name: Upload release payload
+        if: ${{ !inputs.dry_run }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: release-payload
@@ -161,6 +163,21 @@ jobs:
       id-token: write
 
     steps:
+      - name: Validate release target before publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
+          CURRENT_HEAD=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${{ github.ref_name }}" --jq '.object.sha')
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} before publish. Re-run the release from the latest commit."
+            exit 1
+          fi
+
       - name: Download release payload
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
         with:
@@ -185,6 +202,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
 
     steps:
       - name: Checkout triggering commit
@@ -197,6 +215,20 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Validate release target before finalize
+        run: |
+          if [ "${{ github.ref_type }}" != "branch" ]; then
+            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
+            exit 1
+          fi
+
+          git fetch origin "${{ github.ref_name }}"
+          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            exit 1
+          fi
 
       - name: Download release payload
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
@@ -219,7 +251,7 @@ jobs:
             exit 1
           fi
           git commit -m "v${{ needs.prepare.outputs.new_version }}"
-          git push origin "HEAD:${{ github.ref_name }}"
+          git push --force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA} origin "HEAD:${{ github.ref_name }}"
 
       - name: Create and push tag
         run: |
@@ -239,6 +271,43 @@ jobs:
       - name: Cleanup temp files
         if: always()
         run: rm -f release-notes.md || true
+
+      - name: Notify release finalization failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          marker='<!-- release-finalize-failure:v1 -->'
+          title="Release finalization failed for v${{ needs.prepare.outputs.new_version }}"
+          body=$(cat <<EOF
+          ${marker}
+          ⚠️ Release finalization failed after the npm publish stage completed.
+
+          Details:
+          - version: \`${{ needs.prepare.outputs.new_version }}\`
+          - branch: \`${{ github.ref_name }}\`
+          - triggering sha: \`${GITHUB_SHA}\`
+          - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          Manual recovery is required before another release run:
+          1. Inspect whether \`${{ github.ref_name }}\` advanced after publish.
+          2. Recreate the version-bump commit, tag, and GitHub Release for the already-published package if needed.
+          3. Close or update this issue once the release metadata is consistent again.
+          EOF
+          )
+
+          issue_number=$(
+            gh api "repos/${GITHUB_REPOSITORY}/issues" \
+              --paginate \
+              --jq ".[] | select(.pull_request | not) | select(.user.login == \"github-actions[bot]\" and .state == \"open\" and (.body | contains(\"${marker}\"))) | .number" \
+              | tail -n1
+          )
+
+          if [ -n "$issue_number" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" -f title="$title" -f body="$body" >/dev/null
+          else
+            gh api --method POST "repos/${GITHUB_REPOSITORY}/issues" -f title="$title" -f body="$body" >/dev/null
+          fi
 
       - name: Release Summary
         run: |
