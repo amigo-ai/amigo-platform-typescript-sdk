@@ -8,6 +8,30 @@ export interface ErrorContext {
   errorCode?: string
   requestId?: string
   detail?: string
+  context?: Record<string, unknown>
+}
+
+const SENSITIVE_FIELDS = new Set([
+  'id_token', 'access_token', 'refresh_token', 'authorization',
+  'api_key', 'apikey', 'token', 'secret', 'password', 'x-api-key',
+  'cookie', 'set-cookie',
+])
+
+function sanitizeErrorContext(obj: unknown): unknown {
+  if (typeof obj !== 'object' || !obj) return obj
+  if (Array.isArray(obj)) return obj.map(sanitizeErrorContext)
+
+  const result: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (SENSITIVE_FIELDS.has(key.toLowerCase())) {
+      result[key] = '[REDACTED]'
+    } else if (typeof value === 'object' && value !== null) {
+      result[key] = sanitizeErrorContext(value)
+    } else {
+      result[key] = value
+    }
+  }
+  return result
 }
 
 /** Base class for all Amigo Platform SDK errors */
@@ -16,6 +40,7 @@ export class AmigoError extends Error {
   readonly errorCode?: string
   readonly requestId?: string
   readonly detail?: string
+  readonly context?: Record<string, unknown>
 
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message)
@@ -24,8 +49,24 @@ export class AmigoError extends Error {
     this.errorCode = ctx.errorCode
     this.requestId = ctx.requestId
     this.detail = ctx.detail
-    // Maintain proper prototype chain
+    this.context = ctx.context ? (sanitizeErrorContext(ctx.context) as Record<string, unknown>) : undefined
     Object.setPrototypeOf(this, new.target.prototype)
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, this.constructor)
+    }
+  }
+
+  toJSON(): Record<string, unknown> {
+    return {
+      name: this.name,
+      message: this.message,
+      statusCode: this.statusCode,
+      errorCode: this.errorCode,
+      requestId: this.requestId,
+      detail: this.detail,
+      context: this.context,
+      stack: this.stack,
+    }
   }
 }
 
@@ -146,6 +187,7 @@ export async function createApiError(response: Response): Promise<AmigoError> {
     errorCode: body.error_code,
     requestId: body.request_id,
     detail: body.detail,
+    context: { url: response.url, response: body },
   }
   const message = body.message ?? body.detail ?? response.statusText ?? `HTTP ${response.status}`
 
