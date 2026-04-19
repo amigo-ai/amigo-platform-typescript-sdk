@@ -12,10 +12,13 @@ const SERVICE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   name: 'Scheduling Service',
   description: 'External scheduling system integration',
-  type: 'rest_api',
-  base_url: 'https://scheduling.example.com/api/v1',
-  auth_type: 'bearer',
-  enabled: true,
+  channel_type: 'voice',
+  agent_id: 'agent-00000000-0000-0000-0000-000000000001',
+  context_graph_id: 'cg-00000000-0000-0000-0000-000000000001',
+  is_active: true,
+  keyterms: [],
+  tags: [],
+  tool_capacity: 5,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
@@ -59,7 +62,7 @@ const client = new AmigoClient({
       Response.json({ detail: 'Service not found', error_code: 'not_found' }, { status: 404 }),
 
     [`PUT ${BASE}/services/${SERVICE_ID}`]: () =>
-      Response.json({ ...SERVICE_FIXTURE, name: 'Updated Service', enabled: false }),
+      Response.json({ ...SERVICE_FIXTURE, name: 'Updated Service', is_active: false }),
 
     [`DELETE ${BASE}/services/${SERVICE_ID}`]: () =>
       new Response(null, { status: 204 }),
@@ -70,7 +73,7 @@ describe('ServicesResource', () => {
   it('creates a service', async () => {
     const result = await client.services.create({
       name: 'Scheduling Service',
-      type: 'rest_api',
+      channel_type: 'voice',
     } as never)
     expect(result.id).toBe(SERVICE_ID)
     expect(result.name).toBe('Scheduling Service')
@@ -86,7 +89,7 @@ describe('ServicesResource', () => {
   it('gets a service by id', async () => {
     const result = await client.services.get(SERVICE_ID)
     expect(result.id).toBe(SERVICE_ID)
-    expect(result.type).toBe('rest_api')
+    expect(result.channel_type).toBe('voice')
   })
 
   it('throws NotFoundError for missing service', async () => {
@@ -94,9 +97,9 @@ describe('ServicesResource', () => {
   })
 
   it('updates a service', async () => {
-    const result = await client.services.update(SERVICE_ID, { name: 'Updated Service', enabled: false } as never)
+    const result = await client.services.update(SERVICE_ID, { name: 'Updated Service', is_active: false } as never)
     expect(result.name).toBe('Updated Service')
-    expect(result.enabled).toBe(false)
+    expect(result.is_active).toBe(false)
   })
 
   it('deletes a service', async () => {

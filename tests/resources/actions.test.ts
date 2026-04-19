@@ -5,10 +5,10 @@ import { NotFoundError } from '../../src/core/errors.js'
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
-const SKILL_ID = 'skill-00000000-0000-0000-0000-000000000001'
+const ACTION_ID = 'skill-00000000-0000-0000-0000-000000000001'
 
-const SKILL_FIXTURE = {
-  id: SKILL_ID,
+const ACTION_FIXTURE = {
+  id: ACTION_ID,
   workspace_id: TEST_WORKSPACE_ID,
   name: 'Appointment Lookup',
   description: 'Look up patient appointments in the scheduling system',
@@ -33,10 +33,13 @@ const SKILL_FIXTURE = {
 }
 
 const TEST_RESULT_FIXTURE = {
-  skill_id: SKILL_ID,
-  status: 'success',
-  output: { appointments: [{ id: 'appt-001', date: '2026-02-01', type: 'follow-up' }] },
+  result: 'Appointment found for 2026-02-01',
   duration_ms: 245,
+  rounds: 1,
+  input_tokens: 100,
+  output_tokens: 50,
+  cached_tokens: 0,
+  sub_tool_logs: [],
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -66,71 +69,71 @@ const client = new AmigoClient({
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
     [`POST ${BASE}/skills`]: () =>
-      Response.json(SKILL_FIXTURE, { status: 201 }),
+      Response.json(ACTION_FIXTURE, { status: 201 }),
 
     [`GET ${BASE}/skills`]: () =>
-      Response.json({ items: [SKILL_FIXTURE], has_more: false, continuation_token: null }),
+      Response.json({ items: [ACTION_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/skills/${SKILL_ID}`]: () =>
-      Response.json(SKILL_FIXTURE),
+    [`GET ${BASE}/skills/${ACTION_ID}`]: () =>
+      Response.json(ACTION_FIXTURE),
 
     [`GET ${BASE}/skills/not-found`]: () =>
       Response.json({ detail: 'Skill not found', error_code: 'not_found' }, { status: 404 }),
 
-    [`PUT ${BASE}/skills/${SKILL_ID}`]: () =>
-      Response.json({ ...SKILL_FIXTURE, name: 'Updated Skill', enabled: false }),
+    [`PUT ${BASE}/skills/${ACTION_ID}`]: () =>
+      Response.json({ ...ACTION_FIXTURE, name: 'Updated Action', enabled: false }),
 
-    [`DELETE ${BASE}/skills/${SKILL_ID}`]: () =>
+    [`DELETE ${BASE}/skills/${ACTION_ID}`]: () =>
       new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/skills/${SKILL_ID}/test`]: () =>
+    [`POST ${BASE}/skills/${ACTION_ID}/test`]: () =>
       Response.json(TEST_RESULT_FIXTURE),
   }),
 })
 
-describe('SkillsResource', () => {
-  it('creates a skill', async () => {
-    const result = await client.skills.create({
+describe('ActionsResource', () => {
+  it('creates an action', async () => {
+    const result = await client.actions.create({
       name: 'Appointment Lookup',
       description: 'Look up patient appointments',
       execution_tier: 'T2',
     } as never)
-    expect(result.id).toBe(SKILL_ID)
+    expect(result.id).toBe(ACTION_ID)
     expect(result.name).toBe('Appointment Lookup')
   })
 
-  it('lists skills', async () => {
-    const result = await client.skills.list()
+  it('lists actions', async () => {
+    const result = await client.actions.list()
     expect(result.items).toHaveLength(1)
     expect(result.items[0]?.name).toBe('Appointment Lookup')
     expect(result.has_more).toBe(false)
   })
 
-  it('gets a skill by id', async () => {
-    const result = await client.skills.get(SKILL_ID)
-    expect(result.id).toBe(SKILL_ID)
+  it('gets an action by id', async () => {
+    const result = await client.actions.get(ACTION_ID)
+    expect(result.id).toBe(ACTION_ID)
     expect(result.execution_tier).toBe('T2')
   })
 
-  it('throws NotFoundError for missing skill', async () => {
-    await expect(client.skills.get('not-found')).rejects.toThrow(NotFoundError)
+  it('throws NotFoundError for missing action', async () => {
+    await expect(client.actions.get('not-found')).rejects.toThrow(NotFoundError)
   })
 
-  it('updates a skill', async () => {
-    const result = await client.skills.update(SKILL_ID, { name: 'Updated Skill', enabled: false } as never)
-    expect(result.name).toBe('Updated Skill')
+  it('updates an action', async () => {
+    const result = await client.actions.update(ACTION_ID, { name: 'Updated Action', enabled: false } as never)
+    expect(result.name).toBe('Updated Action')
     expect(result.enabled).toBe(false)
   })
 
-  it('deletes a skill', async () => {
-    await expect(client.skills.delete(SKILL_ID)).resolves.toBeUndefined()
+  it('deletes an action', async () => {
+    await expect(client.actions.delete(ACTION_ID)).resolves.toBeUndefined()
   })
 
-  it('tests a skill with sample input', async () => {
-    const result = await client.skills.test(SKILL_ID, {
+  it('tests an action with sample input', async () => {
+    const result = await client.actions.test(ACTION_ID, {
       input: { patient_id: 'pat-001' },
     } as never)
-    expect(result.status).toBe('success')
+    expect(result.result).toBe('Appointment found for 2026-02-01')
     expect(result.duration_ms).toBe(245)
   })
 })

@@ -39,6 +39,12 @@ npm run gen-types -- --url https://api.platform.amigo.ai/v1/openapi.json  # live
 
 The script patches FastAPI's spec to add missing path parameters (`workspace_id`, `agent_id`, etc.) that FastAPI declares via `Depends()` instead of standard OpenAPI path parameters.
 
+After any `openapi.json` change in `amigo-ai/platform`, run `npm run gen-types` to regenerate. The script auto-detects the local spec at `../platform/services/platform-api/openapi.json`.
+
+## Breaking Changes
+
+Response field removal, rename, or type change breaks this SDK and all consumers. Never publish a version with TypeScript errors in developer-console. Coordinate with `amigo-ai/platform` (spec change) and `amigo-ai/developer-console` (Zod schema + UI updates) before releasing a version with breaking type changes.
+
 ## Testing
 
 - **Unit tests**: MSW (Mock Service Worker) for HTTP mocking, Vitest
@@ -54,6 +60,7 @@ npm run test:all     # everything
 
 ## Adding a New Resource
 
+0. Ensure the platform-api endpoint exists and `openapi.json` has been regenerated. If the path is missing from generated types, the backend hasn't added it yet
 1. Check the generated types: `grep 'your-endpoint' src/generated/api.ts`
 2. Create `src/resources/your-resource.ts` extending `WorkspaceScopedResource`
 3. Use `this.client.GET/POST/PUT/DELETE` with typed path strings from generated types

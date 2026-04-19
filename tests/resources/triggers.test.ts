@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createPlatformClient } from '../../src/core/openapi-client.js'
-import { TriggersResource } from '../../src/resources/triggers.js'
+import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -14,15 +13,16 @@ const TRIGGER_FIXTURE = {
   name: 'Daily Patient Outreach',
   description: 'Send appointment reminders each weekday morning',
   schedule: '0 9 * * 1-5',
-  action: {
-    skill_id: 'skill-00000000-0000-0000-0000-000000000001',
-    params: { message_template: 'reminder' },
-  },
-  status: 'active',
-  last_fired_at: '2026-01-15T09:00:00Z',
+  event_type: 'cron',
+  event_filter: null,
+  action_id: 'skill-00000000-0000-0000-0000-000000000001',
+  input_template: { message_template: 'reminder' },
+  is_active: true,
+  timezone: 'America/New_York',
   next_fire_at: '2026-01-16T09:00:00Z',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
+  created_by: null,
 }
 
 const FIRE_RESULT_FIXTURE = {
@@ -63,9 +63,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-const platformClient = createPlatformClient({
+const client = new AmigoClient({
   apiKey: TEST_API_KEY,
-  baseUrl: 'https://api.platform.amigo.ai',
+  workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
     [`POST ${BASE}/triggers`]: () =>
       Response.json(TRIGGER_FIXTURE, { status: 201 }),
@@ -89,24 +89,22 @@ const platformClient = createPlatformClient({
       Response.json(FIRE_RESULT_FIXTURE),
 
     [`POST ${BASE}/triggers/${TRIGGER_ID}/pause`]: () =>
-      Response.json({ ...TRIGGER_FIXTURE, status: 'paused' }),
+      Response.json({ ...TRIGGER_FIXTURE, is_active: false }),
 
     [`POST ${BASE}/triggers/${TRIGGER_ID}/resume`]: () =>
-      Response.json({ ...TRIGGER_FIXTURE, status: 'active' }),
+      Response.json({ ...TRIGGER_FIXTURE, is_active: true }),
 
     [`GET ${BASE}/triggers/${TRIGGER_ID}/runs`]: () =>
       Response.json({ items: [RUN_FIXTURE], has_more: false, continuation_token: null }),
   }),
 })
 
-const triggers = new TriggersResource(platformClient, TEST_WORKSPACE_ID)
-
 describe('TriggersResource', () => {
   it('creates a trigger', async () => {
-    const result = await triggers.create({
+    const result = await client.triggers.create({
       name: 'Daily Patient Outreach',
       schedule: '0 9 * * 1-5',
-      action: { skill_id: 'skill-00000000-0000-0000-0000-000000000001' },
+      action_id: 'skill-00000000-0000-0000-0000-000000000001',
     } as never)
     expect(result.id).toBe(TRIGGER_ID)
     expect(result.name).toBe('Daily Patient Outreach')
@@ -114,23 +112,23 @@ describe('TriggersResource', () => {
   })
 
   it('lists triggers', async () => {
-    const result = await triggers.list()
+    const result = await client.triggers.list()
     expect(result.items).toHaveLength(1)
-    expect(result.items[0]?.status).toBe('active')
+    expect(result.items[0]?.is_active).toBe(true)
   })
 
   it('gets a trigger by id', async () => {
-    const result = await triggers.get(TRIGGER_ID)
+    const result = await client.triggers.get(TRIGGER_ID)
     expect(result.id).toBe(TRIGGER_ID)
     expect(result.next_fire_at).toBe('2026-01-16T09:00:00Z')
   })
 
   it('throws NotFoundError for missing trigger', async () => {
-    await expect(triggers.get('not-found')).rejects.toThrow(NotFoundError)
+    await expect(client.triggers.get('not-found')).rejects.toThrow(NotFoundError)
   })
 
   it('updates a trigger', async () => {
-    const result = await triggers.update(TRIGGER_ID, {
+    const result = await client.triggers.update(TRIGGER_ID, {
       name: 'Updated Trigger',
       schedule: '0 10 * * 1-5',
     } as never)
@@ -139,27 +137,27 @@ describe('TriggersResource', () => {
   })
 
   it('deletes a trigger', async () => {
-    await expect(triggers.delete(TRIGGER_ID)).resolves.toBeUndefined()
+    await expect(client.triggers.delete(TRIGGER_ID)).resolves.toBeUndefined()
   })
 
   it('fires a trigger manually', async () => {
-    const result = await triggers.fire(TRIGGER_ID)
+    const result = await client.triggers.fire(TRIGGER_ID)
     expect(result.trigger_id).toBe(TRIGGER_ID)
     expect(result.status).toBe('dispatched')
   })
 
   it('pauses a trigger', async () => {
-    const result = await triggers.pause(TRIGGER_ID)
-    expect(result.status).toBe('paused')
+    const result = await client.triggers.pause(TRIGGER_ID)
+    expect(result.is_active).toBe(false)
   })
 
   it('resumes a trigger', async () => {
-    const result = await triggers.resume(TRIGGER_ID)
-    expect(result.status).toBe('active')
+    const result = await client.triggers.resume(TRIGGER_ID)
+    expect(result.is_active).toBe(true)
   })
 
   it('lists trigger runs', async () => {
-    const result = await triggers.listRuns(TRIGGER_ID)
+    const result = await client.triggers.listRuns(TRIGGER_ID)
     expect(result.items).toHaveLength(1)
     expect(result.items[0]).toBeDefined()
   })

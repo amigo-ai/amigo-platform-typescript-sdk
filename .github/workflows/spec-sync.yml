@@ -1,0 +1,71 @@
+name: Spec Sync
+
+on:
+  repository_dispatch:
+    types: [spec-updated]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync-types:
+    name: Regenerate API types
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download latest spec
+        run: |
+          curl -sSfL "${{ github.event.client_payload.spec_url }}" -o openapi.json
+
+      - name: Regenerate types
+        run: npm run gen-types
+
+      - name: Check for changes
+        id: diff
+        run: |
+          if git diff --quiet src/generated/api.ts; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create PR
+        if: steps.diff.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="chore/sync-api-types-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH"
+          git add openapi.json src/generated/api.ts
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync API types from platform spec (${{ github.event.client_payload.spec_sha }})"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "chore: sync API types from platform spec" \
+            --body "$(cat <<'EOF'
+          ## Summary
+          - Auto-synced from platform repo spec change (${{ github.event.client_payload.spec_sha }})
+          - Regenerated `src/generated/api.ts` from latest `openapi.json`
+
+          ## Test plan
+          - [ ] CI passes (typecheck + tests)
+          - [ ] Review generated type diffs for breaking changes
+
+          🤖 Generated automatically by spec-sync workflow
+          EOF
+          )" \
+            --base main

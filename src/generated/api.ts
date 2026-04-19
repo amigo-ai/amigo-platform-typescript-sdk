@@ -7253,41 +7253,96 @@ export interface components {
              * Format: uuid
              */
             call_entity_id: string;
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string | null;
-            /** Caller Id */
+            /**
+             * Caller Id
+             * @description Caller phone number
+             */
             caller_id: string | null;
-            /** Concept */
+            /**
+             * Concept
+             * @description Clinical concept that triggered escalation
+             */
             concept: string | null;
-            /** Connected At */
+            /**
+             * Connected At
+             * @description ISO-8601 timestamp when operator connected
+             */
             connected_at: string | null;
-            /** Direction */
-            direction: string | null;
-            /** Escalation Id */
+            /**
+             * Direction
+             * @description Call direction
+             */
+            direction?: ("inbound" | "outbound") | null;
+            /**
+             * Escalation Id
+             * @description Escalation event ID
+             */
             escalation_id: string | null;
-            /** Immediate */
+            /**
+             * Immediate
+             * @description Whether the escalation requires immediate attention
+             */
             immediate: boolean;
-            /** Operator Entity Id */
+            /**
+             * Operator Entity Id
+             * @description Entity ID of the connected operator
+             */
             operator_entity_id: string | null;
-            /** Operator Type */
-            operator_type: string | null;
-            /** Phone Number */
+            /**
+             * Operator Type
+             * @description Required operator specialization
+             */
+            operator_type: ("clinical" | "administrative" | "crisis_counselor") | null;
+            /**
+             * Phone Number
+             * @description Service phone number
+             */
             phone_number: string | null;
-            /** Regulatory Basis */
+            /**
+             * Regulatory Basis
+             * @description Regulatory reason for escalation
+             */
             regulatory_basis: string | null;
-            /** Requested At */
+            /**
+             * Requested At
+             * @description ISO-8601 timestamp when escalation was requested
+             */
             requested_at: string | null;
-            /** Risk Score */
+            /**
+             * Risk Score
+             * @description Risk score 0.0 to 1.0
+             */
             risk_score: number | null;
-            /** Started At */
+            /**
+             * Started At
+             * @description ISO-8601 timestamp when the call started
+             */
             started_at: string | null;
-            /** Status */
-            status: string;
-            /** Trigger */
+            /**
+             * Status
+             * @description Current escalation state
+             * @enum {string}
+             */
+            status: "none" | "requested" | "connected" | "completed" | "cancelled" | "timeout";
+            /**
+             * Trigger
+             * @description What triggered the escalation
+             */
             trigger: string | null;
-            /** Trigger Source */
+            /**
+             * Trigger Source
+             * @description Source system of the trigger
+             */
             trigger_source: string | null;
-            /** Wait Seconds */
+            /**
+             * Wait Seconds
+             * @description Seconds the caller waited for an operator
+             */
             wait_seconds: number | null;
         };
         /** ActiveSession */
@@ -7910,23 +7965,47 @@ export interface components {
         };
         /** BillingDashboardResponse */
         BillingDashboardResponse: {
-            /** Current Period Total */
+            /**
+             * Current Period Total
+             * @description Total billing for the current period
+             */
             current_period_total: number;
-            /** Delta Pct */
+            /**
+             * Delta Pct
+             * @description Percentage change from previous period
+             */
             delta_pct: number | null;
-            /** Invoice Status Summary */
+            /**
+             * Invoice Status Summary
+             * @description Invoice counts by status
+             */
             invoice_status_summary: {
                 [key: string]: number;
             };
-            /** Period End */
+            /**
+             * Period End
+             * @description Current period end date (ISO-8601)
+             */
             period_end: string | null;
-            /** Period Start */
+            /**
+             * Period Start
+             * @description Current period start date (ISO-8601)
+             */
             period_start: string | null;
-            /** Previous Period Total */
+            /**
+             * Previous Period Total
+             * @description Total billing for the previous period
+             */
             previous_period_total: number | null;
-            /** Top Meters */
+            /**
+             * Top Meters
+             * @description Top meters by value
+             */
             top_meters: components["schemas"]["MeterSummary"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace ID
+             */
             workspace_id: string;
         };
         /** Body_enroll-voiceprint */
@@ -8085,62 +8164,71 @@ export interface components {
          *     timeline (call detail → PlaybackTimeline.segments), not here.
          */
         CallIntelligenceDetail: {
-            /** Call Id */
+            /**
+             * Call Id
+             * @description World entity ID for the call
+             */
             call_id: string;
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid?: string | null;
-            /** Completion Reason */
-            completion_reason?: string | null;
-            /** Conversation Summary */
-            conversation_summary?: {
-                [key: string]: unknown;
-            } | null;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Completion Reason
+             * @description Why the call ended
+             */
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer") | null;
+            /** @description Conversation flow metrics */
+            conversation_summary?: components["schemas"]["ConversationSummary"] | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When intelligence was computed
+             */
+            created_at: string;
             /**
              * Direction
+             * @description Call direction
              * @default inbound
+             * @enum {string}
              */
-            direction?: string;
+            direction?: "inbound" | "outbound" | "playground" | "simulated";
             /**
              * Duration Seconds
+             * @description Call duration in seconds
              * @default 0
              */
             duration_seconds?: number;
-            /** Emotion Summary */
-            emotion_summary?: {
-                [key: string]: unknown;
-            } | null;
-            /** Final State */
+            /** @description Emotional analysis */
+            emotion_summary?: components["schemas"]["EmotionSummary"] | null;
+            /**
+             * Final State
+             * @description Final conversation state name
+             */
             final_state?: string | null;
             /**
              * Key Moments
-             * @default []
+             * @description Notable call events
              */
             key_moments?: components["schemas"]["KeyMoment"][];
-            /** Latency Summary */
-            latency_summary?: {
-                [key: string]: unknown;
-            } | null;
-            /** Operator Summary */
-            operator_summary?: {
-                [key: string]: unknown;
-            } | null;
+            /** @description Audio latency metrics */
+            latency_summary?: components["schemas"]["LatencySummary"] | null;
+            /** @description Operator intervention */
+            operator_summary?: components["schemas"]["OperatorIntelligenceSummary"] | null;
+            /** @description Detailed quality breakdown */
             quality_breakdown?: components["schemas"]["QualityBreakdown"] | null;
-            /** Quality Score */
+            /**
+             * Quality Score
+             * @description Quality score 0.0 to 1.0
+             */
             quality_score?: number | null;
-            /** Risk Summary */
-            risk_summary?: {
-                [key: string]: unknown;
-            } | null;
-            /** Safety Summary */
-            safety_summary?: {
-                [key: string]: unknown;
-            } | null;
-            /** Tool Summary */
-            tool_summary?: {
-                [key: string]: unknown;
-            } | null;
+            /** @description Risk assessment */
+            risk_summary?: components["schemas"]["RiskSummary"] | null;
+            /** @description Safety filter results */
+            safety_summary?: components["schemas"]["SafetySummary"] | null;
+            /** @description Tool usage statistics */
+            tool_summary?: components["schemas"]["ToolSummary"] | null;
         };
         /** CallListResponse */
         CallListResponse: {
@@ -8180,43 +8268,100 @@ export interface components {
         };
         /** CallSummary */
         CallSummary: {
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid?: string | null;
-            /** Caller Id */
+            /**
+             * Caller Id
+             * @description Caller phone number
+             */
             caller_id?: string | null;
-            /** Completion Reason */
-            completion_reason?: string | null;
-            /** Direction */
-            direction?: string | null;
-            /** Duration Seconds */
+            /**
+             * Completion Reason
+             * @description Why the call ended
+             */
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer") | null;
+            /**
+             * Direction
+             * @description Call direction
+             */
+            direction?: ("inbound" | "outbound" | "playground" | "simulated") | null;
+            /**
+             * Duration Seconds
+             * @description Call duration in seconds
+             */
             duration_seconds?: number | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * @description World entity ID for this call
+             */
             entity_id: string;
-            /** Escalation Status */
+            /**
+             * Escalation Status
+             * @description Escalation state if any
+             */
             escalation_status?: string | null;
-            /** Final State */
+            /**
+             * Final State
+             * @description Final conversation state
+             */
             final_state?: string | null;
-            /** Fork Turn Index */
+            /**
+             * Fork Turn Index
+             * @description Turn index where simulation forked
+             */
             fork_turn_index?: number | null;
-            /** Has Recording */
+            /**
+             * Has Recording
+             * @description Whether a recording is available
+             */
             has_recording?: boolean | null;
-            /** Parent Session Id */
+            /**
+             * Parent Session Id
+             * @description Parent session for forked simulations
+             */
             parent_session_id?: string | null;
-            /** Phone Number */
+            /**
+             * Phone Number
+             * @description Service phone number
+             */
             phone_number?: string | null;
-            /** Quality Score */
+            /**
+             * Quality Score
+             * @description Quality score 0.0 to 1.0
+             */
             quality_score?: number | null;
-            /** Run Id */
+            /**
+             * Run Id
+             * @description Simulation run ID (simulated calls only)
+             */
             run_id?: string | null;
-            /** Service Id */
+            /**
+             * Service Id
+             * @description Service ID that handled the call
+             */
             service_id?: string | null;
-            /** Source */
-            source?: string | null;
-            /** Started At */
+            /**
+             * Source
+             * @description Whether this is a real or simulated call
+             */
+            source?: ("real" | "simulated") | null;
+            /**
+             * Started At
+             * @description When the call started
+             */
             started_at?: string | null;
-            /** Status */
+            /**
+             * Status
+             * @description Call status
+             */
             status?: string | null;
-            /** Turns */
+            /**
+             * Turns
+             * @description Number of conversation turns
+             */
             turns?: number | null;
         };
         /** CallTranscriptResponse */
@@ -8851,6 +8996,35 @@ export interface components {
             version: number;
             /** Workspace Id */
             workspace_id: string;
+        };
+        /**
+         * ConversationSummary
+         * @description Conversation flow metrics.
+         */
+        ConversationSummary: {
+            /**
+             * Avg Turn Duration Seconds
+             * @description Average turn duration
+             */
+            avg_turn_duration_seconds?: number | null;
+            /**
+             * Barge In Count
+             * @description Number of caller interruptions
+             * @default 0
+             */
+            barge_in_count?: number;
+            /**
+             * Loop Count
+             * @description Number of detected conversation loops
+             * @default 0
+             */
+            loop_count?: number;
+            /**
+             * Topic Changes
+             * @description Number of topic transitions
+             * @default 0
+             */
+            topic_changes?: number;
         };
         /** CooccurrenceResponse */
         CooccurrenceResponse: {
@@ -9671,8 +9845,12 @@ export interface components {
             address?: {
                 [key: string]: unknown;
             } | null;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the company was created
+             */
+            created_at: string;
             /** Domain */
             domain?: string | null;
             /** Entity Id */
@@ -9733,8 +9911,12 @@ export interface components {
              * @default 1
              */
             confidence?: number;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the contact was created
+             */
+            created_at: string;
             /** Email */
             email?: string | null;
             /** Entity Id */
@@ -9790,8 +9972,12 @@ export interface components {
              * @default 1
              */
             confidence?: number;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the contact was created
+             */
+            created_at: string;
             /** Email */
             email?: string | null;
             /** Entity Id */
@@ -9842,8 +10028,12 @@ export interface components {
             amount?: number | null;
             /** Close Date */
             close_date?: string | null;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the deal was created
+             */
+            created_at: string;
             /** Deal Type */
             deal_type?: string | null;
             /** Entity Id */
@@ -9913,30 +10103,113 @@ export interface components {
             /** Sync Healthy */
             sync_healthy?: boolean | null;
         };
+        /**
+         * CustomerAddress
+         * @description Customer billing address.
+         */
+        CustomerAddress: {
+            /**
+             * City
+             * @description City
+             * @default
+             */
+            city?: string;
+            /**
+             * Country
+             * @description ISO 3166-1 alpha-2 country code
+             * @default US
+             */
+            country?: string;
+            /**
+             * Line1
+             * @description Street address line 1
+             * @default
+             */
+            line1?: string;
+            /**
+             * Line2
+             * @description Street address line 2
+             */
+            line2?: string | null;
+            /**
+             * Postal Code
+             * @description Postal or ZIP code
+             * @default
+             */
+            postal_code?: string;
+            /**
+             * State
+             * @description State or province
+             * @default
+             */
+            state?: string;
+        };
         /** CustomerItem */
         CustomerItem: {
-            /** Address */
-            address: {
-                [key: string]: unknown;
-            };
-            /** Billing Contact */
+            /** @description Billing address */
+            address: components["schemas"]["CustomerAddress"];
+            /**
+             * Billing Contact
+             * @description Billing contact name
+             */
             billing_contact: string | null;
-            /** Billing Email */
+            /**
+             * Billing Email
+             * @description Primary billing email
+             */
             billing_email: string;
-            /** Created At */
+            /**
+             * Created At
+             * @description When the customer was created (ISO-8601)
+             */
             created_at: string | null;
-            /** Id */
+            /**
+             * Id
+             * @description Customer ID
+             */
             id: string;
-            /** Mercury Memo */
+            /**
+             * Mercury Memo
+             * @description Mercury bank memo reference
+             */
             mercury_memo: string | null;
-            /** Name */
+            /**
+             * Name
+             * @description Customer name
+             */
             name: string;
-            /** Slug */
+            /**
+             * Slug
+             * @description URL-safe identifier
+             */
             slug: string;
-            /** Status */
-            status: string;
-            /** Updated At */
+            /**
+             * Status
+             * @description Customer status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /**
+             * Updated At
+             * @description When the customer was last updated (ISO-8601)
+             */
             updated_at: string | null;
+        };
+        /**
+         * DailyCallVolume
+         * @description Call volume for a single date.
+         */
+        DailyCallVolume: {
+            /**
+             * Count
+             * @description Number of calls on this date
+             */
+            count: number;
+            /**
+             * Date
+             * @description ISO-8601 date (YYYY-MM-DD)
+             */
+            date: string;
         };
         /** DashboardResponse */
         DashboardResponse: {
@@ -10424,8 +10697,12 @@ export interface components {
         };
         /** DeliveryResponse */
         DeliveryResponse: {
-            /** Created At */
-            created_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the delivery event was created
+             */
+            created_at: string;
             /** Data */
             data: {
                 [key: string]: unknown;
@@ -10528,6 +10805,34 @@ export interface components {
             note: string;
             /** Region */
             region: string;
+        };
+        /**
+         * EmotionSummary
+         * @description Aggregated emotional analysis across the call.
+         */
+        EmotionSummary: {
+            /**
+             * Avg Valence
+             * @description Average emotional valence -1.0 to 1.0
+             */
+            avg_valence?: number | null;
+            /**
+             * Caller Distress Detected
+             * @description Whether caller distress was detected
+             * @default false
+             */
+            caller_distress_detected?: boolean;
+            /**
+             * Dominant Emotion
+             * @description Most frequent emotion
+             */
+            dominant_emotion?: string | null;
+            /**
+             * Emotion Shifts
+             * @description Number of significant emotion transitions
+             * @default 0
+             */
+            emotion_shifts?: number;
         };
         /**
          * EmotionalShift
@@ -10877,8 +11182,12 @@ export interface components {
              * @default 1
              */
             confidence?: number;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the event was created
+             */
+            created_at: string;
             /** Data */
             data?: {
                 [key: string]: unknown;
@@ -10945,8 +11254,12 @@ export interface components {
              * @default 1
              */
             confidence?: number;
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the relationship was created
+             */
+            created_at: string;
             /** Data */
             data?: {
                 [key: string]: unknown;
@@ -11047,7 +11360,10 @@ export interface components {
              * @default 1
              */
             confidence?: number;
-            /** Created At */
+            /**
+             * Created At
+             * @description When the entity was created
+             */
             created_at?: string | null;
             /**
              * Deal Amount
@@ -11151,7 +11467,10 @@ export interface components {
             status?: string | null;
             /** Tags */
             tags?: string[] | null;
-            /** Updated At */
+            /**
+             * Updated At
+             * @description When the entity was last updated
+             */
             updated_at?: string | null;
             /**
              * Workspace Id
@@ -11303,24 +11622,44 @@ export interface components {
         };
         /** EscalationEventResponse */
         EscalationEventResponse: {
-            /** Confidence */
+            /**
+             * Confidence
+             * @description Confidence score 0.0 to 1.0
+             */
             confidence: number;
-            /** Created At */
-            created_at: string | null;
-            /** Data */
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the event occurred
+             */
+            created_at: string;
+            /**
+             * Data
+             * @description Event payload — shape varies by event_type
+             */
             data: {
                 [key: string]: unknown;
             };
-            /** Event Type */
+            /**
+             * Event Type
+             * @description Event type (e.g. escalation.requested, escalation.connected)
+             */
             event_type: string;
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Ingested At */
-            ingested_at: string | null;
-            /** Source */
+            /**
+             * Ingested At
+             * Format: date-time
+             * @description When the event was ingested
+             */
+            ingested_at: string;
+            /**
+             * Source
+             * @description System that emitted the event
+             */
             source: string;
             /**
              * Workspace Id
@@ -11383,8 +11722,12 @@ export interface components {
         EventSummary: {
             /** Confidence */
             confidence: number;
-            /** Created At */
-            created_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the event was created
+             */
+            created_at: string;
             /** Data */
             data: {
                 [key: string]: unknown;
@@ -12551,55 +12894,94 @@ export interface components {
         };
         /** IntegrationResponse */
         IntegrationResponse: {
+            /** @description Authentication configuration */
             auth?: components["schemas"]["AuthConfig"] | null;
             /**
              * Base Url
+             * @description Base URL for REST/FHIR integrations
              * @default
              */
             base_url?: string;
             /**
              * Builtin
+             * @description Whether this is a system-provided integration
              * @default false
              */
             builtin?: boolean;
             /**
              * Created At
              * Format: date-time
+             * @description When the integration was created
              */
             created_at: string;
-            /** Display Name */
+            /**
+             * Display Name
+             * @description Human-readable name
+             */
             display_name: string;
-            /** Enabled */
+            /**
+             * Enabled
+             * @description Whether the integration is active
+             */
             enabled: boolean;
             /**
              * Endpoints
-             * @default []
+             * @description Configured endpoints
              */
             endpoints?: components["schemas"]["EndpointConfig"][];
-            /** Id */
+            /**
+             * Id
+             * @description Integration ID
+             */
             id: string;
-            /** Mcp Args */
+            /**
+             * Mcp Args
+             * @description MCP stdio command arguments
+             */
             mcp_args?: string[] | null;
-            /** Mcp Command */
+            /**
+             * Mcp Command
+             * @description MCP stdio command
+             */
             mcp_command?: string | null;
-            /** Mcp Headers */
+            /**
+             * Mcp Headers
+             * @description MCP request headers
+             */
             mcp_headers?: {
                 [key: string]: string;
             } | null;
-            /** Mcp Transport */
-            mcp_transport?: string | null;
-            /** Mcp Url */
+            /**
+             * Mcp Transport
+             * @description MCP transport type
+             */
+            mcp_transport?: ("stdio" | "sse" | "http") | null;
+            /**
+             * Mcp Url
+             * @description MCP server URL (SSE/HTTP)
+             */
             mcp_url?: string | null;
-            /** Name */
+            /**
+             * Name
+             * @description Slug-like identifier
+             */
             name: string;
-            /** Protocol */
-            protocol: string;
+            /**
+             * Protocol
+             * @description Communication protocol
+             * @enum {string}
+             */
+            protocol: "rest" | "fhir" | "mcp";
             /**
              * Updated At
              * Format: date-time
+             * @description When the integration was last updated
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace ID
+             */
             workspace_id: string;
         };
         /**
@@ -12855,38 +13237,114 @@ export interface components {
         };
         /** InvoiceItem */
         InvoiceItem: {
-            /** Adjustments */
+            /**
+             * Adjustments
+             * @description Adjustment amount
+             */
             adjustments: string;
-            /** Created At */
+            /**
+             * Created At
+             * @description When the invoice was created (ISO-8601)
+             */
             created_at: string | null;
-            /** Customer Id */
+            /**
+             * Customer Id
+             * @description Customer ID
+             */
             customer_id: string;
-            /** Id */
+            /**
+             * Id
+             * @description Invoice ID
+             */
             id: string;
-            /** Invoice Number */
+            /**
+             * Invoice Number
+             * @description Human-readable invoice number
+             */
             invoice_number: string;
-            /** Line Items */
-            line_items: {
-                [key: string]: unknown;
-            }[];
-            /** Paid At */
+            /**
+             * Line Items
+             * @description Itemized charges
+             */
+            line_items: components["schemas"]["InvoiceLineItem"][];
+            /**
+             * Paid At
+             * @description When the invoice was paid (ISO-8601)
+             */
             paid_at: string | null;
-            /** Pdf S3 Key */
+            /**
+             * Pdf S3 Key
+             * @description S3 key for the PDF
+             */
             pdf_s3_key: string | null;
-            /** Period End */
+            /**
+             * Period End
+             * @description Billing period end (ISO-8601)
+             */
             period_end: string;
-            /** Period Start */
+            /**
+             * Period Start
+             * @description Billing period start (ISO-8601)
+             */
             period_start: string;
-            /** Sent At */
+            /**
+             * Sent At
+             * @description When the invoice was sent (ISO-8601)
+             */
             sent_at: string | null;
-            /** Status */
-            status: string;
-            /** Subtotal */
+            /**
+             * Status
+             * @description Invoice status
+             * @enum {string}
+             */
+            status: "draft" | "sent" | "paid" | "void";
+            /**
+             * Subtotal
+             * @description Subtotal before adjustments
+             */
             subtotal: string;
-            /** Total */
+            /**
+             * Total
+             * @description Invoice total
+             */
             total: string;
-            /** Updated At */
+            /**
+             * Updated At
+             * @description When the invoice was last updated (ISO-8601)
+             */
             updated_at: string | null;
+        };
+        /**
+         * InvoiceLineItem
+         * @description A single line item on an invoice.
+         */
+        InvoiceLineItem: {
+            /**
+             * Description
+             * @description Line item description
+             * @default
+             */
+            description?: string;
+            /**
+             * Meter Key
+             * @description Meter identifier
+             */
+            meter_key: string;
+            /**
+             * Quantity
+             * @description Usage quantity
+             */
+            quantity: string;
+            /**
+             * Total
+             * @description Line item total
+             */
+            total: string;
+            /**
+             * Unit Price
+             * @description Price per unit
+             */
+            unit_price: string;
         };
         /**
          * JoinCallRequest
@@ -12907,13 +13365,26 @@ export interface components {
          * @description Confirmation of operator joining a call's conference.
          */
         JoinCallResponse: {
-            /** Conference Sid */
+            /**
+             * Conference Sid
+             * @description Twilio conference SID
+             */
             conference_sid: string;
-            /** Mode */
-            mode: string;
-            /** Operator Entity Id */
+            /**
+             * Mode
+             * @description Operator mode: listen or takeover
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
+            /**
+             * Operator Entity Id
+             * @description World entity ID of the operator
+             */
             operator_entity_id: string;
-            /** Participant Call Sid */
+            /**
+             * Participant Call Sid
+             * @description Twilio participant call SID
+             */
             participant_call_sid: string;
         };
         /**
@@ -12921,17 +13392,29 @@ export interface components {
          * @description Notable event during the call worth highlighting.
          */
         KeyMoment: {
-            /** Description */
+            /**
+             * Description
+             * @description Human-readable description
+             */
             description: string;
             /**
              * Severity
+             * @description Severity level
              * @default warning
+             * @enum {string}
              */
-            severity?: string;
-            /** Turn */
+            severity?: "info" | "warning" | "error";
+            /**
+             * Turn
+             * @description Turn index where the moment occurred
+             */
             turn?: number | null;
-            /** Type */
-            type: string;
+            /**
+             * Type
+             * @description Category of the moment
+             * @enum {string}
+             */
+            type: "latency_spike" | "silence" | "barge_in" | "loop" | "tool_failure" | "escalation" | "safety_flag" | "high_risk" | "elevated_risk";
         };
         /** LLMConfig */
         LLMConfig: {
@@ -12961,6 +13444,32 @@ export interface components {
              * @default 0
              */
             event_count?: number;
+        };
+        /**
+         * LatencySummary
+         * @description Audio latency and silence metrics.
+         */
+        LatencySummary: {
+            /**
+             * P50 Audio Ttfb Ms
+             * @description Median audio time-to-first-byte (ms)
+             */
+            p50_audio_ttfb_ms?: number | null;
+            /**
+             * P95 Audio Ttfb Ms
+             * @description 95th percentile audio TTFB (ms)
+             */
+            p95_audio_ttfb_ms?: number | null;
+            /**
+             * Silence Ratio
+             * @description Fraction of call spent in silence
+             */
+            silence_ratio?: number | null;
+            /**
+             * Total Silence Seconds
+             * @description Total silence duration in seconds
+             */
+            total_silence_seconds?: number | null;
         };
         /**
          * LeaveCallRequest
@@ -13138,38 +13647,85 @@ export interface components {
             /** Total */
             total: number;
         };
+        /**
+         * MeterBreakdown
+         * @description Breakdown of a meter value by sub-category.
+         */
+        MeterBreakdown: {
+            /**
+             * Categories
+             * @description Sub-category values
+             */
+            categories?: {
+                [key: string]: number;
+            };
+        };
         /** MeterSummary */
         MeterSummary: {
-            /** Display Name */
+            /**
+             * Display Name
+             * @description Human-readable meter name
+             */
             display_name: string;
-            /** Meter Key */
+            /**
+             * Meter Key
+             * @description Unique meter identifier (e.g. voice_minutes)
+             */
             meter_key: string;
-            /** Unit */
+            /**
+             * Unit
+             * @description Unit of measurement (e.g. minutes, calls)
+             */
             unit: string;
-            /** Value */
+            /**
+             * Value
+             * @description Metered value for the period
+             */
             value: number;
         };
         /** MeterValueItem */
         MeterValueItem: {
-            /** Breakdown */
-            breakdown: {
-                [key: string]: unknown;
-            };
-            /** Customer Id */
+            /** @description Sub-category breakdown */
+            breakdown: components["schemas"]["MeterBreakdown"];
+            /**
+             * Customer Id
+             * @description Customer ID
+             */
             customer_id: string;
-            /** Id */
+            /**
+             * Id
+             * @description Meter value record ID
+             */
             id: string;
-            /** Meter Key */
+            /**
+             * Meter Key
+             * @description Meter identifier
+             */
             meter_key: string;
-            /** Period End */
+            /**
+             * Period End
+             * @description Period end (ISO-8601)
+             */
             period_end: string;
-            /** Period Start */
+            /**
+             * Period Start
+             * @description Period start (ISO-8601)
+             */
             period_start: string;
-            /** Unit */
+            /**
+             * Unit
+             * @description Unit of measurement
+             */
             unit: string;
-            /** Updated At */
+            /**
+             * Updated At
+             * @description Last updated (ISO-8601)
+             */
             updated_at: string | null;
-            /** Value */
+            /**
+             * Value
+             * @description Metered value
+             */
             value: string;
         };
         /** MetricCatalogEntry */
@@ -13504,61 +14060,144 @@ export interface components {
              */
             target_fields?: string[] | null;
         };
+        /**
+         * OperatorIntelligenceSummary
+         * @description Operator intervention summary.
+         */
+        OperatorIntelligenceSummary: {
+            /**
+             * Escalated
+             * @description Whether the call was escalated
+             * @default false
+             */
+            escalated?: boolean;
+            /**
+             * Operator Handle Time Seconds
+             * @description Operator handle time
+             */
+            operator_handle_time_seconds?: number | null;
+        };
         /** OperatorPerformanceItem */
         OperatorPerformanceItem: {
-            /** Avg Handle Time Seconds */
+            /**
+             * Avg Handle Time Seconds
+             * @description Average handle time in seconds
+             */
             avg_handle_time_seconds: number;
-            /** Last Call At */
+            /**
+             * Last Call At
+             * @description ISO-8601 timestamp of last call
+             */
             last_call_at: string | null;
-            /** Name */
+            /**
+             * Name
+             * @description Display name
+             */
             name: string | null;
             /**
              * Operator Id
              * Format: uuid
              */
             operator_id: string;
-            /** Status */
-            status: string;
-            /** Total Escalations Handled */
+            /**
+             * Status
+             * @description Current availability
+             * @enum {string}
+             */
+            status: "online" | "busy" | "offline";
+            /**
+             * Total Escalations Handled
+             * @description Lifetime escalation count
+             */
             total_escalations_handled: number;
         };
         /** OperatorResponse */
         OperatorResponse: {
-            /** Active Call Sid */
+            /**
+             * Active Call Sid
+             * @description Call SID if currently on a call
+             */
             active_call_sid: string | null;
-            /** Avg Handle Time Seconds */
+            /**
+             * Avg Handle Time Seconds
+             * @description Average escalation handle time in seconds
+             */
             avg_handle_time_seconds: number;
-            /** Connection Method */
-            connection_method: string;
-            /** Created At */
-            created_at: string | null;
-            /** Email */
+            /**
+             * Connection Method
+             * @description How the operator connects to calls
+             * @enum {string}
+             */
+            connection_method: "browser" | "phone";
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the operator was created
+             */
+            created_at: string;
+            /**
+             * Email
+             * @description Contact email
+             */
             email: string | null;
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Last Call At */
+            /**
+             * Last Call At
+             * @description ISO-8601 timestamp of last call
+             */
             last_call_at: string | null;
-            /** Last Status Change */
+            /**
+             * Last Status Change
+             * @description ISO-8601 timestamp of last status transition
+             */
             last_status_change: string | null;
-            /** Name */
+            /**
+             * Name
+             * @description Display name
+             */
             name: string | null;
-            /** Phone Number */
+            /**
+             * Phone Number
+             * @description E.164 phone number for phone-based operators
+             */
             phone_number: string | null;
-            /** Role */
-            role: string;
-            /** Skills */
+            /**
+             * Role
+             * @description Permission role
+             * @enum {string}
+             */
+            role: "operator" | "supervisor" | "admin";
+            /**
+             * Skills
+             * @description Skill tags for routing
+             */
             skills: string[];
-            /** Status */
-            status: string;
-            /** Total Escalations Handled */
+            /**
+             * Status
+             * @description Current availability
+             * @enum {string}
+             */
+            status: "online" | "busy" | "offline";
+            /**
+             * Total Escalations Handled
+             * @description Lifetime escalation count
+             */
             total_escalations_handled: number;
-            /** Type */
-            type: string | null;
-            /** Updated At */
-            updated_at: string | null;
+            /**
+             * Type
+             * @description Operator specialization
+             */
+            type: ("clinical" | "administrative" | "crisis_counselor") | null;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the operator was last updated
+             */
+            updated_at: string;
             /**
              * Workspace Id
              * Format: uuid
@@ -14297,22 +14936,35 @@ export interface components {
         };
         /** PhoneNumberCallVolume */
         PhoneNumberCallVolume: {
-            /** Avg Duration Seconds */
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration
+             */
             avg_duration_seconds?: number | null;
             /**
              * By Date
-             * @default []
+             * @description Daily volume breakdown
              */
-            by_date?: {
-                [key: string]: unknown;
-            }[];
-            /** Inbound */
+            by_date?: components["schemas"]["DailyCallVolume"][];
+            /**
+             * Inbound
+             * @description Inbound call count
+             */
             inbound: number;
-            /** Outbound */
+            /**
+             * Outbound
+             * @description Outbound call count
+             */
             outbound: number;
-            /** Phone Number */
+            /**
+             * Phone Number
+             * @description E.164 phone number
+             */
             phone_number: string;
-            /** Total Calls */
+            /**
+             * Total Calls
+             * @description Total calls across the period
+             */
             total_calls: number;
         };
         /** PhoneNumberPurchaseResponse */
@@ -14519,10 +15171,14 @@ export interface components {
         PriorityQueueItem: {
             /** Brief Context */
             brief_context?: string | null;
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string;
             /**
              * Caller Id
+             * @description Caller phone number
              * @default
              */
             caller_id?: string;
@@ -14537,9 +15193,11 @@ export interface components {
             current_valence?: number | null;
             /**
              * Direction
+             * @description Call direction
              * @default inbound
+             * @enum {string}
              */
-            direction?: string;
+            direction?: "inbound" | "outbound";
             /** Entity Name */
             entity_name?: string | null;
             /**
@@ -14558,6 +15216,7 @@ export interface components {
             risk_score?: number | null;
             /**
              * Service Id
+             * @description Service ID handling the call
              * @default
              */
             service_id?: string;
@@ -14658,18 +15317,33 @@ export interface components {
          * @description Single quality score component with penalty and context.
          */
         QualityComponent: {
-            /** Name */
-            name: string;
-            /** Penalty */
+            /**
+             * Name
+             * @description Quality dimension
+             * @enum {string}
+             */
+            name: "latency" | "silence" | "barge_ins" | "loops" | "escalation" | "tool_failures";
+            /**
+             * Penalty
+             * @description Penalty subtracted from the score
+             */
             penalty: number;
             /**
              * Severity
+             * @description Severity of the penalty
              * @default none
+             * @enum {string}
              */
-            severity?: string;
-            /** Threshold */
+            severity?: "none" | "minor" | "major" | "critical";
+            /**
+             * Threshold
+             * @description Threshold that was exceeded
+             */
             threshold?: string | null;
-            /** Value */
+            /**
+             * Value
+             * @description Raw measured value
+             */
             value?: number | null;
         };
         /**
@@ -15014,8 +15688,12 @@ export interface components {
             completed_action: ("approved" | "rejected" | "corrected") | null;
             /** Completed At */
             completed_at: string | null;
-            /** Created At */
-            created_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the review item was created
+             */
+            created_at: string;
             entity?: components["schemas"]["EntitySummary"] | null;
             /** Entity Id */
             entity_id: string | null;
@@ -15109,6 +15787,30 @@ export interface components {
                 [key: string]: number;
             };
         };
+        /**
+         * RiskSummary
+         * @description Aggregated risk signals across the call.
+         */
+        RiskSummary: {
+            /**
+             * Composite Score
+             * @description Overall risk score 0.0 to 1.0
+             * @default 0
+             */
+            composite_score?: number;
+            /**
+             * Flags
+             * @description Specific risk flags raised
+             */
+            flags?: string[];
+            /**
+             * Level
+             * @description Risk level
+             * @default low
+             * @enum {string}
+             */
+            level?: "low" | "medium" | "high" | "critical";
+        };
         /** RotateApiKeyRequest */
         RotateApiKeyRequest: {
             /** Duration Days */
@@ -15171,6 +15873,23 @@ export interface components {
             threshold: number;
             /** Triage Hints */
             triage_hints: string[];
+        };
+        /**
+         * SafetySummary
+         * @description Safety filter results.
+         */
+        SafetySummary: {
+            /**
+             * Categories
+             * @description Safety categories matched
+             */
+            categories?: string[];
+            /**
+             * Match Count
+             * @description Number of safety filter matches
+             * @default 0
+             */
+            match_count?: number;
         };
         /**
          * SampleFact
@@ -15424,10 +16143,17 @@ export interface components {
         };
         /** SendGuidanceResponse */
         SendGuidanceResponse: {
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Call SID the guidance was sent to
+             */
             call_sid: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @description Delivery status
+             * @enum {string}
+             */
+            status: "delivered" | "failed";
         };
         /**
          * Service
@@ -16505,8 +17231,12 @@ export interface components {
         };
         /** SwitchModeResponse */
         SwitchModeResponse: {
-            /** Mode */
-            mode: string;
+            /**
+             * Mode
+             * @description New operator mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
         };
         /** SyncBulkRetryResponse */
         SyncBulkRetryResponse: {
@@ -16517,8 +17247,12 @@ export interface components {
         };
         /** SyncEventItem */
         SyncEventItem: {
-            /** Created At */
-            created_at?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the event was created
+             */
+            created_at: string;
             /** Data Source Id */
             data_source_id?: string | null;
             /** Display Name */
@@ -16724,27 +17458,47 @@ export interface components {
         };
         /** TestEndpointResponse */
         TestEndpointResponse: {
-            /** After Filter */
+            /**
+             * After Filter
+             * @description Response after filter transformations
+             */
             after_filter?: unknown;
-            /** After Mapping */
+            /**
+             * After Mapping
+             * @description Response after field mapping
+             */
             after_mapping?: unknown;
             /**
              * Duration Ms
+             * @description Request duration in milliseconds
              * @default 0
              */
             duration_ms?: number;
-            /** Error */
+            /**
+             * Error
+             * @description Error message if the request failed
+             */
             error?: string | null;
-            /** Final Result */
+            /**
+             * Final Result
+             * @description Final processed result
+             */
             final_result?: string | null;
-            /** Raw Response */
+            /**
+             * Raw Response
+             * @description Raw response body from the endpoint
+             */
             raw_response?: unknown;
             /**
              * Retries
+             * @description Number of retry attempts
              * @default 0
              */
             retries?: number;
-            /** Status Code */
+            /**
+             * Status Code
+             * @description HTTP status code from the endpoint
+             */
             status_code?: number | null;
         };
         /** TestSkillRequest */
@@ -16918,6 +17672,30 @@ export interface components {
             tools: components["schemas"]["ResolvedToolItem"][];
             /** Workspace Id */
             workspace_id: string;
+        };
+        /**
+         * ToolSummary
+         * @description Tool usage statistics.
+         */
+        ToolSummary: {
+            /**
+             * Failed
+             * @description Failed tool invocations
+             * @default 0
+             */
+            failed?: number;
+            /**
+             * Failure Rate
+             * @description Tool failure rate 0.0 to 1.0
+             * @default 0
+             */
+            failure_rate?: number;
+            /**
+             * Total Calls
+             * @description Total tool invocations
+             * @default 0
+             */
+            total_calls?: number;
         };
         /** TopSource */
         TopSource: {
@@ -17288,41 +18066,80 @@ export interface components {
             /**
              * Action Id
              * Format: uuid
+             * @description Action (skill) to invoke when fired
              */
             action_id: string;
-            /** Created At */
-            created_at: string | null;
-            /** Created By */
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the trigger was created
+             */
+            created_at: string;
+            /**
+             * Created By
+             * @description Entity ID of the creator
+             */
             created_by: string | null;
-            /** Description */
+            /**
+             * Description
+             * @description Human-readable description
+             */
             description: string | null;
-            /** Event Filter */
+            /**
+             * Event Filter
+             * @description JSONPath filter on event data
+             */
             event_filter: {
                 [key: string]: unknown;
             } | null;
-            /** Event Type */
+            /**
+             * Event Type
+             * @description Event type pattern to match
+             */
             event_type: string;
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Input Template */
+            /**
+             * Input Template
+             * @description Input template merged with event data
+             */
             input_template: {
                 [key: string]: unknown;
             };
-            /** Is Active */
+            /**
+             * Is Active
+             * @description Whether the trigger is active
+             */
             is_active: boolean;
-            /** Name */
+            /**
+             * Name
+             * @description Trigger display name
+             */
             name: string;
-            /** Next Fire At */
+            /**
+             * Next Fire At
+             * @description Next scheduled fire time
+             */
             next_fire_at: string | null;
-            /** Schedule */
+            /**
+             * Schedule
+             * @description Cron schedule expression (e.g. '0 9 * * 1-5')
+             */
             schedule: string | null;
-            /** Timezone */
+            /**
+             * Timezone
+             * @description IANA timezone for schedule evaluation
+             */
             timezone: string;
-            /** Updated At */
-            updated_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the trigger was last updated
+             */
+            updated_at: string;
             /**
              * Workspace Id
              * Format: uuid
@@ -17331,20 +18148,33 @@ export interface components {
         };
         /** TriggerRunResponse */
         TriggerRunResponse: {
-            /** Created At */
-            created_at: string | null;
-            /** Data */
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the run was created
+             */
+            created_at: string;
+            /**
+             * Data
+             * @description Run result data
+             */
             data: {
                 [key: string]: unknown;
             };
-            /** Effective At */
+            /**
+             * Effective At
+             * @description When the run took effect
+             */
             effective_at: string | null;
             /**
              * Event Id
              * Format: uuid
              */
             event_id: string;
-            /** Event Type */
+            /**
+             * Event Type
+             * @description Event type of the run
+             */
             event_type: string;
         };
         /**
@@ -17874,15 +18704,30 @@ export interface components {
         };
         /** UsageTrendPoint */
         UsageTrendPoint: {
-            /** Meter Key */
+            /**
+             * Meter Key
+             * @description Meter identifier
+             */
             meter_key: string;
-            /** Period End */
+            /**
+             * Period End
+             * @description Period end date (ISO-8601)
+             */
             period_end: string;
-            /** Period Start */
+            /**
+             * Period Start
+             * @description Period start date (ISO-8601)
+             */
             period_start: string;
-            /** Unit */
+            /**
+             * Unit
+             * @description Unit of measurement
+             */
             unit: string;
-            /** Value */
+            /**
+             * Value
+             * @description Metered value for this period
+             */
             value: number;
         };
         /** ValidationError */
@@ -18059,8 +18904,12 @@ export interface components {
         WebhookDestinationCreatedResponse: {
             /** Accepted Event Types */
             accepted_event_types: string[];
-            /** Created At */
-            created_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the webhook destination was created
+             */
+            created_at: string;
             /** Created By */
             created_by: string | null;
             /** Description */
@@ -18087,8 +18936,12 @@ export interface components {
              * Format: uuid
              */
             trigger_id: string;
-            /** Updated At */
-            updated_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the webhook destination was last updated
+             */
+            updated_at: string;
             /** Url */
             url: string;
             /**
@@ -18101,8 +18954,12 @@ export interface components {
         WebhookDestinationResponse: {
             /** Accepted Event Types */
             accepted_event_types: string[];
-            /** Created At */
-            created_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the webhook destination was created
+             */
+            created_at: string;
             /** Created By */
             created_by: string | null;
             /** Description */
@@ -18127,8 +18984,12 @@ export interface components {
              * Format: uuid
              */
             trigger_id: string;
-            /** Updated At */
-            updated_at: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the webhook destination was last updated
+             */
+            updated_at: string;
             /** Url */
             url: string;
             /**
@@ -18569,22 +19430,39 @@ export interface components {
         };
         /** AuditEventResponse */
         src__routes__operators_models__AuditEventResponse: {
-            /** Created At */
-            created_at: string | null;
-            /** Data */
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the event occurred
+             */
+            created_at: string;
+            /**
+             * Data
+             * @description Audit payload — shape varies by event_type
+             */
             data: {
                 [key: string]: unknown;
             };
-            /** Event Type */
+            /**
+             * Event Type
+             * @description Audit event type (e.g. operator.status_change)
+             */
             event_type: string;
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Ingested At */
-            ingested_at: string | null;
-            /** Source */
+            /**
+             * Ingested At
+             * Format: date-time
+             * @description When the event was ingested
+             */
+            ingested_at: string;
+            /**
+             * Source
+             * @description System that emitted the event
+             */
             source: string;
             /**
              * Workspace Id

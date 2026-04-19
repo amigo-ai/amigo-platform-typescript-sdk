@@ -5,54 +5,62 @@ const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const VOICE_SETTINGS_FIXTURE = {
-  default_language: 'en',
-  voice_provider: 'deepgram',
-  stt_model: 'nova-2',
-  tts_provider: 'elevenlabs',
-  tts_voice_id: 'voice-abc123',
-  silence_timeout_ms: 3000,
-  max_call_duration_seconds: 1800,
-  recording_enabled: true,
+  language: 'en',
+  post_call_analysis_enabled: true,
+  correction_categories: [],
+  keyterms: [],
+  sensitive_topics: [],
+  transcript_correction_enabled: false,
+  voice_id: 'voice-abc123',
+  pronunciation_dict_id: null,
+  speed: null,
+  tone: null,
+  volume: null,
 }
 
 const BRANDING_FIXTURE = {
-  display_name: 'Acme Health',
-  logo_url: 'https://cdn.example.com/logo.png',
-  primary_color: '#0066CC',
-  secondary_color: '#004499',
-  support_email: 'support@acme.example.com',
-  support_phone: '+14155551000',
+  branding: {
+    primary_color: '#0066CC',
+    background_color: '#FFFFFF',
+    logo_url: 'https://cdn.example.com/logo.png',
+    font_family: null,
+  },
 }
 
 const OUTREACH_FIXTURE = {
-  enabled: true,
-  max_daily_calls: 50,
-  calling_hours: { start: '09:00', end: '17:00', timezone: 'America/New_York' },
-  retry_policy: { max_attempts: 3, delay_minutes: 60 },
+  rules: [
+    { name: 'Appointment Reminders', schedule: '0 9 * * 1-5' },
+  ],
+  data_templates: [
+    { name: 'reminder', fields: ['patient_name', 'appointment_date'] },
+  ],
 }
 
 const MEMORY_SETTINGS_FIXTURE = {
-  enabled: true,
-  retention_days: 90,
-  auto_summarize: true,
+  backfill_requested: false,
+  dimensions: [
+    { name: 'preferences', enabled: true },
+  ],
 }
 
 const SECURITY_FIXTURE = {
-  mfa_required: true,
-  session_timeout_minutes: 60,
-  ip_allowlist: ['10.0.0.0/8'],
+  voice_auth_enabled: true,
 }
 
 const RETENTION_FIXTURE = {
   call_recordings_days: 365,
-  transcripts_days: 730,
-  events_days: 1095,
+  call_transcripts_days: 730,
+  world_events_days: 1095,
+  audit_log_days: 365,
+  phi_data_days: 2555,
+  legal_hold: false,
+  legal_hold_reason: null,
 }
 
 const WORKFLOWS_FIXTURE = {
-  auto_escalation_enabled: true,
-  escalation_timeout_seconds: 120,
-  wrap_up_required: true,
+  workflows: [
+    { name: 'escalation', enabled: true },
+  ],
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -85,31 +93,34 @@ const client = new AmigoClient({
       Response.json(VOICE_SETTINGS_FIXTURE),
 
     [`PUT ${BASE}/settings/voice`]: () =>
-      Response.json({ ...VOICE_SETTINGS_FIXTURE, silence_timeout_ms: 5000 }),
+      Response.json({ ...VOICE_SETTINGS_FIXTURE, language: 'es' }),
 
     [`GET ${BASE}/settings/branding`]: () =>
       Response.json(BRANDING_FIXTURE),
 
     [`PUT ${BASE}/settings/branding`]: () =>
-      Response.json({ ...BRANDING_FIXTURE, display_name: 'Acme Health Pro' }),
+      Response.json({ branding: { ...BRANDING_FIXTURE.branding, primary_color: '#FF0000' } }),
 
     [`GET ${BASE}/settings/outreach`]: () =>
       Response.json(OUTREACH_FIXTURE),
 
     [`PUT ${BASE}/settings/outreach`]: () =>
-      Response.json({ ...OUTREACH_FIXTURE, max_daily_calls: 100 }),
+      Response.json({
+        ...OUTREACH_FIXTURE,
+        rules: [...OUTREACH_FIXTURE.rules, { name: 'Follow-up', schedule: '0 14 * * 1-5' }],
+      }),
 
     [`GET ${BASE}/settings/memory`]: () =>
       Response.json(MEMORY_SETTINGS_FIXTURE),
 
     [`PUT ${BASE}/settings/memory`]: () =>
-      Response.json({ ...MEMORY_SETTINGS_FIXTURE, retention_days: 180 }),
+      Response.json({ ...MEMORY_SETTINGS_FIXTURE, backfill_requested: true }),
 
     [`GET ${BASE}/settings/security`]: () =>
       Response.json(SECURITY_FIXTURE),
 
     [`PUT ${BASE}/settings/security`]: () =>
-      Response.json({ ...SECURITY_FIXTURE, mfa_required: false }),
+      Response.json({ voice_auth_enabled: false }),
 
     [`GET ${BASE}/settings/retention`]: () =>
       Response.json(RETENTION_FIXTURE),
@@ -121,7 +132,12 @@ const client = new AmigoClient({
       Response.json(WORKFLOWS_FIXTURE),
 
     [`PUT ${BASE}/settings/workflows`]: () =>
-      Response.json({ ...WORKFLOWS_FIXTURE, escalation_timeout_seconds: 60 }),
+      Response.json({
+        workflows: [
+          { name: 'escalation', enabled: true },
+          { name: 'wrap-up', enabled: true },
+        ],
+      }),
   }),
 })
 
@@ -129,66 +145,63 @@ describe('SettingsResource', () => {
   describe('voice', () => {
     it('gets voice settings', async () => {
       const result = await client.settings.voice.get()
-      expect(result.default_language).toBe('en')
-      expect(result.recording_enabled).toBe(true)
-      expect(result.silence_timeout_ms).toBe(3000)
+      expect(result.language).toBe('en')
+      expect(result.post_call_analysis_enabled).toBe(true)
     })
 
     it('updates voice settings', async () => {
-      const result = await client.settings.voice.update({ silence_timeout_ms: 5000 } as never)
-      expect(result.silence_timeout_ms).toBe(5000)
+      const result = await client.settings.voice.update({ language: 'es' } as never)
+      expect(result.language).toBe('es')
     })
   })
 
   describe('branding', () => {
     it('gets branding settings', async () => {
       const result = await client.settings.branding.get()
-      expect(result.display_name).toBe('Acme Health')
-      expect(result.primary_color).toBe('#0066CC')
+      expect(result.branding.primary_color).toBe('#0066CC')
     })
 
     it('updates branding settings', async () => {
-      const result = await client.settings.branding.update({ display_name: 'Acme Health Pro' } as never)
-      expect(result.display_name).toBe('Acme Health Pro')
+      const result = await client.settings.branding.update({ branding: { primary_color: '#FF0000' } } as never)
+      expect(result.branding.primary_color).toBe('#FF0000')
     })
   })
 
   describe('outreach', () => {
     it('gets outreach settings', async () => {
       const result = await client.settings.outreach.get()
-      expect(result.enabled).toBe(true)
-      expect(result.max_daily_calls).toBe(50)
+      expect(result.rules).toHaveLength(1)
+      expect(result.data_templates).toHaveLength(1)
     })
 
     it('updates outreach settings', async () => {
-      const result = await client.settings.outreach.update({ max_daily_calls: 100 } as never)
-      expect(result.max_daily_calls).toBe(100)
+      const result = await client.settings.outreach.update({ rules: [] } as never)
+      expect(result.rules).toHaveLength(2)
     })
   })
 
   describe('memory', () => {
     it('gets memory settings', async () => {
       const result = await client.settings.memory.get()
-      expect(result.enabled).toBe(true)
-      expect(result.retention_days).toBe(90)
+      expect(result.backfill_requested).toBe(false)
+      expect(result.dimensions).toHaveLength(1)
     })
 
     it('updates memory settings', async () => {
-      const result = await client.settings.memory.update({ retention_days: 180 } as never)
-      expect(result.retention_days).toBe(180)
+      const result = await client.settings.memory.update({ backfill_requested: true } as never)
+      expect(result.backfill_requested).toBe(true)
     })
   })
 
   describe('security', () => {
     it('gets security settings', async () => {
       const result = await client.settings.security.get()
-      expect(result.mfa_required).toBe(true)
-      expect(result.session_timeout_minutes).toBe(60)
+      expect(result.voice_auth_enabled).toBe(true)
     })
 
     it('updates security settings', async () => {
-      const result = await client.settings.security.update({ mfa_required: false } as never)
-      expect(result.mfa_required).toBe(false)
+      const result = await client.settings.security.update({ voice_auth_enabled: false } as never)
+      expect(result.voice_auth_enabled).toBe(false)
     })
   })
 
@@ -196,7 +209,7 @@ describe('SettingsResource', () => {
     it('gets retention policy', async () => {
       const result = await client.settings.retention.get()
       expect(result.call_recordings_days).toBe(365)
-      expect(result.transcripts_days).toBe(730)
+      expect(result.call_transcripts_days).toBe(730)
     })
 
     it('updates retention policy', async () => {
@@ -208,13 +221,12 @@ describe('SettingsResource', () => {
   describe('workflows', () => {
     it('gets workflow settings', async () => {
       const result = await client.settings.workflows.get()
-      expect(result.auto_escalation_enabled).toBe(true)
-      expect(result.wrap_up_required).toBe(true)
+      expect(result.workflows).toHaveLength(1)
     })
 
     it('updates workflow settings', async () => {
-      const result = await client.settings.workflows.update({ escalation_timeout_seconds: 60 } as never)
-      expect(result.escalation_timeout_seconds).toBe(60)
+      const result = await client.settings.workflows.update({ workflows: [] } as never)
+      expect(result.workflows).toHaveLength(2)
     })
   })
 })

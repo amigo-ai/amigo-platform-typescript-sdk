@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { createPlatformClient } from '../../src/core/openapi-client.js'
-import { OperatorsResource } from '../../src/resources/operators.js'
+import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -21,19 +20,23 @@ const OPERATOR_FIXTURE = {
 }
 
 const DASHBOARD_FIXTURE = {
-  total_operators: 12,
-  available: 8,
-  on_call: 3,
-  offline: 1,
+  workspace_id: TEST_WORKSPACE_ID,
+  operators: {
+    total: 12,
+    online: 8,
+    busy: 3,
+    offline: 1,
+  },
   active_escalations: 2,
-  avg_response_time_seconds: 45,
+  escalations_today: { total: 5, resolved: 3, avg_response_time_seconds: 45 },
+  recent_escalations: [],
 }
 
 const JOIN_CALL_FIXTURE = {
-  operator_id: OPERATOR_ID,
-  call_sid: CALL_SID,
-  status: 'connected',
-  joined_at: '2026-01-15T10:32:00Z',
+  conference_sid: 'CF1234567890abcdef1234567890abcdef',
+  mode: 'listen',
+  operator_entity_id: OPERATOR_ID,
+  participant_call_sid: 'CA0987654321abcdef1234567890abcdef',
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -58,9 +61,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-const platformClient = createPlatformClient({
+const client = new AmigoClient({
   apiKey: TEST_API_KEY,
-  baseUrl: 'https://api.platform.amigo.ai',
+  workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
     [`GET ${BASE}/operators`]: () =>
       Response.json({ items: [OPERATOR_FIXTURE], has_more: false, continuation_token: null }),
@@ -78,7 +81,11 @@ const platformClient = createPlatformClient({
       Response.json(DASHBOARD_FIXTURE),
 
     [`GET ${BASE}/operators/queue`]: () =>
-      Response.json({ queue: [{ call_sid: CALL_SID, priority: 'high', wait_seconds: 30 }] }),
+      Response.json({
+        workspace_id: TEST_WORKSPACE_ID,
+        queue: [{ call_sid: CALL_SID, priority_score: 0.85, wait_seconds: 30 }],
+        total_active: 1,
+      }),
 
     [`POST ${BASE}/operators/${OPERATOR_ID}/join-call`]: () =>
       Response.json(JOIN_CALL_FIXTURE),
@@ -87,27 +94,30 @@ const platformClient = createPlatformClient({
       Response.json({ operator_id: OPERATOR_ID, call_sid: CALL_SID, status: 'disconnected' }),
 
     [`POST ${BASE}/operators/${OPERATOR_ID}/access-token`]: () =>
-      Response.json({ token: 'eyJhbGciOiJSUzI1NiJ9.test', expires_in: 3600 }),
+      Response.json({
+        token: 'eyJhbGciOiJSUzI1NiJ9.test',
+        identity: OPERATOR_ID,
+        conference_sid: 'CF1234567890abcdef1234567890abcdef',
+        connect_params: {},
+      }),
 
     [`GET ${BASE}/operators/escalations`]: () =>
       Response.json({ items: [], has_more: false, continuation_token: null }),
 
     [`GET ${BASE}/operators/escalations/active`]: () =>
-      Response.json({ escalations: [] }),
+      Response.json({ items: [], has_more: false, continuation_token: null }),
   }),
 })
 
-const operators = new OperatorsResource(platformClient, TEST_WORKSPACE_ID)
-
 describe('OperatorsResource', () => {
   it('lists operators', async () => {
-    const result = await operators.list()
+    const result = await client.operators.list()
     expect(result.items).toHaveLength(1)
     expect(result.items[0]?.name).toBe('Dr. Smith')
   })
 
   it('creates an operator', async () => {
-    const result = await operators.create({
+    const result = await client.operators.create({
       name: 'Dr. Smith',
       email: 'smith@clinic.example.com',
     } as never)
@@ -116,47 +126,47 @@ describe('OperatorsResource', () => {
   })
 
   it('gets an operator by id', async () => {
-    const result = await operators.get(OPERATOR_ID)
+    const result = await client.operators.get(OPERATOR_ID)
     expect(result.id).toBe(OPERATOR_ID)
     expect(result.status).toBe('available')
   })
 
   it('throws NotFoundError for missing operator', async () => {
-    await expect(operators.get('not-found')).rejects.toThrow(NotFoundError)
+    await expect(client.operators.get('not-found')).rejects.toThrow(NotFoundError)
   })
 
   it('gets the operator dashboard', async () => {
-    const result = await operators.getDashboard()
-    expect(result.total_operators).toBe(12)
-    expect(result.available).toBe(8)
+    const result = await client.operators.getDashboard()
+    expect(result.operators.total).toBe(12)
+    expect(result.operators.online).toBe(8)
     expect(result.active_escalations).toBe(2)
   })
 
   it('gets the operator queue', async () => {
-    const result = await operators.getQueue()
+    const result = await client.operators.getQueue()
     expect(result.queue).toHaveLength(1)
-    expect(result.queue[0]?.priority).toBe('high')
+    expect(result.queue[0]?.priority_score).toBe(0.85)
   })
 
   it('joins a call', async () => {
-    const result = await operators.joinCall(OPERATOR_ID, { call_sid: CALL_SID } as never)
-    expect(result.status).toBe('connected')
-    expect(result.call_sid).toBe(CALL_SID)
+    const result = await client.operators.joinCall(OPERATOR_ID, { call_sid: CALL_SID } as never)
+    expect(result.mode).toBe('listen')
+    expect(result.participant_call_sid).toBe('CA0987654321abcdef1234567890abcdef')
   })
 
   it('gets an access token', async () => {
-    const result = await operators.getAccessToken(OPERATOR_ID, { scope: 'operator' } as never)
+    const result = await client.operators.getAccessToken(OPERATOR_ID, { scope: 'operator' } as never)
     expect(result.token).toContain('eyJ')
-    expect(result.expires_in).toBe(3600)
+    expect(result.identity).toBe(OPERATOR_ID)
   })
 
   it('lists escalations', async () => {
-    const result = await operators.getEscalations()
+    const result = await client.operators.getEscalations()
     expect(result.items).toHaveLength(0)
   })
 
   it('gets active escalations', async () => {
-    const result = await operators.getActiveEscalations()
-    expect(result.escalations).toHaveLength(0)
+    const result = await client.operators.getActiveEscalations()
+    expect(result.items).toHaveLength(0)
   })
 })

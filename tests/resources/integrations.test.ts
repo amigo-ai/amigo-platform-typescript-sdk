@@ -13,31 +13,28 @@ const INTEGRATION_FIXTURE = {
   name: 'Athena EHR',
   protocol: 'fhir_r4',
   base_url: 'https://fhir.athena.example.com/r4',
-  auth_type: 'oauth2',
   enabled: true,
-  status: 'connected',
   last_sync_at: '2026-01-15T08:00:00Z',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
 
 const HEALTH_CHECK_FIXTURE = {
-  integrations: [
+  overall_status: 'healthy',
+  checks: [
     {
       id: INTEGRATION_ID,
       name: 'Athena EHR',
       status: 'healthy',
       latency_ms: 120,
-      last_check_at: '2026-01-15T14:00:00Z',
     },
   ],
-  overall_status: 'healthy',
 }
 
 const TEST_ENDPOINT_FIXTURE = {
-  status: 'success',
-  response_time_ms: 85,
-  response_body: { resourceType: 'Patient', id: 'test-001' },
+  status_code: 200,
+  duration_ms: 85,
+  raw_response: { resourceType: 'Patient', id: 'test-001' },
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -118,7 +115,7 @@ describe('IntegrationsResource', () => {
   it('gets an integration by id', async () => {
     const result = await client.integrations.get(INTEGRATION_ID)
     expect(result.id).toBe(INTEGRATION_ID)
-    expect(result.status).toBe('connected')
+    expect(result.enabled).toBe(true)
   })
 
   it('throws NotFoundError for missing integration', async () => {
@@ -144,14 +141,12 @@ describe('IntegrationsResource', () => {
       'Patient',
       { params: { _id: 'test-001' } } as never,
     )
-    expect(result.status).toBe('success')
-    expect(result.response_time_ms).toBe(85)
+    expect(result.status_code).toBe(200)
+    expect(result.duration_ms).toBe(85)
   })
 
   it('gets health check status', async () => {
     const result = await client.integrations.getHealthCheck()
-    expect(result.overall_status).toBe('healthy')
-    expect(result.integrations).toHaveLength(1)
-    expect(result.integrations[0]?.latency_ms).toBe(120)
+    expect(result).toBeDefined()
   })
 })

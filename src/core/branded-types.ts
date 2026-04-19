@@ -12,6 +12,8 @@ export type ApiKeyId = Brand<string, 'ApiKeyId'>
 export type AgentId = Brand<string, 'AgentId'>
 export type PersonaId = Brand<string, 'PersonaId'>
 export type SkillId = Brand<string, 'SkillId'>
+/** @deprecated Use ActionId instead */
+export type ActionId = Brand<string, 'ActionId'>
 export type ServiceId = Brand<string, 'ServiceId'>
 export type ContextGraphId = Brand<string, 'ContextGraphId'>
 export type CallId = Brand<string, 'CallId'>
@@ -34,6 +36,7 @@ export const apiKeyId = (id: string): ApiKeyId => id as ApiKeyId
 export const agentId = (id: string): AgentId => id as AgentId
 export const personaId = (id: string): PersonaId => id as PersonaId
 export const skillId = (id: string): SkillId => id as SkillId
+export const actionId = (id: string): ActionId => id as ActionId
 export const serviceId = (id: string): ServiceId => id as ServiceId
 export const contextGraphId = (id: string): ContextGraphId => id as ContextGraphId
 export const callId = (id: string): CallId => id as CallId

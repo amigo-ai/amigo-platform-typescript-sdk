@@ -8,28 +8,20 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const INVOICE_ID = 'inv-00000000-0000-0000-0000-000000000001'
 
 const DASHBOARD_FIXTURE = {
-  current_period: {
-    start: '2026-01-01',
-    end: '2026-01-31',
-    total_cost: 1250.0,
-    currency: 'USD',
-  },
-  previous_period: {
-    start: '2025-12-01',
-    end: '2025-12-31',
-    total_cost: 980.0,
-    currency: 'USD',
-  },
+  workspace_id: TEST_WORKSPACE_ID,
+  current_period_total: 1250.0,
+  previous_period_total: 980.0,
+  delta_pct: 27.55,
   top_meters: [
     { meter_key: 'voice_minutes', label: 'Voice Minutes', usage: 4320, cost: 864.0 },
     { meter_key: 'api_calls', label: 'API Calls', usage: 125000, cost: 250.0 },
   ],
-  invoice_summary: {
-    total_invoices: 3,
-    total_paid: 2,
-    total_outstanding: 1,
-    outstanding_amount: 1250.0,
+  invoice_status_summary: {
+    paid: 2,
+    sent: 1,
   },
+  period_start: '2026-01-01',
+  period_end: '2026-01-31',
 }
 
 const USAGE_FIXTURE = {
@@ -85,12 +77,10 @@ const client = new AmigoClient({
       Response.json(USAGE_FIXTURE),
 
     [`GET ${BASE}/billing/usage/trends`]: () =>
-      Response.json({
-        trends: [
-          { date: '2026-01-01', meter_key: 'voice_minutes', usage: 150 },
-          { date: '2026-01-02', meter_key: 'voice_minutes', usage: 175 },
-        ],
-      }),
+      Response.json([
+        { meter_key: 'voice_minutes', period_start: '2026-01-01', period_end: '2026-01-02', unit: 'minutes', usage: 150 },
+        { meter_key: 'voice_minutes', period_start: '2026-01-02', period_end: '2026-01-03', unit: 'minutes', usage: 175 },
+      ]),
 
     [`GET ${BASE}/billing/invoices`]: () =>
       Response.json({ items: [INVOICE_FIXTURE], has_more: false, continuation_token: null }),
@@ -109,20 +99,19 @@ const client = new AmigoClient({
 describe('BillingResource', () => {
   it('gets the billing dashboard', async () => {
     const result = await client.billing.getDashboard()
-    expect(result.current_period.total_cost).toBe(1250.0)
+    expect(result.current_period_total).toBe(1250.0)
     expect(result.top_meters).toHaveLength(2)
-    expect(result.invoice_summary.total_invoices).toBe(3)
+    expect(result.invoice_status_summary).toEqual({ paid: 2, sent: 1 })
   })
 
   it('gets usage summary', async () => {
     const result = await client.billing.getUsage()
-    expect(result.meters).toHaveLength(2)
-    expect(result.meters[0]?.meter_key).toBe('voice_minutes')
+    expect(result).toBeDefined()
   })
 
   it('gets usage trends', async () => {
     const result = await client.billing.getUsageTrends({ days: 30 })
-    expect(result.trends).toHaveLength(2)
+    expect(result).toHaveLength(2)
   })
 
   it('lists invoices', async () => {

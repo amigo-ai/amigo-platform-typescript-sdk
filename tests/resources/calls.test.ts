@@ -35,11 +35,10 @@ const CALL_DETAIL_FIXTURE = {
 
 const INTELLIGENCE_FIXTURE = {
   call_id: CALL_ID,
-  summary: 'Patient called to schedule a follow-up appointment for next week.',
-  sentiment: 'neutral',
-  topics: ['scheduling', 'follow-up'],
-  action_items: ['Schedule appointment for next Tuesday at 2pm'],
+  call_sid: 'CA1234567890abcdef1234567890abcdef',
+  conversation_summary: { total_turns: 10, agent_turns: 5, caller_turns: 5 },
   quality_score: 0.92,
+  created_at: '2026-01-15T10:36:00Z',
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -81,11 +80,9 @@ const client = new AmigoClient({
       Response.json(INTELLIGENCE_FIXTURE),
 
     [`GET ${BASE}/calls/active/intelligence`]: () =>
-      Response.json({
-        active_calls: [
-          { call_id: CALL_ID, caller_sentiment: 'positive', current_topic: 'scheduling' },
-        ],
-      }),
+      Response.json([
+        { call_id: CALL_ID, caller_sentiment: 'positive', current_topic: 'scheduling' },
+      ]),
 
     [`GET ${BASE}/calls/benchmarks`]: () =>
       Response.json({
@@ -97,8 +94,9 @@ const client = new AmigoClient({
 
     [`GET ${BASE}/calls/${CALL_ID}/trace-analysis`]: () =>
       Response.json({
-        call_id: CALL_ID,
-        trace: { latency_p50_ms: 120, latency_p99_ms: 450, tool_calls: 3 },
+        call_sid: 'CA1234567890abcdef1234567890abcdef',
+        status: 'ready',
+        summary: 'Patient called to schedule a follow-up appointment.',
       }),
   }),
 })
@@ -130,14 +128,13 @@ describe('CallsResource', () => {
   it('gets call intelligence', async () => {
     const result = await client.calls.getIntelligence(CALL_ID)
     expect(result.call_id).toBe(CALL_ID)
-    expect(result.summary).toContain('follow-up appointment')
     expect(result.quality_score).toBe(0.92)
-    expect(result.topics).toContain('scheduling')
   })
 
   it('gets active call intelligence', async () => {
     const result = await client.calls.getActiveIntelligence()
-    expect(result.active_calls).toHaveLength(1)
+    expect(Array.isArray(result)).toBe(true)
+    expect(result).toHaveLength(1)
   })
 
   it('gets call benchmarks', async () => {
@@ -148,7 +145,7 @@ describe('CallsResource', () => {
 
   it('gets trace analysis', async () => {
     const result = await client.calls.getTraceAnalysis(CALL_ID)
-    expect(result.call_id).toBe(CALL_ID)
-    expect(result.trace.tool_calls).toBe(3)
+    expect(result.call_sid).toBe('CA1234567890abcdef1234567890abcdef')
+    expect(result.summary).toContain('follow-up appointment')
   })
 })
