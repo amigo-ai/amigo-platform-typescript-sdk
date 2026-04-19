@@ -25,7 +25,7 @@ const TEST_RESULT_FIXTURE = {
   function_name: FUNCTION_NAME,
   result: { bmi: 24.2, category: 'normal' },
   duration_ms: 45,
-  success: true,
+  error: null,
 }
 
 const CATALOG_FIXTURE = {
@@ -37,12 +37,13 @@ const CATALOG_FIXTURE = {
 }
 
 const QUERY_RESULT_FIXTURE = {
-  columns: ['name', 'age'],
   results: [
     { name: 'Jane Doe', age: 42 },
     { name: 'John Smith', age: 35 },
   ],
   count: 2,
+  duration_ms: 120,
+  error: null,
 }
 
 const SYNC_RESULT_FIXTURE = {
@@ -128,10 +129,8 @@ describe('FunctionsResource', () => {
     const result = await client.functions.test(FUNCTION_NAME, {
       args: { height_cm: 175, weight_kg: 74 },
     } as never)
-    // @ts-expect-error fixture field
-    expect(result.success).toBe(true)
-    // @ts-expect-error fixture field
-    expect(result.result.bmi).toBe(24.2)
+    expect(result.error).toBeNull()
+    expect(result.result).toEqual({ bmi: 24.2, category: 'normal' })
     expect(result.duration_ms).toBe(45)
   })
 
@@ -146,8 +145,7 @@ describe('FunctionsResource', () => {
       sql: 'SELECT name, age FROM patients',
     } as never)
     expect(result.count).toBe(2)
-    // @ts-expect-error fixture field
-    expect(result.columns).toEqual(['name', 'age'])
+    expect(result.duration_ms).toBe(120)
     expect(result.results).toHaveLength(2)
   })
 

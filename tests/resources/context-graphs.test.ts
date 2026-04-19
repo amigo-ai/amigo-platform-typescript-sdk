@@ -12,11 +12,8 @@ const GRAPH_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   name: 'Appointment Scheduling',
   description: 'Handles appointment booking flow',
-  states: {
-    greeting: { transitions: [{ target: 'collect_info', condition: 'patient_identified' }] },
-    collect_info: { transitions: [{ target: 'confirm', condition: 'info_complete' }] },
-    confirm: { transitions: [] },
-  },
+  latest_version: 1,
+  state_count: 3,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
@@ -26,7 +23,6 @@ const VERSION_FIXTURE = {
   context_graph_id: GRAPH_ID,
   version: 1,
   name: 'Appointment Scheduling',
-  states: GRAPH_FIXTURE.states,
   created_at: '2026-01-01T00:00:00Z',
 }
 
@@ -106,8 +102,7 @@ describe('ContextGraphsResource', () => {
   it('gets a context graph by id', async () => {
     const result = await client.contextGraphs.get(GRAPH_ID)
     expect(result.id).toBe(GRAPH_ID)
-    // @ts-expect-error fixture field
-    expect(result.states).toBeDefined()
+    expect(result.state_count).toBe(3)
   })
 
   it('throws NotFoundError for missing context graph', async () => {

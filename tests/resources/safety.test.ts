@@ -7,12 +7,17 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const TEMPLATE_ID = 'tpl-00000000-0000-0000-0000-000000000001'
 
 const CONFIG_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  escalation_enabled: true,
-  risk_threshold: 0.8,
-  auto_escalate_keywords: ['emergency', 'urgent', 'suicide'],
-  pii_redaction_enabled: true,
-  recording_consent_required: true,
+  accumulation_cumulative_count: 0,
+  accumulation_enabled: true,
+  accumulation_fast_track_level: 3,
+  accumulation_mild_threshold: 0.8,
+  accumulation_single_turn_threshold: 0.9,
+  accumulation_window_size: 5,
+  applied_template_ids: ['tpl-001'],
+  triage_enabled: true,
+  triage_max_history_turns: 10,
+  triage_model: 'claude-sonnet',
+  triage_timeout_s: 30,
 }
 
 const TEMPLATE_FIXTURE = {
@@ -62,7 +67,7 @@ const client = new AmigoClient({
       Response.json(CONFIG_FIXTURE),
 
     [`PUT ${BASE}/safety/config`]: () =>
-      Response.json({ ...CONFIG_FIXTURE, risk_threshold: 0.9 }),
+      Response.json({ ...CONFIG_FIXTURE, accumulation_mild_threshold: 0.9 }),
 
     [`GET ${BASE}/safety/templates`]: () =>
       Response.json({ items: [TEMPLATE_FIXTURE], has_more: false, continuation_token: null }),
@@ -78,20 +83,16 @@ const client = new AmigoClient({
 describe('SafetyResource', () => {
   it('gets safety config', async () => {
     const result = await client.safety.getConfig()
-    // @ts-expect-error fixture field
-    expect(result.escalation_enabled).toBe(true)
-    // @ts-expect-error fixture field
-    expect(result.risk_threshold).toBe(0.8)
-    // @ts-expect-error fixture field
-    expect(result.auto_escalate_keywords).toContain('emergency')
+    expect(result.accumulation_enabled).toBe(true)
+    expect(result.accumulation_mild_threshold).toBe(0.8)
+    expect(result.applied_template_ids).toContain('tpl-001')
   })
 
   it('updates safety config', async () => {
     const result = await client.safety.updateConfig({
-      risk_threshold: 0.9,
+      accumulation_mild_threshold: 0.9,
     } as never)
-    // @ts-expect-error fixture field
-    expect(result.risk_threshold).toBe(0.9)
+    expect(result.accumulation_mild_threshold).toBe(0.9)
   })
 
   it('lists safety templates', async () => {

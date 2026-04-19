@@ -12,18 +12,24 @@ const PHONE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   phone_number: '+14155551234',
   display_name: 'Main Line',
-  agent_id: 'agent-00000000-0000-0000-0000-000000000001',
+  inbound_service_id: 'agent-00000000-0000-0000-0000-000000000001',
   status: 'active',
-  capabilities: { voice: true, sms: true },
+  capabilities: ['voice', 'sms'],
   forwarding: null,
+  provider: 'twilio',
+  provider_phone_sid: null,
+  notes: '',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
 
 const FORWARDING_FIXTURE = {
-  phone_number_id: PHONE_ID,
-  forward_to: '+14155559999',
-  enabled: true,
+  ...PHONE_FIXTURE,
+  forwarding: {
+    forward_to: '+14155559999',
+    enabled: true,
+    should_disconnect: false,
+  },
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -118,10 +124,8 @@ describe('PhoneNumbersResource', () => {
     const result = await client.phoneNumbers.setForwarding(PHONE_ID, {
       forward_to: '+14155559999',
     } as never)
-    // @ts-expect-error fixture field
-    expect(result.forward_to).toBe('+14155559999')
-    // @ts-expect-error fixture field
-    expect(result.enabled).toBe(true)
+    expect(result.forwarding?.forward_to).toBe('+14155559999')
+    expect(result.forwarding?.enabled).toBe(true)
   })
 
   it('clears call forwarding', async () => {
