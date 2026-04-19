@@ -36,6 +36,14 @@ import { SimulationsResource } from './resources/simulations.js'
 import { SettingsResource } from './resources/settings.js'
 import { BillingResource } from './resources/billing.js'
 import { MemoryResource } from './resources/memory.js'
+import { PersonasResource } from './resources/personas.js'
+import { ReviewQueueResource } from './resources/review-queue.js'
+import { RecordingsResource } from './resources/recordings.js'
+import { AuditResource } from './resources/audit.js'
+import { WebhookDestinationsResource } from './resources/webhook-destinations.js'
+import { SafetyResource } from './resources/safety.js'
+import { ComplianceResource } from './resources/compliance.js'
+import { FunctionsResource } from './resources/functions.js'
 
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
 
@@ -86,6 +94,14 @@ export class AmigoClient {
   readonly settings: SettingsResource
   readonly billing: BillingResource
   readonly memory: MemoryResource
+  readonly personas: PersonasResource
+  readonly reviewQueue: ReviewQueueResource
+  readonly recordings: RecordingsResource
+  readonly audit: AuditResource
+  readonly webhookDestinations: WebhookDestinationsResource
+  readonly safety: SafetyResource
+  readonly compliance: ComplianceResource
+  readonly functions: FunctionsResource
 
   constructor(config: AmigoClientConfig) {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
@@ -122,6 +138,14 @@ export class AmigoClient {
     this.settings = new SettingsResource(client, ws)
     this.billing = new BillingResource(client, ws)
     this.memory = new MemoryResource(client, ws)
+    this.personas = new PersonasResource(client, ws)
+    this.reviewQueue = new ReviewQueueResource(client, ws)
+    this.recordings = new RecordingsResource(client, ws)
+    this.audit = new AuditResource(client, ws)
+    this.webhookDestinations = new WebhookDestinationsResource(client, ws)
+    this.safety = new SafetyResource(client, ws)
+    this.compliance = new ComplianceResource(client, ws)
+    this.functions = new FunctionsResource(client, ws)
   }
 }
 
@@ -153,6 +177,7 @@ export type {
   WorkspaceId,
   ApiKeyId,
   AgentId,
+  PersonaId,
   SkillId,
   ServiceId,
   ContextGraphId,
@@ -163,6 +188,7 @@ export type {
   EventId,
   SimulationRunId,
   SimulationSessionId,
+  FunctionId,
   DataSourceId,
 } from './core/branded-types.js'
 
@@ -170,6 +196,7 @@ export {
   workspaceId,
   apiKeyId,
   agentId,
+  personaId,
   skillId,
   serviceId,
   contextGraphId,
@@ -180,6 +207,7 @@ export {
   eventId,
   simulationRunId,
   simulationSessionId,
+  functionId,
   dataSourceId,
 } from './core/branded-types.js'
 
