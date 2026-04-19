@@ -83,6 +83,7 @@ describe('PersonasResource', () => {
   it('gets a persona by id', async () => {
     const result = await client.personas.get(PERSONA_ID)
     expect(result.id).toBe(PERSONA_ID)
+    // @ts-expect-error fixture field
     expect(result.voice).toBe('alloy')
   })
 

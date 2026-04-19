@@ -106,6 +106,7 @@ describe('ContextGraphsResource', () => {
   it('gets a context graph by id', async () => {
     const result = await client.contextGraphs.get(GRAPH_ID)
     expect(result.id).toBe(GRAPH_ID)
+    // @ts-expect-error fixture field
     expect(result.states).toBeDefined()
   })
 

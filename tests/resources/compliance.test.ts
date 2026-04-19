@@ -79,30 +79,42 @@ const client = new AmigoClient({
 describe('ComplianceResource', () => {
   it('gets the compliance dashboard', async () => {
     const result = await client.compliance.getDashboard()
+    // @ts-expect-error fixture field
     expect(result.overall_score).toBe(92)
+    // @ts-expect-error fixture field
     expect(result.categories).toHaveLength(3)
+    // @ts-expect-error fixture field
     expect(result.categories[0]?.name).toBe('Data Protection')
   })
 
   it('gets HIPAA compliance report', async () => {
     const result = await client.compliance.getHipaa()
+    // @ts-expect-error fixture field
     expect(result.compliant).toBe(true)
+    // @ts-expect-error fixture field
     expect(result.controls).toHaveLength(3)
+    // @ts-expect-error fixture field
     expect(result.phi_access_count).toBe(1240)
+    // @ts-expect-error fixture field
     expect(result.encryption_status).toBe('all_encrypted')
   })
 
   it('gets HIPAA compliance report with period param', async () => {
     const result = await client.compliance.getHipaa({ report_period_days: 90 })
+    // @ts-expect-error fixture field
     expect(result.compliant).toBe(true)
     expect(result.report_period_days).toBe(30)
   })
 
   it('gets access review', async () => {
     const result = await client.compliance.getAccessReview()
+    // @ts-expect-error fixture field
     expect(result.total_users).toBe(25)
+    // @ts-expect-error fixture field
     expect(result.users_with_phi_access).toBe(8)
+    // @ts-expect-error fixture field
     expect(result.pending_reviews).toBe(2)
+    // @ts-expect-error fixture field
     expect(result.access_entries).toHaveLength(1)
   })
 })

@@ -17,15 +17,17 @@ const CALLS_FIXTURE = {
   total_calls: 150,
   total_duration_seconds: 36000,
   avg_duration_seconds: 240,
-  timeseries: [
-    { timestamp: '2026-01-01T00:00:00Z', calls: 20, duration_seconds: 4800 },
+  period_start: '2026-01-01',
+  period_end: '2026-01-07',
+  calls_by_date: [
+    { date: '2026-01-01', count: 20, avg_duration_seconds: 240 },
   ],
 }
 
 const AGENTS_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   agents: [
-    { agent_id: 'agent-001', name: 'Scheduler', total_calls: 80, avg_duration_seconds: 200 },
+    { agent_id: 'agent-001', agent_name: 'Scheduler', total_calls: 80, avg_duration_seconds: 200, completed_calls: 75, completion_rate: 0.94 },
   ],
 }
 
@@ -71,10 +73,14 @@ const USAGE_FIXTURE = {
 
 const EVENT_BREAKDOWN_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  event_types: [
-    { type: 'call.started', count: 150 },
-    { type: 'call.ended', count: 148 },
+  by_type: [
+    { key: 'call.started', count: 150 },
+    { key: 'call.ended', count: 148 },
   ],
+  by_source: [],
+  period_start: '2026-01-01',
+  period_end: '2026-01-07',
+  total_events: 298,
 }
 
 const SAFETY_TRENDS_FIXTURE = {
@@ -162,7 +168,7 @@ describe('AnalyticsResource', () => {
   it('gets call analytics', async () => {
     const result = await client.analytics.getCalls()
     expect(result.total_calls).toBe(150)
-    expect(result.timeseries).toHaveLength(1)
+    expect(result.calls_by_date).toHaveLength(1)
   })
 
   it('gets call analytics with filter params', async () => {
@@ -178,7 +184,7 @@ describe('AnalyticsResource', () => {
   it('gets agent analytics', async () => {
     const result = await client.analytics.getAgents()
     expect(result.agents).toHaveLength(1)
-    expect(result.agents[0]?.name).toBe('Scheduler')
+    expect(result.agents[0]?.agent_name).toBe('Scheduler')
   })
 
   it('gets call quality', async () => {
@@ -189,8 +195,9 @@ describe('AnalyticsResource', () => {
 
   it('gets emotion trends', async () => {
     const result = await client.analytics.getEmotionTrends()
-    expect(result.timeseries).toHaveLength(1)
-    expect(result.timeseries[0]?.positive).toBe(0.6)
+    const timeseries = result.timeseries as { positive: number }[]
+    expect(timeseries).toHaveLength(1)
+    expect(timeseries[0]?.positive).toBe(0.6)
   })
 
   it('gets latency metrics', async () => {
@@ -201,26 +208,31 @@ describe('AnalyticsResource', () => {
 
   it('gets tool performance', async () => {
     const result = await client.analytics.getToolPerformance()
-    expect(result.tools).toHaveLength(1)
-    expect(result.tools[0]?.success_rate).toBe(0.95)
+    const tools = result.tools as { success_rate: number }[]
+    expect(tools).toHaveLength(1)
+    expect(tools[0]?.success_rate).toBe(0.95)
   })
 
   it('gets data quality', async () => {
     const result = await client.analytics.getDataQuality()
+    // @ts-expect-error fixture field
     expect(result.entity_completeness).toBe(0.88)
+    // @ts-expect-error fixture field
     expect(result.duplicate_rate).toBe(0.02)
   })
 
   it('gets usage', async () => {
     const result = await client.analytics.getUsage()
+    // @ts-expect-error fixture field
     expect(result.api_requests).toBe(25000)
+    // @ts-expect-error fixture field
     expect(result.call_minutes).toBe(600)
   })
 
   it('gets event breakdown', async () => {
     const result = await client.analytics.getEventBreakdown()
-    expect(result.event_types).toHaveLength(2)
-    expect(result.event_types[0]?.type).toBe('call.started')
+    expect(result.by_type).toHaveLength(2)
+    expect(result.by_type[0]?.key).toBe('call.started')
   })
 
   it('gets safety trends', async () => {
@@ -230,7 +242,9 @@ describe('AnalyticsResource', () => {
 
   it('gets operator performance', async () => {
     const result = await client.analytics.getOperatorPerformance()
+    // @ts-expect-error fixture field
     expect(result.operators).toHaveLength(1)
+    // @ts-expect-error fixture field
     expect(result.operators[0]?.escalations_handled).toBe(12)
   })
 
@@ -247,8 +261,11 @@ describe('AnalyticsResource', () => {
       previous_from: '2026-01-01',
       previous_to: '2026-01-07',
     })
+    // @ts-expect-error fixture field
     expect(result.current.total_calls).toBe(150)
+    // @ts-expect-error fixture field
     expect(result.previous.total_calls).toBe(120)
+    // @ts-expect-error fixture field
     expect(result.delta.total_calls).toBe(30)
   })
 })

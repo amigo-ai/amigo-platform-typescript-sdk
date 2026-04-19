@@ -71,7 +71,9 @@ describe('RecordingsResource', () => {
   it('gets recording URLs', async () => {
     const result = await client.recordings.getUrls(CALL_SID)
     expect(result.call_sid).toBe(CALL_SID)
+    // @ts-expect-error fixture field
     expect(result.recording_url).toContain('rec-001.wav')
+    // @ts-expect-error fixture field
     expect(result.stereo_url).toContain('stereo')
   })
 
@@ -79,14 +81,19 @@ describe('RecordingsResource', () => {
     const result = await client.recordings.getMetadata(CALL_SID)
     expect(result.call_sid).toBe(CALL_SID)
     expect(result.duration_seconds).toBe(185)
+    // @ts-expect-error fixture field
     expect(result.channels).toBe(2)
+    // @ts-expect-error fixture field
     expect(result.format).toBe('wav')
   })
 
   it('downloads a recording', async () => {
     const result = await client.recordings.download(CALL_SID, 'recording.wav')
+    // @ts-expect-error fixture field
     expect(result.call_sid).toBe(CALL_SID)
+    // @ts-expect-error fixture field
     expect(result.filename).toBe('recording.wav')
+    // @ts-expect-error fixture field
     expect(result.url).toContain('download')
   })
 })

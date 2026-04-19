@@ -24,7 +24,7 @@ const FUNCTION_FIXTURE = {
 const TEST_RESULT_FIXTURE = {
   function_name: FUNCTION_NAME,
   result: { bmi: 24.2, category: 'normal' },
-  execution_time_ms: 45,
+  duration_ms: 45,
   success: true,
 }
 
@@ -38,18 +38,22 @@ const CATALOG_FIXTURE = {
 
 const QUERY_RESULT_FIXTURE = {
   columns: ['name', 'age'],
-  rows: [
-    ['Jane Doe', 42],
-    ['John Smith', 35],
+  results: [
+    { name: 'Jane Doe', age: 42 },
+    { name: 'John Smith', age: 35 },
   ],
-  row_count: 2,
+  count: 2,
 }
 
 const SYNC_RESULT_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  synced: 5,
-  errors: 0,
-  synced_at: '2026-01-01T00:00:00Z',
+  count: 5,
+  items: [
+    { name: 'fn1' },
+    { name: 'fn2' },
+    { name: 'fn3' },
+    { name: 'fn4' },
+    { name: 'fn5' },
+  ],
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -124,9 +128,11 @@ describe('FunctionsResource', () => {
     const result = await client.functions.test(FUNCTION_NAME, {
       args: { height_cm: 175, weight_kg: 74 },
     } as never)
+    // @ts-expect-error fixture field
     expect(result.success).toBe(true)
+    // @ts-expect-error fixture field
     expect(result.result.bmi).toBe(24.2)
-    expect(result.execution_time_ms).toBe(45)
+    expect(result.duration_ms).toBe(45)
   })
 
   it('gets the function catalog', async () => {
@@ -139,14 +145,15 @@ describe('FunctionsResource', () => {
     const result = await client.functions.query({
       sql: 'SELECT name, age FROM patients',
     } as never)
-    expect(result.row_count).toBe(2)
+    expect(result.count).toBe(2)
+    // @ts-expect-error fixture field
     expect(result.columns).toEqual(['name', 'age'])
-    expect(result.rows).toHaveLength(2)
+    expect(result.results).toHaveLength(2)
   })
 
   it('syncs functions', async () => {
     const result = await client.functions.sync()
-    expect(result.synced).toBe(5)
-    expect(result.errors).toBe(0)
+    expect(result.count).toBe(5)
+    expect(result.items).toHaveLength(5)
   })
 })

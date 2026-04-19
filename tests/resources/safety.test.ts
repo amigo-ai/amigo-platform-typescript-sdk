@@ -78,8 +78,11 @@ const client = new AmigoClient({
 describe('SafetyResource', () => {
   it('gets safety config', async () => {
     const result = await client.safety.getConfig()
+    // @ts-expect-error fixture field
     expect(result.escalation_enabled).toBe(true)
+    // @ts-expect-error fixture field
     expect(result.risk_threshold).toBe(0.8)
+    // @ts-expect-error fixture field
     expect(result.auto_escalate_keywords).toContain('emergency')
   })
 
@@ -87,6 +90,7 @@ describe('SafetyResource', () => {
     const result = await client.safety.updateConfig({
       risk_threshold: 0.9,
     } as never)
+    // @ts-expect-error fixture field
     expect(result.risk_threshold).toBe(0.9)
   })
 

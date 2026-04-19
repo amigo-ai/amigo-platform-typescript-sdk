@@ -11,7 +11,7 @@ const PHONE_FIXTURE = {
   id: PHONE_ID,
   workspace_id: TEST_WORKSPACE_ID,
   phone_number: '+14155551234',
-  friendly_name: 'Main Line',
+  display_name: 'Main Line',
   agent_id: 'agent-00000000-0000-0000-0000-000000000001',
   status: 'active',
   capabilities: { voice: true, sms: true },
@@ -65,7 +65,7 @@ const client = new AmigoClient({
       Response.json({ detail: 'Phone number not found', error_code: 'not_found' }, { status: 404 }),
 
     [`PUT ${BASE}/phone-numbers/${PHONE_ID}`]: () =>
-      Response.json({ ...PHONE_FIXTURE, friendly_name: 'Updated Line' }),
+      Response.json({ ...PHONE_FIXTURE, display_name: 'Updated Line' }),
 
     [`DELETE ${BASE}/phone-numbers/${PHONE_ID}`]: () =>
       new Response(null, { status: 204 }),
@@ -96,7 +96,7 @@ describe('PhoneNumbersResource', () => {
   it('gets a phone number by id', async () => {
     const result = await client.phoneNumbers.get(PHONE_ID)
     expect(result.id).toBe(PHONE_ID)
-    expect(result.friendly_name).toBe('Main Line')
+    expect(result.display_name).toBe('Main Line')
   })
 
   it('throws NotFoundError for missing phone number', async () => {
@@ -105,9 +105,9 @@ describe('PhoneNumbersResource', () => {
 
   it('updates a phone number', async () => {
     const result = await client.phoneNumbers.update(PHONE_ID, {
-      friendly_name: 'Updated Line',
+      display_name: 'Updated Line',
     } as never)
-    expect(result.friendly_name).toBe('Updated Line')
+    expect(result.display_name).toBe('Updated Line')
   })
 
   it('releases a phone number', async () => {
@@ -118,7 +118,9 @@ describe('PhoneNumbersResource', () => {
     const result = await client.phoneNumbers.setForwarding(PHONE_ID, {
       forward_to: '+14155559999',
     } as never)
+    // @ts-expect-error fixture field
     expect(result.forward_to).toBe('+14155559999')
+    // @ts-expect-error fixture field
     expect(result.enabled).toBe(true)
   })
 

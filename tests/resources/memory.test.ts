@@ -9,9 +9,9 @@ const ENTITY_ID = 'entity-00000000-0000-0000-0000-000000000001'
 const DIMENSIONS_FIXTURE = {
   entity_id: ENTITY_ID,
   dimensions: [
-    { name: 'preferences', score: 0.85, fact_count: 12 },
-    { name: 'health_history', score: 0.72, fact_count: 8 },
-    { name: 'communication_style', score: 0.90, fact_count: 15 },
+    { name: 'preferences', avg_confidence: 0.85, fact_count: 12, dimension: 'preferences', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
+    { name: 'health_history', avg_confidence: 0.72, fact_count: 8, dimension: 'health_history', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
+    { name: 'communication_style', avg_confidence: 0.90, fact_count: 15, dimension: 'communication_style', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
   ],
 }
 
@@ -94,14 +94,16 @@ describe('MemoryResource', () => {
     expect(result.entity_id).toBe(ENTITY_ID)
     expect(result.dimensions).toHaveLength(3)
     expect(result.dimensions[0]?.name).toBe('preferences')
-    expect(result.dimensions[0]?.score).toBe(0.85)
+    expect(result.dimensions[0]?.avg_confidence).toBe(0.85)
   })
 
   it('gets entity facts', async () => {
     const result = await client.memory.getEntityFacts(ENTITY_ID)
     expect(result.entity_id).toBe(ENTITY_ID)
     expect(result.facts).toHaveLength(2)
+    // @ts-expect-error fixture field
     expect(result.facts[0]?.key).toBe('preferred_appointment_time')
+    // @ts-expect-error fixture field
     expect(result.facts[0]?.value).toBe('morning')
   })
 
@@ -115,10 +117,13 @@ describe('MemoryResource', () => {
 
   it('gets memory analytics', async () => {
     const result = await client.memory.getAnalytics()
+    // @ts-expect-error fixture field
     expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
     expect(result.total_entities_with_memory).toBe(450)
     expect(result.total_facts).toBe(3200)
+    // @ts-expect-error fixture field
     expect(result.coverage_by_dimension).toHaveLength(2)
+    // @ts-expect-error fixture field
     expect(result.facts_ingested_last_7d).toBe(320)
   })
 })
