@@ -1,6 +1,8 @@
 const textEncoder = new TextEncoder()
 const MAX_TIMESTAMP_SKEW_MS = 5 * 60 * 1000
-let webCryptoPromise: Promise<typeof globalThis.crypto> | undefined
+type WebCryptoLike = { subtle: NonNullable<typeof globalThis.crypto>['subtle'] }
+
+let webCryptoPromise: Promise<WebCryptoLike> | undefined
 
 export interface WebhookEvent<T = unknown> {
   id: string
@@ -190,12 +192,12 @@ async function signWebhookPayload(
   return new Uint8Array(mac)
 }
 
-async function resolveWebCrypto(): Promise<typeof globalThis.crypto> {
+async function resolveWebCrypto(): Promise<WebCryptoLike> {
   if (globalThis.crypto?.subtle) {
     return globalThis.crypto
   }
 
-  webCryptoPromise ??= import('node:crypto').then(({ webcrypto }) => webcrypto)
+  webCryptoPromise ??= import('node:crypto').then(({ webcrypto }) => webcrypto as WebCryptoLike)
   return await webCryptoPromise
 }
 
