@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.0] - 2026-04-19
+
+### Features
+
+- harden sdk release and verification surface (#1)
+
 ## [0.3.0] - 2026-04-19
 
 ### Features
