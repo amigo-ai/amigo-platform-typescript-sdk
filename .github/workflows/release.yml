@@ -66,7 +66,7 @@ jobs:
           RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
 
           if [ "$BRANCH_PROTECTED" = "true" ] && [ -z "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches."
+            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches. Branches protected only by rulesets are not detected by this check and still require the token."
             exit 1
           fi
 
@@ -271,6 +271,8 @@ jobs:
           npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
 
   finalize:
+    # Keep `prepare` upstream of `finalize`: it performs the pre-publish
+    # credential checks that stop release finalization failures before publish.
     if: ${{ !inputs.dry_run }}
     needs: [prepare, publish]
     runs-on: ubuntu-latest
@@ -285,7 +287,8 @@ jobs:
         run: |
           RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
           if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            echo "checkout_token=$RELEASE_PUSH_TOKEN" >> "$GITHUB_OUTPUT"
+            echo "::add-mask::$RELEASE_PUSH_TOKEN_TRIMMED"
+            echo "checkout_token=$RELEASE_PUSH_TOKEN_TRIMMED" >> "$GITHUB_OUTPUT"
             echo "has_release_push_token=true" >> "$GITHUB_OUTPUT"
           else
             echo "checkout_token=${{ github.token }}" >> "$GITHUB_OUTPUT"

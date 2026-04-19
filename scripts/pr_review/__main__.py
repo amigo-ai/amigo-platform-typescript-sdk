@@ -289,40 +289,46 @@ def delete_comment(comment_id: str) -> None:
 
 
 def post_comment(pr_number: str, body: str) -> str:
-    raw = subprocess.check_output(
-        [
-            "gh",
-            "api",
-            "--method",
-            "POST",
-            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{pr_number}/comments",
-            "-f",
-            f"body={body}",
-            "--jq",
-            ".id",
-        ],
-        text=True,
-        stderr=subprocess.PIPE,
-    )
+    try:
+        raw = subprocess.check_output(
+            [
+                "gh",
+                "api",
+                "--method",
+                "POST",
+                f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{pr_number}/comments",
+                "-f",
+                f"body={body}",
+                "--jq",
+                ".id",
+            ],
+            text=True,
+            stderr=subprocess.PIPE,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Failed to post review comment: {format_error(exc)}") from exc
     return raw.strip()
 
 
 def update_comment(comment_id: str, body: str) -> str:
-    raw = subprocess.check_output(
-        [
-            "gh",
-            "api",
-            "--method",
-            "PATCH",
-            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
-            "-f",
-            f"body={body}",
-            "--jq",
-            ".id",
-        ],
-        text=True,
-        stderr=subprocess.PIPE,
-    )
+    try:
+        raw = subprocess.check_output(
+            [
+                "gh",
+                "api",
+                "--method",
+                "PATCH",
+                f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
+                "-f",
+                f"body={body}",
+                "--jq",
+                ".id",
+            ],
+            text=True,
+            stderr=subprocess.PIPE,
+        )
+    except subprocess.CalledProcessError as exc:
+        raise RuntimeError(f"Failed to update review comment: {format_error(exc)}") from exc
     return raw.strip()
 
 
