@@ -41,6 +41,7 @@ console.log(stats.total_calls, stats.avg_duration_seconds)
 | `workspaceId` | `string` | Yes | Your workspace ID — all resource operations are scoped to this |
 | `baseUrl` | `string` | No | Override the API base URL (default: `https://api.platform.amigo.ai`) |
 | `retry` | `RetryOptions` | No | Retry configuration for transient failures |
+| `fetch` | `typeof fetch` | No | Custom fetch for BFF proxy, cookie forwarding, or test mocking |
 
 ### Retry options
 
@@ -256,10 +257,121 @@ console.log(memory.dimensions) // list of configured memory dimensions
 ### Billing
 
 ```typescript
+const dashboard = await client.billing.getDashboard()
 const usage = await client.billing.getUsage()
-console.log(usage.meters, usage.total_events)
-
 const { items: invoices } = await client.billing.listInvoices()
+const pdf = await client.billing.getInvoicePdf('invoice-id')
+```
+
+### Operators
+
+```typescript
+const { items: operators } = await client.operators.list()
+const dashboard = await client.operators.getDashboard()
+const queue = await client.operators.getQueue()
+const escalations = await client.operators.getActiveEscalations()
+
+// Join/leave calls, switch mode, send guidance
+await client.operators.joinCall('operator-id', { call_sid: 'call-sid' })
+await client.operators.sendGuidance('operator-id', { text: 'Ask about allergies' })
+await client.operators.wrapUp('operator-id', { outcome: 'resolved' })
+```
+
+### Triggers (Automations)
+
+```typescript
+const trigger = await client.triggers.create({
+  name: 'Daily outreach',
+  schedule: '0 9 * * 1-5',
+  timezone: 'America/New_York',
+  action_id: 'skill-id',
+  event_type: 'trigger.scheduled',
+  input_template: { campaign: 'follow-up' },
+})
+
+await client.triggers.fire(trigger.id)
+await client.triggers.pause(trigger.id)
+await client.triggers.resume(trigger.id)
+const runs = await client.triggers.listRuns(trigger.id)
+```
+
+### Review Queue
+
+```typescript
+const stats = await client.reviewQueue.getStats()
+const dashboard = await client.reviewQueue.getDashboard()
+const { items } = await client.reviewQueue.list({ status: 'pending' })
+
+// Claim, approve, reject, correct
+await client.reviewQueue.claim('item-id')
+await client.reviewQueue.approve('item-id', { notes: 'Verified correct' })
+await client.reviewQueue.reject('item-id', { reason: 'Data mismatch' })
+await client.reviewQueue.batchApprove({ item_ids: ['id1', 'id2'] })
+```
+
+### Personas
+
+```typescript
+const persona = await client.personas.create({
+  name: 'Friendly Scheduler',
+  voice_style: 'warm and professional',
+})
+const { items: personas } = await client.personas.list()
+```
+
+### Compliance & Safety
+
+```typescript
+const hipaa = await client.compliance.getHipaa()
+const safetyConfig = await client.safety.getConfig()
+const templates = await client.safety.listTemplates()
+```
+
+### Audit
+
+```typescript
+const { items: events } = await client.audit.list({ limit: 50 })
+const summary = await client.audit.getSummary()
+await client.audit.createExport({ start_date: '2026-01-01', end_date: '2026-03-31' })
+```
+
+### Recordings
+
+```typescript
+const urls = await client.recordings.getUrls('call-sid')
+const metadata = await client.recordings.getMetadata('call-sid')
+```
+
+### Functions (UC Functions)
+
+```typescript
+const catalog = await client.functions.getCatalog()
+const { items: functions } = await client.functions.list()
+const result = await client.functions.test('my-function', { input: { query: 'test' } })
+```
+
+### Webhook Destinations
+
+```typescript
+const dest = await client.webhookDestinations.create({
+  name: 'My Webhook',
+  url: 'https://example.com/webhook',
+  events: ['call.completed'],
+})
+const deliveries = await client.webhookDestinations.listDeliveries(dest.id)
+```
+
+## BFF Proxy (Next.js)
+
+For frontend apps that use a Backend-for-Frontend proxy:
+
+```typescript
+const client = new AmigoClient({
+  apiKey: 'bff-proxy',
+  workspaceId: 'ws-id',
+  baseUrl: '/api/platform',
+  fetch: customFetchWithCookies,
+})
 ```
 
 ## Pagination
