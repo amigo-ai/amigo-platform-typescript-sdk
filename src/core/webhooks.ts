@@ -36,9 +36,7 @@ export async function verifyWebhookSignature(
   signature: string,
   secret: string,
 ): Promise<boolean>
-export async function verifyWebhookSignature(
-  options: WebhookVerificationOptions,
-): Promise<boolean>
+export async function verifyWebhookSignature(options: WebhookVerificationOptions): Promise<boolean>
 export async function verifyWebhookSignature(
   payloadOrOptions: string | Uint8Array | ArrayBuffer | WebhookVerificationOptions,
   signature?: string,
@@ -46,7 +44,11 @@ export async function verifyWebhookSignature(
 ): Promise<boolean> {
   const options = normalizeVerificationOptions(payloadOrOptions, signature, secret)
   const payloadBytes = toUint8Array(options.payload)
-  const expectedSignature = await signWebhookPayload(payloadBytes, options.secret, options.timestamp)
+  const expectedSignature = await signWebhookPayload(
+    payloadBytes,
+    options.secret,
+    options.timestamp,
+  )
   const actualSignature = normalizeSignature(options.signature)
 
   if (!actualSignature || !constantTimeEqual(expectedSignature, actualSignature)) {
@@ -135,7 +137,11 @@ function normalizeParseOptions<T>(
   signature?: string,
   secret?: string,
 ): ParseWebhookEventOptions<T> {
-  if (typeof payloadOrOptions === 'object' && payloadOrOptions !== null && 'payload' in payloadOrOptions) {
+  if (
+    typeof payloadOrOptions === 'object' &&
+    payloadOrOptions !== null &&
+    'payload' in payloadOrOptions
+  ) {
     return payloadOrOptions
   }
 
@@ -178,7 +184,7 @@ async function signWebhookPayload(
     ? concatUint8Arrays(textEncoder.encode(`v1:${timestamp}:`), payload)
     : payload
 
-  const mac = await crypto.subtle.sign('HMAC', key, message)
+  const mac = await crypto.subtle.sign('HMAC', key, toCryptoBuffer(message))
   return new Uint8Array(mac)
 }
 
@@ -221,4 +227,9 @@ function concatUint8Arrays(left: Uint8Array, right: Uint8Array): Uint8Array {
   combined.set(left, 0)
   combined.set(right, left.length)
   return combined
+}
+
+function toCryptoBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = Uint8Array.from(bytes)
+  return copy.buffer
 }
