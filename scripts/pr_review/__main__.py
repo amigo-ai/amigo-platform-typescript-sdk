@@ -41,6 +41,7 @@ DEFAULT_VERTEX_REGION = os.environ.get("VERTEX_REGION", "global")
 SPECIALIST_MAX_TOKENS = 4000
 ORCHESTRATOR_MAX_TOKENS = 7000
 MAX_DIFF_CHARS = 140_000
+MAX_ERROR_CHARS = 800
 
 
 @dataclass(frozen=True)
@@ -57,7 +58,7 @@ BUCKETS: tuple[Bucket, ...] = (
         ("src/", "openapi.json", "api.md", "README.md", "package.json", "package-lock.json"),
     ),
     Bucket("tests", "test-reviewer", ("tests/",)),
-    Bucket("ci", "ci-reviewer", (".github/workflows/", "scripts/")),
+    Bucket("ci", "ci-reviewer", (".github/workflows/", "scripts/", ".claude/agents/")),
 )
 
 ALWAYS_ON = ("principles-reviewer", "security-reviewer")
@@ -127,6 +128,13 @@ def changed_file_paths(pr_meta: dict) -> list[str]:
     return [f["path"] for f in pr_meta.get("files", [])]
 
 
+def format_error(exc: Exception) -> str:
+    message = " ".join(f"{type(exc).__name__}: {exc}".split()).replace("`", "'")
+    if len(message) <= MAX_ERROR_CHARS:
+        return message
+    return message[: MAX_ERROR_CHARS - 3] + "..."
+
+
 async def run_specialist(
     client: AsyncAnthropicVertex,
     agent_name: str,
@@ -173,7 +181,7 @@ DIFF:
         ).strip()
         return agent_name, text
     except Exception as exc:  # noqa: BLE001
-        return agent_name, f"Specialist failed: `{type(exc).__name__}: {exc}`"
+        return agent_name, f"⚠️ Specialist failed: `{format_error(exc)}`"
 
 
 async def run_orchestrator(
@@ -211,33 +219,77 @@ but accurate: do not invent blockers, and do not soften real ones.
         system=system,
         messages=[{"role": "user", "content": user}],
     )
-    return "\n".join(
+    review_text = "\n".join(
         block.text for block in response.content if getattr(block, "type", None) == "text"
     ).strip()
+    if not review_text:
+        raise RuntimeError("Orchestrator response contained no text blocks")
+    return review_text
 
 
 def find_prior_review_comments(pr_number: str) -> list[str]:
+    selector = (
+        ".[] | select(.user.login == "
+        '"github-actions[bot]"'
+        f" and (.body | contains({json.dumps(COMMENT_MARKER)}))) | .id"
+    )
     raw = subprocess.check_output(
-        ["gh", "api", f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{pr_number}/comments"],
+        [
+            "gh",
+            "api",
+            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/{pr_number}/comments",
+            "--paginate",
+            "--jq",
+            selector,
+        ],
         text=True,
     )
-    comments = json.loads(raw)
-    return [
-        str(comment["id"])
-        for comment in comments
-        if COMMENT_MARKER in (comment.get("body") or "")
-    ]
+    return [line.strip() for line in raw.splitlines() if line.strip()]
 
 
 def delete_comment(comment_id: str) -> None:
     subprocess.run(
-        ["gh", "api", "-X", "DELETE", f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}"],
+        [
+            "gh",
+            "api",
+            "--method",
+            "DELETE",
+            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
+        ],
         check=True,
     )
 
 
 def post_comment(pr_number: str, body: str) -> None:
     subprocess.run(["gh", "pr", "comment", pr_number, "--body", body], check=True)
+
+
+def update_comment(comment_id: str, body: str) -> None:
+    subprocess.run(
+        [
+            "gh",
+            "api",
+            "--method",
+            "PATCH",
+            f"repos/{os.environ['GITHUB_REPOSITORY']}/issues/comments/{comment_id}",
+            "-f",
+            f"body={body}",
+        ],
+        check=True,
+    )
+
+
+def upsert_review_comment(pr_number: str, body: str) -> None:
+    comment_ids = find_prior_review_comments(pr_number)
+    latest_comment_id = comment_ids[-1] if comment_ids else None
+
+    if latest_comment_id:
+        update_comment(latest_comment_id, body)
+    else:
+        post_comment(pr_number, body)
+
+    for comment_id in comment_ids[:-1]:
+        delete_comment(comment_id)
 
 
 def compose_final_comment(report_markdown: str, buckets: list[str]) -> str:
@@ -250,6 +302,37 @@ def compose_final_comment(report_markdown: str, buckets: list[str]) -> str:
     )
     footer = "\n\n---\n\n*Skip automated reviews by including `[skip review]` in the PR title.*"
     return header + report_markdown + footer
+
+
+def compose_orchestrator_failure_report(
+    exc: Exception,
+    specialist_findings: dict[str, str],
+) -> str:
+    completed = sorted(
+        agent for agent, text in specialist_findings.items() if not text.startswith("⚠️ Specialist failed:")
+    )
+    failed = sorted(
+        agent for agent, text in specialist_findings.items() if text.startswith("⚠️ Specialist failed:")
+    )
+    completed_summary = ", ".join(f"`{agent}`" for agent in completed) if completed else "(none)"
+    failed_summary = ", ".join(f"`{agent}`" for agent in failed) if failed else "(none)"
+    return f"""### Blockers
+- Automated review orchestration failed before the final consolidated report was produced.
+
+### Concerns
+- `{format_error(exc)}`
+
+### Suggestions
+- Inspect the GitHub Actions logs for the failing run and re-run the reviewer after fixing the underlying issue.
+- Use the specialist passes listed below as rough input only; a human reviewer should still cover type safety, API contract changes, test coverage, and breaking changes before merge.
+
+### What's good
+- Completed specialist passes before the orchestrator failed: {completed_summary}
+- Specialist passes that failed independently: {failed_summary}
+
+### Verdict
+COMMENT. The consolidated automated review did not complete, so human follow-up is required.
+"""
 
 
 async def review_pr(
@@ -314,19 +397,21 @@ async def review_pr(
 
         results = await asyncio.gather(*tasks)
         findings = dict(results)
-        report = await run_orchestrator(
-            client,
-            findings,
-            pr_meta,
-            sorted(bucket.name for bucket in active_buckets),
-            docs_only,
-            orchestrator_model,
-        )
+        try:
+            report = await run_orchestrator(
+                client,
+                findings,
+                pr_meta,
+                sorted(bucket.name for bucket in active_buckets),
+                docs_only,
+                orchestrator_model,
+            )
+        except Exception as exc:  # noqa: BLE001
+            print(f"Orchestrator failed: {format_error(exc)}", file=sys.stderr)
+            report = compose_orchestrator_failure_report(exc, findings)
         comment = compose_final_comment(report, sorted(bucket.name for bucket in active_buckets))
 
-    for prior in find_prior_review_comments(pr_number):
-        delete_comment(prior)
-    post_comment(pr_number, comment)
+    upsert_review_comment(pr_number, comment)
     print(f"Posted review comment on PR #{pr_number}.")
     return 0
 

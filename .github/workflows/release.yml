@@ -20,24 +20,27 @@ on:
 
 permissions:
   actions: read
-  contents: write
+  contents: read
 
 jobs:
-  release:
+  prepare:
     runs-on: ubuntu-latest
     permissions:
       actions: read
-      contents: write
-      id-token: write
+      contents: read
+    outputs:
+      current_version: ${{ steps.current_version.outputs.version }}
+      new_version: ${{ steps.new_version.outputs.version }}
+      tarball_file: ${{ steps.pack.outputs.file }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
           node-version: '22'
           cache: 'npm'
@@ -58,16 +61,11 @@ jobs:
             exit 1
           fi
 
-      - name: Configure git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
       - name: Get current version
         id: current_version
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$CURRENT_VERSION" >> "$GITHUB_OUTPUT"
           echo "Current version: $CURRENT_VERSION"
 
       - name: Regenerate types from committed spec
@@ -79,24 +77,19 @@ jobs:
       - name: Check generated API docs
         run: npm run docs:check
 
-      - name: Increment version
+      - name: Increment version in workspace
         id: new_version
         run: |
-          echo "Incrementing ${{ inputs.version_type }} version..."
+          npm version ${{ inputs.version_type }} --no-git-tag-version
+          NEW_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
           if [ "${{ inputs.dry_run }}" = "true" ]; then
-            NEW_VERSION=$(npm version ${{ inputs.version_type }} --no-git-tag-version --dry-run)
-            NEW_VERSION=${NEW_VERSION#v}
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "(dry-run) Version would be: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
+            echo "(dry-run) Prepared version: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
           else
-            npm version ${{ inputs.version_type }} --no-git-tag-version
-            NEW_VERSION=$(node -p "require('./package.json').version")
-            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
-            echo "Version updated: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
+            echo "Prepared version: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
           fi
 
       - name: Update CHANGELOG.md
-        if: ${{ !inputs.dry_run }}
         run: |
           NEW_VERSION="${{ steps.new_version.outputs.version }}"
           ENTRY=$(node scripts/release-history.mjs changelog --version "$NEW_VERSION")
@@ -117,57 +110,31 @@ jobs:
         id: pack
         run: |
           FILE=$(npm pack --silent)
-          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
           echo "Tarball created: $FILE"
           ls -la "$FILE"
 
-      - name: Commit version bump
-        if: ${{ !inputs.dry_run }}
-        run: |
-          git add package.json package-lock.json CHANGELOG.md || true
-          git commit -m "v${{ steps.new_version.outputs.version }}"
-          git push origin HEAD
-
-      - name: Publish to npm
-        if: ${{ !inputs.dry_run }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          FILE="${{ steps.pack.outputs.file }}"
-          npm publish "$FILE" --provenance --access public
-
       - name: Build release notes
-        if: ${{ !inputs.dry_run }}
         run: |
           node scripts/release-history.mjs release-notes \
             --version "${{ steps.new_version.outputs.version }}" \
             --repo "${GITHUB_REPOSITORY}" \
             > release-notes.md
 
-      - name: Create and push tag
-        if: ${{ !inputs.dry_run }}
-        run: |
-          git tag -a "v${{ steps.new_version.outputs.version }}" -m "Release v${{ steps.new_version.outputs.version }}"
-          git push origin "v${{ steps.new_version.outputs.version }}"
-
-      - name: Create GitHub Release
-        if: ${{ !inputs.dry_run }}
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+      - name: Upload release payload
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          tag_name: 'v${{ steps.new_version.outputs.version }}'
-          name: 'Release v${{ steps.new_version.outputs.version }}'
-          body_path: release-notes.md
-          draft: false
-          files: |
+          name: release-payload
+          path: |
+            CHANGELOG.md
+            package.json
+            package-lock.json
+            release-notes.md
             ${{ steps.pack.outputs.file }}
-
-      - name: Cleanup temp files
-        if: always()
-        run: rm -f release-notes.md || true
+          retention-days: 30
 
       - name: Upload build artifacts
-        if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: dist-${{ steps.new_version.outputs.version }}
           path: |
@@ -177,9 +144,106 @@ jobs:
 
       - name: Release Summary
         run: |
-          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Version: ${{ steps.new_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Published: ${{ inputs.dry_run && 'skipped' || 'npm' }}" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ steps.new_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Prepared tarball: ${{ steps.pack.outputs.file }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Publish stage: ${{ inputs.dry_run && 'skipped' || 'pending' }}" >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    if: ${{ !inputs.dry_run }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Download release payload
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: release-payload
+          path: release-payload
+
+      - name: Setup Node
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
+
+  finalize:
+    if: ${{ !inputs.dry_run }}
+    needs: [prepare, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout triggering commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Configure git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Download release payload
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7
+        with:
+          name: release-payload
+          path: release-payload
+
+      - name: Apply release metadata
+        run: |
+          cp release-payload/package.json package.json
+          cp release-payload/package-lock.json package-lock.json
+          cp release-payload/CHANGELOG.md CHANGELOG.md
+          cp release-payload/release-notes.md release-notes.md
+
+      - name: Commit version bump
+        run: |
+          git add package.json package-lock.json CHANGELOG.md
+          if git diff --cached --quiet; then
+            echo "::error::No release metadata changes were produced."
+            exit 1
+          fi
+          git commit -m "v${{ needs.prepare.outputs.new_version }}"
+          git push origin "HEAD:${{ github.ref_name }}"
+
+      - name: Create and push tag
+        run: |
+          git tag -a "v${{ needs.prepare.outputs.new_version }}" -m "Release v${{ needs.prepare.outputs.new_version }}"
+          git push origin "v${{ needs.prepare.outputs.new_version }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          tag_name: 'v${{ needs.prepare.outputs.new_version }}'
+          name: 'Release v${{ needs.prepare.outputs.new_version }}'
+          body_path: release-notes.md
+          draft: false
+          files: |
+            release-payload/${{ needs.prepare.outputs.tarball_file }}
+
+      - name: Cleanup temp files
+        if: always()
+        run: rm -f release-notes.md || true
+
+      - name: Release Summary
+        run: |
+          echo "## Release Finalization" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ needs.prepare.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Published: npm" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"

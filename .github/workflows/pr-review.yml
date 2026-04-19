@@ -76,27 +76,82 @@ jobs:
 
       - name: Checkout
         if: steps.guard.outputs.skip == 'false'
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
 
       - name: Authenticate to GCP (WIF)
+        id: auth
         if: steps.guard.outputs.skip == 'false'
-        uses: google-github-actions/auth@v3
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        continue-on-error: true
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_REVIEW_SA }}
           create_credentials_file: true
           export_environment_variables: true
 
+      - name: Report WIF trust mismatch
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'failure'
+        run: |
+          marker='<!-- pr-review-auth-status -->'
+          matching_comment_ids() {
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              --paginate \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${1}\"))) | .id"
+          }
+          body=$(cat <<EOF
+          ${marker}
+          ⚠️ Claude review could not authenticate to GCP Vertex for \`${{ github.repository }}\`.
+
+          The configured Workload Identity Federation provider rejected this repo's GitHub OIDC token. In practice this means the provider or service-account trust in \`platform-infra/pr-review\` still only allows other repositories or workflow refs.
+
+          Expected trust inputs:
+          - repository: \`${{ github.repository }}\`
+          - workflow: \`${{ github.repository }}/.github/workflows/pr-review.yml\`
+
+          The SDK PR checks remain valid; only the external review integration is unavailable until the GCP trust policy is expanded.
+          EOF
+          )
+
+          comment_ids="$(matching_comment_ids "$marker")"
+          latest_comment_id=""
+          for comment_id in $comment_ids; do
+            latest_comment_id="$comment_id"
+          done
+
+          if [ -n "$latest_comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$latest_comment_id" -f body="$body" >/dev/null
+          else
+            gh pr comment "$PR_NUMBER" --body "$body"
+          fi
+
+          for comment_id in $comment_ids; do
+            if [ "$comment_id" != "$latest_comment_id" ]; then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
+            fi
+          done
+
+      - name: Clear stale WIF trust mismatch note
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        run: |
+          marker='<!-- pr-review-auth-status -->'
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
+            | while read -r comment_id; do
+                [ -n "$comment_id" ] || continue
+                gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
+              done
+
       - name: Install uv
-        if: steps.guard.outputs.skip == 'false'
-        uses: astral-sh/setup-uv@v7
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        uses: astral-sh/setup-uv@37802adc94f370d6bfd71619e3f0bf239e1f3b78 # v7
         with:
           enable-cache: true
 
       - name: Run review
-        if: steps.guard.outputs.skip == 'false'
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
         run: |
           uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
             python -m scripts.pr_review --pr "$PR_NUMBER" \
@@ -105,7 +160,49 @@ jobs:
               --vertex-project "$VERTEX_PROJECT" \
               --vertex-region "$VERTEX_REGION"
 
-      - name: Fallback comment on failure
-        if: failure() && steps.guard.outputs.skip == 'false'
+      - name: Clear stale failure note
+        if: success() && steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
         run: |
-          gh pr comment "$PR_NUMBER" --body "⚠️ Automated Claude (Vertex) SDK review failed to run. A human reviewer should review this PR before merge. See action logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          marker='<!-- sdk-review-failure:v1 -->'
+          gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+            --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
+            | while read -r comment_id; do
+                [ -n "$comment_id" ] || continue
+                gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
+              done
+
+      - name: Fallback comment on failure
+        if: failure() && steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
+        run: |
+          marker='<!-- sdk-review-failure:v1 -->'
+          matching_comment_ids() {
+            gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              --paginate \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${1}\"))) | .id"
+          }
+          body=$(cat <<EOF
+          ${marker}
+          ⚠️ Claude code review failed before it could post a structured report.
+
+          See [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for the underlying failure. A human reviewer should cover type safety, API contract changes, test coverage, and breaking changes before merge.
+          EOF
+          )
+
+          comment_ids="$(matching_comment_ids "$marker")"
+          latest_comment_id=""
+          for comment_id in $comment_ids; do
+            latest_comment_id="$comment_id"
+          done
+
+          if [ -n "$latest_comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$latest_comment_id" -f body="$body" >/dev/null
+          else
+            gh pr comment "$PR_NUMBER" --body "$body"
+          fi
+
+          for comment_id in $comment_ids; do
+            if [ "$comment_id" != "$latest_comment_id" ]; then
+              gh api --method DELETE "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" >/dev/null
+            fi
+          done
