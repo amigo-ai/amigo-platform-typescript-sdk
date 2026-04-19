@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.4.4] - 2026-04-19
+
+### Features
+
+- refresh README platform context and release hardening (#16)
+
+### Security
+
+- Polish the public repo surface and close security findings
+
+### Improvements
+
+- Stabilize Node 18 retry handling and refine the README platform graphic (#15)
+
+### Maintenance
+
+- Refresh generated SDK types from the committed Platform API spec
+
 This changelog tracks notable user-facing changes to the published SDK. Entries stay focused on package behavior, developer experience, and release hardening rather than internal branch noise.
 
 ## [0.4.3] - 2026-04-19
