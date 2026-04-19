@@ -7365,8 +7365,11 @@ export interface components {
             description: string;
             /** Id */
             id: string;
-            /** Latest Version */
-            latest_version?: number | null;
+            /**
+             * Latest Version
+             * @default 0
+             */
+            latest_version?: number;
             /** Name */
             name: string;
             /**
@@ -7521,8 +7524,11 @@ export interface components {
         };
         /** ArchiveResponse */
         ArchiveResponse: {
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @constant
+             */
+            status: "archived";
             /** Surface Id */
             surface_id: string;
         };
@@ -8727,12 +8733,18 @@ export interface components {
             description: string;
             /** Id */
             id: string;
-            /** Latest Version */
-            latest_version?: number | null;
+            /**
+             * Latest Version
+             * @default 0
+             */
+            latest_version?: number;
             /** Name */
             name: string;
-            /** State Count */
-            state_count?: number | null;
+            /**
+             * State Count
+             * @default 0
+             */
+            state_count?: number;
             /**
              * Updated At
              * Format: date-time
@@ -9477,8 +9489,11 @@ export interface components {
         };
         /** CreateSurfaceResponse */
         CreateSurfaceResponse: {
-            /** Channel */
-            channel: string;
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "sms" | "whatsapp" | "imessage" | "email" | "voice" | "web";
             /** Created At */
             created_at: string;
             /** Description */
@@ -9493,8 +9508,11 @@ export interface components {
             fields_count: number;
             /** Id */
             id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
             /** Title */
             title: string;
             /** Token */
@@ -10366,7 +10384,7 @@ export interface components {
         /** DeliverSurfaceResponse */
         DeliverSurfaceResponse: {
             /** Channel */
-            channel?: string | null;
+            channel?: ("sms" | "whatsapp" | "imessage" | "email" | "voice" | "web") | null;
             /** Channel Address */
             channel_address: string;
             /** Delivered At */
@@ -10379,8 +10397,11 @@ export interface components {
             from_number?: string | null;
             /** Message Id */
             message_id?: string | null;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "delivered" | "pending_review";
             /** Surface Id */
             surface_id: string;
             /** Url */
@@ -11361,8 +11382,11 @@ export interface components {
             fhir_resource_type: string | null;
             /** Id */
             id: string;
-            /** Review Status */
-            review_status: string;
+            /**
+             * Review Status
+             * @enum {string}
+             */
+            review_status: "pending" | "raw" | "uncertain" | "verified" | "approved" | "human_approved" | "auto_approved" | "rejected" | "corrected" | "flagged";
         };
         /** EventTypeRegistryResponse */
         EventTypeRegistryResponse: {
@@ -12485,8 +12509,11 @@ export interface components {
         InjectResponse: {
             /** Call Sid */
             call_sid: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "delivered" | "queued_no_subscriber";
         };
         /** IntakeFileResponse */
         IntakeFileResponse: {
@@ -14894,10 +14921,16 @@ export interface components {
         };
         /** ReviewActionResponse */
         ReviewActionResponse: {
-            /** Action */
-            action: string;
-            /** Status */
-            status: string;
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approved" | "rejected";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
             /** Surface Id */
             surface_id: string;
         };
@@ -14937,7 +14970,7 @@ export interface components {
             /** Assigned To */
             assigned_to: string | null;
             /** Completed Action */
-            completed_action: string | null;
+            completed_action: ("approved" | "rejected" | "corrected") | null;
             /** Completed At */
             completed_at: string | null;
             /** Created At */
@@ -14963,8 +14996,11 @@ export interface components {
             reason: string;
             /** Session Id */
             session_id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "in_progress" | "completed" | "rejected";
             /** Workspace Id */
             workspace_id: string;
         };
@@ -16298,7 +16334,7 @@ export interface components {
         /** SurfaceResponse */
         SurfaceResponse: {
             /** Channel */
-            channel?: string | null;
+            channel?: ("sms" | "whatsapp" | "imessage" | "email" | "voice" | "web") | null;
             /**
              * Context
              * @default {}
@@ -16337,8 +16373,11 @@ export interface components {
             opened_at?: string | null;
             /** Resource Type */
             resource_type?: string | null;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
             /** Submitted At */
             submitted_at?: string | null;
             /** Submitted Data */
@@ -16602,8 +16641,11 @@ export interface components {
             result?: string | null;
             /** Skill */
             skill: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "dispatched" | "running" | "completed" | "failed" | "cancelled" | "timeout";
             /**
              * Sub Tool Count
              * @default 0
@@ -16611,8 +16653,11 @@ export interface components {
             sub_tool_count?: number;
             /** Task Id */
             task_id: string;
-            /** Tier */
-            tier: string;
+            /**
+             * Tier
+             * @enum {string}
+             */
+            tier: "direct" | "companion" | "desktop" | "computer_use";
             /** Workspace Id */
             workspace_id: string;
         };
@@ -17188,8 +17233,9 @@ export interface components {
             /**
              * Status
              * @default fired
+             * @constant
              */
-            status?: string;
+            status?: "fired";
             /**
              * Trigger Id
              * Format: uuid
