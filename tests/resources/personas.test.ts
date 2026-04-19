@@ -11,9 +11,11 @@ const PERSONA_FIXTURE = {
   id: PERSONA_ID,
   workspace_id: TEST_WORKSPACE_ID,
   name: 'Friendly Receptionist',
-  description: 'A warm and welcoming front-desk persona',
-  voice: 'alloy',
-  tone: 'warm',
+  background: 'A warm and welcoming front-desk persona',
+  communication_style: { tone: 'warm' },
+  default_language: 'eng',
+  developed_by: 'Amigo',
+  role: 'receptionist',
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
@@ -83,8 +85,7 @@ describe('PersonasResource', () => {
   it('gets a persona by id', async () => {
     const result = await client.personas.get(PERSONA_ID)
     expect(result.id).toBe(PERSONA_ID)
-    // @ts-expect-error fixture field
-    expect(result.voice).toBe('alloy')
+    expect(result.communication_style).toEqual({ tone: 'warm' })
   })
 
   it('throws NotFoundError for missing persona', async () => {

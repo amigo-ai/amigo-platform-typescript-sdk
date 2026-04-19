@@ -8,26 +8,31 @@ const CALL_SID = 'CA1234567890abcdef1234567890abcdef'
 
 const URLS_FIXTURE = {
   call_sid: CALL_SID,
-  recording_url: 'https://recordings.example.com/rec-001.wav',
-  stereo_url: 'https://recordings.example.com/rec-001-stereo.wav',
-  expires_at: '2026-01-02T00:00:00Z',
+  inbound_url: 'https://recordings.example.com/rec-001-inbound.wav',
+  outbound_url: 'https://recordings.example.com/rec-001-outbound.wav',
+  metadata_url: 'https://recordings.example.com/rec-001-metadata.json',
 }
 
 const METADATA_FIXTURE = {
   call_sid: CALL_SID,
+  call_start_iso: '2026-01-01T00:00:00Z',
+  call_end_iso: '2026-01-01T00:03:05Z',
   duration_seconds: 185,
-  channels: 2,
-  sample_rate: 16000,
-  format: 'wav',
-  size_bytes: 5920000,
-  created_at: '2026-01-01T00:00:00Z',
+  direction: 'inbound' as const,
+  service_id: 'agent-001',
+  workspace_id: TEST_WORKSPACE_ID,
+  tts_provider: 'elevenlabs',
+  media_start_epoch_ms: 1735689600000,
+  inbound_format: 'wav',
+  inbound_sample_rate: 16000,
+  inbound_size_bytes: 2960000,
+  outbound_format: 'wav',
+  outbound_sample_rate: 16000,
+  outbound_size_bytes: 2960000,
 }
 
 const DOWNLOAD_FIXTURE = {
-  call_sid: CALL_SID,
-  filename: 'recording.wav',
-  url: 'https://recordings.example.com/download/rec-001.wav',
-  content_type: 'audio/wav',
+  data: 'binary-audio-content',
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -71,29 +76,21 @@ describe('RecordingsResource', () => {
   it('gets recording URLs', async () => {
     const result = await client.recordings.getUrls(CALL_SID)
     expect(result.call_sid).toBe(CALL_SID)
-    // @ts-expect-error fixture field
-    expect(result.recording_url).toContain('rec-001.wav')
-    // @ts-expect-error fixture field
-    expect(result.stereo_url).toContain('stereo')
+    expect(result.inbound_url).toContain('inbound')
+    expect(result.outbound_url).toContain('outbound')
   })
 
   it('gets recording metadata', async () => {
     const result = await client.recordings.getMetadata(CALL_SID)
     expect(result.call_sid).toBe(CALL_SID)
     expect(result.duration_seconds).toBe(185)
-    // @ts-expect-error fixture field
-    expect(result.channels).toBe(2)
-    // @ts-expect-error fixture field
-    expect(result.format).toBe('wav')
+    expect(result.inbound_sample_rate).toBe(16000)
+    expect(result.inbound_format).toBe('wav')
   })
 
   it('downloads a recording', async () => {
     const result = await client.recordings.download(CALL_SID, 'recording.wav')
-    // @ts-expect-error fixture field
-    expect(result.call_sid).toBe(CALL_SID)
-    // @ts-expect-error fixture field
-    expect(result.filename).toBe('recording.wav')
-    // @ts-expect-error fixture field
-    expect(result.url).toContain('download')
+    // download returns `unknown` per the OpenAPI spec
+    expect(result).toBeDefined()
   })
 })

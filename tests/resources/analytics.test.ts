@@ -59,16 +59,24 @@ const TOOL_PERFORMANCE_FIXTURE = {
 }
 
 const DATA_QUALITY_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  entity_completeness: 0.88,
-  duplicate_rate: 0.02,
+  confidence_by_source: {},
+  confidence_distribution: [
+    { confidence_range: 'verified', count: 88 },
+    { confidence_range: 'raw', count: 12 },
+  ],
+  period_start: '2026-01-01',
+  period_end: '2026-01-07',
+  review_pipeline: {},
 }
 
 const USAGE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  api_requests: 25000,
-  call_minutes: 600,
-  storage_mb: 1024,
+  buckets: [
+    { event_type: 'call.started', event_date: '2026-01-01', count: 50 },
+  ],
+  period_start: '2026-01-01',
+  period_end: '2026-01-07',
+  total_events: 25000,
 }
 
 const EVENT_BREAKDOWN_FIXTURE = {
@@ -90,9 +98,17 @@ const SAFETY_TRENDS_FIXTURE = {
 }
 
 const OPERATOR_PERFORMANCE_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  operators: [
-    { operator_id: 'op-001', name: 'Dr. Smith', escalations_handled: 12, avg_response_time_seconds: 30 },
+  summary: {
+    escalated_count: 12,
+    escalation_rate: 0.08,
+    operator_handled_count: 10,
+    total_calls: 150,
+    avg_escalated_duration_seconds: 300,
+    avg_escalated_quality_score: 0.85,
+    avg_non_escalated_quality_score: 0.90,
+  },
+  trend: [
+    { date: '2026-01-01', escalated_count: 3, total_calls: 20 },
   ],
 }
 
@@ -215,18 +231,14 @@ describe('AnalyticsResource', () => {
 
   it('gets data quality', async () => {
     const result = await client.analytics.getDataQuality()
-    // @ts-expect-error fixture field
-    expect(result.entity_completeness).toBe(0.88)
-    // @ts-expect-error fixture field
-    expect(result.duplicate_rate).toBe(0.02)
+    expect(result.confidence_distribution).toHaveLength(2)
+    expect(result.period_start).toBe('2026-01-01')
   })
 
   it('gets usage', async () => {
     const result = await client.analytics.getUsage()
-    // @ts-expect-error fixture field
-    expect(result.api_requests).toBe(25000)
-    // @ts-expect-error fixture field
-    expect(result.call_minutes).toBe(600)
+    expect(result.total_events).toBe(25000)
+    expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
   })
 
   it('gets event breakdown', async () => {
@@ -242,10 +254,8 @@ describe('AnalyticsResource', () => {
 
   it('gets operator performance', async () => {
     const result = await client.analytics.getOperatorPerformance()
-    // @ts-expect-error fixture field
-    expect(result.operators).toHaveLength(1)
-    // @ts-expect-error fixture field
-    expect(result.operators[0]?.escalations_handled).toBe(12)
+    expect(result.summary.escalated_count).toBe(12)
+    expect(result.trend).toHaveLength(1)
   })
 
   it('gets advanced call stats', async () => {
@@ -261,11 +271,8 @@ describe('AnalyticsResource', () => {
       previous_from: '2026-01-01',
       previous_to: '2026-01-07',
     })
-    // @ts-expect-error fixture field
-    expect(result.current.total_calls).toBe(150)
-    // @ts-expect-error fixture field
-    expect(result.previous.total_calls).toBe(120)
-    // @ts-expect-error fixture field
-    expect(result.delta.total_calls).toBe(30)
+    expect(result.current).toBeDefined()
+    expect(result.previous).toBeDefined()
+    expect(result.delta).toBeDefined()
   })
 })

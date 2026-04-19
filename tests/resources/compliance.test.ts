@@ -5,38 +5,35 @@ const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const DASHBOARD_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  overall_score: 92,
-  categories: [
-    { name: 'Data Protection', score: 95 },
-    { name: 'Access Control', score: 88 },
-    { name: 'Audit Trail', score: 93 },
-  ],
-  last_assessment_at: '2026-01-15T00:00:00Z',
+  active_credentials: 5,
+  generated_at: '2026-01-15T00:00:00Z',
+  hipaa_status: 'compliant',
+  last_audit_export: '2026-01-10T00:00:00Z',
+  legal_hold: false,
+  retention_days: 365,
+  total_credentials: 8,
 }
 
 const HIPAA_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  compliant: true,
+  compliance_status: 'compliant',
   report_period_days: 30,
-  controls: [
-    { id: 'AC-1', name: 'Access Control Policy', status: 'compliant' },
-    { id: 'AU-1', name: 'Audit and Accountability Policy', status: 'compliant' },
-    { id: 'SC-1', name: 'System and Communications Protection', status: 'review_needed' },
-  ],
-  phi_access_count: 1240,
-  encryption_status: 'all_encrypted',
+  access_controls: { total_keys: 8, active_keys: 5 },
+  api_key_summary: { active: 5, revoked: 3 },
+  audit_summary: { total_events: 1240, last_export: '2026-01-10T00:00:00Z' },
+  encryption: { at_rest: true, in_transit: true },
+  generated_at: '2026-01-15T00:00:00Z',
+  retention_policy: { days: 365, enforced: true },
 }
 
 const ACCESS_REVIEW_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  total_users: 25,
-  users_with_phi_access: 8,
-  last_review_at: '2026-01-10T00:00:00Z',
-  pending_reviews: 2,
-  access_entries: [
-    { user_id: 'u-001', email: 'admin@clinic.example.com', role: 'admin', last_access: '2026-01-14T00:00:00Z' },
+  credentials: [
+    { id: 'cred-001', type: 'api_key', status: 'active' },
   ],
+  generated_at: '2026-01-10T00:00:00Z',
+  jwt_credentials_note: 'JWT credentials are managed via identity service',
+  total_credentials: 8,
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -79,42 +76,30 @@ const client = new AmigoClient({
 describe('ComplianceResource', () => {
   it('gets the compliance dashboard', async () => {
     const result = await client.compliance.getDashboard()
-    // @ts-expect-error fixture field
-    expect(result.overall_score).toBe(92)
-    // @ts-expect-error fixture field
-    expect(result.categories).toHaveLength(3)
-    // @ts-expect-error fixture field
-    expect(result.categories[0]?.name).toBe('Data Protection')
+    expect(result.hipaa_status).toBe('compliant')
+    expect(result.active_credentials).toBe(5)
+    expect(result.total_credentials).toBe(8)
   })
 
   it('gets HIPAA compliance report', async () => {
     const result = await client.compliance.getHipaa()
-    // @ts-expect-error fixture field
-    expect(result.compliant).toBe(true)
-    // @ts-expect-error fixture field
-    expect(result.controls).toHaveLength(3)
-    // @ts-expect-error fixture field
-    expect(result.phi_access_count).toBe(1240)
-    // @ts-expect-error fixture field
-    expect(result.encryption_status).toBe('all_encrypted')
+    expect(result.compliance_status).toBe('compliant')
+    expect(result.report_period_days).toBe(30)
+    expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
+    expect(result.encryption).toEqual({ at_rest: true, in_transit: true })
   })
 
   it('gets HIPAA compliance report with period param', async () => {
     const result = await client.compliance.getHipaa({ report_period_days: 90 })
-    // @ts-expect-error fixture field
-    expect(result.compliant).toBe(true)
+    expect(result.compliance_status).toBe('compliant')
     expect(result.report_period_days).toBe(30)
   })
 
   it('gets access review', async () => {
     const result = await client.compliance.getAccessReview()
-    // @ts-expect-error fixture field
-    expect(result.total_users).toBe(25)
-    // @ts-expect-error fixture field
-    expect(result.users_with_phi_access).toBe(8)
-    // @ts-expect-error fixture field
-    expect(result.pending_reviews).toBe(2)
-    // @ts-expect-error fixture field
-    expect(result.access_entries).toHaveLength(1)
+    expect(result.total_credentials).toBe(8)
+    expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
+    expect(result.jwt_credentials_note).toBeDefined()
+    expect(result.credentials).toHaveLength(1)
   })
 })

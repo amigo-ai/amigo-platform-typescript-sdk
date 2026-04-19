@@ -8,6 +8,7 @@ const ENTITY_ID = 'entity-00000000-0000-0000-0000-000000000001'
 
 const DIMENSIONS_FIXTURE = {
   entity_id: ENTITY_ID,
+  total_facts: 35,
   dimensions: [
     { name: 'preferences', avg_confidence: 0.85, fact_count: 12, dimension: 'preferences', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
     { name: 'health_history', avg_confidence: 0.72, fact_count: 8, dimension: 'health_history', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
@@ -17,38 +18,44 @@ const DIMENSIONS_FIXTURE = {
 
 const FACTS_FIXTURE = {
   entity_id: ENTITY_ID,
+  dimension: null,
+  total: 2,
   facts: [
     {
-      id: 'fact-001',
       dimension: 'preferences',
-      key: 'preferred_appointment_time',
-      value: 'morning',
       confidence: 0.92,
+      data: { preferred_appointment_time: 'morning' },
+      event_type: 'call.ended',
+      extracted_text: 'preferred_appointment_time: morning',
+      ingested_at: '2026-01-01T00:00:00Z',
       source: 'call:CA123',
-      extracted_at: '2026-01-01T00:00:00Z',
     },
     {
-      id: 'fact-002',
       dimension: 'preferences',
-      key: 'language',
-      value: 'Spanish',
       confidence: 0.98,
+      data: { language: 'Spanish' },
+      event_type: 'call.ended',
+      extracted_text: 'language: Spanish',
+      ingested_at: '2026-01-02T00:00:00Z',
       source: 'call:CA456',
-      extracted_at: '2026-01-02T00:00:00Z',
     },
   ],
 }
 
 const ANALYTICS_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
+  active_dimensions: 3,
+  builtin_dimensions: 2,
+  coverage_rate: 0.78,
+  custom_dimensions: 1,
+  dimensions: [],
+  facts_last_24h: 45,
+  facts_last_7d: 320,
+  facts_last_30d: 1200,
+  llm_dimensions: 1,
+  top_sources: [],
+  total_entities_in_workspace: 600,
   total_entities_with_memory: 450,
   total_facts: 3200,
-  avg_dimensions_per_entity: 4.2,
-  coverage_by_dimension: [
-    { dimension: 'preferences', entity_coverage_pct: 0.78 },
-    { dimension: 'health_history', entity_coverage_pct: 0.55 },
-  ],
-  facts_ingested_last_7d: 320,
 }
 
 function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
@@ -101,10 +108,8 @@ describe('MemoryResource', () => {
     const result = await client.memory.getEntityFacts(ENTITY_ID)
     expect(result.entity_id).toBe(ENTITY_ID)
     expect(result.facts).toHaveLength(2)
-    // @ts-expect-error fixture field
-    expect(result.facts[0]?.key).toBe('preferred_appointment_time')
-    // @ts-expect-error fixture field
-    expect(result.facts[0]?.value).toBe('morning')
+    expect(result.facts[0]?.dimension).toBe('preferences')
+    expect(result.facts[0]?.confidence).toBe(0.92)
   })
 
   it('gets entity facts with dimension filter', async () => {
@@ -117,13 +122,9 @@ describe('MemoryResource', () => {
 
   it('gets memory analytics', async () => {
     const result = await client.memory.getAnalytics()
-    // @ts-expect-error fixture field
-    expect(result.workspace_id).toBe(TEST_WORKSPACE_ID)
     expect(result.total_entities_with_memory).toBe(450)
     expect(result.total_facts).toBe(3200)
-    // @ts-expect-error fixture field
-    expect(result.coverage_by_dimension).toHaveLength(2)
-    // @ts-expect-error fixture field
-    expect(result.facts_ingested_last_7d).toBe(320)
+    expect(result.coverage_rate).toBe(0.78)
+    expect(result.facts_last_7d).toBe(320)
   })
 })
