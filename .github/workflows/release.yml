@@ -244,6 +244,18 @@ jobs:
             exit 1
           fi
 
+      - name: Confirm branch has not moved before applying release metadata
+        run: |
+          # Best-effort fail-fast check. The commit/push step repeats this
+          # immediately before push, and force-with-lease remains the
+          # authoritative compare-and-swap guard.
+          git fetch origin "${{ github.ref_name }}"
+          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
+          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            exit 1
+          fi
+
       - name: Download release payload
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
