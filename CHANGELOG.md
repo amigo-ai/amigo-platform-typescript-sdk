@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0] - 2026-04-19
+
+### Features
+
+- add coverage reporting, fix README badges, rebrand skills to actions in docs
+- Claude on Vertex AI code review — matches platform repo pattern
+- supreme grade repo — CONTRIBUTING, SECURITY, CODE_OF_CONDUCT, PR review, CODEOWNERS
+
+### Chores
+
+- fix vitest/rollup native bindings, add .nvmrc + .npmrc, coverage reporting
+
 ## [0.2.1] - 2026-04-19
 
 ### Features
