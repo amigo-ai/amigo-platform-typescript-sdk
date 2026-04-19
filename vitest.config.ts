@@ -2,18 +2,47 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    // Override default excludes to allow tests/dist/
-    exclude: ['node_modules/**', 'dist/**', '.git/**'],
+    environment: 'node',
+    globals: true,
     coverage: {
       provider: 'v8',
-      include: ['src/**'],
-      exclude: ['src/types/**', 'node_modules/**'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/generated/**', 'coverage/**', '**/*.config.*', '**/*.test.*'],
       thresholds: {
-        lines: 50,
-        statements: 50,
-        branches: 50,
-        functions: 35,
+        lines: 80,
+        branches: 75,
+        functions: 80,
+        statements: 80,
       },
+    },
+    projects: [
+      {
+        test: {
+          name: 'unit',
+          include: ['tests/**/*.{test,spec}.{js,ts}', 'src/**/*.{test,spec}.{js,ts}'],
+          exclude: ['node_modules', 'dist', 'tests/integration/**', 'tests/dist/**'],
+        },
+      },
+      {
+        test: {
+          name: 'dist',
+          include: ['tests/dist/**/*.{test,spec}.{js,ts}'],
+          exclude: ['**/node_modules/**'],
+        },
+      },
+      {
+        test: {
+          name: 'integration',
+          include: ['tests/integration/**'],
+          env: { RUN_INTEGRATION: 'true' },
+          pool: 'forks',
+        },
+      },
+    ],
+  },
+  resolve: {
+    alias: {
+      '^(\\.{1,2}/.*)\\.js$': '$1',
     },
   },
 })

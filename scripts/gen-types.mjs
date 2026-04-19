@@ -1,15 +1,16 @@
 /**
- * Generate TypeScript types from the platform-api OpenAPI spec.
+ * Generate TypeScript types from the platform OpenAPI spec.
  *
  * Sources (in priority order):
- *   1. Local sibling repo:  ../platform/services/platform-api/openapi.json
- *   2. Live staging API:    https://internal-api.platform.amigo.ai/v1/openapi.json
- *   3. Live production API: https://api.platform.amigo.ai/v1/openapi.json
+ *   1. Explicit --spec path/to/spec.json
+ *   2. Explicit --url https://...
+ *   3. Committed repo snapshot: openapi.json
+ *   4. Local sibling repo: ../platform/services/platform-api/openapi.json
+ *   5. Live production API: https://api.platform.amigo.ai/v1/openapi.json
  *
- * Usage:
- *   node scripts/gen-types.mjs                          # auto-detect source
- *   node scripts/gen-types.mjs --spec path/to/spec.json # explicit local file
- *   node scripts/gen-types.mjs --url https://...        # explicit URL
+ * The default path is intentionally deterministic for public builds: if
+ * `openapi.json` is committed in this repo, builds do not depend on local
+ * sibling checkouts or live network state.
  */
 
 import fs from 'node:fs'
@@ -19,115 +20,145 @@ import openapiTS, { astToString } from 'openapi-typescript'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const OUT_FILE = path.resolve(__dirname, '../src/generated/api.ts')
+const REPO_SPEC = path.resolve(__dirname, '../openapi.json')
+const SIBLING_SPEC = path.resolve(__dirname, '../../platform/services/platform-api/openapi.json')
+const DEFAULT_SPEC_URL = 'https://api.platform.amigo.ai/v1/openapi.json'
 
-// Parse args
 const args = process.argv.slice(2)
-let specSource
 
-const specArgIdx = args.indexOf('--spec')
-const urlArgIdx = args.indexOf('--url')
-
-if (specArgIdx !== -1 && args[specArgIdx + 1]) {
-  specSource = path.resolve(args[specArgIdx + 1])
-} else if (urlArgIdx !== -1 && args[urlArgIdx + 1]) {
-  specSource = args[urlArgIdx + 1]
-} else {
-  // Auto-detect: prefer local committed spec from sibling platform repo
-  const localSpec = path.resolve(__dirname, '../../platform/services/platform-api/openapi.json')
-  if (fs.existsSync(localSpec)) {
-    specSource = localSpec
-    console.log(`Using local spec: ${localSpec}`)
-  } else {
-    specSource = 'https://api.platform.amigo.ai/v1/openapi.json'
-    console.log(`Local spec not found, using live API: ${specSource}`)
-  }
+function getArgValue(name) {
+  const index = args.indexOf(name)
+  return index === -1 ? undefined : args[index + 1]
 }
 
+function resolveSpecSource() {
+  const specArg = getArgValue('--spec')
+  const urlArg = getArgValue('--url')
+
+  if (specArg) {
+    const resolvedPath = path.resolve(specArg)
+    console.log(`Using explicit spec: ${resolvedPath}`)
+    return resolvedPath
+  }
+
+  if (urlArg) {
+    console.log(`Using explicit URL: ${urlArg}`)
+    return urlArg
+  }
+
+  if (fs.existsSync(REPO_SPEC)) {
+    console.log(`Using committed spec snapshot: ${REPO_SPEC}`)
+    return REPO_SPEC
+  }
+
+  if (fs.existsSync(SIBLING_SPEC)) {
+    console.log(`Committed spec not found, using sibling repo spec: ${SIBLING_SPEC}`)
+    return SIBLING_SPEC
+  }
+
+  console.log(`Committed spec not found, using live API: ${DEFAULT_SPEC_URL}`)
+  return DEFAULT_SPEC_URL
+}
+
+async function loadSpec(specSource) {
+  if (specSource.startsWith('http')) {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 30_000)
+    try {
+      const response = await fetch(specSource, { signal: controller.signal })
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status} ${response.statusText}`)
+      }
+      return await response.json()
+    } finally {
+      clearTimeout(timeout)
+    }
+  }
+
+  return JSON.parse(fs.readFileSync(specSource, 'utf-8'))
+}
+
+function patchOpenApiDocument(input) {
+  const existingSchemas = new Set(Object.keys(input.components?.schemas ?? {}))
+
+  function fixDiscriminatorMappings(obj) {
+    if (!obj || typeof obj !== 'object') return
+
+    if (obj.discriminator?.mapping) {
+      for (const [key, ref] of Object.entries(obj.discriminator.mapping)) {
+        if (!existingSchemas.has(ref.replace('#/components/schemas/', ''))) {
+          delete obj.discriminator.mapping[key]
+        }
+      }
+    }
+
+    for (const value of Object.values(obj)) {
+      if (Array.isArray(value)) {
+        value.forEach(fixDiscriminatorMappings)
+      } else if (typeof value === 'object' && value !== null) {
+        fixDiscriminatorMappings(value)
+      }
+    }
+  }
+
+  fixDiscriminatorMappings(input)
+
+  const seenOperationIds = new Map()
+  for (const [, pathItem] of Object.entries(input.paths ?? {})) {
+    for (const [method, operation] of Object.entries(pathItem)) {
+      if (typeof operation !== 'object' || !operation.operationId) continue
+
+      const { operationId } = operation
+      if (seenOperationIds.has(operationId)) {
+        operation.operationId = `${operationId}-${method}`
+      } else {
+        seenOperationIds.set(operationId, true)
+      }
+    }
+  }
+
+  for (const [pathKey, pathItem] of Object.entries(input.paths ?? {})) {
+    const templateParams = [...pathKey.matchAll(/\{(\w+)\}/g)].map((match) => match[1])
+    if (templateParams.length === 0) continue
+
+    for (const [, operation] of Object.entries(pathItem)) {
+      if (typeof operation !== 'object' || !operation.responses) continue
+
+      if (!operation.parameters) {
+        operation.parameters = []
+      }
+
+      for (const paramName of templateParams) {
+        const exists = operation.parameters.some(
+          (param) => param.name === paramName && param.in === 'path'
+        )
+
+        if (!exists) {
+          operation.parameters.push({
+            name: paramName,
+            in: 'path',
+            required: true,
+            schema: { type: 'string' },
+          })
+        }
+      }
+    }
+  }
+
+  return input
+}
+
+const specSource = resolveSpecSource()
 console.log(`Generating types from: ${specSource}`)
 
-// Resolve spec (local file or URL)
-let input
-if (specSource.startsWith('http')) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 30_000)
-  try {
-    const res = await fetch(specSource, { signal: controller.signal })
-    if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`)
-    input = await res.json()
-  } finally {
-    clearTimeout(timeout)
-  }
-} else {
-  input = JSON.parse(fs.readFileSync(specSource, 'utf-8'))
-}
-
-// Fix broken discriminator mappings (references to non-existent schemas)
-const existingSchemas = new Set(Object.keys(input.components?.schemas ?? {}))
-function fixDiscriminatorMappings(obj) {
-  if (!obj || typeof obj !== 'object') return
-  if (obj.discriminator?.mapping) {
-    for (const [key, ref] of Object.entries(obj.discriminator.mapping)) {
-      if (!existingSchemas.has(ref.replace('#/components/schemas/', ''))) {
-        delete obj.discriminator.mapping[key]
-      }
-    }
-  }
-  for (const val of Object.values(obj)) {
-    if (Array.isArray(val)) val.forEach(fixDiscriminatorMappings)
-    else if (typeof val === 'object' && val !== null) fixDiscriminatorMappings(val)
-  }
-}
-fixDiscriminatorMappings(input)
-
-// Fix duplicate operationIds (FastAPI generates collisions for overloaded routes)
-const seenOps = new Map()
-for (const [, pathItem] of Object.entries(input.paths ?? {})) {
-  for (const [method, op] of Object.entries(pathItem)) {
-    if (typeof op !== 'object' || !op.operationId) continue
-    const id = op.operationId
-    if (seenOps.has(id)) {
-      op.operationId = `${id}-${method}`
-    } else {
-      seenOps.set(id, true)
-    }
-  }
-}
-
-// FastAPI injects workspace_id, agent_id, etc. via Depends() so they're
-// missing from the spec's operation parameters. Patch all operations to
-// declare path params that appear in their URL template.
-for (const [pathKey, pathItem] of Object.entries(input.paths ?? {})) {
-  const templateParams = [...pathKey.matchAll(/\{(\w+)\}/g)].map(m => m[1])
-  if (templateParams.length === 0) continue
-
-  for (const [, op] of Object.entries(pathItem)) {
-    if (typeof op !== 'object' || !op.responses) continue
-    if (!op.parameters) op.parameters = []
-    for (const paramName of templateParams) {
-      const exists = op.parameters.some(p => p.name === paramName && p.in === 'path')
-      if (!exists) {
-        op.parameters.push({
-          name: paramName,
-          in: 'path',
-          required: true,
-          schema: { type: 'string' },
-        })
-      }
-    }
-  }
-}
-
-// Generate TypeScript
+const input = patchOpenApiDocument(await loadSpec(specSource))
 const ast = await openapiTS(input, { defaultNonNullable: false })
-let code = astToString(ast)
+const code = astToString(ast)
 
-// Note: FastAPI prefixes some inline schemas with src__routes__module__
-// We keep these prefixes to avoid name collisions with components/schemas.
-// Consumers should use components['schemas']['SchemaName'] which are always clean.
-
-// Ensure output directory exists
 const outDir = path.dirname(OUT_FILE)
-if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true })
+if (!fs.existsSync(outDir)) {
+  fs.mkdirSync(outDir, { recursive: true })
+}
 
 fs.writeFileSync(OUT_FILE, code)
 
