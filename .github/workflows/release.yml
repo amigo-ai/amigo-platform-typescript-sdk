@@ -4,63 +4,234 @@ on:
   workflow_dispatch:
     inputs:
       version_type:
+        description: 'Version increment type'
         required: true
-        default: "patch"
+        default: 'patch'
         type: choice
-        options: [patch, minor, major]
+        options:
+          - patch
+          - minor
+          - major
       dry_run:
+        description: 'Dry run (skip publish, commits, tags)'
         required: false
         default: false
         type: boolean
 
+  workflow_call:
+    inputs:
+      version_type:
+        description: 'Version increment type (patch|minor|major)'
+        required: true
+        type: string
+        default: 'patch'
+      dry_run:
+        description: 'Dry run (skip upload)'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
 jobs:
   test:
     uses: ./.github/workflows/test.yml
+    with:
+      skip_codecov: true
+    secrets: inherit
 
   release:
     runs-on: ubuntu-latest
     needs: test
-    if: ${{ !inputs.dry_run }}
     environment: npm
     permissions:
       contents: write
       id-token: write
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
-          registry-url: "https://registry.npmjs.org"
+          node-version: '22'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-      - run: git config user.name "github-actions[bot]"
-      - run: git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Bump version
-        run: npm version ${{ inputs.version_type }} --no-git-tag-version
-
-      - name: Build
-        run: npm run build
-
-      - name: Publish
-        run: npm publish --provenance --access public
-
-      - name: Commit + tag
+      - name: Configure git
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          git add package.json package-lock.json
-          git commit -m "v${VERSION}"
-          git tag "v${VERSION}"
-          git push origin HEAD --tags
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Get current version
+        id: current_version
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          gh release create "v${VERSION}" --generate-notes
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Regenerate types from committed spec
+        run: |
+          echo "Regenerating types from openapi.json..."
+          npm run gen-types
+          echo "Types regenerated"
+
+      - name: Increment version
+        id: new_version
+        run: |
+          echo "Incrementing ${{ inputs.version_type }} version..."
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            NEW_VERSION=$(npm version ${{ inputs.version_type }} --no-git-tag-version --dry-run)
+            NEW_VERSION=${NEW_VERSION#v}
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "(dry-run) Version would be: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
+          else
+            npm version ${{ inputs.version_type }} --no-git-tag-version
+            NEW_VERSION=$(node -p "require('./package.json').version")
+            echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            echo "Version updated: ${{ steps.current_version.outputs.version }} -> $NEW_VERSION"
+          fi
+
+      - name: Build package
+        run: |
+          rm -rf dist/
+          npm run build
+          ls -la dist/
+
+      - name: Pack tarball
+        id: pack
+        run: |
+          FILE=$(npm pack --silent)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          echo "Tarball created: $FILE"
+          ls -la "$FILE"
+
+      - name: Publish to npm (OIDC Trusted Publisher)
+        if: ${{ !inputs.dry_run }}
+        run: |
+          FILE="${{ steps.pack.outputs.file }}"
+          npm publish "$FILE" --provenance --access public
+
+      - name: Update CHANGELOG.md
+        if: ${{ !inputs.dry_run }}
+        run: |
+          NEW_VERSION="${{ steps.new_version.outputs.version }}"
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            ENTRY=$(bash scripts/generate-changelog.sh --from "$PREV_TAG" --version "$NEW_VERSION")
+          else
+            ENTRY=$(bash scripts/generate-changelog.sh --version "$NEW_VERSION")
+          fi
+          if [ -f CHANGELOG.md ]; then
+            { head -1 CHANGELOG.md; echo ""; echo "$ENTRY"; tail -n +2 CHANGELOG.md; } > CHANGELOG.tmp
+            mv CHANGELOG.tmp CHANGELOG.md
+          else
+            { echo "# Changelog"; echo ""; echo "$ENTRY"; } > CHANGELOG.md
+          fi
+
+      - name: Commit version bump
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git add package.json package-lock.json CHANGELOG.md || true
+          git commit -m "v${{ steps.new_version.outputs.version }}"
+          git push origin HEAD
+
+      - name: Build release notes
+        if: ${{ !inputs.dry_run }}
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          NEW_TAG="v${{ steps.new_version.outputs.version }}"
+
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+
+          {
+            echo "## What's Changed in ${NEW_TAG}"
+            echo ""
+
+            FEATS=$(git log --pretty=format:'- %s (%h)' "${PREV_TAG}..HEAD" | grep -iE '^- feat(\(.*\))?:' | sed -E 's/^- feat(\([^)]*\))?:[[:space:]]*/- /' || true)
+            if [ -n "$FEATS" ]; then
+              echo "### Features"
+              echo "$FEATS"
+              echo ""
+            fi
+
+            FIXES=$(git log --pretty=format:'- %s (%h)' "${PREV_TAG}..HEAD" | grep -iE '^- fix(\(.*\))?:' | sed -E 's/^- fix(\([^)]*\))?:[[:space:]]*/- /' || true)
+            if [ -n "$FIXES" ]; then
+              echo "### Bug Fixes"
+              echo "$FIXES"
+              echo ""
+            fi
+
+            OTHER=$(git log --pretty=format:'- %s (%h)' "${PREV_TAG}..HEAD" | grep -ivE '^- (feat|fix|chore|docs|refactor|test|ci|build|style)(\(.*\))?:' || true)
+            if [ -n "$OTHER" ]; then
+              echo "### Other Changes"
+              echo "$OTHER"
+              echo ""
+            fi
+
+            if [ -z "$FEATS" ] && [ -z "$FIXES" ] && [ -z "$OTHER" ]; then
+              echo "### Changes"
+              git log --pretty=format:'- %s (%h)' "${PREV_TAG}..HEAD" || echo "- (no commits found)"
+              echo ""
+            fi
+
+            echo "---"
+            echo ""
+            echo "**Full Changelog**: https://github.com/${GITHUB_REPOSITORY}/compare/${PREV_TAG}...${NEW_TAG}"
+            echo ""
+            echo "### Installation"
+            echo "\`\`\`bash"
+            echo "npm install @amigo-ai/platform-sdk@${{ steps.new_version.outputs.version }}"
+            echo "\`\`\`"
+          } > release-notes.md
+
+          sed -i -E "s@\(#([0-9]+)\)@([#\1](https://github.com/${GITHUB_REPOSITORY}/pull/\1))@g" release-notes.md
+
+      - name: Create and push tag
+        if: ${{ !inputs.dry_run }}
+        run: |
+          git tag -a "v${{ steps.new_version.outputs.version }}" -m "Release v${{ steps.new_version.outputs.version }}"
+          git push origin "v${{ steps.new_version.outputs.version }}"
+
+      - name: Create GitHub Release
+        if: ${{ !inputs.dry_run }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: 'v${{ steps.new_version.outputs.version }}'
+          name: 'Release v${{ steps.new_version.outputs.version }}'
+          body_path: release-notes.md
+          draft: false
+          files: |
+            ${{ steps.pack.outputs.file }}
+
+      - name: Cleanup temp files
+        if: always()
+        run: rm -f release-notes.md || true
+
+      - name: Upload build artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ steps.new_version.outputs.version }}
+          path: |
+            dist/
+            ${{ steps.pack.outputs.file }}
+          retention-days: 30
+
+      - name: Release Summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Version: ${{ steps.new_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Published: ${{ inputs.dry_run && 'skipped' || 'npm (OIDC)' }}" >> $GITHUB_STEP_SUMMARY

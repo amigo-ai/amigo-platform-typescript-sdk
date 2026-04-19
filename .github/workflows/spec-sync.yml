@@ -1,4 +1,4 @@
-name: Spec Sync
+name: Spec Sync (Platform API changes)
 
 on:
   repository_dispatch:
@@ -6,16 +6,15 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  sync-types:
-    name: Regenerate API types
+  detect:
+    name: Detect spec changes
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    outputs:
+      changed: ${{ steps.diff.outputs.changed }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v4
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -28,44 +27,86 @@ jobs:
 
       - name: Download latest spec
         run: |
-          curl -sSfL "${{ github.event.client_payload.spec_url }}" -o openapi.json
+          SPEC_URL="${{ github.event.client_payload.spec_url }}"
+          if [ -z "$SPEC_URL" ]; then
+            echo "::error::No spec_url in client_payload"
+            exit 1
+          fi
+          curl -sSfL "$SPEC_URL" -o openapi-new.json
 
-      - name: Regenerate types
-        run: npm run gen-types
-
-      - name: Check for changes
+      - name: Compare with committed spec
         id: diff
         run: |
-          if git diff --quiet src/generated/api.ts; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
+          if ! diff -q openapi.json openapi-new.json >/dev/null 2>&1; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Spec changed — will regenerate types"
+
+            # Section-level diagnostics
+            OLD_PATHS=$(jq -r '(.paths // {}) | keys | length' openapi.json)
+            NEW_PATHS=$(jq -r '(.paths // {}) | keys | length' openapi-new.json)
+            OLD_SCHEMAS=$(jq -r '(.components.schemas // {}) | keys | length' openapi.json)
+            NEW_SCHEMAS=$(jq -r '(.components.schemas // {}) | keys | length' openapi-new.json)
+            echo "Paths: $OLD_PATHS -> $NEW_PATHS"
+            echo "Schemas: $OLD_SCHEMAS -> $NEW_SCHEMAS"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Spec unchanged — nothing to do"
           fi
+
+      - name: Update spec + regenerate types
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          cp openapi-new.json openapi.json
+          npm run gen-types
+
+      - name: Verify types compile
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          npm run typecheck
+          npm run build
+          npm test -- --reporter=dot
 
       - name: Create PR
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="chore/sync-api-types-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b "$BRANCH"
-          git add openapi.json src/generated/api.ts
+          SPEC_SHA="${{ github.event.client_payload.spec_sha }}"
+          SHORT_SHA="${SPEC_SHA:0:8}"
+          BRANCH="chore/sync-api-types-${SHORT_SHA}"
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: sync API types from platform spec (${{ github.event.client_payload.spec_sha }})"
+          git checkout -b "$BRANCH"
+          git add openapi.json src/generated/api.ts
+          git commit -m "chore: sync API types from platform spec (${SHORT_SHA})"
           git push origin "$BRANCH"
+
           gh pr create \
-            --title "chore: sync API types from platform spec" \
-            --body "$(cat <<'EOF'
+            --title "chore: sync API types from platform (${SHORT_SHA})" \
+            --body "$(cat <<EOF
           ## Summary
-          - Auto-synced from platform repo spec change (${{ github.event.client_payload.spec_sha }})
-          - Regenerated `src/generated/api.ts` from latest `openapi.json`
+          - Auto-synced from platform repo spec change (${SPEC_SHA})
+          - Regenerated \`src/generated/api.ts\` from latest \`openapi.json\`
+          - Typecheck + build + tests verified
 
           ## Test plan
-          - [ ] CI passes (typecheck + tests)
+          - [x] CI passes (typecheck + build + tests)
           - [ ] Review generated type diffs for breaking changes
 
-          🤖 Generated automatically by spec-sync workflow
+          > After merging, trigger a release via Actions -> Release -> Run workflow
+
+          Generated automatically by spec-sync workflow
           EOF
           )" \
             --base main
+
+  auto-release:
+    name: Auto-release (minor)
+    needs: detect
+    if: needs.detect.outputs.changed == 'true' && github.event.client_payload.auto_release == true
+    uses: ./.github/workflows/release.yml
+    with:
+      version_type: minor
+      dry_run: false
+    secrets: inherit

@@ -8243,27 +8243,42 @@ export interface components {
         };
         /** CallStatsResponse */
         CallStatsResponse: {
-            /** Avg Duration Seconds */
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration in seconds
+             */
             avg_duration_seconds: number;
-            /** Calls By Date */
-            calls_by_date: {
-                [key: string]: unknown;
-            }[];
+            /**
+             * Calls By Date
+             * @description Daily call volume breakdown
+             */
+            calls_by_date: components["schemas"]["DailyCallStat"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Calls */
+            /**
+             * Total Calls
+             * @description Total number of calls in the period
+             */
             total_calls: number;
-            /** Total Duration Seconds */
+            /**
+             * Total Duration Seconds
+             * @description Sum of all call durations in seconds
+             */
             total_duration_seconds: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** CallSummary */
@@ -8745,9 +8760,15 @@ export interface components {
         };
         /** ConfidenceBucket */
         ConfidenceBucket: {
-            /** Confidence Range */
+            /**
+             * Confidence Range
+             * @description Confidence level bucket label (e.g. 'raw', 'verified', 'authoritative')
+             */
             confidence_range: string;
-            /** Count */
+            /**
+             * Count
+             * @description Number of events in this confidence bucket
+             */
             count: number;
         };
         /** ConfigToPolicyRequest */
@@ -10196,6 +10217,27 @@ export interface components {
             updated_at: string | null;
         };
         /**
+         * DailyCallStat
+         * @description Per-day call volume and duration.
+         */
+        DailyCallStat: {
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration in seconds
+             */
+            avg_duration_seconds?: number | null;
+            /**
+             * Count
+             * @description Number of calls on this date
+             */
+            count: number;
+            /**
+             * Date
+             * @description Date string (YYYY-MM-DD)
+             */
+            date: string;
+        };
+        /**
          * DailyCallVolume
          * @description Call volume for a single date.
          */
@@ -10378,33 +10420,53 @@ export interface components {
          * @description Data quality metrics — confidence distribution, review pipeline stats.
          */
         DataQualityResponse: {
-            /** Confidence By Source */
+            /**
+             * Confidence By Source
+             * @description Confidence distribution broken down by event source
+             */
             confidence_by_source: {
                 [key: string]: components["schemas"]["ConfidenceBucket"][];
             };
-            /** Confidence Distribution */
+            /**
+             * Confidence Distribution
+             * @description Overall confidence distribution across buckets
+             */
             confidence_distribution: components["schemas"]["ConfidenceBucket"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Review Pipeline */
+            /**
+             * Review Pipeline
+             * @description Review pipeline throughput statistics
+             */
             review_pipeline: {
                 [key: string]: unknown;
             };
-            /** Timeseries */
+            /**
+             * Timeseries
+             * @description Daily confidence averages and event counts
+             */
             timeseries: {
                 [key: string]: unknown;
             }[];
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** DataQueryResponse */
@@ -11232,7 +11294,7 @@ export interface components {
             /** Sync Error */
             sync_error?: string | null;
             /** Sync Status */
-            sync_status?: string | null;
+            sync_status?: ("pending" | "failed") | null;
             /** Synced At */
             synced_at?: string | null;
         };
@@ -11690,29 +11752,55 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * EventBreakdownItem
+         * @description Single row in an event breakdown aggregation.
+         */
+        EventBreakdownItem: {
+            /**
+             * Count
+             * @description Number of events for this key
+             */
+            count: number;
+            /**
+             * Key
+             * @description Grouping key (event type or source name)
+             */
+            key: string;
+        };
         /** EventBreakdownResponse */
         EventBreakdownResponse: {
-            /** By Source */
-            by_source: {
-                [key: string]: unknown;
-            }[];
-            /** By Type */
-            by_type: {
-                [key: string]: unknown;
-            }[];
+            /**
+             * By Source
+             * @description Event counts grouped by source
+             */
+            by_source: components["schemas"]["EventBreakdownItem"][];
+            /**
+             * By Type
+             * @description Event counts grouped by event type
+             */
+            by_type: components["schemas"]["EventBreakdownItem"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /**
@@ -14905,33 +14993,59 @@ export interface components {
         };
         /** PersonaResponse */
         PersonaResponse: {
-            /** Background */
+            /**
+             * Background
+             * @description Background context and instructions for the persona
+             */
             background: string;
-            /** Communication Style */
+            /**
+             * Communication Style
+             * @description Communication style configuration
+             */
             communication_style: {
                 [key: string]: unknown;
             };
             /**
              * Created At
              * Format: date-time
+             * @description When the persona was created
              */
             created_at: string;
-            /** Default Language */
+            /**
+             * Default Language
+             * @description ISO 639-3 language code (e.g. 'eng')
+             */
             default_language: string;
-            /** Developed By */
+            /**
+             * Developed By
+             * @description Organization or team that created this persona
+             */
             developed_by: string;
-            /** Id */
+            /**
+             * Id
+             * @description Unique persona identifier
+             */
             id: string;
-            /** Name */
+            /**
+             * Name
+             * @description Display name of the persona
+             */
             name: string;
-            /** Role */
+            /**
+             * Role
+             * @description Role the persona embodies (e.g. 'Receptionist')
+             */
             role: string;
             /**
              * Updated At
              * Format: date-time
+             * @description When the persona was last updated
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this persona
+             */
             workspace_id: string;
         };
         /** PhoneNumberCallVolume */
@@ -15417,38 +15531,81 @@ export interface components {
          * @description Call recording metadata.
          */
         RecordingMetadataResponse: {
-            /** Call End Iso */
+            /**
+             * Call End Iso
+             * @description Call end time as ISO-8601 string
+             */
             call_end_iso: string;
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string;
-            /** Call Start Iso */
+            /**
+             * Call Start Iso
+             * @description Call start time as ISO-8601 string
+             */
             call_start_iso: string;
             /**
              * Direction
+             * @description Call direction
              * @enum {string}
              */
             direction: "inbound" | "outbound";
-            /** Duration Seconds */
+            /**
+             * Duration Seconds
+             * @description Total call duration in seconds
+             */
             duration_seconds: number;
-            /** Inbound Format */
+            /**
+             * Inbound Format
+             * @description Audio format for the inbound (caller) channel
+             */
             inbound_format: string;
-            /** Inbound Sample Rate */
+            /**
+             * Inbound Sample Rate
+             * @description Sample rate in Hz for the inbound channel
+             */
             inbound_sample_rate: number;
-            /** Inbound Size Bytes */
+            /**
+             * Inbound Size Bytes
+             * @description Inbound audio file size in bytes
+             */
             inbound_size_bytes: number;
-            /** Media Start Epoch Ms */
+            /**
+             * Media Start Epoch Ms
+             * @description Media stream start time as Unix epoch milliseconds
+             */
             media_start_epoch_ms: number;
-            /** Outbound Format */
+            /**
+             * Outbound Format
+             * @description Audio format for the outbound (agent) channel
+             */
             outbound_format: string;
-            /** Outbound Sample Rate */
+            /**
+             * Outbound Sample Rate
+             * @description Sample rate in Hz for the outbound channel
+             */
             outbound_sample_rate: number;
-            /** Outbound Size Bytes */
+            /**
+             * Outbound Size Bytes
+             * @description Outbound audio file size in bytes
+             */
             outbound_size_bytes: number;
-            /** Service Id */
+            /**
+             * Service Id
+             * @description Service (agent) that handled the call
+             */
             service_id: string;
-            /** Tts Provider */
+            /**
+             * Tts Provider
+             * @description Text-to-speech provider used for the call
+             */
             tts_provider: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this recording
+             */
             workspace_id: string;
         };
         /**
@@ -15456,16 +15613,29 @@ export interface components {
          * @description Download paths for call recording playback.
          */
         RecordingUrlsResponse: {
-            /** Call Sid */
+            /**
+             * Call Sid
+             * @description Twilio call SID
+             */
             call_sid: string;
-            /** Inbound Url */
+            /**
+             * Inbound Url
+             * @description Download URL for inbound (caller) audio
+             */
             inbound_url?: string | null;
-            /** Metadata Url */
+            /**
+             * Metadata Url
+             * @description Download URL for recording metadata JSON
+             */
             metadata_url?: string | null;
-            /** Outbound Url */
+            /**
+             * Outbound Url
+             * @description Download URL for outbound (agent) audio
+             */
             outbound_url?: string | null;
             /**
              * Status
+             * @description Recording availability status
              * @default available
              * @constant
              */
@@ -15853,25 +16023,49 @@ export interface components {
         };
         /** SafetyRuleResponse */
         SafetyRuleResponse: {
-            /** Agent Config */
+            /**
+             * Agent Config
+             * @description Agent triage configuration (model, timeout, action space)
+             */
             agent_config: {
                 [key: string]: unknown;
             };
-            /** Description */
+            /**
+             * Description
+             * @description Human-readable description of what the rule detects
+             */
             description: string;
-            /** Escalation */
+            /**
+             * Escalation
+             * @description Escalation configuration (operator type, reason, regulatory basis)
+             */
             escalation: {
                 [key: string]: unknown;
             };
-            /** Name */
+            /**
+             * Name
+             * @description Unique rule name within the template
+             */
             name: string;
-            /** Standalone Threshold */
+            /**
+             * Standalone Threshold
+             * @description Confidence threshold for triggering on a single turn
+             */
             standalone_threshold: number;
-            /** Tags */
+            /**
+             * Tags
+             * @description Classification tags for grouping and filtering
+             */
             tags: string[];
-            /** Threshold */
+            /**
+             * Threshold
+             * @description Confidence threshold for triggering in accumulated context
+             */
             threshold: number;
-            /** Triage Hints */
+            /**
+             * Triage Hints
+             * @description Hints for the triage model to identify this safety concern
+             */
             triage_hints: string[];
         };
         /**
@@ -16994,19 +17188,37 @@ export interface components {
         };
         /** SubToolLog */
         SubToolLog: {
-            /** Duration Ms */
+            /**
+             * Duration Ms
+             * @description Execution time in milliseconds
+             */
             duration_ms: number;
-            /** Input */
+            /**
+             * Input
+             * @description Input parameters passed to the tool
+             */
             input: {
                 [key: string]: unknown;
             };
-            /** Output */
+            /**
+             * Output
+             * @description Raw output returned by the tool
+             */
             output: string;
-            /** Round */
+            /**
+             * Round
+             * @description Agent reasoning round in which the tool was called
+             */
             round: number;
-            /** Succeeded */
+            /**
+             * Succeeded
+             * @description Whether the tool invocation succeeded
+             */
             succeeded: boolean;
-            /** Tool Name */
+            /**
+             * Tool Name
+             * @description Name of the tool that was invoked
+             */
             tool_name: string;
         };
         /** SubToolLogItem */
@@ -17278,8 +17490,11 @@ export interface components {
             source_system?: string | null;
             /** Sync Error */
             sync_error?: string | null;
-            /** Sync Status */
-            sync_status: string;
+            /**
+             * Sync Status
+             * @enum {string}
+             */
+            sync_status: "pending" | "failed";
             /** Synced At */
             synced_at?: string | null;
         };
@@ -17517,21 +17732,45 @@ export interface components {
         };
         /** TestSkillResponse */
         TestSkillResponse: {
-            /** Cached Tokens */
+            /**
+             * Cached Tokens
+             * @description Number of tokens served from cache
+             */
             cached_tokens: number;
-            /** Duration Ms */
+            /**
+             * Duration Ms
+             * @description Total execution time in milliseconds
+             */
             duration_ms: number;
-            /** Error */
+            /**
+             * Error
+             * @description Error message if the skill execution failed
+             */
             error?: string | null;
-            /** Input Tokens */
+            /**
+             * Input Tokens
+             * @description Number of input tokens consumed
+             */
             input_tokens: number;
-            /** Output Tokens */
+            /**
+             * Output Tokens
+             * @description Number of output tokens generated
+             */
             output_tokens: number;
-            /** Result */
+            /**
+             * Result
+             * @description Final result text produced by the skill
+             */
             result: string;
-            /** Rounds */
+            /**
+             * Rounds
+             * @description Number of agent reasoning rounds executed
+             */
             rounds: number;
-            /** Sub Tool Logs */
+            /**
+             * Sub Tool Logs
+             * @description Chronological log of tool invocations
+             */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
         };
         /** ThroughputBucket */
@@ -18669,37 +18908,61 @@ export interface components {
         };
         /** UsageBucket */
         UsageBucket: {
-            /** Avg Duration Seconds */
+            /**
+             * Avg Duration Seconds
+             * @description Average event duration in seconds
+             */
             avg_duration_seconds?: number | null;
-            /** Count */
+            /**
+             * Count
+             * @description Number of events in this bucket
+             */
             count: number;
             /**
              * Event Date
              * Format: date
+             * @description Date of the usage bucket
              */
             event_date: string;
-            /** Event Type */
+            /**
+             * Event Type
+             * @description World event type
+             */
             event_type: string;
-            /** Total Duration Seconds */
+            /**
+             * Total Duration Seconds
+             * @description Total event duration in seconds
+             */
             total_duration_seconds?: number | null;
         };
         /** UsageSummaryResponse */
         UsageSummaryResponse: {
-            /** Buckets */
+            /**
+             * Buckets
+             * @description Usage data grouped by event type and date
+             */
             buckets: components["schemas"]["UsageBucket"][];
             /**
              * Period End
              * Format: date
+             * @description End of the reporting period
              */
             period_end: string;
             /**
              * Period Start
              * Format: date
+             * @description Start of the reporting period
              */
             period_start: string;
-            /** Total Events */
+            /**
+             * Total Events
+             * @description Total number of events in the period
+             */
             total_events: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace identifier
+             */
             workspace_id: string;
         };
         /** UsageTrendPoint */
@@ -19370,38 +19633,78 @@ export interface components {
         };
         /** AuditEventResponse */
         src__routes__audit__AuditEventResponse: {
-            /** Action */
+            /**
+             * Action
+             * @description Action that was performed (e.g. 'entity.read')
+             */
             action: string;
-            /** Actor Credential Id */
+            /**
+             * Actor Credential Id
+             * @description Credential ID used by the actor
+             */
             actor_credential_id?: string | null;
-            /** Actor Entity Id */
+            /**
+             * Actor Entity Id
+             * @description Entity ID of the actor who performed the action
+             */
             actor_entity_id?: string | null;
-            /** Id */
+            /**
+             * Id
+             * @description Unique audit event identifier
+             */
             id: string;
-            /** Ip Address */
+            /**
+             * Ip Address
+             * @description IP address of the actor
+             */
             ip_address?: string | null;
-            /** Metadata */
+            /**
+             * Metadata
+             * @description Additional event-specific metadata
+             */
             metadata?: {
                 [key: string]: unknown;
             } | null;
             /**
              * Phi Accessed
+             * @description Whether protected health information was accessed
              * @default false
              */
             phi_accessed?: boolean;
-            /** Resource Id */
+            /**
+             * Resource Id
+             * @description ID of the accessed resource
+             */
             resource_id?: string | null;
-            /** Resource Name */
+            /**
+             * Resource Name
+             * @description Human-readable name of the accessed resource
+             */
             resource_name?: string | null;
-            /** Resource Type */
+            /**
+             * Resource Type
+             * @description Type of resource that was accessed
+             */
             resource_type: string;
-            /** Service */
+            /**
+             * Service
+             * @description Service that produced the event
+             */
             service: string;
-            /** Timestamp */
+            /**
+             * Timestamp
+             * @description ISO-8601 timestamp of the event
+             */
             timestamp: string;
-            /** User Agent */
+            /**
+             * User Agent
+             * @description User-Agent header from the request
+             */
             user_agent?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * @description Workspace that owns this audit event
+             */
             workspace_id: string;
         };
         /** CreateSessionRequest */

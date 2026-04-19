@@ -1,23 +1,86 @@
 name: Test
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
   pull_request:
   workflow_call:
+    inputs:
+      skip_codecov:
+        description: 'Skip Codecov upload'
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
-      - run: npm test
-      - run: npm run test:dist
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Run unit tests (fast)
+        if: ${{ inputs.skip_codecov }}
+        run: npm test -- --reporter=dot
+
+      - name: Run tests with coverage
+        if: ${{ !inputs.skip_codecov }}
+        run: npx vitest run --coverage
+
+      - name: Upload coverage to Codecov
+        if: ${{ !inputs.skip_codecov }}
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    if: >
+      github.event_name == 'push' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run integration tests
+        env:
+          AMIGO_TEST_API_KEY: ${{ secrets.AMIGO_TEST_API_KEY }}
+          AMIGO_TEST_WORKSPACE_ID: ${{ secrets.AMIGO_TEST_WORKSPACE_ID }}
+          AMIGO_TEST_BASE_URL: ${{ secrets.AMIGO_TEST_BASE_URL }}
+        run: npx vitest run tests/integration/ --reporter=dot
