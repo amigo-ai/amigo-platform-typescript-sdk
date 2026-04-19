@@ -37,6 +37,10 @@ export class ApiKeysResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListParams & { mine_only?: boolean }) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Revoke an API key */
   async revoke(keyId: ApiKeyId | string): Promise<void> {
     await this.client.DELETE('/v1/{workspace_id}/api-keys/{key_id}', {

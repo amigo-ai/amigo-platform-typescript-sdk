@@ -30,6 +30,10 @@ export class ReviewQueueResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListReviewItemsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async get(itemId: string) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/review-queue/{item_id}', {
@@ -60,6 +64,10 @@ export class ReviewQueueResource extends WorkspaceScopedResource {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
     )
+  }
+
+  getMyQueueAutoPaging(params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.getMyQueue(pageParams), params)
   }
 
   async approve(itemId: string, body: components['schemas']['ApproveRequest']) {
@@ -129,6 +137,10 @@ export class ReviewQueueResource extends WorkspaceScopedResource {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
     )
+  }
+
+  getHistoryAutoPaging(params?: ReviewHistoryParams) {
+    return this.iteratePaginatedList((pageParams) => this.getHistory(pageParams), params)
   }
 
   async getTrends(params?: { days?: number }) {

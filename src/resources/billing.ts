@@ -54,6 +54,10 @@ export class BillingResource extends WorkspaceScopedResource {
     )
   }
 
+  listInvoicesAutoPaging(params?: ListInvoicesParams) {
+    return this.iteratePaginatedList((pageParams) => this.listInvoices(pageParams), params)
+  }
+
   /** Get invoice detail */
   async getInvoice(invoiceId: string) {
     return extractData(

@@ -33,6 +33,10 @@ export class IntegrationsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListIntegrationsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get a single integration */
   async get(integrationId: IntegrationId | string) {
     return extractData(

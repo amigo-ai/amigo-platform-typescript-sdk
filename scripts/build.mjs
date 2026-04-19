@@ -5,7 +5,7 @@ const shared = {
   bundle: true,
   sourcemap: true,
   external: ['openapi-fetch', 'node:crypto'],
-  target: 'node18',
+  target: 'node20',
 }
 
 await Promise.all([

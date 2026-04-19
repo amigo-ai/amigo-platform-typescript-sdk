@@ -38,6 +38,14 @@ export class AuditResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListAuditParams) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.list(pageParams),
+      (page) => page.events,
+      params,
+    )
+  }
+
   async getSummary(params?: { date_from?: string | null; date_to?: string | null }) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/audit/summary', {
@@ -51,6 +59,14 @@ export class AuditResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/audit/phi-access', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
+    )
+  }
+
+  getPhiAccessAutoPaging(params?: PhiAccessParams) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.getPhiAccess(pageParams),
+      (page) => page.events,
+      params,
     )
   }
 
@@ -76,6 +92,14 @@ export class AuditResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/audit/entity/{entity_id}/access-log', {
         params: { path: { workspace_id: this.workspaceId, entity_id: entityId }, query: params },
       }),
+    )
+  }
+
+  getEntityAccessLogAutoPaging(entityId: string, params?: EntityAccessLogParams) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.getEntityAccessLog(entityId, pageParams),
+      (page) => page.events,
+      params,
     )
   }
 }

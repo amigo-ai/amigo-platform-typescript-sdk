@@ -30,6 +30,10 @@ export class DataSourcesResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListDataSourcesParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async get(dataSourceId: DataSourceId | string) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/data-sources/{data_source_id}', {

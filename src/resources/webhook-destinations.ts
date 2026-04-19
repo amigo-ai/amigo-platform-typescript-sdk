@@ -11,6 +11,10 @@ export class WebhookDestinationsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async create(body: components['schemas']['CreateWebhookDestinationRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/webhook-destinations', {
@@ -57,6 +61,13 @@ export class WebhookDestinationsResource extends WorkspaceScopedResource {
           },
         },
       ),
+    )
+  }
+
+  listDeliveriesAutoPaging(destinationId: string, params?: ListParams) {
+    return this.iteratePaginatedList(
+      (pageParams) => this.listDeliveries(destinationId, pageParams),
+      params,
     )
   }
 

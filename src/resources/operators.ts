@@ -10,6 +10,10 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: { status?: string; limit?: number; offset?: number }) {
+    return this.iterateOffsetPaginatedList((pageParams) => this.list(pageParams), (page) => page.items, params)
+  }
+
   async create(body: components['schemas']['CreateOperatorRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/operators', {
@@ -48,6 +52,14 @@ export class OperatorsResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/operators/escalations', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
+    )
+  }
+
+  getEscalationsAutoPaging(params?: { status?: string; limit?: number; offset?: number }) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.getEscalations(pageParams),
+      (page) => page.items,
+      params,
     )
   }
 
@@ -157,6 +169,14 @@ export class OperatorsResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/operators/audit-log', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
+    )
+  }
+
+  getAuditLogAutoPaging(params?: { limit?: number; offset?: number }) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.getAuditLog(pageParams),
+      (page) => page.items,
+      params,
     )
   }
 }

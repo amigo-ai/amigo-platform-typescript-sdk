@@ -106,6 +106,39 @@ describe('AgentsResource', () => {
     expect(result.has_more).toBe(false)
   })
 
+  it('auto-pages agents', async () => {
+    const pagedClient = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit) => {
+        const request = input instanceof Request ? input : new Request(input, init)
+        const url = new URL(request.url)
+        const token = url.searchParams.get('continuation_token')
+
+        if (token === '1') {
+          return Response.json({
+            items: [{ ...AGENT_FIXTURE, id: 'agent-2', name: 'Second Agent' }],
+            has_more: false,
+            continuation_token: null,
+          })
+        }
+
+        return Response.json({
+          items: [AGENT_FIXTURE],
+          has_more: true,
+          continuation_token: 1,
+        })
+      },
+    })
+
+    const names: string[] = []
+    for await (const agent of pagedClient.agents.listAutoPaging({ limit: 1 })) {
+      names.push(agent.name)
+    }
+
+    expect(names).toEqual(['Test Agent', 'Second Agent'])
+  })
+
   it('creates an agent', async () => {
     const result = await client.agents.create({ name: 'My Agent' })
     expect(result.name).toBe('My Agent')

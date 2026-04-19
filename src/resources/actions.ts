@@ -35,6 +35,10 @@ export class ActionsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListActionsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get a single action */
   async get(actionId: ActionId | string) {
     return extractData(

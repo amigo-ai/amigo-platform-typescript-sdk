@@ -27,6 +27,10 @@ export class CallsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListCallsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get full call detail including turns, escalation, safety, and recording info */
   async get(callId: string) {
     return extractData(

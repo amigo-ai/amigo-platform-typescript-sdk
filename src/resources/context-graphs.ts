@@ -30,6 +30,10 @@ export class ContextGraphsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListContextGraphsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async get(contextGraphId: ContextGraphId | string) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/context-graphs/{context_graph_id}', {
@@ -86,6 +90,13 @@ export class ContextGraphsResource extends WorkspaceScopedResource {
           query: params,
         },
       }),
+    )
+  }
+
+  listVersionsAutoPaging(contextGraphId: ContextGraphId | string, params?: ListParams) {
+    return this.iteratePaginatedList(
+      (pageParams) => this.listVersions(contextGraphId, pageParams),
+      params,
     )
   }
 

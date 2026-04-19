@@ -26,7 +26,7 @@
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 
-Typed from the committed `openapi.json` snapshot, validated on Node 18, 20, and 22, and tested as packaged ESM and CommonJS tarballs before release.
+Typed from the committed `openapi.json` snapshot, validated on active LTS Node releases (20, 22, and 24), and tested as packaged ESM and CommonJS tarballs before release.
 
 ## Platform context
 
@@ -119,7 +119,7 @@ The SDK is built around web-standard primitives. Use it in runtimes that provide
 - `TextEncoder` / `TextDecoder`
 - `crypto.subtle` for webhook signature verification
 
-CI currently validates Node-based packaging and runtime behavior. Standards-based edge/server runtimes with the same APIs work well with the low-level request wrappers.
+CI currently validates active LTS Node releases. Standards-based edge/server runtimes with the same APIs work well with the low-level request wrappers.
 
 ## Generated Types
 
@@ -586,17 +586,21 @@ const client = new AmigoClient({
 
 ## Pagination
 
-All list methods return `{ items, has_more, continuation_token }`. Use the `paginate` utility to iterate all pages automatically:
+The SDK now exposes first-class async auto-pagination helpers on collection resources:
 
 ```typescript
-import { AmigoClient, paginate } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@amigo-ai/platform-sdk'
 
-for await (const entity of paginate((token) =>
-  client.world.listEntities({ continuation_token: token, limit: 100 }),
-)) {
-  // process entity
+for await (const agent of client.agents.listAutoPaging({ limit: 100 })) {
+  console.log(agent.name)
+}
+
+for await (const entity of client.world.listEntitiesAutoPaging({ limit: 100 })) {
+  console.log(entity.display_name)
 }
 ```
+
+For custom pagination flows, the lower-level `paginate(...)` utility remains available.
 
 ## Error handling
 

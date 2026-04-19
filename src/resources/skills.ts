@@ -33,6 +33,10 @@ export class SkillsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListSkillsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get a single skill */
   async get(skillId: SkillId | string) {
     return extractData(

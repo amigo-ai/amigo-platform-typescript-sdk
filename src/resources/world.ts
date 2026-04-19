@@ -30,6 +30,24 @@ export class WorldResource extends WorkspaceScopedResource {
     )
   }
 
+  listEntitiesAutoPaging(params?: {
+    entity_type?: string[] | null
+    q?: string | null
+    limit?: number
+    offset?: number
+    has_projection?: boolean | null
+    source?: string | null
+    source_system?: string | null
+    semantic?: string | null
+    tags?: string[] | null
+  }) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.listEntities(pageParams),
+      (page) => page.entities,
+      params,
+    )
+  }
+
   /** Get a single entity */
   async getEntity(entityId: EntityId | string) {
     return extractData(
@@ -148,6 +166,21 @@ export class WorldResource extends WorkspaceScopedResource {
     )
   }
 
+  getTimelineAutoPaging(
+    entityId: EntityId | string,
+    params?: {
+      domain?: string | null
+      limit?: number
+      offset?: number
+    },
+  ) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.getTimeline(entityId, pageParams),
+      (page) => page.events,
+      params,
+    )
+  }
+
   // ---- Sync ----
 
   /** Get sync status grouped by sink (Lakebase, Delta, etc.) */
@@ -173,6 +206,22 @@ export class WorldResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/world/sync/events', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
+    )
+  }
+
+  listSyncEventsAutoPaging(params: {
+    status: 'pending' | 'failed'
+    data_source_id?: string | null
+    source_system?: string | null
+    fhir_resource_type?: string | null
+    fhir_resource_id?: string | null
+    limit?: number
+    offset?: number
+  }) {
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.listSyncEvents(pageParams),
+      (page) => page.events,
+      params,
     )
   }
 

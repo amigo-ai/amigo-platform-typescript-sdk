@@ -27,6 +27,10 @@ export class PhoneNumbersResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get a phone number */
   async get(phoneNumberId: PhoneNumberId | string) {
     return extractData(

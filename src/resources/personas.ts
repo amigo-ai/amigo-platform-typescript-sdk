@@ -17,6 +17,10 @@ export class PersonasResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListPersonasParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async create(body: components['schemas']['CreatePersonaRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/personas', {
