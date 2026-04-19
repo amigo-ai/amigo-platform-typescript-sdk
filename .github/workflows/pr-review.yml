@@ -68,22 +68,55 @@ jobs:
           fetch-depth: 0
 
       - name: Authenticate to GCP (WIF)
+        id: auth
         if: steps.guard.outputs.skip == 'false'
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        continue-on-error: true
         with:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_REVIEW_SA }}
           create_credentials_file: true
           export_environment_variables: true
 
+      - name: Report WIF trust mismatch
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'failure'
+        run: |
+          marker='<!-- pr-review-auth-status -->'
+          body=$(cat <<EOF
+          ${marker}
+          ⚠️ Claude review could not authenticate to GCP Vertex for \`${{ github.repository }}\`.
+
+          The configured Workload Identity Federation provider rejected this repo's GitHub OIDC token. In practice this means the provider or service-account trust in \`platform-infra/pr-review\` still only allows other repositories or workflow refs.
+
+          Expected trust inputs:
+          - repository: \`${{ github.repository }}\`
+          - workflow: \`${{ github.repository }}/.github/workflows/pr-review.yml\`
+
+          The SDK PR checks remain valid; only the external review integration is unavailable until the GCP trust policy is expanded.
+          EOF
+          )
+
+          comment_id=$(
+            gh api "repos/$GITHUB_REPOSITORY/issues/${{ github.event.pull_request.number }}/comments" \
+              --paginate \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\"))) | .id" \
+              | tail -n1
+          )
+
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -f body="$body" >/dev/null
+          else
+            gh pr comment "${{ github.event.pull_request.number }}" --body "$body"
+          fi
+
       - name: Install uv
-        if: steps.guard.outputs.skip == 'false'
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
         uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           enable-cache: true
 
       - name: Run review
-        if: steps.guard.outputs.skip == 'false'
+        if: steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
         run: |
           uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
             python scripts/pr-review.py --pr "${{ github.event.pull_request.number }}" \
@@ -92,7 +125,7 @@ jobs:
               --vertex-region "$VERTEX_REGION"
 
       - name: Fallback comment on failure
-        if: failure() && steps.guard.outputs.skip == 'false'
+        if: failure() && steps.guard.outputs.skip == 'false' && steps.auth.outcome == 'success'
         run: |
           gh pr comment "${{ github.event.pull_request.number }}" \
             --body "⚠️ Claude code review failed. See [action logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})."
