@@ -95,13 +95,10 @@
   <text x="1036" y="385" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" fill="#B0C5CF">Operators, integrations, numbers</text>
 
   <path d="M 306 256 C 328 256 344 256 366 256" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
-  <text x="334" y="232" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">typed requests</text>
 
   <path d="M 704 256 C 728 256 740 256 764 256" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
-  <text x="734" y="232" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">workspace auth</text>
 
   <path d="M 952 406 C 952 420 952 430 952 446" fill="none" stroke="url(#arrowStroke)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#arrow)"/>
-  <text x="952" y="422" text-anchor="middle" font-family="'Inter', 'Helvetica Neue', Arial, sans-serif" font-size="12" font-weight="600" fill="#8EE4FF">backed by platform systems</text>
 
   <rect x="60" y="448" width="1080" height="70" rx="20" fill="white" fill-opacity="0.05" stroke="url(#panelStroke)" stroke-width="1"/>
   <text x="88" y="477" font-family="'SFMono-Regular', Menlo, monospace" font-size="12" font-weight="600" fill="#B4C9D4" letter-spacing="2">PLATFORM SYSTEMS</text>
