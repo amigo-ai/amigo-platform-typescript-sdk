@@ -25,6 +25,10 @@ export class AgentsResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListAgentsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async get(agentId: AgentId | string) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/agents/{agent_id}', {
@@ -54,6 +58,10 @@ export class AgentsResource extends WorkspaceScopedResource {
         params: { path: { workspace_id: this.workspaceId, agent_id: agentId }, query: params },
       }),
     )
+  }
+
+  listVersionsAutoPaging(agentId: AgentId | string, params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.listVersions(agentId, pageParams), params)
   }
 
   async getVersion(agentId: AgentId | string, version: number | 'latest') {

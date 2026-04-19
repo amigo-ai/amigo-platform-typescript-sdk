@@ -11,6 +11,10 @@ export class TriggersResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async create(body: components['schemas']['CreateTriggerRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/triggers', {
@@ -73,5 +77,9 @@ export class TriggersResource extends WorkspaceScopedResource {
         params: { path: { workspace_id: this.workspaceId, trigger_id: triggerId }, query: params },
       }),
     )
+  }
+
+  listRunsAutoPaging(triggerId: string, params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.listRuns(triggerId, pageParams), params)
   }
 }

@@ -31,6 +31,10 @@ export class ServicesResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListServicesParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   async get(serviceId: ServiceId | string) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/services/{service_id}', {

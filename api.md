@@ -61,6 +61,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `archive`
@@ -70,6 +71,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `me`
 - `create`
 - `list`
+- `listAutoPaging`
 - `revoke`
 - `rotate`
 
@@ -77,10 +79,12 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
 - `listVersions`
+- `listVersionsAutoPaging`
 - `getVersion`
 - `createVersion`
 
@@ -88,6 +92,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
@@ -97,6 +102,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
@@ -105,11 +111,13 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `operators`
 
 - `list`
+- `listAutoPaging`
 - `create`
 - `get`
 - `getDashboard`
 - `getQueue`
 - `getEscalations`
+- `getEscalationsAutoPaging`
 - `getActiveEscalations`
 - `getEscalationStats`
 - `getPerformance`
@@ -122,10 +130,12 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `wrapUp`
 - `getCallTranscript`
 - `getAuditLog`
+- `getAuditLogAutoPaging`
 
 ### `triggers`
 
 - `list`
+- `listAutoPaging`
 - `create`
 - `get`
 - `update`
@@ -134,11 +144,13 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `pause`
 - `resume`
 - `listRuns`
+- `listRunsAutoPaging`
 
 ### `services`
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
@@ -147,17 +159,20 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
 - `createVersion`
 - `listVersions`
+- `listVersionsAutoPaging`
 - `getVersion`
 
 ### `dataSources`
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
@@ -167,6 +182,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `world`
 
 - `listEntities`
+- `listEntitiesAutoPaging`
 - `getEntity`
 - `getRelationships`
 - `getGraph`
@@ -177,8 +193,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `listDuplicates`
 - `search`
 - `getTimeline`
+- `getTimelineAutoPaging`
 - `getSyncStatusBySink`
 - `listSyncEvents`
+- `listSyncEventsAutoPaging`
 - `getSyncQueueDepth`
 - `retrySyncEvent`
 - `retryAllSyncEvents`
@@ -188,6 +206,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `calls`
 
 - `list`
+- `listAutoPaging`
 - `get`
 - `getIntelligence`
 - `getActiveIntelligence`
@@ -198,6 +217,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `provision`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `release`
@@ -208,6 +228,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 - `create`
 - `list`
+- `listAutoPaging`
 - `get`
 - `update`
 - `delete`
@@ -260,6 +281,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getUsage`
 - `getUsageTrends`
 - `listInvoices`
+- `listInvoicesAutoPaging`
 - `getInvoice`
 - `getInvoicePdf`
 
@@ -272,6 +294,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `personas`
 
 - `list`
+- `listAutoPaging`
 - `create`
 - `get`
 - `update`
@@ -280,10 +303,12 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `reviewQueue`
 
 - `list`
+- `listAutoPaging`
 - `get`
 - `getStats`
 - `getDashboard`
 - `getMyQueue`
+- `getMyQueueAutoPaging`
 - `approve`
 - `reject`
 - `claim`
@@ -292,6 +317,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `batchApprove`
 - `batchReject`
 - `getHistory`
+- `getHistoryAutoPaging`
 - `getTrends`
 - `getPerformance`
 - `getCorrectionSchema`
@@ -306,20 +332,25 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `audit`
 
 - `list`
+- `listAutoPaging`
 - `getSummary`
 - `getPhiAccess`
+- `getPhiAccessAutoPaging`
 - `createExport`
 - `listExports`
 - `getEntityAccessLog`
+- `getEntityAccessLogAutoPaging`
 
 ### `webhookDestinations`
 
 - `list`
+- `listAutoPaging`
 - `create`
 - `get`
 - `update`
 - `delete`
 - `listDeliveries`
+- `listDeliveriesAutoPaging`
 - `rotateSecret`
 
 ### `safety`

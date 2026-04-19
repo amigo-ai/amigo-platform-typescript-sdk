@@ -72,6 +72,47 @@ describe('WorldResource', () => {
     expect(result.entities[0]?.entity_type).toBe('patient')
   })
 
+  it('auto-pages entities', async () => {
+    const secondEntity = {
+      ...entityFixture,
+      id: 'entity-00000000-0000-0000-0000-000000000002',
+      display_name: 'John Smith',
+    }
+
+    const pagedClient = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit) => {
+        const request = input instanceof Request ? input : new Request(input, init)
+        const url = new URL(request.url)
+        const offset = url.searchParams.get('offset')
+
+        if (offset === '1') {
+          return Response.json({
+            entities: [secondEntity],
+            has_more: false,
+            next_offset: null,
+            total: 2,
+          })
+        }
+
+        return Response.json({
+          entities: [entityFixture],
+          has_more: true,
+          next_offset: 1,
+          total: 2,
+        })
+      },
+    })
+
+    const names: string[] = []
+    for await (const entity of pagedClient.world.listEntitiesAutoPaging({ limit: 1 })) {
+      names.push(entity.display_name ?? '')
+    }
+
+    expect(names).toEqual(['Jane Doe', 'John Smith'])
+  })
+
   it('gets an entity', async () => {
     const result = await client.world.getEntity(ENTITY_ID)
     expect(result.canonical_id).toBe('MRN-12345')

@@ -29,6 +29,10 @@ export class WorkspacesResource extends WorkspaceScopedResource {
     )
   }
 
+  listAutoPaging(params?: ListParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
+  }
+
   /** Get a single workspace by ID */
   async get(id?: WorkspaceId | string) {
     return extractData(

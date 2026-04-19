@@ -33,6 +33,61 @@ export abstract class WorkspaceScopedResource {
     ) => this
     return new ResourceCtor(scopePlatformClient(this.client, options), this.workspaceId)
   }
+
+  protected async *iteratePaginatedList<
+    TPage extends {
+      items?: readonly unknown[]
+      has_more?: boolean
+      continuation_token?: number | null
+    },
+    TParams,
+  >(
+    fetchPage: (params: TParams) => Promise<TPage>,
+    params: TParams,
+  ): AsyncGenerator<TPage extends { items?: readonly (infer TItem)[] } ? TItem : never> {
+    type Item = TPage extends { items?: readonly (infer TItem)[] } ? TItem : never
+    let nextParams = params
+
+    while (true) {
+      const page = await fetchPage(nextParams)
+
+      for (const item of page.items ?? []) {
+        yield item as Item
+      }
+
+      if (!page.has_more || page.continuation_token === null || page.continuation_token === undefined) {
+        break
+      }
+
+      nextParams = { ...(nextParams as object | undefined), continuation_token: page.continuation_token } as TParams
+    }
+  }
+
+  protected async *iterateOffsetPaginatedList<
+    TPage extends { has_more?: boolean; next_offset?: number | null },
+    TItem,
+    TParams,
+  >(
+    fetchPage: (params: TParams) => Promise<TPage>,
+    selectItems: (page: TPage) => readonly TItem[],
+    params: TParams,
+  ): AsyncGenerator<TItem> {
+    let nextParams = params
+
+    while (true) {
+      const page = await fetchPage(nextParams)
+
+      for (const item of selectItems(page)) {
+        yield item
+      }
+
+      if (!page.has_more || page.next_offset === null || page.next_offset === undefined) {
+        break
+      }
+
+      nextParams = { ...(nextParams as object | undefined), offset: page.next_offset } as TParams
+    }
+  }
 }
 
 export function scopePlatformClient(
