@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1] - 2026-04-19
+
+### Features
+
+- harden package verification and examples (#2)
+
 ## [0.4.0] - 2026-04-19
 
 ### Features
