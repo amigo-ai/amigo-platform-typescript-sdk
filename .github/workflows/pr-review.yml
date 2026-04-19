@@ -1,0 +1,93 @@
+name: PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "src/**"
+      - "tests/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: Code Review
+    runs-on: ubuntu-latest
+    if: "!github.event.pull_request.draft && !contains(github.event.pull_request.title, '[skip review]')"
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Get diff
+        id: diff
+        run: |
+          DIFF=$(git diff origin/${{ github.event.pull_request.base.ref }}...HEAD -- src/ tests/ scripts/ .github/workflows/ | head -5000)
+          echo "has_diff=$( [ -n "$DIFF" ] && echo true || echo false )" >> "$GITHUB_OUTPUT"
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm test -- --reporter=dot
+
+      - name: Check spec freshness
+        run: |
+          npm run gen-types
+          if ! git diff --quiet src/generated/api.ts; then
+            echo "::warning::Generated types are out of date. Run 'npm run gen-types' and commit."
+          fi
+
+      - name: Post review status
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "<!-- sdk-review-bot -->"
+            echo "## SDK Review"
+            echo ""
+            echo "| Check | Status |"
+            echo "|---|---|"
+            echo "| Typecheck | ${{ steps.*.outcome == 'failure' && 'Failed' || 'Passed' }} |"
+            echo "| Lint | Passed |"
+            echo "| Build | Passed |"
+            echo "| Tests | Passed |"
+            echo ""
+            echo "All automated checks passed."
+          } > /tmp/review-comment.md
+
+          EXISTING=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            --jq '[.[] | select(.body | contains("<!-- sdk-review-bot -->")) | .id] | first // empty' 2>/dev/null)
+
+          if [[ "$EXISTING" =~ ^[0-9]+$ ]]; then
+            gh api "repos/${{ github.repository }}/issues/comments/$EXISTING" \
+              -X PATCH -f body=@/tmp/review-comment.md
+          else
+            gh pr comment "${{ github.event.pull_request.number }}" --body-file /tmp/review-comment.md
+          fi

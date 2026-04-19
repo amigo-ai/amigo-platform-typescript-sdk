@@ -1,78 +1,135 @@
 # @amigo-ai/platform-sdk
 
-Official TypeScript SDK for the Amigo Platform API.
+Official TypeScript SDK for the Amigo Platform API (`@amigo-ai/platform-sdk` on npm).
+
+## Key Commands
+
+| Task | Command |
+|---|---|
+| Build (generate types + bundle + declarations) | `npm run build` |
+| Run unit tests | `npm test` |
+| Run all tests (unit + core + integration) | `npx vitest run` |
+| Typecheck | `npm run typecheck` |
+| Lint | `npm run lint` |
+| Format check | `npm run format` |
+| Format write | `npm run format:write` |
+| Generate types from OpenAPI spec | `npm run gen-types` |
+
+The `build` script runs type generation, esbuild bundling, and `tsc` declaration emit in sequence.
 
 ## Architecture
 
-Single runtime dependency: `openapi-fetch`. All types auto-generated from the platform-api OpenAPI spec.
-
 ```
 platform/services/platform-api/openapi.json  (committed, CI-checked)
-       ↓  scripts/gen-types.mjs (openapi-typescript)
-src/generated/api.ts  (auto-generated — DO NOT EDIT)
-       ↓
+       |  scripts/gen-types.mjs (openapi-typescript)
+       v
+src/generated/api.ts  (auto-generated -- DO NOT EDIT)
+       |
+       v
 src/resources/*.ts  (typed resource classes using openapi-fetch client)
-       ↓
-src/index.ts  (AmigoClient — entry point, injects client into all resources)
+       |
+       v
+src/index.ts  (AmigoClient -- entry point, injects client into all resources)
 ```
 
-## Key Patterns
-
-- **openapi-fetch client** with middleware chain: auth → error → retry
-- **Auto-generated types** from `openapi-typescript` — never hand-write API types
-- **Resource classes** extend `WorkspaceScopedResource`, receive injected `PlatformFetch` client
-- **Branded types** for ID safety (`WorkspaceId`, `AgentId`, etc.) — zero runtime cost
-- **Error hierarchy**: `AmigoError` base → status-specific subclasses (401→AuthenticationError, etc.)
-- **Exponential backoff + jitter** — GET retries on 5xx/408/429, POST only on 429 with Retry-After
-- **Custom fetch support** — `new AmigoClient({ fetch: customFetch })` for BFF proxy patterns
-- **Dual ESM/CJS** — esbuild bundles, tsc emits declarations only
-
-## Codegen
-
-Types are generated from the committed OpenAPI spec in `amigo-ai/platform`:
-
-```bash
-npm run gen-types                                      # auto-detect local spec
-npm run gen-types -- --spec path/to/openapi.json       # explicit file
-npm run gen-types -- --url https://api.platform.amigo.ai/v1/openapi.json  # live API
+```
+src/
+  index.ts              -- AmigoClient class, config validation, public re-exports
+  core/
+    auth.ts             -- API key auth middleware
+    errors.ts           -- Error hierarchy (AmigoError base), error factory, error middleware
+    retry.ts            -- Exponential backoff with jitter, Retry-After header support
+    openapi-client.ts   -- Creates openapi-fetch Client with auth + error + retry middleware
+    utils.ts            -- Response helpers
+    branded-types.ts    -- Branded type aliases (WorkspaceId, AgentId, ActionId, etc.)
+    rate-limit.ts       -- RateLimitInfo type, parseRateLimitHeaders()
+    webhooks.ts         -- HMAC-SHA256 webhook verification, parseWebhookEvent()
+  resources/
+    actions.ts          -- Action (skill) CRUD and testing
+    agents.ts           -- Agent CRUD and versioning
+    analytics.ts        -- Call stats, event breakdown, data quality
+    api-keys.ts         -- API key management
+    audit.ts            -- Audit log queries
+    billing.ts          -- Dashboard, usage, invoices
+    calls.ts            -- Call list, detail, intelligence, trace analysis
+    context-graphs.ts   -- Context graph (HSM) CRUD and versioning
+    data-sources.ts     -- Connected data source management
+    integrations.ts     -- Integration CRUD, endpoint testing, health check
+    memory.ts           -- Memory fact queries
+    operators.ts        -- Operator CRUD, dashboard, queue, escalations, call actions
+    personas.ts         -- Persona management
+    phone-numbers.ts    -- Phone number provisioning
+    recordings.ts       -- Call recording access
+    review-queue.ts     -- Review queue management
+    safety.ts           -- Safety rule management
+    services.ts         -- Service CRUD
+    settings.ts         -- Workspace settings (voice, branding, outreach, memory, security, retention, workflows)
+    simulations.ts      -- Call simulation management
+    triggers.ts         -- Trigger CRUD, fire, pause, resume, runs
+    webhook-destinations.ts -- Webhook destination management
+    workspaces.ts       -- Workspace CRUD
+    world.ts            -- World model entities, events, relationships
+  generated/
+    api.ts              -- Auto-generated OpenAPI types (DO NOT EDIT)
+tests/
+  core/                 -- Core utility tests (rate-limit, webhooks)
+  integration/          -- Integration tests (require real API credentials)
+  resources/            -- Per-resource unit tests
+scripts/
+  gen-types.mjs         -- OpenAPI -> TypeScript codegen with FastAPI path param patching
+  build.mjs             -- esbuild bundler producing ESM (.mjs) and CJS (.cjs)
+  generate-changelog.sh -- Conventional commit changelog generator
 ```
 
-The script patches FastAPI's spec to add missing path parameters (`workspace_id`, `agent_id`, etc.) that FastAPI declares via `Depends()` instead of standard OpenAPI path parameters.
+## Conventions
 
-After any `openapi.json` change in `amigo-ai/platform`, run `npm run gen-types` to regenerate. The script auto-detects the local spec at `../platform/services/platform-api/openapi.json`.
+- **Strict TypeScript** -- `strict: true`, `noUncheckedIndexedAccess: true` in tsconfig.
+- **Single runtime dependency** -- `openapi-fetch` is the only production dep.
+- **Dual ESM/CJS output** -- esbuild produces `dist/index.mjs` (ESM) and `dist/index.cjs` (CJS). Declarations go to `dist/types/`.
+- **Vitest** -- Test runner with coverage thresholds (85% lines, 80% branches).
+- **ESLint** -- Lint runs with `--max-warnings 0` (zero tolerance).
+- **Skills rebranded to Actions** -- `client.actions.*` (API paths still `/skills/` for backward compat).
+
+## Important Patterns
+
+### Error Hierarchy
+
+`AmigoError` is the base class. Subclasses map to HTTP status codes (e.g., `AuthenticationError` for 401, `NotFoundError` for 404, `RateLimitError` for 429). `createApiError()` maps response status to the right error class. `createErrorMiddleware()` plugs into openapi-fetch middleware.
+
+### Retry with Jitter
+
+`createRetryingFetch()` wraps the global fetch with exponential backoff and jitter. It respects `Retry-After` headers and only retries idempotent methods (GET by default). POST requests only retry on 429 when a `Retry-After` header is present.
+
+### Rate Limit Headers
+
+`parseRateLimitHeaders(headers)` extracts `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`, and `Retry-After` from response headers.
+
+### Webhook Verification
+
+`parseWebhookEvent(payload, signature, secret)` verifies HMAC-SHA256 signatures and parses webhook payloads. Uses Web Crypto API for cross-platform compatibility.
+
+## Generated Code
+
+Files in `src/generated/` are auto-generated from the platform-api OpenAPI spec. Do not edit them manually. Regenerate with:
+
+```sh
+npm run gen-types
+```
+
+The codegen script auto-detects the local spec at `../platform/services/platform-api/openapi.json`.
 
 ## Breaking Changes
 
-Response field removal, rename, or type change breaks this SDK and all consumers. Never publish a version with TypeScript errors in developer-console. Coordinate with `amigo-ai/platform` (spec change) and `amigo-ai/developer-console` (Zod schema + UI updates) before releasing a version with breaking type changes.
+Response field removal, rename, or type change breaks this SDK and all consumers (developer-console). Coordinate with `amigo-ai/platform` (spec change) and `amigo-ai/developer-console` (UI updates) before releasing a version with breaking type changes.
 
-## Testing
+## Cross-Repo Contract
 
-- **Unit tests**: MSW (Mock Service Worker) for HTTP mocking, Vitest
-- **Dist tests**: verify built artifacts import correctly
-- **Integration tests**: real API calls (requires credentials)
-- **Coverage thresholds**: 85% lines, 80% branches
-
-```bash
-npm test             # unit tests
-npm run test:dist    # built artifact tests
-npm run test:all     # everything
 ```
-
-## Adding a New Resource
-
-0. Ensure the platform-api endpoint exists and `openapi.json` has been regenerated. If the path is missing from generated types, the backend hasn't added it yet
-1. Check the generated types: `grep 'your-endpoint' src/generated/api.ts`
-2. Create `src/resources/your-resource.ts` extending `WorkspaceScopedResource`
-3. Use `this.client.GET/POST/PUT/DELETE` with typed path strings from generated types
-4. Use `extractData(await this.client.METHOD(...))` for data-returning calls
-5. Register in `src/index.ts` constructor
-6. Add tests in `tests/resources/your-resource.test.ts`
-7. Export types from `src/index.ts`
-
-## Build
-
-```bash
-npm run build    # gen-types → esbuild (ESM+CJS) → tsc (declarations)
-npm run lint     # eslint --max-warnings 0
-npm run typecheck  # tsc --noEmit
+platform-api Pydantic models
+       | make openapi
+openapi.json (committed, CI-checked by oasdiff)
+       | sdk-sync.yml (auto-PR on spec change)
+@amigo-ai/platform-sdk (npm, provenance-attested)
+       | npm dependency
+developer-console (TypeScript catches breaks at compile time)
 ```
