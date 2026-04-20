@@ -266,7 +266,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --access public --registry=https://registry.npmjs.org/
+          npm publish "./release-payload/${{ needs.prepare.outputs.tarball_file }}" --access public --registry=https://registry.npmjs.org/
           rm -f .npmrc
 
   finalize:
