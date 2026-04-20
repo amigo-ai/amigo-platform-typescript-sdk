@@ -1983,6 +1983,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/dashboards": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Dashboards */
+        get: operations["list_dashboards_v1__workspace_id__dashboards_get"];
+        put?: never;
+        /** Create Dashboard */
+        post: operations["create_dashboard_v1__workspace_id__dashboards_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/dashboards/by-slug/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dashboard By Slug */
+        get: operations["get_dashboard_by_slug_v1__workspace_id__dashboards_by_slug__slug__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/dashboards/{dashboard_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Dashboard */
+        get: operations["get_dashboard_v1__workspace_id__dashboards__dashboard_id__get"];
+        /** Update Dashboard */
+        put: operations["update_dashboard_v1__workspace_id__dashboards__dashboard_id__put"];
+        post?: never;
+        /** Delete Dashboard */
+        delete: operations["delete_dashboard_v1__workspace_id__dashboards__dashboard_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/dashboards/{dashboard_id}/execute": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Execute Dashboard
+         * @description Execute all panel queries and return results for rendering.
+         *
+         *     SQL injection is mitigated by ResearchQueryService.execute_sql, which calls
+         *     _validate_read_only_sql to block DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE/
+         *     DELETE/UPDATE/INSERT statements. Catalog-level access is further restricted
+         *     by the service principal's Databricks grants (read-only on analytics catalog).
+         */
+        post: operations["execute_dashboard_v1__workspace_id__dashboards__dashboard_id__execute_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/data-sources": {
         parameters: {
             query?: never;
@@ -9523,6 +9602,28 @@ export interface components {
             /** Slug */
             slug: string;
         };
+        /** CreateDashboardRequest */
+        CreateDashboardRequest: {
+            description?: components["schemas"]["DescriptionString"] | null;
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            }[];
+            /** Page Context */
+            page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+            /** Panels */
+            panels?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Refresh Interval
+             * @default 300
+             */
+            refresh_interval?: number;
+            /** Slug */
+            slug: string;
+            title: components["schemas"]["NameString"];
+        };
         /** CreateDataSourceRequest */
         CreateDataSourceRequest: {
             /** Connection Config */
@@ -10491,6 +10592,85 @@ export interface components {
              * @description ISO-8601 date (YYYY-MM-DD)
              */
             date: string;
+        };
+        /** DashboardDefinitionResponse */
+        DashboardDefinitionResponse: {
+            /**
+             * Created At
+             * @description When the dashboard was created
+             */
+            created_at?: string | null;
+            /**
+             * Created By
+             * @description Creator identifier
+             */
+            created_by?: string | null;
+            /**
+             * Description
+             * @description Human-readable description
+             */
+            description?: string | null;
+            /**
+             * Filters
+             * @description Dashboard-level filter controls
+             */
+            filters: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Is Active
+             * @description Whether the dashboard is active
+             */
+            is_active: boolean;
+            /**
+             * Page Context
+             * @description Developer console page where this dashboard renders
+             */
+            page_context?: string | null;
+            /**
+             * Panels
+             * @description Ordered list of panel definitions
+             */
+            panels: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Refresh Interval
+             * @description Auto-refresh interval in seconds
+             */
+            refresh_interval: number;
+            /**
+             * Slug
+             * @description URL-safe identifier
+             */
+            slug: string;
+            /**
+             * Title
+             * @description Dashboard display title
+             */
+            title: string;
+            /**
+             * Updated At
+             * @description When the dashboard was last updated
+             */
+            updated_at?: string | null;
+            /** Workspace Id */
+            workspace_id?: string | null;
+        };
+        /** DashboardExecuteResponse */
+        DashboardExecuteResponse: {
+            /**
+             * Dashboard Id
+             * Format: uuid
+             */
+            dashboard_id: string;
+            /** Results */
+            results: components["schemas"]["PanelResultResponse"][];
         };
         /** DashboardResponse */
         DashboardResponse: {
@@ -12225,6 +12405,16 @@ export interface components {
             event_type: string;
             /** Sources */
             sources: string[];
+        };
+        /** ExecutePanelRequest */
+        ExecutePanelRequest: {
+            /**
+             * Filter Values
+             * @description Filter values to apply to panel queries
+             */
+            filter_values?: {
+                [key: string]: unknown;
+            };
         };
         /** ExitCondition */
         ExitCondition: {
@@ -15007,6 +15197,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[DashboardDefinitionResponse] */
+        PaginatedResponse_DashboardDefinitionResponse_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DashboardDefinitionResponse"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[DataSourceResponse] */
         PaginatedResponse_DataSourceResponse_: {
             /** Continuation Token */
@@ -15237,6 +15438,29 @@ export interface components {
             items: components["schemas"]["WorkspaceResponse"][];
             /** Total */
             total?: number | null;
+        };
+        /** PanelResultResponse */
+        PanelResultResponse: {
+            /**
+             * Columns
+             * @description Column names
+             */
+            columns: string[];
+            /**
+             * Error
+             * @description Error message if query failed
+             */
+            error?: string | null;
+            /**
+             * Panel Id
+             * @description Panel identifier from the definition
+             */
+            panel_id: string;
+            /**
+             * Rows
+             * @description Result rows
+             */
+            rows: unknown[][];
         };
         /** PatientBurdenDetailResponse */
         PatientBurdenDetailResponse: {
@@ -15836,10 +16060,18 @@ export interface components {
          * @description How the agent narrates waiting on a tool.
          *
          *     The actual utterance is generated from tool semantics + turn emotion +
-         *     patient context. No hardcoded vocabulary: operators describe the shape
-         *     of the wait, the engine chooses the words.
+         *     patient context. Operators describe the shape of the wait, the engine
+         *     chooses the words.
+         *
+         *     ``custom_phrase`` is a narrow escape hatch for demo-critical slow tools
+         *     where generic templates cannot cover the wait. Gated: only honored when
+         *     ``expected_latency_ms >= 4000`` and ``progress_class`` is set, and the
+         *     phrase is at most 30 words. The gate keeps the surface small so the
+         *     engine-picks-words contract holds for the bulk of tools.
          */
         ProgressHint: {
+            /** Custom Phrase */
+            custom_phrase?: string | null;
             /** Expected Latency Ms */
             expected_latency_ms?: number | null;
             /**
@@ -19132,6 +19364,25 @@ export interface components {
             name?: string | null;
             /** Status */
             status?: ("active" | "archived") | null;
+        };
+        /** UpdateDashboardRequest */
+        UpdateDashboardRequest: {
+            description?: components["schemas"]["DescriptionString"] | null;
+            /** Filters */
+            filters?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Page Context */
+            page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+            /** Panels */
+            panels?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Refresh Interval */
+            refresh_interval?: number | null;
+            /** Slug */
+            slug?: string | null;
+            title?: components["schemas"]["NameString"] | null;
         };
         /** UpdateDataSourceRequest */
         UpdateDataSourceRequest: {
@@ -25022,6 +25273,242 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CrmStatusResponse"];
+                };
+            };
+        };
+    };
+    list_dashboards_v1__workspace_id__dashboards_get: {
+        parameters: {
+            query?: {
+                page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DashboardDefinitionResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_dashboard_v1__workspace_id__dashboards_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateDashboardRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_dashboard_by_slug_v1__workspace_id__dashboards_by_slug__slug__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_dashboard_v1__workspace_id__dashboards__dashboard_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dashboard_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_dashboard_v1__workspace_id__dashboards__dashboard_id__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dashboard_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateDashboardRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_dashboard_v1__workspace_id__dashboards__dashboard_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dashboard_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    execute_dashboard_v1__workspace_id__dashboards__dashboard_id__execute_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                dashboard_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ExecutePanelRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardExecuteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

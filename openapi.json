@@ -5768,6 +5768,83 @@
         "title": "CreateCustomerRequest",
         "type": "object"
       },
+      "CreateDashboardRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filters": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 20,
+            "title": "Filters",
+            "type": "array"
+          },
+          "page_context": {
+            "anyOf": [
+              {
+                "enum": [
+                  "home",
+                  "patients",
+                  "calls",
+                  "analytics",
+                  "pipeline",
+                  "operators",
+                  "surfaces",
+                  "compliance",
+                  "custom"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Context"
+          },
+          "panels": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 50,
+            "title": "Panels",
+            "type": "array"
+          },
+          "refresh_interval": {
+            "default": 300,
+            "maximum": 86400.0,
+            "minimum": 10.0,
+            "title": "Refresh Interval",
+            "type": "integer"
+          },
+          "slug": {
+            "maxLength": 128,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9\\-]*$",
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "$ref": "#/components/schemas/NameString"
+          }
+        },
+        "required": [
+          "slug",
+          "title"
+        ],
+        "title": "CreateDashboardRequest",
+        "type": "object"
+      },
       "CreateDataSourceRequest": {
         "properties": {
           "connection_config": {
@@ -8282,6 +8359,160 @@
           "count"
         ],
         "title": "DailyCallVolume",
+        "type": "object"
+      },
+      "DashboardDefinitionResponse": {
+        "properties": {
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the dashboard was created",
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Creator identifier",
+            "title": "Created By"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable description",
+            "title": "Description"
+          },
+          "filters": {
+            "description": "Dashboard-level filter controls",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Filters",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "description": "Whether the dashboard is active",
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "page_context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Developer console page where this dashboard renders",
+            "title": "Page Context"
+          },
+          "panels": {
+            "description": "Ordered list of panel definitions",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Panels",
+            "type": "array"
+          },
+          "refresh_interval": {
+            "description": "Auto-refresh interval in seconds",
+            "title": "Refresh Interval",
+            "type": "integer"
+          },
+          "slug": {
+            "description": "URL-safe identifier",
+            "title": "Slug",
+            "type": "string"
+          },
+          "title": {
+            "description": "Dashboard display title",
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the dashboard was last updated",
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "panels",
+          "filters",
+          "refresh_interval",
+          "is_active"
+        ],
+        "title": "DashboardDefinitionResponse",
+        "type": "object"
+      },
+      "DashboardExecuteResponse": {
+        "properties": {
+          "dashboard_id": {
+            "format": "uuid",
+            "title": "Dashboard Id",
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/PanelResultResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "dashboard_id",
+          "results"
+        ],
+        "title": "DashboardExecuteResponse",
         "type": "object"
       },
       "DashboardResponse": {
@@ -12404,6 +12635,18 @@
           "sources"
         ],
         "title": "EventTypeSummary",
+        "type": "object"
+      },
+      "ExecutePanelRequest": {
+        "properties": {
+          "filter_values": {
+            "additionalProperties": true,
+            "description": "Filter values to apply to panel queries",
+            "title": "Filter Values",
+            "type": "object"
+          }
+        },
+        "title": "ExecutePanelRequest",
         "type": "object"
       },
       "ExitCondition": {
@@ -18956,6 +19199,49 @@
         "title": "PaginatedResponse[CustomerItem]",
         "type": "object"
       },
+      "PaginatedResponse_DashboardDefinitionResponse_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DashboardDefinitionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[DashboardDefinitionResponse]",
+        "type": "object"
+      },
       "PaginatedResponse_DataSourceResponse_": {
         "properties": {
           "continuation_token": {
@@ -19857,6 +20143,51 @@
           "has_more"
         ],
         "title": "PaginatedResponse[WorkspaceResponse]",
+        "type": "object"
+      },
+      "PanelResultResponse": {
+        "properties": {
+          "columns": {
+            "description": "Column names",
+            "items": {
+              "type": "string"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Error message if query failed",
+            "title": "Error"
+          },
+          "panel_id": {
+            "description": "Panel identifier from the definition",
+            "title": "Panel Id",
+            "type": "string"
+          },
+          "rows": {
+            "description": "Result rows",
+            "items": {
+              "items": {},
+              "type": "array"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "panel_id",
+          "columns",
+          "rows"
+        ],
+        "title": "PanelResultResponse",
         "type": "object"
       },
       "PatientBurdenDetailResponse": {
@@ -21339,8 +21670,21 @@
       },
       "ProgressHint": {
         "additionalProperties": false,
-        "description": "How the agent narrates waiting on a tool.\n\nThe actual utterance is generated from tool semantics + turn emotion +\npatient context. No hardcoded vocabulary: operators describe the shape\nof the wait, the engine chooses the words.",
+        "description": "How the agent narrates waiting on a tool.\n\nThe actual utterance is generated from tool semantics + turn emotion +\npatient context. Operators describe the shape of the wait, the engine\nchooses the words.\n\n``custom_phrase`` is a narrow escape hatch for demo-critical slow tools\nwhere generic templates cannot cover the wait. Gated: only honored when\n``expected_latency_ms >= 4000`` and ``progress_class`` is set, and the\nphrase is at most 30 words. The gate keeps the surface small so the\nengine-picks-words contract holds for the bulk of tools.",
         "properties": {
+          "custom_phrase": {
+            "anyOf": [
+              {
+                "description": "Operator-authored filler utterance for the first monitor tick. Gated: requires expected_latency_ms >= 4000, progress_class set, and at most 30 words. Subsequent ticks use class templates.",
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Phrase"
+          },
           "expected_latency_ms": {
             "anyOf": [
               {
@@ -28836,6 +29180,113 @@
           }
         },
         "title": "UpdateCustomerRequest",
+        "type": "object"
+      },
+      "UpdateDashboardRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filters": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filters"
+          },
+          "page_context": {
+            "anyOf": [
+              {
+                "enum": [
+                  "home",
+                  "patients",
+                  "calls",
+                  "analytics",
+                  "pipeline",
+                  "operators",
+                  "surfaces",
+                  "compliance",
+                  "custom"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Page Context"
+          },
+          "panels": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "maxItems": 50,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Panels"
+          },
+          "refresh_interval": {
+            "anyOf": [
+              {
+                "maximum": 86400.0,
+                "minimum": 10.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Refresh Interval"
+          },
+          "slug": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 2,
+                "pattern": "^[a-z0-9][a-z0-9\\-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Slug"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NameString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "UpdateDashboardRequest",
         "type": "object"
       },
       "UpdateDataSourceRequest": {
@@ -39696,6 +40147,358 @@
         "summary": "CRM sync status",
         "tags": [
           "CRM"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/dashboards": {
+      "get": {
+        "operationId": "list_dashboards_v1__workspace_id__dashboards_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page_context",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "home",
+                    "patients",
+                    "calls",
+                    "analytics",
+                    "pipeline",
+                    "operators",
+                    "surfaces",
+                    "compliance",
+                    "custom"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Context"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "exclusiveMinimum": 0,
+              "maximum": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_DashboardDefinitionResponse_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Dashboards",
+        "tags": [
+          "Dashboards"
+        ]
+      },
+      "post": {
+        "operationId": "create_dashboard_v1__workspace_id__dashboards_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDashboardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Dashboard",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/dashboards/by-slug/{slug}": {
+      "get": {
+        "operationId": "get_dashboard_by_slug_v1__workspace_id__dashboards_by_slug__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dashboard By Slug",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/dashboards/{dashboard_id}": {
+      "delete": {
+        "operationId": "delete_dashboard_v1__workspace_id__dashboards__dashboard_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dashboard Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Dashboard",
+        "tags": [
+          "Dashboards"
+        ]
+      },
+      "get": {
+        "operationId": "get_dashboard_v1__workspace_id__dashboards__dashboard_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dashboard Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Dashboard",
+        "tags": [
+          "Dashboards"
+        ]
+      },
+      "put": {
+        "operationId": "update_dashboard_v1__workspace_id__dashboards__dashboard_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dashboard Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDashboardRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Dashboard",
+        "tags": [
+          "Dashboards"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/dashboards/{dashboard_id}/execute": {
+      "post": {
+        "description": "Execute all panel queries and return results for rendering.\n\nSQL injection is mitigated by ResearchQueryService.execute_sql, which calls\n_validate_read_only_sql to block DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE/\nDELETE/UPDATE/INSERT statements. Catalog-level access is further restricted\nby the service principal's Databricks grants (read-only on analytics catalog).",
+        "operationId": "execute_dashboard_v1__workspace_id__dashboards__dashboard_id__execute_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "dashboard_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Dashboard Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/ExecutePanelRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardExecuteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Execute Dashboard",
+        "tags": [
+          "Dashboards"
         ]
       }
     },
