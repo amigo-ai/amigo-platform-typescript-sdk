@@ -263,12 +263,11 @@ jobs:
 
       - name: Publish to npm
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          # This guard is best-effort, not atomic with npm publish. Concurrency
-          # prevents overlapping release dispatches per ref, while finalize
-          # still uses force-with-lease as the authoritative CAS check.
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
           npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --access public --registry=https://registry.npmjs.org/
+          rm -f .npmrc
 
   finalize:
     # Keep `prepare` upstream of `finalize`: it performs the pre-publish
