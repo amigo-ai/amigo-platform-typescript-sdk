@@ -88,7 +88,7 @@ const client = new AmigoClient({
       Response.json({ detail: 'Session not found', error_code: 'not_found' }, { status: 404 }),
 
     [`DELETE ${BASE}/simulations/sessions/${SESSION_ID}`]: () =>
-      Response.json({ deleted: true }),
+      Response.json({ status: 'destroyed' }),
 
     [`POST ${BASE}/simulations/sessions/step`]: () =>
       Response.json(STEP_RESULT_FIXTURE),
@@ -123,7 +123,7 @@ describe('SimulationsResource', () => {
 
   it('deletes a simulation session', async () => {
     const result = await client.simulations.deleteSession(SESSION_ID)
-    expect(result.deleted).toBe(true)
+    expect(result.status).toBe('destroyed')
   })
 
   it('steps through a simulation turn', async () => {
@@ -140,7 +140,7 @@ describe('SimulationsResource', () => {
     const result = await client.simulations.recommend({
       session_id: SESSION_ID,
     } as never)
-    expect(result.session_id).toBe(SESSION_ID)
+    expect(result.suggestions).toBeDefined()
   })
 
   it('gets session intelligence', async () => {
