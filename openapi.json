@@ -627,7 +627,8 @@
                   "inbound",
                   "outbound",
                   "playground",
-                  "simulated"
+                  "simulated",
+                  "test"
                 ],
                 "type": "string"
               },
@@ -750,9 +751,8 @@
               "none",
               "requested",
               "connected",
-              "completed",
-              "cancelled",
-              "timeout"
+              "handback",
+              "completed"
             ],
             "title": "Status",
             "type": "string"
@@ -3023,7 +3023,13 @@
                   "timeout",
                   "error",
                   "voicemail",
-                  "no_answer"
+                  "no_answer",
+                  "caller_hangup",
+                  "forwarded",
+                  "terminal_state",
+                  "warm_transfer_completed",
+                  "no_inbound_audio",
+                  "cancelled"
                 ],
                 "type": "string"
               },
@@ -3065,7 +3071,8 @@
               "inbound",
               "outbound",
               "playground",
-              "simulated"
+              "simulated",
+              "test"
             ],
             "title": "Direction",
             "type": "string"
@@ -3321,7 +3328,13 @@
                   "timeout",
                   "error",
                   "voicemail",
-                  "no_answer"
+                  "no_answer",
+                  "caller_hangup",
+                  "forwarded",
+                  "terminal_state",
+                  "warm_transfer_completed",
+                  "no_inbound_audio",
+                  "cancelled"
                 ],
                 "type": "string"
               },
@@ -3339,7 +3352,8 @@
                   "inbound",
                   "outbound",
                   "playground",
-                  "simulated"
+                  "simulated",
+                  "test"
                 ],
                 "type": "string"
               },
@@ -3370,6 +3384,13 @@
           "escalation_status": {
             "anyOf": [
               {
+                "enum": [
+                  "none",
+                  "requested",
+                  "connected",
+                  "handback",
+                  "completed"
+                ],
                 "type": "string"
               },
               {
@@ -3480,7 +3501,9 @@
               {
                 "enum": [
                   "real",
-                  "simulated"
+                  "simulated",
+                  "playground",
+                  "scribe"
                 ],
                 "type": "string"
               },
@@ -4150,6 +4173,11 @@
             "type": "string"
           },
           "level": {
+            "enum": [
+              "info",
+              "warning",
+              "critical"
+            ],
             "title": "Level",
             "type": "string"
           },
@@ -4600,6 +4628,11 @@
           },
           "health_status": {
             "default": "unknown",
+            "enum": [
+              "unknown",
+              "healthy",
+              "degraded"
+            ],
             "title": "Health Status",
             "type": "string"
           },
@@ -4628,6 +4661,10 @@
           "last_sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "success",
+                  "error"
+                ],
                 "type": "string"
               },
               {
@@ -4681,6 +4718,7 @@
         "properties": {
           "data_source_id": {
             "description": "UUID of the connected data source",
+            "format": "uuid",
             "title": "Data Source Id",
             "type": "string"
           },
@@ -4690,11 +4728,13 @@
               "additionalProperties": true,
               "type": "object"
             },
+            "maxItems": 100,
             "title": "Entries",
             "type": "array"
           },
           "resource_type": {
             "description": "FHIR resource type (e.g. Patient, Condition, MedicationRequest)",
+            "maxLength": 256,
             "title": "Resource Type",
             "type": "string"
           },
@@ -5749,6 +5789,7 @@
             "items": {
               "type": "string"
             },
+            "maxItems": 100,
             "title": "Entity Types",
             "type": "array"
           },
@@ -8006,6 +8047,10 @@
           "last_sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "success",
+                  "error"
+                ],
                 "type": "string"
               },
               {
@@ -8675,6 +8720,11 @@
             "type": "object"
           },
           "health_status": {
+            "enum": [
+              "unknown",
+              "healthy",
+              "degraded"
+            ],
             "title": "Health Status",
             "type": "string"
           },
@@ -8721,6 +8771,10 @@
           "last_sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "success",
+                  "error"
+                ],
                 "type": "string"
               },
               {
@@ -8734,6 +8788,18 @@
             "type": "string"
           },
           "source_type": {
+            "enum": [
+              "rest_api",
+              "webhook",
+              "file_drop",
+              "fhir",
+              "fhir_store",
+              "ehr",
+              "crm",
+              "database",
+              "custom",
+              "smart_fhir"
+            ],
             "title": "Source Type",
             "type": "string"
           },
@@ -8749,6 +8815,12 @@
             "title": "Sync Schedule"
           },
           "sync_strategy": {
+            "enum": [
+              "manual",
+              "scheduled",
+              "webhook",
+              "continuous"
+            ],
             "title": "Sync Strategy",
             "type": "string"
           },
@@ -8802,6 +8874,11 @@
             "type": "integer"
           },
           "health_status": {
+            "enum": [
+              "unknown",
+              "healthy",
+              "degraded"
+            ],
             "title": "Health Status",
             "type": "string"
           },
@@ -8828,6 +8905,10 @@
           "last_sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "success",
+                  "error"
+                ],
                 "type": "string"
               },
               {
@@ -9517,6 +9598,21 @@
       "DescriptionString": {
         "maxLength": 2000,
         "type": "string"
+      },
+      "DestroySessionResponse": {
+        "properties": {
+          "status": {
+            "const": "destroyed",
+            "description": "Session destruction status",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "DestroySessionResponse",
+        "type": "object"
       },
       "DimensionAnalytics": {
         "description": "Per-dimension aggregate stats across all entities.",
@@ -17890,6 +17986,7 @@
             "items": {
               "$ref": "#/components/schemas/OperatorPerformanceTrendPoint"
             },
+            "maxItems": 2200,
             "title": "Trend",
             "type": "array"
           }
@@ -17974,7 +18071,8 @@
         "description": "Single time-bucket data point in the operator performance trend series.",
         "properties": {
           "date": {
-            "description": "ISO 8601 date string for the time bucket",
+            "description": "Date for the time bucket",
+            "format": "date",
             "title": "Date",
             "type": "string"
           },
@@ -20768,6 +20866,11 @@
         "properties": {
           "connector_status": {
             "default": "unavailable",
+            "enum": [
+              "healthy",
+              "degraded",
+              "unavailable"
+            ],
             "title": "Connector Status",
             "type": "string"
           },
@@ -21129,7 +21232,8 @@
               "inbound",
               "outbound",
               "playground",
-              "simulated"
+              "simulated",
+              "test"
             ],
             "title": "Direction",
             "type": "string"
@@ -21581,6 +21685,24 @@
           "session_id"
         ],
         "title": "RecommendRequest",
+        "type": "object"
+      },
+      "RecommendResponse": {
+        "properties": {
+          "suggestions": {
+            "description": "LLM-generated caller message suggestions",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Suggestions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "suggestions"
+        ],
+        "title": "RecommendResponse",
         "type": "object"
       },
       "RecordingMetadataResponse": {
@@ -22770,7 +22892,8 @@
         "description": "Single time-bucket data point in the safety trend series.",
         "properties": {
           "date": {
-            "description": "ISO 8601 date string for the time bucket",
+            "description": "Date for the time bucket",
+            "format": "date",
             "title": "Date",
             "type": "string"
           },
@@ -22819,6 +22942,7 @@
             "items": {
               "$ref": "#/components/schemas/SafetyTrendPoint"
             },
+            "maxItems": 2200,
             "title": "Trend",
             "type": "array"
           }
@@ -24938,6 +25062,11 @@
             "type": "integer"
           },
           "health_status": {
+            "enum": [
+              "unknown",
+              "healthy",
+              "degraded"
+            ],
             "title": "Health Status",
             "type": "string"
           },
@@ -24975,6 +25104,18 @@
             "type": "string"
           },
           "source_type": {
+            "enum": [
+              "rest_api",
+              "webhook",
+              "file_drop",
+              "fhir",
+              "fhir_store",
+              "ehr",
+              "crm",
+              "database",
+              "custom",
+              "smart_fhir"
+            ],
             "title": "Source Type",
             "type": "string"
           }
@@ -25024,6 +25165,11 @@
             "type": "integer"
           },
           "health_status": {
+            "enum": [
+              "unknown",
+              "healthy",
+              "degraded"
+            ],
             "title": "Health Status",
             "type": "string"
           },
@@ -25064,6 +25210,10 @@
           "last_sync_status": {
             "anyOf": [
               {
+                "enum": [
+                  "success",
+                  "error"
+                ],
                 "type": "string"
               },
               {
@@ -25094,6 +25244,18 @@
             "type": "array"
           },
           "source_type": {
+            "enum": [
+              "rest_api",
+              "webhook",
+              "file_drop",
+              "fhir",
+              "fhir_store",
+              "ehr",
+              "crm",
+              "database",
+              "custom",
+              "smart_fhir"
+            ],
             "title": "Source Type",
             "type": "string"
           }
@@ -25168,6 +25330,18 @@
             "type": "integer"
           },
           "source_type": {
+            "enum": [
+              "rest_api",
+              "webhook",
+              "file_drop",
+              "fhir",
+              "fhir_store",
+              "ehr",
+              "crm",
+              "database",
+              "custom",
+              "smart_fhir"
+            ],
             "title": "Source Type",
             "type": "string"
           },
@@ -28694,6 +28868,7 @@
                 "items": {
                   "type": "string"
                 },
+                "maxItems": 100,
                 "type": "array"
               },
               {
@@ -51004,9 +51179,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Simulation-Recommend",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RecommendResponse"
                 }
               }
             },
@@ -51090,11 +51263,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Simulation-Destroy",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DestroySessionResponse"
                 }
               }
             },

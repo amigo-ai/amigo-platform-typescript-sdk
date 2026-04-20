@@ -7419,7 +7419,7 @@ export interface components {
              * Direction
              * @description Call direction
              */
-            direction?: ("inbound" | "outbound" | "playground" | "simulated") | null;
+            direction?: ("inbound" | "outbound" | "playground" | "simulated" | "test") | null;
             /**
              * Escalation Id
              * @description Escalation event ID
@@ -7470,7 +7470,7 @@ export interface components {
              * @description Current escalation state
              * @enum {string}
              */
-            status: "none" | "requested" | "connected" | "completed" | "cancelled" | "timeout";
+            status: "none" | "requested" | "connected" | "handback" | "completed";
             /**
              * Trigger
              * @description What triggered the escalation
@@ -8356,7 +8356,7 @@ export interface components {
              * Completion Reason
              * @description Why the call ended
              */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /** @description Conversation flow metrics */
             conversation_summary?: components["schemas"]["ConversationSummary"] | null;
             /**
@@ -8370,7 +8370,7 @@ export interface components {
              * @default inbound
              * @enum {string}
              */
-            direction?: "inbound" | "outbound" | "playground" | "simulated";
+            direction?: "inbound" | "outbound" | "playground" | "simulated" | "test";
             /**
              * Duration Seconds
              * @description Call duration in seconds
@@ -8474,12 +8474,12 @@ export interface components {
              * Completion Reason
              * @description Why the call ended
              */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /**
              * Direction
              * @description Call direction
              */
-            direction?: ("inbound" | "outbound" | "playground" | "simulated") | null;
+            direction?: ("inbound" | "outbound" | "playground" | "simulated" | "test") | null;
             /**
              * Duration Seconds
              * @description Call duration in seconds
@@ -8494,7 +8494,7 @@ export interface components {
              * Escalation Status
              * @description Escalation state if any
              */
-            escalation_status?: string | null;
+            escalation_status?: ("none" | "requested" | "connected" | "handback" | "completed") | null;
             /**
              * Final State
              * @description Final conversation state
@@ -8539,7 +8539,7 @@ export interface components {
              * Source
              * @description Whether this is a real or simulated call
              */
-            source?: ("real" | "simulated") | null;
+            source?: ("real" | "simulated" | "playground" | "scribe") | null;
             /**
              * Started At
              * @description When the call started
@@ -8844,8 +8844,11 @@ export interface components {
         CommandCenterAlert: {
             /** Code */
             code: string;
-            /** Level */
-            level: string;
+            /**
+             * Level
+             * @enum {string}
+             */
+            level: "info" | "warning" | "critical";
             /** Message */
             message: string;
             /** Section */
@@ -9067,8 +9070,9 @@ export interface components {
             /**
              * Health Status
              * @default unknown
+             * @enum {string}
              */
-            health_status?: string;
+            health_status?: "unknown" | "healthy" | "degraded";
             /**
              * Is Active
              * @default true
@@ -9082,7 +9086,7 @@ export interface components {
              */
             last_sync_event_count?: number;
             /** Last Sync Status */
-            last_sync_status?: string | null;
+            last_sync_status?: ("success" | "error") | null;
             /** Name */
             name: string;
             /** Source Type */
@@ -9102,6 +9106,7 @@ export interface components {
         ConnectorResourcesResponse: {
             /**
              * Data Source Id
+             * Format: uuid
              * @description UUID of the connected data source
              */
             data_source_id: string;
@@ -10349,7 +10354,7 @@ export interface components {
             /** Last Sync At */
             last_sync_at?: string | null;
             /** Last Sync Status */
-            last_sync_status?: string | null;
+            last_sync_status?: ("success" | "error") | null;
             /**
              * Sync Failure Count
              * @default 0
@@ -10735,8 +10740,11 @@ export interface components {
             field_mappings: {
                 [key: string]: unknown;
             };
-            /** Health Status */
-            health_status: string;
+            /**
+             * Health Status
+             * @enum {string}
+             */
+            health_status: "unknown" | "healthy" | "degraded";
             /** Id */
             id: string;
             /** Is Active */
@@ -10750,15 +10758,21 @@ export interface components {
             /** Last Sync Event Count */
             last_sync_event_count: number;
             /** Last Sync Status */
-            last_sync_status: string | null;
+            last_sync_status: ("success" | "error") | null;
             /** Name */
             name: string;
-            /** Source Type */
-            source_type: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir";
             /** Sync Schedule */
             sync_schedule: string | null;
-            /** Sync Strategy */
-            sync_strategy: string;
+            /**
+             * Sync Strategy
+             * @enum {string}
+             */
+            sync_strategy: "manual" | "scheduled" | "webhook" | "continuous";
             /**
              * Updated At
              * Format: date-time
@@ -10775,8 +10789,11 @@ export interface components {
             event_count: number;
             /** Failed Count */
             failed_count: number;
-            /** Health Status */
-            health_status: string;
+            /**
+             * Health Status
+             * @enum {string}
+             */
+            health_status: "unknown" | "healthy" | "degraded";
             /** Is Active */
             is_active: boolean;
             /** Last Sync At */
@@ -10784,7 +10801,7 @@ export interface components {
             /** Last Sync Event Count */
             last_sync_event_count: number;
             /** Last Sync Status */
-            last_sync_status: string | null;
+            last_sync_status: ("success" | "error") | null;
             /** Name */
             name: string;
             /** Synced Count */
@@ -11070,6 +11087,15 @@ export interface components {
             workspace_id: string;
         };
         DescriptionString: string;
+        /** DestroySessionResponse */
+        DestroySessionResponse: {
+            /**
+             * Status
+             * @description Session destruction status
+             * @constant
+             */
+            status: "destroyed";
+        };
         /**
          * DimensionAnalytics
          * @description Per-dimension aggregate stats across all entities.
@@ -14640,7 +14666,8 @@ export interface components {
         OperatorPerformanceTrendPoint: {
             /**
              * Date
-             * @description ISO 8601 date string for the time bucket
+             * Format: date
+             * @description Date for the time bucket
              */
             date: string;
             /**
@@ -15595,8 +15622,9 @@ export interface components {
             /**
              * Connector Status
              * @default unavailable
+             * @enum {string}
              */
-            connector_status?: string;
+            connector_status?: "healthy" | "degraded" | "unavailable";
             /**
              * Events Last Hour
              * @default 0
@@ -15757,7 +15785,7 @@ export interface components {
              * @default inbound
              * @enum {string}
              */
-            direction?: "inbound" | "outbound" | "playground" | "simulated";
+            direction?: "inbound" | "outbound" | "playground" | "simulated" | "test";
             /** Entity Name */
             entity_name?: string | null;
             /**
@@ -15971,6 +15999,14 @@ export interface components {
             n?: number;
             /** Session Id */
             session_id: string;
+        };
+        /** RecommendResponse */
+        RecommendResponse: {
+            /**
+             * Suggestions
+             * @description LLM-generated caller message suggestions
+             */
+            suggestions: string[];
         };
         /**
          * RecordingMetadataResponse
@@ -16537,7 +16573,8 @@ export interface components {
         SafetyTrendPoint: {
             /**
              * Date
-             * @description ISO 8601 date string for the time bucket
+             * Format: date
+             * @description Date for the time bucket
              */
             date: string;
             /**
@@ -17512,8 +17549,11 @@ export interface components {
              * @default 0
              */
             event_count?: number;
-            /** Health Status */
-            health_status: string;
+            /**
+             * Health Status
+             * @enum {string}
+             */
+            health_status: "unknown" | "healthy" | "degraded";
             /** Id */
             id: string;
             /** Is Active */
@@ -17523,8 +17563,11 @@ export interface components {
             last_sync_at?: string | null;
             /** Name */
             name: string;
-            /** Source Type */
-            source_type: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -17542,8 +17585,11 @@ export interface components {
              * @default 0
              */
             event_count?: number;
-            /** Health Status */
-            health_status: string;
+            /**
+             * Health Status
+             * @enum {string}
+             */
+            health_status: "unknown" | "healthy" | "degraded";
             /** Id */
             id: string;
             /** Is Active */
@@ -17557,7 +17603,7 @@ export interface components {
              */
             last_sync_event_count?: number;
             /** Last Sync Status */
-            last_sync_status?: string | null;
+            last_sync_status?: ("success" | "error") | null;
             /** Name */
             name: string;
             /**
@@ -17574,8 +17620,11 @@ export interface components {
              * @default []
              */
             recent_failures?: components["schemas"]["SourceFailureItem"][];
-            /** Source Type */
-            source_type: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -17607,8 +17656,11 @@ export interface components {
              * @default 0
              */
             last_poll_event_count?: number;
-            /** Source Type */
-            source_type: string;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir";
             /** Status */
             status: string;
             /** Workspace Id */
@@ -33343,9 +33395,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["RecommendResponse"];
                 };
             };
             /** @description Validation Error */
@@ -33444,9 +33494,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
+                    "application/json": components["schemas"]["DestroySessionResponse"];
                 };
             };
             /** @description Validation Error */
