@@ -268,7 +268,7 @@ jobs:
           # This guard is best-effort, not atomic with npm publish. Concurrency
           # prevents overlapping release dispatches per ref, while finalize
           # still uses force-with-lease as the authoritative CAS check.
-          npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --provenance --access public
+          npm publish "release-payload/${{ needs.prepare.outputs.tarball_file }}" --access public --registry=https://registry.npmjs.org/
 
   finalize:
     # Keep `prepare` upstream of `finalize`: it performs the pre-publish
