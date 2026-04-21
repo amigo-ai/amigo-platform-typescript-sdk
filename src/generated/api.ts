@@ -258,6 +258,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/upload/{link_token}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Receive Upload */
+        post: operations["upload-intake-file-via-link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/upload/{link_token}/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Link Info */
+        get: operations["get-intake-link-info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/me": {
         parameters: {
             query?: never;
@@ -3105,6 +3139,61 @@ export interface paths {
         put?: never;
         /** Receive Intake File */
         post: operations["receive_intake_file_v1__workspace_id__intake_files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List upload links */
+        get: operations["list-intake-links"];
+        put?: never;
+        /**
+         * Generate upload link
+         * @description Create a shareable upload link for a customer.
+         */
+        post: operations["create-intake-link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke upload link */
+        delete: operations["revoke-intake-link"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List uploads for a link */
+        get: operations["list-intake-link-uploads"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5959,6 +6048,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/bridge/plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Simulation Bridge Plan
+         * @description Infer a TargetSpec from an NL objective — preview before running /bridge.
+         *
+         *     UX: user types "test scheduling failures in 20 different ways", we return
+         *     a structured target_spec + rationale. The frontend shows both, lets the
+         *     user edit (add/remove states, tighten pathways), then POSTs the final
+         *     spec to /bridge. Same LLM, same Vertex cost structure as /bridge, but
+         *     no run is created — pure inference.
+         */
+        post: operations["simulation-bridge-plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/config-to-policy": {
         parameters: {
             query?: never;
@@ -5991,6 +6106,28 @@ export interface paths {
          * @description Create a simulation coverage run with an optional Lakebase branch.
          */
         post: operations["create-simulation-run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Run
+         * @description Fetch a single run including objective / bridge_request / scenarios.
+         *
+         *     Use the bridge_request payload to re-POST /bridge and replay the run.
+         */
+        get: operations["get-simulation-run"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -8667,8 +8804,33 @@ export interface components {
         BrandingSettingsResponse: {
             branding: components["schemas"]["BrandingConfig"];
         };
+        /** BridgePlanRequest */
+        BridgePlanRequest: {
+            /** Objective */
+            objective: string;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+        };
+        /** BridgePlanResponse */
+        BridgePlanResponse: {
+            /** Available States */
+            available_states?: string[];
+            /** Available Tools */
+            available_tools?: string[];
+            /** Rationale */
+            rationale: string;
+            target_spec: components["schemas"]["TargetSpec"];
+        };
         /** BridgeRequest */
         BridgeRequest: {
+            /**
+             * Auto Target Spec
+             * @default false
+             */
+            auto_target_spec?: boolean;
             /** Branch Name */
             branch_name?: string | null;
             /**
@@ -8676,6 +8838,7 @@ export interface components {
              * @default 3
              */
             concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Turns
              * @default 20
@@ -8695,9 +8858,13 @@ export interface components {
             service_id: string;
             /** Tags */
             tags?: string[];
+            target_spec?: components["schemas"]["TargetSpec"] | null;
         };
         /** BridgeResponse */
         BridgeResponse: {
+            inferred_target_spec?: components["schemas"]["TargetSpec"] | null;
+            /** Inferred Target Spec Rationale */
+            inferred_target_spec_rationale?: string | null;
             /**
              * Run Id
              * Format: uuid
@@ -9462,6 +9629,13 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** CompletionCriteria */
+        CompletionCriteria: {
+            /** State Based */
+            state_based?: string[];
+            /** Tool Based */
+            tool_based?: string[];
+        };
         /**
          * ComplianceDashboardResponse
          * @description Composite compliance health overview.
@@ -10171,6 +10345,21 @@ export interface components {
              * @enum {string}
              */
             protocol?: "rest" | "fhir" | "mcp";
+        };
+        /** CreateLinkRequest */
+        CreateLinkRequest: {
+            customer_slug: components["schemas"]["SlugString"];
+            display_name?: components["schemas"]["DescriptionString"] | null;
+            /**
+             * Expires In Hours
+             * @default 168
+             */
+            expires_in_hours?: number;
+            /**
+             * Max Uploads
+             * @default 100
+             */
+            max_uploads?: number;
         };
         /** CreateMonitorConceptRequest */
         CreateMonitorConceptRequest: {
@@ -12951,6 +13140,29 @@ export interface components {
             /** Next State */
             next_state: string;
         };
+        /** ExplorationConfig */
+        ExplorationConfig: {
+            /**
+             * Coverage Driven Selection
+             * @default false
+             */
+            coverage_driven_selection?: boolean;
+            /**
+             * Enable Forking
+             * @default false
+             */
+            enable_forking?: boolean;
+            /**
+             * Max Forks Per Scenario
+             * @default 2
+             */
+            max_forks_per_scenario?: number;
+            /**
+             * Recommend Candidates
+             * @default 3
+             */
+            recommend_candidates?: number;
+        };
         /** FeatureDef */
         FeatureDef: {
             /** Kind */
@@ -14158,6 +14370,74 @@ export interface components {
             /** Volume Path */
             volume_path: string;
         };
+        /** IntakeLinkResponse */
+        IntakeLinkResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            customer_slug: components["schemas"]["SlugString"];
+            display_name: components["schemas"]["NameString"] | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Upload At */
+            last_upload_at: string | null;
+            /** Link Token */
+            link_token: string;
+            /** Max Uploads */
+            max_uploads: number;
+            /** Revoked At */
+            revoked_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "expired" | "revoked" | "exhausted";
+            /** Upload Count */
+            upload_count: number;
+            /** Upload Url */
+            upload_url: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** IntakeUploadResponse */
+        IntakeUploadResponse: {
+            /** Content Type */
+            content_type: string;
+            customer_slug: components["schemas"]["SlugString"];
+            filename: components["schemas"]["NameString"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Received At
+             * Format: date-time
+             */
+            received_at: string;
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "skipped" | "pending" | "clean" | "infected";
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+        };
         /** IntegrationResponse */
         IntegrationResponse: {
             /** @description Authentication configuration */
@@ -15135,7 +15415,7 @@ export interface components {
             ai_query_endpoint?: string | null;
             /**
              * Ai Query Prompt
-             * @description Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'
+             * @description Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric — conversational_naturalness — is ~5KB).
              */
             ai_query_prompt?: string | null;
             /**
@@ -15399,6 +15679,17 @@ export interface components {
             workspace_id: string;
         };
         NameString: string;
+        /** NonDesiredState */
+        NonDesiredState: {
+            /**
+             * Mode
+             * @default hard
+             * @enum {string}
+             */
+            mode?: "hard" | "soft";
+            /** State */
+            state: string;
+        };
         /** OcrRequest */
         OcrRequest: {
             /**
@@ -15640,6 +15931,13 @@ export interface components {
             online: number;
             /** Total */
             total: number;
+        };
+        /** OrderedPathway */
+        OrderedPathway: {
+            /** Id */
+            id: string;
+            /** Sequence */
+            sequence: string[];
         };
         /** OutboundLogItem */
         OutboundLogItem: {
@@ -18303,6 +18601,55 @@ export interface components {
              */
             tools_called?: string[];
         };
+        /**
+         * SimulationRunResponse
+         * @description Full run payload — used by GET /runs/{run_id} for replay flows.
+         */
+        SimulationRunResponse: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /** Bridge Request */
+            bridge_request?: {
+                [key: string]: unknown;
+            } | null;
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Objective */
+            objective?: string | null;
+            /** Scenarios */
+            scenarios?: {
+                [key: string]: unknown;
+            }[] | null;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed";
+            /** Tags */
+            tags?: string[];
+            /**
+             * Total Sessions
+             * @default 0
+             */
+            total_sessions?: number;
+            /**
+             * Total Turns
+             * @default 0
+             */
+            total_turns?: number;
+        };
         /** SimulationSessionResponse */
         SimulationSessionResponse: {
             /** Greeting */
@@ -19280,6 +19627,16 @@ export interface components {
             event_id: string;
             /** Status */
             status: string;
+        };
+        /** TargetSpec */
+        TargetSpec: {
+            completion_criteria?: components["schemas"]["CompletionCriteria"];
+            /** Desired States */
+            desired_states?: string[];
+            /** Non Desired States */
+            non_desired_states?: components["schemas"]["NonDesiredState"][];
+            /** Ordered Pathways */
+            ordered_pathways?: components["schemas"]["OrderedPathway"][];
         };
         /** TaskListResponse */
         TaskListResponse: {
@@ -22137,6 +22494,139 @@ export interface operations {
                 };
             };
             /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "upload-intake-file-via-link": {
+        parameters: {
+            query?: never;
+            header: {
+                "x-amigo-intake-filename": string;
+                "x-amigo-intake-content-type": string;
+            };
+            path: {
+                link_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description File uploaded successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid filename or content type */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited or upload limit reached */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Upload service unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-intake-link-info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Link metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Invalid token */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Upload limit reached */
             429: {
                 headers: {
                     [name: string]: unknown;
@@ -28630,6 +29120,136 @@ export interface operations {
             };
         };
     };
+    "list-intake-links": {
+        parameters: {
+            query?: {
+                include_expired?: boolean;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeLinkResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeLinkResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "revoke-intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-intake-link-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeUploadResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-integrations": {
         parameters: {
             query?: {
@@ -34919,6 +35539,41 @@ export interface operations {
             };
         };
     };
+    "simulation-bridge-plan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BridgePlanRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BridgePlanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "config-to-turn-policy": {
         parameters: {
             query?: never;
@@ -35016,6 +35671,38 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationRunResponse"];
                 };
             };
             /** @description Validation Error */
