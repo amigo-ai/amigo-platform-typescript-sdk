@@ -41,8 +41,9 @@ const resourceClassMap = new Map(
 const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')
 const clientClass = getClass(indexSource, 'AmigoClient')
 const clientFields = collectPublicClassFields(clientClass)
+const DOCUMENTED_CLIENT_METHODS = new Set(['withOptions', 'onLatency', 'measureLatency'])
 const clientMethods = collectPublicMethodNames(clientClass).filter(
-  (name) => name === 'withOptions' || name === name.toUpperCase(),
+  (name) => DOCUMENTED_CLIENT_METHODS.has(name) || name === name.toUpperCase(),
 )
 const exportMap = collectExportMap(indexSource)
 const resourceEntries = clientFields
@@ -78,9 +79,12 @@ const markdown = await prettier.format(
       .map((field) => `- \`${field.name}: ${field.typeText}\``),
     '',
     'Client methods:',
-    ...clientMethods.map((method) =>
-      method === 'withOptions' ? '- `withOptions(options)`' : `- \`${method}(path, options?)\``,
-    ),
+    ...clientMethods.map((method) => {
+      if (method === 'withOptions') return '- `withOptions(options)`'
+      if (method === 'onLatency') return '- `onLatency(listener)` — returns an unsubscribe function'
+      if (method === 'measureLatency') return '- `measureLatency(fn)` — returns `{ result, events, totalMs }`'
+      return `- \`${method}(path, options?)\``
+    }),
     '',
     'Notes:',
     '- Workspace-scoped paths receive the configured `workspaceId` automatically, and the configured value wins if `workspace_id` is provided manually.',
@@ -95,6 +99,7 @@ const markdown = await prettier.format(
     `- Request option types: ${formatNames(exportMap.types.get('./core/request-options.js'))}`,
     `- Webhooks: ${formatNames(exportMap.values.get('./core/webhooks.js'))}`,
     `- Pagination and response helpers: ${formatNames(exportMap.values.get('./core/utils.js'))}`,
+    `- Telemetry types: ${formatNames(exportMap.types.get('./core/telemetry.js'))}`,
     `- Response and hook types: ${formatNames(
       [
         ...(exportMap.types.get('./core/utils.js') ?? []),

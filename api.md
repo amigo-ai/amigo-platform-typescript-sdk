@@ -53,7 +53,7 @@ Notes:
 - Request option types: `AmigoRequestOptions`, `ScopedRequestOptions`
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
-- Telemetry types: `TelemetryOptions`, `LatencyEvent`
+- Telemetry types: `LatencyEvent`, `TelemetryOptions`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
 - Generated OpenAPI types: `paths`, `components`, `operations`
 
