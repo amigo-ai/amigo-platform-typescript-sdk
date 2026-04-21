@@ -1215,6 +1215,160 @@
         "title": "AnnotationState",
         "type": "object"
       },
+      "AnomalyAlertResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AnomalyAlertRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "AnomalyAlertResponse",
+        "type": "object"
+      },
+      "AnomalyAlertRow": {
+        "properties": {
+          "actions_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actions Json"
+          },
+          "alert_id": {
+            "title": "Alert Id",
+            "type": "string"
+          },
+          "decomposition_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decomposition Json"
+          },
+          "detected_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detected At"
+          },
+          "mechanism": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mechanism"
+          },
+          "narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Narrative"
+          },
+          "priority_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Priority Score"
+          },
+          "projection_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Projection Json"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "enum": [
+                  "high",
+                  "medium",
+                  "low"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity"
+          },
+          "slice_label": {
+            "title": "Slice Label",
+            "type": "string"
+          },
+          "stats_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stats Json"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "alert_id",
+          "slice_label"
+        ],
+        "title": "AnomalyAlertRow",
+        "type": "object"
+      },
       "ApiKeyResponse": {
         "properties": {
           "created_at": {
@@ -3608,6 +3762,39 @@
         "title": "CallTranscriptResponse",
         "type": "object"
       },
+      "CatalogEntry": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "exists": {
+            "title": "Exists",
+            "type": "boolean"
+          },
+          "layer": {
+            "title": "Layer",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "layer",
+          "description",
+          "row_count",
+          "exists"
+        ],
+        "title": "CatalogEntry",
+        "type": "object"
+      },
       "CatalogFunctionDef": {
         "description": "A function discovered from the Databricks UC catalog.",
         "properties": {
@@ -3844,6 +4031,231 @@
           "status"
         ],
         "title": "ClaimResponse",
+        "type": "object"
+      },
+      "ClusterForecastPointRow": {
+        "properties": {
+          "cluster_name": {
+            "title": "Cluster Name",
+            "type": "string"
+          },
+          "focus_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focus Area"
+          },
+          "is_historical": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Historical"
+          },
+          "lower_95": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lower 95"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
+          "t": {
+            "title": "T",
+            "type": "number"
+          },
+          "upper_95": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upper 95"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "cluster_name",
+          "t"
+        ],
+        "title": "ClusterForecastPointRow",
+        "type": "object"
+      },
+      "ClusterForecastResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterForecastPointRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ClusterForecastResponse",
+        "type": "object"
+      },
+      "ClusterSummaryResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ClusterSummaryRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ClusterSummaryResponse",
+        "type": "object"
+      },
+      "ClusterSummaryRow": {
+        "properties": {
+          "cluster_name": {
+            "title": "Cluster Name",
+            "type": "string"
+          },
+          "cohort_size": {
+            "title": "Cohort Size",
+            "type": "integer"
+          },
+          "mean_age": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Age"
+          },
+          "mean_bmi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Bmi"
+          },
+          "mean_hba1c": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Hba1C"
+          },
+          "mean_y_hat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mean Y Hat"
+          },
+          "pct_male": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct Male"
+          },
+          "pct_prediabetes": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct Prediabetes"
+          },
+          "pct_t2d": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pct T2D"
+          }
+        },
+        "required": [
+          "cluster_name",
+          "cohort_size"
+        ],
+        "title": "ClusterSummaryRow",
         "type": "object"
       },
       "CoachingItem": {
@@ -4164,6 +4576,61 @@
           "label"
         ],
         "title": "CollectionField",
+        "type": "object"
+      },
+      "ColumnInfo": {
+        "properties": {
+          "column_name": {
+            "title": "Column Name",
+            "type": "string"
+          },
+          "comment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Comment"
+          },
+          "data_type": {
+            "title": "Data Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "column_name",
+          "data_type"
+        ],
+        "title": "ColumnInfo",
+        "type": "object"
+      },
+      "ColumnsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ColumnInfo"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ColumnsResponse",
         "type": "object"
       },
       "CommandCenterAlert": {
@@ -9521,6 +9988,79 @@
         "title": "DecisionState",
         "type": "object"
       },
+      "DecompositionRow": {
+        "properties": {
+          "beta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beta"
+          },
+          "ci_hi": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ci Hi"
+          },
+          "ci_lo": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ci Lo"
+          },
+          "contribution": {
+            "title": "Contribution",
+            "type": "number"
+          },
+          "delta_x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta X"
+          },
+          "family": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family"
+          },
+          "feature_name": {
+            "title": "Feature Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "feature_name",
+          "contribution"
+        ],
+        "title": "DecompositionRow",
+        "type": "object"
+      },
       "DeliverSurfaceRequest": {
         "description": "Request to mark a surface as delivered.",
         "properties": {
@@ -10043,6 +10583,172 @@
           "ok"
         ],
         "title": "DisconnectResponse",
+        "type": "object"
+      },
+      "DistrictMetricsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DistrictMetricsRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "DistrictMetricsResponse",
+        "type": "object"
+      },
+      "DistrictMetricsRow": {
+        "properties": {
+          "access_narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Access Narrative"
+          },
+          "anomaly_narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anomaly Narrative"
+          },
+          "capacity_gap_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Capacity Gap Pct"
+          },
+          "cohort_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cohort Size"
+          },
+          "district_name": {
+            "title": "District Name",
+            "type": "string"
+          },
+          "is_anomaly": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Anomaly"
+          },
+          "pcp_per_1k": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pcp Per 1K"
+          },
+          "residual": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Residual"
+          },
+          "t2d_incidence_per_1k": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T2D Incidence Per 1K"
+          },
+          "t2d_predicted_per_1k": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "T2D Predicted Per 1K"
+          },
+          "unmet_demand_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unmet Demand Score"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "district_name"
+        ],
+        "title": "DistrictMetricsRow",
         "type": "object"
       },
       "DriverRow": {
@@ -12678,6 +13384,91 @@
         "title": "ExitCondition",
         "type": "object"
       },
+      "FeatureDef": {
+        "properties": {
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "kind"
+        ],
+        "title": "FeatureDef",
+        "type": "object"
+      },
+      "FeatureDistributionResponse": {
+        "properties": {
+          "bins": {
+            "items": {
+              "$ref": "#/components/schemas/HistogramBin"
+            },
+            "title": "Bins",
+            "type": "array"
+          },
+          "feature": {
+            "title": "Feature",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "n_total": {
+            "title": "N Total",
+            "type": "integer"
+          },
+          "n_y1": {
+            "title": "N Y1",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "feature",
+          "kind",
+          "bins",
+          "n_total",
+          "n_y1"
+        ],
+        "title": "FeatureDistributionResponse",
+        "type": "object"
+      },
+      "FeaturesResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FeatureDef"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "FeaturesResponse",
+        "type": "object"
+      },
       "FhirAppointmentListResponse": {
         "properties": {
           "appointments": {
@@ -14126,6 +14917,158 @@
         "title": "FireTriggerRequest",
         "type": "object"
       },
+      "ForecastDrawPoint": {
+        "properties": {
+          "draw_id": {
+            "title": "Draw Id",
+            "type": "integer"
+          },
+          "t": {
+            "title": "T",
+            "type": "number"
+          },
+          "value": {
+            "title": "Value",
+            "type": "number"
+          }
+        },
+        "required": [
+          "draw_id",
+          "t",
+          "value"
+        ],
+        "title": "ForecastDrawPoint",
+        "type": "object"
+      },
+      "ForecastDrawsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastDrawPoint"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ForecastDrawsResponse",
+        "type": "object"
+      },
+      "ForecastFanPointRow": {
+        "properties": {
+          "is_historical": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Historical"
+          },
+          "lower_95": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lower 95"
+          },
+          "median": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Median"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "scenario": {
+            "enum": [
+              "baseline",
+              "with_policy",
+              "observational"
+            ],
+            "title": "Scenario",
+            "type": "string"
+          },
+          "t": {
+            "title": "T",
+            "type": "number"
+          },
+          "upper_95": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upper 95"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "run_id",
+          "scenario",
+          "t"
+        ],
+        "title": "ForecastFanPointRow",
+        "type": "object"
+      },
+      "ForecastFanResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ForecastFanPointRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ForecastFanResponse",
+        "type": "object"
+      },
       "ForkAlternative": {
         "properties": {
           "caller_text": {
@@ -15525,6 +16468,34 @@
         "title": "HipaaReportResponse",
         "type": "object"
       },
+      "HistogramBin": {
+        "properties": {
+          "x_hi": {
+            "title": "X Hi",
+            "type": "number"
+          },
+          "x_lo": {
+            "title": "X Lo",
+            "type": "number"
+          },
+          "y0": {
+            "title": "Y0",
+            "type": "integer"
+          },
+          "y1": {
+            "title": "Y1",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "x_lo",
+          "x_hi",
+          "y0",
+          "y1"
+        ],
+        "title": "HistogramBin",
+        "type": "object"
+      },
       "Identity": {
         "properties": {
           "default_spoken_language": {
@@ -16892,6 +17863,32 @@
         "title": "LoopLatencyResponse",
         "type": "object"
       },
+      "M42CatalogResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogEntry"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "M42CatalogResponse",
+        "type": "object"
+      },
       "MarkSyncedRequest": {
         "properties": {
           "data_source_id": {
@@ -17417,11 +18414,6 @@
             "title": "Builtin",
             "type": "boolean"
           },
-          "channel_scope": {
-            "default": "all",
-            "title": "Channel Scope",
-            "type": "string"
-          },
           "description": {
             "anyOf": [
               {
@@ -17435,34 +18427,57 @@
           },
           "extraction_mode": {
             "default": "static",
+            "enum": [
+              "static",
+              "ai_classify",
+              "ai_extract",
+              "ai_sentiment",
+              "ai_query",
+              "sql_expr"
+            ],
             "title": "Extraction Mode",
             "type": "string"
           },
-          "key": {
-            "title": "Key",
+          "granularity": {
+            "default": "aggregate",
+            "enum": [
+              "aggregate",
+              "per_entity"
+            ],
+            "title": "Granularity",
             "type": "string"
           },
+          "has_prompt": {
+            "default": false,
+            "title": "Has Prompt",
+            "type": "boolean"
+          },
+          "key": {
+            "$ref": "#/components/schemas/SlugString"
+          },
           "metric_type": {
+            "enum": [
+              "numerical",
+              "categorical",
+              "boolean"
+            ],
             "title": "Metric Type",
             "type": "string"
           },
           "model_tier": {
             "default": "free",
+            "enum": [
+              "free",
+              "fast",
+              "balanced",
+              "max",
+              "custom"
+            ],
             "title": "Model Tier",
             "type": "string"
           },
           "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "period_granularity": {
-            "default": "daily",
-            "title": "Period Granularity",
-            "type": "string"
-          },
-          "source": {
-            "title": "Source",
-            "type": "string"
+            "$ref": "#/components/schemas/NameString"
           },
           "unit": {
             "anyOf": [
@@ -17480,7 +18495,6 @@
           "key",
           "name",
           "metric_type",
-          "source",
           "builtin"
         ],
         "title": "MetricCatalogEntry",
@@ -17503,7 +18517,7 @@
         "type": "object"
       },
       "MetricDefinition": {
-        "description": "A single metric definition \u2014 what to extract and how.\n\nTwo broad modes:\n- Built-in metrics: extraction is handled by hardcoded pipeline logic\n  (extract_path + aggregation). Shipped with every workspace.\n- Custom metrics: extraction uses AI functions or static JSONB paths.\n  Defined per-workspace via settings API.",
+        "description": "A single metric definition \u2014 what to extract and how.\n\nTwo broad modes:\n- Built-in metrics: extraction is handled by hardcoded pipeline logic\n  (extract_path + aggregation). Shipped with every workspace.\n- Custom metrics: extraction uses AI functions or static JSONB paths.\n  Defined per-workspace via settings API.\n\nFrozen: builtins are process-wide singletons exposed via the\n``BUILTIN_METRICS`` list. A mutable list field (e.g.\n``applies_to_product_types``) could otherwise be mutated by one caller\nand leak into every subsequent call in the same process.",
         "properties": {
           "active": {
             "default": true,
@@ -17580,6 +18594,21 @@
             ],
             "description": "Extraction schema for ai_extract. Required when extraction_mode='ai_extract'.",
             "title": "Ai Schema"
+          },
+          "applies_to_product_types": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Product types this metric applies to (matches service tags, e.g. 'scheduling', 'outbound', 'coaching', 'intake', 'triage', 'support'). When set, the metric only computes for calls belonging to services whose config.tags include one of these keys. When None (default), the metric applies to every service regardless of product type.",
+            "title": "Applies To Product Types"
           },
           "builtin": {
             "default": false,
@@ -17671,6 +18700,16 @@
             "title": "Freshness Sla Minutes",
             "type": "integer"
           },
+          "granularity": {
+            "default": "aggregate",
+            "description": "'aggregate' groups by (workspace, period) \u2014 one value per time bucket. 'per_entity' keeps entity_id \u2014 one value per entity (call, encounter). Judge metrics are typically per_entity. Computed metrics are typically aggregate.",
+            "enum": [
+              "aggregate",
+              "per_entity"
+            ],
+            "title": "Granularity",
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -17730,6 +18769,19 @@
             "title": "Period Granularity",
             "type": "string"
           },
+          "prompt": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Rubric prompt for LLM judge evaluation with {$.path} context variables. Each {$.path} reference is extracted from the entity's projected state and substituted before sending to ai_query. The prompt is both the evaluation criteria and the context specification.",
+            "title": "Prompt"
+          },
           "ratio_denominator_event": {
             "anyOf": [
               {
@@ -17762,7 +18814,8 @@
               "surface_events",
               "emotion_events",
               "connector_events",
-              "zerobus_events"
+              "zerobus_events",
+              "voice_judge_results"
             ],
             "title": "Source",
             "type": "string"
@@ -17838,62 +18891,6 @@
           "event_types"
         ],
         "title": "MetricDefinition",
-        "type": "object"
-      },
-      "MetricFreshnessEntry": {
-        "properties": {
-          "last_computed_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Computed At"
-          },
-          "latest_period_end": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Latest Period End"
-          },
-          "metric_key": {
-            "title": "Metric Key",
-            "type": "string"
-          },
-          "value_count": {
-            "title": "Value Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "metric_key",
-          "value_count"
-        ],
-        "title": "MetricFreshnessEntry",
-        "type": "object"
-      },
-      "MetricFreshnessResponse": {
-        "properties": {
-          "freshness": {
-            "items": {
-              "$ref": "#/components/schemas/MetricFreshnessEntry"
-            },
-            "title": "Freshness",
-            "type": "array"
-          }
-        },
-        "required": [
-          "freshness"
-        ],
-        "title": "MetricFreshnessResponse",
         "type": "object"
       },
       "MetricListResponse": {
@@ -18017,6 +19014,150 @@
           "event_count"
         ],
         "title": "MetricValueResponse",
+        "type": "object"
+      },
+      "ModelRegistryResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ModelRegistryRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "ModelRegistryResponse",
+        "type": "object"
+      },
+      "ModelRegistryRow": {
+        "properties": {
+          "algorithm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Algorithm"
+          },
+          "coefficients_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coefficients Json"
+          },
+          "focus_area": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Focus Area"
+          },
+          "metrics_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics Json"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "trained_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trained At"
+          },
+          "training_set_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Training Set Size"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Version"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "model_id"
+        ],
+        "title": "ModelRegistryRow",
         "type": "object"
       },
       "MonitorConceptResponse": {
@@ -20571,6 +21712,94 @@
         "title": "PatientBurdenRow",
         "type": "object"
       },
+      "PatientLabRow": {
+        "properties": {
+          "loinc_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Loinc Code"
+          },
+          "observation_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation Date"
+          },
+          "patient_id": {
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "test_name": {
+            "title": "Test Name",
+            "type": "string"
+          },
+          "units": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Units"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "patient_id",
+          "test_name"
+        ],
+        "title": "PatientLabRow",
+        "type": "object"
+      },
+      "PatientLabsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PatientLabRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "PatientLabsResponse",
+        "type": "object"
+      },
       "PatientListItem": {
         "description": "Typed patient list item \u2014 replaces untyped dict.",
         "properties": {
@@ -20671,6 +21900,142 @@
           "entity_id"
         ],
         "title": "PatientListItem",
+        "type": "object"
+      },
+      "PatientNoteExtractions": {
+        "properties": {
+          "activity_level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Activity Level"
+          },
+          "concerns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Concerns",
+            "type": "array"
+          },
+          "food_pattern": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Food Pattern"
+          },
+          "hba1c_sentiment": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hba1C Sentiment"
+          },
+          "medications_planned": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Medications Planned",
+            "type": "array"
+          },
+          "n_concerns": {
+            "default": 0,
+            "title": "N Concerns",
+            "type": "integer"
+          },
+          "n_symptoms": {
+            "default": 0,
+            "title": "N Symptoms",
+            "type": "integer"
+          },
+          "smoking_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Smoking Status"
+          },
+          "symptoms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Symptoms",
+            "type": "array"
+          }
+        },
+        "required": [
+          "symptoms",
+          "concerns",
+          "medications_planned"
+        ],
+        "title": "PatientNoteExtractions",
+        "type": "object"
+      },
+      "PatientNoteResponse": {
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "authored_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authored At"
+          },
+          "extractions": {
+            "$ref": "#/components/schemas/PatientNoteExtractions"
+          },
+          "note_text": {
+            "title": "Note Text",
+            "type": "string"
+          },
+          "patient_id": {
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "patient_id",
+          "note_text",
+          "extractions"
+        ],
+        "title": "PatientNoteResponse",
         "type": "object"
       },
       "PatientSearchResponse": {
@@ -20862,6 +22227,186 @@
           "total"
         ],
         "title": "PatientTimelineResponse",
+        "type": "object"
+      },
+      "PatientTopologyResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PatientTopologyRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "PatientTopologyResponse",
+        "type": "object"
+      },
+      "PatientTopologyRow": {
+        "properties": {
+          "age_bucket": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Age Bucket"
+          },
+          "bmi_latest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bmi Latest"
+          },
+          "charlson_cci": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Charlson Cci"
+          },
+          "cluster_name": {
+            "title": "Cluster Name",
+            "type": "string"
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "District"
+          },
+          "emergence_month": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emergence Month"
+          },
+          "gender": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gender"
+          },
+          "hba1c_latest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hba1C Latest"
+          },
+          "nationality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nationality"
+          },
+          "patient_id": {
+            "title": "Patient Id",
+            "type": "string"
+          },
+          "risk_tier": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Tier"
+          },
+          "umap_x": {
+            "title": "Umap X",
+            "type": "number"
+          },
+          "umap_y": {
+            "title": "Umap Y",
+            "type": "number"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          },
+          "y_hat_composite": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Composite"
+          },
+          "y_hat_t2d_1yr": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat T2D 1Yr"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "patient_id",
+          "umap_x",
+          "umap_y",
+          "cluster_name"
+        ],
+        "title": "PatientTopologyRow",
         "type": "object"
       },
       "PerformanceSummaryResponse": {
@@ -21366,6 +22911,128 @@
           "connector_runner_status"
         ],
         "title": "PipelineStatusResponse",
+        "type": "object"
+      },
+      "PositiveSignalResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PositiveSignalRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "PositiveSignalResponse",
+        "type": "object"
+      },
+      "PositiveSignalRow": {
+        "properties": {
+          "baseline": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline"
+          },
+          "delta_unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Unit"
+          },
+          "delta_value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Value"
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headline"
+          },
+          "metric_label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Label"
+          },
+          "narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Narrative"
+          },
+          "signal_id": {
+            "title": "Signal Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "signal_id"
+        ],
+        "title": "PositiveSignalRow",
         "type": "object"
       },
       "PrevalenceResponse": {
@@ -22008,6 +23675,148 @@
           }
         },
         "title": "QuietHours",
+        "type": "object"
+      },
+      "RankedAnomalyResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RankedAnomalyRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "RankedAnomalyResponse",
+        "type": "object"
+      },
+      "RankedAnomalyRow": {
+        "properties": {
+          "alert_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alert Id"
+          },
+          "cohort_size": {
+            "default": 0,
+            "title": "Cohort Size",
+            "type": "integer"
+          },
+          "decomposition": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DecompositionRow"
+            },
+            "title": "Decomposition",
+            "type": "array"
+          },
+          "district_name": {
+            "title": "District Name",
+            "type": "string"
+          },
+          "impact": {
+            "default": 0.0,
+            "title": "Impact",
+            "type": "number"
+          },
+          "indicator": {
+            "default": "t2d_risk",
+            "title": "Indicator",
+            "type": "string"
+          },
+          "is_anomaly": {
+            "default": true,
+            "title": "Is Anomaly",
+            "type": "boolean"
+          },
+          "lat": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lat"
+          },
+          "lon": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lon"
+          },
+          "narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Narrative"
+          },
+          "priority_score": {
+            "default": 0.0,
+            "title": "Priority Score",
+            "type": "number"
+          },
+          "rate_per_1k": {
+            "default": 0.0,
+            "title": "Rate Per 1K",
+            "type": "number"
+          },
+          "residual": {
+            "default": 0.0,
+            "title": "Residual",
+            "type": "number"
+          },
+          "severity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Severity"
+          },
+          "territory_mean": {
+            "default": 0.0,
+            "title": "Territory Mean",
+            "type": "number"
+          }
+        },
+        "required": [
+          "district_name"
+        ],
+        "title": "RankedAnomalyRow",
         "type": "object"
       },
       "RecommendRequest": {
@@ -23360,6 +25169,33 @@
           "confidence"
         ],
         "title": "SampleFact",
+        "type": "object"
+      },
+      "SampleResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "SampleResponse",
         "type": "object"
       },
       "Scenario": {
@@ -31291,6 +33127,255 @@
           "voice_id"
         ],
         "title": "VoiceConfig",
+        "type": "object"
+      },
+      "VoiceJudgeRecentResponse": {
+        "properties": {
+          "count": {
+            "minimum": 0.0,
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VoiceJudgeResultRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "service_id": {
+            "maxLength": 64,
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id",
+          "count",
+          "items"
+        ],
+        "title": "VoiceJudgeRecentResponse",
+        "type": "object"
+      },
+      "VoiceJudgeResultRow": {
+        "description": "One call's voice-judge scoring, as stored in the Delta output table.",
+        "properties": {
+          "accent_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accent Quality Score"
+          },
+          "audio_consistency_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Consistency Score"
+          },
+          "call_entity_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Entity Id"
+          },
+          "call_sid": {
+            "maxLength": 64,
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "clarity_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarity Score"
+          },
+          "computed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Computed At"
+          },
+          "critical_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Critical Count"
+          },
+          "filler_silence_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Silence Score"
+          },
+          "flag_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Flag Count"
+          },
+          "interruption_handling_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interruption Handling Score"
+          },
+          "judge_json": {
+            "anyOf": [
+              {
+                "maxLength": 32768,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Raw Gemini judge output (evidence quotes, per-dim severity). Intended for UI drill-in; opaque string. Capped at 32KB.",
+            "title": "Judge Json"
+          },
+          "latency_dead_air_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Dead Air Score"
+          },
+          "overall_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Score"
+          },
+          "pacing_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pacing Score"
+          },
+          "pronunciation_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pronunciation Score"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "voice_identity_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voice Identity Score"
+          },
+          "warmth_tone_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warmth Tone Score"
+          },
+          "warning_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning Count"
+          }
+        },
+        "required": [
+          "call_sid"
+        ],
+        "title": "VoiceJudgeResultRow",
         "type": "object"
       },
       "VoiceMetrics": {
@@ -40443,7 +42528,7 @@
     },
     "/v1/{workspace_id}/dashboards/{dashboard_id}/execute": {
       "post": {
-        "description": "Execute all panel queries and return results for rendering.\n\nSQL injection is mitigated by ResearchQueryService.execute_sql, which calls\n_validate_read_only_sql to block DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE/\nDELETE/UPDATE/INSERT statements. Catalog-level access is further restricted\nby the service principal's Databricks grants (read-only on analytics catalog).",
+        "description": "Execute all panel queries and return results for rendering.\n\nSQL injection is mitigated by ResearchQueryService.execute_sql, which calls\n_validate_read_only_sql to block DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE/\nDELETE/UPDATE/INSERT statements. Catalog-level access is further restricted\nby the service principal's Databricks grants (read-only on analytics catalog).\n\nEvery panel query MUST reference the ``:ws_id`` parameter so that\nResearchQueryService binds it to the requesting workspace. Queries\nwithout this binding are rejected to prevent cross-tenant data access.",
         "operationId": "execute_dashboard_v1__workspace_id__dashboards__dashboard_id__execute_post",
         "parameters": [
           {
@@ -44538,6 +46623,794 @@
         ]
       }
     },
+    "/v1/{workspace_id}/m42/anomalies/ranked": {
+      "get": {
+        "description": "Ranked anomalies for a single indicator (default ``t2d_risk``). Includes inline decomposition + district centroids for the map. Schema-probes the alerts table so it works pre- and post-multi-indicator pipeline expansion.",
+        "operationId": "list_anomalies_ranked_v1__workspace_id__m42_anomalies_ranked_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "indicator",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Indicator"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RankedAnomalyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Anomalies Ranked",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/anomaly-alerts": {
+      "get": {
+        "description": "Emerging health anomalies with inline causal decomposition, recommended actions, and unacted projection. Hand-seeded demo data.",
+        "operationId": "list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "severity",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Severity"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnomalyAlertResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Anomaly Alerts",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/catalog": {
+      "get": {
+        "description": "Per-table layer + description + row count for the Catalog page.",
+        "operationId": "list_catalog_v1__workspace_id__m42_catalog_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/M42CatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Catalog",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/catalog/{table}/columns": {
+      "get": {
+        "description": "Column metadata (name, type, comment) for one allowlisted m42 table.",
+        "operationId": "describe_table_v1__workspace_id__m42_catalog__table__columns_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "table",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Table",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ColumnsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Describe Table",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/catalog/{table}/sample": {
+      "get": {
+        "description": "Up to ``limit`` raw rows from one allowlisted m42 table for preview.",
+        "operationId": "sample_table_v1__workspace_id__m42_catalog__table__sample_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "table",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Table",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 5,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SampleResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sample Table",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/clusters/forecast": {
+      "get": {
+        "description": "Per-cluster forecast fan points for the Patient Profile multi-line chart. ``focus_area`` defaults to T2D for backward compat.",
+        "operationId": "list_cluster_forecast_v1__workspace_id__m42_clusters_forecast_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "focus_area",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 32,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Focus Area"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterForecastResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Cluster Forecast",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/clusters/summary": {
+      "get": {
+        "description": "Per-cluster cohort stats \u2014 size, mean age/BMI/HbA1c, prediabetes / T2D %, predicted-risk mean. Powers the Patient Profile cluster strip.",
+        "operationId": "list_cluster_summary_v1__workspace_id__m42_clusters_summary_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClusterSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Cluster Summary",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/district-metrics": {
+      "get": {
+        "description": "Per-district t2d observed vs predicted incidence, capacity gap, and unmet-demand score. Hand-seeded demo data.",
+        "operationId": "list_district_metrics_v1__workspace_id__m42_district_metrics_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DistrictMetricsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List District Metrics",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/features": {
+      "get": {
+        "description": "Allowlist of feature columns (continuous or binary) for the Explore UI.",
+        "operationId": "list_features_v1__workspace_id__m42_features_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeaturesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Features",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/features/distribution": {
+      "get": {
+        "description": "Histogram bins for one allowlisted feature, stratified by ``y_t2d_1yr`` outcome. Continuous features get ``bins`` buckets; binary features collapse to 2.",
+        "operationId": "feature_distribution_v1__workspace_id__m42_features_distribution_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "feature",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Feature",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "bins",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 40,
+              "minimum": 2,
+              "title": "Bins",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureDistributionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Feature Distribution",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/forecast-fan": {
+      "get": {
+        "description": "Forecast fan points (t, median, lower/upper 95% CI) for a named run + scenario. Used by the Sensorium observational fan and the Sims dual-envelope overlay.",
+        "operationId": "list_forecast_fan_v1__workspace_id__m42_forecast_fan_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scenario",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "baseline",
+                    "with_policy",
+                    "observational"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scenario"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastFanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Forecast Fan",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/forecast-fan/draws": {
+      "get": {
+        "description": "Sampled subset of raw Poisson bootstrap draws (faint spaghetti curves behind the forecast fan).",
+        "operationId": "list_forecast_draws_v1__workspace_id__m42_forecast_fan_draws_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "default": "observational-territory-t2d",
+              "maxLength": 128,
+              "minLength": 1,
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scenario",
+            "required": false,
+            "schema": {
+              "default": "baseline",
+              "maxLength": 32,
+              "minLength": 1,
+              "title": "Scenario",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sample",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Sample",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ForecastDrawsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Forecast Draws",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/model-registry": {
+      "get": {
+        "description": "Fitted GLM coefficients, training-set size, AUROC for each focus-area model. Inline JSON kept as strings \u2014 clients parse.",
+        "operationId": "list_model_registry_v1__workspace_id__m42_model_registry_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ModelRegistryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Model Registry",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/patient-topology": {
+      "get": {
+        "description": "Patient-level UMAP coordinates + predicted risk for the Self-Image scatter. Hand-seeded demo data (no ML training). Paginated.",
+        "operationId": "list_patient_topology_v1__workspace_id__m42_patient_topology_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cluster"
+            }
+          },
+          {
+            "in": "query",
+            "name": "risk_tier",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 4,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Tier"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10000,
+              "maximum": 50000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientTopologyResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Patient Topology",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/patients/{patient_id}/labs": {
+      "get": {
+        "description": "Patient-level bronze lab rows ordered by observation_date. Drives the mini-trajectory charts in the Patient Profile drawer.",
+        "operationId": "list_patient_labs_v1__workspace_id__m42_patients__patient_id__labs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientLabsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Patient Labs",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/patients/{patient_id}/note": {
+      "get": {
+        "description": "Patient's synthetic clinical note + LLM-extracted structured fields. NLP sample is 500 patients \u2014 returns 404 outside that set.",
+        "operationId": "get_patient_note_v1__workspace_id__m42_patients__patient_id__note_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "patient_id",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 1,
+              "title": "Patient Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatientNoteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Patient Note",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/positive-signals": {
+      "get": {
+        "description": "Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.",
+        "operationId": "list_positive_signals_v1__workspace_id__m42_positive_signals_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PositiveSignalResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Positive Signals",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
     "/v1/{workspace_id}/memory/analytics": {
       "get": {
         "description": "Get workspace-level memory analytics.\n\nReturns aggregate stats about the memory extraction pipeline:\nper-dimension fact counts, coverage rates, source intelligence,\nand recent activity. Cached in Valkey (60s TTL). Uses 4 concurrent\nLakebase queries on cache miss.\n\nPermissions: authenticated (any role).",
@@ -44722,31 +47595,6 @@
           }
         },
         "summary": "List available metrics (builtin + custom)",
-        "tags": [
-          "Metrics"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/metrics/freshness": {
-      "get": {
-        "description": "Get freshness status for all metrics in the workspace.\n\nPermissions: authenticated (any role).",
-        "operationId": "get-metric-freshness",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MetricFreshnessResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Get metric freshness status",
         "tags": [
           "Metrics"
         ]
@@ -49923,6 +52771,69 @@
         "summary": "Upsert a service version set",
         "tags": [
           "Services"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/services/{service_id}/voice-judge/recent": {
+      "get": {
+        "description": "Returns the most recent per-call voice-judge scores for one service, ordered newest first. Produced by the Databricks `voice_judge` job (stereo audio \u2192 Gemini 2.5 Flash \u2192 10-dimension rubric). Used by the Agent Readiness page to populate Voice Quality criterion cards.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not OLTP).\n\n**Default limit**: 20. Max 100.",
+        "operationId": "list-voice-judge-recent",
+        "parameters": [
+          {
+            "description": "Service UUID",
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "description": "Service UUID",
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max rows to return (default 20, max 100)",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "description": "Max rows to return (default 20, max 100)",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VoiceJudgeRecentResponse"
+                }
+              }
+            },
+            "description": "Voice judge rows (newest first)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Analytics warehouse not configured or transiently unavailable"
+          }
+        },
+        "summary": "Recent voice-judge results for a service",
+        "tags": [
+          "Voice Judge"
         ]
       }
     },
