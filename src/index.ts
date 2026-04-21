@@ -37,6 +37,7 @@ import {
   composeHooks,
   createTelemetryHooks,
   createTelemetryState,
+  now,
   type LatencyEvent,
   type TelemetryOptions,
   type TelemetryState,
@@ -242,14 +243,10 @@ export class AmigoClient {
   ): Promise<{ result: T; events: LatencyEvent[]; totalMs: number }> {
     const events: LatencyEvent[] = []
     const unsubscribe = this.onLatency((e) => events.push(e))
-    const t0 =
-      (globalThis as { performance?: { now?: () => number } }).performance?.now?.() ?? Date.now()
+    const t0 = now()
     try {
       const result = await fn()
-      const totalMs =
-        ((globalThis as { performance?: { now?: () => number } }).performance?.now?.() ??
-          Date.now()) - t0
-      return { result, events, totalMs }
+      return { result, events, totalMs: now() - t0 }
     } finally {
       unsubscribe()
     }

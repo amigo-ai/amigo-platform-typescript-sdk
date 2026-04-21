@@ -29,6 +29,8 @@ Instance fields:
 Client methods:
 
 - `withOptions(options)`
+- `onLatency(listener)` — returns an unsubscribe function
+- `measureLatency(fn)` — returns `{ result, events, totalMs }`
 - `GET(path, options?)`
 - `POST(path, options?)`
 - `PUT(path, options?)`
@@ -51,6 +53,7 @@ Notes:
 - Request option types: `AmigoRequestOptions`, `ScopedRequestOptions`
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
+- Telemetry types: `TelemetryOptions`, `LatencyEvent`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
 - Generated OpenAPI types: `paths`, `components`, `operations`
 

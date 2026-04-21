@@ -1,18 +1,3 @@
-/**
- * Latency telemetry for the Amigo Platform SDK.
- *
- * Every HTTP call emits a {@link LatencyEvent} with timing broken into:
- *   - `serverMs`  — how long Amigo's backend spent (from `Server-Timing` / `X-Amigo-Server-Time-Ms`)
- *   - `networkMs` — wall-clock minus server time (network + TLS + SDK overhead)
- *   - `totalMs`   — total SDK time for the call
- *
- * This lets integrators attribute latency: anything beyond `totalMs` in their
- * own measurement is their code; `serverMs` is Amigo; the remainder is transit.
- *
- * Telemetry is a thin layer over the existing {@link ClientHooks} system —
- * it installs its own hook that measures time using the per-request `id`.
- */
-
 import type { ClientHooks } from './openapi-client.js'
 import { extractRequestId } from './utils.js'
 
@@ -83,7 +68,7 @@ function emit(state: TelemetryState, event: LatencyEvent): void {
 
 /** Parse Amigo server-side processing time from response headers. */
 export function parseServerTimeMs(headers: Headers): number | null {
-  const explicit = headers.get('x-amigo-server-time-ms') ?? headers.get('x-server-time-ms')
+  const explicit = headers.get('x-amigo-server-time-ms')
   if (explicit) {
     const n = Number(explicit)
     if (Number.isFinite(n) && n >= 0) return n
@@ -123,7 +108,7 @@ function extractDur(entry: string, requiredName?: string): number | null {
   return null
 }
 
-function now(): number {
+export function now(): number {
   const g = globalThis as { performance?: { now?: () => number } }
   return g.performance?.now?.() ?? Date.now()
 }
@@ -136,11 +121,6 @@ function pathOf(url: string): string {
   }
 }
 
-/**
- * Build a {@link ClientHooks} implementation that records latency events into
- * the given state. Designed to be composed with user-supplied hooks —
- * {@link composeHooks} handles that composition.
- */
 export function createTelemetryHooks(state: TelemetryState): ClientHooks {
   return {
     onRequest({ id }) {
