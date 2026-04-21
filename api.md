@@ -18,6 +18,7 @@ Configuration fields:
 - `timeout?: number`
 - `headers?: HeadersOptions`
 - `hooks?: ClientHooks`
+- `telemetry?: TelemetryOptions`
 - `fetch?: typeof globalThis.fetch`
 
 Instance fields:

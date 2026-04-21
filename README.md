@@ -36,14 +36,14 @@ The SDK is the typed client boundary between your runtime and the workspace-scop
 
 ## Documentation
 
-| Need                                        | Best entry point                                         |
-| ------------------------------------------- | -------------------------------------------------------- |
-| Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                  |
+| Need                                        | Best entry point                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                                            |
 | Tutorials and integration guidance          | [Developer Guide](https://docs.amigo.ai/developer-guide/platform-api/platform-sdk) |
-| Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)     |
-| Repo-local SDK examples                     | [examples/README.md](./examples/README.md)               |
-| Generated package surface                   | [api.md](./api.md)                                       |
-| Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                           |
+| Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)                               |
+| Repo-local SDK examples                     | [examples/README.md](./examples/README.md)                                         |
+| Generated package surface                   | [api.md](./api.md)                                                                 |
+| Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                                                     |
 
 The docs site remains the primary reference. The repo-local examples stay close to the shipped package surface and are typechecked in CI to reduce drift.
 
@@ -231,6 +231,75 @@ const client = new AmigoClient({
   },
 })
 ```
+
+### Latency telemetry
+
+Every HTTP call emits a `LatencyEvent` with timing broken down so you can tell
+whether latency is coming from Amigo's backend, the network, or your own code:
+
+```typescript
+const client = new AmigoClient({
+  apiKey: 'your-key',
+  workspaceId: 'your-workspace-id',
+  telemetry: {
+    onRequest: (e) => {
+      // e.totalMs   — SDK wall-clock (request → response received)
+      // e.serverMs  — Amigo backend time (null if server didn't report)
+      // e.networkMs — totalMs - serverMs (transit + TLS + SDK overhead)
+      metrics.histogram('amigo.sdk.total_ms', e.totalMs, { path: e.path })
+      if (e.serverMs !== null) metrics.histogram('amigo.server.ms', e.serverMs)
+      if (e.networkMs !== null) metrics.histogram('amigo.network.ms', e.networkMs)
+    },
+  },
+})
+```
+
+Server time is parsed from `X-Amigo-Server-Time-Ms` (preferred) or the W3C
+`Server-Timing` header. Telemetry composes with `hooks` — both fire for every
+request.
+
+**Attribute latency in a specific code path** with `measureLatency`:
+
+```typescript
+const t0 = performance.now()
+const { result, events, totalMs } = await client.measureLatency(async () => {
+  const agent = await client.agents.get('agent-id')
+  const facts = await client.memory.getEntityFacts('entity-id')
+  return { agent, facts }
+})
+const wall = performance.now() - t0
+
+const sdkMs = totalMs // time inside SDK calls
+const serverMs = events.reduce((s, e) => s + (e.serverMs ?? 0), 0) // Amigo backend
+const networkMs = events.reduce((s, e) => s + (e.networkMs ?? 0), 0) // transit
+const yourCodeMs = wall - sdkMs // everything else
+```
+
+**Dynamic subscribe** — returns an unsubscribe function:
+
+```typescript
+const unsubscribe = client.onLatency((e) => {
+  logger.info(`${e.method} ${e.path} total=${e.totalMs}ms server=${e.serverMs ?? 'n/a'}ms`)
+})
+// later
+unsubscribe()
+```
+
+#### `LatencyEvent` fields
+
+| Field             | Type                             | Description                                                                      |
+| ----------------- | -------------------------------- | -------------------------------------------------------------------------------- |
+| `method`          | `string`                         | HTTP method (uppercase)                                                          |
+| `url`             | `string`                         | Full request URL                                                                 |
+| `path`            | `string`                         | Pathname (stable key for metric aggregation)                                     |
+| `status`          | `number`                         | HTTP status (0 if request failed before a response)                              |
+| `totalMs`         | `number`                         | Total SDK wall-clock time                                                        |
+| `serverMs`        | `number \| null`                 | Amigo-reported processing time (from `X-Amigo-Server-Time-Ms` / `Server-Timing`) |
+| `networkMs`       | `number \| null`                 | `totalMs - serverMs` when `serverMs` is known                                    |
+| `requestId`       | `string \| null`                 | Server-assigned `X-Request-Id`                                                   |
+| `clientRequestId` | `string`                         | Per-request correlation id (stable across a single call)                         |
+| `startedAt`       | `number`                         | `Date.now()` when the request was issued                                         |
+| `error`           | `{ name, message } \| undefined` | Present when the request failed before a response arrived                        |
 
 ## Resources
 

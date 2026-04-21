@@ -33,6 +33,14 @@ import {
   type ScopedRequestOptions,
 } from './core/request-options.js'
 import type { RetryOptions } from './core/retry.js'
+import {
+  composeHooks,
+  createTelemetryHooks,
+  createTelemetryState,
+  type LatencyEvent,
+  type TelemetryOptions,
+  type TelemetryState,
+} from './core/telemetry.js'
 import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
 import { AgentsResource } from './resources/agents.js'
@@ -101,6 +109,14 @@ export interface AmigoClientConfig {
   hooks?: ClientHooks
 
   /**
+   * Latency telemetry — emits a {@link LatencyEvent} for every HTTP request,
+   * with timing broken into server time vs. network+SDK time. Use this to
+   * distinguish Amigo-side latency from your own code's latency when
+   * integrating the SDK. Composes with `hooks` — both fire.
+   */
+  telemetry?: TelemetryOptions
+
+  /**
    * Custom fetch implementation.
    *
    * Use for BFF proxy routing, server-side cookie forwarding,
@@ -142,6 +158,7 @@ export class AmigoClient {
   readonly compliance!: ComplianceResource
   readonly functions!: FunctionsResource
   private readonly api!: PlatformFetch
+  private readonly telemetry!: TelemetryState
 
   constructor(config: AmigoClientConfig) {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
@@ -153,6 +170,9 @@ export class AmigoClient {
 
     const baseUrl = (config.baseUrl ?? DEFAULT_BASE_URL).replace(/\/$/, '')
 
+    const telemetryState = createTelemetryState(config.telemetry)
+    const hooks = composeHooks(createTelemetryHooks(telemetryState), config.hooks)
+
     const client = createPlatformClient({
       apiKey: config.apiKey,
       baseUrl,
@@ -160,11 +180,11 @@ export class AmigoClient {
       maxRetries: config.maxRetries,
       timeout: config.timeout,
       headers: config.headers,
-      hooks: config.hooks,
+      hooks,
       fetch: config.fetch,
     })
 
-    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl)
+    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl, telemetryState)
   }
 
   withOptions(options: ScopedRequestOptions): AmigoClient {
@@ -172,7 +192,67 @@ export class AmigoClient {
       scopePlatformClient(this.api, options),
       this.workspaceId,
       this.baseUrl,
+      this.telemetry,
     )
+  }
+
+  /**
+   * Subscribe to a latency event for every HTTP request made through this client.
+   *
+   * @returns An unsubscribe function.
+   *
+   * @example
+   * ```ts
+   * const unsubscribe = client.onLatency((e) => {
+   *   console.log(`${e.method} ${e.path} total=${e.totalMs}ms server=${e.serverMs}ms`)
+   * })
+   * // later
+   * unsubscribe()
+   * ```
+   */
+  onLatency(listener: (event: LatencyEvent) => void): () => void {
+    this.telemetry.listeners.add(listener)
+    return () => {
+      this.telemetry.listeners.delete(listener)
+    }
+  }
+
+  /**
+   * Run `fn` and collect latency events for every SDK call made inside it.
+   *
+   * ```ts
+   * const t0 = performance.now()
+   * const { result, events, totalMs } = await client.measureLatency(async () => {
+   *   const agent = await client.agents.get('agent-id')
+   *   const mem = await client.memory.getEntityFacts('entity-id')
+   *   return { agent, mem }
+   * })
+   * const wall = performance.now() - t0
+   * const serverTime = events.reduce((s, e) => s + (e.serverMs ?? 0), 0)
+   * const networkTime = events.reduce((s, e) => s + (e.networkMs ?? 0), 0)
+   * const yourCode = wall - totalMs
+   * ```
+   *
+   * All listeners see all events; overlapping `measureLatency` scopes observe
+   * each other's events. For strict isolation, filter by `clientRequestId` or
+   * use distinct client instances.
+   */
+  async measureLatency<T>(
+    fn: () => Promise<T>,
+  ): Promise<{ result: T; events: LatencyEvent[]; totalMs: number }> {
+    const events: LatencyEvent[] = []
+    const unsubscribe = this.onLatency((e) => events.push(e))
+    const t0 =
+      (globalThis as { performance?: { now?: () => number } }).performance?.now?.() ?? Date.now()
+    try {
+      const result = await fn()
+      const totalMs =
+        ((globalThis as { performance?: { now?: () => number } }).performance?.now?.() ??
+          Date.now()) - t0
+      return { result, events, totalMs }
+    } finally {
+      unsubscribe()
+    }
   }
 
   async GET<Path extends ClientPathsWithMethod<typeof this.api, 'get'>>(
@@ -242,9 +322,10 @@ export class AmigoClient {
     client: PlatformFetch,
     workspaceId: string,
     baseUrl: string,
+    telemetry: TelemetryState,
   ): AmigoClient {
     const instance = Object.create(AmigoClient.prototype) as AmigoClient
-    AmigoClient.hydrate(instance, client, workspaceId, baseUrl)
+    AmigoClient.hydrate(instance, client, workspaceId, baseUrl, telemetry)
     return instance
   }
 
@@ -253,12 +334,14 @@ export class AmigoClient {
     client: PlatformFetch,
     workspaceId: string,
     baseUrl: string,
+    telemetry: TelemetryState,
   ): void {
     const mutable = target as Mutable<AmigoClient>
 
     mutable.workspaceId = workspaceId
     mutable.baseUrl = baseUrl
     ;(target as unknown as { api: PlatformFetch }).api = client
+    ;(target as unknown as { telemetry: TelemetryState }).telemetry = telemetry
 
     mutable.workspaces = new WorkspacesResource(client, workspaceId)
     mutable.apiKeys = new ApiKeysResource(client, workspaceId)
@@ -401,6 +484,8 @@ export type {
 } from './core/utils.js'
 export type { AmigoRequestOptions, ScopedRequestOptions } from './core/request-options.js'
 export type { RetryOptions } from './core/retry.js'
+
+export type { LatencyEvent, TelemetryOptions } from './core/telemetry.js'
 
 export { parseRateLimitHeaders } from './core/rate-limit.js'
 export type { RateLimitInfo } from './core/rate-limit.js'
