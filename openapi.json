@@ -2875,7 +2875,7 @@
           },
           "concurrency": {
             "default": 3,
-            "maximum": 5.0,
+            "maximum": 20.0,
             "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
@@ -2889,7 +2889,7 @@
           },
           "num_scenarios": {
             "default": 5,
-            "maximum": 20.0,
+            "maximum": 50.0,
             "minimum": 1.0,
             "title": "Num Scenarios",
             "type": "integer"
@@ -6551,6 +6551,42 @@
           "display_name"
         ],
         "title": "CreateIntegrationRequest",
+        "type": "object"
+      },
+      "CreateLinkRequest": {
+        "properties": {
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_in_hours": {
+            "default": 168,
+            "maximum": 720.0,
+            "minimum": 1.0,
+            "title": "Expires In Hours",
+            "type": "integer"
+          },
+          "max_uploads": {
+            "default": 100,
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Max Uploads",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "customer_slug"
+        ],
+        "title": "CreateLinkRequest",
         "type": "object"
       },
       "CreateMonitorConceptRequest": {
@@ -16669,6 +16705,170 @@
         "title": "IntakeFileResponse",
         "type": "object"
       },
+      "IntakeLinkResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NameString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_upload_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Upload At"
+          },
+          "link_token": {
+            "maxLength": 128,
+            "minLength": 32,
+            "title": "Link Token",
+            "type": "string"
+          },
+          "max_uploads": {
+            "title": "Max Uploads",
+            "type": "integer"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "expired",
+              "revoked",
+              "exhausted"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "upload_count": {
+            "title": "Upload Count",
+            "type": "integer"
+          },
+          "upload_url": {
+            "maxLength": 512,
+            "title": "Upload Url",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "customer_slug",
+          "display_name",
+          "upload_url",
+          "link_token",
+          "status",
+          "created_at",
+          "expires_at",
+          "revoked_at",
+          "max_uploads",
+          "upload_count",
+          "last_upload_at"
+        ],
+        "title": "IntakeLinkResponse",
+        "type": "object"
+      },
+      "IntakeUploadResponse": {
+        "properties": {
+          "content_type": {
+            "maxLength": 256,
+            "title": "Content Type",
+            "type": "string"
+          },
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "filename": {
+            "$ref": "#/components/schemas/NameString"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "received_at": {
+            "format": "date-time",
+            "title": "Received At",
+            "type": "string"
+          },
+          "scan_status": {
+            "enum": [
+              "skipped",
+              "pending",
+              "clean",
+              "infected"
+            ],
+            "title": "Scan Status",
+            "type": "string"
+          },
+          "sha256": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "customer_slug",
+          "filename",
+          "content_type",
+          "sha256",
+          "size_bytes",
+          "received_at",
+          "scan_status"
+        ],
+        "title": "IntakeUploadResponse",
+        "type": "object"
+      },
       "IntegrationResponse": {
         "properties": {
           "auth": {
@@ -18572,14 +18772,14 @@
           "ai_query_prompt": {
             "anyOf": [
               {
-                "maxLength": 2000,
+                "maxLength": 8000,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'",
+            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric \u2014 conversational_naturalness \u2014 is ~5KB).",
             "title": "Ai Query Prompt"
           },
           "ai_schema": {
@@ -35795,6 +35995,127 @@
         ]
       }
     },
+    "/upload/{link_token}/files": {
+      "post": {
+        "operationId": "upload-intake-file-via-link",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_token",
+            "required": true,
+            "schema": {
+              "title": "Link Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amigo-intake-filename",
+            "required": true,
+            "schema": {
+              "title": "X-Amigo-Intake-Filename",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amigo-intake-content-type",
+            "required": true,
+            "schema": {
+              "title": "X-Amigo-Intake-Content-Type",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "201": {
+            "description": "File uploaded successfully"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "410": {
+            "description": "Link expired"
+          },
+          "413": {
+            "description": "File too large"
+          },
+          "422": {
+            "description": "Invalid filename or content type"
+          },
+          "429": {
+            "description": "Rate limited or upload limit reached"
+          },
+          "503": {
+            "description": "Upload service unavailable"
+          }
+        },
+        "summary": "Receive Upload",
+        "tags": [
+          "Intake Upload"
+        ]
+      }
+    },
+    "/upload/{link_token}/info": {
+      "get": {
+        "operationId": "get-intake-link-info",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_token",
+            "required": true,
+            "schema": {
+              "title": "Link Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Link metadata"
+          },
+          "400": {
+            "description": "Invalid token"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "410": {
+            "description": "Link expired"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Upload limit reached"
+          }
+        },
+        "summary": "Get Link Info",
+        "tags": [
+          "Intake Upload"
+        ]
+      }
+    },
     "/v1/auth/me": {
       "get": {
         "description": "Return information about the currently authenticated API key, including expiration.",
@@ -46204,6 +46525,176 @@
           }
         },
         "summary": "Receive Intake File",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links": {
+      "get": {
+        "operationId": "list-intake-links",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_expired",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Expired",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntakeLinkResponse"
+                  },
+                  "title": "Response List-Intake-Links",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List upload links",
+        "tags": [
+          "Intake"
+        ]
+      },
+      "post": {
+        "description": "Create a shareable upload link for a customer.",
+        "operationId": "create-intake-link",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate upload link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}": {
+      "delete": {
+        "operationId": "revoke-intake-link",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke upload link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads": {
+      "get": {
+        "operationId": "list-intake-link-uploads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntakeUploadResponse"
+                  },
+                  "title": "Response List-Intake-Link-Uploads",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List uploads for a link",
         "tags": [
           "Intake"
         ]

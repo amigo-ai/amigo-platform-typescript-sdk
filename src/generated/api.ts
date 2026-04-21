@@ -258,6 +258,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/upload/{link_token}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Receive Upload */
+        post: operations["upload-intake-file-via-link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/upload/{link_token}/info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Link Info */
+        get: operations["get-intake-link-info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/auth/me": {
         parameters: {
             query?: never;
@@ -3105,6 +3139,61 @@ export interface paths {
         put?: never;
         /** Receive Intake File */
         post: operations["receive_intake_file_v1__workspace_id__intake_files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List upload links */
+        get: operations["list-intake-links"];
+        put?: never;
+        /**
+         * Generate upload link
+         * @description Create a shareable upload link for a customer.
+         */
+        post: operations["create-intake-link"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links/{link_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Revoke upload link */
+        delete: operations["revoke-intake-link"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List uploads for a link */
+        get: operations["list-intake-link-uploads"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10172,6 +10261,21 @@ export interface components {
              */
             protocol?: "rest" | "fhir" | "mcp";
         };
+        /** CreateLinkRequest */
+        CreateLinkRequest: {
+            customer_slug: components["schemas"]["SlugString"];
+            display_name?: components["schemas"]["DescriptionString"] | null;
+            /**
+             * Expires In Hours
+             * @default 168
+             */
+            expires_in_hours?: number;
+            /**
+             * Max Uploads
+             * @default 100
+             */
+            max_uploads?: number;
+        };
         /** CreateMonitorConceptRequest */
         CreateMonitorConceptRequest: {
             agent_config?: components["schemas"]["AgentConfigPayload"];
@@ -14158,6 +14262,74 @@ export interface components {
             /** Volume Path */
             volume_path: string;
         };
+        /** IntakeLinkResponse */
+        IntakeLinkResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            customer_slug: components["schemas"]["SlugString"];
+            display_name: components["schemas"]["NameString"] | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Upload At */
+            last_upload_at: string | null;
+            /** Link Token */
+            link_token: string;
+            /** Max Uploads */
+            max_uploads: number;
+            /** Revoked At */
+            revoked_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "expired" | "revoked" | "exhausted";
+            /** Upload Count */
+            upload_count: number;
+            /** Upload Url */
+            upload_url: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** IntakeUploadResponse */
+        IntakeUploadResponse: {
+            /** Content Type */
+            content_type: string;
+            customer_slug: components["schemas"]["SlugString"];
+            filename: components["schemas"]["NameString"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Received At
+             * Format: date-time
+             */
+            received_at: string;
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "skipped" | "pending" | "clean" | "infected";
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+        };
         /** IntegrationResponse */
         IntegrationResponse: {
             /** @description Authentication configuration */
@@ -15135,7 +15307,7 @@ export interface components {
             ai_query_endpoint?: string | null;
             /**
              * Ai Query Prompt
-             * @description Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'
+             * @description Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric — conversational_naturalness — is ~5KB).
              */
             ai_query_prompt?: string | null;
             /**
@@ -22145,6 +22317,139 @@ export interface operations {
             };
         };
     };
+    "upload-intake-file-via-link": {
+        parameters: {
+            query?: never;
+            header: {
+                "x-amigo-intake-filename": string;
+                "x-amigo-intake-content-type": string;
+            };
+            path: {
+                link_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description File uploaded successfully */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid filename or content type */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited or upload limit reached */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Upload service unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-intake-link-info": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Link metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Invalid token */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Link expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Upload limit reached */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "get-auth-info": {
         parameters: {
             query?: never;
@@ -28617,6 +28922,136 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IntakeFileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-intake-links": {
+        parameters: {
+            query?: {
+                include_expired?: boolean;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeLinkResponse"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLinkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeLinkResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "revoke-intake-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-intake-link-uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeUploadResponse"][];
                 };
             };
             /** @description Validation Error */
