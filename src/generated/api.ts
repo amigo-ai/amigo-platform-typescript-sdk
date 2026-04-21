@@ -2054,6 +2054,10 @@ export interface paths {
          *     _validate_read_only_sql to block DROP/TRUNCATE/ALTER/CREATE/GRANT/REVOKE/
          *     DELETE/UPDATE/INSERT statements. Catalog-level access is further restricted
          *     by the service principal's Databricks grants (read-only on analytics catalog).
+         *
+         *     Every panel query MUST reference the ``:ws_id`` parameter so that
+         *     ResearchQueryService binds it to the requesting workspace. Queries
+         *     without this binding are rejected to prevent cross-tenant data access.
          */
         post: operations["execute_dashboard_v1__workspace_id__dashboards__dashboard_id__execute_post"];
         delete?: never;
@@ -3199,6 +3203,346 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/m42/anomalies/ranked": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Anomalies Ranked
+         * @description Ranked anomalies for a single indicator (default ``t2d_risk``). Includes inline decomposition + district centroids for the map. Schema-probes the alerts table so it works pre- and post-multi-indicator pipeline expansion.
+         */
+        get: operations["list_anomalies_ranked_v1__workspace_id__m42_anomalies_ranked_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/anomaly-alerts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Anomaly Alerts
+         * @description Emerging health anomalies with inline causal decomposition, recommended actions, and unacted projection. Hand-seeded demo data.
+         */
+        get: operations["list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Catalog
+         * @description Per-table layer + description + row count for the Catalog page.
+         */
+        get: operations["list_catalog_v1__workspace_id__m42_catalog_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/catalog/{table}/columns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Describe Table
+         * @description Column metadata (name, type, comment) for one allowlisted m42 table.
+         */
+        get: operations["describe_table_v1__workspace_id__m42_catalog__table__columns_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/catalog/{table}/sample": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sample Table
+         * @description Up to ``limit`` raw rows from one allowlisted m42 table for preview.
+         */
+        get: operations["sample_table_v1__workspace_id__m42_catalog__table__sample_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/clusters/forecast": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Cluster Forecast
+         * @description Per-cluster forecast fan points for the Patient Profile multi-line chart. ``focus_area`` defaults to T2D for backward compat.
+         */
+        get: operations["list_cluster_forecast_v1__workspace_id__m42_clusters_forecast_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/clusters/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Cluster Summary
+         * @description Per-cluster cohort stats — size, mean age/BMI/HbA1c, prediabetes / T2D %, predicted-risk mean. Powers the Patient Profile cluster strip.
+         */
+        get: operations["list_cluster_summary_v1__workspace_id__m42_clusters_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/district-metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List District Metrics
+         * @description Per-district t2d observed vs predicted incidence, capacity gap, and unmet-demand score. Hand-seeded demo data.
+         */
+        get: operations["list_district_metrics_v1__workspace_id__m42_district_metrics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/features": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Features
+         * @description Allowlist of feature columns (continuous or binary) for the Explore UI.
+         */
+        get: operations["list_features_v1__workspace_id__m42_features_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/features/distribution": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feature Distribution
+         * @description Histogram bins for one allowlisted feature, stratified by ``y_t2d_1yr`` outcome. Continuous features get ``bins`` buckets; binary features collapse to 2.
+         */
+        get: operations["feature_distribution_v1__workspace_id__m42_features_distribution_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/forecast-fan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Forecast Fan
+         * @description Forecast fan points (t, median, lower/upper 95% CI) for a named run + scenario. Used by the Sensorium observational fan and the Sims dual-envelope overlay.
+         */
+        get: operations["list_forecast_fan_v1__workspace_id__m42_forecast_fan_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/forecast-fan/draws": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Forecast Draws
+         * @description Sampled subset of raw Poisson bootstrap draws (faint spaghetti curves behind the forecast fan).
+         */
+        get: operations["list_forecast_draws_v1__workspace_id__m42_forecast_fan_draws_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/model-registry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Model Registry
+         * @description Fitted GLM coefficients, training-set size, AUROC for each focus-area model. Inline JSON kept as strings — clients parse.
+         */
+        get: operations["list_model_registry_v1__workspace_id__m42_model_registry_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/patient-topology": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Patient Topology
+         * @description Patient-level UMAP coordinates + predicted risk for the Self-Image scatter. Hand-seeded demo data (no ML training). Paginated.
+         */
+        get: operations["list_patient_topology_v1__workspace_id__m42_patient_topology_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/patients/{patient_id}/labs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Patient Labs
+         * @description Patient-level bronze lab rows ordered by observation_date. Drives the mini-trajectory charts in the Patient Profile drawer.
+         */
+        get: operations["list_patient_labs_v1__workspace_id__m42_patients__patient_id__labs_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/patients/{patient_id}/note": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Patient Note
+         * @description Patient's synthetic clinical note + LLM-extracted structured fields. NLP sample is 500 patients — returns 404 outside that set.
+         */
+        get: operations["get_patient_note_v1__workspace_id__m42_patients__patient_id__note_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/positive-signals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Positive Signals
+         * @description Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.
+         */
+        get: operations["list_positive_signals_v1__workspace_id__m42_positive_signals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/memory/analytics": {
         parameters: {
             query?: never;
@@ -3313,28 +3657,6 @@ export interface paths {
          *     Permissions: authenticated (any role).
          */
         get: operations["get-metric-catalog"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/metrics/freshness": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get metric freshness status
-         * @description Get freshness status for all metrics in the workspace.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-metric-freshness"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4934,6 +5256,30 @@ export interface paths {
          * @description Replace or create a named version set on a service. Pinned agent/HSM versions are validated.
          */
         put: operations["upsert-service-version-set"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/services/{service_id}/voice-judge/recent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Recent voice-judge results for a service
+         * @description Returns the most recent per-call voice-judge scores for one service, ordered newest first. Produced by the Databricks `voice_judge` job (stereo audio → Gemini 2.5 Flash → 10-dimension rubric). Used by the Agent Readiness page to populate Voice Quality criterion cards.
+         *
+         *     **Latency**: 500ms-2s (reads from analytics warehouse, not OLTP).
+         *
+         *     **Default limit**: 20. Max 100.
+         */
+        get: operations["list-voice-judge-recent"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -7734,6 +8080,42 @@ export interface components {
              */
             type: "annotation";
         };
+        /** AnomalyAlertResponse */
+        AnomalyAlertResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["AnomalyAlertRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** AnomalyAlertRow */
+        AnomalyAlertRow: {
+            /** Actions Json */
+            actions_json?: string | null;
+            /** Alert Id */
+            alert_id: string;
+            /** Decomposition Json */
+            decomposition_json?: string | null;
+            /** Detected At */
+            detected_at?: string | null;
+            /** Mechanism */
+            mechanism?: string | null;
+            /** Narrative */
+            narrative?: string | null;
+            /** Priority Score */
+            priority_score?: number | null;
+            /** Projection Json */
+            projection_json?: string | null;
+            /** Severity */
+            severity?: ("high" | "medium" | "low") | null;
+            /** Slice Label */
+            slice_label: string;
+            /** Stats Json */
+            stats_json?: string | null;
+            /** Workspace Id */
+            workspace_id: string;
+        };
         /** ApiKeyResponse */
         ApiKeyResponse: {
             /**
@@ -8649,6 +9031,19 @@ export interface components {
             /** Total Segments */
             total_segments: number;
         };
+        /** CatalogEntry */
+        CatalogEntry: {
+            /** Description */
+            description: string;
+            /** Exists */
+            exists: boolean;
+            /** Layer */
+            layer: string;
+            /** Name */
+            name: string;
+            /** Row Count */
+            row_count: number;
+        };
         /**
          * CatalogFunctionDef
          * @description A function discovered from the Databricks UC catalog.
@@ -8820,6 +9215,64 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** ClusterForecastPointRow */
+        ClusterForecastPointRow: {
+            /** Cluster Name */
+            cluster_name: string;
+            /** Focus Area */
+            focus_area?: string | null;
+            /** Is Historical */
+            is_historical?: boolean | null;
+            /** Lower 95 */
+            lower_95?: number | null;
+            /** Median */
+            median?: number | null;
+            /** T */
+            t: number;
+            /** Upper 95 */
+            upper_95?: number | null;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ClusterForecastResponse */
+        ClusterForecastResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ClusterForecastPointRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ClusterSummaryResponse */
+        ClusterSummaryResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ClusterSummaryRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ClusterSummaryRow */
+        ClusterSummaryRow: {
+            /** Cluster Name */
+            cluster_name: string;
+            /** Cohort Size */
+            cohort_size: number;
+            /** Mean Age */
+            mean_age?: number | null;
+            /** Mean Bmi */
+            mean_bmi?: number | null;
+            /** Mean Hba1C */
+            mean_hba1c?: number | null;
+            /** Mean Y Hat */
+            mean_y_hat?: number | null;
+            /** Pct Male */
+            pct_male?: number | null;
+            /** Pct Prediabetes */
+            pct_prediabetes?: number | null;
+            /** Pct T2D */
+            pct_t2d?: number | null;
+        };
         /**
          * CoachingItem
          * @description A specific, actionable improvement tied to an exact moment in the call.
@@ -8918,6 +9371,24 @@ export interface components {
             type: string;
             /** Validation */
             validation?: string | null;
+        };
+        /** ColumnInfo */
+        ColumnInfo: {
+            /** Column Name */
+            column_name: string;
+            /** Comment */
+            comment?: string | null;
+            /** Data Type */
+            data_type: string;
+        };
+        /** ColumnsResponse */
+        ColumnsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ColumnInfo"][];
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** CommandCenterAlert */
         CommandCenterAlert: {
@@ -11151,6 +11622,23 @@ export interface components {
             /** Wait For */
             wait_for?: ("surface_submission" | "human_approval") | null;
         };
+        /** DecompositionRow */
+        DecompositionRow: {
+            /** Beta */
+            beta?: number | null;
+            /** Ci Hi */
+            ci_hi?: number | null;
+            /** Ci Lo */
+            ci_lo?: number | null;
+            /** Contribution */
+            contribution: number;
+            /** Delta X */
+            delta_x?: number | null;
+            /** Family */
+            family?: string | null;
+            /** Feature Name */
+            feature_name: string;
+        };
         /**
          * DeliverSurfaceRequest
          * @description Request to mark a surface as delivered.
@@ -11347,6 +11835,44 @@ export interface components {
         DisconnectResponse: {
             /** Ok */
             ok: boolean;
+        };
+        /** DistrictMetricsResponse */
+        DistrictMetricsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["DistrictMetricsRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** DistrictMetricsRow */
+        DistrictMetricsRow: {
+            /** Access Narrative */
+            access_narrative?: string | null;
+            /** Anomaly Narrative */
+            anomaly_narrative?: string | null;
+            /** Capacity Gap Pct */
+            capacity_gap_pct?: number | null;
+            /** Cohort Size */
+            cohort_size?: number | null;
+            /** District Name */
+            district_name: string;
+            /** Is Anomaly */
+            is_anomaly?: boolean | null;
+            /** Pcp Per 1K */
+            pcp_per_1k?: number | null;
+            /** Residual */
+            residual?: number | null;
+            /** T2D Incidence Per 1K */
+            t2d_incidence_per_1k?: number | null;
+            /** T2D Predicted Per 1K */
+            t2d_predicted_per_1k?: number | null;
+            /** Unmet Demand Score */
+            unmet_demand_score?: number | null;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Workspace Id */
+            workspace_id: string;
         };
         /**
          * DriverRow
@@ -12425,6 +12951,37 @@ export interface components {
             /** Next State */
             next_state: string;
         };
+        /** FeatureDef */
+        FeatureDef: {
+            /** Kind */
+            kind: string;
+            /** Name */
+            name: string;
+        };
+        /** FeatureDistributionResponse */
+        FeatureDistributionResponse: {
+            /** Bins */
+            bins: components["schemas"]["HistogramBin"][];
+            /** Feature */
+            feature: string;
+            /** Kind */
+            kind: string;
+            /** N Total */
+            n_total: number;
+            /** N Y1 */
+            n_y1: number;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** FeaturesResponse */
+        FeaturesResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["FeatureDef"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
         /** FhirAppointmentListResponse */
         FhirAppointmentListResponse: {
             /** Appointments */
@@ -12872,6 +13429,55 @@ export interface components {
             input?: {
                 [key: string]: unknown;
             } | null;
+        };
+        /** ForecastDrawPoint */
+        ForecastDrawPoint: {
+            /** Draw Id */
+            draw_id: number;
+            /** T */
+            t: number;
+            /** Value */
+            value: number;
+        };
+        /** ForecastDrawsResponse */
+        ForecastDrawsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ForecastDrawPoint"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ForecastFanPointRow */
+        ForecastFanPointRow: {
+            /** Is Historical */
+            is_historical?: boolean | null;
+            /** Lower 95 */
+            lower_95?: number | null;
+            /** Median */
+            median?: number | null;
+            /** Run Id */
+            run_id: string;
+            /**
+             * Scenario
+             * @enum {string}
+             */
+            scenario: "baseline" | "with_policy" | "observational";
+            /** T */
+            t: number;
+            /** Upper 95 */
+            upper_95?: number | null;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ForecastFanResponse */
+        ForecastFanResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ForecastFanPointRow"][];
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** ForkAlternative */
         ForkAlternative: {
@@ -13469,6 +14075,17 @@ export interface components {
             };
             /** Workspace Id */
             workspace_id: string;
+        };
+        /** HistogramBin */
+        HistogramBin: {
+            /** X Hi */
+            x_hi: number;
+            /** X Lo */
+            x_lo: number;
+            /** Y0 */
+            y0: number;
+            /** Y1 */
+            y1: number;
         };
         /** Identity */
         Identity: {
@@ -14181,6 +14798,15 @@ export interface components {
             /** Window Hours */
             window_hours: number;
         };
+        /** M42CatalogResponse */
+        M42CatalogResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["CatalogEntry"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
         /** MarkSyncedRequest */
         MarkSyncedRequest: {
             /** Data Source Id */
@@ -14429,36 +15055,38 @@ export interface components {
         MetricCatalogEntry: {
             /** Builtin */
             builtin: boolean;
-            /**
-             * Channel Scope
-             * @default all
-             */
-            channel_scope?: string;
             /** Description */
             description?: string | null;
             /**
              * Extraction Mode
              * @default static
+             * @enum {string}
              */
-            extraction_mode?: string;
-            /** Key */
-            key: string;
-            /** Metric Type */
-            metric_type: string;
+            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_sentiment" | "ai_query" | "sql_expr";
+            /**
+             * Granularity
+             * @default aggregate
+             * @enum {string}
+             */
+            granularity?: "aggregate" | "per_entity";
+            /**
+             * Has Prompt
+             * @default false
+             */
+            has_prompt?: boolean;
+            key: components["schemas"]["SlugString"];
+            /**
+             * Metric Type
+             * @enum {string}
+             */
+            metric_type: "numerical" | "categorical" | "boolean";
             /**
              * Model Tier
              * @default free
+             * @enum {string}
              */
-            model_tier?: string;
-            /** Name */
-            name: string;
-            /**
-             * Period Granularity
-             * @default daily
-             */
-            period_granularity?: string;
-            /** Source */
-            source: string;
+            model_tier?: "free" | "fast" | "balanced" | "max" | "custom";
+            name: components["schemas"]["NameString"];
             /** Unit */
             unit?: string | null;
         };
@@ -14476,6 +15104,11 @@ export interface components {
          *       (extract_path + aggregation). Shipped with every workspace.
          *     - Custom metrics: extraction uses AI functions or static JSONB paths.
          *       Defined per-workspace via settings API.
+         *
+         *     Frozen: builtins are process-wide singletons exposed via the
+         *     ``BUILTIN_METRICS`` list. A mutable list field (e.g.
+         *     ``applies_to_product_types``) could otherwise be mutated by one caller
+         *     and leak into every subsequent call in the same process.
          */
         MetricDefinition: {
             /**
@@ -14512,6 +15145,11 @@ export interface components {
             ai_schema?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Applies To Product Types
+             * @description Product types this metric applies to (matches service tags, e.g. 'scheduling', 'outbound', 'coaching', 'intake', 'triage', 'support'). When set, the metric only computes for calls belonging to services whose config.tags include one of these keys. When None (default), the metric applies to every service regardless of product type.
+             */
+            applies_to_product_types?: string[] | null;
             /**
              * Builtin
              * @description True for platform-provided metrics (read-only key).
@@ -14555,6 +15193,13 @@ export interface components {
              */
             freshness_sla_minutes?: number;
             /**
+             * Granularity
+             * @description 'aggregate' groups by (workspace, period) — one value per time bucket. 'per_entity' keeps entity_id — one value per entity (call, encounter). Judge metrics are typically per_entity. Computed metrics are typically aggregate.
+             * @default aggregate
+             * @enum {string}
+             */
+            granularity?: "aggregate" | "per_entity";
+            /**
              * Id
              * Format: uuid
              */
@@ -14592,6 +15237,11 @@ export interface components {
              */
             period_granularity?: "hourly" | "daily";
             /**
+             * Prompt
+             * @description Rubric prompt for LLM judge evaluation with {$.path} context variables. Each {$.path} reference is extracted from the entity's projected state and substituted before sending to ai_query. The prompt is both the evaluation criteria and the context specification.
+             */
+            prompt?: string | null;
+            /**
              * Ratio Denominator Event
              * @description Event type for denominator when aggregation='ratio'.
              */
@@ -14606,7 +15256,7 @@ export interface components {
              * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from world.events. 'surface_events' reads from world.events WHERE domain='surface'.
              * @enum {string}
              */
-            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events";
+            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results";
             /**
              * Source Filter
              * @description Optional SQL WHERE fragment for additional filtering (e.g. "source = 'voice_agent'"). Applied after event_type filter.
@@ -14632,22 +15282,6 @@ export interface components {
              * @description Minimum valid value for numerical metrics. Pipeline drops values outside range.
              */
             valid_range_min?: number | null;
-        };
-        /** MetricFreshnessEntry */
-        MetricFreshnessEntry: {
-            /** Last Computed At */
-            last_computed_at?: string | null;
-            /** Latest Period End */
-            latest_period_end?: string | null;
-            /** Metric Key */
-            metric_key: string;
-            /** Value Count */
-            value_count: number;
-        };
-        /** MetricFreshnessResponse */
-        MetricFreshnessResponse: {
-            /** Freshness */
-            freshness: components["schemas"]["MetricFreshnessEntry"][];
         };
         /** MetricListResponse */
         MetricListResponse: {
@@ -14692,6 +15326,40 @@ export interface components {
             unit?: string | null;
             /** Value */
             value: unknown;
+        };
+        /** ModelRegistryResponse */
+        ModelRegistryResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["ModelRegistryRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** ModelRegistryRow */
+        ModelRegistryRow: {
+            /** Algorithm */
+            algorithm?: string | null;
+            /** Coefficients Json */
+            coefficients_json?: string | null;
+            /** Focus Area */
+            focus_area?: string | null;
+            /** Metrics Json */
+            metrics_json?: string | null;
+            /** Model Id */
+            model_id: string;
+            /** Name */
+            name?: string | null;
+            /** Status */
+            status?: string | null;
+            /** Trained At */
+            trained_at?: string | null;
+            /** Training Set Size */
+            training_set_size?: number | null;
+            /** Version */
+            version?: string | null;
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** MonitorConceptResponse */
         MonitorConceptResponse: {
@@ -15552,6 +16220,30 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** PatientLabRow */
+        PatientLabRow: {
+            /** Loinc Code */
+            loinc_code?: string | null;
+            /** Observation Date */
+            observation_date?: string | null;
+            /** Patient Id */
+            patient_id: string;
+            /** Test Name */
+            test_name: string;
+            /** Units */
+            units?: string | null;
+            /** Value */
+            value?: number | null;
+        };
+        /** PatientLabsResponse */
+        PatientLabsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["PatientLabRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
         /**
          * PatientListItem
          * @description Typed patient list item — replaces untyped dict.
@@ -15596,6 +16288,47 @@ export interface components {
              * @description Primary phone number
              */
             phone?: string | null;
+        };
+        /** PatientNoteExtractions */
+        PatientNoteExtractions: {
+            /** Activity Level */
+            activity_level?: string | null;
+            /** Concerns */
+            concerns: string[];
+            /** Food Pattern */
+            food_pattern?: string | null;
+            /** Hba1C Sentiment */
+            hba1c_sentiment?: string | null;
+            /** Medications Planned */
+            medications_planned: string[];
+            /**
+             * N Concerns
+             * @default 0
+             */
+            n_concerns?: number;
+            /**
+             * N Symptoms
+             * @default 0
+             */
+            n_symptoms?: number;
+            /** Smoking Status */
+            smoking_status?: string | null;
+            /** Symptoms */
+            symptoms: string[];
+        };
+        /** PatientNoteResponse */
+        PatientNoteResponse: {
+            /** Author */
+            author?: string | null;
+            /** Authored At */
+            authored_at?: string | null;
+            extractions: components["schemas"]["PatientNoteExtractions"];
+            /** Note Text */
+            note_text: string;
+            /** Patient Id */
+            patient_id: string;
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** PatientSearchResponse */
         PatientSearchResponse: {
@@ -15672,6 +16405,50 @@ export interface components {
             }[];
             /** Total */
             total: number;
+        };
+        /** PatientTopologyResponse */
+        PatientTopologyResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["PatientTopologyRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** PatientTopologyRow */
+        PatientTopologyRow: {
+            /** Age Bucket */
+            age_bucket?: string | null;
+            /** Bmi Latest */
+            bmi_latest?: number | null;
+            /** Charlson Cci */
+            charlson_cci?: number | null;
+            /** Cluster Name */
+            cluster_name: string;
+            /** District */
+            district?: string | null;
+            /** Emergence Month */
+            emergence_month?: number | null;
+            /** Gender */
+            gender?: string | null;
+            /** Hba1C Latest */
+            hba1c_latest?: number | null;
+            /** Nationality */
+            nationality?: string | null;
+            /** Patient Id */
+            patient_id: string;
+            /** Risk Tier */
+            risk_tier?: number | null;
+            /** Umap X */
+            umap_x: number;
+            /** Umap Y */
+            umap_y: number;
+            /** Workspace Id */
+            workspace_id: string;
+            /** Y Hat Composite */
+            y_hat_composite?: number | null;
+            /** Y Hat T2D 1Yr */
+            y_hat_t2d_1yr?: number | null;
         };
         /** PerformanceSummaryResponse */
         PerformanceSummaryResponse: {
@@ -15937,6 +16714,36 @@ export interface components {
             total_events?: number;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
+        };
+        /** PositiveSignalResponse */
+        PositiveSignalResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["PositiveSignalRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** PositiveSignalRow */
+        PositiveSignalRow: {
+            /** Baseline */
+            baseline?: number | null;
+            /** Delta Unit */
+            delta_unit?: string | null;
+            /** Delta Value */
+            delta_value?: number | null;
+            /** Headline */
+            headline?: string | null;
+            /** Metric Label */
+            metric_label?: string | null;
+            /** Narrative */
+            narrative?: string | null;
+            /** Signal Id */
+            signal_id: string;
+            /** Updated At */
+            updated_at?: string | null;
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** PrevalenceResponse */
         PrevalenceResponse: {
@@ -16221,6 +17028,75 @@ export interface components {
              * @default America/New_York
              */
             timezone?: string;
+        };
+        /** RankedAnomalyResponse */
+        RankedAnomalyResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["RankedAnomalyRow"][];
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** RankedAnomalyRow */
+        RankedAnomalyRow: {
+            /** Alert Id */
+            alert_id?: string | null;
+            /**
+             * Cohort Size
+             * @default 0
+             */
+            cohort_size?: number;
+            /**
+             * Decomposition
+             * @default []
+             */
+            decomposition?: components["schemas"]["DecompositionRow"][];
+            /** District Name */
+            district_name: string;
+            /**
+             * Impact
+             * @default 0
+             */
+            impact?: number;
+            /**
+             * Indicator
+             * @default t2d_risk
+             */
+            indicator?: string;
+            /**
+             * Is Anomaly
+             * @default true
+             */
+            is_anomaly?: boolean;
+            /** Lat */
+            lat?: number | null;
+            /** Lon */
+            lon?: number | null;
+            /** Narrative */
+            narrative?: string | null;
+            /**
+             * Priority Score
+             * @default 0
+             */
+            priority_score?: number;
+            /**
+             * Rate Per 1K
+             * @default 0
+             */
+            rate_per_1k?: number;
+            /**
+             * Residual
+             * @default 0
+             */
+            residual?: number;
+            /** Severity */
+            severity?: string | null;
+            /**
+             * Territory Mean
+             * @default 0
+             */
+            territory_mean?: number;
         };
         /** RecommendRequest */
         RecommendRequest: {
@@ -16887,6 +17763,17 @@ export interface components {
             entity_id: string;
             /** Extracted Text */
             extracted_text: string;
+        };
+        /** SampleResponse */
+        SampleResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: {
+                [key: string]: unknown;
+            }[];
+            /** Workspace Id */
+            workspace_id: string;
         };
         /** Scenario */
         Scenario: {
@@ -19863,6 +20750,62 @@ export interface components {
             style?: number;
             /** Voice Id */
             voice_id: string;
+        };
+        /** VoiceJudgeRecentResponse */
+        VoiceJudgeRecentResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["VoiceJudgeResultRow"][];
+            /** Service Id */
+            service_id: string;
+        };
+        /**
+         * VoiceJudgeResultRow
+         * @description One call's voice-judge scoring, as stored in the Delta output table.
+         */
+        VoiceJudgeResultRow: {
+            /** Accent Quality Score */
+            accent_quality_score?: number | null;
+            /** Audio Consistency Score */
+            audio_consistency_score?: number | null;
+            /** Call Entity Id */
+            call_entity_id?: string | null;
+            /** Call Sid */
+            call_sid: string;
+            /** Clarity Score */
+            clarity_score?: number | null;
+            /** Computed At */
+            computed_at?: string | null;
+            /** Critical Count */
+            critical_count?: number | null;
+            /** Filler Silence Score */
+            filler_silence_score?: number | null;
+            /** Flag Count */
+            flag_count?: number | null;
+            /** Interruption Handling Score */
+            interruption_handling_score?: number | null;
+            /**
+             * Judge Json
+             * @description Raw Gemini judge output (evidence quotes, per-dim severity). Intended for UI drill-in; opaque string. Capped at 32KB.
+             */
+            judge_json?: string | null;
+            /** Latency Dead Air Score */
+            latency_dead_air_score?: number | null;
+            /** Overall Score */
+            overall_score?: number | null;
+            /** Pacing Score */
+            pacing_score?: number | null;
+            /** Pronunciation Score */
+            pronunciation_score?: number | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Voice Identity Score */
+            voice_identity_score?: number | null;
+            /** Warmth Tone Score */
+            warmth_tone_score?: number | null;
+            /** Warning Count */
+            warning_count?: number | null;
         };
         /** VoiceMetrics */
         VoiceMetrics: {
@@ -28041,6 +28984,507 @@ export interface operations {
             };
         };
     };
+    list_anomalies_ranked_v1__workspace_id__m42_anomalies_ranked_get: {
+        parameters: {
+            query?: {
+                indicator?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RankedAnomalyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get: {
+        parameters: {
+            query?: {
+                severity?: ("high" | "medium" | "low") | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnomalyAlertResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_catalog_v1__workspace_id__m42_catalog_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["M42CatalogResponse"];
+                };
+            };
+        };
+    };
+    describe_table_v1__workspace_id__m42_catalog__table__columns_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                table: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ColumnsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sample_table_v1__workspace_id__m42_catalog__table__sample_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                table: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SampleResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_cluster_forecast_v1__workspace_id__m42_clusters_forecast_get: {
+        parameters: {
+            query?: {
+                focus_area?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClusterForecastResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_cluster_summary_v1__workspace_id__m42_clusters_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClusterSummaryResponse"];
+                };
+            };
+        };
+    };
+    list_district_metrics_v1__workspace_id__m42_district_metrics_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DistrictMetricsResponse"];
+                };
+            };
+        };
+    };
+    list_features_v1__workspace_id__m42_features_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeaturesResponse"];
+                };
+            };
+        };
+    };
+    feature_distribution_v1__workspace_id__m42_features_distribution_get: {
+        parameters: {
+            query: {
+                feature: string;
+                bins?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeatureDistributionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_forecast_fan_v1__workspace_id__m42_forecast_fan_get: {
+        parameters: {
+            query?: {
+                run_id?: string | null;
+                scenario?: ("baseline" | "with_policy" | "observational") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastFanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_forecast_draws_v1__workspace_id__m42_forecast_fan_draws_get: {
+        parameters: {
+            query?: {
+                run_id?: string;
+                scenario?: string;
+                sample?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForecastDrawsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_model_registry_v1__workspace_id__m42_model_registry_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ModelRegistryResponse"];
+                };
+            };
+        };
+    };
+    list_patient_topology_v1__workspace_id__m42_patient_topology_get: {
+        parameters: {
+            query?: {
+                cluster?: string | null;
+                risk_tier?: number | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientTopologyResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_patient_labs_v1__workspace_id__m42_patients__patient_id__labs_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patient_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientLabsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_patient_note_v1__workspace_id__m42_patients__patient_id__note_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                patient_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PatientNoteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_positive_signals_v1__workspace_id__m42_positive_signals_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PositiveSignalResponse"];
+                };
+            };
+        };
+    };
     "get-memory-analytics": {
         parameters: {
             query?: never;
@@ -28198,35 +29642,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetricCatalogResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-metric-freshness": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MetricFreshnessResponse"];
                 };
             };
             /** @description Rate limited */
@@ -32021,6 +33436,49 @@ export interface operations {
             };
             /** @description Invalid request body. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-voice-judge-recent": {
+        parameters: {
+            query?: {
+                /** @description Max rows to return (default 20, max 100) */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                /** @description Service UUID */
+                service_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Voice judge rows (newest first) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoiceJudgeRecentResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Analytics warehouse not configured or transiently unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
