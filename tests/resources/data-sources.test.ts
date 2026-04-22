@@ -4,6 +4,7 @@ import {
   BadRequestError,
   ConflictError,
   NotFoundError,
+  RateLimitError,
   ServiceUnavailableError,
 } from '../../src/core/errors.js'
 
@@ -91,12 +92,18 @@ describe('DataSourcesResource.triggerSync', () => {
     // The SDK's generic error normalizer stores the parsed body under
     // context.response — consumers can reach through to the structured
     // 409 payload (platform-api FastAPI wraps our response under `detail`).
-    const payload = (error as ConflictError).context?.response as
-      | { detail?: { message?: string; details?: Record<string, unknown> } }
-      | undefined
-    expect(payload?.detail?.message).toBe('Data source is already syncing')
-    expect(payload?.detail?.details?.last_poll_at).toBe('2026-04-22T19:58:00Z')
-    expect(payload?.detail?.details?.last_poll_duration_ms).toBe(42_000)
+    expect((error as ConflictError).context).toBeDefined()
+    expect((error as ConflictError).context).toMatchObject({
+      response: {
+        detail: {
+          message: 'Data source is already syncing',
+          details: {
+            last_poll_at: '2026-04-22T19:58:00Z',
+            last_poll_duration_ms: 42_000,
+          },
+        },
+      },
+    })
   })
 
   it('throws ServiceUnavailableError when connector-runner is down', async () => {
@@ -131,15 +138,37 @@ describe('DataSourcesResource.triggerSync', () => {
   })
 
   it('throws BadRequestError on a malformed data source id', async () => {
+    const malformedId = 'not-a-uuid'
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/data-sources/${DATA_SOURCE_ID}/sync`]: () =>
+        // Mock matches the SDK's constructed path with the malformed segment,
+        // proving the bad ID flows through to the URL (not transformed away).
+        [`POST ${BASE}/data-sources/${malformedId}/sync`]: () =>
           Response.json({ detail: 'Invalid data source ID format' }, { status: 400 }),
       }),
     })
 
-    await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(BadRequestError)
+    await expect(client.dataSources.triggerSync(malformedId)).rejects.toThrow(BadRequestError)
+  })
+
+  it('throws RateLimitError when the per-API-key write limit is exceeded', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      // Disable retries so the 429 surfaces immediately instead of waiting
+      // out the SDK's exponential-backoff Retry-After loop.
+      maxRetries: 0,
+      fetch: mockFetch({
+        [`POST ${BASE}/data-sources/${DATA_SOURCE_ID}/sync`]: () =>
+          new Response(JSON.stringify({ detail: 'Rate limit exceeded' }), {
+            status: 429,
+            headers: { 'Content-Type': 'application/json', 'Retry-After': '30' },
+          }),
+      }),
+    })
+
+    await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(RateLimitError)
   })
 })
