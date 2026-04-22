@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.5.0] - 2026-04-22
+
+### Features
+
+- add triggerSync resource method (#45)
+
+### Bug Fixes
+
+- prefix tarball path with ./ so npm treats it as a file, not a package name (#37)
+- write .npmrc explicitly for npm publish (setup-node breaks tarball resolution) (#36)
+- drop --provenance from npm publish (causes git ls-remote on tarball) (#35)
+
+### Maintenance
+
+- sync API types from platform (04db1b94) (#44)
+- sync API types — intake upload links (#38)
+- sync API types — dashboard definitions endpoints (#34)
+
 ## [0.4.5] - 2026-04-19
 
 ### Bug Fixes
