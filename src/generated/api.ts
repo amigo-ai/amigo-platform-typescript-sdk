@@ -10374,7 +10374,7 @@ export interface components {
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["NameString"] | null;
+            display_name?: components["schemas"]["DescriptionString"] | null;
             /**
              * Expires In Hours
              * @default 168
@@ -18645,7 +18645,10 @@ export interface components {
         SimulationRunResponse: {
             /** Branch Name */
             branch_name?: string | null;
-            bridge_request?: components["schemas"]["BridgeRequest"] | null;
+            /** Bridge Request */
+            bridge_request?: {
+                [key: string]: unknown;
+            } | null;
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -18658,7 +18661,9 @@ export interface components {
             /** Objective */
             objective?: string | null;
             /** Scenarios */
-            scenarios?: components["schemas"]["Scenario"][] | null;
+            scenarios?: {
+                [key: string]: unknown;
+            }[] | null;
             /**
              * Service Id
              * Format: uuid
@@ -21962,6 +21967,11 @@ export interface components {
             /** Branch Name */
             branch_name?: string | null;
             /**
+             * Caller Id
+             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             */
+            caller_id?: string | null;
+            /**
              * Service Id
              * Format: uuid
              */
@@ -22583,11 +22593,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/octet-stream": string;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
