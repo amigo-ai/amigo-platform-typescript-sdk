@@ -180,6 +180,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `delete`
 - `getStatus`
 - `getSyncHistory`
+- `triggerSync`
 
 ### `world`
 
