@@ -169,6 +169,10 @@ describe('DataSourcesResource.triggerSync', () => {
       }),
     })
 
-    await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(RateLimitError)
+    const error = await client.dataSources.triggerSync(DATA_SOURCE_ID).catch((e) => e)
+    expect(error).toBeInstanceOf(RateLimitError)
+    // Confirm the central error pipeline surfaces Retry-After so callers
+    // can implement proper backoff without parsing headers themselves.
+    expect((error as RateLimitError).retryAfter).toBe(30)
   })
 })
