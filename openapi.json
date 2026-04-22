@@ -2859,8 +2859,70 @@
         "title": "BrandingSettingsResponse",
         "type": "object"
       },
+      "BridgePlanRequest": {
+        "properties": {
+          "objective": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Objective",
+            "type": "string"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id",
+          "objective"
+        ],
+        "title": "BridgePlanRequest",
+        "type": "object"
+      },
+      "BridgePlanResponse": {
+        "properties": {
+          "available_states": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Available States",
+            "type": "array"
+          },
+          "available_tools": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "title": "Available Tools",
+            "type": "array"
+          },
+          "rationale": {
+            "maxLength": 1000,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "target_spec": {
+            "$ref": "#/components/schemas/TargetSpec"
+          }
+        },
+        "required": [
+          "target_spec",
+          "rationale"
+        ],
+        "title": "BridgePlanResponse",
+        "type": "object"
+      },
       "BridgeRequest": {
         "properties": {
+          "auto_target_spec": {
+            "default": false,
+            "title": "Auto Target Spec",
+            "type": "boolean"
+          },
           "branch_name": {
             "anyOf": [
               {
@@ -2875,10 +2937,20 @@
           },
           "concurrency": {
             "default": 3,
-            "maximum": 5.0,
+            "maximum": 20.0,
             "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplorationConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "max_turns": {
             "default": 20,
@@ -2889,7 +2961,7 @@
           },
           "num_scenarios": {
             "default": 5,
-            "maximum": 20.0,
+            "maximum": 50.0,
             "minimum": 1.0,
             "title": "Num Scenarios",
             "type": "integer"
@@ -2913,6 +2985,16 @@
             "maxItems": 20,
             "title": "Tags",
             "type": "array"
+          },
+          "target_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -2924,6 +3006,28 @@
       },
       "BridgeResponse": {
         "properties": {
+          "inferred_target_spec": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TargetSpec"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "inferred_target_spec_rationale": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Inferred Target Spec Rationale"
+          },
           "run_id": {
             "format": "uuid",
             "title": "Run Id",
@@ -4741,6 +4845,30 @@
         "title": "CommandCenterResponse",
         "type": "object"
       },
+      "CompletionCriteria": {
+        "properties": {
+          "state_based": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "State Based",
+            "type": "array"
+          },
+          "tool_based": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Tool Based",
+            "type": "array"
+          }
+        },
+        "title": "CompletionCriteria",
+        "type": "object"
+      },
       "ComplianceDashboardResponse": {
         "description": "Composite compliance health overview.",
         "properties": {
@@ -6551,6 +6679,42 @@
           "display_name"
         ],
         "title": "CreateIntegrationRequest",
+        "type": "object"
+      },
+      "CreateLinkRequest": {
+        "properties": {
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_in_hours": {
+            "default": 168,
+            "maximum": 720.0,
+            "minimum": 1.0,
+            "title": "Expires In Hours",
+            "type": "integer"
+          },
+          "max_uploads": {
+            "default": 100,
+            "maximum": 10000.0,
+            "minimum": 1.0,
+            "title": "Max Uploads",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "customer_slug"
+        ],
+        "title": "CreateLinkRequest",
         "type": "object"
       },
       "CreateMonitorConceptRequest": {
@@ -12098,7 +12262,8 @@
                   "pending",
                   "synced",
                   "failed",
-                  "processing"
+                  "processing",
+                  "not_applicable"
                 ],
                 "type": "string"
               },
@@ -13382,6 +13547,36 @@
           "next_state"
         ],
         "title": "ExitCondition",
+        "type": "object"
+      },
+      "ExplorationConfig": {
+        "properties": {
+          "coverage_driven_selection": {
+            "default": false,
+            "title": "Coverage Driven Selection",
+            "type": "boolean"
+          },
+          "enable_forking": {
+            "default": false,
+            "title": "Enable Forking",
+            "type": "boolean"
+          },
+          "max_forks_per_scenario": {
+            "default": 2,
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Max Forks Per Scenario",
+            "type": "integer"
+          },
+          "recommend_candidates": {
+            "default": 3,
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Recommend Candidates",
+            "type": "integer"
+          }
+        },
+        "title": "ExplorationConfig",
         "type": "object"
       },
       "FeatureDef": {
@@ -16669,6 +16864,170 @@
         "title": "IntakeFileResponse",
         "type": "object"
       },
+      "IntakeLinkResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NameString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "last_upload_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Upload At"
+          },
+          "link_token": {
+            "maxLength": 128,
+            "minLength": 32,
+            "title": "Link Token",
+            "type": "string"
+          },
+          "max_uploads": {
+            "title": "Max Uploads",
+            "type": "integer"
+          },
+          "revoked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revoked At"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "expired",
+              "revoked",
+              "exhausted"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "upload_count": {
+            "title": "Upload Count",
+            "type": "integer"
+          },
+          "upload_url": {
+            "maxLength": 512,
+            "title": "Upload Url",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "customer_slug",
+          "display_name",
+          "upload_url",
+          "link_token",
+          "status",
+          "created_at",
+          "expires_at",
+          "revoked_at",
+          "max_uploads",
+          "upload_count",
+          "last_upload_at"
+        ],
+        "title": "IntakeLinkResponse",
+        "type": "object"
+      },
+      "IntakeUploadResponse": {
+        "properties": {
+          "content_type": {
+            "maxLength": 256,
+            "title": "Content Type",
+            "type": "string"
+          },
+          "customer_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "filename": {
+            "$ref": "#/components/schemas/NameString"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "received_at": {
+            "format": "date-time",
+            "title": "Received At",
+            "type": "string"
+          },
+          "scan_status": {
+            "enum": [
+              "skipped",
+              "pending",
+              "clean",
+              "infected"
+            ],
+            "title": "Scan Status",
+            "type": "string"
+          },
+          "sha256": {
+            "maxLength": 64,
+            "minLength": 64,
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "customer_slug",
+          "filename",
+          "content_type",
+          "sha256",
+          "size_bytes",
+          "received_at",
+          "scan_status"
+        ],
+        "title": "IntakeUploadResponse",
+        "type": "object"
+      },
       "IntegrationResponse": {
         "properties": {
           "auth": {
@@ -18572,14 +18931,14 @@
           "ai_query_prompt": {
             "anyOf": [
               {
-                "maxLength": 2000,
+                "maxLength": 8000,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'",
+            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric \u2014 conversational_naturalness \u2014 is ~5KB).",
             "title": "Ai Query Prompt"
           },
           "ai_schema": {
@@ -19240,6 +19599,29 @@
         "minLength": 1,
         "type": "string"
       },
+      "NonDesiredState": {
+        "properties": {
+          "mode": {
+            "default": "hard",
+            "enum": [
+              "hard",
+              "soft"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "state": {
+            "maxLength": 128,
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state"
+        ],
+        "title": "NonDesiredState",
+        "type": "object"
+      },
       "OcrRequest": {
         "properties": {
           "image": {
@@ -19693,6 +20075,31 @@
           "offline"
         ],
         "title": "OperatorStatusCounts",
+        "type": "object"
+      },
+      "OrderedPathway": {
+        "properties": {
+          "id": {
+            "maxLength": 64,
+            "title": "Id",
+            "type": "string"
+          },
+          "sequence": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Sequence",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "sequence"
+        ],
+        "title": "OrderedPathway",
         "type": "object"
       },
       "OutboundLogItem": {
@@ -26088,6 +26495,17 @@
             ],
             "title": "Eager Eot Threshold"
           },
+          "empathy_hold_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empathy Hold Ms"
+          },
           "eot_timeout_ms": {
             "anyOf": [
               {
@@ -26098,6 +26516,17 @@
               }
             ],
             "title": "Eot Timeout Ms"
+          },
+          "filler_cooldown_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Cooldown Ms"
           },
           "filler_style": {
             "default": "backchannel",
@@ -26171,6 +26600,53 @@
               }
             ],
             "title": "Min Tts Speed"
+          },
+          "post_eot_pause_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Eot Pause Ms"
+          },
+          "progress_interval_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Interval Ms"
+          },
+          "progress_vocabulary": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Vocabulary"
+          },
+          "transition_deadline_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transition Deadline Ms"
           },
           "tts_model": {
             "anyOf": [
@@ -26407,6 +26883,128 @@
           "is_terminal"
         ],
         "title": "SimulationObservation",
+        "type": "object"
+      },
+      "SimulationRunResponse": {
+        "description": "Full run payload \u2014 used by GET /runs/{run_id} for replay flows.",
+        "properties": {
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
+          "bridge_request": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bridge Request"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "objective": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objective"
+          },
+          "scenarios": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenarios"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "total_sessions": {
+            "default": 0,
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "default": 0,
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "service_id",
+          "status"
+        ],
+        "title": "SimulationRunResponse",
         "type": "object"
       },
       "SimulationSessionResponse": {
@@ -28607,7 +29205,8 @@
               "pending",
               "synced",
               "failed",
-              "processing"
+              "processing",
+              "not_applicable"
             ],
             "title": "Sync Status",
             "type": "string"
@@ -28937,6 +29536,40 @@
           "status"
         ],
         "title": "SyncRetryResponse",
+        "type": "object"
+      },
+      "TargetSpec": {
+        "properties": {
+          "completion_criteria": {
+            "$ref": "#/components/schemas/CompletionCriteria"
+          },
+          "desired_states": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Desired States",
+            "type": "array"
+          },
+          "non_desired_states": {
+            "items": {
+              "$ref": "#/components/schemas/NonDesiredState"
+            },
+            "maxItems": 50,
+            "title": "Non Desired States",
+            "type": "array"
+          },
+          "ordered_pathways": {
+            "items": {
+              "$ref": "#/components/schemas/OrderedPathway"
+            },
+            "maxItems": 20,
+            "title": "Ordered Pathways",
+            "type": "array"
+          }
+        },
+        "title": "TargetSpec",
         "type": "object"
       },
       "TaskListResponse": {
@@ -35792,6 +36425,127 @@
         "summary": "Submit Surface",
         "tags": [
           "Surface Patient"
+        ]
+      }
+    },
+    "/upload/{link_token}/files": {
+      "post": {
+        "operationId": "upload-intake-file-via-link",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_token",
+            "required": true,
+            "schema": {
+              "title": "Link Token",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amigo-intake-filename",
+            "required": true,
+            "schema": {
+              "title": "X-Amigo-Intake-Filename",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "x-amigo-intake-content-type",
+            "required": true,
+            "schema": {
+              "title": "X-Amigo-Intake-Content-Type",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "201": {
+            "description": "File uploaded successfully"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "410": {
+            "description": "Link expired"
+          },
+          "413": {
+            "description": "File too large"
+          },
+          "422": {
+            "description": "Invalid filename or content type"
+          },
+          "429": {
+            "description": "Rate limited or upload limit reached"
+          },
+          "503": {
+            "description": "Upload service unavailable"
+          }
+        },
+        "summary": "Receive Upload",
+        "tags": [
+          "Intake Upload"
+        ]
+      }
+    },
+    "/upload/{link_token}/info": {
+      "get": {
+        "operationId": "get-intake-link-info",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_token",
+            "required": true,
+            "schema": {
+              "title": "Link Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Link metadata"
+          },
+          "400": {
+            "description": "Invalid token"
+          },
+          "404": {
+            "description": "Link not found"
+          },
+          "410": {
+            "description": "Link expired"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Upload limit reached"
+          }
+        },
+        "summary": "Get Link Info",
+        "tags": [
+          "Intake Upload"
         ]
       }
     },
@@ -46209,6 +46963,176 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/links": {
+      "get": {
+        "operationId": "list-intake-links",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "include_expired",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Expired",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntakeLinkResponse"
+                  },
+                  "title": "Response List-Intake-Links",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List upload links",
+        "tags": [
+          "Intake"
+        ]
+      },
+      "post": {
+        "description": "Create a shareable upload link for a customer.",
+        "operationId": "create-intake-link",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLinkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeLinkResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Generate upload link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}": {
+      "delete": {
+        "operationId": "revoke-intake-link",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Revoke upload link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads": {
+      "get": {
+        "operationId": "list-intake-link-uploads",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/IntakeUploadResponse"
+                  },
+                  "title": "Response List-Intake-Link-Uploads",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List uploads for a link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/integrations": {
       "get": {
         "description": "List integrations for a workspace with pagination. Optionally filter by enabled status. Requires `Integration.view` permission.",
@@ -54223,6 +55147,48 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/bridge/plan": {
+      "post": {
+        "description": "Infer a TargetSpec from an NL objective \u2014 preview before running /bridge.\n\nUX: user types \"test scheduling failures in 20 different ways\", we return\na structured target_spec + rationale. The frontend shows both, lets the\nuser edit (add/remove states, tighten pathways), then POSTs the final\nspec to /bridge. Same LLM, same Vertex cost structure as /bridge, but\nno run is created \u2014 pure inference.",
+        "operationId": "simulation-bridge-plan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BridgePlanRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgePlanResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Simulation Bridge Plan",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/simulations/config-to-policy": {
       "post": {
         "operationId": "config-to-turn-policy",
@@ -54365,6 +55331,50 @@
           }
         },
         "summary": "Create Simulation Run",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/runs/{run_id}": {
+      "get": {
+        "description": "Fetch a single run including objective / bridge_request / scenarios.\n\nUse the bridge_request payload to re-POST /bridge and replay the run.",
+        "operationId": "get-simulation-run",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Run",
         "tags": [
           "Simulations"
         ]
@@ -59598,7 +60608,8 @@
                 "pending",
                 "synced",
                 "failed",
-                "processing"
+                "processing",
+                "not_applicable"
               ],
               "title": "Status",
               "type": "string"
