@@ -6694,7 +6694,7 @@
           "display_name": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/DescriptionString"
+                "$ref": "#/components/schemas/NameString"
               },
               {
                 "type": "null"
@@ -26908,14 +26908,12 @@
           "bridge_request": {
             "anyOf": [
               {
-                "additionalProperties": true,
-                "type": "object"
+                "$ref": "#/components/schemas/BridgeRequest"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Bridge Request"
+            ]
           },
           "completed_at": {
             "anyOf": [
@@ -26960,8 +26958,7 @@
             "anyOf": [
               {
                 "items": {
-                  "additionalProperties": true,
-                  "type": "object"
+                  "$ref": "#/components/schemas/Scenario"
                 },
                 "type": "array"
               },
@@ -36538,6 +36535,18 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/octet-stream": {
+              "schema": {
+                "format": "binary",
+                "title": "File",
+                "type": "string"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {

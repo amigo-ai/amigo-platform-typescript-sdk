@@ -10374,7 +10374,7 @@ export interface components {
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["DescriptionString"] | null;
+            display_name?: components["schemas"]["NameString"] | null;
             /**
              * Expires In Hours
              * @default 168
@@ -18645,10 +18645,7 @@ export interface components {
         SimulationRunResponse: {
             /** Branch Name */
             branch_name?: string | null;
-            /** Bridge Request */
-            bridge_request?: {
-                [key: string]: unknown;
-            } | null;
+            bridge_request?: components["schemas"]["BridgeRequest"] | null;
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -18661,9 +18658,7 @@ export interface components {
             /** Objective */
             objective?: string | null;
             /** Scenarios */
-            scenarios?: {
-                [key: string]: unknown;
-            }[] | null;
+            scenarios?: components["schemas"]["Scenario"][] | null;
             /**
              * Service Id
              * Format: uuid
@@ -22588,7 +22583,11 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
