@@ -92,7 +92,7 @@ describe('DataSourcesResource.triggerSync', () => {
     // The SDK's generic error normalizer stores the parsed body under
     // context.response — consumers can reach through to the structured
     // 409 payload (platform-api FastAPI wraps our response under `detail`).
-    expect((error as ConflictError).context).toBeDefined()
+    // toMatchObject fails on undefined paths, so no separate toBeDefined needed.
     expect((error as ConflictError).context).toMatchObject({
       response: {
         detail: {
@@ -150,7 +150,9 @@ describe('DataSourcesResource.triggerSync', () => {
       }),
     })
 
-    await expect(client.dataSources.triggerSync(malformedId)).rejects.toThrow(BadRequestError)
+    const error = await client.dataSources.triggerSync(malformedId).catch((e) => e)
+    expect(error).toBeInstanceOf(BadRequestError)
+    expect((error as BadRequestError).message).toBe('Invalid data source ID format')
   })
 
   it('throws RateLimitError when the per-API-key write limit is exceeded', async () => {
