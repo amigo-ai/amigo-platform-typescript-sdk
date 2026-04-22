@@ -6694,7 +6694,7 @@
           "display_name": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/NameString"
+                "$ref": "#/components/schemas/DescriptionString"
               },
               {
                 "type": "null"
@@ -26908,12 +26908,14 @@
           "bridge_request": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/BridgeRequest"
+                "additionalProperties": true,
+                "type": "object"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bridge Request"
           },
           "completed_at": {
             "anyOf": [
@@ -26958,7 +26960,8 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/Scenario"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -35830,6 +35833,19 @@
             ],
             "title": "Branch Name"
           },
+          "caller_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
+            "title": "Caller Id"
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
@@ -36535,18 +36551,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "format": "binary",
-                "title": "File",
-                "type": "string"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -47283,6 +47287,64 @@
           }
         },
         "summary": "List uploads for a link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+      "get": {
+        "description": "Proxy the raw file bytes from the UC Volume back to the caller.",
+        "operationId": "download-intake-upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "File bytes with Content-Disposition: attachment"
+          },
+          "404": {
+            "description": "Link, upload, or file not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download an uploaded file",
         "tags": [
           "Intake"
         ]
