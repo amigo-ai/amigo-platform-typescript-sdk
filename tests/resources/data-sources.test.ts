@@ -1,6 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
-import { ConflictError, ServiceUnavailableError, NotFoundError } from '../../src/core/errors.js'
+import {
+  BadRequestError,
+  ConflictError,
+  NotFoundError,
+  ServiceUnavailableError,
+} from '../../src/core/errors.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -81,7 +86,17 @@ describe('DataSourcesResource.triggerSync', () => {
       }),
     })
 
-    await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(ConflictError)
+    const error = await client.dataSources.triggerSync(DATA_SOURCE_ID).catch((e) => e)
+    expect(error).toBeInstanceOf(ConflictError)
+    // The SDK's generic error normalizer stores the parsed body under
+    // context.response — consumers can reach through to the structured
+    // 409 payload (platform-api FastAPI wraps our response under `detail`).
+    const payload = (error as ConflictError).context?.response as
+      | { detail?: { message?: string; details?: Record<string, unknown> } }
+      | undefined
+    expect(payload?.detail?.message).toBe('Data source is already syncing')
+    expect(payload?.detail?.details?.last_poll_at).toBe('2026-04-22T19:58:00Z')
+    expect(payload?.detail?.details?.last_poll_duration_ms).toBe(42_000)
   })
 
   it('throws ServiceUnavailableError when connector-runner is down', async () => {
@@ -113,5 +128,18 @@ describe('DataSourcesResource.triggerSync', () => {
     })
 
     await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(NotFoundError)
+  })
+
+  it('throws BadRequestError on a malformed data source id', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/data-sources/${DATA_SOURCE_ID}/sync`]: () =>
+          Response.json({ detail: 'Invalid data source ID format' }, { status: 400 }),
+      }),
+    })
+
+    await expect(client.dataSources.triggerSync(DATA_SOURCE_ID)).rejects.toThrow(BadRequestError)
   })
 })
