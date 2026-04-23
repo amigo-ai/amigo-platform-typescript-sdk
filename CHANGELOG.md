@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.5.1] - 2026-04-23
+
+### Maintenance
+
+- sync openapi spec from platform (356 paths, 617 schemas)
+
 ## [0.5.0] - 2026-04-22
 
 ### Features
