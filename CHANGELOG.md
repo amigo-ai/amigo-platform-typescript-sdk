@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.2] - 2026-04-23
+
+### Bug Fixes
+
+- expose api field type for path-level inference in GET/POST/PUT
+
+### Documentation
+
+- regenerate api.md after exposing api field
+
 ## [0.5.1] - 2026-04-23
 
 ### Maintenance
