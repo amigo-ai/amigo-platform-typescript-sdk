@@ -7752,6 +7752,7 @@
             ]
           },
           "environment": {
+            "default": "staging",
             "enum": [
               "production",
               "staging",
@@ -7780,8 +7781,7 @@
         },
         "required": [
           "slug",
-          "name",
-          "environment"
+          "name"
         ],
         "title": "CreateWorkspaceRequest",
         "type": "object"

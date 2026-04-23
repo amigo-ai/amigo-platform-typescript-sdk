@@ -10761,9 +10761,10 @@ export interface components {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
             /**
              * Environment
+             * @default staging
              * @enum {string}
              */
-            environment: "production" | "staging" | "development";
+            environment?: "production" | "staging" | "development";
             name: components["schemas"]["StrippedNonemptyString"];
             /**
              * Region
