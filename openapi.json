@@ -5920,6 +5920,195 @@
         "title": "CooccurrenceRow",
         "type": "object"
       },
+      "CopilotSafetyConfig": {
+        "properties": {
+          "crisis_detection": {
+            "default": true,
+            "title": "Crisis Detection",
+            "type": "boolean"
+          },
+          "drug_allergy_alerts": {
+            "default": true,
+            "title": "Drug Allergy Alerts",
+            "type": "boolean"
+          },
+          "drug_interaction_alerts": {
+            "default": true,
+            "title": "Drug Interaction Alerts",
+            "type": "boolean"
+          },
+          "vital_range_alerts": {
+            "default": true,
+            "title": "Vital Range Alerts",
+            "type": "boolean"
+          }
+        },
+        "title": "CopilotSafetyConfig",
+        "type": "object"
+      },
+      "CopilotSettingsRequest": {
+        "properties": {
+          "custom_instructions": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Instructions"
+          },
+          "enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enabled"
+          },
+          "keyterms": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 200,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyterms"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "safety": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CopilotSafetyConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "soap_style": {
+            "anyOf": [
+              {
+                "enum": [
+                  "concise",
+                  "detailed",
+                  "structured"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Soap Style"
+          },
+          "specialty": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialty"
+          },
+          "tools_enabled": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tools Enabled"
+          }
+        },
+        "title": "CopilotSettingsRequest",
+        "type": "object"
+      },
+      "CopilotSettingsResponse": {
+        "properties": {
+          "custom_instructions": {
+            "default": "",
+            "title": "Custom Instructions",
+            "type": "string"
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "keyterms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Keyterms",
+            "type": "array"
+          },
+          "model": {
+            "default": "",
+            "maxLength": 128,
+            "title": "Model",
+            "type": "string"
+          },
+          "safety": {
+            "$ref": "#/components/schemas/CopilotSafetyConfig"
+          },
+          "soap_style": {
+            "default": "concise",
+            "enum": [
+              "concise",
+              "detailed",
+              "structured"
+            ],
+            "title": "Soap Style",
+            "type": "string"
+          },
+          "specialty": {
+            "default": "",
+            "title": "Specialty",
+            "type": "string"
+          },
+          "tools_enabled": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools Enabled",
+            "type": "array"
+          }
+        },
+        "title": "CopilotSettingsResponse",
+        "type": "object"
+      },
       "CorrectRequest": {
         "description": "Submit corrected data \u2014 creates new event at confidence 1.0.",
         "properties": {
@@ -6694,7 +6883,7 @@
           "display_name": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/NameString"
+                "$ref": "#/components/schemas/DescriptionString"
               },
               {
                 "type": "null"
@@ -26908,12 +27097,14 @@
           "bridge_request": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/BridgeRequest"
+                "additionalProperties": true,
+                "type": "object"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bridge Request"
           },
           "completed_at": {
             "anyOf": [
@@ -26958,7 +27149,8 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/Scenario"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -35830,6 +36022,19 @@
             ],
             "title": "Branch Name"
           },
+          "caller_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
+            "title": "Caller Id"
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
@@ -36535,18 +36740,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "format": "binary",
-                "title": "File",
-                "type": "string"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -47288,6 +47481,64 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+      "get": {
+        "description": "Proxy the raw file bytes from the UC Volume back to the caller.",
+        "operationId": "download-intake-upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "File bytes with Content-Disposition: attachment"
+          },
+          "404": {
+            "description": "Link, upload, or file not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download an uploaded file",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/integrations": {
       "get": {
         "description": "List integrations for a workspace with pagination. Optionally filter by enabled status. Requires `Integration.view` permission.",
@@ -54247,6 +54498,67 @@
           }
         },
         "summary": "Update connector settings",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/settings/copilot": {
+      "get": {
+        "description": "Get workspace clinical copilot settings.",
+        "operationId": "get-copilot-settings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CopilotSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get clinical copilot settings",
+        "tags": [
+          "Settings"
+        ]
+      },
+      "put": {
+        "description": "Update workspace clinical copilot settings.\n\nPermissions: admin, owner.",
+        "operationId": "update-copilot-settings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CopilotSettingsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CopilotSettingsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "422": {
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "description": "Too Many Requests"
+          }
+        },
+        "summary": "Update clinical copilot settings",
         "tags": [
           "Settings"
         ]

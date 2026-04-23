@@ -3220,6 +3220,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an uploaded file
+         * @description Proxy the raw file bytes from the UC Volume back to the caller.
+         */
+        get: operations["download-intake-upload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -5549,6 +5569,32 @@ export interface paths {
          *     Permissions: admin, owner.
          */
         put: operations["update-connector-settings"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/settings/copilot": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get clinical copilot settings
+         * @description Get workspace clinical copilot settings.
+         */
+        get: operations["get-copilot-settings"];
+        /**
+         * Update clinical copilot settings
+         * @description Update workspace clinical copilot settings.
+         *
+         *     Permissions: admin, owner.
+         */
+        put: operations["update-copilot-settings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -10085,6 +10131,81 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** CopilotSafetyConfig */
+        CopilotSafetyConfig: {
+            /**
+             * Crisis Detection
+             * @default true
+             */
+            crisis_detection?: boolean;
+            /**
+             * Drug Allergy Alerts
+             * @default true
+             */
+            drug_allergy_alerts?: boolean;
+            /**
+             * Drug Interaction Alerts
+             * @default true
+             */
+            drug_interaction_alerts?: boolean;
+            /**
+             * Vital Range Alerts
+             * @default true
+             */
+            vital_range_alerts?: boolean;
+        };
+        /** CopilotSettingsRequest */
+        CopilotSettingsRequest: {
+            /** Custom Instructions */
+            custom_instructions?: string | null;
+            /** Enabled */
+            enabled?: boolean | null;
+            /** Keyterms */
+            keyterms?: string[] | null;
+            /** Model */
+            model?: string | null;
+            safety?: components["schemas"]["CopilotSafetyConfig"] | null;
+            /** Soap Style */
+            soap_style?: ("concise" | "detailed" | "structured") | null;
+            /** Specialty */
+            specialty?: string | null;
+            /** Tools Enabled */
+            tools_enabled?: string[] | null;
+        };
+        /** CopilotSettingsResponse */
+        CopilotSettingsResponse: {
+            /**
+             * Custom Instructions
+             * @default
+             */
+            custom_instructions?: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled?: boolean;
+            /** Keyterms */
+            keyterms?: string[];
+            /**
+             * Model
+             * @default
+             */
+            model?: string;
+            safety?: components["schemas"]["CopilotSafetyConfig"];
+            /**
+             * Soap Style
+             * @default concise
+             * @enum {string}
+             */
+            soap_style?: "concise" | "detailed" | "structured";
+            /**
+             * Specialty
+             * @default
+             */
+            specialty?: string;
+            /** Tools Enabled */
+            tools_enabled?: string[];
+        };
         /**
          * CorrectRequest
          * @description Submit corrected data — creates new event at confidence 1.0.
@@ -10374,7 +10495,7 @@ export interface components {
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["NameString"] | null;
+            display_name?: components["schemas"]["DescriptionString"] | null;
             /**
              * Expires In Hours
              * @default 168
@@ -18645,7 +18766,10 @@ export interface components {
         SimulationRunResponse: {
             /** Branch Name */
             branch_name?: string | null;
-            bridge_request?: components["schemas"]["BridgeRequest"] | null;
+            /** Bridge Request */
+            bridge_request?: {
+                [key: string]: unknown;
+            } | null;
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -18658,7 +18782,9 @@ export interface components {
             /** Objective */
             objective?: string | null;
             /** Scenarios */
-            scenarios?: components["schemas"]["Scenario"][] | null;
+            scenarios?: {
+                [key: string]: unknown;
+            }[] | null;
             /**
              * Service Id
              * Format: uuid
@@ -21962,6 +22088,11 @@ export interface components {
             /** Branch Name */
             branch_name?: string | null;
             /**
+             * Caller Id
+             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             */
+            caller_id?: string | null;
+            /**
              * Service Id
              * Format: uuid
              */
@@ -22583,11 +22714,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/octet-stream": string;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -29399,6 +29526,46 @@ export interface operations {
             };
         };
     };
+    "download-intake-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                upload_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File bytes with Content-Disposition: attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description Link, upload, or file not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-integrations": {
         parameters: {
             query?: {
@@ -34598,6 +34765,75 @@ export interface operations {
                 content?: never;
             };
             /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-copilot-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CopilotSettingsResponse"];
+                };
+            };
+        };
+    };
+    "update-copilot-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopilotSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CopilotSettingsResponse"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unprocessable Content */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too Many Requests */
             429: {
                 headers: {
                     [name: string]: unknown;
