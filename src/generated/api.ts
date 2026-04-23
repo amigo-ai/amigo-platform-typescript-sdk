@@ -3220,6 +3220,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an uploaded file
+         * @description Proxy the raw file bytes from the UC Volume back to the caller.
+         */
+        get: operations["download-intake-upload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -5094,10 +5114,6 @@ export interface paths {
         /**
          * Finalize Encounter
          * @description Physician finalizes the encounter. Locks the encounter for EHR sync.
-         *
-         *     Reads the encounter entity's projected state and snapshots SOAP + ICD-10
-         *     into the finalize event. This event uses ENCOUNTER_FINALIZED source which
-         *     is outbound-eligible — connector-runner routes it to EHR write handlers.
          */
         post: operations["finalize-encounter"];
         delete?: never;
@@ -5160,86 +5176,6 @@ export interface paths {
          * @description Physician edits a SOAP section. Writes at HIGH confidence (0.9) — supersedes agent observations.
          */
         post: operations["edit-encounter-soap"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Create Session
-         * @description Create a scribe encounter session. Proxies to agent-engine.
-         */
-        post: operations["create-scribe-session"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/sessions/{session_id}/end": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * End Session
-         * @description End a scribe encounter session. Writes encounter.ended with duration.
-         */
-        post: operations["end-scribe-session"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/sessions/{session_id}/snapshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Snapshot
-         * @description Get current scribe session state.
-         */
-        get: operations["scribe-session-snapshot"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/sessions/{session_id}/transcript": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Process Transcript
-         * @description Process a batch of transcript segments through the scribe engine.
-         */
-        post: operations["scribe-process-transcript"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10322,15 +10258,6 @@ export interface components {
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
         };
-        /** CreateEncounterRequest */
-        CreateEncounterRequest: {
-            /** Patient Entity Id */
-            patient_entity_id?: string | null;
-            /** Practitioner Name */
-            practitioner_name?: string | null;
-            /** Service Id */
-            service_id: string;
-        };
         /** CreateIntegrationRequest */
         CreateIntegrationRequest: {
             auth?: components["schemas"]["AuthConfigWithSecrets"] | null;
@@ -10374,7 +10301,7 @@ export interface components {
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["NameString"] | null;
+            display_name?: components["schemas"]["DescriptionString"] | null;
             /**
              * Expires In Hours
              * @default 168
@@ -12232,32 +12159,6 @@ export interface components {
              * @description What caused the shift - exact words and tone
              */
             trigger?: string | null;
-        };
-        /** EncounterSessionResponse */
-        EncounterSessionResponse: {
-            /** Encounter Entity Id */
-            encounter_entity_id: string;
-            /** Greeting */
-            greeting: string;
-            /** Is Terminal */
-            is_terminal: boolean;
-            /** Session Id */
-            session_id: string;
-        } & {
-            [key: string]: unknown;
-        };
-        /** EncounterSnapshotResponse */
-        EncounterSnapshotResponse: {
-            /** Current State */
-            current_state: string;
-            /** Encounter Entity Id */
-            encounter_entity_id: string;
-            /** Is Terminal */
-            is_terminal: boolean;
-            /** Session Id */
-            session_id: string;
-        } & {
-            [key: string]: unknown;
         };
         /**
          * EndpointConfig
@@ -17189,29 +17090,35 @@ export interface components {
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
          *
-         *     The actual utterance is generated from tool semantics + turn emotion +
-         *     patient context. Operators describe the shape of the wait, the engine
-         *     chooses the words.
-         *
-         *     ``custom_phrase`` is a narrow escape hatch for demo-critical slow tools
-         *     where generic templates cannot cover the wait. Gated: only honored when
-         *     ``expected_latency_ms >= 4000`` and ``progress_class`` is set, and the
-         *     phrase is at most 30 words. The gate keeps the surface small so the
-         *     engine-picks-words contract holds for the bulk of tools.
+         *     ``deterministic=true``: scripted — ``phrases`` play verbatim in order.
+         *     ``deterministic=false``: engine picks — ``phrases`` are hints.
+         *     ``trigger_delay_ms``: milliseconds before first filler (0 = immediate).
+         *     ``interval_ms``: milliseconds between subsequent fillers.
          */
         ProgressHint: {
             /** Custom Phrase */
             custom_phrase?: string | null;
+            /**
+             * Deterministic
+             * @default false
+             */
+            deterministic?: boolean;
             /** Expected Latency Ms */
             expected_latency_ms?: number | null;
+            /** Interval Ms */
+            interval_ms?: number | null;
             /**
              * Mode
              * @default auto
              * @enum {string}
              */
             mode?: "auto" | "silent" | "backchannel" | "verbal";
+            /** Phrases */
+            phrases?: string[] | null;
             /** Progress Class */
             progress_class?: ("lookup" | "write" | "external_call" | "compute" | "multi_step") | null;
+            /** Trigger Delay Ms */
+            trigger_delay_ms?: number | null;
         };
         /** ProvisionResponse */
         ProvisionResponse: {
@@ -18645,7 +18552,10 @@ export interface components {
         SimulationRunResponse: {
             /** Branch Name */
             branch_name?: string | null;
-            bridge_request?: components["schemas"]["BridgeRequest"] | null;
+            /** Bridge Request */
+            bridge_request?: {
+                [key: string]: unknown;
+            } | null;
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -18658,7 +18568,9 @@ export interface components {
             /** Objective */
             objective?: string | null;
             /** Scenarios */
-            scenarios?: components["schemas"]["Scenario"][] | null;
+            scenarios?: {
+                [key: string]: unknown;
+            }[] | null;
             /**
              * Service Id
              * Format: uuid
@@ -19901,6 +19813,10 @@ export interface components {
              * @default
              */
             additional_instruction?: string;
+            /** Audio Filler Triggered After */
+            audio_filler_triggered_after?: number | null;
+            /** Audio Fillers */
+            audio_fillers?: string[] | null;
             /**
              * Navigate On Completion
              * @default false
@@ -20250,64 +20166,6 @@ export interface components {
              */
             what_happened: string;
         };
-        /** TranscriptInput */
-        TranscriptInput: {
-            /** Segments */
-            segments: components["schemas"]["TranscriptSegmentInput"][];
-        };
-        /** TranscriptProcessResponse */
-        TranscriptProcessResponse: {
-            /**
-             * Agent Text
-             * @default
-             */
-            agent_text?: string;
-            /**
-             * Alerts
-             * @default []
-             */
-            alerts?: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Entities Discovered
-             * @default []
-             */
-            entities_discovered?: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Icd10 Suggestions
-             * @default []
-             */
-            icd10_suggestions?: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Is Terminal
-             * @default false
-             */
-            is_terminal?: boolean;
-            /**
-             * Soap Updates
-             * @default []
-             */
-            soap_updates?: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * State After
-             * @default
-             */
-            state_after?: string;
-            /**
-             * State Before
-             * @default
-             */
-            state_before?: string;
-        } & {
-            [key: string]: unknown;
-        };
         /** TranscriptSegment */
         TranscriptSegment: {
             /** Confidence */
@@ -20320,15 +20178,6 @@ export interface components {
             timestamp: string | null;
             /** Transcript */
             transcript: string;
-        };
-        /** TranscriptSegmentInput */
-        TranscriptSegmentInput: {
-            /** Speaker */
-            speaker: string;
-            /** Text */
-            text: string;
-            /** Timestamp */
-            timestamp: number;
         };
         /** TrendResponse */
         TrendResponse: {
@@ -21962,6 +21811,11 @@ export interface components {
             /** Branch Name */
             branch_name?: string | null;
             /**
+             * Caller Id
+             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             */
+            caller_id?: string | null;
+            /**
              * Service Id
              * Format: uuid
              */
@@ -22583,11 +22437,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/octet-stream": string;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -29399,6 +29249,46 @@ export interface operations {
             };
         };
     };
+    "download-intake-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                upload_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File bytes with Content-Disposition: attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description Link, upload, or file not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-integrations": {
         parameters: {
             query?: {
@@ -33606,143 +33496,6 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-scribe-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateEncounterRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EncounterSessionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "end-scribe-session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "scribe-session-snapshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EncounterSnapshotResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "scribe-process-transcript": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                session_id: string;
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TranscriptInput"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TranscriptProcessResponse"];
                 };
             };
             /** @description Validation Error */
