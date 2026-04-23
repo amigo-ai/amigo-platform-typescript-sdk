@@ -396,3 +396,5 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getCatalog`
 - `query`
 - `sync`
+
+### `api`
