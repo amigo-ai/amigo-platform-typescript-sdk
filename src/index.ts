@@ -141,7 +141,8 @@ export class AmigoClient {
   readonly safety!: SafetyResource
   readonly compliance!: ComplianceResource
   readonly functions!: FunctionsResource
-  private readonly api!: PlatformFetch
+  /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
+  readonly api!: PlatformFetch
 
   constructor(config: AmigoClientConfig) {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
