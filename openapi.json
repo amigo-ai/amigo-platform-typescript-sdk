@@ -6694,7 +6694,7 @@
           "display_name": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/NameString"
+                "$ref": "#/components/schemas/DescriptionString"
               },
               {
                 "type": "null"
@@ -23749,12 +23749,12 @@
       },
       "ProgressHint": {
         "additionalProperties": false,
-        "description": "How the agent narrates waiting on a tool.\n\nThe actual utterance is generated from tool semantics + turn emotion +\npatient context. Operators describe the shape of the wait, the engine\nchooses the words.\n\n``custom_phrase`` is a narrow escape hatch for demo-critical slow tools\nwhere generic templates cannot cover the wait. Gated: only honored when\n``expected_latency_ms >= 4000`` and ``progress_class`` is set, and the\nphrase is at most 30 words. The gate keeps the surface small so the\nengine-picks-words contract holds for the bulk of tools.",
+        "description": "How the agent narrates waiting on a tool.\n\n``deterministic=true``: scripted \u2014 ``phrases`` play verbatim in order.\n``deterministic=false``: engine picks \u2014 ``phrases`` are hints.\n``trigger_delay_ms``: milliseconds before first filler (0 = immediate).\n``interval_ms``: milliseconds between subsequent fillers.",
         "properties": {
           "custom_phrase": {
             "anyOf": [
               {
-                "description": "Operator-authored filler utterance for the first monitor tick. Gated: requires expected_latency_ms >= 4000, progress_class set, and at most 30 words. Subsequent ticks use class templates.",
+                "description": "Legacy: use phrases instead.",
                 "maxLength": 500,
                 "type": "string"
               },
@@ -23763,6 +23763,11 @@
               }
             ],
             "title": "Custom Phrase"
+          },
+          "deterministic": {
+            "default": false,
+            "title": "Deterministic",
+            "type": "boolean"
           },
           "expected_latency_ms": {
             "anyOf": [
@@ -23777,6 +23782,19 @@
             ],
             "title": "Expected Latency Ms"
           },
+          "interval_ms": {
+            "anyOf": [
+              {
+                "maximum": 30000.0,
+                "minimum": 100.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interval Ms"
+          },
           "mode": {
             "default": "auto",
             "enum": [
@@ -23787,6 +23805,23 @@
             ],
             "title": "Mode",
             "type": "string"
+          },
+          "phrases": {
+            "anyOf": [
+              {
+                "description": "Filler phrases. deterministic=true: played verbatim in order. deterministic=false: used as hints for early attempts.",
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "minItems": 1,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phrases"
           },
           "progress_class": {
             "anyOf": [
@@ -23805,6 +23840,19 @@
               }
             ],
             "title": "Progress Class"
+          },
+          "trigger_delay_ms": {
+            "anyOf": [
+              {
+                "maximum": 30000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trigger Delay Ms"
           }
         },
         "title": "ProgressHint",
@@ -26908,12 +26956,14 @@
           "bridge_request": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/BridgeRequest"
+                "additionalProperties": true,
+                "type": "object"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Bridge Request"
           },
           "completed_at": {
             "anyOf": [
@@ -26958,7 +27008,8 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/Scenario"
+                  "additionalProperties": true,
+                  "type": "object"
                 },
                 "type": "array"
               },
@@ -30019,6 +30070,31 @@
             "default": "",
             "title": "Additional Instruction",
             "type": "string"
+          },
+          "audio_filler_triggered_after": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Filler Triggered After"
+          },
+          "audio_fillers": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Audio Fillers"
           },
           "navigate_on_completion": {
             "default": false,
@@ -35830,6 +35906,19 @@
             ],
             "title": "Branch Name"
           },
+          "caller_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
+            "title": "Caller Id"
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
@@ -36535,18 +36624,6 @@
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/octet-stream": {
-              "schema": {
-                "format": "binary",
-                "title": "File",
-                "type": "string"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -47283,6 +47360,64 @@
           }
         },
         "summary": "List uploads for a link",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+      "get": {
+        "description": "Proxy the raw file bytes from the UC Volume back to the caller.",
+        "operationId": "download-intake-upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "File bytes with Content-Disposition: attachment"
+          },
+          "404": {
+            "description": "Link, upload, or file not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download an uploaded file",
         "tags": [
           "Intake"
         ]
