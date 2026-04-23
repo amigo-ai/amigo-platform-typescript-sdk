@@ -45,6 +45,13 @@ The SDK is the typed client boundary between your runtime and the workspace-scop
 | Generated package surface                   | [api.md](./api.md)                                       |
 | Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                           |
 
+### Guides
+
+| Guide | Description |
+| ----- | ----------- |
+| [Build a Custom Patient Form](./docs/guides/build-a-form.md) | Create, deliver, and render patient intake forms using surfaces |
+| [Build a Custom Clinical Copilot](./docs/guides/build-a-scribe.md) | Real-time ambient documentation with encounter review and voiceprint enrollment |
+
 The docs site remains the primary reference. The repo-local examples stay close to the shipped package surface and are typechecked in CI to reduce drift.
 
 ## Installation
@@ -427,6 +434,65 @@ await client.settings.retention.update({ call_recordings_days: 90 })
 // Memory dimensions
 const memory = await client.settings.memory.get()
 console.log(memory.dimensions) // list of configured memory dimensions
+```
+
+### Surfaces (Patient Forms)
+
+Surfaces are workspace-scoped form specs for collecting patient data. Create a form, deliver it via SMS or email, and track completion. See the full guide: [Build a Custom Patient Form](./docs/guides/build-a-form.md).
+
+```typescript
+// Create a patient intake form
+const surface = await client.POST('/v1/{workspace_id}/surfaces', {
+  body: {
+    entity_id: patientId,
+    title: 'New Patient Intake',
+    channel: 'sms',
+    fields: [
+      { key: 'full_name', label: 'Full Name', field_type: 'text', required: true },
+      { key: 'date_of_birth', label: 'Date of Birth', field_type: 'date', required: true },
+      { key: 'allergies', label: 'Allergies', field_type: 'multiselect', options: ['Penicillin', 'Sulfa', 'None'] },
+    ],
+  },
+})
+console.log(surface.data.url) // Patient-facing token URL
+
+// Deliver via SMS
+await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/deliver', {
+  params: { path: { surface_id: surface.data.id } },
+  body: { channel_address: '+15551234567' },
+})
+
+// Track completion
+const { data: rates } = await client.GET('/v1/{workspace_id}/analytics/surfaces/completion-rates', {})
+```
+
+Public token routes (`/s/{token}/spec`, `/s/{token}/submit`, etc.) require no API key -- use `openapi-fetch` with the SDK's `paths` type for full type safety on unauthenticated endpoints.
+
+### Scribe (Clinical Copilot)
+
+Build ambient clinical documentation tools. The SDK covers encounter review actions and scribe settings. The real-time copilot WebSocket (`/copilot-stream`) is documented in the full guide: [Build a Custom Clinical Copilot](./docs/guides/build-a-scribe.md).
+
+```typescript
+// Configure scribe settings
+const settings = await client.settings.scribe.get()
+await client.settings.scribe.update({ enabled: true, soap_style: 'detailed' })
+
+// Approve ICD-10 codes after physician review
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve', {
+  params: { path: { encounter_id: encounterId } },
+  body: { code: 'J06.9' },
+})
+
+// Edit SOAP notes
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit', {
+  params: { path: { encounter_id: encounterId } },
+  body: { section: 'assessment', content: 'Acute upper respiratory infection...' },
+})
+
+// Finalize for EHR sync
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize', {
+  params: { path: { encounter_id: encounterId } },
+})
 ```
 
 ### Billing

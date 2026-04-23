@@ -27,3 +27,11 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - [examples/advanced/request-control.ts](./advanced/request-control.ts): use low-level typed request helpers with timeout, retries, headers, and raw response access
 - [examples/world/search-entities.ts](./world/search-entities.ts): query entities and inspect timelines
 - [examples/webhooks/verify-webhook.ts](./webhooks/verify-webhook.ts): verify and parse a webhook delivery
+- [examples/surfaces/create-and-deliver.ts](./surfaces/create-and-deliver.ts): create a patient intake form and deliver it via SMS
+- [examples/surfaces/render-form.ts](./surfaces/render-form.ts): fetch a surface spec by token and display the field structure (uses public token routes)
+- [examples/scribe/encounter-review.ts](./scribe/encounter-review.ts): fetch an encounter entity, approve ICD-10 codes, edit SOAP notes, and finalize
+
+For full walkthroughs, see the guides:
+
+- [Build a Custom Patient Form](../docs/guides/build-a-form.md)
+- [Build a Custom Clinical Copilot](../docs/guides/build-a-scribe.md)
