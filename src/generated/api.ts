@@ -3220,6 +3220,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an uploaded file
+         * @description Proxy the raw file bytes from the UC Volume back to the caller.
+         */
+        get: operations["download-intake-upload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -10374,7 +10394,7 @@ export interface components {
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["NameString"] | null;
+            display_name?: components["schemas"]["DescriptionString"] | null;
             /**
              * Expires In Hours
              * @default 168
@@ -17189,29 +17209,35 @@ export interface components {
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
          *
-         *     The actual utterance is generated from tool semantics + turn emotion +
-         *     patient context. Operators describe the shape of the wait, the engine
-         *     chooses the words.
-         *
-         *     ``custom_phrase`` is a narrow escape hatch for demo-critical slow tools
-         *     where generic templates cannot cover the wait. Gated: only honored when
-         *     ``expected_latency_ms >= 4000`` and ``progress_class`` is set, and the
-         *     phrase is at most 30 words. The gate keeps the surface small so the
-         *     engine-picks-words contract holds for the bulk of tools.
+         *     ``deterministic=true``: scripted — ``phrases`` play verbatim in order.
+         *     ``deterministic=false``: engine picks — ``phrases`` are hints.
+         *     ``trigger_delay_ms``: milliseconds before first filler (0 = immediate).
+         *     ``interval_ms``: milliseconds between subsequent fillers.
          */
         ProgressHint: {
             /** Custom Phrase */
             custom_phrase?: string | null;
+            /**
+             * Deterministic
+             * @default false
+             */
+            deterministic?: boolean;
             /** Expected Latency Ms */
             expected_latency_ms?: number | null;
+            /** Interval Ms */
+            interval_ms?: number | null;
             /**
              * Mode
              * @default auto
              * @enum {string}
              */
             mode?: "auto" | "silent" | "backchannel" | "verbal";
+            /** Phrases */
+            phrases?: string[] | null;
             /** Progress Class */
             progress_class?: ("lookup" | "write" | "external_call" | "compute" | "multi_step") | null;
+            /** Trigger Delay Ms */
+            trigger_delay_ms?: number | null;
         };
         /** ProvisionResponse */
         ProvisionResponse: {
@@ -18645,7 +18671,10 @@ export interface components {
         SimulationRunResponse: {
             /** Branch Name */
             branch_name?: string | null;
-            bridge_request?: components["schemas"]["BridgeRequest"] | null;
+            /** Bridge Request */
+            bridge_request?: {
+                [key: string]: unknown;
+            } | null;
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -18658,7 +18687,9 @@ export interface components {
             /** Objective */
             objective?: string | null;
             /** Scenarios */
-            scenarios?: components["schemas"]["Scenario"][] | null;
+            scenarios?: {
+                [key: string]: unknown;
+            }[] | null;
             /**
              * Service Id
              * Format: uuid
@@ -21962,6 +21993,11 @@ export interface components {
             /** Branch Name */
             branch_name?: string | null;
             /**
+             * Caller Id
+             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             */
+            caller_id?: string | null;
+            /**
              * Service Id
              * Format: uuid
              */
@@ -22583,11 +22619,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/octet-stream": string;
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -29387,6 +29419,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["IntakeUploadResponse"][];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "download-intake-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                upload_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File bytes with Content-Disposition: attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description Link, upload, or file not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
