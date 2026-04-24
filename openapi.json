@@ -994,6 +994,90 @@
         "title": "AgentResponse",
         "type": "object"
       },
+      "AgentTranscriptEvent": {
+        "properties": {
+          "action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Action"
+          },
+          "filler_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filler Type"
+          },
+          "interrupted": {
+            "default": false,
+            "title": "Interrupted",
+            "type": "boolean"
+          },
+          "speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Speaker Id"
+          },
+          "speaker_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Speaker Role"
+          },
+          "streaming": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Streaming"
+          },
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          },
+          "type": {
+            "const": "agent_transcript",
+            "default": "agent_transcript",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcript"
+        ],
+        "title": "AgentTranscriptEvent",
+        "type": "object"
+      },
       "AgentVersion": {
         "description": "A version of an Agent document.",
         "properties": {
@@ -3255,6 +3339,102 @@
         "title": "BriefingSection",
         "type": "object"
       },
+      "CallEndedEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "completion_reason": {
+            "enum": [
+              "completed",
+              "abandoned",
+              "escalated",
+              "transferred",
+              "timeout",
+              "error",
+              "voicemail",
+              "no_answer",
+              "caller_hangup",
+              "forwarded",
+              "terminal_state",
+              "warm_transfer_completed",
+              "no_inbound_audio",
+              "cancelled"
+            ],
+            "title": "Completion Reason",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "inbound",
+              "outbound",
+              "playground",
+              "simulated",
+              "test"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "escalated": {
+            "default": false,
+            "title": "Escalated",
+            "type": "boolean"
+          },
+          "event_type": {
+            "const": "call.ended",
+            "default": "call.ended",
+            "title": "Event Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "direction",
+          "duration_seconds",
+          "completion_reason"
+        ],
+        "title": "CallEndedEvent",
+        "type": "object"
+      },
+      "CallEscalatedEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "escalation_id": {
+            "title": "Escalation Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "call.escalated",
+            "default": "call.escalated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "trigger": {
+            "title": "Trigger",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "escalation_id",
+          "trigger",
+          "reason"
+        ],
+        "title": "CallEscalatedEvent",
+        "type": "object"
+      },
       "CallIntelligenceDetail": {
         "description": "Layer 4 (Narrative) intelligence for a completed call.\n\nAggregated summaries, quality breakdown, and key moments \u2014 the\ninterpretive layer. Per-turn visualization data lives on the unified\ntimeline (call detail \u2192 PlaybackTimeline.segments), not here.",
         "properties": {
@@ -3497,6 +3677,54 @@
           "has_more"
         ],
         "title": "CallListResponse",
+        "type": "object"
+      },
+      "CallStartedEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "caller_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Caller Id"
+          },
+          "direction": {
+            "enum": [
+              "inbound",
+              "outbound",
+              "playground",
+              "simulated",
+              "test"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "call.started",
+            "default": "call.started",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "direction",
+          "service_id"
+        ],
+        "title": "CallStartedEvent",
         "type": "object"
       },
       "CallStatsResponse": {
@@ -15156,6 +15384,17 @@
             ],
             "title": "Median"
           },
+          "observed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed"
+          },
           "run_id": {
             "title": "Run Id",
             "type": "string"
@@ -15187,6 +15426,17 @@
           "workspace_id": {
             "title": "Workspace Id",
             "type": "string"
+          },
+          "ym": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ym"
           }
         },
         "required": [
@@ -15778,6 +16028,66 @@
           "templates"
         ],
         "title": "FormTemplateUpdateRequest",
+        "type": "object"
+      },
+      "ForwardCallResolvedEvent": {
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Error"
+          },
+          "location_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Location Name"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Result"
+          },
+          "target_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Target Number"
+          },
+          "type": {
+            "const": "forward_call_resolved",
+            "default": "forward_call_resolved",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "ForwardCallResolvedEvent",
         "type": "object"
       },
       "ForwardingConfigRequest": {
@@ -19582,6 +19892,163 @@
         "title": "NonDesiredState",
         "type": "object"
       },
+      "NoteRollupCategoryEntry": {
+        "properties": {
+          "mean_risk": {
+            "title": "Mean Risk",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "pct": {
+            "title": "Pct",
+            "type": "number"
+          },
+          "risk_lift": {
+            "title": "Risk Lift",
+            "type": "number"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "n",
+          "pct",
+          "mean_risk",
+          "risk_lift"
+        ],
+        "title": "NoteRollupCategoryEntry",
+        "type": "object"
+      },
+      "NoteRollupResponse": {
+        "properties": {
+          "cohort_mean_risk": {
+            "title": "Cohort Mean Risk",
+            "type": "number"
+          },
+          "sdoh": {
+            "$ref": "#/components/schemas/NoteRollupSdoh"
+          },
+          "sentiment_distribution": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Sentiment Distribution",
+            "type": "array"
+          },
+          "top_concerns": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Concerns",
+            "type": "array"
+          },
+          "top_medications": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Medications",
+            "type": "array"
+          },
+          "top_symptoms": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Symptoms",
+            "type": "array"
+          },
+          "total_notes": {
+            "title": "Total Notes",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "total_notes",
+          "cohort_mean_risk",
+          "sentiment_distribution",
+          "top_symptoms",
+          "top_concerns",
+          "top_medications",
+          "sdoh"
+        ],
+        "title": "NoteRollupResponse",
+        "type": "object"
+      },
+      "NoteRollupSdoh": {
+        "properties": {
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Activity",
+            "type": "array"
+          },
+          "diet": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Diet",
+            "type": "array"
+          },
+          "smoking": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Smoking",
+            "type": "array"
+          }
+        },
+        "required": [
+          "activity",
+          "smoking",
+          "diet"
+        ],
+        "title": "NoteRollupSdoh",
+        "type": "object"
+      },
+      "ObserverSSEEvent": {
+        "discriminator": {
+          "mapping": {
+            "agent_transcript": "#/components/schemas/AgentTranscriptEvent",
+            "forward_call_resolved": "#/components/schemas/ForwardCallResolvedEvent",
+            "speaker_muted": "#/components/schemas/SpeakerMutedEvent",
+            "tool_call_completed": "#/components/schemas/ToolCallCompletedEvent",
+            "tool_call_started": "#/components/schemas/ToolCallStartedEvent",
+            "user_transcript": "#/components/schemas/UserTranscriptEvent"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/UserTranscriptEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AgentTranscriptEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ToolCallStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ToolCallCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ForwardCallResolvedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SpeakerMutedEvent"
+          }
+        ]
+      },
       "OcrRequest": {
         "properties": {
           "image": {
@@ -19637,6 +20104,100 @@
           }
         },
         "title": "OperatorIntelligenceSummary",
+        "type": "object"
+      },
+      "OperatorJoinedCallEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "operator.joined_call",
+            "default": "operator.joined_call",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "operator_id",
+          "mode"
+        ],
+        "title": "OperatorJoinedCallEvent",
+        "type": "object"
+      },
+      "OperatorLeftCallEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "operator.left_call",
+            "default": "operator.left_call",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "human_segment_turn_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Human Segment Turn Count"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "operator_id"
+        ],
+        "title": "OperatorLeftCallEvent",
+        "type": "object"
+      },
+      "OperatorModeChangedEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "operator.mode_changed",
+            "default": "operator.mode_changed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "mode": {
+            "title": "Mode",
+            "type": "string"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "operator_id",
+          "mode"
+        ],
+        "title": "OperatorModeChangedEvent",
         "type": "object"
       },
       "OperatorPerformanceItem": {
@@ -19819,6 +20380,78 @@
           "escalated_count"
         ],
         "title": "OperatorPerformanceTrendPoint",
+        "type": "object"
+      },
+      "OperatorProfileUpdatedEvent": {
+        "properties": {
+          "changes": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Changes"
+          },
+          "event_type": {
+            "const": "operator.profile_updated",
+            "default": "operator.profile_updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id"
+        ],
+        "title": "OperatorProfileUpdatedEvent",
+        "type": "object"
+      },
+      "OperatorRegisteredEvent": {
+        "properties": {
+          "event_type": {
+            "const": "operator.registered",
+            "default": "operator.registered",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Timestamp"
+          }
+        },
+        "required": [
+          "operator_id"
+        ],
+        "title": "OperatorRegisteredEvent",
         "type": "object"
       },
       "OperatorResponse": {
@@ -20009,6 +20642,30 @@
         "title": "OperatorResponse",
         "type": "object"
       },
+      "OperatorStatusChangedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "operator.status_changed",
+            "default": "operator.status_changed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "operator_id": {
+            "title": "Operator Id",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id",
+          "status"
+        ],
+        "title": "OperatorStatusChangedEvent",
+        "type": "object"
+      },
       "OperatorStatusCounts": {
         "properties": {
           "busy": {
@@ -20035,6 +20692,37 @@
           "offline"
         ],
         "title": "OperatorStatusCounts",
+        "type": "object"
+      },
+      "OperatorWrapUpEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "operator.wrap_up",
+            "default": "operator.wrap_up",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "wrap_up_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Wrap Up Reason"
+          }
+        },
+        "required": [
+          "call_sid"
+        ],
+        "title": "OperatorWrapUpEvent",
         "type": "object"
       },
       "OrderedPathway": {
@@ -23105,6 +23793,30 @@
         "title": "PhoneNumberResponse",
         "type": "object"
       },
+      "PipelineErrorEvent": {
+        "properties": {
+          "data_source_id": {
+            "title": "Data Source Id",
+            "type": "string"
+          },
+          "error": {
+            "title": "Error",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "pipeline.error",
+            "default": "pipeline.error",
+            "title": "Event Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source_id",
+          "error"
+        ],
+        "title": "PipelineErrorEvent",
+        "type": "object"
+      },
       "PipelineMetrics": {
         "properties": {
           "connector_status": {
@@ -23278,6 +23990,35 @@
           "connector_runner_status"
         ],
         "title": "PipelineStatusResponse",
+        "type": "object"
+      },
+      "PipelineSyncCompletedEvent": {
+        "properties": {
+          "data_source_id": {
+            "title": "Data Source Id",
+            "type": "string"
+          },
+          "duration_ms": {
+            "title": "Duration Ms",
+            "type": "integer"
+          },
+          "event_count": {
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "event_type": {
+            "const": "pipeline.sync_completed",
+            "default": "pipeline.sync_completed",
+            "title": "Event Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "data_source_id",
+          "event_count",
+          "duration_ms"
+        ],
+        "title": "PipelineSyncCompletedEvent",
         "type": "object"
       },
       "PositiveSignalResponse": {
@@ -28149,6 +28890,25 @@
         "title": "SourceStatus",
         "type": "object"
       },
+      "SpeakerMutedEvent": {
+        "properties": {
+          "muted": {
+            "title": "Muted",
+            "type": "boolean"
+          },
+          "type": {
+            "const": "speaker_muted",
+            "default": "speaker_muted",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "muted"
+        ],
+        "title": "SpeakerMutedEvent",
+        "type": "object"
+      },
       "SqlQueryRequest": {
         "properties": {
           "sql": {
@@ -28319,6 +29079,137 @@
         "title": "StepRequest",
         "type": "object"
       },
+      "StratifiedFitRow": {
+        "properties": {
+          "auroc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auroc"
+          },
+          "base_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Rate"
+          },
+          "coefficients_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coefficients Json"
+          },
+          "cohort": {
+            "title": "Cohort",
+            "type": "string"
+          },
+          "intercept": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intercept"
+          },
+          "is_pooled_fallback": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Pooled Fallback"
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N"
+          },
+          "outcome_key": {
+            "title": "Outcome Key",
+            "type": "string"
+          },
+          "outcome_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Name"
+          },
+          "region": {
+            "title": "Region",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "outcome_key",
+          "cohort",
+          "region"
+        ],
+        "title": "StratifiedFitRow",
+        "type": "object"
+      },
+      "StratifiedFitsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StratifiedFitRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "StratifiedFitsResponse",
+        "type": "object"
+      },
       "StrippedNonemptyString": {
         "minLength": 1,
         "type": "string"
@@ -28477,6 +29368,155 @@
         "title": "SuggestionsResponse",
         "type": "object"
       },
+      "SurfaceArchivedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "surface.archived",
+            "default": "surface.archived",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id"
+        ],
+        "title": "SurfaceArchivedEvent",
+        "type": "object"
+      },
+      "SurfaceCreatedEvent": {
+        "properties": {
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.created",
+            "default": "surface.created",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "fields_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields Count"
+          },
+          "form_template_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Form Template Id"
+          },
+          "review_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Review Required"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id",
+          "channel"
+        ],
+        "title": "SurfaceCreatedEvent",
+        "type": "object"
+      },
+      "SurfaceDeliveredEvent": {
+        "properties": {
+          "channel": {
+            "title": "Channel",
+            "type": "string"
+          },
+          "channel_address": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Channel Address"
+          },
+          "delivery_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Delivery Status"
+          },
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.delivered",
+            "default": "surface.delivered",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id",
+          "channel"
+        ],
+        "title": "SurfaceDeliveredEvent",
+        "type": "object"
+      },
       "SurfaceField": {
         "description": "A single data collection field in a surface spec.\n\nGenerated by agents from HSM analysis. Each field maps\nto a specific piece of data the world model needs.",
         "properties": {
@@ -28592,6 +29632,119 @@
         "title": "SurfaceField",
         "type": "object"
       },
+      "SurfaceFieldSavedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.field_saved",
+            "default": "surface.field_saved",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "field_id": {
+            "title": "Field Id",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id",
+          "field_id"
+        ],
+        "title": "SurfaceFieldSavedEvent",
+        "type": "object"
+      },
+      "SurfaceOpenedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.opened",
+            "default": "surface.opened",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id"
+        ],
+        "title": "SurfaceOpenedEvent",
+        "type": "object"
+      },
+      "SurfacePendingReviewEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.pending_review",
+            "default": "surface.pending_review",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "form_template_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Form Template Id"
+          },
+          "review_required": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Review Required"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Source"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id"
+        ],
+        "title": "SurfacePendingReviewEvent",
+        "type": "object"
+      },
       "SurfaceProgressResponse": {
         "properties": {
           "empty_count": {
@@ -28642,6 +29795,30 @@
           "required_empty_keys"
         ],
         "title": "SurfaceProgressResponse",
+        "type": "object"
+      },
+      "SurfaceReshapedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "surface.reshaped",
+            "default": "surface.reshaped",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "original_surface_id": {
+            "title": "Original Surface Id",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "original_surface_id"
+        ],
+        "title": "SurfaceReshapedEvent",
         "type": "object"
       },
       "SurfaceResponse": {
@@ -28839,6 +30016,49 @@
         "title": "SurfaceResponse",
         "type": "object"
       },
+      "SurfaceReviewApprovedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "surface.review_approved",
+            "default": "surface.review_approved",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id"
+        ],
+        "title": "SurfaceReviewApprovedEvent",
+        "type": "object"
+      },
+      "SurfaceReviewRejectedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "surface.review_rejected",
+            "default": "surface.review_rejected",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "reason"
+        ],
+        "title": "SurfaceReviewRejectedEvent",
+        "type": "object"
+      },
       "SurfaceSection": {
         "description": "A page/step in a multi-page surface form.",
         "properties": {
@@ -29021,6 +30241,61 @@
           "fields"
         ],
         "title": "SurfaceSpec",
+        "type": "object"
+      },
+      "SurfaceSubmittedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "surface.submitted",
+            "default": "surface.submitted",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Submitted At"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id",
+          "entity_id"
+        ],
+        "title": "SurfaceSubmittedEvent",
+        "type": "object"
+      },
+      "SurfaceUpdatedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "surface.updated",
+            "default": "surface.updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "surface_id": {
+            "title": "Surface Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "surface_id"
+        ],
+        "title": "SurfaceUpdatedEvent",
         "type": "object"
       },
       "SwitchModeRequest": {
@@ -29984,6 +31259,66 @@
         "title": "ThroughputBucket",
         "type": "object"
       },
+      "ToolCallCompletedEvent": {
+        "properties": {
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Error"
+          },
+          "output": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Output"
+          },
+          "succeeded": {
+            "default": true,
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "tool_call_completed",
+            "default": "tool_call_completed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_name"
+        ],
+        "title": "ToolCallCompletedEvent",
+        "type": "object"
+      },
       "ToolCallDetail": {
         "description": "Rich tool call data from a simulation step.",
         "properties": {
@@ -30075,6 +31410,38 @@
           "tool_id"
         ],
         "title": "ToolCallSpec",
+        "type": "object"
+      },
+      "ToolCallStartedEvent": {
+        "properties": {
+          "tool_input": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tool Input"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "tool_call_started",
+            "default": "tool_call_started",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_name"
+        ],
+        "title": "ToolCallStartedEvent",
         "type": "object"
       },
       "ToolExecuteRequest": {
@@ -33660,6 +35027,90 @@
         "title": "UsageTrendPoint",
         "type": "object"
       },
+      "UserTranscriptEvent": {
+        "properties": {
+          "eot_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Eot Confidence"
+          },
+          "is_barge_in": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Is Barge In"
+          },
+          "speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Speaker Id"
+          },
+          "speaker_role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Speaker Role"
+          },
+          "state": {
+            "default": "",
+            "title": "State",
+            "type": "string"
+          },
+          "stt_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Stt Confidence"
+          },
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          },
+          "type": {
+            "const": "user_transcript",
+            "default": "user_transcript",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcript"
+        ],
+        "title": "UserTranscriptEvent",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -35390,6 +36841,107 @@
         ],
         "title": "WorkspaceResponse",
         "type": "object"
+      },
+      "WorkspaceSSEEvent": {
+        "discriminator": {
+          "mapping": {
+            "call.ended": "#/components/schemas/CallEndedEvent",
+            "call.escalated": "#/components/schemas/CallEscalatedEvent",
+            "call.started": "#/components/schemas/CallStartedEvent",
+            "operator.joined_call": "#/components/schemas/OperatorJoinedCallEvent",
+            "operator.left_call": "#/components/schemas/OperatorLeftCallEvent",
+            "operator.mode_changed": "#/components/schemas/OperatorModeChangedEvent",
+            "operator.profile_updated": "#/components/schemas/OperatorProfileUpdatedEvent",
+            "operator.registered": "#/components/schemas/OperatorRegisteredEvent",
+            "operator.status_changed": "#/components/schemas/OperatorStatusChangedEvent",
+            "operator.wrap_up": "#/components/schemas/OperatorWrapUpEvent",
+            "pipeline.error": "#/components/schemas/PipelineErrorEvent",
+            "pipeline.sync_completed": "#/components/schemas/PipelineSyncCompletedEvent",
+            "surface.archived": "#/components/schemas/SurfaceArchivedEvent",
+            "surface.created": "#/components/schemas/SurfaceCreatedEvent",
+            "surface.delivered": "#/components/schemas/SurfaceDeliveredEvent",
+            "surface.field_saved": "#/components/schemas/SurfaceFieldSavedEvent",
+            "surface.opened": "#/components/schemas/SurfaceOpenedEvent",
+            "surface.pending_review": "#/components/schemas/SurfacePendingReviewEvent",
+            "surface.reshaped": "#/components/schemas/SurfaceReshapedEvent",
+            "surface.review_approved": "#/components/schemas/SurfaceReviewApprovedEvent",
+            "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
+            "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
+            "surface.updated": "#/components/schemas/SurfaceUpdatedEvent"
+          },
+          "propertyName": "event_type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/CallStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CallEndedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/CallEscalatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceCreatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceDeliveredEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceArchivedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceReshapedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceSubmittedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceFieldSavedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceOpenedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfacePendingReviewEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceReviewApprovedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SurfaceReviewRejectedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/PipelineSyncCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/PipelineErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorRegisteredEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorStatusChangedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorProfileUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorJoinedCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorLeftCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorModeChangedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/OperatorWrapUpEvent"
+          }
+        ]
       },
       "WrapUpRequest": {
         "description": "Request to record operator intervention wrap-up.",
@@ -45059,9 +46611,15 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceSSEEvent"
+                }
               },
-              "text/event-stream": {}
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceSSEEvent"
+                }
+              }
             },
             "description": "SSE stream"
           },
@@ -48370,6 +49928,76 @@
         ]
       }
     },
+    "/v1/{workspace_id}/m42/notes/rollup": {
+      "get": {
+        "description": "Cohort-wide (or per-cluster / per-district) rollup of NLP extractions joined onto patient-topology risk. Surfaces which narrative signals correlate with higher predicted T2D risk.",
+        "operationId": "get_notes_rollup_v1__workspace_id__m42_notes_rollup_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cluster"
+            }
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteRollupResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Notes Rollup",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
     "/v1/{workspace_id}/m42/patient-topology": {
       "get": {
         "description": "Patient-level UMAP coordinates + predicted risk for the Self-Image scatter. Hand-seeded demo data (no ML training). Paginated.",
@@ -48570,6 +50198,58 @@
           }
         },
         "summary": "List Positive Signals",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/stratified-fits": {
+      "get": {
+        "description": "Per-cohort x region GLM fits with pooled fallback. Drives the dashboard's outcome-by-segment comparison view.",
+        "operationId": "list_stratified_fits_v1__workspace_id__m42_stratified_fits_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StratifiedFitsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Stratified Fits",
         "tags": [
           "M42"
         ]
