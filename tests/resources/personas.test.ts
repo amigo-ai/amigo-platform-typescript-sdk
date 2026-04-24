@@ -20,7 +20,9 @@ const PERSONA_FIXTURE = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -36,7 +38,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -49,11 +53,9 @@ const client = new AmigoClient({
     [`GET ${BASE}/personas`]: () =>
       Response.json({ items: [PERSONA_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST ${BASE}/personas`]: () =>
-      Response.json(PERSONA_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/personas`]: () => Response.json(PERSONA_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/personas/${PERSONA_ID}`]: () =>
-      Response.json(PERSONA_FIXTURE),
+    [`GET ${BASE}/personas/${PERSONA_ID}`]: () => Response.json(PERSONA_FIXTURE),
 
     [`GET ${BASE}/personas/not-found`]: () =>
       Response.json({ detail: 'Persona not found', error_code: 'not_found' }, { status: 404 }),
@@ -61,8 +63,7 @@ const client = new AmigoClient({
     [`PATCH ${BASE}/personas/${PERSONA_ID}`]: () =>
       Response.json({ ...PERSONA_FIXTURE, name: 'Updated Persona' }),
 
-    [`DELETE ${BASE}/personas/${PERSONA_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/personas/${PERSONA_ID}`]: () => new Response(null, { status: 204 }),
   }),
 })
 

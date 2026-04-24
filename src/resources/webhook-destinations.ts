@@ -52,15 +52,12 @@ export class WebhookDestinationsResource extends WorkspaceScopedResource {
 
   async listDeliveries(destinationId: string, params?: ListParams) {
     return extractData(
-      await this.client.GET(
-        '/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries',
-        {
-          params: {
-            path: { workspace_id: this.workspaceId, destination_id: destinationId },
-            query: params,
-          },
+      await this.client.GET('/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries', {
+        params: {
+          path: { workspace_id: this.workspaceId, destination_id: destinationId },
+          query: params,
         },
-      ),
+      }),
     )
   }
 

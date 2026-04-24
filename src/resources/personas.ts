@@ -38,10 +38,7 @@ export class PersonasResource extends WorkspaceScopedResource {
     )
   }
 
-  async update(
-    personaId: PersonaId | string,
-    body: components['schemas']['UpdatePersonaRequest'],
-  ) {
+  async update(personaId: PersonaId | string, body: components['schemas']['UpdatePersonaRequest']) {
     return extractData(
       await this.client.PATCH('/v1/{workspace_id}/personas/{persona_id}', {
         params: { path: { workspace_id: this.workspaceId, persona_id: personaId } },

@@ -52,7 +52,9 @@ const INTELLIGENCE_FIXTURE = {
   },
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -68,7 +70,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -78,11 +82,9 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`POST ${BASE}/simulations/sessions`]: () =>
-      Response.json(SESSION_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/simulations/sessions`]: () => Response.json(SESSION_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/simulations/sessions/${SESSION_ID}`]: () =>
-      Response.json(SESSION_FIXTURE),
+    [`GET ${BASE}/simulations/sessions/${SESSION_ID}`]: () => Response.json(SESSION_FIXTURE),
 
     [`GET ${BASE}/simulations/sessions/not-found`]: () =>
       Response.json({ detail: 'Session not found', error_code: 'not_found' }, { status: 404 }),
@@ -90,11 +92,9 @@ const client = new AmigoClient({
     [`DELETE ${BASE}/simulations/sessions/${SESSION_ID}`]: () =>
       Response.json({ status: 'destroyed' }),
 
-    [`POST ${BASE}/simulations/sessions/step`]: () =>
-      Response.json(STEP_RESULT_FIXTURE),
+    [`POST ${BASE}/simulations/sessions/step`]: () => Response.json(STEP_RESULT_FIXTURE),
 
-    [`POST ${BASE}/simulations/sessions/recommend`]: () =>
-      Response.json(RECOMMEND_FIXTURE),
+    [`POST ${BASE}/simulations/sessions/recommend`]: () => Response.json(RECOMMEND_FIXTURE),
 
     [`GET ${BASE}/simulations/sessions/${SESSION_ID}/intelligence`]: () =>
       Response.json(INTELLIGENCE_FIXTURE),

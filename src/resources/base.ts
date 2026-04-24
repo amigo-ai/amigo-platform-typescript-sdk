@@ -55,11 +55,18 @@ export abstract class WorkspaceScopedResource {
         yield item as Item
       }
 
-      if (!page.has_more || page.continuation_token === null || page.continuation_token === undefined) {
+      if (
+        !page.has_more ||
+        page.continuation_token === null ||
+        page.continuation_token === undefined
+      ) {
         break
       }
 
-      nextParams = { ...(nextParams as object | undefined), continuation_token: page.continuation_token } as TParams
+      nextParams = {
+        ...(nextParams as object | undefined),
+        continuation_token: page.continuation_token,
+      } as TParams
     }
   }
 

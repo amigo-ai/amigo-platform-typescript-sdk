@@ -4,7 +4,14 @@ import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const ROOT = path.resolve(__dirname, '..')
-const SECTION_ORDER = ['Features', 'Security', 'Improvements', 'Bug Fixes', 'Documentation', 'Maintenance']
+const SECTION_ORDER = [
+  'Features',
+  'Security',
+  'Improvements',
+  'Bug Fixes',
+  'Documentation',
+  'Maintenance',
+]
 const SECURITY_PATTERNS = [
   /\bsecurity\b/i,
   /\bvulnerability\b/i,

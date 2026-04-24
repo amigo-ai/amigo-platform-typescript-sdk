@@ -26,7 +26,9 @@ const VERSION_FIXTURE = {
   created_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -42,7 +44,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -55,20 +59,20 @@ const client = new AmigoClient({
     [`GET ${BASE}/context-graphs`]: () =>
       Response.json({ items: [GRAPH_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST ${BASE}/context-graphs`]: () =>
-      Response.json(GRAPH_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/context-graphs`]: () => Response.json(GRAPH_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/context-graphs/${GRAPH_ID}`]: () =>
-      Response.json(GRAPH_FIXTURE),
+    [`GET ${BASE}/context-graphs/${GRAPH_ID}`]: () => Response.json(GRAPH_FIXTURE),
 
     [`GET ${BASE}/context-graphs/not-found`]: () =>
-      Response.json({ detail: 'Context graph not found', error_code: 'not_found' }, { status: 404 }),
+      Response.json(
+        { detail: 'Context graph not found', error_code: 'not_found' },
+        { status: 404 },
+      ),
 
     [`PUT ${BASE}/context-graphs/${GRAPH_ID}`]: () =>
       Response.json({ ...GRAPH_FIXTURE, name: 'Updated Graph' }),
 
-    [`DELETE ${BASE}/context-graphs/${GRAPH_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/context-graphs/${GRAPH_ID}`]: () => new Response(null, { status: 204 }),
 
     [`POST ${BASE}/context-graphs/${GRAPH_ID}/versions`]: () =>
       Response.json(VERSION_FIXTURE, { status: 201 }),
@@ -76,8 +80,7 @@ const client = new AmigoClient({
     [`GET ${BASE}/context-graphs/${GRAPH_ID}/versions`]: () =>
       Response.json({ items: [VERSION_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/context-graphs/${GRAPH_ID}/versions/1`]: () =>
-      Response.json(VERSION_FIXTURE),
+    [`GET ${BASE}/context-graphs/${GRAPH_ID}/versions/1`]: () => Response.json(VERSION_FIXTURE),
 
     [`GET ${BASE}/context-graphs/${GRAPH_ID}/versions/latest`]: () =>
       Response.json(VERSION_FIXTURE),

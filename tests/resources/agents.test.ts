@@ -45,7 +45,9 @@ const AGENT_VERSION_FIXTURE = {
   updated_at: '2026-01-02T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -65,7 +67,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
         return handler()
       }
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -81,8 +85,7 @@ const client = new AmigoClient({
     [`POST ${BASE}/agents`]: () =>
       Response.json({ ...AGENT_FIXTURE, name: 'My Agent' }, { status: 201 }),
 
-    [`GET ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
-      Response.json(AGENT_FIXTURE),
+    [`GET ${BASE}/agents/${AGENT_FIXTURE.id}`]: () => Response.json(AGENT_FIXTURE),
 
     [`GET ${BASE}/agents/not-found`]: () =>
       Response.json({ detail: 'Agent not found', error_code: 'not_found' }, { status: 404 }),
@@ -90,8 +93,7 @@ const client = new AmigoClient({
     [`PUT ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
       Response.json({ ...AGENT_FIXTURE, name: 'Updated Agent' }),
 
-    [`DELETE ${BASE}/agents/${AGENT_FIXTURE.id}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/agents/${AGENT_FIXTURE.id}`]: () => new Response(null, { status: 204 }),
 
     [`POST ${BASE}/agents/${AGENT_FIXTURE.id}/versions`]: () =>
       Response.json(AGENT_VERSION_FIXTURE),

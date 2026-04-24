@@ -11,7 +11,11 @@ export class OperatorsResource extends WorkspaceScopedResource {
   }
 
   listAutoPaging(params?: { status?: string; limit?: number; offset?: number }) {
-    return this.iterateOffsetPaginatedList((pageParams) => this.list(pageParams), (page) => page.items, params)
+    return this.iterateOffsetPaginatedList(
+      (pageParams) => this.list(pageParams),
+      (page) => page.items,
+      params,
+    )
   }
 
   async create(body: components['schemas']['CreateOperatorRequest']) {

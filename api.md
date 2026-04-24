@@ -65,6 +65,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `update`
 - `archive`
+- `provision`
+- `checkEnvironment`
+- `convertEnvironment`
 
 ### `apiKeys`
 

@@ -201,15 +201,12 @@ The response includes:
 Deliver the form via SMS, email, or any channel. The platform handles SMS and email delivery natively.
 
 ```typescript
-const delivery = await client.POST(
-  '/v1/{workspace_id}/surfaces/{surface_id}/deliver',
-  {
-    params: { path: { surface_id: surface.data.id } },
-    body: {
-      channel_address: '+15551234567',
-    },
+const delivery = await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/deliver', {
+  params: { path: { surface_id: surface.data.id } },
+  body: {
+    channel_address: '+15551234567',
   },
-)
+})
 
 console.log('Delivery status:', delivery.data.status)
 console.log('Sent via:', delivery.data.delivery_provider)
@@ -219,15 +216,12 @@ console.log('Message ID:', delivery.data.message_id)
 For email delivery, pass an email address instead:
 
 ```typescript
-const emailDelivery = await client.POST(
-  '/v1/{workspace_id}/surfaces/{surface_id}/deliver',
-  {
-    params: { path: { surface_id: surface.data.id } },
-    body: {
-      channel_address: 'jane.doe@example.com',
-    },
+const emailDelivery = await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/deliver', {
+  params: { path: { surface_id: surface.data.id } },
+  body: {
+    channel_address: 'jane.doe@example.com',
   },
-)
+})
 ```
 
 ## Step 3: Render the form (custom UI)
@@ -465,21 +459,15 @@ await client.PATCH('/v1/{workspace_id}/surfaces/{surface_id}', {
 })
 
 // Check field-level completion progress
-const { data: progress } = await client.GET(
-  '/v1/{workspace_id}/surfaces/{surface_id}/progress',
-  {
-    params: { path: { surface_id: 'surface-id' } },
-  },
-)
+const { data: progress } = await client.GET('/v1/{workspace_id}/surfaces/{surface_id}/progress', {
+  params: { path: { surface_id: 'surface-id' } },
+})
 console.log('Progress:', progress)
 
 // Reshape: create a new surface with only the unfilled fields
-const { data: reshaped } = await client.POST(
-  '/v1/{workspace_id}/surfaces/{surface_id}/reshape',
-  {
-    params: { path: { surface_id: 'surface-id' } },
-  },
-)
+const { data: reshaped } = await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/reshape', {
+  params: { path: { surface_id: 'surface-id' } },
+})
 console.log('Reshaped surface:', reshaped.id)
 
 // Archive a surface
@@ -512,15 +500,15 @@ Supported operators: `eq`, `neq`, `in`, `not_in`, `contains`.
 
 These endpoints use the surface token for authentication (no API key needed):
 
-| Method | Path                              | Description                             |
-| ------ | --------------------------------- | --------------------------------------- |
-| GET    | `/s/{token}/spec`                 | Fetch form spec + saved values          |
-| POST   | `/s/{token}/submit`               | Submit completed form                   |
-| POST   | `/s/{token}/heal`                 | LLM auto-correction for a field value   |
-| POST   | `/s/{token}/ocr`                  | Extract structured data from an image   |
-| GET    | `/s/{token}/availability`         | Appointment slots                       |
-| POST   | `/s/{token}/book`                 | Book an appointment                     |
-| PUT    | `/s/{token}/fields/{key}`         | Auto-save a single field                |
+| Method | Path                              | Description                                     |
+| ------ | --------------------------------- | ----------------------------------------------- |
+| GET    | `/s/{token}/spec`                 | Fetch form spec + saved values                  |
+| POST   | `/s/{token}/submit`               | Submit completed form                           |
+| POST   | `/s/{token}/heal`                 | LLM auto-correction for a field value           |
+| POST   | `/s/{token}/ocr`                  | Extract structured data from an image           |
+| GET    | `/s/{token}/availability`         | Appointment slots                               |
+| POST   | `/s/{token}/book`                 | Book an appointment                             |
+| PUT    | `/s/{token}/fields/{key}`         | Auto-save a single field                        |
 | GET    | `/s/{token}/lookup/{lookup_type}` | Medication, allergy, pharmacy, insurance search |
 
 ## Next steps

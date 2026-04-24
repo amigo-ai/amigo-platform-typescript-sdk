@@ -37,7 +37,9 @@ const APPLY_RESULT_FIXTURE = {
   skipped: [],
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -53,7 +55,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -63,8 +67,7 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/safety/config`]: () =>
-      Response.json(CONFIG_FIXTURE),
+    [`GET ${BASE}/safety/config`]: () => Response.json(CONFIG_FIXTURE),
 
     [`PUT ${BASE}/safety/config`]: () =>
       Response.json({ ...CONFIG_FIXTURE, accumulation_mild_threshold: 0.9 }),
@@ -72,8 +75,7 @@ const client = new AmigoClient({
     [`GET ${BASE}/safety/templates`]: () =>
       Response.json({ items: [TEMPLATE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/safety/templates/${TEMPLATE_ID}`]: () =>
-      Response.json(TEMPLATE_FIXTURE),
+    [`GET ${BASE}/safety/templates/${TEMPLATE_ID}`]: () => Response.json(TEMPLATE_FIXTURE),
 
     [`POST ${BASE}/safety/templates/${TEMPLATE_ID}/apply`]: () =>
       Response.json(APPLY_RESULT_FIXTURE),

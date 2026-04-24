@@ -44,7 +44,9 @@ const INVOICE_FIXTURE = {
   created_at: '2026-02-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -60,7 +62,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -70,23 +74,32 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/billing/dashboard`]: () =>
-      Response.json(DASHBOARD_FIXTURE),
+    [`GET ${BASE}/billing/dashboard`]: () => Response.json(DASHBOARD_FIXTURE),
 
-    [`GET ${BASE}/billing/usage`]: () =>
-      Response.json(USAGE_FIXTURE),
+    [`GET ${BASE}/billing/usage`]: () => Response.json(USAGE_FIXTURE),
 
     [`GET ${BASE}/billing/usage/trends`]: () =>
       Response.json([
-        { meter_key: 'voice_minutes', period_start: '2026-01-01', period_end: '2026-01-02', unit: 'minutes', usage: 150 },
-        { meter_key: 'voice_minutes', period_start: '2026-01-02', period_end: '2026-01-03', unit: 'minutes', usage: 175 },
+        {
+          meter_key: 'voice_minutes',
+          period_start: '2026-01-01',
+          period_end: '2026-01-02',
+          unit: 'minutes',
+          usage: 150,
+        },
+        {
+          meter_key: 'voice_minutes',
+          period_start: '2026-01-02',
+          period_end: '2026-01-03',
+          unit: 'minutes',
+          usage: 175,
+        },
       ]),
 
     [`GET ${BASE}/billing/invoices`]: () =>
       Response.json({ items: [INVOICE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/billing/invoices/${INVOICE_ID}`]: () =>
-      Response.json(INVOICE_FIXTURE),
+    [`GET ${BASE}/billing/invoices/${INVOICE_ID}`]: () => Response.json(INVOICE_FIXTURE),
 
     [`GET ${BASE}/billing/invoices/not-found`]: () =>
       Response.json({ detail: 'Invoice not found', error_code: 'not_found' }, { status: 404 }),

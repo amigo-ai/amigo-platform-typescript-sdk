@@ -37,7 +37,9 @@ const ROTATE_RESULT_FIXTURE = {
   rotation_expires_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -53,7 +55,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -69,17 +73,18 @@ const client = new AmigoClient({
     [`POST ${BASE}/webhook-destinations`]: () =>
       Response.json(DESTINATION_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/webhook-destinations/${DEST_ID}`]: () =>
-      Response.json(DESTINATION_FIXTURE),
+    [`GET ${BASE}/webhook-destinations/${DEST_ID}`]: () => Response.json(DESTINATION_FIXTURE),
 
     [`GET ${BASE}/webhook-destinations/not-found`]: () =>
-      Response.json({ detail: 'Webhook destination not found', error_code: 'not_found' }, { status: 404 }),
+      Response.json(
+        { detail: 'Webhook destination not found', error_code: 'not_found' },
+        { status: 404 },
+      ),
 
     [`PUT ${BASE}/webhook-destinations/${DEST_ID}`]: () =>
       Response.json({ ...DESTINATION_FIXTURE, name: 'Updated Webhook' }),
 
-    [`DELETE ${BASE}/webhook-destinations/${DEST_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/webhook-destinations/${DEST_ID}`]: () => new Response(null, { status: 204 }),
 
     [`GET ${BASE}/webhook-destinations/${DEST_ID}/deliveries`]: () =>
       Response.json({ items: [DELIVERY_FIXTURE], has_more: false, continuation_token: null }),

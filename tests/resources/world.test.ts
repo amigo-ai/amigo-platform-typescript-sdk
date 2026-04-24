@@ -5,7 +5,9 @@ const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const ENTITY_ID = 'entity-00000000-0000-0000-0000-000000000001'
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -21,7 +23,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -44,8 +48,7 @@ const client = new AmigoClient({
     [`GET ${BASE}/world/entities`]: () =>
       Response.json({ entities: [entityFixture], has_more: false, next_offset: null, total: 1 }),
 
-    [`GET ${BASE}/world/entities/${ENTITY_ID}`]: () =>
-      Response.json(entityFixture),
+    [`GET ${BASE}/world/entities/${ENTITY_ID}`]: () => Response.json(entityFixture),
 
     [`GET ${BASE}/world/entities/${ENTITY_ID}/relationships`]: () =>
       Response.json({ relationships: [] }),
@@ -53,7 +56,9 @@ const client = new AmigoClient({
     [`GET ${BASE}/world/entities/${ENTITY_ID}/timeline`]: () =>
       Response.json({
         entity_id: ENTITY_ID,
-        events: [{ id: 'event-001', event_type: 'call_completed', domain: 'voice', source: 'voice-agent' }],
+        events: [
+          { id: 'event-001', event_type: 'call_completed', domain: 'voice', source: 'voice-agent' },
+        ],
         has_more: false,
       }),
 

@@ -28,15 +28,15 @@ const HIPAA_FIXTURE = {
 
 const ACCESS_REVIEW_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  credentials: [
-    { id: 'cred-001', type: 'api_key', status: 'active' },
-  ],
+  credentials: [{ id: 'cred-001', type: 'api_key', status: 'active' }],
   generated_at: '2026-01-10T00:00:00Z',
   jwt_credentials_note: 'JWT credentials are managed via identity service',
   total_credentials: 8,
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -52,7 +52,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -62,14 +64,11 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/compliance/dashboard`]: () =>
-      Response.json(DASHBOARD_FIXTURE),
+    [`GET ${BASE}/compliance/dashboard`]: () => Response.json(DASHBOARD_FIXTURE),
 
-    [`GET ${BASE}/compliance/hipaa`]: () =>
-      Response.json(HIPAA_FIXTURE),
+    [`GET ${BASE}/compliance/hipaa`]: () => Response.json(HIPAA_FIXTURE),
 
-    [`GET ${BASE}/compliance/access-review`]: () =>
-      Response.json(ACCESS_REVIEW_FIXTURE),
+    [`GET ${BASE}/compliance/access-review`]: () => Response.json(ACCESS_REVIEW_FIXTURE),
   }),
 })
 
