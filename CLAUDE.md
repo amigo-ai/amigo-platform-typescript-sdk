@@ -4,16 +4,16 @@ Official TypeScript SDK for the Amigo Platform API (`@amigo-ai/platform-sdk` on 
 
 ## Key Commands
 
-| Task | Command |
-|---|---|
-| Build (generate types + bundle + declarations) | `npm run build` |
-| Run unit tests | `npm test` |
-| Run all tests (unit + core + integration) | `npx vitest run` |
-| Typecheck | `npm run typecheck` |
-| Lint | `npm run lint` |
-| Format check | `npm run format` |
-| Format write | `npm run format:write` |
-| Generate types from OpenAPI spec | `npm run gen-types` |
+| Task                                           | Command                |
+| ---------------------------------------------- | ---------------------- |
+| Build (generate types + bundle + declarations) | `npm run build`        |
+| Run unit tests                                 | `npm test`             |
+| Run all tests (unit + core + integration)      | `npx vitest run`       |
+| Typecheck                                      | `npm run typecheck`    |
+| Lint                                           | `npm run lint`         |
+| Format check                                   | `npm run format`       |
+| Format write                                   | `npm run format:write` |
+| Generate types from OpenAPI spec               | `npm run gen-types`    |
 
 The `build` script runs type generation, esbuild bundling, and `tsc` declaration emit in sequence.
 

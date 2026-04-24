@@ -10,9 +10,36 @@ const DIMENSIONS_FIXTURE = {
   entity_id: ENTITY_ID,
   total_facts: 35,
   dimensions: [
-    { name: 'preferences', avg_confidence: 0.85, fact_count: 12, dimension: 'preferences', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
-    { name: 'health_history', avg_confidence: 0.72, fact_count: 8, dimension: 'health_history', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
-    { name: 'communication_style', avg_confidence: 0.90, fact_count: 15, dimension: 'communication_style', description: null, latest_fact_at: null, source_count: 1, weight: 1.0 },
+    {
+      name: 'preferences',
+      avg_confidence: 0.85,
+      fact_count: 12,
+      dimension: 'preferences',
+      description: null,
+      latest_fact_at: null,
+      source_count: 1,
+      weight: 1.0,
+    },
+    {
+      name: 'health_history',
+      avg_confidence: 0.72,
+      fact_count: 8,
+      dimension: 'health_history',
+      description: null,
+      latest_fact_at: null,
+      source_count: 1,
+      weight: 1.0,
+    },
+    {
+      name: 'communication_style',
+      avg_confidence: 0.9,
+      fact_count: 15,
+      dimension: 'communication_style',
+      description: null,
+      latest_fact_at: null,
+      source_count: 1,
+      weight: 1.0,
+    },
   ],
 }
 
@@ -58,7 +85,9 @@ const ANALYTICS_FIXTURE = {
   total_facts: 3200,
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -74,7 +103,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -84,14 +115,11 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/memory/${ENTITY_ID}/dimensions`]: () =>
-      Response.json(DIMENSIONS_FIXTURE),
+    [`GET ${BASE}/memory/${ENTITY_ID}/dimensions`]: () => Response.json(DIMENSIONS_FIXTURE),
 
-    [`GET ${BASE}/memory/${ENTITY_ID}/facts`]: () =>
-      Response.json(FACTS_FIXTURE),
+    [`GET ${BASE}/memory/${ENTITY_ID}/facts`]: () => Response.json(FACTS_FIXTURE),
 
-    [`GET ${BASE}/memory/analytics`]: () =>
-      Response.json(ANALYTICS_FIXTURE),
+    [`GET ${BASE}/memory/analytics`]: () => Response.json(ANALYTICS_FIXTURE),
   }),
 })
 

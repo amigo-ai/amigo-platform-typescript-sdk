@@ -26,7 +26,11 @@ const CALL_DETAIL_FIXTURE = {
   ...CALL_FIXTURE,
   turns: [
     { role: 'agent', text: 'Hello, how can I help you today?', timestamp: '2026-01-15T10:30:05Z' },
-    { role: 'caller', text: 'I need to schedule an appointment.', timestamp: '2026-01-15T10:30:12Z' },
+    {
+      role: 'caller',
+      text: 'I need to schedule an appointment.',
+      timestamp: '2026-01-15T10:30:12Z',
+    },
   ],
   escalation: null,
   safety: { flagged: false, categories: [] },
@@ -41,7 +45,9 @@ const INTELLIGENCE_FIXTURE = {
   created_at: '2026-01-15T10:36:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -57,7 +63,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -70,14 +78,12 @@ const client = new AmigoClient({
     [`GET ${BASE}/calls`]: () =>
       Response.json({ items: [CALL_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/calls/${CALL_ID}`]: () =>
-      Response.json(CALL_DETAIL_FIXTURE),
+    [`GET ${BASE}/calls/${CALL_ID}`]: () => Response.json(CALL_DETAIL_FIXTURE),
 
     [`GET ${BASE}/calls/not-found`]: () =>
       Response.json({ detail: 'Call not found', error_code: 'not_found' }, { status: 404 }),
 
-    [`GET ${BASE}/calls/${CALL_ID}/intelligence`]: () =>
-      Response.json(INTELLIGENCE_FIXTURE),
+    [`GET ${BASE}/calls/${CALL_ID}/intelligence`]: () => Response.json(INTELLIGENCE_FIXTURE),
 
     [`GET ${BASE}/calls/active/intelligence`]: () =>
       Response.json([

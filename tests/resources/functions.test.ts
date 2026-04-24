@@ -48,16 +48,12 @@ const QUERY_RESULT_FIXTURE = {
 
 const SYNC_RESULT_FIXTURE = {
   count: 5,
-  items: [
-    { name: 'fn1' },
-    { name: 'fn2' },
-    { name: 'fn3' },
-    { name: 'fn4' },
-    { name: 'fn5' },
-  ],
+  items: [{ name: 'fn1' }, { name: 'fn2' }, { name: 'fn3' }, { name: 'fn4' }, { name: 'fn5' }],
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -73,7 +69,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -86,23 +84,17 @@ const client = new AmigoClient({
     [`GET ${BASE}/functions`]: () =>
       Response.json({ items: [FUNCTION_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST ${BASE}/functions`]: () =>
-      Response.json(FUNCTION_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/functions`]: () => Response.json(FUNCTION_FIXTURE, { status: 201 }),
 
-    [`DELETE ${BASE}/functions/${FUNCTION_NAME}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/functions/${FUNCTION_NAME}`]: () => new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/functions/${FUNCTION_NAME}/test`]: () =>
-      Response.json(TEST_RESULT_FIXTURE),
+    [`POST ${BASE}/functions/${FUNCTION_NAME}/test`]: () => Response.json(TEST_RESULT_FIXTURE),
 
-    [`GET ${BASE}/functions/catalog`]: () =>
-      Response.json(CATALOG_FIXTURE),
+    [`GET ${BASE}/functions/catalog`]: () => Response.json(CATALOG_FIXTURE),
 
-    [`POST ${BASE}/functions/query`]: () =>
-      Response.json(QUERY_RESULT_FIXTURE),
+    [`POST ${BASE}/functions/query`]: () => Response.json(QUERY_RESULT_FIXTURE),
 
-    [`POST ${BASE}/functions/sync`]: () =>
-      Response.json(SYNC_RESULT_FIXTURE),
+    [`POST ${BASE}/functions/sync`]: () => Response.json(SYNC_RESULT_FIXTURE),
   }),
 })
 

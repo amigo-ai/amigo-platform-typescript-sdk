@@ -22,9 +22,7 @@ async function sign(payload: string, secret: string, timestamp?: string): Promis
     ['sign'],
   )
 
-  const message = timestamp
-    ? `${`v1:${timestamp}:`}${payload}`
-    : payload
+  const message = timestamp ? `${`v1:${timestamp}:`}${payload}` : payload
 
   const mac = await crypto.subtle.sign('HMAC', key, encoder.encode(message))
   const hex = Array.from(new Uint8Array(mac))

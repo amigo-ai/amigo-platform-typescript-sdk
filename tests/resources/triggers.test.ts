@@ -41,7 +41,9 @@ const RUN_FIXTURE = {
   duration_ms: 12000,
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -57,7 +59,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -67,14 +71,12 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`POST ${BASE}/triggers`]: () =>
-      Response.json(TRIGGER_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/triggers`]: () => Response.json(TRIGGER_FIXTURE, { status: 201 }),
 
     [`GET ${BASE}/triggers`]: () =>
       Response.json({ items: [TRIGGER_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/triggers/${TRIGGER_ID}`]: () =>
-      Response.json(TRIGGER_FIXTURE),
+    [`GET ${BASE}/triggers/${TRIGGER_ID}`]: () => Response.json(TRIGGER_FIXTURE),
 
     [`GET ${BASE}/triggers/not-found`]: () =>
       Response.json({ detail: 'Trigger not found', error_code: 'not_found' }, { status: 404 }),
@@ -82,11 +84,9 @@ const client = new AmigoClient({
     [`PUT ${BASE}/triggers/${TRIGGER_ID}`]: () =>
       Response.json({ ...TRIGGER_FIXTURE, name: 'Updated Trigger', schedule: '0 10 * * 1-5' }),
 
-    [`DELETE ${BASE}/triggers/${TRIGGER_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/triggers/${TRIGGER_ID}`]: () => new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/triggers/${TRIGGER_ID}/fire`]: () =>
-      Response.json(FIRE_RESULT_FIXTURE),
+    [`POST ${BASE}/triggers/${TRIGGER_ID}/fire`]: () => Response.json(FIRE_RESULT_FIXTURE),
 
     [`POST ${BASE}/triggers/${TRIGGER_ID}/pause`]: () =>
       Response.json({ ...TRIGGER_FIXTURE, is_active: false }),

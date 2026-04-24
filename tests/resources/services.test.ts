@@ -23,7 +23,9 @@ const SERVICE_FIXTURE = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -39,7 +41,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -49,14 +53,12 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`POST ${BASE}/services`]: () =>
-      Response.json(SERVICE_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/services`]: () => Response.json(SERVICE_FIXTURE, { status: 201 }),
 
     [`GET ${BASE}/services`]: () =>
       Response.json({ items: [SERVICE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/services/${SERVICE_ID}`]: () =>
-      Response.json(SERVICE_FIXTURE),
+    [`GET ${BASE}/services/${SERVICE_ID}`]: () => Response.json(SERVICE_FIXTURE),
 
     [`GET ${BASE}/services/not-found`]: () =>
       Response.json({ detail: 'Service not found', error_code: 'not_found' }, { status: 404 }),
@@ -64,8 +66,7 @@ const client = new AmigoClient({
     [`PUT ${BASE}/services/${SERVICE_ID}`]: () =>
       Response.json({ ...SERVICE_FIXTURE, name: 'Updated Service', is_active: false }),
 
-    [`DELETE ${BASE}/services/${SERVICE_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/services/${SERVICE_ID}`]: () => new Response(null, { status: 204 }),
   }),
 })
 
@@ -97,7 +98,10 @@ describe('ServicesResource', () => {
   })
 
   it('updates a service', async () => {
-    const result = await client.services.update(SERVICE_ID, { name: 'Updated Service', is_active: false } as never)
+    const result = await client.services.update(SERVICE_ID, {
+      name: 'Updated Service',
+      is_active: false,
+    } as never)
     expect(result.name).toBe('Updated Service')
     expect(result.is_active).toBe(false)
   })

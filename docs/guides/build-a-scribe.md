@@ -203,24 +203,18 @@ After the encounter ends, the physician reviews the AI-generated documentation a
 
 ```typescript
 // Approve a suggested ICD-10 code (writes at HIGH confidence 0.9)
-await client.POST(
-  '/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve',
-  {
-    params: { path: { encounter_id: encounterId } },
-    body: { code: 'J06.9' }, // Acute upper respiratory infection
-  },
-)
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve', {
+  params: { path: { encounter_id: encounterId } },
+  body: { code: 'J06.9' }, // Acute upper respiratory infection
+})
 
 // Approve multiple codes
 const codesToApprove = ['J06.9', 'R05.9', 'Z87.09']
 for (const code of codesToApprove) {
-  await client.POST(
-    '/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve',
-    {
-      params: { path: { encounter_id: encounterId } },
-      body: { code },
-    },
-  )
+  await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve', {
+    params: { path: { encounter_id: encounterId } },
+    body: { code },
+  })
 }
 ```
 
@@ -228,49 +222,40 @@ for (const code of codesToApprove) {
 
 ```typescript
 // Reject an incorrect suggestion with an optional reason
-await client.POST(
-  '/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/reject',
-  {
-    params: { path: { encounter_id: encounterId } },
-    body: {
-      code: 'Z87.09',
-      reason: 'Patient has no relevant allergy history',
-    },
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/reject', {
+  params: { path: { encounter_id: encounterId } },
+  body: {
+    code: 'Z87.09',
+    reason: 'Patient has no relevant allergy history',
   },
-)
+})
 ```
 
 ### Edit SOAP notes
 
 ```typescript
 // Edit a specific SOAP section (writes at HIGH confidence 0.9, supersedes agent observations)
-await client.POST(
-  '/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit',
-  {
-    params: { path: { encounter_id: encounterId } },
-    body: {
-      section: 'assessment',
-      content:
-        'Patient presents with acute upper respiratory infection. ' +
-        'Symptoms consistent with viral etiology. No signs of bacterial superinfection.',
-    },
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit', {
+  params: { path: { encounter_id: encounterId } },
+  body: {
+    section: 'assessment',
+    content:
+      'Patient presents with acute upper respiratory infection. ' +
+      'Symptoms consistent with viral etiology. No signs of bacterial superinfection.',
   },
-)
+})
 
 // Edit the plan
-await client.POST(
-  '/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit',
-  {
-    params: { path: { encounter_id: encounterId } },
-    body: {
-      section: 'plan',
-      content:
-        '1. Supportive care: rest, fluids, OTC antipyretics\n' +
-        '2. Follow up in 7 days if symptoms worsen\n' +
-        '3. Return precautions discussed',
-    },
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit', {
+  params: { path: { encounter_id: encounterId } },
+  body: {
+    section: 'plan',
+    content:
+      '1. Supportive care: rest, fluids, OTC antipyretics\n' +
+      '2. Follow up in 7 days if symptoms worsen\n' +
+      '3. Return precautions discussed',
   },
-)
+})
 ```
 
 Valid SOAP sections: `subjective`, `objective`, `assessment`, `plan`.
@@ -280,12 +265,9 @@ Valid SOAP sections: `subjective`, `objective`, `assessment`, `plan`.
 Once review is complete, finalize the encounter. This locks the documentation for EHR sync:
 
 ```typescript
-await client.POST(
-  '/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize',
-  {
-    params: { path: { encounter_id: encounterId } },
-  },
-)
+await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize', {
+  params: { path: { encounter_id: encounterId } },
+})
 
 console.log('Encounter finalized and ready for EHR sync')
 ```
@@ -341,20 +323,20 @@ console.log('Enrolled at:', status.data.enrolled_at)
 
 ## WebSocket protocol reference
 
-| Direction | Format | Description |
-| --------- | ------ | ----------- |
-| Client -> Server | Binary (PCM16) | Raw audio frames |
-| Server -> Client | JSON | Transcript segments and tool results |
+| Direction        | Format         | Description                          |
+| ---------------- | -------------- | ------------------------------------ |
+| Client -> Server | Binary (PCM16) | Raw audio frames                     |
+| Server -> Client | JSON           | Transcript segments and tool results |
 
 ### Server message types
 
-| `type` | `tool` (for tool_result) | Description |
-| ------ | ----------------------- | ----------- |
-| `transcript_segment` | -- | Live transcription with speaker, text, timestamp, is_final |
-| `tool_result` | `soap_update` | SOAP note section updated |
-| `tool_result` | `icd10_suggestions` | New ICD-10 code suggestions |
-| `tool_result` | `clinical_alert` | Drug interaction, allergy, or care gap alert |
-| `tool_result` | `encounter_entity` | Full encounter entity state snapshot |
+| `type`               | `tool` (for tool_result) | Description                                                |
+| -------------------- | ------------------------ | ---------------------------------------------------------- |
+| `transcript_segment` | --                       | Live transcription with speaker, text, timestamp, is_final |
+| `tool_result`        | `soap_update`            | SOAP note section updated                                  |
+| `tool_result`        | `icd10_suggestions`      | New ICD-10 code suggestions                                |
+| `tool_result`        | `clinical_alert`         | Drug interaction, allergy, or care gap alert               |
+| `tool_result`        | `encounter_entity`       | Full encounter entity state snapshot                       |
 
 ### Connection URL
 
@@ -370,17 +352,17 @@ Parameters:
 
 ## SDK endpoints reference
 
-| Method | Path | Description |
-| ------ | ---- | ----------- |
-| GET | `/v1/{ws}/settings/scribe` | Get scribe settings |
-| PUT | `/v1/{ws}/settings/scribe` | Update scribe settings |
-| POST | `/v1/{ws}/scribe/encounters/{id}/icd10/approve` | Approve an ICD-10 code |
-| POST | `/v1/{ws}/scribe/encounters/{id}/icd10/reject` | Reject an ICD-10 code |
-| POST | `/v1/{ws}/scribe/encounters/{id}/soap/edit` | Edit a SOAP section |
-| POST | `/v1/{ws}/scribe/encounters/{id}/finalize` | Finalize the encounter |
-| POST | `/v1/{ws}/voiceprints/enroll` | Enroll a voiceprint (FormData) |
-| POST | `/v1/{ws}/voiceprints/verify` | Verify a speaker |
-| GET | `/v1/{ws}/voiceprints/{entity_id}` | Check enrollment status |
+| Method | Path                                            | Description                    |
+| ------ | ----------------------------------------------- | ------------------------------ |
+| GET    | `/v1/{ws}/settings/scribe`                      | Get scribe settings            |
+| PUT    | `/v1/{ws}/settings/scribe`                      | Update scribe settings         |
+| POST   | `/v1/{ws}/scribe/encounters/{id}/icd10/approve` | Approve an ICD-10 code         |
+| POST   | `/v1/{ws}/scribe/encounters/{id}/icd10/reject`  | Reject an ICD-10 code          |
+| POST   | `/v1/{ws}/scribe/encounters/{id}/soap/edit`     | Edit a SOAP section            |
+| POST   | `/v1/{ws}/scribe/encounters/{id}/finalize`      | Finalize the encounter         |
+| POST   | `/v1/{ws}/voiceprints/enroll`                   | Enroll a voiceprint (FormData) |
+| POST   | `/v1/{ws}/voiceprints/verify`                   | Verify a speaker               |
+| GET    | `/v1/{ws}/voiceprints/{entity_id}`              | Check enrollment status        |
 
 The `client.settings.scribe.get()` and `client.settings.scribe.update(...)` resource methods are available for scribe settings. All other scribe and voiceprint operations use the `client.POST(...)` / `client.GET(...)` helpers.
 

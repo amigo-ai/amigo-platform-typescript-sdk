@@ -36,20 +36,20 @@ The SDK is the typed client boundary between your runtime and the workspace-scop
 
 ## Documentation
 
-| Need                                        | Best entry point                                         |
-| ------------------------------------------- | -------------------------------------------------------- |
-| Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                  |
+| Need                                        | Best entry point                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Product architecture and deployment context | [docs.amigo.ai](https://docs.amigo.ai/)                                            |
 | Tutorials and integration guidance          | [Developer Guide](https://docs.amigo.ai/developer-guide/platform-api/platform-sdk) |
-| Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)     |
-| Repo-local SDK examples                     | [examples/README.md](./examples/README.md)               |
-| Generated package surface                   | [api.md](./api.md)                                       |
-| Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                           |
+| Endpoint-by-endpoint REST reference         | [API Reference](https://docs.amigo.ai/api-reference)                               |
+| Repo-local SDK examples                     | [examples/README.md](./examples/README.md)                                         |
+| Generated package surface                   | [api.md](./api.md)                                                                 |
+| Published release history                   | [CHANGELOG.md](./CHANGELOG.md)                                                     |
 
 ### Guides
 
-| Guide | Description |
-| ----- | ----------- |
-| [Build a Custom Patient Form](./docs/guides/build-a-form.md) | Create, deliver, and render patient intake forms using surfaces |
+| Guide                                                              | Description                                                                     |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| [Build a Custom Patient Form](./docs/guides/build-a-form.md)       | Create, deliver, and render patient intake forms using surfaces                 |
 | [Build a Custom Clinical Copilot](./docs/guides/build-a-scribe.md) | Real-time ambient documentation with encounter review and voiceprint enrollment |
 
 The docs site remains the primary reference. The repo-local examples stay close to the shipped package surface and are typechecked in CI to reduce drift.
@@ -450,7 +450,12 @@ const surface = await client.POST('/v1/{workspace_id}/surfaces', {
     fields: [
       { key: 'full_name', label: 'Full Name', field_type: 'text', required: true },
       { key: 'date_of_birth', label: 'Date of Birth', field_type: 'date', required: true },
-      { key: 'allergies', label: 'Allergies', field_type: 'multiselect', options: ['Penicillin', 'Sulfa', 'None'] },
+      {
+        key: 'allergies',
+        label: 'Allergies',
+        field_type: 'multiselect',
+        options: ['Penicillin', 'Sulfa', 'None'],
+      },
     ],
   },
 })
@@ -463,7 +468,10 @@ await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/deliver', {
 })
 
 // Track completion
-const { data: rates } = await client.GET('/v1/{workspace_id}/analytics/surfaces/completion-rates', {})
+const { data: rates } = await client.GET(
+  '/v1/{workspace_id}/analytics/surfaces/completion-rates',
+  {},
+)
 ```
 
 Public token routes (`/s/{token}/spec`, `/s/{token}/submit`, etc.) require no API key -- use `openapi-fetch` with the SDK's `paths` type for full type safety on unauthenticated endpoints.

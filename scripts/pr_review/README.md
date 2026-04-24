@@ -27,14 +27,14 @@ uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
 
 ## Environment
 
-| Var | Purpose | Default |
-|---|---|---|
-| `GITHUB_REPOSITORY` | `owner/repo` for PR comment lookups | required |
-| `GH_TOKEN` | `gh` CLI auth | `GITHUB_TOKEN` in CI |
-| `VERTEX_PROJECT` | GCP project with Claude on Vertex | `amigo-platform` |
-| `VERTEX_REGION` | Vertex region | `global` |
-| `REVIEW_MODEL` | specialist model ID | `claude-sonnet-4-6` |
-| `REVIEW_ORCHESTRATOR_MODEL` | consolidator model ID | `claude-opus-4-6` |
+| Var                         | Purpose                             | Default              |
+| --------------------------- | ----------------------------------- | -------------------- |
+| `GITHUB_REPOSITORY`         | `owner/repo` for PR comment lookups | required             |
+| `GH_TOKEN`                  | `gh` CLI auth                       | `GITHUB_TOKEN` in CI |
+| `VERTEX_PROJECT`            | GCP project with Claude on Vertex   | `amigo-platform`     |
+| `VERTEX_REGION`             | Vertex region                       | `global`             |
+| `REVIEW_MODEL`              | specialist model ID                 | `claude-sonnet-4-6`  |
+| `REVIEW_ORCHESTRATOR_MODEL` | consolidator model ID               | `claude-opus-4-6`    |
 
 The workflow uses `google-github-actions/auth` to set up ADC in CI. Local runs
 need valid Google ADC as well.

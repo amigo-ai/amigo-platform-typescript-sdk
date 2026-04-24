@@ -28,19 +28,13 @@ const BRANDING_FIXTURE = {
 }
 
 const OUTREACH_FIXTURE = {
-  rules: [
-    { name: 'Appointment Reminders', schedule: '0 9 * * 1-5' },
-  ],
-  data_templates: [
-    { name: 'reminder', fields: ['patient_name', 'appointment_date'] },
-  ],
+  rules: [{ name: 'Appointment Reminders', schedule: '0 9 * * 1-5' }],
+  data_templates: [{ name: 'reminder', fields: ['patient_name', 'appointment_date'] }],
 }
 
 const MEMORY_SETTINGS_FIXTURE = {
   backfill_requested: false,
-  dimensions: [
-    { name: 'preferences', enabled: true },
-  ],
+  dimensions: [{ name: 'preferences', enabled: true }],
 }
 
 const SECURITY_FIXTURE = {
@@ -58,12 +52,12 @@ const RETENTION_FIXTURE = {
 }
 
 const WORKFLOWS_FIXTURE = {
-  workflows: [
-    { name: 'escalation', enabled: true },
-  ],
+  workflows: [{ name: 'escalation', enabled: true }],
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -79,7 +73,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -89,20 +85,17 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/settings/voice`]: () =>
-      Response.json(VOICE_SETTINGS_FIXTURE),
+    [`GET ${BASE}/settings/voice`]: () => Response.json(VOICE_SETTINGS_FIXTURE),
 
     [`PUT ${BASE}/settings/voice`]: () =>
       Response.json({ ...VOICE_SETTINGS_FIXTURE, language: 'es' }),
 
-    [`GET ${BASE}/settings/branding`]: () =>
-      Response.json(BRANDING_FIXTURE),
+    [`GET ${BASE}/settings/branding`]: () => Response.json(BRANDING_FIXTURE),
 
     [`PUT ${BASE}/settings/branding`]: () =>
       Response.json({ branding: { ...BRANDING_FIXTURE.branding, primary_color: '#FF0000' } }),
 
-    [`GET ${BASE}/settings/outreach`]: () =>
-      Response.json(OUTREACH_FIXTURE),
+    [`GET ${BASE}/settings/outreach`]: () => Response.json(OUTREACH_FIXTURE),
 
     [`PUT ${BASE}/settings/outreach`]: () =>
       Response.json({
@@ -110,26 +103,21 @@ const client = new AmigoClient({
         rules: [...OUTREACH_FIXTURE.rules, { name: 'Follow-up', schedule: '0 14 * * 1-5' }],
       }),
 
-    [`GET ${BASE}/settings/memory`]: () =>
-      Response.json(MEMORY_SETTINGS_FIXTURE),
+    [`GET ${BASE}/settings/memory`]: () => Response.json(MEMORY_SETTINGS_FIXTURE),
 
     [`PUT ${BASE}/settings/memory`]: () =>
       Response.json({ ...MEMORY_SETTINGS_FIXTURE, backfill_requested: true }),
 
-    [`GET ${BASE}/settings/security`]: () =>
-      Response.json(SECURITY_FIXTURE),
+    [`GET ${BASE}/settings/security`]: () => Response.json(SECURITY_FIXTURE),
 
-    [`PUT ${BASE}/settings/security`]: () =>
-      Response.json({ voice_auth_enabled: false }),
+    [`PUT ${BASE}/settings/security`]: () => Response.json({ voice_auth_enabled: false }),
 
-    [`GET ${BASE}/settings/retention`]: () =>
-      Response.json(RETENTION_FIXTURE),
+    [`GET ${BASE}/settings/retention`]: () => Response.json(RETENTION_FIXTURE),
 
     [`PUT ${BASE}/settings/retention`]: () =>
       Response.json({ ...RETENTION_FIXTURE, call_recordings_days: 180 }),
 
-    [`GET ${BASE}/settings/workflows`]: () =>
-      Response.json(WORKFLOWS_FIXTURE),
+    [`GET ${BASE}/settings/workflows`]: () => Response.json(WORKFLOWS_FIXTURE),
 
     [`PUT ${BASE}/settings/workflows`]: () =>
       Response.json({
@@ -162,7 +150,9 @@ describe('SettingsResource', () => {
     })
 
     it('updates branding settings', async () => {
-      const result = await client.settings.branding.update({ branding: { primary_color: '#FF0000' } } as never)
+      const result = await client.settings.branding.update({
+        branding: { primary_color: '#FF0000' },
+      } as never)
       expect(result.branding.primary_color).toBe('#FF0000')
     })
   })

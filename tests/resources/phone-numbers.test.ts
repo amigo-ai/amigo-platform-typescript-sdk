@@ -32,7 +32,9 @@ const FORWARDING_FIXTURE = {
   },
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -48,7 +50,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -61,11 +65,9 @@ const client = new AmigoClient({
     [`GET ${BASE}/phone-numbers`]: () =>
       Response.json({ items: [PHONE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST ${BASE}/phone-numbers`]: () =>
-      Response.json(PHONE_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/phone-numbers`]: () => Response.json(PHONE_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/phone-numbers/${PHONE_ID}`]: () =>
-      Response.json(PHONE_FIXTURE),
+    [`GET ${BASE}/phone-numbers/${PHONE_ID}`]: () => Response.json(PHONE_FIXTURE),
 
     [`GET ${BASE}/phone-numbers/not-found`]: () =>
       Response.json({ detail: 'Phone number not found', error_code: 'not_found' }, { status: 404 }),
@@ -73,11 +75,9 @@ const client = new AmigoClient({
     [`PUT ${BASE}/phone-numbers/${PHONE_ID}`]: () =>
       Response.json({ ...PHONE_FIXTURE, display_name: 'Updated Line' }),
 
-    [`DELETE ${BASE}/phone-numbers/${PHONE_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/phone-numbers/${PHONE_ID}`]: () => new Response(null, { status: 204 }),
 
-    [`PUT ${BASE}/phone-numbers/${PHONE_ID}/forwarding`]: () =>
-      Response.json(FORWARDING_FIXTURE),
+    [`PUT ${BASE}/phone-numbers/${PHONE_ID}/forwarding`]: () => Response.json(FORWARDING_FIXTURE),
 
     [`DELETE ${BASE}/phone-numbers/${PHONE_ID}/forwarding`]: () =>
       new Response(null, { status: 204 }),

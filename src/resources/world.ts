@@ -166,10 +166,7 @@ export class WorldResource extends WorkspaceScopedResource {
   // ---- Duplicate Detection ----
 
   /** List potential duplicate entity pairs for review or merging */
-  async listDuplicates(params?: {
-    entity_type?: string | null
-    confidence_max?: number
-  }) {
+  async listDuplicates(params?: { entity_type?: string | null; confidence_max?: number }) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/world/entities/duplicates', {
         params: { path: { workspace_id: this.workspaceId }, query: params },

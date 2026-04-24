@@ -42,7 +42,9 @@ const TEST_RESULT_FIXTURE = {
   sub_tool_logs: [],
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -58,7 +60,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -68,14 +72,12 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`POST ${BASE}/skills`]: () =>
-      Response.json(ACTION_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/skills`]: () => Response.json(ACTION_FIXTURE, { status: 201 }),
 
     [`GET ${BASE}/skills`]: () =>
       Response.json({ items: [ACTION_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/skills/${ACTION_ID}`]: () =>
-      Response.json(ACTION_FIXTURE),
+    [`GET ${BASE}/skills/${ACTION_ID}`]: () => Response.json(ACTION_FIXTURE),
 
     [`GET ${BASE}/skills/not-found`]: () =>
       Response.json({ detail: 'Skill not found', error_code: 'not_found' }, { status: 404 }),
@@ -83,11 +85,9 @@ const client = new AmigoClient({
     [`PUT ${BASE}/skills/${ACTION_ID}`]: () =>
       Response.json({ ...ACTION_FIXTURE, name: 'Updated Action', enabled: false }),
 
-    [`DELETE ${BASE}/skills/${ACTION_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/skills/${ACTION_ID}`]: () => new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/skills/${ACTION_ID}/test`]: () =>
-      Response.json(TEST_RESULT_FIXTURE),
+    [`POST ${BASE}/skills/${ACTION_ID}/test`]: () => Response.json(TEST_RESULT_FIXTURE),
   }),
 })
 
@@ -120,7 +120,10 @@ describe('ActionsResource', () => {
   })
 
   it('updates an action', async () => {
-    const result = await client.actions.update(ACTION_ID, { name: 'Updated Action', enabled: false } as never)
+    const result = await client.actions.update(ACTION_ID, {
+      name: 'Updated Action',
+      enabled: false,
+    } as never)
     expect(result.name).toBe('Updated Action')
     expect(result.enabled).toBe(false)
   })

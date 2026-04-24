@@ -102,13 +102,10 @@ console.log(`  Expires: ${surface.data.expires_at}`)
 console.log(`  Fields:  ${surface.data.fields_count}`)
 
 // Deliver via SMS
-const delivery = await client.POST(
-  '/v1/{workspace_id}/surfaces/{surface_id}/deliver',
-  {
-    params: { path: { surface_id: surface.data.id } },
-    body: { channel_address: '+15551234567' },
-  },
-)
+const delivery = await client.POST('/v1/{workspace_id}/surfaces/{surface_id}/deliver', {
+  params: { path: { surface_id: surface.data.id } },
+  body: { channel_address: '+15551234567' },
+})
 
 console.log('\nDelivery:')
 console.log(`  Status:   ${delivery.data.status}`)

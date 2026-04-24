@@ -35,7 +35,9 @@ const DOWNLOAD_FIXTURE = {
   data: 'binary-audio-content',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -51,7 +53,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -61,11 +65,9 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/recordings/${CALL_SID}/urls`]: () =>
-      Response.json(URLS_FIXTURE),
+    [`GET ${BASE}/recordings/${CALL_SID}/urls`]: () => Response.json(URLS_FIXTURE),
 
-    [`GET ${BASE}/recordings/${CALL_SID}/metadata`]: () =>
-      Response.json(METADATA_FIXTURE),
+    [`GET ${BASE}/recordings/${CALL_SID}/metadata`]: () => Response.json(METADATA_FIXTURE),
 
     [`GET ${BASE}/recordings/${CALL_SID}/download/recording.wav`]: () =>
       Response.json(DOWNLOAD_FIXTURE),

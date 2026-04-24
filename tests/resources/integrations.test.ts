@@ -37,7 +37,9 @@ const TEST_ENDPOINT_FIXTURE = {
   raw_response: { resourceType: 'Patient', id: 'test-001' },
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -53,7 +55,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -63,14 +67,12 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`POST ${BASE}/integrations`]: () =>
-      Response.json(INTEGRATION_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/integrations`]: () => Response.json(INTEGRATION_FIXTURE, { status: 201 }),
 
     [`GET ${BASE}/integrations`]: () =>
       Response.json({ items: [INTEGRATION_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`GET ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
-      Response.json(INTEGRATION_FIXTURE),
+    [`GET ${BASE}/integrations/${INTEGRATION_ID}`]: () => Response.json(INTEGRATION_FIXTURE),
 
     [`GET ${BASE}/integrations/not-found`]: () =>
       Response.json({ detail: 'Integration not found', error_code: 'not_found' }, { status: 404 }),
@@ -78,14 +80,12 @@ const client = new AmigoClient({
     [`PUT ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
       Response.json({ ...INTEGRATION_FIXTURE, name: 'Updated Integration', enabled: false }),
 
-    [`DELETE ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
-      new Response(null, { status: 204 }),
+    [`DELETE ${BASE}/integrations/${INTEGRATION_ID}`]: () => new Response(null, { status: 204 }),
 
     [`POST ${BASE}/integrations/${INTEGRATION_ID}/endpoints/Patient/test`]: () =>
       Response.json(TEST_ENDPOINT_FIXTURE),
 
-    [`GET ${BASE}/integrations/health-check`]: () =>
-      Response.json(HEALTH_CHECK_FIXTURE),
+    [`GET ${BASE}/integrations/health-check`]: () => Response.json(HEALTH_CHECK_FIXTURE),
   }),
 })
 
@@ -136,11 +136,9 @@ describe('IntegrationsResource', () => {
   })
 
   it('tests an endpoint', async () => {
-    const result = await client.integrations.testEndpoint(
-      INTEGRATION_ID,
-      'Patient',
-      { params: { _id: 'test-001' } } as never,
-    )
+    const result = await client.integrations.testEndpoint(INTEGRATION_ID, 'Patient', {
+      params: { _id: 'test-001' },
+    } as never)
     expect(result.status_code).toBe(200)
     expect(result.duration_ms).toBe(85)
   })

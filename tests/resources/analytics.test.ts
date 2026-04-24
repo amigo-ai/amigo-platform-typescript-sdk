@@ -19,15 +19,20 @@ const CALLS_FIXTURE = {
   avg_duration_seconds: 240,
   period_start: '2026-01-01',
   period_end: '2026-01-07',
-  calls_by_date: [
-    { date: '2026-01-01', count: 20, avg_duration_seconds: 240 },
-  ],
+  calls_by_date: [{ date: '2026-01-01', count: 20, avg_duration_seconds: 240 }],
 }
 
 const AGENTS_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   agents: [
-    { agent_id: 'agent-001', agent_name: 'Scheduler', total_calls: 80, avg_duration_seconds: 200, completed_calls: 75, completion_rate: 0.94 },
+    {
+      agent_id: 'agent-001',
+      agent_name: 'Scheduler',
+      total_calls: 80,
+      avg_duration_seconds: 200,
+      completed_calls: 75,
+      completion_rate: 0.94,
+    },
   ],
 }
 
@@ -40,9 +45,7 @@ const CALL_QUALITY_FIXTURE = {
 
 const EMOTION_TRENDS_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  timeseries: [
-    { timestamp: '2026-01-01T00:00:00Z', positive: 0.6, neutral: 0.3, negative: 0.1 },
-  ],
+  timeseries: [{ timestamp: '2026-01-01T00:00:00Z', positive: 0.6, neutral: 0.3, negative: 0.1 }],
 }
 
 const LATENCY_FIXTURE = {
@@ -53,9 +56,7 @@ const LATENCY_FIXTURE = {
 
 const TOOL_PERFORMANCE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  tools: [
-    { name: 'book_appointment', success_rate: 0.95, avg_latency_ms: 450 },
-  ],
+  tools: [{ name: 'book_appointment', success_rate: 0.95, avg_latency_ms: 450 }],
 }
 
 const DATA_QUALITY_FIXTURE = {
@@ -71,9 +72,7 @@ const DATA_QUALITY_FIXTURE = {
 
 const USAGE_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
-  buckets: [
-    { event_type: 'call.started', event_date: '2026-01-01', count: 50 },
-  ],
+  buckets: [{ event_type: 'call.started', event_date: '2026-01-01', count: 50 }],
   period_start: '2026-01-01',
   period_end: '2026-01-07',
   total_events: 25000,
@@ -105,11 +104,9 @@ const OPERATOR_PERFORMANCE_FIXTURE = {
     total_calls: 150,
     avg_escalated_duration_seconds: 300,
     avg_escalated_quality_score: 0.85,
-    avg_non_escalated_quality_score: 0.90,
+    avg_non_escalated_quality_score: 0.9,
   },
-  trend: [
-    { date: '2026-01-01', escalated_count: 3, total_calls: 20 },
-  ],
+  trend: [{ date: '2026-01-01', escalated_count: 3, total_calls: 20 }],
 }
 
 const ADVANCED_CALL_STATS_FIXTURE = {
@@ -126,7 +123,9 @@ const COMPARISON_FIXTURE = {
   delta: { total_calls: 30, avg_duration_seconds: 20 },
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -142,7 +141,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -163,7 +164,8 @@ const client = new AmigoClient({
     [`GET ${BASE}/analytics/usage`]: () => Response.json(USAGE_FIXTURE),
     [`GET ${BASE}/analytics/events`]: () => Response.json(EVENT_BREAKDOWN_FIXTURE),
     [`GET ${BASE}/analytics/safety-trends`]: () => Response.json(SAFETY_TRENDS_FIXTURE),
-    [`GET ${BASE}/analytics/operator-performance`]: () => Response.json(OPERATOR_PERFORMANCE_FIXTURE),
+    [`GET ${BASE}/analytics/operator-performance`]: () =>
+      Response.json(OPERATOR_PERFORMANCE_FIXTURE),
     [`GET ${BASE}/analytics/calls/advanced`]: () => Response.json(ADVANCED_CALL_STATS_FIXTURE),
     [`GET ${BASE}/analytics/calls/comparison`]: () => Response.json(COMPARISON_FIXTURE),
   }),

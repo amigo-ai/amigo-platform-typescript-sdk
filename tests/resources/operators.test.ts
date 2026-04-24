@@ -39,7 +39,9 @@ const JOIN_CALL_FIXTURE = {
   participant_call_sid: 'CA0987654321abcdef1234567890abcdef',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -55,7 +57,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -68,17 +72,14 @@ const client = new AmigoClient({
     [`GET ${BASE}/operators`]: () =>
       Response.json({ items: [OPERATOR_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST ${BASE}/operators`]: () =>
-      Response.json(OPERATOR_FIXTURE, { status: 201 }),
+    [`POST ${BASE}/operators`]: () => Response.json(OPERATOR_FIXTURE, { status: 201 }),
 
-    [`GET ${BASE}/operators/${OPERATOR_ID}`]: () =>
-      Response.json(OPERATOR_FIXTURE),
+    [`GET ${BASE}/operators/${OPERATOR_ID}`]: () => Response.json(OPERATOR_FIXTURE),
 
     [`GET ${BASE}/operators/not-found`]: () =>
       Response.json({ detail: 'Operator not found', error_code: 'not_found' }, { status: 404 }),
 
-    [`GET ${BASE}/operators/dashboard`]: () =>
-      Response.json(DASHBOARD_FIXTURE),
+    [`GET ${BASE}/operators/dashboard`]: () => Response.json(DASHBOARD_FIXTURE),
 
     [`GET ${BASE}/operators/queue`]: () =>
       Response.json({
@@ -87,8 +88,7 @@ const client = new AmigoClient({
         total_active: 1,
       }),
 
-    [`POST ${BASE}/operators/${OPERATOR_ID}/join-call`]: () =>
-      Response.json(JOIN_CALL_FIXTURE),
+    [`POST ${BASE}/operators/${OPERATOR_ID}/join-call`]: () => Response.json(JOIN_CALL_FIXTURE),
 
     [`POST ${BASE}/operators/${OPERATOR_ID}/leave-call`]: () =>
       Response.json({ operator_id: OPERATOR_ID, call_sid: CALL_SID, status: 'disconnected' }),
@@ -155,7 +155,9 @@ describe('OperatorsResource', () => {
   })
 
   it('gets an access token', async () => {
-    const result = await client.operators.getAccessToken(OPERATOR_ID, { scope: 'operator' } as never)
+    const result = await client.operators.getAccessToken(OPERATOR_ID, {
+      scope: 'operator',
+    } as never)
     expect(result.token).toContain('eyJ')
     expect(result.identity).toBe(OPERATOR_ID)
   })
