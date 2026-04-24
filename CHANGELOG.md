@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.5.3] - 2026-04-24
+
+### Features
+
+- add provision, checkEnvironment, convertEnvironment methods (#54)
+
+### Documentation
+
+- add build-a-form and build-a-scribe developer guides
+
 ## [0.5.2] - 2026-04-23
 
 ### Bug Fixes
