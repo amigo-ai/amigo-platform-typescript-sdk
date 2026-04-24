@@ -17042,6 +17042,12 @@ export interface components {
             nationality?: string | null;
             /** Patient Id */
             patient_id: string;
+            /** Pca X */
+            pca_x?: number | null;
+            /** Pca Y */
+            pca_y?: number | null;
+            /** Pca Z */
+            pca_z?: number | null;
             /** Risk Tier */
             risk_tier?: number | null;
             /** Umap X */

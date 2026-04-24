@@ -23408,6 +23408,39 @@
             "title": "Patient Id",
             "type": "string"
           },
+          "pca_x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca X"
+          },
+          "pca_y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Y"
+          },
+          "pca_z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Z"
+          },
           "risk_tier": {
             "anyOf": [
               {
