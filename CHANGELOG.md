@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.4] - 2026-04-24
+
+### Maintenance
+
+- sync API types from platform (fb8530c8) (#59)
+- sync API types from platform — webhook hardening (PR #1852) (#56)
+
 ## [0.5.3] - 2026-04-24
 
 ### Features
