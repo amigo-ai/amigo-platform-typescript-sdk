@@ -8186,7 +8186,7 @@ export interface components {
              * Filler Type
              * @default null
              */
-            filler_type?: string | null;
+            filler_type?: ("empathy" | "receipt" | "working") | null;
             /**
              * Interrupted
              * @default false
@@ -9082,8 +9082,11 @@ export interface components {
             event_type: "call.escalated";
             /** Reason */
             reason: string;
-            /** Trigger */
-            trigger: string;
+            /**
+             * Trigger
+             * @enum {string}
+             */
+            trigger: "caller" | "ai" | "operator";
         };
         /**
          * CallIntelligenceDetail
@@ -9824,11 +9827,7 @@ export interface components {
         };
         /**
          * ConnectorDef
-         * @description A single connector definition in workspace.settings["connectors"].
-         *
-         *     Config is config — no mutable status fields. Health and sync state
-         *     are derived from the event stream (Phase 6) or world.data_sources
-         *     index (interim).
+         * @description A single connector definition stored in platform.connector_configs.
          */
         ConnectorDef: {
             /** Connection Config */
@@ -12355,6 +12354,18 @@ export interface components {
              */
             trigger?: string | null;
         };
+        /** EncounterUpdatedEvent */
+        EncounterUpdatedEvent: {
+            /** Encounter Entity Id */
+            encounter_entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "encounter.updated";
+            /** Session Id */
+            session_id: string;
+        };
         /**
          * EndpointConfig
          * @description Configuration for a single integration endpoint.
@@ -14679,7 +14690,7 @@ export interface components {
              * @description Communication protocol
              * @enum {string}
              */
-            protocol: "rest" | "fhir" | "mcp";
+            protocol: "rest" | "fhir" | "mcp" | "desktop";
             /**
              * Updated At
              * Format: date-time
@@ -15841,6 +15852,26 @@ export interface components {
             workspace_id: string;
         };
         NameString: string;
+        /** NarrativeUpdatedEvent */
+        NarrativeUpdatedEvent: {
+            /** Confidence */
+            confidence: number;
+            /** Event Count */
+            event_count: number;
+            /** Event Id */
+            event_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "self_image.brief_generated";
+            /** Target Entity Id */
+            target_entity_id: string;
+            /** Target Entity Type */
+            target_entity_type: string;
+            /** Version */
+            version: string;
+        };
         /** NonDesiredState */
         NonDesiredState: {
             /**
@@ -15932,8 +15963,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.joined_call";
-            /** Mode */
-            mode: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
             /** Operator Id */
             operator_id: string;
         };
@@ -15963,8 +15997,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.mode_changed";
-            /** Mode */
-            mode: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
             /** Operator Id */
             operator_id: string;
         };
@@ -16210,8 +16247,11 @@ export interface components {
             event_type: "operator.status_changed";
             /** Operator Id */
             operator_id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "online" | "busy" | "offline";
         };
         /** OperatorStatusCounts */
         OperatorStatusCounts: {
@@ -17042,6 +17082,12 @@ export interface components {
             nationality?: string | null;
             /** Patient Id */
             patient_id: string;
+            /** Pca X */
+            pca_x?: number | null;
+            /** Pca Y */
+            pca_y?: number | null;
+            /** Pca Z */
+            pca_z?: number | null;
             /** Risk Tier */
             risk_tier?: number | null;
             /** Umap X */
@@ -18150,6 +18196,39 @@ export interface components {
             /** Rejected */
             rejected: number;
         };
+        /** ReviewSubmittedEvent */
+        ReviewSubmittedEvent: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "reject" | "correct" | "batch_approve" | "batch_reject";
+            /**
+             * Count
+             * @default null
+             */
+            count?: number | null;
+            /**
+             * Entity Id
+             * @default null
+             */
+            entity_id?: string | null;
+            /**
+             * Entity Type
+             * @default null
+             */
+            entity_type?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "review.submitted";
+            /**
+             * Item Id
+             * @default null
+             */
+            item_id?: string | null;
+        };
         /**
          * RiskSignalConfig
          * @description Per-workspace risk scoring config. Stored on Service.
@@ -19164,6 +19243,28 @@ export interface components {
              */
             safety_response?: string;
         };
+        /** SimulationTurnStoredEvent */
+        SimulationTurnStoredEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "simulation.turn_stored";
+            /** Is Terminal */
+            is_terminal: boolean;
+            /** Run Id */
+            run_id: string;
+            /** Service Id */
+            service_id: string;
+            /** Session Id */
+            session_id: string;
+            /** State After */
+            state_after: string;
+            /** State Before */
+            state_before: string;
+            /** Turn Index */
+            turn_index: number;
+        };
         /** SinkSyncStatus */
         SinkSyncStatus: {
             /**
@@ -19700,8 +19801,11 @@ export interface components {
         };
         /** SurfaceCreatedEvent */
         SurfaceCreatedEvent: {
-            /** Channel */
-            channel: string;
+            /**
+             * Channel
+             * @default null
+             */
+            channel?: string | null;
             /** Entity Id */
             entity_id: string;
             /**
@@ -19753,6 +19857,16 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.delivered";
+            /**
+             * Message Id
+             * @default null
+             */
+            message_id?: string | null;
+            /**
+             * Short Url
+             * @default null
+             */
+            short_url?: string | null;
             /** Surface Id */
             surface_id: string;
         };
@@ -19805,8 +19919,8 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.field_saved";
-            /** Field Id */
-            field_id: string;
+            /** Field Key */
+            field_key: string;
             /** Surface Id */
             surface_id: string;
         };
@@ -19951,8 +20065,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.review_rejected";
-            /** Reason */
-            reason: string;
+            /**
+             * Reason
+             * @default null
+             */
+            reason?: string | null;
             /** Surface Id */
             surface_id: string;
         };
@@ -20022,6 +20139,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.submitted";
+            /**
+             * Fields Submitted
+             * @default null
+             */
+            fields_submitted?: string[] | null;
             /**
              * Submitted At
              * @default null
@@ -20398,6 +20520,48 @@ export interface components {
              * @description Chronological log of tool invocations
              */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
+        };
+        /** TextCompletedEvent */
+        TextCompletedEvent: {
+            /** Channel Kind */
+            channel_kind: string;
+            /**
+             * Completion Reason
+             * @default null
+             */
+            completion_reason?: string | null;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "text.completed";
+            /** Final State */
+            final_state: string;
+            /** Session Id */
+            session_id: string;
+            /** Turn Count */
+            turn_count: number;
+        };
+        /** TextStartedEvent */
+        TextStartedEvent: {
+            /** Channel Kind */
+            channel_kind: string;
+            /**
+             * Entity Id
+             * @default null
+             */
+            entity_id?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "text.started";
+            /** Service Id */
+            service_id: string;
+            /** Session Id */
+            session_id: string;
         };
         /** ThroughputBucket */
         ThroughputBucket: {
@@ -20891,6 +21055,34 @@ export interface components {
             /** Year Month */
             year_month: string;
         };
+        /** TriggerCompletedEvent */
+        TriggerCompletedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.completed";
+            /** Status */
+            status: string;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
+        };
+        /** TriggerFailedEvent */
+        TriggerFailedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.failed";
+            /** Status */
+            status: string;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
+        };
         /** TriggerFireResponse */
         TriggerFireResponse: {
             /**
@@ -20909,6 +21101,23 @@ export interface components {
              * Format: uuid
              */
             trigger_id: string;
+        };
+        /** TriggerFiredEvent */
+        TriggerFiredEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.fired";
+            /**
+             * Manual
+             * @default false
+             */
+            manual?: boolean;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
         };
         /** TriggerResponse */
         TriggerResponse: {
@@ -22337,7 +22546,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
         /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.
