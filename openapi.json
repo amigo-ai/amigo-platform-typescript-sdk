@@ -1011,6 +1011,11 @@
           "filler_type": {
             "anyOf": [
               {
+                "enum": [
+                  "empathy",
+                  "receipt",
+                  "working"
+                ],
                 "type": "string"
               },
               {
@@ -1063,7 +1068,8 @@
           },
           "transcript": {
             "title": "Transcript",
-            "type": "string"
+            "type": "string",
+            "x-phi": true
           },
           "type": {
             "const": "agent_transcript",
@@ -3422,6 +3428,11 @@
             "type": "string"
           },
           "trigger": {
+            "enum": [
+              "caller",
+              "ai",
+              "operator"
+            ],
             "title": "Trigger",
             "type": "string"
           }
@@ -3695,7 +3706,8 @@
               }
             ],
             "default": null,
-            "title": "Caller Id"
+            "title": "Caller Id",
+            "x-phi": true
           },
           "direction": {
             "enum": [
@@ -11538,6 +11550,30 @@
         "title": "EmotionalShift",
         "type": "object"
       },
+      "EncounterUpdatedEvent": {
+        "properties": {
+          "encounter_entity_id": {
+            "title": "Encounter Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "encounter.updated",
+            "default": "encounter.updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "encounter_entity_id",
+          "session_id"
+        ],
+        "title": "EncounterUpdatedEvent",
+        "type": "object"
+      },
       "EndpointConfig": {
         "description": "Configuration for a single integration endpoint.",
         "properties": {
@@ -16078,7 +16114,8 @@
               }
             ],
             "default": null,
-            "title": "Target Number"
+            "title": "Target Number",
+            "x-phi": true
           },
           "type": {
             "const": "forward_call_resolved",
@@ -19869,6 +19906,50 @@
         "minLength": 1,
         "type": "string"
       },
+      "NarrativeUpdatedEvent": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event_count": {
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "self_image.brief_generated",
+            "default": "self_image.brief_generated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "target_entity_id": {
+            "title": "Target Entity Id",
+            "type": "string"
+          },
+          "target_entity_type": {
+            "title": "Target Entity Type",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_entity_id",
+          "target_entity_type",
+          "event_id",
+          "version",
+          "confidence",
+          "event_count"
+        ],
+        "title": "NarrativeUpdatedEvent",
+        "type": "object"
+      },
       "NonDesiredState": {
         "properties": {
           "mode": {
@@ -20119,6 +20200,10 @@
             "type": "string"
           },
           "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
             "title": "Mode",
             "type": "string"
           },
@@ -20184,6 +20269,10 @@
             "type": "string"
           },
           "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
             "title": "Mode",
             "type": "string"
           },
@@ -20655,6 +20744,11 @@
             "type": "string"
           },
           "status": {
+            "enum": [
+              "online",
+              "busy",
+              "offline"
+            ],
             "title": "Status",
             "type": "string"
           }
@@ -23408,6 +23502,39 @@
             "title": "Patient Id",
             "type": "string"
           },
+          "pca_x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca X"
+          },
+          "pca_y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Y"
+          },
+          "pca_z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Z"
+          },
           "risk_tier": {
             "anyOf": [
               {
@@ -25944,6 +26071,80 @@
         "title": "ReviewStatsResponse",
         "type": "object"
       },
+      "ReviewSubmittedEvent": {
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "reject",
+              "correct",
+              "batch_approve",
+              "batch_reject"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Count"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Type"
+          },
+          "event_type": {
+            "const": "review.submitted",
+            "default": "review.submitted",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Item Id"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ReviewSubmittedEvent",
+        "type": "object"
+      },
       "RiskSignalConfig": {
         "description": "Per-workspace risk scoring config. Stored on Service.",
         "properties": {
@@ -28011,6 +28212,55 @@
         "title": "SimulationTurnPolicyResponse",
         "type": "object"
       },
+      "SimulationTurnStoredEvent": {
+        "properties": {
+          "event_type": {
+            "const": "simulation.turn_stored",
+            "default": "simulation.turn_stored",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "is_terminal": {
+            "title": "Is Terminal",
+            "type": "boolean"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "state_after": {
+            "title": "State After",
+            "type": "string"
+          },
+          "state_before": {
+            "title": "State Before",
+            "type": "string"
+          },
+          "turn_index": {
+            "title": "Turn Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "service_id",
+          "run_id",
+          "session_id",
+          "turn_index",
+          "state_before",
+          "state_after",
+          "is_terminal"
+        ],
+        "title": "SimulationTurnStoredEvent",
+        "type": "object"
+      },
       "SinkSyncStatus": {
         "properties": {
           "data_source_id": {
@@ -29390,8 +29640,16 @@
       "SurfaceCreatedEvent": {
         "properties": {
           "channel": {
-            "title": "Channel",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Channel"
           },
           "entity_id": {
             "title": "Entity Id",
@@ -29458,8 +29716,7 @@
         },
         "required": [
           "surface_id",
-          "entity_id",
-          "channel"
+          "entity_id"
         ],
         "title": "SurfaceCreatedEvent",
         "type": "object"
@@ -29480,7 +29737,8 @@
               }
             ],
             "default": null,
-            "title": "Channel Address"
+            "title": "Channel Address",
+            "x-phi": true
           },
           "delivery_status": {
             "anyOf": [
@@ -29503,6 +29761,30 @@
             "default": "surface.delivered",
             "title": "Event Type",
             "type": "string"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Message Id"
+          },
+          "short_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Short Url"
           },
           "surface_id": {
             "title": "Surface Id",
@@ -29644,8 +29926,8 @@
             "title": "Event Type",
             "type": "string"
           },
-          "field_id": {
-            "title": "Field Id",
+          "field_key": {
+            "title": "Field Key",
             "type": "string"
           },
           "surface_id": {
@@ -29656,7 +29938,7 @@
         "required": [
           "surface_id",
           "entity_id",
-          "field_id"
+          "field_key"
         ],
         "title": "SurfaceFieldSavedEvent",
         "type": "object"
@@ -30044,8 +30326,16 @@
             "type": "string"
           },
           "reason": {
-            "title": "Reason",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
           },
           "surface_id": {
             "title": "Surface Id",
@@ -30053,8 +30343,7 @@
           }
         },
         "required": [
-          "surface_id",
-          "reason"
+          "surface_id"
         ],
         "title": "SurfaceReviewRejectedEvent",
         "type": "object"
@@ -30254,6 +30543,21 @@
             "default": "surface.submitted",
             "title": "Event Type",
             "type": "string"
+          },
+          "fields_submitted": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields Submitted"
           },
           "submitted_at": {
             "anyOf": [
@@ -31230,6 +31534,98 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
+      "TextCompletedEvent": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "completion_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completion Reason"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "event_type": {
+            "const": "text.completed",
+            "default": "text.completed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "final_state": {
+            "title": "Final State",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "turn_count": {
+            "title": "Turn Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "duration_seconds",
+          "turn_count",
+          "final_state",
+          "channel_kind"
+        ],
+        "title": "TextCompletedEvent",
+        "type": "object"
+      },
+      "TextStartedEvent": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "event_type": {
+            "const": "text.started",
+            "default": "text.started",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "service_id",
+          "channel_kind"
+        ],
+        "title": "TextStartedEvent",
+        "type": "object"
+      },
       "ThroughputBucket": {
         "properties": {
           "bucket": {
@@ -31295,7 +31691,8 @@
               }
             ],
             "default": null,
-            "title": "Output"
+            "title": "Output",
+            "x-phi": true
           },
           "succeeded": {
             "default": true,
@@ -31425,7 +31822,8 @@
               }
             ],
             "default": null,
-            "title": "Tool Input"
+            "title": "Tool Input",
+            "x-phi": true
           },
           "tool_name": {
             "title": "Tool Name",
@@ -32226,6 +32624,64 @@
         "title": "TrendRow",
         "type": "object"
       },
+      "TriggerCompletedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.completed",
+            "default": "trigger.completed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name",
+          "status"
+        ],
+        "title": "TriggerCompletedEvent",
+        "type": "object"
+      },
+      "TriggerFailedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.failed",
+            "default": "trigger.failed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name",
+          "status"
+        ],
+        "title": "TriggerFailedEvent",
+        "type": "object"
+      },
       "TriggerFireResponse": {
         "properties": {
           "fired_event_id": {
@@ -32250,6 +32706,35 @@
           "trigger_id"
         ],
         "title": "TriggerFireResponse",
+        "type": "object"
+      },
+      "TriggerFiredEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.fired",
+            "default": "trigger.fired",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "manual": {
+            "default": false,
+            "title": "Manual",
+            "type": "boolean"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name"
+        ],
+        "title": "TriggerFiredEvent",
         "type": "object"
       },
       "TriggerResponse": {
@@ -35096,7 +35581,8 @@
           },
           "transcript": {
             "title": "Transcript",
-            "type": "string"
+            "type": "string",
+            "x-phi": true
           },
           "type": {
             "const": "user_transcript",
@@ -36848,6 +37334,7 @@
             "call.ended": "#/components/schemas/CallEndedEvent",
             "call.escalated": "#/components/schemas/CallEscalatedEvent",
             "call.started": "#/components/schemas/CallStartedEvent",
+            "encounter.updated": "#/components/schemas/EncounterUpdatedEvent",
             "operator.joined_call": "#/components/schemas/OperatorJoinedCallEvent",
             "operator.left_call": "#/components/schemas/OperatorLeftCallEvent",
             "operator.mode_changed": "#/components/schemas/OperatorModeChangedEvent",
@@ -36857,6 +37344,9 @@
             "operator.wrap_up": "#/components/schemas/OperatorWrapUpEvent",
             "pipeline.error": "#/components/schemas/PipelineErrorEvent",
             "pipeline.sync_completed": "#/components/schemas/PipelineSyncCompletedEvent",
+            "review.submitted": "#/components/schemas/ReviewSubmittedEvent",
+            "self_image.brief_generated": "#/components/schemas/NarrativeUpdatedEvent",
+            "simulation.turn_stored": "#/components/schemas/SimulationTurnStoredEvent",
             "surface.archived": "#/components/schemas/SurfaceArchivedEvent",
             "surface.created": "#/components/schemas/SurfaceCreatedEvent",
             "surface.delivered": "#/components/schemas/SurfaceDeliveredEvent",
@@ -36867,7 +37357,12 @@
             "surface.review_approved": "#/components/schemas/SurfaceReviewApprovedEvent",
             "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
             "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
-            "surface.updated": "#/components/schemas/SurfaceUpdatedEvent"
+            "surface.updated": "#/components/schemas/SurfaceUpdatedEvent",
+            "text.completed": "#/components/schemas/TextCompletedEvent",
+            "text.started": "#/components/schemas/TextStartedEvent",
+            "trigger.completed": "#/components/schemas/TriggerCompletedEvent",
+            "trigger.failed": "#/components/schemas/TriggerFailedEvent",
+            "trigger.fired": "#/components/schemas/TriggerFiredEvent"
           },
           "propertyName": "event_type"
         },
@@ -36880,6 +37375,18 @@
           },
           {
             "$ref": "#/components/schemas/CallEscalatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/EncounterUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/NarrativeUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ReviewSubmittedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SimulationTurnStoredEvent"
           },
           {
             "$ref": "#/components/schemas/SurfaceCreatedEvent"
@@ -36913,6 +37420,21 @@
           },
           {
             "$ref": "#/components/schemas/SurfaceReviewRejectedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerFiredEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerFailedEvent"
           },
           {
             "$ref": "#/components/schemas/PipelineSyncCompletedEvent"
