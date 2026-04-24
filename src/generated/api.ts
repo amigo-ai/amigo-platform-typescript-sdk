@@ -8175,6 +8175,16 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** AgentTranscriptDeltaEvent */
+        AgentTranscriptDeltaEvent: {
+            /** Delta */
+            delta: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "agent_transcript_delta";
+        };
         /** AgentTranscriptEvent */
         AgentTranscriptEvent: {
             /**
@@ -8186,7 +8196,7 @@ export interface components {
              * Filler Type
              * @default null
              */
-            filler_type?: string | null;
+            filler_type?: ("empathy" | "receipt" | "working") | null;
             /**
              * Interrupted
              * @default false
@@ -8644,6 +8654,39 @@ export interface components {
             region?: string | null;
         };
         BackgroundString: string;
+        /** BargeInEvent */
+        BargeInEvent: {
+            /**
+             * Discarded Texts
+             * @default null
+             */
+            discarded_texts?: string[] | null;
+            /**
+             * Interrupted Speaker Id
+             * @default null
+             */
+            interrupted_speaker_id?: string | null;
+            /**
+             * Interrupted Text
+             * @default null
+             */
+            interrupted_text?: string | null;
+            /**
+             * Interrupting Speaker Id
+             * @default null
+             */
+            interrupting_speaker_id?: string | null;
+            /**
+             * Total Barge Ins
+             * @default null
+             */
+            total_barge_ins?: number | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "barge_in";
+        };
         /**
          * BatchActionResponse
          * @description Result of a batch operation.
@@ -9082,8 +9125,11 @@ export interface components {
             event_type: "call.escalated";
             /** Reason */
             reason: string;
-            /** Trigger */
-            trigger: string;
+            /**
+             * Trigger
+             * @enum {string}
+             */
+            trigger: "caller" | "ai" | "operator";
         };
         /**
          * CallIntelligenceDetail
@@ -9540,12 +9586,16 @@ export interface components {
             lower_95?: number | null;
             /** Median */
             median?: number | null;
+            /** Observed */
+            observed?: number | null;
             /** T */
             t: number;
             /** Upper 95 */
             upper_95?: number | null;
             /** Workspace Id */
             workspace_id: string;
+            /** Ym */
+            ym?: string | null;
         };
         /** ClusterForecastResponse */
         ClusterForecastResponse: {
@@ -9802,6 +9852,18 @@ export interface components {
             /** Total Credentials */
             total_credentials: number;
         };
+        /** CompoundEmotionEvent */
+        CompoundEmotionEvent: {
+            /** Compounds */
+            compounds: components["schemas"]["EmotionScore"][];
+            /** Turn Index */
+            turn_index: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "compound_emotion";
+        };
         /** ConfidenceBucket */
         ConfidenceBucket: {
             /**
@@ -9824,11 +9886,7 @@ export interface components {
         };
         /**
          * ConnectorDef
-         * @description A single connector definition in workspace.settings["connectors"].
-         *
-         *     Config is config — no mutable status fields. Health and sync state
-         *     are derived from the event stream (Phase 6) or world.data_sources
-         *     index (interim).
+         * @description A single connector definition stored in platform.connector_configs.
          */
         ConnectorDef: {
             /** Connection Config */
@@ -12289,6 +12347,128 @@ export interface components {
             /** Region */
             region: string;
         };
+        /** EmotionBurst */
+        EmotionBurst: {
+            /** Score */
+            score: number;
+            /** Type */
+            type: string;
+        };
+        /** EmotionEvent */
+        EmotionEvent: {
+            /** Arousal */
+            arousal: number;
+            /**
+             * Barge In Count
+             * @default 0
+             */
+            barge_in_count?: number;
+            /**
+             * Call Duration S
+             * @default null
+             */
+            call_duration_s?: number | null;
+            /**
+             * Coherence
+             * @default null
+             */
+            coherence?: number | null;
+            /**
+             * Dominance
+             * @default null
+             */
+            dominance?: number | null;
+            /** Dominant */
+            dominant: string;
+            /**
+             * Emotional Shifts
+             * @default null
+             */
+            emotional_shifts?: number | null;
+            /**
+             * Language Sentiment
+             * @default null
+             */
+            language_sentiment?: number | null;
+            /**
+             * Language Toxicity
+             * @default null
+             */
+            language_toxicity?: {
+                [key: string]: number;
+            } | null;
+            /**
+             * Provider
+             * @default null
+             */
+            provider?: string | null;
+            /**
+             * Recent Bursts
+             * @default null
+             */
+            recent_bursts?: components["schemas"]["EmotionBurst"][] | null;
+            /**
+             * Scores
+             * @default null
+             */
+            scores?: components["schemas"]["EmotionScore"][] | null;
+            /**
+             * Segment Arousal
+             * @default null
+             */
+            segment_arousal?: number | null;
+            /**
+             * Segment Dominant
+             * @default null
+             */
+            segment_dominant?: string | null;
+            /**
+             * Segment Valence
+             * @default null
+             */
+            segment_valence?: number | null;
+            /** @default null */
+            speaker?: components["schemas"]["SpeakerAcoustics"] | null;
+            /**
+             * Speaker Similarity
+             * @default null
+             */
+            speaker_similarity?: number | null;
+            /**
+             * Total Segments
+             * @default null
+             */
+            total_segments?: number | null;
+            /**
+             * Trend
+             * @default null
+             */
+            trend?: ("improving" | "stable" | "deteriorating") | null;
+            /**
+             * Turn Count
+             * @default null
+             */
+            turn_count?: number | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "emotion";
+            /** Valence */
+            valence: number;
+            /**
+             * Verified Speaker Id
+             * @default null
+             */
+            verified_speaker_id?: string | null;
+        };
+        /** EmotionScore */
+        EmotionScore: {
+            /** Name */
+            name: string;
+            /** Score */
+            score: number;
+        };
         /**
          * EmotionSummary
          * @description Aggregated emotional analysis across the call.
@@ -12354,6 +12534,44 @@ export interface components {
              * @description What caused the shift - exact words and tone
              */
             trigger?: string | null;
+        };
+        /** EmpathyClassifiedEvent */
+        EmpathyClassifiedEvent: {
+            /** Empathy Baseline */
+            empathy_baseline: number;
+            /**
+             * Filler Type
+             * @enum {string}
+             */
+            filler_type: "empathy" | "receipt" | "working";
+            /** Should Pause */
+            should_pause: boolean;
+            /** Suppress Filler */
+            suppress_filler: boolean;
+            /** Tier */
+            tier: number;
+            /**
+             * Tier Name
+             * @enum {string}
+             */
+            tier_name: "FUNCTIONAL" | "LIGHT_TOUCH" | "FULL_EMPATHY" | "HOLD_SPACE";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "empathy_classified";
+        };
+        /** EncounterUpdatedEvent */
+        EncounterUpdatedEvent: {
+            /** Encounter Entity Id */
+            encounter_entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "encounter.updated";
+            /** Session Id */
+            session_id: string;
         };
         /**
          * EndpointConfig
@@ -14679,7 +14897,7 @@ export interface components {
              * @description Communication protocol
              * @enum {string}
              */
-            protocol: "rest" | "fhir" | "mcp";
+            protocol: "rest" | "fhir" | "mcp" | "desktop";
             /**
              * Updated At
              * Format: date-time
@@ -15152,6 +15370,31 @@ export interface components {
              * @default 0
              */
             event_count?: number;
+        };
+        /** LatencyEvent */
+        LatencyEvent: {
+            /** Audio Ttfb Ms */
+            audio_ttfb_ms: number;
+            /** Continuation */
+            continuation: boolean;
+            /** E2E Ttfb Ms */
+            e2e_ttfb_ms: number;
+            /** Engine Ms */
+            engine_ms: number;
+            /**
+             * Is Greeting
+             * @default false
+             */
+            is_greeting?: boolean;
+            /** Nav Ms */
+            nav_ms: number;
+            /** Render Ms */
+            render_ms: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "latency";
         };
         /**
          * LatencySummary
@@ -15841,6 +16084,75 @@ export interface components {
             workspace_id: string;
         };
         NameString: string;
+        /** NarrativeUpdatedEvent */
+        NarrativeUpdatedEvent: {
+            /** Confidence */
+            confidence: number;
+            /** Event Count */
+            event_count: number;
+            /** Event Id */
+            event_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "self_image.brief_generated";
+            /** Target Entity Id */
+            target_entity_id: string;
+            /** Target Entity Type */
+            target_entity_type: string;
+            /** Version */
+            version: string;
+        };
+        /** NavTimingEvent */
+        NavTimingEvent: {
+            /**
+             * Input Tokens
+             * @default null
+             */
+            input_tokens?: number | null;
+            /**
+             * Model
+             * @default null
+             */
+            model?: string | null;
+            /** Nav Ms */
+            nav_ms: number;
+            /**
+             * Output Tokens
+             * @default null
+             */
+            output_tokens?: number | null;
+            /** Render Ms */
+            render_ms: number;
+            /**
+             * Retry Attempts
+             * @default null
+             */
+            retry_attempts?: number | null;
+            /**
+             * Selected Action
+             * @default null
+             */
+            selected_action?: string | null;
+            /**
+             * State
+             * @default null
+             */
+            state?: string | null;
+            /** Total Ms */
+            total_ms: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "nav_timing";
+            /**
+             * Used Fallback
+             * @default null
+             */
+            used_fallback?: boolean | null;
+        };
         /** NonDesiredState */
         NonDesiredState: {
             /**
@@ -15892,7 +16204,7 @@ export interface components {
             /** Smoking */
             smoking: components["schemas"]["NoteRollupCategoryEntry"][];
         };
-        ObserverSSEEvent: components["schemas"]["UserTranscriptEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["SpeakerMutedEvent"];
+        ObserverSSEEvent: components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
         /** OcrRequest */
         OcrRequest: {
             /**
@@ -15932,8 +16244,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.joined_call";
-            /** Mode */
-            mode: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
             /** Operator Id */
             operator_id: string;
         };
@@ -15963,8 +16278,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.mode_changed";
-            /** Mode */
-            mode: string;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
             /** Operator Id */
             operator_id: string;
         };
@@ -16210,8 +16528,11 @@ export interface components {
             event_type: "operator.status_changed";
             /** Operator Id */
             operator_id: string;
-            /** Status */
-            status: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "online" | "busy" | "offline";
         };
         /** OperatorStatusCounts */
         OperatorStatusCounts: {
@@ -16735,6 +17056,75 @@ export interface components {
              */
             rows: unknown[][];
         };
+        /** ParticipantJoinedEvent */
+        ParticipantJoinedEvent: {
+            /** Conference Sid */
+            conference_sid: string;
+            /**
+             * Display Name
+             * @default null
+             */
+            display_name?: string | null;
+            /**
+             * Operator Entity Id
+             * @default null
+             */
+            operator_entity_id?: string | null;
+            /** Participant Id */
+            participant_id: string;
+            /**
+             * Participant Name
+             * @default null
+             */
+            participant_name?: string | null;
+            /**
+             * Participant Role
+             * @enum {string}
+             */
+            participant_role: "caller" | "agent" | "operator";
+            /**
+             * Phone Number
+             * @default null
+             */
+            phone_number?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "participant_joined";
+        };
+        /** ParticipantLeftEvent */
+        ParticipantLeftEvent: {
+            /** Conference Sid */
+            conference_sid: string;
+            /**
+             * Display Name
+             * @default null
+             */
+            display_name?: string | null;
+            /**
+             * Operator Entity Id
+             * @default null
+             */
+            operator_entity_id?: string | null;
+            /** Participant Id */
+            participant_id: string;
+            /**
+             * Participant Role
+             * @enum {string}
+             */
+            participant_role: "caller" | "agent" | "operator";
+            /**
+             * Phone Number
+             * @default null
+             */
+            phone_number?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "participant_left";
+        };
         /** PatientBurdenDetailResponse */
         PatientBurdenDetailResponse: {
             /** Age Adjusted Charlson Index */
@@ -17042,6 +17432,12 @@ export interface components {
             nationality?: string | null;
             /** Patient Id */
             patient_id: string;
+            /** Pca X */
+            pca_x?: number | null;
+            /** Pca Y */
+            pca_y?: number | null;
+            /** Pca Z */
+            pca_z?: number | null;
             /** Risk Tier */
             risk_tier?: number | null;
             /** Umap X */
@@ -18150,6 +18546,39 @@ export interface components {
             /** Rejected */
             rejected: number;
         };
+        /** ReviewSubmittedEvent */
+        ReviewSubmittedEvent: {
+            /**
+             * Action
+             * @enum {string}
+             */
+            action: "approve" | "reject" | "correct" | "batch_approve" | "batch_reject";
+            /**
+             * Count
+             * @default null
+             */
+            count?: number | null;
+            /**
+             * Entity Id
+             * @default null
+             */
+            entity_id?: string | null;
+            /**
+             * Entity Type
+             * @default null
+             */
+            entity_type?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "review.submitted";
+            /**
+             * Item Id
+             * @default null
+             */
+            item_id?: string | null;
+        };
         /**
          * RiskSignalConfig
          * @description Per-workspace risk scoring config. Stored on Service.
@@ -18857,12 +19286,156 @@ export interface components {
             /** Tts Model */
             tts_model?: ("sonic-turbo" | "sonic-3") | null;
         };
+        /** SessionEndEvent */
+        SessionEndEvent: {
+            /**
+             * Call Sid
+             * @default null
+             */
+            call_sid?: string | null;
+            /**
+             * Completion Reason
+             * @default
+             */
+            completion_reason?: string;
+            /**
+             * Duration S
+             * @default 0
+             */
+            duration_s?: number;
+            /**
+             * Emotional Summary
+             * @default null
+             */
+            emotional_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Final State
+             * @default
+             */
+            final_state?: string;
+            /**
+             * Has Recording
+             * @default null
+             */
+            has_recording?: boolean | null;
+            /**
+             * Session Id
+             * @default null
+             */
+            session_id?: string | null;
+            /**
+             * Trace Id
+             * @default null
+             */
+            trace_id?: string | null;
+            /**
+             * Turns
+             * @default 0
+             */
+            turns?: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "session_end";
+        };
+        /** SessionInfoEvent */
+        SessionInfoEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * Caller Id
+             * @default
+             */
+            caller_id?: string;
+            /**
+             * Current State
+             * @default
+             */
+            current_state?: string;
+            /**
+             * Direction
+             * @default inbound
+             * @enum {string}
+             */
+            direction?: "inbound" | "outbound" | "playground" | "simulated" | "test";
+            /**
+             * Duration Seconds
+             * @default 0
+             */
+            duration_seconds?: number;
+            /**
+             * Service Id
+             * @default
+             */
+            service_id?: string;
+            /**
+             * Start Time
+             * @default 0
+             */
+            start_time?: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "session_info";
+            /**
+             * Workspace Id
+             * @default
+             */
+            workspace_id?: string;
+        };
         /** SessionResponse */
         SessionResponse: {
             /** Created At */
             created_at?: string | null;
             /** Id */
             id: string;
+        };
+        /** SessionStartEvent */
+        SessionStartEvent: {
+            /**
+             * Call Sid
+             * @default null
+             */
+            call_sid?: string | null;
+            /**
+             * Initial State
+             * @default null
+             */
+            initial_state?: string | null;
+            /**
+             * Mode
+             * @default null
+             */
+            mode?: string | null;
+            /**
+             * Service Id
+             * @default null
+             */
+            service_id?: string | null;
+            /**
+             * Session Id
+             * @default null
+             */
+            session_id?: string | null;
+            /**
+             * Trace Id
+             * @default null
+             */
+            trace_id?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "session_start";
+            /**
+             * Workspace Id
+             * @default null
+             */
+            workspace_id?: string | null;
         };
         /** SessionStatusResponse */
         SessionStatusResponse: {
@@ -19163,6 +19736,28 @@ export interface components {
              * @default suspend_forward
              */
             safety_response?: string;
+        };
+        /** SimulationTurnStoredEvent */
+        SimulationTurnStoredEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "simulation.turn_stored";
+            /** Is Terminal */
+            is_terminal: boolean;
+            /** Run Id */
+            run_id: string;
+            /** Service Id */
+            service_id: string;
+            /** Session Id */
+            session_id: string;
+            /** State After */
+            state_after: string;
+            /** State Before */
+            state_before: string;
+            /** Turn Index */
+            turn_index: number;
         };
         /** SinkSyncStatus */
         SinkSyncStatus: {
@@ -19483,6 +20078,34 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** SpeakerAcoustics */
+        SpeakerAcoustics: {
+            /**
+             * Energy Delta
+             * @default null
+             */
+            energy_delta?: number | null;
+            /**
+             * Energy Trend
+             * @default null
+             */
+            energy_trend?: ("rising" | "falling" | "stable") | null;
+            /**
+             * Normalized
+             * @default null
+             */
+            normalized?: boolean | null;
+            /**
+             * Pitch Delta
+             * @default null
+             */
+            pitch_delta?: number | null;
+            /**
+             * Zcr Delta
+             * @default null
+             */
+            zcr_delta?: number | null;
+        };
         /** SpeakerMutedEvent */
         SpeakerMutedEvent: {
             /** Muted */
@@ -19528,6 +20151,28 @@ export interface components {
              * @default 0
              */
             topic_risk_score?: number;
+        };
+        /** StateTransitionEvent */
+        StateTransitionEvent: {
+            /**
+             * Annotation
+             * @default null
+             */
+            annotation?: string | null;
+            /** Next State */
+            next_state: string;
+            /** Previous State */
+            previous_state: string;
+            /**
+             * Transition Type
+             * @default null
+             */
+            transition_type?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "state_transition";
         };
         /**
          * StaticToolDef
@@ -19700,8 +20345,11 @@ export interface components {
         };
         /** SurfaceCreatedEvent */
         SurfaceCreatedEvent: {
-            /** Channel */
-            channel: string;
+            /**
+             * Channel
+             * @default null
+             */
+            channel?: string | null;
             /** Entity Id */
             entity_id: string;
             /**
@@ -19753,6 +20401,16 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.delivered";
+            /**
+             * Message Id
+             * @default null
+             */
+            message_id?: string | null;
+            /**
+             * Short Url
+             * @default null
+             */
+            short_url?: string | null;
             /** Surface Id */
             surface_id: string;
         };
@@ -19805,8 +20463,8 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.field_saved";
-            /** Field Id */
-            field_id: string;
+            /** Field Key */
+            field_key: string;
             /** Surface Id */
             surface_id: string;
         };
@@ -19951,8 +20609,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.review_rejected";
-            /** Reason */
-            reason: string;
+            /**
+             * Reason
+             * @default null
+             */
+            reason?: string | null;
             /** Surface Id */
             surface_id: string;
         };
@@ -20022,6 +20683,11 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.submitted";
+            /**
+             * Fields Submitted
+             * @default null
+             */
+            fields_submitted?: string[] | null;
             /**
              * Submitted At
              * @default null
@@ -20398,6 +21064,48 @@ export interface components {
              * @description Chronological log of tool invocations
              */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
+        };
+        /** TextCompletedEvent */
+        TextCompletedEvent: {
+            /** Channel Kind */
+            channel_kind: string;
+            /**
+             * Completion Reason
+             * @default null
+             */
+            completion_reason?: string | null;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "text.completed";
+            /** Final State */
+            final_state: string;
+            /** Session Id */
+            session_id: string;
+            /** Turn Count */
+            turn_count: number;
+        };
+        /** TextStartedEvent */
+        TextStartedEvent: {
+            /** Channel Kind */
+            channel_kind: string;
+            /**
+             * Entity Id
+             * @default null
+             */
+            entity_id?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "text.started";
+            /** Service Id */
+            service_id: string;
+            /** Session Id */
+            session_id: string;
         };
         /** ThroughputBucket */
         ThroughputBucket: {
@@ -20891,6 +21599,34 @@ export interface components {
             /** Year Month */
             year_month: string;
         };
+        /** TriggerCompletedEvent */
+        TriggerCompletedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.completed";
+            /** Status */
+            status: string;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
+        };
+        /** TriggerFailedEvent */
+        TriggerFailedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.failed";
+            /** Status */
+            status: string;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
+        };
         /** TriggerFireResponse */
         TriggerFireResponse: {
             /**
@@ -20909,6 +21645,23 @@ export interface components {
              * Format: uuid
              */
             trigger_id: string;
+        };
+        /** TriggerFiredEvent */
+        TriggerFiredEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "trigger.fired";
+            /**
+             * Manual
+             * @default false
+             */
+            manual?: boolean;
+            /** Trigger Id */
+            trigger_id: string;
+            /** Trigger Name */
+            trigger_name: string;
         };
         /** TriggerResponse */
         TriggerResponse: {
@@ -21746,6 +22499,35 @@ export interface components {
             /** Voice Id */
             voice_id: string;
         };
+        /** VoiceContextAppliedEvent */
+        VoiceContextAppliedEvent: {
+            /** Emotion Detection Enabled */
+            emotion_detection_enabled: boolean;
+            /** Filler Enabled */
+            filler_enabled: boolean;
+            /** Reasoning */
+            reasoning: string;
+            /**
+             * Tts Emotion
+             * @default null
+             */
+            tts_emotion?: string | null;
+            /**
+             * Tts Speed
+             * @default null
+             */
+            tts_speed?: number | null;
+            /**
+             * Tts Volume
+             * @default null
+             */
+            tts_volume?: number | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "voice_context_applied";
+        };
         /** VoiceJudgeRecentResponse */
         VoiceJudgeRecentResponse: {
             /** Count */
@@ -22337,7 +23119,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
         /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.

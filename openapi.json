@@ -994,6 +994,26 @@
         "title": "AgentResponse",
         "type": "object"
       },
+      "AgentTranscriptDeltaEvent": {
+        "properties": {
+          "delta": {
+            "title": "Delta",
+            "type": "string",
+            "x-phi": true
+          },
+          "type": {
+            "const": "agent_transcript_delta",
+            "default": "agent_transcript_delta",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delta"
+        ],
+        "title": "AgentTranscriptDeltaEvent",
+        "type": "object"
+      },
       "AgentTranscriptEvent": {
         "properties": {
           "action": {
@@ -1011,6 +1031,11 @@
           "filler_type": {
             "anyOf": [
               {
+                "enum": [
+                  "empathy",
+                  "receipt",
+                  "working"
+                ],
                 "type": "string"
               },
               {
@@ -1063,7 +1088,8 @@
           },
           "transcript": {
             "title": "Transcript",
-            "type": "string"
+            "type": "string",
+            "x-phi": true
           },
           "type": {
             "const": "agent_transcript",
@@ -2409,6 +2435,83 @@
         "maxLength": 10000,
         "type": "string"
       },
+      "BargeInEvent": {
+        "properties": {
+          "discarded_texts": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Discarded Texts",
+            "x-phi": true
+          },
+          "interrupted_speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Interrupted Speaker Id"
+          },
+          "interrupted_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Interrupted Text",
+            "x-phi": true
+          },
+          "interrupting_speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Interrupting Speaker Id"
+          },
+          "total_barge_ins": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Total Barge Ins"
+          },
+          "type": {
+            "const": "barge_in",
+            "default": "barge_in",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "BargeInEvent",
+        "type": "object"
+      },
       "BatchActionResponse": {
         "description": "Result of a batch operation.",
         "properties": {
@@ -3422,6 +3525,11 @@
             "type": "string"
           },
           "trigger": {
+            "enum": [
+              "caller",
+              "ai",
+              "operator"
+            ],
             "title": "Trigger",
             "type": "string"
           }
@@ -3695,7 +3803,8 @@
               }
             ],
             "default": null,
-            "title": "Caller Id"
+            "title": "Caller Id",
+            "x-phi": true
           },
           "direction": {
             "enum": [
@@ -4420,6 +4529,17 @@
             ],
             "title": "Median"
           },
+          "observed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed"
+          },
           "t": {
             "title": "T",
             "type": "number"
@@ -4438,6 +4558,17 @@
           "workspace_id": {
             "title": "Workspace Id",
             "type": "string"
+          },
+          "ym": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ym"
           }
         },
         "required": [
@@ -5160,6 +5291,33 @@
         "title": "ComplianceDashboardResponse",
         "type": "object"
       },
+      "CompoundEmotionEvent": {
+        "properties": {
+          "compounds": {
+            "items": {
+              "$ref": "#/components/schemas/EmotionScore"
+            },
+            "title": "Compounds",
+            "type": "array"
+          },
+          "turn_index": {
+            "title": "Turn Index",
+            "type": "integer"
+          },
+          "type": {
+            "const": "compound_emotion",
+            "default": "compound_emotion",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "compounds",
+          "turn_index"
+        ],
+        "title": "CompoundEmotionEvent",
+        "type": "object"
+      },
       "ConfidenceBucket": {
         "properties": {
           "confidence_range": {
@@ -5195,7 +5353,7 @@
         "type": "object"
       },
       "ConnectorDef": {
-        "description": "A single connector definition in workspace.settings[\"connectors\"].\n\nConfig is config \u2014 no mutable status fields. Health and sync state\nare derived from the event stream (Phase 6) or world.data_sources\nindex (interim).",
+        "description": "A single connector definition stored in platform.connector_configs.",
         "properties": {
           "connection_config": {
             "additionalProperties": true,
@@ -11409,6 +11567,306 @@
         "title": "EgressIpsResponse",
         "type": "object"
       },
+      "EmotionBurst": {
+        "properties": {
+          "score": {
+            "title": "Score",
+            "type": "number"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "score"
+        ],
+        "title": "EmotionBurst",
+        "type": "object"
+      },
+      "EmotionEvent": {
+        "properties": {
+          "arousal": {
+            "title": "Arousal",
+            "type": "number"
+          },
+          "barge_in_count": {
+            "default": 0,
+            "title": "Barge In Count",
+            "type": "integer"
+          },
+          "call_duration_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Call Duration S"
+          },
+          "coherence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Coherence"
+          },
+          "dominance": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Dominance"
+          },
+          "dominant": {
+            "title": "Dominant",
+            "type": "string"
+          },
+          "emotional_shifts": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Emotional Shifts"
+          },
+          "language_sentiment": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Language Sentiment"
+          },
+          "language_toxicity": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Language Toxicity"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Provider"
+          },
+          "recent_bursts": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EmotionBurst"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Recent Bursts"
+          },
+          "scores": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EmotionScore"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Scores"
+          },
+          "segment_arousal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Segment Arousal"
+          },
+          "segment_dominant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Segment Dominant"
+          },
+          "segment_valence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Segment Valence"
+          },
+          "speaker": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpeakerAcoustics"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null
+          },
+          "speaker_similarity": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Speaker Similarity"
+          },
+          "total_segments": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Total Segments"
+          },
+          "trend": {
+            "anyOf": [
+              {
+                "enum": [
+                  "improving",
+                  "stable",
+                  "deteriorating"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trend"
+          },
+          "turn_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Turn Count"
+          },
+          "type": {
+            "const": "emotion",
+            "default": "emotion",
+            "title": "Type",
+            "type": "string"
+          },
+          "valence": {
+            "title": "Valence",
+            "type": "number"
+          },
+          "verified_speaker_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Verified Speaker Id",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "dominant",
+          "valence",
+          "arousal"
+        ],
+        "title": "EmotionEvent",
+        "type": "object"
+      },
+      "EmotionScore": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "score": {
+            "title": "Score",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "score"
+        ],
+        "title": "EmotionScore",
+        "type": "object"
+      },
       "EmotionSummary": {
         "description": "Aggregated emotional analysis across the call.",
         "properties": {
@@ -11536,6 +11994,85 @@
           }
         },
         "title": "EmotionalShift",
+        "type": "object"
+      },
+      "EmpathyClassifiedEvent": {
+        "properties": {
+          "empathy_baseline": {
+            "title": "Empathy Baseline",
+            "type": "number"
+          },
+          "filler_type": {
+            "enum": [
+              "empathy",
+              "receipt",
+              "working"
+            ],
+            "title": "Filler Type",
+            "type": "string"
+          },
+          "should_pause": {
+            "title": "Should Pause",
+            "type": "boolean"
+          },
+          "suppress_filler": {
+            "title": "Suppress Filler",
+            "type": "boolean"
+          },
+          "tier": {
+            "title": "Tier",
+            "type": "integer"
+          },
+          "tier_name": {
+            "enum": [
+              "FUNCTIONAL",
+              "LIGHT_TOUCH",
+              "FULL_EMPATHY",
+              "HOLD_SPACE"
+            ],
+            "title": "Tier Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "empathy_classified",
+            "default": "empathy_classified",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tier",
+          "tier_name",
+          "should_pause",
+          "suppress_filler",
+          "filler_type",
+          "empathy_baseline"
+        ],
+        "title": "EmpathyClassifiedEvent",
+        "type": "object"
+      },
+      "EncounterUpdatedEvent": {
+        "properties": {
+          "encounter_entity_id": {
+            "title": "Encounter Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "encounter.updated",
+            "default": "encounter.updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "encounter_entity_id",
+          "session_id"
+        ],
+        "title": "EncounterUpdatedEvent",
         "type": "object"
       },
       "EndpointConfig": {
@@ -16078,7 +16615,8 @@
               }
             ],
             "default": null,
-            "title": "Target Number"
+            "title": "Target Number",
+            "x-phi": true
           },
           "type": {
             "const": "forward_call_resolved",
@@ -17433,7 +17971,8 @@
             "enum": [
               "rest",
               "fhir",
-              "mcp"
+              "mcp",
+              "desktop"
             ],
             "title": "Protocol",
             "type": "string"
@@ -18321,6 +18860,55 @@
           }
         },
         "title": "LastPollInfo",
+        "type": "object"
+      },
+      "LatencyEvent": {
+        "properties": {
+          "audio_ttfb_ms": {
+            "title": "Audio Ttfb Ms",
+            "type": "number"
+          },
+          "continuation": {
+            "title": "Continuation",
+            "type": "boolean"
+          },
+          "e2e_ttfb_ms": {
+            "title": "E2E Ttfb Ms",
+            "type": "number"
+          },
+          "engine_ms": {
+            "title": "Engine Ms",
+            "type": "number"
+          },
+          "is_greeting": {
+            "default": false,
+            "title": "Is Greeting",
+            "type": "boolean"
+          },
+          "nav_ms": {
+            "title": "Nav Ms",
+            "type": "number"
+          },
+          "render_ms": {
+            "title": "Render Ms",
+            "type": "number"
+          },
+          "type": {
+            "const": "latency",
+            "default": "latency",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "e2e_ttfb_ms",
+          "engine_ms",
+          "nav_ms",
+          "render_ms",
+          "audio_ttfb_ms",
+          "continuation"
+        ],
+        "title": "LatencyEvent",
         "type": "object"
       },
       "LatencySummary": {
@@ -19869,6 +20457,163 @@
         "minLength": 1,
         "type": "string"
       },
+      "NarrativeUpdatedEvent": {
+        "properties": {
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "event_count": {
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "event_id": {
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "self_image.brief_generated",
+            "default": "self_image.brief_generated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "target_entity_id": {
+            "title": "Target Entity Id",
+            "type": "string"
+          },
+          "target_entity_type": {
+            "title": "Target Entity Type",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target_entity_id",
+          "target_entity_type",
+          "event_id",
+          "version",
+          "confidence",
+          "event_count"
+        ],
+        "title": "NarrativeUpdatedEvent",
+        "type": "object"
+      },
+      "NavTimingEvent": {
+        "properties": {
+          "input_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Input Tokens"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model"
+          },
+          "nav_ms": {
+            "title": "Nav Ms",
+            "type": "number"
+          },
+          "output_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Output Tokens"
+          },
+          "render_ms": {
+            "title": "Render Ms",
+            "type": "number"
+          },
+          "retry_attempts": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Retry Attempts"
+          },
+          "selected_action": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Selected Action"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "State"
+          },
+          "total_ms": {
+            "title": "Total Ms",
+            "type": "number"
+          },
+          "type": {
+            "const": "nav_timing",
+            "default": "nav_timing",
+            "title": "Type",
+            "type": "string"
+          },
+          "used_fallback": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Used Fallback"
+          }
+        },
+        "required": [
+          "nav_ms",
+          "render_ms",
+          "total_ms"
+        ],
+        "title": "NavTimingEvent",
+        "type": "object"
+      },
       "NonDesiredState": {
         "properties": {
           "mode": {
@@ -20020,32 +20765,88 @@
         "discriminator": {
           "mapping": {
             "agent_transcript": "#/components/schemas/AgentTranscriptEvent",
+            "agent_transcript_delta": "#/components/schemas/AgentTranscriptDeltaEvent",
+            "barge_in": "#/components/schemas/BargeInEvent",
+            "compound_emotion": "#/components/schemas/CompoundEmotionEvent",
+            "emotion": "#/components/schemas/EmotionEvent",
+            "empathy_classified": "#/components/schemas/EmpathyClassifiedEvent",
             "forward_call_resolved": "#/components/schemas/ForwardCallResolvedEvent",
+            "latency": "#/components/schemas/LatencyEvent",
+            "nav_timing": "#/components/schemas/NavTimingEvent",
+            "participant_joined": "#/components/schemas/ParticipantJoinedEvent",
+            "participant_left": "#/components/schemas/ParticipantLeftEvent",
+            "session_end": "#/components/schemas/SessionEndEvent",
+            "session_info": "#/components/schemas/SessionInfoEvent",
+            "session_start": "#/components/schemas/SessionStartEvent",
             "speaker_muted": "#/components/schemas/SpeakerMutedEvent",
+            "state_transition": "#/components/schemas/StateTransitionEvent",
             "tool_call_completed": "#/components/schemas/ToolCallCompletedEvent",
             "tool_call_started": "#/components/schemas/ToolCallStartedEvent",
-            "user_transcript": "#/components/schemas/UserTranscriptEvent"
+            "user_transcript": "#/components/schemas/UserTranscriptEvent",
+            "voice_context_applied": "#/components/schemas/VoiceContextAppliedEvent"
           },
           "propertyName": "type"
         },
         "oneOf": [
           {
-            "$ref": "#/components/schemas/UserTranscriptEvent"
+            "$ref": "#/components/schemas/AgentTranscriptDeltaEvent"
           },
           {
             "$ref": "#/components/schemas/AgentTranscriptEvent"
           },
           {
-            "$ref": "#/components/schemas/ToolCallStartedEvent"
+            "$ref": "#/components/schemas/BargeInEvent"
           },
           {
-            "$ref": "#/components/schemas/ToolCallCompletedEvent"
+            "$ref": "#/components/schemas/CompoundEmotionEvent"
+          },
+          {
+            "$ref": "#/components/schemas/EmotionEvent"
+          },
+          {
+            "$ref": "#/components/schemas/EmpathyClassifiedEvent"
           },
           {
             "$ref": "#/components/schemas/ForwardCallResolvedEvent"
           },
           {
+            "$ref": "#/components/schemas/LatencyEvent"
+          },
+          {
+            "$ref": "#/components/schemas/NavTimingEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ParticipantJoinedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ParticipantLeftEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SessionEndEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SessionInfoEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SessionStartEvent"
+          },
+          {
             "$ref": "#/components/schemas/SpeakerMutedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/StateTransitionEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ToolCallCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ToolCallStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/UserTranscriptEvent"
+          },
+          {
+            "$ref": "#/components/schemas/VoiceContextAppliedEvent"
           }
         ]
       },
@@ -20119,6 +20920,10 @@
             "type": "string"
           },
           "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
             "title": "Mode",
             "type": "string"
           },
@@ -20184,6 +20989,10 @@
             "type": "string"
           },
           "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
             "title": "Mode",
             "type": "string"
           },
@@ -20655,6 +21464,11 @@
             "type": "string"
           },
           "status": {
+            "enum": [
+              "online",
+              "busy",
+              "offline"
+            ],
             "title": "Status",
             "type": "string"
           }
@@ -22386,6 +23200,163 @@
         "title": "PanelResultResponse",
         "type": "object"
       },
+      "ParticipantJoinedEvent": {
+        "properties": {
+          "conference_sid": {
+            "title": "Conference Sid",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Display Name",
+            "x-phi": true
+          },
+          "operator_entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Operator Entity Id"
+          },
+          "participant_id": {
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "participant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Participant Name",
+            "x-phi": true
+          },
+          "participant_role": {
+            "enum": [
+              "caller",
+              "agent",
+              "operator"
+            ],
+            "title": "Participant Role",
+            "type": "string"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Phone Number",
+            "x-phi": true
+          },
+          "type": {
+            "const": "participant_joined",
+            "default": "participant_joined",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant_id",
+          "participant_role",
+          "conference_sid"
+        ],
+        "title": "ParticipantJoinedEvent",
+        "type": "object"
+      },
+      "ParticipantLeftEvent": {
+        "properties": {
+          "conference_sid": {
+            "title": "Conference Sid",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Display Name",
+            "x-phi": true
+          },
+          "operator_entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Operator Entity Id"
+          },
+          "participant_id": {
+            "title": "Participant Id",
+            "type": "string"
+          },
+          "participant_role": {
+            "enum": [
+              "caller",
+              "agent",
+              "operator"
+            ],
+            "title": "Participant Role",
+            "type": "string"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Phone Number",
+            "x-phi": true
+          },
+          "type": {
+            "const": "participant_left",
+            "default": "participant_left",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participant_id",
+          "participant_role",
+          "conference_sid"
+        ],
+        "title": "ParticipantLeftEvent",
+        "type": "object"
+      },
       "PatientBurdenDetailResponse": {
         "properties": {
           "age_adjusted_charlson_index": {
@@ -23407,6 +24378,39 @@
           "patient_id": {
             "title": "Patient Id",
             "type": "string"
+          },
+          "pca_x": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca X"
+          },
+          "pca_y": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Y"
+          },
+          "pca_z": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pca Z"
           },
           "risk_tier": {
             "anyOf": [
@@ -25944,6 +26948,80 @@
         "title": "ReviewStatsResponse",
         "type": "object"
       },
+      "ReviewSubmittedEvent": {
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "reject",
+              "correct",
+              "batch_approve",
+              "batch_reject"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Count"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Type"
+          },
+          "event_type": {
+            "const": "review.submitted",
+            "default": "review.submitted",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Item Id"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ReviewSubmittedEvent",
+        "type": "object"
+      },
       "RiskSignalConfig": {
         "description": "Per-workspace risk scoring config. Stored on Service.",
         "properties": {
@@ -27416,6 +28494,161 @@
         "title": "ServiceVoiceConfig",
         "type": "object"
       },
+      "SessionEndEvent": {
+        "properties": {
+          "call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Call Sid"
+          },
+          "completion_reason": {
+            "default": "",
+            "title": "Completion Reason",
+            "type": "string"
+          },
+          "duration_s": {
+            "default": 0.0,
+            "title": "Duration S",
+            "type": "number"
+          },
+          "emotional_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Emotional Summary"
+          },
+          "final_state": {
+            "default": "",
+            "title": "Final State",
+            "type": "string"
+          },
+          "has_recording": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Has Recording"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Session Id"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trace Id"
+          },
+          "turns": {
+            "default": 0,
+            "title": "Turns",
+            "type": "integer"
+          },
+          "type": {
+            "const": "session_end",
+            "default": "session_end",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "SessionEndEvent",
+        "type": "object"
+      },
+      "SessionInfoEvent": {
+        "properties": {
+          "call_sid": {
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "caller_id": {
+            "default": "",
+            "title": "Caller Id",
+            "type": "string",
+            "x-phi": true
+          },
+          "current_state": {
+            "default": "",
+            "title": "Current State",
+            "type": "string"
+          },
+          "direction": {
+            "default": "inbound",
+            "enum": [
+              "inbound",
+              "outbound",
+              "playground",
+              "simulated",
+              "test"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "duration_seconds": {
+            "default": 0.0,
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "service_id": {
+            "default": "",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "start_time": {
+            "default": 0.0,
+            "title": "Start Time",
+            "type": "number"
+          },
+          "type": {
+            "const": "session_info",
+            "default": "session_info",
+            "title": "Type",
+            "type": "string"
+          },
+          "workspace_id": {
+            "default": "",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid"
+        ],
+        "title": "SessionInfoEvent",
+        "type": "object"
+      },
       "SessionResponse": {
         "properties": {
           "created_at": {
@@ -27438,6 +28671,102 @@
           "id"
         ],
         "title": "SessionResponse",
+        "type": "object"
+      },
+      "SessionStartEvent": {
+        "properties": {
+          "call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Call Sid"
+          },
+          "initial_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Initial State"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Mode"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Session Id"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Trace Id"
+          },
+          "type": {
+            "const": "session_start",
+            "default": "session_start",
+            "title": "Type",
+            "type": "string"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Workspace Id"
+          }
+        },
+        "title": "SessionStartEvent",
         "type": "object"
       },
       "SessionStatusResponse": {
@@ -28009,6 +29338,55 @@
           }
         },
         "title": "SimulationTurnPolicyResponse",
+        "type": "object"
+      },
+      "SimulationTurnStoredEvent": {
+        "properties": {
+          "event_type": {
+            "const": "simulation.turn_stored",
+            "default": "simulation.turn_stored",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "is_terminal": {
+            "title": "Is Terminal",
+            "type": "boolean"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "state_after": {
+            "title": "State After",
+            "type": "string"
+          },
+          "state_before": {
+            "title": "State Before",
+            "type": "string"
+          },
+          "turn_index": {
+            "title": "Turn Index",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "service_id",
+          "run_id",
+          "session_id",
+          "turn_index",
+          "state_before",
+          "state_after",
+          "is_terminal"
+        ],
+        "title": "SimulationTurnStoredEvent",
         "type": "object"
       },
       "SinkSyncStatus": {
@@ -28890,6 +30268,77 @@
         "title": "SourceStatus",
         "type": "object"
       },
+      "SpeakerAcoustics": {
+        "properties": {
+          "energy_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Energy Delta"
+          },
+          "energy_trend": {
+            "anyOf": [
+              {
+                "enum": [
+                  "rising",
+                  "falling",
+                  "stable"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Energy Trend"
+          },
+          "normalized": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Normalized"
+          },
+          "pitch_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pitch Delta"
+          },
+          "zcr_delta": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Zcr Delta"
+          }
+        },
+        "title": "SpeakerAcoustics",
+        "type": "object"
+      },
       "SpeakerMutedEvent": {
         "properties": {
           "muted": {
@@ -29002,6 +30451,54 @@
           }
         },
         "title": "StateRiskOverride",
+        "type": "object"
+      },
+      "StateTransitionEvent": {
+        "properties": {
+          "annotation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Annotation"
+          },
+          "next_state": {
+            "title": "Next State",
+            "type": "string"
+          },
+          "previous_state": {
+            "title": "Previous State",
+            "type": "string"
+          },
+          "transition_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Transition Type"
+          },
+          "type": {
+            "const": "state_transition",
+            "default": "state_transition",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "previous_state",
+          "next_state"
+        ],
+        "title": "StateTransitionEvent",
         "type": "object"
       },
       "StaticToolDef-Input": {
@@ -29390,8 +30887,16 @@
       "SurfaceCreatedEvent": {
         "properties": {
           "channel": {
-            "title": "Channel",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Channel"
           },
           "entity_id": {
             "title": "Entity Id",
@@ -29458,8 +30963,7 @@
         },
         "required": [
           "surface_id",
-          "entity_id",
-          "channel"
+          "entity_id"
         ],
         "title": "SurfaceCreatedEvent",
         "type": "object"
@@ -29480,7 +30984,8 @@
               }
             ],
             "default": null,
-            "title": "Channel Address"
+            "title": "Channel Address",
+            "x-phi": true
           },
           "delivery_status": {
             "anyOf": [
@@ -29503,6 +31008,30 @@
             "default": "surface.delivered",
             "title": "Event Type",
             "type": "string"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Message Id"
+          },
+          "short_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Short Url"
           },
           "surface_id": {
             "title": "Surface Id",
@@ -29644,8 +31173,8 @@
             "title": "Event Type",
             "type": "string"
           },
-          "field_id": {
-            "title": "Field Id",
+          "field_key": {
+            "title": "Field Key",
             "type": "string"
           },
           "surface_id": {
@@ -29656,7 +31185,7 @@
         "required": [
           "surface_id",
           "entity_id",
-          "field_id"
+          "field_key"
         ],
         "title": "SurfaceFieldSavedEvent",
         "type": "object"
@@ -30044,8 +31573,16 @@
             "type": "string"
           },
           "reason": {
-            "title": "Reason",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reason"
           },
           "surface_id": {
             "title": "Surface Id",
@@ -30053,8 +31590,7 @@
           }
         },
         "required": [
-          "surface_id",
-          "reason"
+          "surface_id"
         ],
         "title": "SurfaceReviewRejectedEvent",
         "type": "object"
@@ -30254,6 +31790,21 @@
             "default": "surface.submitted",
             "title": "Event Type",
             "type": "string"
+          },
+          "fields_submitted": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Fields Submitted"
           },
           "submitted_at": {
             "anyOf": [
@@ -31230,6 +32781,98 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
+      "TextCompletedEvent": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "completion_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Completion Reason"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "event_type": {
+            "const": "text.completed",
+            "default": "text.completed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "final_state": {
+            "title": "Final State",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          },
+          "turn_count": {
+            "title": "Turn Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "session_id",
+          "duration_seconds",
+          "turn_count",
+          "final_state",
+          "channel_kind"
+        ],
+        "title": "TextCompletedEvent",
+        "type": "object"
+      },
+      "TextStartedEvent": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "event_type": {
+            "const": "text.started",
+            "default": "text.started",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "service_id": {
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_id": {
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "service_id",
+          "channel_kind"
+        ],
+        "title": "TextStartedEvent",
+        "type": "object"
+      },
       "ThroughputBucket": {
         "properties": {
           "bucket": {
@@ -31295,7 +32938,8 @@
               }
             ],
             "default": null,
-            "title": "Output"
+            "title": "Output",
+            "x-phi": true
           },
           "succeeded": {
             "default": true,
@@ -31425,7 +33069,8 @@
               }
             ],
             "default": null,
-            "title": "Tool Input"
+            "title": "Tool Input",
+            "x-phi": true
           },
           "tool_name": {
             "title": "Tool Name",
@@ -32226,6 +33871,64 @@
         "title": "TrendRow",
         "type": "object"
       },
+      "TriggerCompletedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.completed",
+            "default": "trigger.completed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name",
+          "status"
+        ],
+        "title": "TriggerCompletedEvent",
+        "type": "object"
+      },
+      "TriggerFailedEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.failed",
+            "default": "trigger.failed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name",
+          "status"
+        ],
+        "title": "TriggerFailedEvent",
+        "type": "object"
+      },
       "TriggerFireResponse": {
         "properties": {
           "fired_event_id": {
@@ -32250,6 +33953,35 @@
           "trigger_id"
         ],
         "title": "TriggerFireResponse",
+        "type": "object"
+      },
+      "TriggerFiredEvent": {
+        "properties": {
+          "event_type": {
+            "const": "trigger.fired",
+            "default": "trigger.fired",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "manual": {
+            "default": false,
+            "title": "Manual",
+            "type": "boolean"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_name": {
+            "title": "Trigger Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "trigger_name"
+        ],
+        "title": "TriggerFiredEvent",
         "type": "object"
       },
       "TriggerResponse": {
@@ -35096,7 +36828,8 @@
           },
           "transcript": {
             "title": "Transcript",
-            "type": "string"
+            "type": "string",
+            "x-phi": true
           },
           "type": {
             "const": "user_transcript",
@@ -35214,6 +36947,71 @@
           "voice_id"
         ],
         "title": "VoiceConfig",
+        "type": "object"
+      },
+      "VoiceContextAppliedEvent": {
+        "properties": {
+          "emotion_detection_enabled": {
+            "title": "Emotion Detection Enabled",
+            "type": "boolean"
+          },
+          "filler_enabled": {
+            "title": "Filler Enabled",
+            "type": "boolean"
+          },
+          "reasoning": {
+            "title": "Reasoning",
+            "type": "string"
+          },
+          "tts_emotion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tts Emotion"
+          },
+          "tts_speed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tts Speed"
+          },
+          "tts_volume": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Tts Volume"
+          },
+          "type": {
+            "const": "voice_context_applied",
+            "default": "voice_context_applied",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filler_enabled",
+          "emotion_detection_enabled",
+          "reasoning"
+        ],
+        "title": "VoiceContextAppliedEvent",
         "type": "object"
       },
       "VoiceJudgeRecentResponse": {
@@ -36848,6 +38646,7 @@
             "call.ended": "#/components/schemas/CallEndedEvent",
             "call.escalated": "#/components/schemas/CallEscalatedEvent",
             "call.started": "#/components/schemas/CallStartedEvent",
+            "encounter.updated": "#/components/schemas/EncounterUpdatedEvent",
             "operator.joined_call": "#/components/schemas/OperatorJoinedCallEvent",
             "operator.left_call": "#/components/schemas/OperatorLeftCallEvent",
             "operator.mode_changed": "#/components/schemas/OperatorModeChangedEvent",
@@ -36857,6 +38656,9 @@
             "operator.wrap_up": "#/components/schemas/OperatorWrapUpEvent",
             "pipeline.error": "#/components/schemas/PipelineErrorEvent",
             "pipeline.sync_completed": "#/components/schemas/PipelineSyncCompletedEvent",
+            "review.submitted": "#/components/schemas/ReviewSubmittedEvent",
+            "self_image.brief_generated": "#/components/schemas/NarrativeUpdatedEvent",
+            "simulation.turn_stored": "#/components/schemas/SimulationTurnStoredEvent",
             "surface.archived": "#/components/schemas/SurfaceArchivedEvent",
             "surface.created": "#/components/schemas/SurfaceCreatedEvent",
             "surface.delivered": "#/components/schemas/SurfaceDeliveredEvent",
@@ -36867,7 +38669,12 @@
             "surface.review_approved": "#/components/schemas/SurfaceReviewApprovedEvent",
             "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
             "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
-            "surface.updated": "#/components/schemas/SurfaceUpdatedEvent"
+            "surface.updated": "#/components/schemas/SurfaceUpdatedEvent",
+            "text.completed": "#/components/schemas/TextCompletedEvent",
+            "text.started": "#/components/schemas/TextStartedEvent",
+            "trigger.completed": "#/components/schemas/TriggerCompletedEvent",
+            "trigger.failed": "#/components/schemas/TriggerFailedEvent",
+            "trigger.fired": "#/components/schemas/TriggerFiredEvent"
           },
           "propertyName": "event_type"
         },
@@ -36880,6 +38687,18 @@
           },
           {
             "$ref": "#/components/schemas/CallEscalatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/EncounterUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/NarrativeUpdatedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ReviewSubmittedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SimulationTurnStoredEvent"
           },
           {
             "$ref": "#/components/schemas/SurfaceCreatedEvent"
@@ -36913,6 +38732,21 @@
           },
           {
             "$ref": "#/components/schemas/SurfaceReviewRejectedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextStartedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerFiredEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TriggerFailedEvent"
           },
           {
             "$ref": "#/components/schemas/PipelineSyncCompletedEvent"
