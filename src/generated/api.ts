@@ -3632,6 +3632,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/m42/notes/rollup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Notes Rollup
+         * @description Cohort-wide (or per-cluster / per-district) rollup of NLP extractions joined onto patient-topology risk. Surfaces which narrative signals correlate with higher predicted T2D risk.
+         */
+        get: operations["get_notes_rollup_v1__workspace_id__m42_notes_rollup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/m42/patient-topology": {
         parameters: {
             query?: never;
@@ -3704,6 +3724,26 @@ export interface paths {
          * @description Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.
          */
         get: operations["list_positive_signals_v1__workspace_id__m42_positive_signals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/stratified-fits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Stratified Fits
+         * @description Per-cohort x region GLM fits with pooled fallback. Drives the dashboard's outcome-by-segment comparison view.
+         */
+        get: operations["list_stratified_fits_v1__workspace_id__m42_stratified_fits_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -13653,6 +13693,8 @@ export interface components {
             lower_95?: number | null;
             /** Median */
             median?: number | null;
+            /** Observed */
+            observed?: number | null;
             /** Run Id */
             run_id: string;
             /**
@@ -13666,6 +13708,8 @@ export interface components {
             upper_95?: number | null;
             /** Workspace Id */
             workspace_id: string;
+            /** Ym */
+            ym?: string | null;
         };
         /** ForecastFanResponse */
         ForecastFanResponse: {
@@ -15674,6 +15718,46 @@ export interface components {
             mode?: "hard" | "soft";
             /** State */
             state: string;
+        };
+        /** NoteRollupCategoryEntry */
+        NoteRollupCategoryEntry: {
+            /** Mean Risk */
+            mean_risk: number;
+            /** N */
+            n: number;
+            /** Pct */
+            pct: number;
+            /** Risk Lift */
+            risk_lift: number;
+            /** Value */
+            value: string;
+        };
+        /** NoteRollupResponse */
+        NoteRollupResponse: {
+            /** Cohort Mean Risk */
+            cohort_mean_risk: number;
+            sdoh: components["schemas"]["NoteRollupSdoh"];
+            /** Sentiment Distribution */
+            sentiment_distribution: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Concerns */
+            top_concerns: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Medications */
+            top_medications: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Symptoms */
+            top_symptoms: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Total Notes */
+            total_notes: number;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** NoteRollupSdoh */
+        NoteRollupSdoh: {
+            /** Activity */
+            activity: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Diet */
+            diet: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Smoking */
+            smoking: components["schemas"]["NoteRollupCategoryEntry"][];
         };
         /** OcrRequest */
         OcrRequest: {
@@ -19197,6 +19281,40 @@ export interface components {
             session_id: string;
             /** Valence */
             valence?: number | null;
+        };
+        /** StratifiedFitRow */
+        StratifiedFitRow: {
+            /** Auroc */
+            auroc?: number | null;
+            /** Base Rate */
+            base_rate?: number | null;
+            /** Coefficients Json */
+            coefficients_json?: string | null;
+            /** Cohort */
+            cohort: string;
+            /** Intercept */
+            intercept?: number | null;
+            /** Is Pooled Fallback */
+            is_pooled_fallback?: boolean | null;
+            /** N */
+            n?: number | null;
+            /** Outcome Key */
+            outcome_key: string;
+            /** Outcome Name */
+            outcome_name?: string | null;
+            /** Region */
+            region: string;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** StratifiedFitsResponse */
+        StratifiedFitsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["StratifiedFitRow"][];
+            /** Workspace Id */
+            workspace_id: string;
         };
         StrippedNonemptyString: string;
         /** SubAccountResponse */
@@ -30182,6 +30300,40 @@ export interface operations {
             };
         };
     };
+    get_notes_rollup_v1__workspace_id__m42_notes_rollup_get: {
+        parameters: {
+            query?: {
+                cluster?: string | null;
+                district?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteRollupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_patient_topology_v1__workspace_id__m42_patient_topology_get: {
         parameters: {
             query?: {
@@ -30300,6 +30452,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PositiveSignalResponse"];
+                };
+            };
+        };
+    };
+    list_stratified_fits_v1__workspace_id__m42_stratified_fits_get: {
+        parameters: {
+            query?: {
+                outcome_key?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StratifiedFitsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
