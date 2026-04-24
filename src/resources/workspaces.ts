@@ -43,10 +43,7 @@ export class WorkspacesResource extends WorkspaceScopedResource {
   }
 
   /** Update workspace metadata */
-  async update(
-    body: components['schemas']['UpdateWorkspaceRequest'],
-    id?: WorkspaceId | string,
-  ) {
+  async update(body: components['schemas']['UpdateWorkspaceRequest'], id?: WorkspaceId | string) {
     return extractData(
       await this.client.PATCH('/v1/workspaces/{workspace_id}', {
         params: { path: { workspace_id: id ?? this.workspaceId } },
@@ -56,12 +53,43 @@ export class WorkspacesResource extends WorkspaceScopedResource {
   }
 
   /** Archive (soft-delete) a workspace */
-  async archive(
-    body: components['schemas']['ArchiveWorkspaceRequest'],
+  async archive(body: components['schemas']['ArchiveWorkspaceRequest'], id?: WorkspaceId | string) {
+    return extractData(
+      await this.client.POST('/v1/workspaces/{workspace_id}/archive', {
+        params: { path: { workspace_id: id ?? this.workspaceId } },
+        body,
+      }),
+    )
+  }
+
+  /** Provision a workspace (seed integrations, mark as provisioned) */
+  async provision(id?: WorkspaceId | string) {
+    return extractData(
+      await this.client.POST('/v1/workspaces/{workspace_id}/provision', {
+        params: { path: { workspace_id: id ?? this.workspaceId } },
+      }),
+    )
+  }
+
+  /** Pre-check environment conversion warnings */
+  async checkEnvironment(target?: 'production' | 'staging', id?: WorkspaceId | string) {
+    return extractData(
+      await this.client.GET('/v1/workspaces/{workspace_id}/environment-check', {
+        params: {
+          path: { workspace_id: id ?? this.workspaceId },
+          query: target ? { target } : undefined,
+        },
+      }),
+    )
+  }
+
+  /** Convert workspace between staging and production */
+  async convertEnvironment(
+    body: components['schemas']['ConvertEnvironmentRequest'],
     id?: WorkspaceId | string,
   ) {
     return extractData(
-      await this.client.POST('/v1/workspaces/{workspace_id}/archive', {
+      await this.client.POST('/v1/workspaces/{workspace_id}/convert-environment', {
         params: { path: { workspace_id: id ?? this.workspaceId } },
         body,
       }),

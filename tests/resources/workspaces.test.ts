@@ -14,7 +14,9 @@ const WORKSPACE_FIXTURE = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(routes: Record<string, () => Response | Promise<Response>>): typeof globalThis.fetch {
+function mockFetch(
+  routes: Record<string, () => Response | Promise<Response>>,
+): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -30,7 +32,9 @@ function mockFetch(routes: Record<string, () => Response | Promise<Response>>): 
       const [pMethod, ...pPathParts] = pattern.split(' ')
       if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
     }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), { status: 500 })
+    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
+      status: 500,
+    })
   }
 }
 
@@ -41,11 +45,9 @@ const client = new AmigoClient({
     [`GET /v1/workspaces`]: () =>
       Response.json({ items: [WORKSPACE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST /v1/workspaces`]: () =>
-      Response.json(WORKSPACE_FIXTURE, { status: 201 }),
+    [`POST /v1/workspaces`]: () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
 
-    [`GET /v1/workspaces/${TEST_WORKSPACE_ID}`]: () =>
-      Response.json(WORKSPACE_FIXTURE),
+    [`GET /v1/workspaces/${TEST_WORKSPACE_ID}`]: () => Response.json(WORKSPACE_FIXTURE),
 
     [`GET /v1/workspaces/not-found`]: () =>
       Response.json({ detail: 'Workspace not found', error_code: 'not_found' }, { status: 404 }),
@@ -55,6 +57,19 @@ const client = new AmigoClient({
 
     [`POST /v1/workspaces/${TEST_WORKSPACE_ID}/archive`]: () =>
       Response.json({ ...WORKSPACE_FIXTURE, status: 'archived' }),
+
+    [`POST /v1/workspaces/${TEST_WORKSPACE_ID}/provision`]: () =>
+      Response.json({ workspace: WORKSPACE_FIXTURE }),
+
+    [`GET /v1/workspaces/${TEST_WORKSPACE_ID}/environment-check`]: () =>
+      Response.json({
+        current: 'staging',
+        target: 'production',
+        warnings: ['No HIPAA BAA on file'],
+      }),
+
+    [`POST /v1/workspaces/${TEST_WORKSPACE_ID}/convert-environment`]: () =>
+      Response.json({ ...WORKSPACE_FIXTURE, environment: 'production' }),
   }),
 })
 
@@ -94,5 +109,25 @@ describe('WorkspacesResource', () => {
   it('archives a workspace', async () => {
     const result = await client.workspaces.archive({ reason: 'No longer needed' } as never)
     expect(result.name).toBeDefined()
+  })
+
+  it('provisions a workspace', async () => {
+    const result = await client.workspaces.provision()
+    expect(result.workspace.id).toBe(TEST_WORKSPACE_ID)
+  })
+
+  it('checks environment conversion warnings', async () => {
+    const result = await client.workspaces.checkEnvironment('production')
+    expect(result.current).toBe('staging')
+    expect(result.target).toBe('production')
+    expect(result.warnings).toEqual(['No HIPAA BAA on file'])
+  })
+
+  it('converts workspace environment', async () => {
+    const result = await client.workspaces.convertEnvironment({
+      target: 'production',
+      confirm_slug: 'acme-health',
+    })
+    expect(result.name).toBe('Acme Health')
   })
 })
