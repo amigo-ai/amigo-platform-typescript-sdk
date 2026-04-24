@@ -3632,6 +3632,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/m42/notes/rollup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Notes Rollup
+         * @description Cohort-wide (or per-cluster / per-district) rollup of NLP extractions joined onto patient-topology risk. Surfaces which narrative signals correlate with higher predicted T2D risk.
+         */
+        get: operations["get_notes_rollup_v1__workspace_id__m42_notes_rollup_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/m42/patient-topology": {
         parameters: {
             query?: never;
@@ -3704,6 +3724,26 @@ export interface paths {
          * @description Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.
          */
         get: operations["list_positive_signals_v1__workspace_id__m42_positive_signals_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/m42/stratified-fits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Stratified Fits
+         * @description Per-cohort x region GLM fits with pooled fallback. Drives the dashboard's outcome-by-segment comparison view.
+         */
+        get: operations["list_stratified_fits_v1__workspace_id__m42_stratified_fits_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -8135,6 +8175,46 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** AgentTranscriptEvent */
+        AgentTranscriptEvent: {
+            /**
+             * Action
+             * @default null
+             */
+            action?: string | null;
+            /**
+             * Filler Type
+             * @default null
+             */
+            filler_type?: string | null;
+            /**
+             * Interrupted
+             * @default false
+             */
+            interrupted?: boolean;
+            /**
+             * Speaker Id
+             * @default null
+             */
+            speaker_id?: string | null;
+            /**
+             * Speaker Role
+             * @default null
+             */
+            speaker_role?: string | null;
+            /**
+             * Streaming
+             * @default null
+             */
+            streaming?: boolean | null;
+            /** Transcript */
+            transcript: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "agent_transcript";
+        };
         /**
          * AgentVersion
          * @description A version of an Agent document.
@@ -8962,6 +9042,49 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** CallEndedEvent */
+        CallEndedEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * Completion Reason
+             * @enum {string}
+             */
+            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled";
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound" | "playground" | "simulated" | "test";
+            /** Duration Seconds */
+            duration_seconds: number;
+            /**
+             * Escalated
+             * @default false
+             */
+            escalated?: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "call.ended";
+        };
+        /** CallEscalatedEvent */
+        CallEscalatedEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /** Escalation Id */
+            escalation_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "call.escalated";
+            /** Reason */
+            reason: string;
+            /** Trigger */
+            trigger: string;
+        };
         /**
          * CallIntelligenceDetail
          * @description Layer 4 (Narrative) intelligence for a completed call.
@@ -9046,6 +9169,28 @@ export interface components {
             items: components["schemas"]["CallSummary"][];
             /** Total */
             total: number;
+        };
+        /** CallStartedEvent */
+        CallStartedEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * Caller Id
+             * @default null
+             */
+            caller_id?: string | null;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound" | "playground" | "simulated" | "test";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "call.started";
+            /** Service Id */
+            service_id: string;
         };
         /** CallStatsResponse */
         CallStatsResponse: {
@@ -13653,6 +13798,8 @@ export interface components {
             lower_95?: number | null;
             /** Median */
             median?: number | null;
+            /** Observed */
+            observed?: number | null;
             /** Run Id */
             run_id: string;
             /**
@@ -13666,6 +13813,8 @@ export interface components {
             upper_95?: number | null;
             /** Workspace Id */
             workspace_id: string;
+            /** Ym */
+            ym?: string | null;
         };
         /** ForecastFanResponse */
         ForecastFanResponse: {
@@ -13884,6 +14033,34 @@ export interface components {
         FormTemplateUpdateRequest: {
             /** Templates */
             templates: components["schemas"]["FormTemplate-Input"][];
+        };
+        /** ForwardCallResolvedEvent */
+        ForwardCallResolvedEvent: {
+            /**
+             * Error
+             * @default null
+             */
+            error?: string | null;
+            /**
+             * Location Name
+             * @default null
+             */
+            location_name?: string | null;
+            /**
+             * Result
+             * @default null
+             */
+            result?: string | null;
+            /**
+             * Target Number
+             * @default null
+             */
+            target_number?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "forward_call_resolved";
         };
         /**
          * ForwardingConfigRequest
@@ -15675,6 +15852,47 @@ export interface components {
             /** State */
             state: string;
         };
+        /** NoteRollupCategoryEntry */
+        NoteRollupCategoryEntry: {
+            /** Mean Risk */
+            mean_risk: number;
+            /** N */
+            n: number;
+            /** Pct */
+            pct: number;
+            /** Risk Lift */
+            risk_lift: number;
+            /** Value */
+            value: string;
+        };
+        /** NoteRollupResponse */
+        NoteRollupResponse: {
+            /** Cohort Mean Risk */
+            cohort_mean_risk: number;
+            sdoh: components["schemas"]["NoteRollupSdoh"];
+            /** Sentiment Distribution */
+            sentiment_distribution: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Concerns */
+            top_concerns: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Medications */
+            top_medications: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Top Symptoms */
+            top_symptoms: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Total Notes */
+            total_notes: number;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** NoteRollupSdoh */
+        NoteRollupSdoh: {
+            /** Activity */
+            activity: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Diet */
+            diet: components["schemas"]["NoteRollupCategoryEntry"][];
+            /** Smoking */
+            smoking: components["schemas"]["NoteRollupCategoryEntry"][];
+        };
+        ObserverSSEEvent: components["schemas"]["UserTranscriptEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["SpeakerMutedEvent"];
         /** OcrRequest */
         OcrRequest: {
             /**
@@ -15704,6 +15922,51 @@ export interface components {
              * @description Operator handle time
              */
             operator_handle_time_seconds?: number | null;
+        };
+        /** OperatorJoinedCallEvent */
+        OperatorJoinedCallEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.joined_call";
+            /** Mode */
+            mode: string;
+            /** Operator Id */
+            operator_id: string;
+        };
+        /** OperatorLeftCallEvent */
+        OperatorLeftCallEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.left_call";
+            /**
+             * Human Segment Turn Count
+             * @default null
+             */
+            human_segment_turn_count?: number | null;
+            /** Operator Id */
+            operator_id: string;
+        };
+        /** OperatorModeChangedEvent */
+        OperatorModeChangedEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.mode_changed";
+            /** Mode */
+            mode: string;
+            /** Operator Id */
+            operator_id: string;
         };
         /** OperatorPerformanceItem */
         OperatorPerformanceItem: {
@@ -15815,6 +16078,38 @@ export interface components {
              */
             total_calls: number;
         };
+        /** OperatorProfileUpdatedEvent */
+        OperatorProfileUpdatedEvent: {
+            /**
+             * Changes
+             * @default null
+             */
+            changes?: {
+                [key: string]: string | null;
+            } | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.profile_updated";
+            /** Operator Id */
+            operator_id: string;
+        };
+        /** OperatorRegisteredEvent */
+        OperatorRegisteredEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.registered";
+            /** Operator Id */
+            operator_id: string;
+            /**
+             * Timestamp
+             * @default null
+             */
+            timestamp?: string | null;
+        };
         /** OperatorResponse */
         OperatorResponse: {
             /**
@@ -15906,6 +16201,18 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** OperatorStatusChangedEvent */
+        OperatorStatusChangedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.status_changed";
+            /** Operator Id */
+            operator_id: string;
+            /** Status */
+            status: string;
+        };
         /** OperatorStatusCounts */
         OperatorStatusCounts: {
             /** Busy */
@@ -15916,6 +16223,21 @@ export interface components {
             online: number;
             /** Total */
             total: number;
+        };
+        /** OperatorWrapUpEvent */
+        OperatorWrapUpEvent: {
+            /** Call Sid */
+            call_sid: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "operator.wrap_up";
+            /**
+             * Wrap Up Reason
+             * @default null
+             */
+            wrap_up_reason?: string | null;
         };
         /** OrderedPathway */
         OrderedPathway: {
@@ -16901,6 +17223,18 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** PipelineErrorEvent */
+        PipelineErrorEvent: {
+            /** Data Source Id */
+            data_source_id: string;
+            /** Error */
+            error: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "pipeline.error";
+        };
         /** PipelineMetrics */
         PipelineMetrics: {
             /**
@@ -16997,6 +17331,20 @@ export interface components {
             total_events?: number;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
+        };
+        /** PipelineSyncCompletedEvent */
+        PipelineSyncCompletedEvent: {
+            /** Data Source Id */
+            data_source_id: string;
+            /** Duration Ms */
+            duration_ms: number;
+            /** Event Count */
+            event_count: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "pipeline.sync_completed";
         };
         /** PositiveSignalResponse */
         PositiveSignalResponse: {
@@ -19135,6 +19483,16 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** SpeakerMutedEvent */
+        SpeakerMutedEvent: {
+            /** Muted */
+            muted: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "speaker_muted";
+        };
         /** SqlQueryRequest */
         SqlQueryRequest: {
             /** Sql */
@@ -19197,6 +19555,40 @@ export interface components {
             session_id: string;
             /** Valence */
             valence?: number | null;
+        };
+        /** StratifiedFitRow */
+        StratifiedFitRow: {
+            /** Auroc */
+            auroc?: number | null;
+            /** Base Rate */
+            base_rate?: number | null;
+            /** Coefficients Json */
+            coefficients_json?: string | null;
+            /** Cohort */
+            cohort: string;
+            /** Intercept */
+            intercept?: number | null;
+            /** Is Pooled Fallback */
+            is_pooled_fallback?: boolean | null;
+            /** N */
+            n?: number | null;
+            /** Outcome Key */
+            outcome_key: string;
+            /** Outcome Name */
+            outcome_name?: string | null;
+            /** Region */
+            region: string;
+            /** Workspace Id */
+            workspace_id: string;
+        };
+        /** StratifiedFitsResponse */
+        StratifiedFitsResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["StratifiedFitRow"][];
+            /** Workspace Id */
+            workspace_id: string;
         };
         StrippedNonemptyString: string;
         /** SubAccountResponse */
@@ -19296,6 +19688,74 @@ export interface components {
             /** Suggestions */
             suggestions: string[];
         };
+        /** SurfaceArchivedEvent */
+        SurfaceArchivedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.archived";
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfaceCreatedEvent */
+        SurfaceCreatedEvent: {
+            /** Channel */
+            channel: string;
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.created";
+            /**
+             * Fields Count
+             * @default null
+             */
+            fields_count?: number | null;
+            /**
+             * Form Template Id
+             * @default null
+             */
+            form_template_id?: string | null;
+            /**
+             * Review Required
+             * @default null
+             */
+            review_required?: boolean | null;
+            /**
+             * Source
+             * @default null
+             */
+            source?: string | null;
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfaceDeliveredEvent */
+        SurfaceDeliveredEvent: {
+            /** Channel */
+            channel: string;
+            /**
+             * Channel Address
+             * @default null
+             */
+            channel_address?: string | null;
+            /**
+             * Delivery Status
+             * @default null
+             */
+            delivery_status?: string | null;
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.delivered";
+            /** Surface Id */
+            surface_id: string;
+        };
         /**
          * SurfaceField
          * @description A single data collection field in a surface spec.
@@ -19336,6 +19796,59 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /** SurfaceFieldSavedEvent */
+        SurfaceFieldSavedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.field_saved";
+            /** Field Id */
+            field_id: string;
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfaceOpenedEvent */
+        SurfaceOpenedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.opened";
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfacePendingReviewEvent */
+        SurfacePendingReviewEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.pending_review";
+            /**
+             * Form Template Id
+             * @default null
+             */
+            form_template_id?: string | null;
+            /**
+             * Review Required
+             * @default null
+             */
+            review_required?: boolean | null;
+            /**
+             * Source
+             * @default null
+             */
+            source?: string | null;
+            /** Surface Id */
+            surface_id: string;
+        };
         /** SurfaceProgressResponse */
         SurfaceProgressResponse: {
             /** Empty Count */
@@ -19352,6 +19865,18 @@ export interface components {
             surface_id: string;
             /** Total Fields */
             total_fields: number;
+        };
+        /** SurfaceReshapedEvent */
+        SurfaceReshapedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.reshaped";
+            /** Original Surface Id */
+            original_surface_id: string;
+            /** Surface Id */
+            surface_id: string;
         };
         /** SurfaceResponse */
         SurfaceResponse: {
@@ -19409,6 +19934,28 @@ export interface components {
             /** Title */
             title?: string | null;
         };
+        /** SurfaceReviewApprovedEvent */
+        SurfaceReviewApprovedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.review_approved";
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfaceReviewRejectedEvent */
+        SurfaceReviewRejectedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.review_rejected";
+            /** Reason */
+            reason: string;
+            /** Surface Id */
+            surface_id: string;
+        };
         /**
          * SurfaceSection
          * @description A page/step in a multi-page surface form.
@@ -19465,6 +20012,33 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title: components["schemas"]["NameString"];
+        };
+        /** SurfaceSubmittedEvent */
+        SurfaceSubmittedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.submitted";
+            /**
+             * Submitted At
+             * @default null
+             */
+            submitted_at?: string | null;
+            /** Surface Id */
+            surface_id: string;
+        };
+        /** SurfaceUpdatedEvent */
+        SurfaceUpdatedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "surface.updated";
+            /** Surface Id */
+            surface_id: string;
         };
         /**
          * SwitchModeRequest
@@ -19834,6 +20408,36 @@ export interface components {
             /** Source System */
             source_system?: string | null;
         };
+        /** ToolCallCompletedEvent */
+        ToolCallCompletedEvent: {
+            /**
+             * Duration Ms
+             * @default null
+             */
+            duration_ms?: number | null;
+            /**
+             * Error
+             * @default null
+             */
+            error?: string | null;
+            /**
+             * Output
+             * @default null
+             */
+            output?: string | null;
+            /**
+             * Succeeded
+             * @default true
+             */
+            succeeded?: boolean;
+            /** Tool Name */
+            tool_name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "tool_call_completed";
+        };
         /**
          * ToolCallDetail
          * @description Rich tool call data from a simulation step.
@@ -19884,6 +20488,23 @@ export interface components {
             progress?: components["schemas"]["ProgressHint"] | null;
             /** Tool Id */
             tool_id: string;
+        };
+        /** ToolCallStartedEvent */
+        ToolCallStartedEvent: {
+            /**
+             * Tool Input
+             * @default null
+             */
+            tool_input?: {
+                [key: string]: unknown;
+            } | null;
+            /** Tool Name */
+            tool_name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "tool_call_started";
         };
         /** ToolExecuteRequest */
         ToolExecuteRequest: {
@@ -21035,6 +21656,46 @@ export interface components {
              */
             value: number;
         };
+        /** UserTranscriptEvent */
+        UserTranscriptEvent: {
+            /**
+             * Eot Confidence
+             * @default null
+             */
+            eot_confidence?: number | null;
+            /**
+             * Is Barge In
+             * @default null
+             */
+            is_barge_in?: boolean | null;
+            /**
+             * Speaker Id
+             * @default null
+             */
+            speaker_id?: string | null;
+            /**
+             * Speaker Role
+             * @default null
+             */
+            speaker_role?: string | null;
+            /**
+             * State
+             * @default
+             */
+            state?: string;
+            /**
+             * Stt Confidence
+             * @default null
+             */
+            stt_confidence?: number | null;
+            /** Transcript */
+            transcript: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "user_transcript";
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -21676,6 +22337,7 @@ export interface components {
              */
             updated_at: string;
         };
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
         /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.
@@ -27998,8 +28660,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
-                    "text/event-stream": unknown;
+                    "application/json": components["schemas"]["WorkspaceSSEEvent"];
+                    "text/event-stream": components["schemas"]["WorkspaceSSEEvent"];
                 };
             };
             /** @description Rate limit exceeded */
@@ -30182,6 +30844,40 @@ export interface operations {
             };
         };
     };
+    get_notes_rollup_v1__workspace_id__m42_notes_rollup_get: {
+        parameters: {
+            query?: {
+                cluster?: string | null;
+                district?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoteRollupResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_patient_topology_v1__workspace_id__m42_patient_topology_get: {
         parameters: {
             query?: {
@@ -30300,6 +30996,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PositiveSignalResponse"];
+                };
+            };
+        };
+    };
+    list_stratified_fits_v1__workspace_id__m42_stratified_fits_get: {
+        parameters: {
+            query?: {
+                outcome_key?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StratifiedFitsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
