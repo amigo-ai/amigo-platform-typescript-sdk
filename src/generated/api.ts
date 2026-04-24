@@ -1562,6 +1562,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/calls/outbound": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create an outbound call
+         * @description Initiate an outbound voice call from a workspace phone number. The phone_from number must be registered in this workspace. Supports idempotency via the idempotency_key field.
+         */
+        post: operations["create-outbound-call"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/calls/phone-volume": {
         parameters: {
             query?: never;
@@ -10614,6 +10634,58 @@ export interface components {
              * @enum {string}
              */
             type?: "clinical" | "administrative" | "crisis_counselor";
+        };
+        /**
+         * CreateOutboundCallRequest
+         * @description Request body for creating an outbound call.
+         */
+        CreateOutboundCallRequest: {
+            /**
+             * Idempotency Key
+             * @description Client-provided idempotency key. Auto-generated if omitted.
+             */
+            idempotency_key?: string | null;
+            /**
+             * Outbound Task Entity Id
+             * @description World model outbound_task entity ID for completion feedback.
+             */
+            outbound_task_entity_id?: string | null;
+            /**
+             * Phone From
+             * @description Caller ID phone number in E.164 format. Must belong to this workspace.
+             */
+            phone_from: string;
+            /**
+             * Phone To
+             * @description Destination phone number in E.164 format (e.g. +18005551234)
+             */
+            phone_to: string;
+            /**
+             * Service Id
+             * @description Service ID for the voice agent to use.
+             */
+            service_id?: string | null;
+            /**
+             * System Prompt
+             * @description Optional system prompt override for this call.
+             */
+            system_prompt?: string | null;
+        };
+        /**
+         * CreateOutboundCallResponse
+         * @description Response from creating an outbound call.
+         */
+        CreateOutboundCallResponse: {
+            /**
+             * Call Sid
+             * @description Twilio call SID for the outbound call
+             */
+            call_sid: string;
+            /**
+             * Status
+             * @description Initial call status (typically 'queued')
+             */
+            status: string;
         };
         /** CreatePersonaRequest */
         CreatePersonaRequest: {
@@ -27088,6 +27160,76 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "create-outbound-call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOutboundCallRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateOutboundCallResponse"];
+                };
+            };
+            /** @description Invalid phone number format */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description phone_from does not belong to this workspace */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Upstream Twilio or voice agent error */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Voice agent or outbound calls not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
