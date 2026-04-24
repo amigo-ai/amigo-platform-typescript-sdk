@@ -19582,6 +19582,130 @@
         "title": "NonDesiredState",
         "type": "object"
       },
+      "NoteRollupCategoryEntry": {
+        "properties": {
+          "mean_risk": {
+            "title": "Mean Risk",
+            "type": "number"
+          },
+          "n": {
+            "title": "N",
+            "type": "integer"
+          },
+          "pct": {
+            "title": "Pct",
+            "type": "number"
+          },
+          "risk_lift": {
+            "title": "Risk Lift",
+            "type": "number"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "n",
+          "pct",
+          "mean_risk",
+          "risk_lift"
+        ],
+        "title": "NoteRollupCategoryEntry",
+        "type": "object"
+      },
+      "NoteRollupResponse": {
+        "properties": {
+          "cohort_mean_risk": {
+            "title": "Cohort Mean Risk",
+            "type": "number"
+          },
+          "sdoh": {
+            "$ref": "#/components/schemas/NoteRollupSdoh"
+          },
+          "sentiment_distribution": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Sentiment Distribution",
+            "type": "array"
+          },
+          "top_concerns": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Concerns",
+            "type": "array"
+          },
+          "top_medications": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Medications",
+            "type": "array"
+          },
+          "top_symptoms": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Top Symptoms",
+            "type": "array"
+          },
+          "total_notes": {
+            "title": "Total Notes",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "total_notes",
+          "cohort_mean_risk",
+          "sentiment_distribution",
+          "top_symptoms",
+          "top_concerns",
+          "top_medications",
+          "sdoh"
+        ],
+        "title": "NoteRollupResponse",
+        "type": "object"
+      },
+      "NoteRollupSdoh": {
+        "properties": {
+          "activity": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Activity",
+            "type": "array"
+          },
+          "diet": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Diet",
+            "type": "array"
+          },
+          "smoking": {
+            "items": {
+              "$ref": "#/components/schemas/NoteRollupCategoryEntry"
+            },
+            "title": "Smoking",
+            "type": "array"
+          }
+        },
+        "required": [
+          "activity",
+          "smoking",
+          "diet"
+        ],
+        "title": "NoteRollupSdoh",
+        "type": "object"
+      },
       "OcrRequest": {
         "properties": {
           "image": {
@@ -28317,6 +28441,137 @@
           "caller_text"
         ],
         "title": "StepRequest",
+        "type": "object"
+      },
+      "StratifiedFitRow": {
+        "properties": {
+          "auroc": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auroc"
+          },
+          "base_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Rate"
+          },
+          "coefficients_json": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coefficients Json"
+          },
+          "cohort": {
+            "title": "Cohort",
+            "type": "string"
+          },
+          "intercept": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intercept"
+          },
+          "is_pooled_fallback": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Pooled Fallback"
+          },
+          "n": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "N"
+          },
+          "outcome_key": {
+            "title": "Outcome Key",
+            "type": "string"
+          },
+          "outcome_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome Name"
+          },
+          "region": {
+            "title": "Region",
+            "type": "string"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "outcome_key",
+          "cohort",
+          "region"
+        ],
+        "title": "StratifiedFitRow",
+        "type": "object"
+      },
+      "StratifiedFitsResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/StratifiedFitRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "workspace_id": {
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id",
+          "count",
+          "items"
+        ],
+        "title": "StratifiedFitsResponse",
         "type": "object"
       },
       "StrippedNonemptyString": {
@@ -48370,6 +48625,76 @@
         ]
       }
     },
+    "/v1/{workspace_id}/m42/notes/rollup": {
+      "get": {
+        "description": "Cohort-wide (or per-cluster / per-district) rollup of NLP extractions joined onto patient-topology risk. Surfaces which narrative signals correlate with higher predicted T2D risk.",
+        "operationId": "get_notes_rollup_v1__workspace_id__m42_notes_rollup_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "cluster",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cluster"
+            }
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "District"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoteRollupResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Notes Rollup",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
     "/v1/{workspace_id}/m42/patient-topology": {
       "get": {
         "description": "Patient-level UMAP coordinates + predicted risk for the Self-Image scatter. Hand-seeded demo data (no ML training). Paginated.",
@@ -48570,6 +48895,58 @@
           }
         },
         "summary": "List Positive Signals",
+        "tags": [
+          "M42"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/m42/stratified-fits": {
+      "get": {
+        "description": "Per-cohort x region GLM fits with pooled fallback. Drives the dashboard's outcome-by-segment comparison view.",
+        "operationId": "list_stratified_fits_v1__workspace_id__m42_stratified_fits_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "outcome_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Outcome Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StratifiedFitsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Stratified Fits",
         "tags": [
           "M42"
         ]
