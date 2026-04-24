@@ -635,6 +635,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/workspaces/{workspace_id}/convert-environment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Convert workspace environment
+         * @description Convert workspace between staging and production. Requires slug confirmation.
+         */
+        post: operations["convert-workspace-environment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/environment-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Pre-check environment conversion
+         * @description Returns compliance warnings for converting between staging and production. Does not mutate.
+         */
+        get: operations["check-environment-conversion"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces/{workspace_id}/provision": {
         parameters: {
             query?: never;
@@ -9975,6 +10015,15 @@ export interface components {
              */
             topic_changes?: number;
         };
+        /** ConvertEnvironmentRequest */
+        ConvertEnvironmentRequest: {
+            confirm_slug: components["schemas"]["SlugString"];
+            /**
+             * Target
+             * @enum {string}
+             */
+            target: "production" | "staging";
+        };
         /** CooccurrenceResponse */
         CooccurrenceResponse: {
             /** Count */
@@ -10742,7 +10791,7 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             /** Field Mapping */
             field_mapping?: {
-                [key: string]: unknown;
+                [key: string]: string;
             } | null;
             name: components["schemas"]["NameString"];
             /**
@@ -10761,9 +10810,10 @@ export interface components {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
             /**
              * Environment
+             * @default staging
              * @enum {string}
              */
-            environment: "production" | "staging" | "development";
+            environment?: "production" | "staging" | "development";
             name: components["schemas"]["StrippedNonemptyString"];
             /**
              * Region
@@ -12804,6 +12854,15 @@ export interface components {
             has_projection: boolean;
             /** Last Updated */
             last_updated: string | null;
+        };
+        /** EnvironmentCheckResponse */
+        EnvironmentCheckResponse: {
+            /** Current */
+            current: string;
+            /** Target */
+            target: string;
+            /** Warnings */
+            warnings: string[];
         };
         /**
          * EnvironmentOverrides
@@ -20867,7 +20926,7 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             /** Field Mapping */
             field_mapping?: {
-                [key: string]: unknown;
+                [key: string]: string;
             } | null;
             /** Is Active */
             is_active?: boolean | null;
@@ -23360,6 +23419,107 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "convert-workspace-environment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConvertEnvironmentRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace slug confirmation did not match. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "check-environment-conversion": {
+        parameters: {
+            query?: {
+                target?: "production" | "staging";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EnvironmentCheckResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

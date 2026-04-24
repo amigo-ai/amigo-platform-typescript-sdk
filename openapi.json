@@ -5740,6 +5740,27 @@
         "title": "ConversationSummary",
         "type": "object"
       },
+      "ConvertEnvironmentRequest": {
+        "properties": {
+          "confirm_slug": {
+            "$ref": "#/components/schemas/SlugString"
+          },
+          "target": {
+            "enum": [
+              "production",
+              "staging"
+            ],
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "confirm_slug"
+        ],
+        "title": "ConvertEnvironmentRequest",
+        "type": "object"
+      },
       "CooccurrenceResponse": {
         "properties": {
           "count": {
@@ -7689,8 +7710,10 @@
         "properties": {
           "accepted_event_types": {
             "items": {
+              "maxLength": 128,
               "type": "string"
             },
+            "maxItems": 50,
             "title": "Accepted Event Types",
             "type": "array"
           },
@@ -7707,7 +7730,9 @@
           "field_mapping": {
             "anyOf": [
               {
-                "additionalProperties": true,
+                "additionalProperties": {
+                  "type": "string"
+                },
                 "type": "object"
               },
               {
@@ -7752,6 +7777,7 @@
             ]
           },
           "environment": {
+            "default": "staging",
             "enum": [
               "production",
               "staging",
@@ -7780,8 +7806,7 @@
         },
         "required": [
           "slug",
-          "name",
-          "environment"
+          "name"
         ],
         "title": "CreateWorkspaceRequest",
         "type": "object"
@@ -12943,6 +12968,32 @@
           "has_projection"
         ],
         "title": "EntityTypeSummary",
+        "type": "object"
+      },
+      "EnvironmentCheckResponse": {
+        "properties": {
+          "current": {
+            "title": "Current",
+            "type": "string"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "warnings": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Warnings",
+            "type": "array"
+          }
+        },
+        "required": [
+          "current",
+          "target",
+          "warnings"
+        ],
+        "title": "EnvironmentCheckResponse",
         "type": "object"
       },
       "EnvironmentOverrides": {
@@ -33319,8 +33370,10 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -33342,7 +33395,9 @@
           "field_mapping": {
             "anyOf": [
               {
-                "additionalProperties": true,
+                "additionalProperties": {
+                  "type": "string"
+                },
                 "type": "object"
               },
               {
@@ -37692,6 +37747,104 @@
           }
         },
         "summary": "Archive a workspace",
+        "tags": [
+          "Workspaces"
+        ]
+      }
+    },
+    "/v1/workspaces/{workspace_id}/convert-environment": {
+      "post": {
+        "description": "Convert workspace between staging and production. Requires slug confirmation.",
+        "operationId": "convert-workspace-environment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConvertEnvironmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Workspace not found."
+          },
+          "422": {
+            "description": "Workspace slug confirmation did not match."
+          }
+        },
+        "summary": "Convert workspace environment",
+        "tags": [
+          "Workspaces"
+        ]
+      }
+    },
+    "/v1/workspaces/{workspace_id}/environment-check": {
+      "get": {
+        "description": "Returns compliance warnings for converting between staging and production. Does not mutate.",
+        "operationId": "check-environment-conversion",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "target",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "staging"
+              ],
+              "title": "Target",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentCheckResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Pre-check environment conversion",
         "tags": [
           "Workspaces"
         ]
