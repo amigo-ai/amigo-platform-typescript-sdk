@@ -13630,8 +13630,14 @@ export interface components {
         };
         /** FhirAppointmentView */
         FhirAppointmentView: {
+            /** Appointment Type */
+            appointment_type?: string | null;
+            /** Cancel Reason */
+            cancel_reason?: string | null;
             /** Canonical Id */
             canonical_id?: string | null;
+            /** Duration Minutes */
+            duration_minutes?: number | null;
             /** End */
             end?: string | null;
             /** Entity Id */
@@ -13645,6 +13651,8 @@ export interface components {
             last_event_at?: string | null;
             /** Location Name */
             location_name?: string | null;
+            /** Modality */
+            modality?: string | null;
             /** Patient Name */
             patient_name?: string | null;
             /** Practitioner Name */
@@ -13801,6 +13809,12 @@ export interface components {
             address?: {
                 [key: string]: unknown;
             } | null;
+            /** Address City */
+            address_city?: string | null;
+            /** Address Postal Code */
+            address_postal_code?: string | null;
+            /** Address State */
+            address_state?: string | null;
             /** Allergies */
             allergies?: string[];
             /** Birth Date */
@@ -13835,12 +13849,24 @@ export interface components {
             last_event_at?: string | null;
             /** Last Name */
             last_name?: string | null;
+            /** Member Id */
+            member_id?: string | null;
             /** Mrn */
             mrn?: string | null;
             /** Name */
             name?: string | null;
             /** Phone */
             phone?: string | null;
+            /** Policyholder Dob */
+            policyholder_dob?: string | null;
+            /** Policyholder Name */
+            policyholder_name?: string | null;
+            /** Policyholder Relationship */
+            policyholder_relationship?: string | null;
+            /** Practice Payer Id */
+            practice_payer_id?: string | null;
+            /** Primary Payer Name */
+            primary_payer_name?: string | null;
             /** Source System */
             source_system?: string | null;
         };
@@ -13873,12 +13899,16 @@ export interface components {
             event_count?: number;
             /** Last Event At */
             last_event_at?: string | null;
+            /** Member Id */
+            member_id?: string | null;
             /** Name */
             name?: string | null;
             /** Npi */
             npi?: string | null;
             /** Phone */
             phone?: string | null;
+            /** Scheduling Eligible */
+            scheduling_eligible?: boolean | null;
             /** Source System */
             source_system?: string | null;
             /** Specialty */
@@ -13988,18 +14018,28 @@ export interface components {
              * @default 0
              */
             event_count?: number;
+            /** Facility Id */
+            facility_id?: string | null;
             /** Last Event At */
             last_event_at?: string | null;
+            /** Provider Id */
+            provider_id?: string | null;
             /** Provider Name */
             provider_name?: string | null;
             /** Schedule Ref */
             schedule_ref?: string | null;
             /** Source System */
             source_system?: string | null;
+            /** Specialty */
+            specialty?: string | null;
             /** Start */
             start?: string | null;
             /** Status */
             status?: string | null;
+            /** Visit Type Ids */
+            visit_type_ids?: string | null;
+            /** Visit Type Names */
+            visit_type_names?: string | null;
         };
         /** FhirStatusResponse */
         FhirStatusResponse: {
