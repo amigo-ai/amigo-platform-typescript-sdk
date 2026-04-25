@@ -15617,6 +15617,8 @@ export interface components {
             sync_error?: string | null;
             /** Synced At */
             synced_at?: string | null;
+            /** Workspace Id */
+            workspace_id?: string | null;
         };
         /** MemoryAnalyticsResponse */
         MemoryAnalyticsResponse: {
