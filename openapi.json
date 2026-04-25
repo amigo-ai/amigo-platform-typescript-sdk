@@ -14524,6 +14524,28 @@
       },
       "FhirAppointmentView": {
         "properties": {
+          "appointment_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Appointment Type"
+          },
+          "cancel_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cancel Reason"
+          },
           "canonical_id": {
             "anyOf": [
               {
@@ -14534,6 +14556,17 @@
               }
             ],
             "title": "Canonical Id"
+          },
+          "duration_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Minutes"
           },
           "end": {
             "anyOf": [
@@ -14576,6 +14609,17 @@
               }
             ],
             "title": "Location Name"
+          },
+          "modality": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modality"
           },
           "patient_name": {
             "anyOf": [
@@ -15065,6 +15109,39 @@
             ],
             "title": "Address"
           },
+          "address_city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address City"
+          },
+          "address_postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Postal Code"
+          },
+          "address_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address State"
+          },
           "allergies": {
             "items": {
               "type": "string"
@@ -15182,6 +15259,17 @@
             ],
             "title": "Last Name"
           },
+          "member_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Member Id"
+          },
           "mrn": {
             "anyOf": [
               {
@@ -15214,6 +15302,61 @@
               }
             ],
             "title": "Phone"
+          },
+          "policyholder_dob": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policyholder Dob"
+          },
+          "policyholder_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policyholder Name"
+          },
+          "policyholder_relationship": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policyholder Relationship"
+          },
+          "practice_payer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Practice Payer Id"
+          },
+          "primary_payer_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Payer Name"
           },
           "source_system": {
             "anyOf": [
@@ -15314,6 +15457,17 @@
             ],
             "title": "Last Event At"
           },
+          "member_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Member Id"
+          },
           "name": {
             "anyOf": [
               {
@@ -15346,6 +15500,17 @@
               }
             ],
             "title": "Phone"
+          },
+          "scheduling_eligible": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scheduling Eligible"
           },
           "source_system": {
             "anyOf": [
@@ -15707,6 +15872,17 @@
             "title": "Event Count",
             "type": "integer"
           },
+          "facility_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
+          },
           "last_event_at": {
             "anyOf": [
               {
@@ -15717,6 +15893,17 @@
               }
             ],
             "title": "Last Event At"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
           },
           "provider_name": {
             "anyOf": [
@@ -15751,6 +15938,17 @@
             ],
             "title": "Source System"
           },
+          "specialty": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialty"
+          },
           "start": {
             "anyOf": [
               {
@@ -15772,6 +15970,28 @@
               }
             ],
             "title": "Status"
+          },
+          "visit_type_ids": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visit Type Ids"
+          },
+          "visit_type_names": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visit Type Names"
           }
         },
         "required": [
