@@ -7195,6 +7195,102 @@
         "title": "CreateOperatorRequest",
         "type": "object"
       },
+      "CreateOutboundCallRequest": {
+        "description": "Request body for creating an outbound call.",
+        "properties": {
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Client-provided idempotency key. Auto-generated if omitted.",
+            "title": "Idempotency Key"
+          },
+          "outbound_task_entity_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "World model outbound_task entity ID for completion feedback.",
+            "title": "Outbound Task Entity Id"
+          },
+          "phone_from": {
+            "description": "Caller ID phone number in E.164 format. Must belong to this workspace.",
+            "maxLength": 16,
+            "title": "Phone From",
+            "type": "string"
+          },
+          "phone_to": {
+            "description": "Destination phone number in E.164 format (e.g. +18005551234)",
+            "maxLength": 16,
+            "title": "Phone To",
+            "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Service ID for the voice agent to use.",
+            "title": "Service Id"
+          },
+          "system_prompt": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional system prompt override for this call.",
+            "title": "System Prompt"
+          }
+        },
+        "required": [
+          "phone_to",
+          "phone_from"
+        ],
+        "title": "CreateOutboundCallRequest",
+        "type": "object"
+      },
+      "CreateOutboundCallResponse": {
+        "description": "Response from creating an outbound call.",
+        "properties": {
+          "call_sid": {
+            "description": "Twilio call SID for the outbound call",
+            "title": "Call Sid",
+            "type": "string"
+          },
+          "status": {
+            "description": "Initial call status (typically 'queued')",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "call_sid",
+          "status"
+        ],
+        "title": "CreateOutboundCallResponse",
+        "type": "object"
+      },
       "CreatePersonaRequest": {
         "properties": {
           "background": {
@@ -44909,6 +45005,63 @@
           }
         },
         "summary": "Workspace call quality benchmarks",
+        "tags": [
+          "Calls"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/calls/outbound": {
+      "post": {
+        "description": "Initiate an outbound voice call from a workspace phone number. The phone_from number must be registered in this workspace. Supports idempotency via the idempotency_key field.",
+        "operationId": "create-outbound-call",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOutboundCallRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateOutboundCallResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "Invalid phone number format"
+          },
+          "403": {
+            "description": "phone_from does not belong to this workspace"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "502": {
+            "description": "Upstream Twilio or voice agent error"
+          },
+          "503": {
+            "description": "Voice agent or outbound calls not configured"
+          }
+        },
+        "summary": "Create an outbound call",
         "tags": [
           "Calls"
         ]

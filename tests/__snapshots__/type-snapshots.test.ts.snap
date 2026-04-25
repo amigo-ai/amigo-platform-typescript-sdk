@@ -41,6 +41,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "create-monitor-concept",
   "create-operator",
   "create-operator-briefing",
+  "create-outbound-call",
   "create-persona",
   "create-phone-number",
   "create-self-service-workspace",
