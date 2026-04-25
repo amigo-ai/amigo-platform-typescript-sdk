@@ -25935,6 +25935,17 @@
       },
       "PurgeEntityResponse": {
         "properties": {
+          "delta_events_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Events Note"
+          },
           "display_name": {
             "anyOf": [
               {
@@ -28803,6 +28814,18 @@
             ],
             "title": "Transition Deadline Ms"
           },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
           "tts_model": {
             "anyOf": [
               {
@@ -28817,6 +28840,22 @@
               }
             ],
             "title": "Tts Model"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
           }
         },
         "title": "ServiceVoiceConfig",
@@ -37274,6 +37313,34 @@
             "default": 0,
             "title": "Style",
             "type": "number"
+          },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
           },
           "voice_id": {
             "title": "Voice Id",
@@ -64597,7 +64664,7 @@
     },
     "/v1/{workspace_id}/world/sync/by-sink": {
       "get": {
-        "description": "Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source from outbound_sync_log. For workspaces with multiple outbound sinks (e.g. Revolution + HubSpot).",
+        "description": "Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source. For workspaces with multiple outbound sinks (e.g. Revolution + HubSpot).",
         "operationId": "outbound-sync-by-sink",
         "responses": {
           "200": {

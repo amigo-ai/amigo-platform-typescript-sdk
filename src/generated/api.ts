@@ -7720,7 +7720,7 @@ export interface paths {
         };
         /**
          * Outbound sync status per data source
-         * @description Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source from outbound_sync_log. For workspaces with multiple outbound sinks (e.g. Revolution + HubSpot).
+         * @description Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source. For workspaces with multiple outbound sinks (e.g. Revolution + HubSpot).
          */
         get: operations["outbound-sync-by-sink"];
         put?: never;
@@ -18061,6 +18061,8 @@ export interface components {
         };
         /** PurgeEntityResponse */
         PurgeEntityResponse: {
+            /** Delta Events Note */
+            delta_events_note?: string | null;
             /** Display Name */
             display_name: string | null;
             /** Edges Deleted */
@@ -19397,8 +19399,14 @@ export interface components {
             progress_vocabulary?: string[] | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
             /** Tts Model */
             tts_model?: ("sonic-turbo" | "sonic-3") | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
         };
         /** SessionEndEvent */
         SessionEndEvent: {
@@ -22616,6 +22624,12 @@ export interface components {
              * @default 0
              */
             style?: number;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
             /** Voice Id */
             voice_id: string;
         };
