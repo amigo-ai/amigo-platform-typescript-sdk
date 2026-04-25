@@ -28803,6 +28803,18 @@
             ],
             "title": "Transition Deadline Ms"
           },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
           "tts_model": {
             "anyOf": [
               {
@@ -28817,6 +28829,22 @@
               }
             ],
             "title": "Tts Model"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
           }
         },
         "title": "ServiceVoiceConfig",
@@ -37274,6 +37302,34 @@
             "default": 0,
             "title": "Style",
             "type": "number"
+          },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
           },
           "voice_id": {
             "title": "Voice Id",

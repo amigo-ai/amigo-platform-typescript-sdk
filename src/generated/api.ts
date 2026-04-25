@@ -19397,8 +19397,14 @@ export interface components {
             progress_vocabulary?: string[] | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
             /** Tts Model */
             tts_model?: ("sonic-turbo" | "sonic-3") | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
         };
         /** SessionEndEvent */
         SessionEndEvent: {
@@ -22616,6 +22622,12 @@ export interface components {
              * @default 0
              */
             style?: number;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
             /** Voice Id */
             voice_id: string;
         };
