@@ -5505,7 +5505,7 @@
             "title": "Last Ingested At"
           },
           "source": {
-            "description": "Operator-defined source identifier as written to world.events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.",
+            "description": "Operator-defined source identifier as written to Delta world_events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.",
             "maxLength": 256,
             "minLength": 1,
             "title": "Source",
@@ -20377,7 +20377,7 @@
             "title": "Ratio Numerator Event"
           },
           "source": {
-            "description": "'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from world.events. 'surface_events' reads from world.events WHERE domain='surface'.",
+            "description": "'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from Delta world_events. 'surface_events' reads from Delta world_events WHERE domain='surface'.",
             "enum": [
               "call_intelligence",
               "world_events",
@@ -39887,7 +39887,7 @@
     },
     "/s/{token}/availability": {
       "get": {
-        "description": "Return available appointment slots for the surface's workspace.\n\nQueries FHIR Slot resources from world.events that are free and\nwithin the requested date range. Token-authenticated, no Bearer auth.",
+        "description": "Return available appointment slots for the surface's workspace.\n\nQueries FHIR Slot resources from world.entities that are free and\nwithin the requested date range. Token-authenticated, no Bearer auth.",
         "operationId": "get-surface-availability",
         "parameters": [
           {
@@ -62088,7 +62088,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/runs": {
       "get": {
-        "description": "Execution history \u2014 query world.events for this trigger's lifecycle events.",
+        "description": "Execution history \u2014 query Delta world_events for this trigger's lifecycle events.",
         "operationId": "list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get",
         "parameters": [
           {
@@ -62774,7 +62774,7 @@
     },
     "/v1/{workspace_id}/voiceprints/{entity_id}": {
       "get": {
-        "description": "Check voiceprint enrollment status for any entity.\n\nQueries world.events directly for the latest voiceprint.enrolled event.\nThis works for both world entities (patients/practitioners) and identity\nentities (developer console users) \u2014 the event table is the source of\ntruth for enrollment, not the entity state projection.\n\nPermissions: authenticated (any role).",
+        "description": "Check voiceprint enrollment status for any entity.\n\nQueries world.entities for voiceprint enrollment status.\nThis works for both world entities (patients/practitioners) and identity\nentities (developer console users) \u2014 the entity state projection is the\nread surface (world.events table has been dropped).\n\nPermissions: authenticated (any role).",
         "operationId": "get-voiceprint-status",
         "parameters": [
           {
@@ -63039,7 +63039,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries": {
       "get": {
-        "description": "Delivery history \u2014 query world.events for this destination's webhook receives.",
+        "description": "Delivery history \u2014 query Delta world_events for this destination's webhook receives.",
         "operationId": "list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get",
         "parameters": [
           {
