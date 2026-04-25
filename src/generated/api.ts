@@ -15617,6 +15617,8 @@ export interface components {
             sync_error?: string | null;
             /** Synced At */
             synced_at?: string | null;
+            /** Workspace Id */
+            workspace_id?: string | null;
         };
         /** MemoryAnalyticsResponse */
         MemoryAnalyticsResponse: {
@@ -22754,6 +22756,12 @@ export interface components {
             tone?: string | null;
             /** Transcript Correction Enabled */
             transcript_correction_enabled?: boolean | null;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
             /** Voice Id */
             voice_id?: string | null;
             /** Volume */
@@ -22782,6 +22790,12 @@ export interface components {
             tone: string | null;
             /** Transcript Correction Enabled */
             transcript_correction_enabled: boolean;
+            /** Tts Config */
+            tts_config: {
+                [key: string]: unknown;
+            } | null;
+            /** Tts Provider */
+            tts_provider: ("cartesia" | "elevenlabs" | "groq") | null;
             /** Voice Id */
             voice_id: string | null;
             /** Volume */

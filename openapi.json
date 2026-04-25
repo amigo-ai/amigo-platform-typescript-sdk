@@ -19464,6 +19464,18 @@
               }
             ],
             "title": "Synced At"
+          },
+          "workspace_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workspace Id"
           }
         },
         "required": [
@@ -37736,6 +37748,34 @@
             ],
             "title": "Transcript Correction Enabled"
           },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
+          },
           "voice_id": {
             "anyOf": [
               {
@@ -37831,6 +37871,34 @@
             "title": "Transcript Correction Enabled",
             "type": "boolean"
           },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
+          },
           "voice_id": {
             "anyOf": [
               {
@@ -37865,7 +37933,9 @@
           "pronunciation_dict_id",
           "sensitive_topics",
           "post_call_analysis_enabled",
-          "transcript_correction_enabled"
+          "transcript_correction_enabled",
+          "tts_provider",
+          "tts_config"
         ],
         "title": "VoiceSettingsResponse",
         "type": "object"
