@@ -21306,6 +21306,12 @@ export interface components {
              */
             navigate_on_completion?: boolean;
             progress?: components["schemas"]["ProgressHint"] | null;
+            /**
+             * Result Persistence
+             * @default accumulate
+             * @enum {string}
+             */
+            result_persistence?: "accumulate" | "override";
             /** Tool Id */
             tool_id: string;
         };

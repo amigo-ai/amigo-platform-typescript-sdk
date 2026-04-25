@@ -33361,6 +33361,15 @@
               }
             ]
           },
+          "result_persistence": {
+            "default": "accumulate",
+            "enum": [
+              "accumulate",
+              "override"
+            ],
+            "title": "Result Persistence",
+            "type": "string"
+          },
           "tool_id": {
             "title": "Tool Id",
             "type": "string"
