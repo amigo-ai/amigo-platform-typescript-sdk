@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.6.1] - 2026-04-26
+
+### Improvements
+
+- harden SDK packaging and release automation (#82)
+
 ## [0.6.0] - 2026-04-26
 
 ### Bug Fixes
