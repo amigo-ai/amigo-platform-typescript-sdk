@@ -69,6 +69,23 @@ REVIEW_ACCURACY_CONTRACT = """
   TypeScript consumers still need it to resolve.
 - Before flagging recovery-issue cleanup as overbroad, inspect author filters
   in the exact issue query or jq selector.
+- Before claiming code is unreachable after a shell loop, trace each `exit`,
+  `break`, and loop-exhaustion path. An `exit` inside a success branch does not
+  make the code after the loop unreachable when that branch never matches.
+- When reviewing GitHub Actions bash steps, remember the runner uses `bash -e`
+  by default unless the step overrides `shell:`. A bare command or function call
+  that returns non-zero exits the step before later cleanup commands run.
+- Do not claim a later summary or warning also renders after an earlier branch
+  executes `exit`; first prove that control can actually reach both blocks.
+- For `node -e 'script' arg1 arg2`, Node exposes `arg1` at `process.argv[1]`.
+  Do not ask authors to switch to `slice(2)` unless the invocation uses a script
+  file path rather than `-e`.
+- In GitHub Actions `run: |` blocks, YAML removes the block indentation before
+  the shell executes the script. Do not claim heredoc content is indented solely
+  because the workflow file is indented under `run: |`.
+- Do not claim a GitHub Actions job can finish green after a later notification
+  step fails unless the workflow uses `continue-on-error`, `|| true`, or another
+  explicit failure-suppression mechanism on that step.
 - Before claiming a helper is public API, inspect `src/index.ts` public exports
   or package tarball smoke tests rather than assuming internal imports are
   exported.
