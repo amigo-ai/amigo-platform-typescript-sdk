@@ -83,7 +83,7 @@ export interface paths {
          * Get Availability
          * @description Return available appointment slots for the surface's workspace.
          *
-         *     Queries FHIR Slot resources from world.events that are free and
+         *     Queries FHIR Slot resources from world.entities that are free and
          *     within the requested date range. Token-authenticated, no Bearer auth.
          */
         get: operations["get-surface-availability"];
@@ -6944,7 +6944,7 @@ export interface paths {
         };
         /**
          * List Trigger Runs
-         * @description Execution history — query world.events for this trigger's lifecycle events.
+         * @description Execution history — query Delta world_events for this trigger's lifecycle events.
          */
         get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
         put?: never;
@@ -7153,10 +7153,10 @@ export interface paths {
          * Get Voiceprint Status
          * @description Check voiceprint enrollment status for any entity.
          *
-         *     Queries world.events directly for the latest voiceprint.enrolled event.
+         *     Queries world.entities for voiceprint enrollment status.
          *     This works for both world entities (patients/practitioners) and identity
-         *     entities (developer console users) — the event table is the source of
-         *     truth for enrollment, not the entity state projection.
+         *     entities (developer console users) — the entity state projection is the
+         *     read surface (world.events table has been dropped).
          *
          *     Permissions: authenticated (any role).
          */
@@ -7215,7 +7215,7 @@ export interface paths {
         };
         /**
          * List Deliveries
-         * @description Delivery history — query world.events for this destination's webhook receives.
+         * @description Delivery history — query Delta world_events for this destination's webhook receives.
          */
         get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
         put?: never;
@@ -9975,7 +9975,7 @@ export interface components {
             last_ingested_at: string | null;
             /**
              * Source
-             * @description Operator-defined source identifier as written to world.events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.
+             * @description Operator-defined source identifier as written to Delta world_events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.
              */
             source: string;
         };
@@ -12006,9 +12006,8 @@ export interface components {
             /**
              * Source Type
              * @description Category of the audio input
-             * @enum {string}
              */
-            source_type: "transcript" | "tone" | "tool_result" | "emotion" | "silence" | "barge_in" | "breathing" | "speech_rate";
+            source_type: string;
         };
         /**
          * DecisionState
@@ -16067,7 +16066,7 @@ export interface components {
             ratio_numerator_event?: string | null;
             /**
              * Source
-             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from world.events. 'surface_events' reads from world.events WHERE domain='surface'.
+             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from Delta world_events. 'surface_events' reads from Delta world_events WHERE domain='surface'.
              * @enum {string}
              */
             source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results";
