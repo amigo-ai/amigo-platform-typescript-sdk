@@ -50,6 +50,7 @@ import { PhoneNumbersResource } from './resources/phone-numbers.js'
 import { IntegrationsResource } from './resources/integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
 import { SimulationsResource } from './resources/simulations.js'
+import { MetricsResource } from './resources/metrics.js'
 import { SettingsResource } from './resources/settings.js'
 import { BillingResource } from './resources/billing.js'
 import { MemoryResource } from './resources/memory.js'
@@ -160,6 +161,7 @@ export class AmigoClient {
   readonly integrations!: IntegrationsResource
   readonly analytics!: AnalyticsResource
   readonly simulations!: SimulationsResource
+  readonly metrics!: MetricsResource
   readonly settings!: SettingsResource
   readonly billing!: BillingResource
   readonly memory!: MemoryResource
@@ -307,6 +309,7 @@ export class AmigoClient {
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
     mutable.simulations = new SimulationsResource(client, workspaceId)
+    mutable.metrics = new MetricsResource(client, workspaceId)
     mutable.settings = new SettingsResource(client, workspaceId)
     mutable.billing = new BillingResource(client, workspaceId)
     mutable.memory = new MemoryResource(client, workspaceId)
@@ -452,6 +455,18 @@ export type {
   ResponseHookContext,
   ErrorHookContext,
 } from './core/openapi-client.js'
+
+export type {
+  MetricCatalogEntry,
+  MetricCatalogResponse,
+  MetricListResponse,
+  MetricValue,
+  NumericalMetricValue,
+  CategoricalMetricValue,
+  BooleanMetricValue,
+  MetricValuesParams,
+  MetricTrendParams,
+} from './resources/metrics.js'
 
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'

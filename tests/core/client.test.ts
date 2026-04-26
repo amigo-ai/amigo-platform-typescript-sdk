@@ -55,6 +55,7 @@ describe('AmigoClient configuration', () => {
     expect(client.actions).toBeDefined()
     expect(client.services).toBeDefined()
     expect(client.world).toBeDefined()
+    expect(client.metrics).toBeDefined()
     expect(client.webhookDestinations).toBeDefined()
   })
 

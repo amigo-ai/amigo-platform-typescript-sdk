@@ -271,6 +271,13 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `recommend`
 - `getIntelligence`
 
+### `metrics`
+
+- `listLatest`
+- `getCatalog`
+- `getValues`
+- `getTrend`
+
 ### `settings`
 
 - `voice.get`
