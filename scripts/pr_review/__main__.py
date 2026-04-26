@@ -45,6 +45,46 @@ SPECIALIST_MAX_TOKENS = 4000
 ORCHESTRATOR_MAX_TOKENS = 7000
 MAX_DIFF_CHARS = 140_000
 MAX_ERROR_CHARS = 800
+REVIEW_ACCURACY_CONTRACT = """
+## Review accuracy contract
+
+- Ground every blocker or concern in a changed file and a concrete behavior,
+  security, release, package, or type-safety failure mode visible in this PR.
+- If a finding depends on an assumption that is not proven by the diff or repo
+  context, downgrade it to a suggestion or explicitly ask for human
+  verification.
+- Do not raise generic best-practice advice as a blocker. Blockers must be
+  merge-blocking defects with a clear corrective patch.
+- If the code is correct and a prior concern would be a false positive, prefer
+  tightening reviewer guidance over asking for unnecessary code churn.
+- Do not claim a changed file is absent from the diff unless you have checked
+  the full changed-file list in the PR metadata.
+- Treat newly added files in the cumulative PR diff as present even if they are
+  not new in the latest force-push delta.
+- Do not require registry metadata fields that are not reliably exposed by the
+  public npm CLI/API; make those checks suggestions unless the workflow already
+  has a deterministic source of truth.
+- Do not call a dependency unnecessary solely because source imports are
+  type-only. If published `.d.ts` files import the package, downstream
+  TypeScript consumers still need it to resolve.
+- Before flagging recovery-issue cleanup as overbroad, inspect author filters
+  in the exact issue query or jq selector.
+- Before claiming a helper is public API, inspect `src/index.ts` public exports
+  or package tarball smoke tests rather than assuming internal imports are
+  exported.
+- Before claiming an action version comment is wrong, verify that the commented
+  tag exists and points at the pinned SHA.
+- Remember npm semver caret behavior for pre-1.0 ranges: `^0.1.0` is capped
+  below `0.2.0`, not below `1.0.0`.
+- Before suggesting that an action pin lacks a version comment, inspect the
+  exact changed line. A trailing comment such as `# v4.9.0` is a version
+  comment and must not be reported as missing.
+- Do not ask authors to add comments inside JSON files. For JSON package
+  metadata coupling, prefer executable validation, documentation, or release
+  notes.
+- Avoid duplicate findings across agents; one precise finding is better than
+  several overlapping warnings.
+""".strip()
 ERROR_REDACTION_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
     (re.compile(r"(?i)(authorization:?\s*bearer\s+)[a-z0-9._~-]+"), r"\1[REDACTED]"),
     (re.compile(r"\bya29\.[A-Za-z0-9._-]+\b"), "[REDACTED_OAUTH_TOKEN]"),
@@ -112,8 +152,9 @@ def load_agent_system_prompt(name: str) -> str:
     if text.startswith("---"):
         parts = text.split("---", 2)
         if len(parts) >= 3:
-            return parts[2].strip()
-    return text.strip()
+            text = parts[2]
+    prompt = text.strip()
+    return f"{prompt}\n\n{REVIEW_ACCURACY_CONTRACT}"
 
 
 def fetch_pr_metadata(pr_number: str) -> dict:

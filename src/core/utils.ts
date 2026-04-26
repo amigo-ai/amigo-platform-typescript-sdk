@@ -39,30 +39,49 @@ export function buildLastResponse(response: Response): LastResponseInfo {
   }
 }
 
-/**
- * Extracts the data payload from an openapi-fetch response,
- * throwing ParseError if the response is empty or unexpected.
- */
-export function extractData<T>(result: {
+interface OpenApiResult<T> {
   data?: T
   error?: unknown
   response?: Response
-}): WithResponseMetadata<T> {
+}
+
+interface ExtractDataOptions {
+  allowEmptyBody?: boolean
+}
+
+/**
+ * Extracts the data payload from an openapi-fetch response.
+ * Empty-body success responses return undefined; other empty responses throw.
+ */
+export function extractData<T>(
+  result: OpenApiResult<T>,
+  options: ExtractDataOptions = {},
+): WithResponseMetadata<T> {
   if (result.data !== undefined) {
     return attachResponseMetadata(result.data, result.response) as WithResponseMetadata<T>
   }
+
+  if (isEmptyBodySuccess(result.response) || options.allowEmptyBody) {
+    return undefined as WithResponseMetadata<T>
+  }
+
+  // Degenerate openapi-fetch results with both data and error keep the SDK's
+  // original data-first behavior; without data, errors stay fatal.
+  if (result.error !== undefined) {
+    throw new ParseError('Unexpected error response from API', JSON.stringify(result.error))
+  }
+
   throw new ParseError(
     'Unexpected empty response from API',
-    result.error !== undefined ? JSON.stringify(result.error) : undefined,
+    result.response ? `status=${result.response.status}` : undefined,
   )
 }
 
-export function withResponse<T>(result: {
-  data?: T
-  error?: unknown
-  response: Response
-}): AmigoResponse<T> {
-  const data = extractData(result)
+export function withResponse<T>(
+  result: OpenApiResult<T> & { response: Response },
+  options: ExtractDataOptions = {},
+): AmigoResponse<T> {
+  const data = extractData(result, options)
   const lastResponse = buildLastResponse(result.response)
 
   return {
@@ -127,6 +146,10 @@ function attachResponseMetadata<T>(data: T, response?: Response): WithResponseMe
   defineHiddenMetadata(target, 'lastResponse', lastResponse)
 
   return target as WithResponseMetadata<T>
+}
+
+function isEmptyBodySuccess(response?: Response): boolean {
+  return response?.status === 204 || response?.status === 205
 }
 
 function defineHiddenMetadata<T extends object, K extends keyof ResponseMetadata>(

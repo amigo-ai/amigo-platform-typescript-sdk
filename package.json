@@ -3,7 +3,8 @@
   "version": "0.6.0",
   "description": "Official TypeScript SDK for the Amigo Platform API",
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "provenance": true
   },
   "keywords": [
     "amigo",
@@ -27,8 +28,14 @@
   "exports": {
     ".": {
       "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/types/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
@@ -46,7 +53,7 @@
     "clean": "node scripts/clean.mjs",
     "gen-types": "node scripts/gen-types.mjs",
     "openapi:sync": "node scripts/sync-openapi.mjs",
-    "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json",
+    "build": "npm run clean && npm run gen-types && npm run esbuild && tsc --project tsconfig.build.json && node scripts/prepare-cjs-types.mjs",
     "esbuild": "node scripts/build.mjs",
     "docs:api": "node scripts/gen-api-docs.mjs",
     "docs:check": "node scripts/gen-api-docs.mjs --check",
@@ -59,6 +66,7 @@
     "test": "vitest run --project unit",
     "test:dist": "vitest run --project dist",
     "test:tarball": "node scripts/test-tarball.mjs",
+    "test:reviewer": "python -m unittest scripts.pr_review.test_main",
     "test:integration": "vitest run --project integration",
     "test:all": "vitest run",
     "test:watch": "vitest",
@@ -69,7 +77,8 @@
   },
   "sideEffects": false,
   "dependencies": {
-    "openapi-fetch": "^0.17.0"
+    "openapi-fetch": "^0.17.0",
+    "openapi-typescript-helpers": "^0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -112,8 +121,5 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "optionalDependencies": {
-    "@rollup/rollup-darwin-arm64": "^4.60.2"
   }
 }

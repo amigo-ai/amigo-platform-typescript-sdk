@@ -32,6 +32,12 @@ Thank you for your interest in contributing to the Amigo Platform SDK! This guid
 - **`npm run format`** — Check formatting with Prettier
 - **`npm run format:write`** — Auto-format with Prettier
 
+### Dependency Upgrades
+
+When upgrading `openapi-fetch`, keep the direct `openapi-typescript-helpers` dependency aligned with the range declared by `openapi-fetch`. The SDK's published declarations import both packages directly, and `npm run test:tarball` enforces the range coupling.
+
+`npm run test:reviewer` uses Python's standard `unittest` runner. Use the repository CI Python version when changing `scripts/pr_review/`; the workflow currently runs the reviewer tests on Python 3.12.
+
 ## Testing
 
 This project uses **Vitest** as the testing framework.
@@ -82,6 +88,10 @@ npm run gen-types -- --spec path/to/openapi.json       # explicit file
 ```
 
 **Never manually edit** files in `src/generated/` — they will be overwritten.
+
+## Declaration Entrypoints
+
+The build emits one TypeScript declaration graph and then creates a CJS entrypoint at `dist/types/index.d.cts`. Keep the internal relative `.js` specifiers intact: under TypeScript `NodeNext`, `.d.cts` selects the CommonJS declaration entrypoint while `.js` specifiers still match the emitted JavaScript filenames. `npm run test:tarball` verifies both ESM and CJS declaration resolution with `skipLibCheck: false`.
 
 ## Project Structure
 
@@ -135,16 +145,17 @@ scripts/
 
 ## Release Process
 
-Releases are handled via GitHub Actions (`release.yml`):
+Releases are handled by two GitHub Actions workflows:
 
-1. Reuses the test workflow to validate the build
-2. Regenerates types from the committed OpenAPI spec
+1. `release.yml` verifies the latest Test workflow passed for the target commit
+2. Regenerates types from the committed OpenAPI spec and fails on generated drift
 3. Bumps the version (patch/minor/major)
-4. Builds and packs the package
-5. Publishes to npm with provenance attestation
-6. Generates CHANGELOG.md entries from conventional commits
-7. Creates a Git tag and GitHub Release with release notes
-8. Uploads build artifacts (tarball + dist/)
+4. Generates `CHANGELOG.md` entries from conventional commits
+5. Runs the full prepublish verification suite and packs the package
+6. Pushes the version commit and annotated `v*` tag
+7. Creates the GitHub Release with release notes and the tarball artifact
+8. The GitHub Release `published` event triggers `publish.yml` from the immutable release tag
+9. `publish.yml` rebuilds from the tag and publishes to npm with provenance
 
 ### Triggering a Release
 
@@ -156,8 +167,9 @@ When the platform API spec changes on `main`, the `spec-sync.yml` workflow:
 
 1. Detects spec differences
 2. Opens a PR with regenerated types
-3. Optionally auto-releases a minor version
+3. After that PR is merged, `spec-auto-release.yml` waits for the Test workflow on `main` to pass
+4. Dispatches a minor release automatically
 
 ### Repository Secrets
 
-Maintainers: see the internal runbook for CI secret configuration.
+Maintainers: configure npm trusted publishing for `publish.yml` where possible. Keep `NPM_TOKEN` only as a temporary fallback and configure `RELEASE_PUSH_TOKEN` only when branch protection prevents the default `GITHUB_TOKEN` from pushing release commits and tags. See the internal runbook for CI secret configuration.

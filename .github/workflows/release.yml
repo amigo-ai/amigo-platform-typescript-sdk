@@ -13,39 +13,38 @@ on:
           - minor
           - major
       dry_run:
-        description: 'Dry run (skip publish, commits, tags)'
+        description: 'Dry run (prepare local version/changelog/package only; skip commits, tags, releases, and publish dispatch)'
         required: false
         default: false
         type: boolean
 
 # Release operators:
-# - Configure `RELEASE_PUSH_TOKEN` when the target branch is protected.
-# - The token must be able to push the version-bump commit and tag after npm
-#   publish succeeds. Without it, protected-branch finalization is rejected
-#   before publish begins.
+# - Prefer npm trusted publishing for the Publish workflow. Configure the
+#   package on npm with this repository and `publish.yml` as the trusted
+#   publisher, then remove long-lived npm automation tokens.
+# - Configure `RELEASE_PUSH_TOKEN` only when the target branch is protected and
+#   the default `GITHUB_TOKEN` cannot push the version commit and tag.
 
 permissions:
   actions: read
-  contents: read
-  id-token: write
+  contents: write
+  issues: write
 
 concurrency:
   group: release-${{ github.ref_name || github.run_id }}
   cancel-in-progress: false
 
 jobs:
-  prepare:
+  release:
+    name: Prepare tag and GitHub Release
     runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
+    timeout-minutes: 20
     outputs:
-      current_version: ${{ steps.current_version.outputs.version }}
       new_version: ${{ steps.new_version.outputs.version }}
-      tarball_file: ${{ steps.pack.outputs.file }}
+      release_tag: ${{ steps.new_version.outputs.tag }}
 
     steps:
-      - name: Validate release target before prepare
+      - name: Validate release target
         run: |
           if [ "${{ github.ref_type }}" != "branch" ]; then
             echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
@@ -59,36 +58,65 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
         run: |
-          # This preflight catches the common missing-token and repo-level
-          # permission cases before publish. It cannot prove branch-level bypass
-          # against rulesets or protected-branch push restrictions.
+          echo "::add-mask::$RELEASE_PUSH_TOKEN"
+          # This catches common missing-token and repo-level permission cases
+          # before any release metadata is created. Ruleset-only restrictions
+          # may still require RELEASE_PUSH_TOKEN even when .protected is false.
           BRANCH_PROTECTED=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${BRANCH_NAME}" --jq '.protected')
           RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
 
           if [ "$BRANCH_PROTECTED" = "true" ] && [ -z "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can finalize releases on protected branches. Branches protected only by rulesets are not detected by this check and still require the token."
+            echo "::error::Branch ${BRANCH_NAME} is protected. Configure RELEASE_PUSH_TOKEN with push access that can create the version commit and tag."
             exit 1
           fi
 
           if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            CAN_PUSH=$(GH_TOKEN="$RELEASE_PUSH_TOKEN" gh api "repos/${GITHUB_REPOSITORY}" --jq '.permissions.push // false')
+            CAN_PUSH=$(GH_TOKEN="$RELEASE_PUSH_TOKEN_TRIMMED" gh api "repos/${GITHUB_REPOSITORY}" --jq '.permissions.push // false')
             if [ "$CAN_PUSH" != "true" ]; then
               echo "::error::RELEASE_PUSH_TOKEN lacks repository-level push permission for ${GITHUB_REPOSITORY}."
               exit 1
             fi
           fi
 
-      - name: Checkout code
+      - name: Resolve push credentials
+        id: push_credentials
+        env:
+          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          echo "::add-mask::$RELEASE_PUSH_TOKEN"
+          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
+          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
+            echo "::add-mask::$RELEASE_PUSH_TOKEN_TRIMMED"
+            echo "has_release_push_token=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_release_push_token=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout code with release push token
+        if: steps.push_credentials.outputs.has_release_push_token == 'true'
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_PUSH_TOKEN }}
+
+      - name: Checkout code with GitHub token
+        if: steps.push_credentials.outputs.has_release_push_token != 'true'
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          token: ${{ github.token }}
 
       - name: Setup Node
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         with:
-          node-version: '22'
+          node-version: '24'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Install npm 11
+        run: npm install --global npm@11.13.0
 
       - name: Install dependencies
         run: npm ci
@@ -117,24 +145,81 @@ jobs:
         run: |
           NEW_VERSION=$(node -e 'const [version, type] = process.argv.slice(1); const parts = version.split(".").map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) throw new Error(`Invalid semver: ${version}`); const [major, minor, patch] = parts; const next = { patch: [major, minor, patch + 1], minor: [major, minor + 1, 0], major: [major + 1, 0, 0] }[type]; if (!next) throw new Error(`Unsupported version type: ${type}`); console.log(next.join("."));' "${{ steps.current_version.outputs.version }}" "${{ inputs.version_type }}")
           echo "version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=v$NEW_VERSION" >> "$GITHUB_OUTPUT"
+          echo "Target version: $NEW_VERSION"
+
+      - name: Ensure target version is available
+        env:
+          NEW_VERSION: ${{ steps.new_version.outputs.version }}
+          RELEASE_TAG: ${{ steps.new_version.outputs.tag }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null; then
+            echo "::error::Local tag ${RELEASE_TAG} already exists."
+            exit 1
+          fi
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "::error::Remote tag ${RELEASE_TAG} already exists."
+            exit 1
+          fi
+
+          VIEW_LOG=$(mktemp)
+          trap 'rm -f "$VIEW_LOG"' EXIT
+          VIEW_FOUND=false
+          for attempt in 1 2; do
+            : > "$VIEW_LOG"
+            if npm view "@amigo-ai/platform-sdk@${NEW_VERSION}" version --json >"$VIEW_LOG" 2>&1; then
+              VIEW_FOUND=true
+              break
+            fi
+            if grep -Eq 'E404|"code"[[:space:]]*:[[:space:]]*"E404"|404 Not Found' "$VIEW_LOG"; then
+              break
+            fi
+            echo "npm view failed for @amigo-ai/platform-sdk@${NEW_VERSION}; retrying once."
+            sleep 10
+          done
+
+          if [ "$VIEW_FOUND" = "true" ]; then
+            echo "::error::@amigo-ai/platform-sdk@${NEW_VERSION} already exists on npm."
+            exit 1
+          fi
+
+          if grep -Eq 'E404|"code"[[:space:]]*:[[:space:]]*"E404"|404 Not Found' "$VIEW_LOG"; then
+            echo "@amigo-ai/platform-sdk@${NEW_VERSION} is not published yet."
+          else
+            echo "::error::Unable to verify npm publication state for @amigo-ai/platform-sdk@${NEW_VERSION}."
+            cat "$VIEW_LOG"
+            {
+              echo "## npm publication check failed"
+              echo ""
+              echo "Could not verify whether @amigo-ai/platform-sdk@${NEW_VERSION} already exists. Release was stopped before creating git metadata."
+              echo "Re-run this workflow after the npm registry recovers; this guard runs before release metadata is created."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
 
       - name: Regenerate types from committed spec
-        run: |
-          echo "Regenerating types from openapi.json..."
-          npm run gen-types
-          echo "Types regenerated"
+        run: npm run gen-types
 
-      - name: Check generated API docs
-        run: npm run docs:check
+      - name: Verify generated types are committed
+        run: |
+          if ! git diff --quiet -- src/generated/api.ts; then
+            echo "::error::src/generated/api.ts changed after regenerating from openapi.json. Commit the generated type update before releasing."
+            git diff -- src/generated/api.ts
+            exit 1
+          fi
 
       - name: Increment version in workspace
-        if: ${{ !inputs.dry_run }}
+        # Dry runs intentionally mutate only the ephemeral runner workspace so
+        # the package, tarball, and release notes are validated at the exact
+        # target version without pushing release metadata.
         run: |
           npm version "${{ steps.new_version.outputs.version }}" --no-git-tag-version
           echo "Prepared version: ${{ steps.current_version.outputs.version }} -> ${{ steps.new_version.outputs.version }}"
 
       - name: Update CHANGELOG.md
-        if: ${{ !inputs.dry_run }}
+        # See the dry-run note above: this is local-only unless the later
+        # non-dry-run commit step persists the generated metadata.
         run: |
           NEW_VERSION="${{ steps.new_version.outputs.version }}"
           ENTRY=$(node scripts/release-history.mjs changelog --version "$NEW_VERSION")
@@ -145,11 +230,8 @@ jobs:
             { echo "# Changelog"; echo ""; echo "$ENTRY"; } > CHANGELOG.md
           fi
 
-      - name: Build package
-        run: |
-          rm -rf dist/
-          npm run build
-          ls -la dist/
+      - name: Verify package
+        run: npm run prepublishOnly
 
       - name: Pack tarball
         id: pack
@@ -166,182 +248,34 @@ jobs:
             --repo "${GITHUB_REPOSITORY}" \
             > release-notes.md
 
-      - name: Upload release payload
-        if: ${{ !inputs.dry_run }}
+      - name: Upload release artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
         with:
-          name: release-payload
+          name: release-${{ steps.new_version.outputs.version }}
           path: |
-            CHANGELOG.md
-            package.json
-            package-lock.json
+            dist/
             release-notes.md
             ${{ steps.pack.outputs.file }}
           retention-days: 30
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.0
-        with:
-          name: dist-${{ steps.new_version.outputs.version }}
-          path: |
-            dist/
-            ${{ steps.pack.outputs.file }}
-          retention-days: 30
-
-      - name: Release Summary
-        run: |
-          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: ${{ steps.new_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Dry Run: ${{ inputs.dry_run }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Prepared tarball: ${{ steps.pack.outputs.file }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Publish stage: ${{ inputs.dry_run && 'skipped' || 'pending' }}" >> "$GITHUB_STEP_SUMMARY"
-
-  publish:
-    if: ${{ !inputs.dry_run }}
-    needs: prepare
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
-
-    steps:
-      - name: Validate npm credentials
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -z "${NODE_AUTH_TOKEN//[[:space:]]/}" ]; then
-            echo "::error::NPM_TOKEN secret is not configured."
-            exit 1
-          fi
-
-      - name: Validate release target before publish
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if [ "${{ github.ref_type }}" != "branch" ]; then
-            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
-            exit 1
-          fi
-
-          CURRENT_HEAD=$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/heads/${{ github.ref_name }}" --jq '.object.sha')
-          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
-            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} before publish. Re-run the release from the latest commit."
-            exit 1
-          fi
-
-      - name: Download release payload
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: release-payload
-          path: release-payload
-
-      - name: Validate release payload
-        run: |
-          if [ -z "${{ needs.prepare.outputs.tarball_file }}" ]; then
-            echo "::error::prepare job did not produce a tarball filename."
-            exit 1
-          fi
-
-          if [ ! -f "release-payload/${{ needs.prepare.outputs.tarball_file }}" ]; then
-            echo "::error::Expected tarball release-payload/${{ needs.prepare.outputs.tarball_file }} was not found."
-            exit 1
-          fi
-
-      - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
-        with:
-          node-version: '22'
-          registry-url: 'https://registry.npmjs.org'
-
-      - name: Validate npm authentication
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm whoami --registry=https://registry.npmjs.org/
-
-      - name: Publish to npm
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
-          npm publish "./release-payload/${{ needs.prepare.outputs.tarball_file }}" --access public --registry=https://registry.npmjs.org/
-          rm -f .npmrc
-
-  finalize:
-    # Keep `prepare` upstream of `finalize`: it performs the pre-publish
-    # credential checks that stop release finalization failures before publish.
-    if: ${{ !inputs.dry_run }}
-    needs: [prepare, publish]
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Resolve finalize credentials
-        id: finalize_credentials
-        env:
-          RELEASE_PUSH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
-        run: |
-          RELEASE_PUSH_TOKEN_TRIMMED="${RELEASE_PUSH_TOKEN//[[:space:]]/}"
-          if [ -n "$RELEASE_PUSH_TOKEN_TRIMMED" ]; then
-            echo "::add-mask::$RELEASE_PUSH_TOKEN_TRIMMED"
-            echo "checkout_token=$RELEASE_PUSH_TOKEN_TRIMMED" >> "$GITHUB_OUTPUT"
-            echo "has_release_push_token=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "checkout_token=${{ github.token }}" >> "$GITHUB_OUTPUT"
-            echo "has_release_push_token=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Checkout triggering commit
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          # Check out the dispatch-time SHA so release finalization can compare
-          # against the exact commit that prepared and published the tarball.
-          ref: ${{ github.sha }}
-          fetch-depth: 0
-          token: ${{ steps.finalize_credentials.outputs.checkout_token }}
-
       - name: Configure git
+        if: ${{ !inputs.dry_run }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Validate release ref type
+      - name: Confirm branch has not moved
+        if: ${{ !inputs.dry_run }}
         run: |
-          if [ "${{ github.ref_type }}" != "branch" ]; then
-            echo "::error::Release workflow must be dispatched from a branch ref. Found ref_type=${{ github.ref_type }}."
-            exit 1
-          fi
-
-      - name: Confirm branch has not moved before applying release metadata
-        run: |
-          # Best-effort fail-fast check. The commit/push step repeats this
-          # immediately before push, and force-with-lease remains the
-          # authoritative compare-and-swap guard.
           git fetch origin "${{ github.ref_name }}"
           CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
           if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
-            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
+            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD}. Re-run the release from the latest commit."
             exit 1
           fi
 
-      - name: Download release payload
-        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
-        with:
-          name: release-payload
-          path: release-payload
-
-      - name: Apply release metadata
-        run: |
-          cp release-payload/package.json package.json
-          cp release-payload/package-lock.json package-lock.json
-          cp release-payload/CHANGELOG.md CHANGELOG.md
-          cp release-payload/release-notes.md release-notes.md
-
-      - name: Commit and push version bump
-        id: commit_push
+      - name: Commit and push release metadata
+        if: ${{ !inputs.dry_run }}
         run: |
           git add package.json package-lock.json CHANGELOG.md
           if git diff --cached --quiet; then
@@ -349,92 +283,121 @@ jobs:
             exit 1
           fi
 
-          git commit -m "v${{ needs.prepare.outputs.new_version }}"
+          git commit -m "v${{ steps.new_version.outputs.version }}"
+          git tag -a "${{ steps.new_version.outputs.tag }}" -m "Release ${{ steps.new_version.outputs.tag }}"
 
-          git fetch origin "${{ github.ref_name }}"
-          CURRENT_HEAD=$(git rev-parse "origin/${{ github.ref_name }}")
-          if [ "$CURRENT_HEAD" != "$GITHUB_SHA" ]; then
-            echo "::error::Branch ${{ github.ref_name }} moved from ${GITHUB_SHA} to ${CURRENT_HEAD} after publish. Manual finalization is required."
-            exit 1
-          fi
+          git push --atomic \
+            "--force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA}" \
+            origin \
+            "HEAD:${{ github.ref_name }}" \
+            "${{ steps.new_version.outputs.tag }}"
 
-          git push "--force-with-lease=refs/heads/${{ github.ref_name }}:${GITHUB_SHA}" origin "HEAD:${{ github.ref_name }}"
-
-      - name: Create and push tag
-        id: push_tag
-        if: steps.commit_push.outcome == 'success'
-        run: |
-          git tag -a "v${{ needs.prepare.outputs.new_version }}" -m "Release v${{ needs.prepare.outputs.new_version }}"
-          git push origin "v${{ needs.prepare.outputs.new_version }}"
-
-      - name: Create GitHub Release
-        if: steps.push_tag.outcome == 'success'
-        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          tag_name: 'v${{ needs.prepare.outputs.new_version }}'
-          name: 'Release v${{ needs.prepare.outputs.new_version }}'
-          body_path: release-notes.md
-          draft: false
-          files: |
-            release-payload/${{ needs.prepare.outputs.tarball_file }}
-
-      - name: Cleanup temp files
-        if: always()
-        run: rm -f release-notes.md || true
-
-      - name: Release Summary
-        run: |
-          echo "## Release Finalization" >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Version: ${{ needs.prepare.outputs.new_version }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Published: npm" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Git commit and tag: completed after publish" >> "$GITHUB_STEP_SUMMARY"
-
-  notify_finalize_failure:
-    # `always()` is required so this recovery path still runs when `finalize`
-    # fails; otherwise Actions would skip the notification by default.
-    if: >-
-      ${{
-        !inputs.dry_run &&
-        always() &&
-        needs.publish.result == 'success' &&
-        (needs.finalize.result == 'failure' || needs.finalize.result == 'skipped')
-      }}
-    needs: [prepare, publish, finalize]
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-
-    steps:
-      - name: Notify release finalization failure
+      - name: Verify release tag exists
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          marker='<!-- release-finalize-failure:v1 -->'
-          title="Release finalization failed for v${{ needs.prepare.outputs.new_version }}"
+          if ! git ls-remote --exit-code --tags origin "refs/tags/${{ steps.new_version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "::error::Expected release tag ${{ steps.new_version.outputs.tag }} does not exist on origin."
+            exit 1
+          fi
+
+      - name: Create GitHub Release with release push token
+        if: ${{ !inputs.dry_run && steps.push_credentials.outputs.has_release_push_token == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PUSH_TOKEN }}
+        run: |
+          echo "::add-mask::$GH_TOKEN"
+          gh release create "${{ steps.new_version.outputs.tag }}" \
+            "${{ steps.pack.outputs.file }}" \
+            --title "Release ${{ steps.new_version.outputs.tag }}" \
+            --notes-file release-notes.md
+
+      - name: Create GitHub Release with GitHub token
+        if: ${{ !inputs.dry_run && steps.push_credentials.outputs.has_release_push_token != 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.new_version.outputs.tag }}" \
+            "${{ steps.pack.outputs.file }}" \
+            --title "Release ${{ steps.new_version.outputs.tag }}" \
+            --notes-file release-notes.md
+
+      - name: Verify publish workflow queued
+        id: publish_run
+        if: ${{ !inputs.dry_run }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.new_version.outputs.tag }}
+        run: |
+          RELEASE_PUBLISHED_AT=$(gh release view "$RELEASE_TAG" --json publishedAt --jq '.publishedAt')
+          if [ -z "$RELEASE_PUBLISHED_AT" ]; then
+            echo "::error::Could not resolve published timestamp for GitHub Release ${RELEASE_TAG}."
+            exit 1
+          fi
+
+          RELEASE_LOOKBACK_AT=$(node -e 'const publishedAt = Date.parse(process.argv[1]); if (Number.isNaN(publishedAt)) process.exit(1); console.log(new Date(publishedAt - 60_000).toISOString().replace(/\.\d{3}Z$/, "Z"));' "$RELEASE_PUBLISHED_AT")
+          for attempt in $(seq 1 30); do
+            RUN_URL=$(gh run list \
+              --workflow publish.yml \
+              --limit 50 \
+              --json event,createdAt,url \
+              --jq ".[] | select(.event == \"release\" and .createdAt >= \"${RELEASE_LOOKBACK_AT}\") | .url" \
+              | head -n 1)
+
+            if [ -n "$RUN_URL" ]; then
+              echo "url=$RUN_URL" >> "$GITHUB_OUTPUT"
+              echo "Publish workflow queued: $RUN_URL"
+              exit 0
+            fi
+
+            echo "Publish workflow for ${RELEASE_TAG} not visible yet (attempt ${attempt}/30)."
+            sleep 10
+          done
+
+          echo "::warning::GitHub Release ${RELEASE_TAG} was created, but publish.yml was not visible within 5 minutes."
+          {
+            echo "## Publish workflow visibility warning"
+            echo ""
+            echo "GitHub Release ${RELEASE_TAG} was created, but publish.yml was not visible within 5 minutes. This may be an Actions API propagation delay; check the Publish workflow before taking manual recovery steps."
+          } >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Notify release recovery required
+        if: ${{ failure() && !inputs.dry_run && steps.publish_run.outcome != 'failure' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.new_version.outputs.tag }}
+          RELEASE_VERSION: ${{ steps.new_version.outputs.version }}
+          BRANCH_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -z "$RELEASE_TAG" ]; then
+            echo "::error::Release tag output is blank; inspect the failed workflow before retrying."
+            exit 1
+          fi
+
+          if ! git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "No pushed release tag detected; recovery notification is not needed."
+            exit 0
+          fi
+
+          marker='<!-- release-recovery-required:v1 -->'
+          title="Release recovery required for ${RELEASE_TAG}"
           body=$(cat <<EOF
           ${marker}
-          ⚠️ Release finalization failed after the npm publish stage completed.
+          A release workflow failed after tag \`${RELEASE_TAG}\` was pushed.
 
-          Details:
-          - version: \`${{ needs.prepare.outputs.new_version }}\`
-          - branch: \`${{ github.ref_name }}\`
+          Manual recovery is required before another release attempt:
+          1. Inspect workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+          2. Verify whether GitHub Release \`${RELEASE_TAG}\` exists.
+          3. If the release is missing, create it from tag \`${RELEASE_TAG}\` with the intended release notes.
+          4. Verify whether \`@amigo-ai/platform-sdk@${RELEASE_VERSION}\` published to npm.
+          5. If npm publish did not run, dispatch \`publish.yml\` from tag \`${RELEASE_TAG}\` with \`expected_version=${RELEASE_VERSION}\`.
+
+          Context:
+          - branch: \`${BRANCH_NAME}\`
           - triggering sha: \`${GITHUB_SHA}\`
-          - workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-
-          Possible partial states:
-          - npm package is already published, but the version-bump commit, tag, and GitHub Release are all missing.
-          - npm package is already published and the git tag exists, but the GitHub Release was not created.
-          - npm package is already published and the version-bump commit landed, but the tag or GitHub Release did not.
-
-          Manual recovery is required before another release run:
-          1. Confirm the package version is already live on npm before taking any further release action.
-          2. Inspect whether \`${{ github.ref_name }}\` advanced after publish.
-          3. Check whether the version-bump commit landed on the branch.
-          4. Check whether tag \`v${{ needs.prepare.outputs.new_version }}\` exists remotely.
-          5. Recreate the missing commit, tag, and/or GitHub Release metadata for the already-published package as needed.
-          6. Close or update this issue once the release metadata is consistent again.
+          - tag: \`${RELEASE_TAG}\`
           EOF
           )
 
@@ -454,3 +417,18 @@ jobs:
               gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/${issue_number}" -f state=closed >/dev/null
             fi
           done
+
+      - name: Publish handoff
+        if: ${{ !inputs.dry_run }}
+        run: echo "publish.yml will run once from the GitHub Release published event."
+
+      - name: Release Summary
+        run: |
+          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Version: ${{ steps.new_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Previous: ${{ steps.current_version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Dry Run: ${{ inputs.dry_run }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tarball: ${{ steps.pack.outputs.file }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Publish: ${{ inputs.dry_run && 'skipped' || 'publish.yml triggered by release event' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Publish run: ${{ steps.publish_run.outputs.url || '(not queued in this run)' }}" >> "$GITHUB_STEP_SUMMARY"
