@@ -139,23 +139,24 @@ function mockFetch(routes: Record<string, RouteHandler>): typeof globalThis.fetc
   }
 }
 
-const getValuesHandler = vi.fn((request: Request) => {
-  const searchParams = new URL(request.url).searchParams
+const getValuesHandler = vi.fn((_request: Request) => Response.json(METRIC_VALUES_FIXTURE))
 
-  expect(searchParams.get('date_from')).toBe('2026-04-01T00:00:00Z')
-  expect(searchParams.get('date_to')).toBe('2026-04-26T00:00:00Z')
-  expect(searchParams.get('limit')).toBe('30')
+const getTrendHandler = vi.fn((_request: Request) => Response.json(METRIC_TREND_FIXTURE))
 
-  return Response.json(METRIC_VALUES_FIXTURE)
-})
-
-const getTrendHandler = vi.fn((request: Request) => {
-  const searchParams = new URL(request.url).searchParams
-
-  expect(searchParams.get('days')).toBe('14')
-
-  return Response.json(METRIC_TREND_FIXTURE)
-})
+function expectExhaustiveMetricValue(value: MetricValue): string | number | boolean | null {
+  switch (value.metric_type) {
+    case 'numerical':
+      return value.value
+    case 'categorical':
+      return value.value
+    case 'boolean':
+      return value.value
+    default: {
+      const exhaustive: never = value
+      throw new Error(`Unhandled metric value variant: ${JSON.stringify(exhaustive)}`)
+    }
+  }
+}
 
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
@@ -199,20 +200,39 @@ describe('MetricsResource', () => {
       date_to: '2026-04-26T00:00:00Z',
       limit: 30,
     })
+    const request = getValuesHandler.mock.calls[0]?.[0]
+    const metric = result.metrics[0]
 
-    expect(result.metrics[0]?.metric_key).toBe('voice_quality_score')
-    expect(result.metrics[0]?.event_count).toBe(30)
-    expect(result.metrics[0]?.value).toBe(0.91)
     expect(getValuesHandler).toHaveBeenCalledTimes(1)
+    expect(request).toBeDefined()
+    if (!request) throw new Error('Expected getValues request to be captured')
+
+    const searchParams = new URL(request.url).searchParams
+    expect(searchParams.get('date_from')).toBe('2026-04-01T00:00:00Z')
+    expect(searchParams.get('date_to')).toBe('2026-04-26T00:00:00Z')
+    expect(searchParams.get('limit')).toBe('30')
+    expect(metric?.metric_key).toBe('voice_quality_score')
+    expect(metric?.event_count).toBe(30)
+    expect(metric?.metric_type).toBe('numerical')
+    if (metric?.metric_type === 'numerical') {
+      const value: number | null = metric.value
+      expect(value).toBe(0.91)
+    }
   })
 
   it('gets a metric trend', async () => {
     const result = await client.metrics.getTrend('voice_quality_score', { days: 14 })
+    const request = getTrendHandler.mock.calls[0]?.[0]
 
+    expect(getTrendHandler).toHaveBeenCalledTimes(1)
+    expect(request).toBeDefined()
+    if (!request) throw new Error('Expected getTrend request to be captured')
+
+    const searchParams = new URL(request.url).searchParams
+    expect(searchParams.get('days')).toBe('14')
     expect(result.metrics[0]?.metric_key).toBe('voice_quality_score')
     expect(result.metrics[0]?.period_start).toBe('2026-04-12T00:00:00Z')
     expect(result.metrics[0]?.value).toBe(0.77)
-    expect(getTrendHandler).toHaveBeenCalledTimes(1)
   })
 
   it('exposes a discriminated MetricValue type', () => {
@@ -231,5 +251,15 @@ describe('MetricsResource', () => {
     const value: MetricValueResponse = METRIC_VARIANT_FIXTURES.numerical
 
     expect(value.metric_type).toBe('numerical')
+    expect(value.value).toBe(0.87)
+    expect(value.unit).toBe('score')
+  })
+
+  it('exhaustively handles generated MetricValue variants', () => {
+    expect(METRIC_LIST_FIXTURE.metrics.map(expectExhaustiveMetricValue)).toEqual([
+      0.87,
+      'positive',
+      true,
+    ])
   })
 })

@@ -461,13 +461,14 @@ export type {
   MetricCatalogResponse,
   MetricListResponse,
   MetricValue,
-  MetricValueResponse,
   NumericalMetricValue,
   CategoricalMetricValue,
   BooleanMetricValue,
   MetricValuesParams,
   MetricTrendParams,
 } from './resources/metrics.js'
+/** @deprecated Use `MetricValue` instead. */
+export type { MetricValueResponse } from './resources/metrics.js'
 
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'
