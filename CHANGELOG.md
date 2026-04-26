@@ -7,7 +7,15 @@
 - Metric values now use the exported `MetricValue` discriminated union
   (`numerical`, `categorical`, or `boolean`) generated from the platform
   OpenAPI schema. The previous generated `MetricValueResponse` schema has been
-  replaced by value-type-specific schemas.
+  replaced by value-type-specific schemas. A deprecated top-level
+  `MetricValueResponse` compatibility alias remains available from the SDK
+  entrypoint.
+
+```ts
+if (metric.metric_type === 'numerical') {
+  const value: number | null = metric.value
+}
+```
 
 ### Features
 

@@ -461,6 +461,7 @@ export type {
   MetricCatalogResponse,
   MetricListResponse,
   MetricValue,
+  MetricValueResponse,
   NumericalMetricValue,
   CategoricalMetricValue,
   BooleanMetricValue,

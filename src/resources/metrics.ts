@@ -5,6 +5,8 @@ export type MetricCatalogEntry = components['schemas']['MetricCatalogEntry']
 export type MetricCatalogResponse = components['schemas']['MetricCatalogResponse']
 export type MetricListResponse = components['schemas']['MetricListResponse']
 export type MetricValue = MetricListResponse['metrics'][number]
+/** @deprecated Use `MetricValue` instead. */
+export type MetricValueResponse = MetricValue
 export type NumericalMetricValue = components['schemas']['NumericalMetricValueResponse']
 export type CategoricalMetricValue = components['schemas']['CategoricalMetricValueResponse']
 export type BooleanMetricValue = components['schemas']['BooleanMetricValueResponse']
