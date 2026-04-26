@@ -6394,6 +6394,29 @@
             "title": "As Of",
             "type": "string"
           },
+          "read_model_status": {
+            "description": "ready = Lakebase projection returned rows; empty = no summary rows; unavailable = read failed.",
+            "enum": [
+              "ready",
+              "empty",
+              "unavailable"
+            ],
+            "title": "Read Model Status",
+            "type": "string"
+          },
+          "read_model_synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Most recent platform.connector_health_summary synced_at value in this response.",
+            "title": "Read Model Synced At"
+          },
           "sources": {
             "items": {
               "$ref": "#/components/schemas/ConnectorHealthItem"
@@ -6404,7 +6427,8 @@
           }
         },
         "required": [
-          "as_of"
+          "as_of",
+          "read_model_status"
         ],
         "title": "ConnectorHealthResponse",
         "type": "object"
@@ -8195,7 +8219,7 @@
             "title": "Phone From"
           },
           "phone_to": {
-            "description": "Destination phone number in E.164 format (e.g. +18005551234)",
+            "description": "Destination phone number in E.164 format.",
             "maxLength": 16,
             "title": "Phone To",
             "type": "string"
@@ -26809,6 +26833,28 @@
             ],
             "title": "Entity Resolution"
           },
+          "event_read_model_status": {
+            "default": "empty",
+            "enum": [
+              "ready",
+              "empty",
+              "unavailable"
+            ],
+            "title": "Event Read Model Status",
+            "type": "string"
+          },
+          "event_read_model_synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Read Model Synced At"
+          },
           "gap_scanner": {
             "anyOf": [
               {
@@ -41982,6 +42028,75 @@
             "$ref": "#/components/schemas/OperatorWrapUpEvent"
           }
         ]
+      },
+      "WorldDashboardResponse": {
+        "properties": {
+          "avg_confidence": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Avg Confidence"
+          },
+          "entity_counts": {
+            "$ref": "#/components/schemas/EntityStatsSummary"
+          },
+          "event_read_model_status": {
+            "default": "empty",
+            "description": "ready = Lakebase projection returned a row; empty = no summary row; unavailable = read failed.",
+            "enum": [
+              "ready",
+              "empty",
+              "unavailable"
+            ],
+            "title": "Event Read Model Status",
+            "type": "string"
+          },
+          "event_read_model_synced_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "platform.event_velocity_summary synced_at for this workspace.",
+            "title": "Event Read Model Synced At"
+          },
+          "events_24h": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Events 24H",
+            "type": "integer"
+          },
+          "events_7d": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Events 7D",
+            "type": "integer"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceBreakdownItem"
+            },
+            "maxItems": 500,
+            "title": "Sources",
+            "type": "array"
+          }
+        },
+        "required": [
+          "entity_counts"
+        ],
+        "title": "WorldDashboardResponse",
+        "type": "object"
       },
       "WrapUpRequest": {
         "description": "Request to record operator intervention wrap-up.",
@@ -66451,9 +66566,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response World-Dashboard",
-                  "type": "object"
+                  "$ref": "#/components/schemas/WorldDashboardResponse"
                 }
               }
             },

@@ -10351,6 +10351,17 @@ export interface components {
              * @description Server clock at query time (UTC).
              */
             as_of: string;
+            /**
+             * Read Model Status
+             * @description ready = Lakebase projection returned rows; empty = no summary rows; unavailable = read failed.
+             * @enum {string}
+             */
+            read_model_status: "ready" | "empty" | "unavailable";
+            /**
+             * Read Model Synced At
+             * @description Most recent platform.connector_health_summary synced_at value in this response.
+             */
+            read_model_synced_at?: string | null;
             /** Sources */
             sources?: components["schemas"]["ConnectorHealthItem"][];
         };
@@ -11044,7 +11055,7 @@ export interface components {
             phone_from?: string | null;
             /**
              * Phone To
-             * @description Destination phone number in E.164 format (e.g. +18005551234)
+             * @description Destination phone number in E.164 format.
              */
             phone_to: string;
             /**
@@ -18372,6 +18383,14 @@ export interface components {
             entity_resolution?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Event Read Model Status
+             * @default empty
+             * @enum {string}
+             */
+            event_read_model_status?: "ready" | "empty" | "unavailable";
+            /** Event Read Model Synced At */
+            event_read_model_synced_at?: string | null;
             /** Gap Scanner */
             gap_scanner?: {
                 [key: string]: unknown;
@@ -24191,6 +24210,36 @@ export interface components {
             updated_at: string;
         };
         WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
+        /** WorldDashboardResponse */
+        WorldDashboardResponse: {
+            /** Avg Confidence */
+            avg_confidence?: number | null;
+            entity_counts: components["schemas"]["EntityStatsSummary"];
+            /**
+             * Event Read Model Status
+             * @description ready = Lakebase projection returned a row; empty = no summary row; unavailable = read failed.
+             * @default empty
+             * @enum {string}
+             */
+            event_read_model_status?: "ready" | "empty" | "unavailable";
+            /**
+             * Event Read Model Synced At
+             * @description platform.event_velocity_summary synced_at for this workspace.
+             */
+            event_read_model_synced_at?: string | null;
+            /**
+             * Events 24H
+             * @default 0
+             */
+            events_24h?: number;
+            /**
+             * Events 7D
+             * @default 0
+             */
+            events_7d?: number;
+            /** Sources */
+            sources?: components["schemas"]["SourceBreakdownItem"][];
+        };
         /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.
@@ -41741,9 +41790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["WorldDashboardResponse"];
                 };
             };
         };
