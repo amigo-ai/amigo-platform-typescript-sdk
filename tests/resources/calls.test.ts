@@ -16,7 +16,7 @@ const CALL_FIXTURE = {
   status: 'completed',
   from_number: '+14155551234',
   to_number: '+14155555678',
-  duration_seconds: 342,
+  call_duration_seconds: 342,
   started_at: '2026-01-15T10:30:00Z',
   ended_at: '2026-01-15T10:35:42Z',
   created_at: '2026-01-15T10:30:00Z',
@@ -124,7 +124,7 @@ describe('CallsResource', () => {
     const result = await client.calls.get(CALL_ID)
     expect(result.id).toBe(CALL_ID)
     expect(result.turns).toHaveLength(2)
-    expect(result.duration_seconds).toBe(342)
+    expect(result.call_duration_seconds).toBe(342)
   })
 
   it('throws NotFoundError for missing call', async () => {
