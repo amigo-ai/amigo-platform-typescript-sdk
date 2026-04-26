@@ -17,6 +17,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "archive-surface",
   "archive-workspace",
   "attach-billing-workspace",
+  "bind-channel-phone",
   "book-surface-appointment",
   "check-environment-conversion",
   "clear-phone-number-forwarding",
