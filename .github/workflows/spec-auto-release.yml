@@ -1,0 +1,109 @@
+name: Spec Auto Release
+
+on:
+  workflow_run:
+    workflows: ['Test']
+    types: [completed]
+    branches: [main]
+
+permissions:
+  actions: write
+  contents: read
+
+env:
+  RELEASE_VERSION_TYPE: minor
+
+concurrency:
+  group: spec-auto-release
+  cancel-in-progress: false
+
+jobs:
+  dispatch-release:
+    name: Dispatch release after synced spec passes CI
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 2
+
+      - name: Detect synced Platform API spec commit
+        id: detect
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          SUBJECT=$(git log -1 --pretty=%s)
+          CHANGED_FILES=$(gh api "repos/${GITHUB_REPOSITORY}/commits/${{ github.event.workflow_run.head_sha }}" --jq '.files[].filename')
+
+          if ! printf '%s\n' "$SUBJECT" | grep -Eq '^chore: sync API types from platform'; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Latest commit is not a platform spec sync: ${SUBJECT}"
+            exit 0
+          fi
+
+          if ! printf '%s\n' "$CHANGED_FILES" | grep -qx 'openapi.json'; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Spec sync commit did not change openapi.json."
+            exit 0
+          fi
+
+          if ! printf '%s\n' "$CHANGED_FILES" | grep -qx 'src/generated/api.ts'; then
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Spec sync commit did not change src/generated/api.ts."
+            exit 0
+          fi
+
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+
+      - name: Check release dispatch idempotency
+        id: release
+        if: steps.detect.outputs.should_release == 'true'
+        run: |
+          git fetch --depth=1 origin main:refs/remotes/origin/main
+          TESTED_SHA="${{ github.event.workflow_run.head_sha }}"
+          MAIN_SHA=$(git rev-parse origin/main)
+          if [ "$MAIN_SHA" != "$TESTED_SHA" ]; then
+            echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+            echo "Main moved from tested commit ${TESTED_SHA} to ${MAIN_SHA}; skipping release dispatch for the stale workflow run."
+            exit 0
+          fi
+
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          NEXT_VERSION=$(node -e 'const [version, type] = process.argv.slice(1); const parts = version.split(".").map(Number); if (parts.length !== 3 || parts.some(Number.isNaN)) throw new Error(`Invalid semver: ${version}`); const [major, minor, patch] = parts; const next = { patch: [major, minor, patch + 1], minor: [major, minor + 1, 0], major: [major + 1, 0, 0] }[type]; if (!next) throw new Error(`Unsupported version type: ${type}`); console.log(next.join("."));' "$CURRENT_VERSION" "$RELEASE_VERSION_TYPE")
+          RELEASE_TAG="v${NEXT_VERSION}"
+
+          if git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "should_dispatch=false" >> "$GITHUB_OUTPUT"
+            echo "Release tag ${RELEASE_TAG} already exists; skipping duplicate release dispatch."
+            exit 0
+          fi
+
+          echo "should_dispatch=true" >> "$GITHUB_OUTPUT"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch minor release
+        if: steps.release.outputs.should_dispatch == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # release.yml independently revalidates the target version and tag,
+          # so a concurrent main update is caught before release metadata is created.
+          gh workflow run release.yml \
+            --ref main \
+            -f version_type="$RELEASE_VERSION_TYPE" \
+            -f dry_run=false
+
+      - name: Summary
+        run: |
+          echo "## Spec Auto Release" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Tested commit: ${{ github.event.workflow_run.head_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release dispatched: ${{ steps.release.outputs.should_dispatch == 'true' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Release tag: ${{ steps.release.outputs.tag || '(not applicable)' }}" >> "$GITHUB_STEP_SUMMARY"

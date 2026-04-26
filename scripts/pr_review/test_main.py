@@ -39,6 +39,23 @@ class FormatErrorTests(unittest.TestCase):
         self.assertTrue(formatted.endswith("..."))
 
 
+class AgentPromptTests(unittest.TestCase):
+    def test_load_agent_prompt_appends_accuracy_contract(self) -> None:
+        prompt = PR_REVIEW.load_agent_system_prompt("code-reviewer")
+
+        self.assertIn("Produce an unsparing", prompt)
+        self.assertIn("## Review accuracy contract", prompt)
+        self.assertIn("If the code is correct", prompt)
+        self.assertIn("A trailing comment such as `# v4.9.0`", prompt)
+        self.assertIn("Do not ask authors to add comments inside JSON files", prompt)
+        self.assertIn("Treat newly added files in the cumulative PR diff", prompt)
+        self.assertIn("published `.d.ts` files import the package", prompt)
+        self.assertIn("inspect author filters", prompt)
+        self.assertIn("inspect `src/index.ts` public exports", prompt)
+        self.assertIn("tag exists and points at the pinned SHA", prompt)
+        self.assertIn("`^0.1.0` is capped", prompt)
+
+
 class CommentLookupTests(unittest.TestCase):
     @patch.object(PR_REVIEW.subprocess, "check_output")
     def test_find_prior_review_comments_sorts_and_deduplicates(self, check_output) -> None:

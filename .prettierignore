@@ -1,0 +1,6 @@
+coverage/
+dist/
+node_modules/
+
+openapi.json
+src/generated/api.ts

@@ -17,7 +17,8 @@
  * ```
  */
 
-import type { ClientPathsWithMethod, HeadersOptions, MethodResponse } from 'openapi-fetch'
+import type { FetchResponse, HeadersOptions } from 'openapi-fetch'
+import type { MediaType, PathsWithMethod } from 'openapi-typescript-helpers'
 import { ConfigurationError } from './core/errors.js'
 import {
   applyPlatformRequestOptions,
@@ -67,6 +68,35 @@ import { withResponse, type AmigoResponse } from './core/utils.js'
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
 
 type Mutable<T> = { -readonly [K in keyof T]: T[K] }
+// The generated client exposes TRACE, but the SDK only publishes helpers for
+// platform methods that exist in the committed OpenAPI snapshot.
+type PlatformMethod = 'get' | 'put' | 'post' | 'delete' | 'options' | 'head' | 'patch'
+type EmptyOptions = Record<never, never>
+type PathForMethod<Method extends PlatformMethod> = Extract<PathsWithMethod<paths, Method>, string>
+type SuccessData<Operation extends Record<string | number, unknown>> = Extract<
+  FetchResponse<Operation, EmptyOptions, MediaType>,
+  { error?: never }
+>['data']
+type IsNever<Value> = [Value] extends [never] ? true : false
+type DefinedSuccessData<Operation extends Record<string | number, unknown>> = Exclude<
+  SuccessData<Operation>,
+  undefined
+>
+// Success data preserves nullable response bodies. Endpoints with no success
+// body resolve to undefined so low-level helpers can represent 204/205 results.
+type OperationResponse<
+  Path extends keyof paths & string,
+  Method extends PlatformMethod,
+> = Method extends keyof paths[Path]
+  ? paths[Path][Method] extends infer Operation extends Record<string | number, unknown>
+    ? IsNever<SuccessData<Operation>> extends true
+      ? never
+      : // Preserve nullable success bodies; only no-content operations collapse to undefined.
+        [DefinedSuccessData<Operation>] extends [never]
+        ? undefined
+        : DefinedSuccessData<Operation>
+    : never
+  : never
 
 export interface AmigoClientConfig {
   /** API key created via POST /v1/{workspace_id}/api-keys */
@@ -176,67 +206,67 @@ export class AmigoClient {
     )
   }
 
-  async GET<Path extends ClientPathsWithMethod<typeof this.api, 'get'>>(
+  async GET<Path extends PathForMethod<'get'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'get'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'get', Path>>> {
+  ): Promise<AmigoResponse<OperationResponse<Path, 'get'>>> {
     return withResponse(await this.resolveApiRequest(path, 'GET', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'get', Path>
+      OperationResponse<Path, 'get'>
     >
   }
 
-  async POST<Path extends ClientPathsWithMethod<typeof this.api, 'post'>>(
+  async POST<Path extends PathForMethod<'post'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'post'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'post', Path>>> {
+  ): Promise<AmigoResponse<OperationResponse<Path, 'post'>>> {
     return withResponse(await this.resolveApiRequest(path, 'POST', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'post', Path>
+      OperationResponse<Path, 'post'>
     >
   }
 
-  async PUT<Path extends ClientPathsWithMethod<typeof this.api, 'put'>>(
+  async PUT<Path extends PathForMethod<'put'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'put'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'put', Path>>> {
+  ): Promise<AmigoResponse<OperationResponse<Path, 'put'>>> {
     return withResponse(await this.resolveApiRequest(path, 'PUT', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'put', Path>
+      OperationResponse<Path, 'put'>
     >
   }
 
-  async PATCH<Path extends ClientPathsWithMethod<typeof this.api, 'patch'>>(
+  async PATCH<Path extends PathForMethod<'patch'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'patch'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'patch', Path>>> {
+  ): Promise<AmigoResponse<OperationResponse<Path, 'patch'>>> {
     return withResponse(await this.resolveApiRequest(path, 'PATCH', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'patch', Path>
+      OperationResponse<Path, 'patch'>
     >
   }
 
-  async DELETE<Path extends ClientPathsWithMethod<typeof this.api, 'delete'>>(
+  async DELETE<Path extends PathForMethod<'delete'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'delete'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'delete', Path>>> {
+  ): Promise<AmigoResponse<OperationResponse<Path, 'delete'>>> {
     return withResponse(await this.resolveApiRequest(path, 'DELETE', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'delete', Path>
+      OperationResponse<Path, 'delete'>
     >
   }
 
-  async HEAD<Path extends ClientPathsWithMethod<typeof this.api, 'head'>>(
+  async HEAD<Path extends PathForMethod<'head'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'head'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'head', Path>>> {
-    return withResponse(await this.resolveApiRequest(path, 'HEAD', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'head', Path>
-    >
+  ): Promise<AmigoResponse<OperationResponse<Path, 'head'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'HEAD', init), {
+      allowEmptyBody: true,
+    }) as AmigoResponse<OperationResponse<Path, 'head'>>
   }
 
-  async OPTIONS<Path extends ClientPathsWithMethod<typeof this.api, 'options'>>(
+  async OPTIONS<Path extends PathForMethod<'options'>>(
     path: Path,
     ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'options'>>>
-  ): Promise<AmigoResponse<MethodResponse<typeof this.api, 'options', Path>>> {
-    return withResponse(await this.resolveApiRequest(path, 'OPTIONS', init)) as AmigoResponse<
-      MethodResponse<typeof this.api, 'options', Path>
-    >
+  ): Promise<AmigoResponse<OperationResponse<Path, 'options'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'OPTIONS', init), {
+      allowEmptyBody: true,
+    }) as AmigoResponse<OperationResponse<Path, 'options'>>
   }
 
   private static fromPlatformClient(

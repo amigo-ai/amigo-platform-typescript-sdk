@@ -42,6 +42,13 @@ You review source and public API changes.
 
 - Flag as **CONCERN** if package metadata, exports, or dependency changes risk
   ESM/CJS or Node LTS compatibility.
+- Do **not** flag a type-only package as unnecessary runtime dependency when
+  the published `.d.ts` files import it directly; direct declaration imports
+  must remain resolvable for consumers and should not rely on a transitive
+  dependency being hoisted.
+- Do **not** flag relative `.js` specifiers in generated declaration files as
+  broken CJS declarations when the packed tarball's CJS TypeScript fixture runs
+  `moduleResolution: NodeNext` with `skipLibCheck: false`.
 
 ## Output
 

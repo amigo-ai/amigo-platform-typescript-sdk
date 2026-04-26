@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { AmigoClient, ConfigurationError, RequestTimeoutError } from '../../src/index.js'
+import { withResponse } from '../../src/core/utils.js'
 import { TEST_API_KEY, fixtures } from '../test-helpers.js'
 
 describe('AmigoClient configuration', () => {
@@ -108,6 +109,68 @@ describe('AmigoClient configuration', () => {
     expect(result.requestId).toBe('req_low_level')
     expect(result.data._request_id).toBe('req_low_level')
     expect(result.data.items).toHaveLength(1)
+  })
+
+  it('supports low-level no-content success responses', async () => {
+    const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
+      const request = input instanceof Request ? input : new Request(input, init)
+      expect(request.method).toBe('DELETE')
+      expect(request.url).toBe('https://api.example.com/v1/ws-001/agents/agent-123')
+
+      return new Response(null, {
+        status: 204,
+        headers: { 'x-request-id': 'req_delete_123' },
+      })
+    })
+
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: 'ws-001',
+      baseUrl: 'https://api.example.com',
+      fetch: mockFetch as typeof fetch,
+    })
+
+    const result = await client.DELETE('/v1/{workspace_id}/agents/{agent_id}', {
+      params: { path: { agent_id: 'agent-123' } },
+    })
+
+    expect(result.data).toBeUndefined()
+    expect((result as { error?: unknown }).error).toBeUndefined()
+    expect(result.response.status).toBe(204)
+    expect(result.requestId).toBe('req_delete_123')
+  })
+
+  it('keeps data-first precedence when an openapi response contains data and error', () => {
+    const result = withResponse({
+      data: { ok: true },
+      error: { detail: 'conflicting response' },
+      response: Response.json({ ok: true }),
+    })
+
+    expect(result.data).toMatchObject({ ok: true })
+  })
+
+  it('allows explicitly empty successful responses', () => {
+    const result = withResponse(
+      {
+        data: undefined,
+        response: new Response(null, { status: 200 }),
+      },
+      { allowEmptyBody: true },
+    )
+
+    expect(result.data).toBeUndefined()
+  })
+
+  it('allows no-content responses even if an upstream parser reports an error', () => {
+    const result = withResponse({
+      data: undefined,
+      error: { detail: 'empty body' },
+      response: new Response(null, { status: 204 }),
+    })
+
+    expect(result.data).toBeUndefined()
+    expect((result as { error?: unknown }).error).toBeUndefined()
   })
 
   it('uses the configured workspaceId when workspace path params are provided manually', async () => {
