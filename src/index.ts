@@ -64,6 +64,7 @@ import { ComplianceResource } from './resources/compliance.js'
 import { FunctionsResource } from './resources/functions.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { paths } from './generated/api.js'
+import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
 import { withResponse, type AmigoResponse } from './core/utils.js'
 
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
@@ -468,7 +469,7 @@ export type {
   MetricTrendParams,
 } from './resources/metrics.js'
 /** @deprecated Use `MetricValue` instead. */
-export type { MetricValueResponse } from './resources/metrics.js'
+export type MetricValueResponse = MetricValueAlias
 
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'

@@ -71,36 +71,36 @@ const METRIC_CATALOG_FIXTURE: MetricCatalogResponse = {
   ],
 }
 
+const METRIC_HISTORY_VALUE = {
+  metric_key: 'voice_quality_score',
+  metric_type: 'numerical',
+  period_start: '2026-04-24T00:00:00Z',
+  period_end: '2026-04-25T00:00:00Z',
+  value: 0.91,
+  event_count: 30,
+  avg_confidence: 0.94,
+  unit: 'score',
+  computed_at: '2026-04-25T12:00:00Z',
+} satisfies NumericalMetricValue
+
 const METRIC_VALUES_FIXTURE: MetricListResponse = {
-  metrics: [
-    {
-      metric_key: 'voice_quality_score',
-      metric_type: 'numerical',
-      period_start: '2026-04-24T00:00:00Z',
-      period_end: '2026-04-25T00:00:00Z',
-      value: 0.91,
-      event_count: 30,
-      avg_confidence: 0.94,
-      unit: 'score',
-      computed_at: '2026-04-25T12:00:00Z',
-    },
-  ],
+  metrics: [METRIC_HISTORY_VALUE],
 }
 
+const METRIC_TREND_VALUE = {
+  metric_key: 'voice_quality_score',
+  metric_type: 'numerical',
+  period_start: '2026-04-12T00:00:00Z',
+  period_end: '2026-04-13T00:00:00Z',
+  value: 0.77,
+  event_count: 14,
+  avg_confidence: 0.88,
+  unit: 'score',
+  computed_at: '2026-04-13T12:00:00Z',
+} satisfies NumericalMetricValue
+
 const METRIC_TREND_FIXTURE: MetricListResponse = {
-  metrics: [
-    {
-      metric_key: 'voice_quality_score',
-      metric_type: 'numerical',
-      period_start: '2026-04-12T00:00:00Z',
-      period_end: '2026-04-13T00:00:00Z',
-      value: 0.77,
-      event_count: 14,
-      avg_confidence: 0.88,
-      unit: 'score',
-      computed_at: '2026-04-13T12:00:00Z',
-    },
-  ],
+  metrics: [METRIC_TREND_VALUE],
 }
 
 const METRIC_VARIANT_FIXTURES = {
@@ -201,7 +201,6 @@ describe('MetricsResource', () => {
       limit: 30,
     })
     const request = getValuesHandler.mock.calls[0]?.[0]
-    const metric = result.metrics[0]
 
     expect(getValuesHandler).toHaveBeenCalledTimes(1)
     expect(request).toBeDefined()
@@ -211,10 +210,13 @@ describe('MetricsResource', () => {
     expect(searchParams.get('date_from')).toBe('2026-04-01T00:00:00Z')
     expect(searchParams.get('date_to')).toBe('2026-04-26T00:00:00Z')
     expect(searchParams.get('limit')).toBe('30')
-    expect(metric?.metric_key).toBe('voice_quality_score')
-    expect(metric?.event_count).toBe(30)
-    expect(metric?.metric_type).toBe('numerical')
-    if (metric?.metric_type === 'numerical') {
+    expect([...searchParams.keys()].sort()).toEqual(['date_from', 'date_to', 'limit'])
+    expect(result.metrics).toHaveLength(1)
+    const metric = result.metrics[0]!
+    expect(metric.metric_key).toBe('voice_quality_score')
+    expect(metric.event_count).toBe(30)
+    expect(metric.metric_type).toBe('numerical')
+    if (metric.metric_type === 'numerical') {
       const value: number | null = metric.value
       expect(value).toBe(0.91)
     }
@@ -230,9 +232,12 @@ describe('MetricsResource', () => {
 
     const searchParams = new URL(request.url).searchParams
     expect(searchParams.get('days')).toBe('14')
-    expect(result.metrics[0]?.metric_key).toBe('voice_quality_score')
-    expect(result.metrics[0]?.period_start).toBe('2026-04-12T00:00:00Z')
-    expect(result.metrics[0]?.value).toBe(0.77)
+    expect([...searchParams.keys()]).toEqual(['days'])
+    expect(result.metrics).toHaveLength(1)
+    const metric = result.metrics[0]!
+    expect(metric.metric_key).toBe('voice_quality_score')
+    expect(metric.period_start).toBe('2026-04-12T00:00:00Z')
+    expect(metric.value).toBe(0.77)
   })
 
   it('exposes a discriminated MetricValue type', () => {
