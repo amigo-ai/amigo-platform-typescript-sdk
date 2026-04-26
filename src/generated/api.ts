@@ -27967,6 +27967,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Channel manager phone selection timed out */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "get-phone-call-volume": {
