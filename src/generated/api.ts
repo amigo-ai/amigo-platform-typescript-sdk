@@ -83,7 +83,7 @@ export interface paths {
          * Get Availability
          * @description Return available appointment slots for the surface's workspace.
          *
-         *     Queries FHIR Slot resources from world.events that are free and
+         *     Queries FHIR Slot resources from world.entities that are free and
          *     within the requested date range. Token-authenticated, no Bearer auth.
          */
         get: operations["get-surface-availability"];
@@ -1573,7 +1573,7 @@ export interface paths {
         put?: never;
         /**
          * Create an outbound call
-         * @description Initiate an outbound voice call from a workspace phone number. The phone_from number must be registered in this workspace. Supports idempotency via the idempotency_key field.
+         * @description Initiate an outbound voice call from a workspace phone number. Provide either phone_from (direct caller ID) or use_case_id (channel-manager selects the optimal number). Supports idempotency via the idempotency_key field.
          */
         post: operations["create-outbound-call"];
         delete?: never;
@@ -4452,6 +4452,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/phone-numbers/bind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bind a channel-manager phone number
+         * @description Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and creates the binding with sub_account_sid for credential resolution. Requires PhoneNumber.create permission.
+         */
+        post: operations["bind-channel-phone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/phone-numbers/{phone_number_id}": {
         parameters: {
             query?: never;
@@ -6944,7 +6964,7 @@ export interface paths {
         };
         /**
          * List Trigger Runs
-         * @description Execution history — query world.events for this trigger's lifecycle events.
+         * @description Execution history — query Delta world_events for this trigger's lifecycle events.
          */
         get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
         put?: never;
@@ -7153,10 +7173,10 @@ export interface paths {
          * Get Voiceprint Status
          * @description Check voiceprint enrollment status for any entity.
          *
-         *     Queries world.events directly for the latest voiceprint.enrolled event.
+         *     Queries world.entities for voiceprint enrollment status.
          *     This works for both world entities (patients/practitioners) and identity
-         *     entities (developer console users) — the event table is the source of
-         *     truth for enrollment, not the entity state projection.
+         *     entities (developer console users) — the entity state projection is the
+         *     read surface (world.events table has been dropped).
          *
          *     Permissions: authenticated (any role).
          */
@@ -7215,7 +7235,7 @@ export interface paths {
         };
         /**
          * List Deliveries
-         * @description Delivery history — query world.events for this destination's webhook receives.
+         * @description Delivery history — query Delta world_events for this destination's webhook receives.
          */
         get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
         put?: never;
@@ -8520,6 +8540,18 @@ export interface components {
             /** S3 Key */
             s3_key: string;
         };
+        /** AuditSummary */
+        AuditSummary: {
+            /**
+             * Event Count
+             * @default 0
+             */
+            event_count?: number;
+            /** Latest Event */
+            latest_event?: {
+                [key: string]: unknown;
+            } | null;
+        };
         /** AuditSummaryResponse */
         AuditSummaryResponse: {
             /** Phi Access Events */
@@ -8878,6 +8910,48 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * BindChannelPhoneRequest
+         * @description Bind a channel-manager-provisioned phone number to this workspace.
+         */
+        BindChannelPhoneRequest: {
+            /**
+             * Capabilities
+             * @default [
+             *       "inbound",
+             *       "outbound"
+             *     ]
+             */
+            capabilities?: string[];
+            /**
+             * Channel Phone Id
+             * Format: uuid
+             * @description Phone number ID from channel-manager
+             */
+            channel_phone_id: string;
+            /**
+             * Display Name
+             * @default
+             */
+            display_name?: string;
+            forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
+            /**
+             * Inbound Service Id
+             * @description Voice agent service ID for inbound call routing
+             */
+            inbound_service_id?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes?: string;
+            /**
+             * Setup Id
+             * Format: uuid
+             * @description Channel-manager Twilio setup ID that owns the phone number
+             */
+            setup_id: string;
+        };
         /** Body_enroll-voiceprint */
         "Body_enroll-voiceprint": {
             /** Audio */
@@ -9104,6 +9178,141 @@ export interface components {
             content: string;
             /** Title */
             title: string;
+        };
+        /**
+         * CallDetailResponse
+         * @description Full call detail — the canonical response for GET /calls/{call_id}.
+         *
+         *     This is the single source of truth for the call detail shape. The OpenAPI
+         *     spec is generated from this model. The SDK TypeScript types are generated
+         *     from the spec. The developer-console consumes SDK types directly.
+         */
+        CallDetailResponse: {
+            audit?: components["schemas"]["AuditSummary"] | null;
+            /**
+             * Barge In Events
+             * @default []
+             */
+            barge_in_events?: components["schemas"]["BargeInEvent"][];
+            /** Call Analysis */
+            call_analysis?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Call Duration Seconds
+             * @default 0
+             */
+            call_duration_seconds?: number;
+            /** Call End Time */
+            call_end_time?: string | null;
+            /** Call Sid */
+            call_sid?: string | null;
+            /** Call Start Time */
+            call_start_time?: string | null;
+            /** Caller Id */
+            caller_id?: string | null;
+            /** Completion Reason */
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
+            /** Conference Sid */
+            conference_sid?: string | null;
+            config?: components["schemas"]["ConversationConfig"] | null;
+            /** Conversation Summary */
+            conversation_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Direction */
+            direction?: ("inbound" | "outbound" | "playground" | "simulated" | "test") | null;
+            emotional_summary?: components["schemas"]["EmotionalSummary"] | null;
+            /** Error */
+            error?: string | null;
+            escalation?: components["schemas"]["EscalationState"] | null;
+            /** Final State */
+            final_state?: string | null;
+            /** Fork Turn Index */
+            fork_turn_index?: number | null;
+            forwarding?: components["schemas"]["ForwardingDetails"] | null;
+            /**
+             * Has Recording
+             * @default false
+             */
+            has_recording?: boolean;
+            /**
+             * Human Segments
+             * @default []
+             */
+            human_segments?: components["schemas"]["HumanSegment"][];
+            /** Id */
+            id: string;
+            /** Media Start Time */
+            media_start_time?: string | null;
+            /** Parent Session Id */
+            parent_session_id?: string | null;
+            /**
+             * Participants
+             * @default []
+             */
+            participants?: components["schemas"]["Participant"][];
+            /** Per Turn Accuracy */
+            per_turn_accuracy?: (number | null)[] | null;
+            /** Phone Number */
+            phone_number?: string | null;
+            /** Quality Score */
+            quality_score?: number | null;
+            /** Recording Path */
+            recording_path?: string | null;
+            /** Run Id */
+            run_id?: string | null;
+            safety?: components["schemas"]["SafetyState"] | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Score */
+            score?: number | null;
+            /** Score Rationale */
+            score_rationale?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Source */
+            source?: string | null;
+            /**
+             * States Visited
+             * @default []
+             */
+            states_visited?: string[];
+            /**
+             * Status
+             * @default completed
+             */
+            status?: string;
+            timeline?: components["schemas"]["PlaybackTimeline"] | null;
+            /** Transcript Accuracy */
+            transcript_accuracy?: number | null;
+            /**
+             * Triggered Behaviors
+             * @default []
+             */
+            triggered_behaviors?: string[];
+            /**
+             * Turns
+             * @default []
+             */
+            turns?: components["schemas"]["Turn"][];
+            /** Twilio Recording Duration */
+            twilio_recording_duration?: number | null;
+            /** Twilio Recording Sid */
+            twilio_recording_sid?: string | null;
+            /** Verified Transcript */
+            verified_transcript?: string | null;
+            /** Verified Words */
+            verified_words?: {
+                [key: string]: unknown;
+            }[] | null;
+            /**
+             * Workspace Id
+             * @default
+             */
+            workspace_id?: string;
         };
         /** CallEndedEvent */
         CallEndedEvent: {
@@ -9884,6 +10093,21 @@ export interface components {
              */
             type: "compound_emotion";
         };
+        /** ConceptMatch */
+        ConceptMatch: {
+            /** Agent Action */
+            agent_action?: string | null;
+            /** Agent Confidence */
+            agent_confidence?: number | null;
+            /** Agent Reasoning */
+            agent_reasoning?: string | null;
+            /** At */
+            at?: string | null;
+            /** Concept */
+            concept: string;
+            /** Similarity */
+            similarity: number;
+        };
         /** ConfidenceBucket */
         ConfidenceBucket: {
             /**
@@ -9975,7 +10199,7 @@ export interface components {
             last_ingested_at: string | null;
             /**
              * Source
-             * @description Operator-defined source identifier as written to world.events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.
+             * @description Operator-defined source identifier as written to Delta world_events.source (e.g. 'charm', 'careclinic', 'hazel'). Enum-like; never user input.
              */
             source: string;
         };
@@ -10208,6 +10432,25 @@ export interface components {
             version: number;
             /** Workspace Id */
             workspace_id: string;
+        };
+        /** ConversationConfig */
+        ConversationConfig: {
+            /** Agent Id */
+            agent_id?: string | null;
+            /** Agent Name */
+            agent_name?: string | null;
+            /** Agent Version */
+            agent_version?: number | null;
+            /** Context Graph Id */
+            context_graph_id?: string | null;
+            /** Context Graph Version */
+            context_graph_version?: number | null;
+            /** Gpt Audio Model */
+            gpt_audio_model?: string | null;
+            /** Initial State */
+            initial_state?: string | null;
+            /** Navigation Model */
+            navigation_model?: string | null;
         };
         /**
          * ConversationSummary
@@ -10638,6 +10881,10 @@ export interface components {
         /**
          * CreateOutboundCallRequest
          * @description Request body for creating an outbound call.
+         *
+         *     Exactly one of ``phone_from`` or ``use_case_id`` is required.
+         *     When ``use_case_id`` is provided, channel-manager selects the optimal
+         *     outbound phone number for that use case.
          */
         CreateOutboundCallRequest: {
             /**
@@ -10654,7 +10901,7 @@ export interface components {
              * Phone From
              * @description Caller ID phone number in E.164 format. Must belong to this workspace.
              */
-            phone_from: string;
+            phone_from?: string | null;
             /**
              * Phone To
              * @description Destination phone number in E.164 format (e.g. +18005551234)
@@ -10670,6 +10917,11 @@ export interface components {
              * @description Optional system prompt override for this call.
              */
             system_prompt?: string | null;
+            /**
+             * Use Case Id
+             * @description Channel-manager use case ID. When provided, channel-manager selects the optimal outbound phone number for this use case.
+             */
+            use_case_id?: string | null;
         };
         /**
          * CreateOutboundCallResponse
@@ -10681,6 +10933,16 @@ export interface components {
              * @description Twilio call SID for the outbound call
              */
             call_sid: string;
+            /**
+             * Phone From
+             * @description Resolved caller ID when use_case_id was used.
+             */
+            phone_from?: string | null;
+            /**
+             * Setup Id
+             * @description Channel-manager setup ID when use_case_id was used.
+             */
+            setup_id?: string | null;
             /**
              * Status
              * @description Initial call status (typically 'queued')
@@ -10714,6 +10976,8 @@ export interface components {
              *     ]
              */
             capabilities?: string[];
+            /** Channel Phone Id */
+            channel_phone_id?: string | null;
             /**
              * Display Name
              * @default
@@ -10743,6 +11007,8 @@ export interface components {
              * @enum {string}
              */
             status?: "active" | "inactive";
+            /** Sub Account Sid */
+            sub_account_sid?: string | null;
         };
         /** CreateRunRequest */
         CreateRunRequest: {
@@ -12006,9 +12272,8 @@ export interface components {
             /**
              * Source Type
              * @description Category of the audio input
-             * @enum {string}
              */
-            source_type: "transcript" | "tone" | "tool_result" | "emotion" | "silence" | "barge_in" | "breathing" | "speech_rate";
+            source_type: string;
         };
         /**
          * DecisionState
@@ -12606,6 +12871,27 @@ export interface components {
              * @description What caused the shift - exact words and tone
              */
             trigger?: string | null;
+        };
+        /** EmotionalSummary */
+        EmotionalSummary: {
+            /** Average Arousal */
+            average_arousal?: number | null;
+            /** Average Valence */
+            average_valence?: number | null;
+            /** Barge In Count */
+            barge_in_count?: number | null;
+            /** Dominant Emotion */
+            dominant_emotion?: string | null;
+            /** Emotional Shifts */
+            emotional_shifts?: number | null;
+            /** Final Trend */
+            final_trend?: string | null;
+            /** Peak Negative Emotion */
+            peak_negative_emotion?: string | null;
+            /** Peak Negative Valence */
+            peak_negative_valence?: number | null;
+            /** Segment Count */
+            segment_count?: number | null;
         };
         /** EmpathyClassifiedEvent */
         EmpathyClassifiedEvent: {
@@ -13418,6 +13704,51 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** EscalationState */
+        EscalationState: {
+            /** Agent Confidence */
+            agent_confidence?: number | null;
+            /** Completed At */
+            completed_at?: string | null;
+            /** Concept */
+            concept?: string | null;
+            /** Connected At */
+            connected_at?: string | null;
+            /** Escalation Id */
+            escalation_id?: string | null;
+            /** Handle Time Seconds */
+            handle_time_seconds?: number | null;
+            /** Human Segment Turn Count */
+            human_segment_turn_count?: number | null;
+            /**
+             * Immediate
+             * @default false
+             */
+            immediate?: boolean;
+            /** Operator Entity Id */
+            operator_entity_id?: string | null;
+            /** Operator Type */
+            operator_type?: string | null;
+            /** Regulatory Basis */
+            regulatory_basis?: string | null;
+            /** Requested At */
+            requested_at?: string | null;
+            /** Risk Score */
+            risk_score?: number | null;
+            /** Similarity */
+            similarity?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "none" | "requested" | "connected" | "handback" | "completed";
+            /** Trigger */
+            trigger?: string | null;
+            /** Trigger Source */
+            trigger_source?: string | null;
+            /** Wait Seconds */
+            wait_seconds?: number | null;
         };
         /** EscalationStatsBucket */
         EscalationStatsBucket: {
@@ -14419,6 +14750,20 @@ export interface components {
             /** Should Disconnect */
             should_disconnect: boolean;
         };
+        /** ForwardingDetails */
+        ForwardingDetails: {
+            /** Forward To */
+            forward_to: string;
+            /** Forwarded At */
+            forwarded_at?: string | null;
+            /** Should Disconnect */
+            should_disconnect: boolean;
+            /**
+             * Warm Transfer
+             * @default true
+             */
+            warm_transfer?: boolean;
+        };
         /**
          * FunctionCreateRequest
          * @description Register a new function. Name must be unique within the workspace.
@@ -14790,6 +15135,15 @@ export interface components {
             y0: number;
             /** Y1 */
             y1: number;
+        };
+        /** HumanSegment */
+        HumanSegment: {
+            /** Speaker Role */
+            speaker_role: string;
+            /** Timestamp */
+            timestamp?: string | null;
+            /** Transcript */
+            transcript: string;
         };
         /** Identity */
         Identity: {
@@ -16067,7 +16421,7 @@ export interface components {
             ratio_numerator_event?: string | null;
             /**
              * Source
-             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from world.events. 'surface_events' reads from world.events WHERE domain='surface'.
+             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from Delta world_events. 'surface_events' reads from Delta world_events WHERE domain='surface'.
              * @enum {string}
              */
             source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results";
@@ -17185,6 +17539,27 @@ export interface components {
              */
             rows: unknown[][];
         };
+        /** Participant */
+        Participant: {
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Joined At
+             * Format: date-time
+             */
+            joined_at: string;
+            /** Left At */
+            left_at?: string | null;
+            /** Participant Id */
+            participant_id: string;
+            /** Phone Number */
+            phone_number?: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "caller" | "agent" | "operator";
+        };
         /** ParticipantJoinedEvent */
         ParticipantJoinedEvent: {
             /** Conference Sid */
@@ -17718,6 +18093,8 @@ export interface components {
         PhoneNumberResponse: {
             /** Capabilities */
             capabilities: string[];
+            /** Channel Phone Id */
+            channel_phone_id?: string | null;
             /**
              * Created At
              * Format: date-time
@@ -17870,6 +18247,36 @@ export interface components {
              * @enum {string}
              */
             event_type: "pipeline.sync_completed";
+        };
+        /** PlaybackTimeline */
+        PlaybackTimeline: {
+            /** Avg Perceived Latency Ms */
+            avg_perceived_latency_ms?: number | null;
+            /** Avg Processing Gap Ms */
+            avg_processing_gap_ms?: number | null;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Max Processing Gap Ms */
+            max_processing_gap_ms?: number | null;
+            /** Segments */
+            segments: components["schemas"]["TimelineSegment"][];
+            /**
+             * Total Agent Speech Seconds
+             * @default 0
+             */
+            total_agent_speech_seconds?: number;
+            /**
+             * Total Silence Seconds
+             * @default 0
+             */
+            total_silence_seconds?: number;
+            /**
+             * Total User Speech Seconds
+             * @default 0
+             */
+            total_user_speech_seconds?: number;
+            /** Turns */
+            turns: components["schemas"]["TurnTimeline"][];
         };
         /** PositiveSignalResponse */
         PositiveSignalResponse: {
@@ -18853,6 +19260,33 @@ export interface components {
              * @description Hints for the triage model to identify this safety concern
              */
             triage_hints: string[];
+        };
+        /** SafetyState */
+        SafetyState: {
+            /**
+             * Concept Matches
+             * @default []
+             */
+            concept_matches?: components["schemas"]["ConceptMatch"][];
+            /**
+             * Concern Turn Count
+             * @default 0
+             */
+            concern_turn_count?: number;
+            /**
+             * Peak Concern Level
+             * @default 0
+             */
+            peak_concern_level?: number;
+            /** Trajectory */
+            trajectory?: string | null;
+            /**
+             * Triage History
+             * @default []
+             */
+            triage_history?: {
+                [key: string]: unknown;
+            }[];
         };
         /**
          * SafetySummary
@@ -20293,6 +20727,27 @@ export interface components {
              */
             topic_risk_score?: number;
         };
+        /** StateTransition */
+        StateTransition: {
+            /** Annotation */
+            annotation?: string | null;
+            /** From State */
+            readonly from_state: string;
+            /**
+             * Next State
+             * @default
+             */
+            next_state?: string;
+            /**
+             * Previous State
+             * @default
+             */
+            previous_state?: string;
+            /** To State */
+            readonly to_state: string;
+            /** Type */
+            type?: string | null;
+        };
         /** StateTransitionEvent */
         StateTransitionEvent: {
             /**
@@ -21257,6 +21712,83 @@ export interface components {
             /** Source System */
             source_system?: string | null;
         };
+        /** TimelineSegment */
+        TimelineSegment: {
+            /** Audio Ttfb Ms */
+            audio_ttfb_ms?: number | null;
+            /** Audio Window End */
+            audio_window_end?: number | null;
+            /** Audio Window Start */
+            audio_window_start?: number | null;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** E2E Ttfb Ms */
+            e2e_ttfb_ms?: number | null;
+            /** Emotion */
+            emotion?: string | null;
+            /** End */
+            end: number;
+            /** Engine Ms */
+            engine_ms?: number | null;
+            /** Eot Confidence */
+            eot_confidence?: number | null;
+            /** From State */
+            from_state?: string | null;
+            /** Label */
+            label: string;
+            /** Lane */
+            lane: string;
+            /** Nav Ms */
+            nav_ms?: number | null;
+            /** Render Ms */
+            render_ms?: number | null;
+            /** Start */
+            start: number;
+            /** State */
+            state?: string | null;
+            /** Stt Confidence */
+            stt_confidence?: number | null;
+            /** Succeeded */
+            succeeded?: boolean | null;
+            /** To State */
+            to_state?: string | null;
+            /** Tool Name */
+            tool_name?: string | null;
+            /** Turn Index */
+            turn_index: number;
+            /** Type */
+            type: string;
+            /** Valence */
+            valence?: number | null;
+        };
+        /** ToolCall */
+        ToolCall: {
+            /** Call Id */
+            call_id?: string | null;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** Endpoint Name */
+            endpoint_name?: string | null;
+            /** Error Message */
+            error_message?: string | null;
+            /** Input */
+            input?: {
+                [key: string]: unknown;
+            } | null;
+            /** Integration Name */
+            integration_name?: string | null;
+            /** Output */
+            output?: string | null;
+            /** Protocol */
+            protocol?: string | null;
+            /**
+             * Succeeded
+             * @default true
+             */
+            succeeded?: boolean;
+            /** Tool Name */
+            tool_name: string;
+        };
         /** ToolCallCompletedEvent */
         ToolCallCompletedEvent: {
             /**
@@ -21960,6 +22492,83 @@ export interface components {
              */
             triggered_at: string;
         };
+        /** Turn */
+        Turn: {
+            /** Agent Action */
+            agent_action?: string | null;
+            /** Agent Speech End Ms */
+            agent_speech_end_ms?: number | null;
+            /** Agent Speech Start Ms */
+            agent_speech_start_ms?: number | null;
+            /** Agent Transcript */
+            agent_transcript?: string | null;
+            /** Audio Ttfb Ms */
+            audio_ttfb_ms?: number | null;
+            /** Audio Window End Ms */
+            audio_window_end_ms?: number | null;
+            /** Audio Window Start Ms */
+            audio_window_start_ms?: number | null;
+            /** Emotion Label */
+            emotion_label?: string | null;
+            /** Emotion Valence */
+            emotion_valence?: number | null;
+            /** Engine Ms */
+            engine_ms?: number | null;
+            /** Eot Confidence */
+            eot_confidence?: number | null;
+            /** Filler Type */
+            filler_type?: string | null;
+            /** Id */
+            id?: string | null;
+            /**
+             * Inner Thoughts
+             * @default []
+             */
+            inner_thoughts?: string[];
+            /**
+             * Interrupted
+             * @default false
+             */
+            interrupted?: boolean;
+            /** Nav Ms */
+            nav_ms?: number | null;
+            /** Render Ms */
+            render_ms?: number | null;
+            /** Speaker Id */
+            speaker_id?: string | null;
+            /** Speaker Role */
+            speaker_role?: string | null;
+            /**
+             * State
+             * @default
+             */
+            state?: string;
+            /**
+             * State Transitions
+             * @default []
+             */
+            state_transitions?: components["schemas"]["StateTransition"][];
+            /** Stt Confidence */
+            stt_confidence?: number | null;
+            /** Timestamp */
+            timestamp?: string | null;
+            /**
+             * Tool Calls
+             * @default []
+             */
+            tool_calls?: components["schemas"]["ToolCall"][];
+            /**
+             * Trigger
+             * @default
+             */
+            trigger?: string;
+            /** User Speech End Ms */
+            user_speech_end_ms?: number | null;
+            /** User Speech Start Ms */
+            user_speech_start_ms?: number | null;
+            /** User Transcript */
+            user_transcript?: string | null;
+        };
         /**
          * TurnPolicy
          * @description Voice pipeline parameters declared per HSM state.
@@ -22013,6 +22622,17 @@ export interface components {
             stt_eot_threshold?: number | null;
             /** Stt Eot Timeout Ms */
             stt_eot_timeout_ms?: number | null;
+        };
+        /** TurnTimeline */
+        TurnTimeline: {
+            /** Active End */
+            active_end: number;
+            /** Active Start */
+            active_start: number;
+            /** Seek To */
+            seek_to: number;
+            /** Turn Index */
+            turn_index: number;
         };
         /** UnificationRuleResponse */
         UnificationRuleResponse: {
@@ -22219,6 +22839,8 @@ export interface components {
         UpdatePhoneNumberRequest: {
             /** Capabilities */
             capabilities?: string[] | null;
+            /** Channel Phone Id */
+            channel_phone_id?: string | null;
             /** Display Name */
             display_name?: string | null;
             forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
@@ -22232,6 +22854,8 @@ export interface components {
             provider_phone_sid?: string | null;
             /** Status */
             status?: ("active" | "inactive") | null;
+            /** Sub Account Sid */
+            sub_account_sid?: string | null;
         };
         /** UpdateSafetyConfigRequest */
         UpdateSafetyConfigRequest: {
@@ -27306,6 +27930,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description No phone number available for use case */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -27329,7 +27960,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Voice agent or outbound calls not configured */
+            /** @description Voice agent, outbound calls, or channel manager not configured */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -27443,9 +28074,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["CallDetailResponse"];
                 };
             };
             /** @description Call not found */
@@ -33664,6 +34293,69 @@ export interface operations {
             };
             /** @description Invalid request body. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "bind-channel-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BindChannelPhoneRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PhoneNumberResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel phone ID not found in channel-manager. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Phone number already registered. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager not configured. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
