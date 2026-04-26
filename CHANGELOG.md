@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - 2026-04-26
+
+### Bug Fixes
+
+- update test fixture for call_duration_seconds rename
+
+### Maintenance
+
+- sync API types from platform (54356672)
+
 ## [0.5.10] - 2026-04-25
 
 ### Maintenance
