@@ -62,6 +62,10 @@ describe('resource surface smoke tests', () => {
       previous_from: '2025-12-25',
       previous_to: '2025-12-31',
     })
+    await client.metrics.listLatest()
+    await client.metrics.getCatalog()
+    await client.metrics.getValues('voice_quality_score', { limit: 30 })
+    await client.metrics.getTrend('voice_quality_score', { days: 14 })
 
     await client.contextGraphs.create(EMPTY_BODY)
     await client.contextGraphs.list({ limit: 5 })

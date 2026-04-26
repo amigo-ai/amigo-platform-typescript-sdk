@@ -5009,7 +5009,7 @@ export interface paths {
         put?: never;
         /**
          * Approve review item
-         * @description Promotes event confidence to 0.95 (human-approved) and recomputes entity state.
+         * @description Marks the review item approved and lets SDP projections rebuild entity state.
          */
         post: operations["approve_review_item_v1__workspace_id__review_queue__item_id__approve_post"];
         delete?: never;
@@ -5049,7 +5049,7 @@ export interface paths {
         put?: never;
         /**
          * Submit corrected data
-         * @description Creates a new event at confidence 1.0 that supersedes the original, and recomputes entity state.
+         * @description Creates a corrected event and lets SDP projections rebuild entity state.
          */
         post: operations["correct_review_item_v1__workspace_id__review_queue__item_id__correct_post"];
         delete?: never;
@@ -5109,7 +5109,7 @@ export interface paths {
         put?: never;
         /**
          * Reject review item
-         * @description Demotes event confidence to 0.0 (rejected) and recomputes entity state.
+         * @description Marks the review item rejected and lets SDP projections rebuild entity state.
          */
         post: operations["reject_review_item_v1__workspace_id__review_queue__item_id__reject_post"];
         delete?: never;
@@ -7111,6 +7111,74 @@ export interface paths {
         patch: operations["update-unification-rule"];
         trace?: never;
     };
+    "/v1/{workspace_id}/use-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List channel use cases
+         * @description List use cases with optional filters by entity_name, channel, setup_id. Requires Channel.view permission.
+         */
+        get: operations["list-use-cases"];
+        put?: never;
+        /**
+         * Create a channel use case
+         * @description Create a voice or email use case. Body is a discriminated union on the `channel` field. Requires Channel.create permission.
+         */
+        post: operations["create-use-case"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/use-cases/{use_case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a channel use case
+         * @description Delete a use case. Fails if voice use case still has phone assignments. Requires Channel.delete permission.
+         */
+        delete: operations["delete-use-case"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/voicemail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List voicemails
+         * @description List voicemail records with optional filters. Requires Channel.view permission.
+         */
+        get: operations["list-voicemails"];
+        put?: never;
+        /**
+         * Send a voicemail
+         * @description Send a ringless voicemail. Accepts multipart form with use_case_id, recipient_phone_number (US E.164), and audio MP3 file (10-60s, max 8 MB). Requires Channel.send permission.
+         */
+        post: operations["send-voicemail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/voiceprints/enroll": {
         parameters: {
             query?: never;
@@ -8964,6 +9032,18 @@ export interface components {
              */
             sample_rate?: number;
         };
+        /** Body_send-voicemail */
+        "Body_send-voicemail": {
+            /** Audio */
+            audio: string;
+            /** Recipient Phone Number */
+            recipient_phone_number: string;
+            /**
+             * Use Case Id
+             * Format: uuid
+             */
+            use_case_id: string;
+        };
         /** Body_verify-voiceprint */
         "Body_verify-voiceprint": {
             /** Audio */
@@ -8990,6 +9070,36 @@ export interface components {
              * @description The FHIR Slot ID to book
              */
             slot_id: string;
+        };
+        /** BooleanMetricValueResponse */
+        BooleanMetricValueResponse: {
+            /** Avg Confidence */
+            avg_confidence?: number | null;
+            /** Computed At */
+            computed_at?: string | null;
+            /** Event Count */
+            event_count: number;
+            /** Metric Key */
+            metric_key: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            metric_type: "boolean";
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /** Unit */
+            unit?: string | null;
+            /** Value */
+            value: boolean | null;
         };
         /**
          * BrandingConfig
@@ -9678,6 +9788,36 @@ export interface components {
              */
             schema?: string;
         };
+        /** CategoricalMetricValueResponse */
+        CategoricalMetricValueResponse: {
+            /** Avg Confidence */
+            avg_confidence?: number | null;
+            /** Computed At */
+            computed_at?: string | null;
+            /** Event Count */
+            event_count: number;
+            /** Metric Key */
+            metric_key: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            metric_type: "categorical";
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /** Unit */
+            unit?: string | null;
+            /** Value */
+            value: string | null;
+        };
         /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
@@ -10211,6 +10351,17 @@ export interface components {
              * @description Server clock at query time (UTC).
              */
             as_of: string;
+            /**
+             * Read Model Status
+             * @description ready = Lakebase projection returned rows; empty = no summary rows; unavailable = read failed.
+             * @enum {string}
+             */
+            read_model_status: "ready" | "empty" | "unavailable";
+            /**
+             * Read Model Synced At
+             * @description Most recent platform.connector_health_summary synced_at value in this response.
+             */
+            read_model_synced_at?: string | null;
             /** Sources */
             sources?: components["schemas"]["ConnectorHealthItem"][];
         };
@@ -10904,7 +11055,7 @@ export interface components {
             phone_from?: string | null;
             /**
              * Phone To
-             * @description Destination phone number in E.164 format (e.g. +18005551234)
+             * @description Destination phone number in E.164 format.
              */
             phone_to: string;
             /**
@@ -12683,6 +12834,35 @@ export interface components {
             note: string;
             /** Region */
             region: string;
+        };
+        /** EmailUseCaseRequest */
+        EmailUseCaseRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            channel: "email";
+            /** Description */
+            description?: string | null;
+            /**
+             * Email Type
+             * @enum {string}
+             */
+            email_type: "transactional" | "marketing";
+            /** Entity Name */
+            entity_name: string;
+            /** Name */
+            name: string;
+            /**
+             * Sender Email Address
+             * Format: email
+             */
+            sender_email_address: string;
+            /**
+             * Setup Id
+             * Format: uuid
+             */
+            setup_id: string;
         };
         /** EmotionBurst */
         EmotionBurst: {
@@ -16454,7 +16634,7 @@ export interface components {
         /** MetricListResponse */
         MetricListResponse: {
             /** Metrics */
-            metrics: components["schemas"]["MetricValueResponse"][];
+            metrics: (components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"])[];
         };
         /**
          * MetricSettingsRequest
@@ -16473,27 +16653,6 @@ export interface components {
         MetricSettingsResponse: {
             /** Definitions */
             definitions: components["schemas"]["MetricDefinition"][];
-        };
-        /** MetricValueResponse */
-        MetricValueResponse: {
-            /** Avg Confidence */
-            avg_confidence?: number | null;
-            /** Computed At */
-            computed_at?: string | null;
-            /** Event Count */
-            event_count: number;
-            /** Metric Key */
-            metric_key: string;
-            /** Metric Type */
-            metric_type: string;
-            /** Period End */
-            period_end: string;
-            /** Period Start */
-            period_start: string;
-            /** Unit */
-            unit?: string | null;
-            /** Value */
-            value: unknown;
         };
         /** ModelRegistryResponse */
         ModelRegistryResponse: {
@@ -16686,6 +16845,36 @@ export interface components {
             diet: components["schemas"]["NoteRollupCategoryEntry"][];
             /** Smoking */
             smoking: components["schemas"]["NoteRollupCategoryEntry"][];
+        };
+        /** NumericalMetricValueResponse */
+        NumericalMetricValueResponse: {
+            /** Avg Confidence */
+            avg_confidence?: number | null;
+            /** Computed At */
+            computed_at?: string | null;
+            /** Event Count */
+            event_count: number;
+            /** Metric Key */
+            metric_key: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            metric_type: "numerical";
+            /**
+             * Period End
+             * Format: date-time
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date-time
+             */
+            period_start: string;
+            /** Unit */
+            unit?: string | null;
+            /** Value */
+            value: number | null;
         };
         ObserverSSEEvent: components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
         /** OcrRequest */
@@ -18194,6 +18383,14 @@ export interface components {
             entity_resolution?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Event Read Model Status
+             * @default empty
+             * @enum {string}
+             */
+            event_read_model_status?: "ready" | "empty" | "unavailable";
+            /** Event Read Model Synced At */
+            event_read_model_synced_at?: string | null;
             /** Gap Scanner */
             gap_scanner?: {
                 [key: string]: unknown;
@@ -23180,6 +23377,44 @@ export interface components {
              */
             value: number;
         };
+        /** UseCaseListResponse */
+        UseCaseListResponse: {
+            /** Items */
+            items: components["schemas"]["UseCaseResponse"][];
+        };
+        /** UseCaseResponse */
+        UseCaseResponse: {
+            /** Channel */
+            channel: string;
+            /** Configuration Set Name */
+            configuration_set_name?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /** Email Type */
+            email_type?: string | null;
+            /** Entity Name */
+            entity_name: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Sender Email Address */
+            sender_email_address?: string | null;
+            /** Setup Id */
+            setup_id: string;
+            /** Tier */
+            tier?: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
             /**
@@ -23469,6 +23704,60 @@ export interface components {
             voice_id: string | null;
             /** Volume */
             volume: number | null;
+        };
+        /** VoiceUseCaseRequest */
+        VoiceUseCaseRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail";
+            /** Description */
+            description?: string | null;
+            /** Entity Name */
+            entity_name: string;
+            /** Name */
+            name: string;
+            /**
+             * Setup Id
+             * Format: uuid
+             */
+            setup_id: string;
+        };
+        /** VoicemailListResponse */
+        VoicemailListResponse: {
+            /** Items */
+            items: components["schemas"]["VoicemailResponse"][];
+        };
+        /** VoicemailResponse */
+        VoicemailResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Recipient Phone Number */
+            recipient_phone_number: string;
+            /** Setup Id */
+            setup_id: string;
+            /** Status */
+            status: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Use Case Id */
+            use_case_id: string;
+            /** Voicemail Id */
+            voicemail_id: string;
+        };
+        /** VoicemailSentResponse */
+        VoicemailSentResponse: {
+            /** Sender Phone Number */
+            sender_phone_number: string;
+            /** Voicemail Id */
+            voicemail_id: string;
         };
         /** VoiceprintEnrollResponse */
         VoiceprintEnrollResponse: {
@@ -23921,6 +24210,36 @@ export interface components {
             updated_at: string;
         };
         WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
+        /** WorldDashboardResponse */
+        WorldDashboardResponse: {
+            /** Avg Confidence */
+            avg_confidence?: number | null;
+            entity_counts: components["schemas"]["EntityStatsSummary"];
+            /**
+             * Event Read Model Status
+             * @description ready = Lakebase projection returned a row; empty = no summary row; unavailable = read failed.
+             * @default empty
+             * @enum {string}
+             */
+            event_read_model_status?: "ready" | "empty" | "unavailable";
+            /**
+             * Event Read Model Synced At
+             * @description platform.event_velocity_summary synced_at for this workspace.
+             */
+            event_read_model_synced_at?: string | null;
+            /**
+             * Events 24H
+             * @default 0
+             */
+            events_24h?: number;
+            /**
+             * Events 7D
+             * @default 0
+             */
+            events_7d?: number;
+            /** Sources */
+            sources?: components["schemas"]["SourceBreakdownItem"][];
+        };
         /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.
@@ -27962,6 +28281,13 @@ export interface operations {
             };
             /** @description Voice agent, outbound calls, or channel manager not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager phone selection timed out */
+            504: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -40676,6 +41002,294 @@ export interface operations {
             };
         };
     };
+    "list-use-cases": {
+        parameters: {
+            query?: {
+                entity_name?: string | null;
+                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email") | null;
+                setup_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UseCaseListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoiceUseCaseRequest"] | components["schemas"]["EmailUseCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UseCaseResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Setup not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case already exists or setup not approved. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case has active phone assignments. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-voicemails": {
+        parameters: {
+            query?: {
+                use_case_id?: string | null;
+                setup_id?: string | null;
+                status?: string[] | null;
+                recipient_phone_number?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoicemailListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "send-voicemail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_send-voicemail"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoicemailSentResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found or no phone assigned. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Audio exceeds 8 MB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid audio or configuration. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "enroll-voiceprint": {
         parameters: {
             query?: never;
@@ -41176,9 +41790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["WorldDashboardResponse"];
                 };
             };
         };

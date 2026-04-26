@@ -1,0 +1,61 @@
+import type { components, operations } from '../generated/api.js'
+import { WorkspaceScopedResource, extractData } from './base.js'
+
+export type MetricCatalogEntry = components['schemas']['MetricCatalogEntry']
+export type MetricCatalogResponse = components['schemas']['MetricCatalogResponse']
+export type MetricListResponse = components['schemas']['MetricListResponse']
+export type NumericalMetricValue = components['schemas']['NumericalMetricValueResponse']
+export type CategoricalMetricValue = components['schemas']['CategoricalMetricValueResponse']
+export type BooleanMetricValue = components['schemas']['BooleanMetricValueResponse']
+export type MetricValue = NumericalMetricValue | CategoricalMetricValue | BooleanMetricValue
+/** @deprecated Use `MetricValue` instead. */
+export type MetricValueResponse = MetricValue
+export type MetricValuesParams = NonNullable<operations['get-metric-values']['parameters']['query']>
+export type MetricTrendParams = NonNullable<operations['get-metric-trend']['parameters']['query']>
+
+/**
+ * Metrics — computed metric catalog and typed metric values.
+ */
+export class MetricsResource extends WorkspaceScopedResource {
+  /** List the latest value for each metric in the workspace */
+  async listLatest() {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/metrics', {
+        params: { path: { workspace_id: this.workspaceId } },
+      }),
+    )
+  }
+
+  /** List available built-in and custom metric definitions */
+  async getCatalog() {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/metrics/catalog', {
+        params: { path: { workspace_id: this.workspaceId } },
+      }),
+    )
+  }
+
+  /** Get stored values for one metric key, optionally bounded by time range */
+  async getValues(metricKey: string, params?: MetricValuesParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/metrics/{metric_key}', {
+        params: {
+          path: { workspace_id: this.workspaceId, metric_key: metricKey },
+          query: params,
+        },
+      }),
+    )
+  }
+
+  /** Get a recent time-series trend for one metric key */
+  async getTrend(metricKey: string, params?: MetricTrendParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/metrics/{metric_key}/trend', {
+        params: {
+          path: { workspace_id: this.workspaceId, metric_key: metricKey },
+          query: params,
+        },
+      }),
+    )
+  }
+}

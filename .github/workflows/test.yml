@@ -52,6 +52,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Verify generated API types are committed
+        run: |
+          npm run gen-types
+          git diff --exit-code -- src/generated/api.ts
+
       - name: Run unit tests (fast)
         if: ${{ inputs.skip_codecov || matrix.node-version != 22 }}
         run: npm test -- --reporter=dot
