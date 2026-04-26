@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0] - 2026-04-26
+
+### Improvements
+
+- Add metrics resource (#85)
+- Harden release publish visibility check (#84)
+
 ## Unreleased
 
 ### Breaking Changes
