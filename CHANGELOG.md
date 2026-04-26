@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Breaking Changes
+
+- Metric values now use the exported `MetricValue` discriminated union
+  (`numerical`, `categorical`, or `boolean`) generated from the platform
+  OpenAPI schema. The previous generated `MetricValueResponse` schema has been
+  replaced by value-type-specific schemas.
+
+### Features
+
+- Add `client.metrics` for metric catalogs, latest values, metric history, and
+  metric trends.
+
 ## [0.6.1] - 2026-04-26
 
 ### Improvements
