@@ -7111,6 +7111,74 @@ export interface paths {
         patch: operations["update-unification-rule"];
         trace?: never;
     };
+    "/v1/{workspace_id}/use-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List channel use cases
+         * @description List use cases with optional filters by entity_name, channel, setup_id. Requires Channel.view permission.
+         */
+        get: operations["list-use-cases"];
+        put?: never;
+        /**
+         * Create a channel use case
+         * @description Create a voice or email use case. Body is a discriminated union on the `channel` field. Requires Channel.create permission.
+         */
+        post: operations["create-use-case"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/use-cases/{use_case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete a channel use case
+         * @description Delete a use case. Fails if voice use case still has phone assignments. Requires Channel.delete permission.
+         */
+        delete: operations["delete-use-case"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/voicemail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List voicemails
+         * @description List voicemail records with optional filters. Requires Channel.view permission.
+         */
+        get: operations["list-voicemails"];
+        put?: never;
+        /**
+         * Send a voicemail
+         * @description Send a ringless voicemail. Accepts multipart form with use_case_id, recipient_phone_number (US E.164), and audio MP3 file (10-60s, max 8 MB). Requires Channel.send permission.
+         */
+        post: operations["send-voicemail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/voiceprints/enroll": {
         parameters: {
             query?: never;
@@ -8963,6 +9031,18 @@ export interface components {
              * @default 16000
              */
             sample_rate?: number;
+        };
+        /** Body_send-voicemail */
+        "Body_send-voicemail": {
+            /** Audio */
+            audio: string;
+            /** Recipient Phone Number */
+            recipient_phone_number: string;
+            /**
+             * Use Case Id
+             * Format: uuid
+             */
+            use_case_id: string;
         };
         /** Body_verify-voiceprint */
         "Body_verify-voiceprint": {
@@ -12683,6 +12763,35 @@ export interface components {
             note: string;
             /** Region */
             region: string;
+        };
+        /** EmailUseCaseRequest */
+        EmailUseCaseRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            channel: "email";
+            /** Description */
+            description?: string | null;
+            /**
+             * Email Type
+             * @enum {string}
+             */
+            email_type: "transactional" | "marketing";
+            /** Entity Name */
+            entity_name: string;
+            /** Name */
+            name: string;
+            /**
+             * Sender Email Address
+             * Format: email
+             */
+            sender_email_address: string;
+            /**
+             * Setup Id
+             * Format: uuid
+             */
+            setup_id: string;
         };
         /** EmotionBurst */
         EmotionBurst: {
@@ -23180,6 +23289,44 @@ export interface components {
              */
             value: number;
         };
+        /** UseCaseListResponse */
+        UseCaseListResponse: {
+            /** Items */
+            items: components["schemas"]["UseCaseResponse"][];
+        };
+        /** UseCaseResponse */
+        UseCaseResponse: {
+            /** Channel */
+            channel: string;
+            /** Configuration Set Name */
+            configuration_set_name?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /** Email Type */
+            email_type?: string | null;
+            /** Entity Name */
+            entity_name: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Sender Email Address */
+            sender_email_address?: string | null;
+            /** Setup Id */
+            setup_id: string;
+            /** Tier */
+            tier?: string | null;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
             /**
@@ -23469,6 +23616,60 @@ export interface components {
             voice_id: string | null;
             /** Volume */
             volume: number | null;
+        };
+        /** VoiceUseCaseRequest */
+        VoiceUseCaseRequest: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail";
+            /** Description */
+            description?: string | null;
+            /** Entity Name */
+            entity_name: string;
+            /** Name */
+            name: string;
+            /**
+             * Setup Id
+             * Format: uuid
+             */
+            setup_id: string;
+        };
+        /** VoicemailListResponse */
+        VoicemailListResponse: {
+            /** Items */
+            items: components["schemas"]["VoicemailResponse"][];
+        };
+        /** VoicemailResponse */
+        VoicemailResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Recipient Phone Number */
+            recipient_phone_number: string;
+            /** Setup Id */
+            setup_id: string;
+            /** Status */
+            status: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Use Case Id */
+            use_case_id: string;
+            /** Voicemail Id */
+            voicemail_id: string;
+        };
+        /** VoicemailSentResponse */
+        VoicemailSentResponse: {
+            /** Sender Phone Number */
+            sender_phone_number: string;
+            /** Voicemail Id */
+            voicemail_id: string;
         };
         /** VoiceprintEnrollResponse */
         VoiceprintEnrollResponse: {
@@ -27962,6 +28163,13 @@ export interface operations {
             };
             /** @description Voice agent, outbound calls, or channel manager not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager phone selection timed out */
+            504: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -40669,6 +40877,294 @@ export interface operations {
             };
             /** @description Invalid data_source_id reference. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-use-cases": {
+        parameters: {
+            query?: {
+                entity_name?: string | null;
+                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email") | null;
+                setup_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UseCaseListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VoiceUseCaseRequest"] | components["schemas"]["EmailUseCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UseCaseResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Setup not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case already exists or setup not approved. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                use_case_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case has active phone assignments. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-voicemails": {
+        parameters: {
+            query?: {
+                use_case_id?: string | null;
+                setup_id?: string | null;
+                status?: string[] | null;
+                recipient_phone_number?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoicemailListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "send-voicemail": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_send-voicemail"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VoicemailSentResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found or no phone assigned. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Audio exceeds 8 MB. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid audio or configuration. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
                 headers: {
                     [name: string]: unknown;
                 };
