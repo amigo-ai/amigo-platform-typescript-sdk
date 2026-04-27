@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.8.0] - 2026-04-27
+
+### Improvements
+
+- Expose call timeline actor types (#89)
+
 ## [0.7.0] - 2026-04-26
 
 ### Improvements
