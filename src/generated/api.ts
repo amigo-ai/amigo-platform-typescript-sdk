@@ -11322,6 +11322,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Is Active
              * @default true
@@ -14008,6 +14009,34 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * EscalationPolicy
+         * @description Per-service routing for engine-detected escalation triggers.
+         *
+         *     Each trigger source maps to one EscalationAction. The three enumerated
+         *     fields below are the trigger_sources actually emitted by the agent-engine
+         *     today; new triggers can be added as fields without breaking back-compat.
+         *
+         *     Partial policies are intentional: every field defaults to OperatorAction,
+         *     so a PUT body like ``{"context_window_exhaustion": {"type": "forward"}}``
+         *     overrides only that trigger and leaves the others on the operator default.
+         *     To opt the entire service back to today's behavior, set
+         *     ``Service.escalation_policy = None`` (caveat: the platform-api Service
+         *     update path uses ``exclude_none=True`` and currently has no clears-via-null
+         *     branch, so this requires a direct config edit; see follow-up issue).
+         *
+         *     Resolution lookup is done against ``model_fields``: a trigger_source that
+         *     is not an enumerated field name falls through to OperatorAction, never
+         *     a non-Action Pydantic internal.
+         */
+        EscalationPolicy: {
+            /** Context Window Exhaustion */
+            context_window_exhaustion?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+            /** Conversation Monitor */
+            conversation_monitor?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+            /** Risk Scorer */
+            risk_scorer?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+        };
         /** EscalationState */
         EscalationState: {
             /** Agent Confidence */
@@ -15016,6 +15045,26 @@ export interface components {
             /** Templates */
             templates: components["schemas"]["FormTemplate-Input"][];
         };
+        /**
+         * ForwardAction
+         * @description Cold-transfer the caller to the inbound phone number's configured
+         *     forwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).
+         *
+         *     No agent-side decision and no operator dashboard required — the engine
+         *     invokes the same forwarding callback used by the LLM-driven `forward_call`
+         *     tool, with no location override, which falls through to the static
+         *     `ForwardingMap` populated from the phone-number config.
+         *
+         *     If forwarding is not configured for the inbound phone number, the
+         *     dispatcher falls back to the operator path (audit event + SSE only).
+         */
+        ForwardAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "forward";
+        };
         /** ForwardCallResolvedEvent */
         ForwardCallResolvedEvent: {
             /**
@@ -15353,6 +15402,17 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HangupAction
+         * @description End the call gracefully via the existing speaker-drain hangup path.
+         */
+        HangupAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "hangup";
         };
         /**
          * HardEscalationRule
@@ -17100,6 +17160,18 @@ export interface components {
              * @description Optional list of field keys to extract
              */
             target_fields?: string[] | null;
+        };
+        /**
+         * OperatorAction
+         * @description Today's behavior — write escalation.requested + publish SSE, wait for a
+         *     human operator to join via the dashboard. No-op if no operators are staffed.
+         */
+        OperatorAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "operator";
         };
         /**
          * OperatorIntelligenceSummary
@@ -20132,6 +20204,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Hard Escalation Rules
              * @default []
@@ -20197,6 +20270,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /** Id */
             id: string;
             /** Is Active */
@@ -23445,6 +23519,7 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             /** Environment */
             environment?: ("sandbox" | "production") | null;
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Keyterms */

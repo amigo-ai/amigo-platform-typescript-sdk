@@ -8660,6 +8660,16 @@
             "title": "Environment",
             "type": "string"
           },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "is_active": {
             "default": true,
             "title": "Is Active",
@@ -15391,6 +15401,79 @@
         "title": "EscalationEventResponse",
         "type": "object"
       },
+      "EscalationPolicy": {
+        "description": "Per-service routing for engine-detected escalation triggers.\n\nEach trigger source maps to one EscalationAction. The three enumerated\nfields below are the trigger_sources actually emitted by the agent-engine\ntoday; new triggers can be added as fields without breaking back-compat.\n\nPartial policies are intentional: every field defaults to OperatorAction,\nso a PUT body like ``{\"context_window_exhaustion\": {\"type\": \"forward\"}}``\noverrides only that trigger and leaves the others on the operator default.\nTo opt the entire service back to today's behavior, set\n``Service.escalation_policy = None`` (caveat: the platform-api Service\nupdate path uses ``exclude_none=True`` and currently has no clears-via-null\nbranch, so this requires a direct config edit; see follow-up issue).\n\nResolution lookup is done against ``model_fields``: a trigger_source that\nis not an enumerated field name falls through to OperatorAction, never\na non-Action Pydantic internal.",
+        "properties": {
+          "context_window_exhaustion": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Context Window Exhaustion"
+          },
+          "conversation_monitor": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Conversation Monitor"
+          },
+          "risk_scorer": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Risk Scorer"
+          }
+        },
+        "title": "EscalationPolicy",
+        "type": "object"
+      },
       "EscalationState": {
         "properties": {
           "agent_confidence": {
@@ -18522,6 +18605,19 @@
         "title": "FormTemplateUpdateRequest",
         "type": "object"
       },
+      "ForwardAction": {
+        "description": "Cold-transfer the caller to the inbound phone number's configured\nforwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven `forward_call`\ntool, with no location override, which falls through to the static\n`ForwardingMap` populated from the phone-number config.\n\nIf forwarding is not configured for the inbound phone number, the\ndispatcher falls back to the operator path (audit event + SSE only).",
+        "properties": {
+          "type": {
+            "const": "forward",
+            "default": "forward",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "ForwardAction",
+        "type": "object"
+      },
       "ForwardCallResolvedEvent": {
         "properties": {
           "error": {
@@ -19244,6 +19340,19 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HangupAction": {
+        "description": "End the call gracefully via the existing speaker-drain hangup path.",
+        "properties": {
+          "type": {
+            "const": "hangup",
+            "default": "hangup",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "HangupAction",
         "type": "object"
       },
       "HardEscalationRule": {
@@ -23157,6 +23266,19 @@
           "image"
         ],
         "title": "OcrRequest",
+        "type": "object"
+      },
+      "OperatorAction": {
+        "description": "Today's behavior \u2014 write escalation.requested + publish SSE, wait for a\nhuman operator to join via the dashboard. No-op if no operators are staffed.",
+        "properties": {
+          "type": {
+            "const": "operator",
+            "default": "operator",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "OperatorAction",
         "type": "object"
       },
       "OperatorIntelligenceSummary": {
@@ -30699,6 +30821,16 @@
             "title": "Environment",
             "type": "string"
           },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "hard_escalation_rules": {
             "default": [],
             "items": {
@@ -30867,6 +30999,16 @@
             ],
             "title": "Environment",
             "type": "string"
+          },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "id": {
             "title": "Id",
@@ -34537,7 +34679,7 @@
             "items": {
               "$ref": "#/components/schemas/SurfaceField"
             },
-            "maxItems": 100,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Fields",
             "type": "array"
@@ -39426,6 +39568,16 @@
               }
             ],
             "title": "Environment"
+          },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "is_active": {
             "anyOf": [
