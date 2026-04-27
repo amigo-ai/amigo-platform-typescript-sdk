@@ -21677,6 +21677,55 @@
         "title": "MeterValueItem",
         "type": "object"
       },
+      "MeteringEmitRequest": {
+        "properties": {
+          "event_type": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9._]*$",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "metering_metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional audit/dispute breadcrumbs.",
+            "title": "Metering Metadata"
+          },
+          "metering_quantity": {
+            "minimum": 0.0,
+            "title": "Metering Quantity",
+            "type": "number"
+          },
+          "metering_unit": {
+            "anyOf": [
+              {
+                "maxLength": 32,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.",
+            "title": "Metering Unit"
+          }
+        },
+        "required": [
+          "event_type",
+          "metering_quantity"
+        ],
+        "title": "MeteringEmitRequest",
+        "type": "object"
+      },
       "MetricCatalogEntry": {
         "properties": {
           "builtin": {
@@ -26720,9 +26769,50 @@
             "title": "Workspace Id",
             "type": "string"
           },
+          "y_hat_asthma_12mo": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Asthma 12Mo"
+          },
+          "y_hat_chf_90d": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Chf 90D"
+          },
+          "y_hat_ckd_1yr": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Ckd 1Yr"
+          },
           "y_hat_composite": {
             "anyOf": [
               {
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26731,9 +26821,37 @@
             ],
             "title": "Y Hat Composite"
           },
+          "y_hat_copd_12mo": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Copd 12Mo"
+          },
+          "y_hat_htn_1yr": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Y Hat Htn 1Yr"
+          },
           "y_hat_t2d_1yr": {
             "anyOf": [
               {
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -56503,6 +56621,52 @@
         "summary": "Get memory facts for an entity",
         "tags": [
           "Memory"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/metering/emit": {
+      "post": {
+        "description": "Emit one metering event for the calling workspace.\n\nScope: workspace-scoped via path param; auth via API key (same as every\nother workspace route). 202 on success \u2014 emission is fire-and-forget.\n\n``event_type`` is a free-form string (regex-validated). Aggregation\ninto ``customer_meter_values`` is handled by SDP materialized views\nin ``databricks/pipelines/billing.py``; an event_type with no matching\nMV still lands in ``world_events`` but doesn't roll up into invoices\nuntil someone adds an MV for it.",
+        "operationId": "emit-metering-event",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MeteringEmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Emit-Metering-Event",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Emit Metering Event",
+        "tags": [
+          "Metering"
         ]
       }
     },
