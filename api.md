@@ -219,6 +219,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `list`
 - `listAutoPaging`
 - `get`
+- `getTimeline`
 - `getIntelligence`
 - `getActiveIntelligence`
 - `getBenchmarks`

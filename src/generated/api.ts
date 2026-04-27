@@ -1662,6 +1662,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/calls/{call_id}/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call metric values
+         * @description Latest per-call Universal Metric Store values for the call detail sidebar.
+         */
+        get: operations["list-call-metric-values"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/calls/{call_id}/timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call playback timeline
+         * @description Canonical playback timeline for the call detail visualization. This is the same strongly typed timeline model embedded in the call detail response, exposed directly for timeline-only consumers.
+         */
+        get: operations["get-call-timeline"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
         parameters: {
             query?: never;
@@ -3910,6 +3950,26 @@ export interface paths {
         get: operations["get-metric-values"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metrics/{metric_key}/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate a metric once without storing it
+         * @description Execute one metric definition without persisting to UMS.
+         */
+        post: operations["evaluate-metric"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10912,7 +10972,7 @@ export interface components {
                 [key: string]: unknown;
             }[];
             /** Page Context */
-            page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+            page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
             /** Panels */
             panels?: {
                 [key: string]: unknown;
@@ -14262,8 +14322,14 @@ export interface components {
             address?: {
                 [key: string]: unknown;
             } | null;
+            /** Address Line */
+            address_line?: string | null;
             /** Canonical Id */
             canonical_id?: string | null;
+            /** City */
+            city?: string | null;
+            /** Country */
+            country?: string | null;
             /** Entity Id */
             entity_id: string;
             /**
@@ -14271,18 +14337,30 @@ export interface components {
              * @default 0
              */
             event_count?: number;
+            /** Facility Id */
+            facility_id?: string | null;
             /** Hours */
             hours?: {
                 [key: string]: unknown;
             } | null;
             /** Last Event At */
             last_event_at?: string | null;
+            /** Latitude */
+            latitude?: number | null;
+            /** Longitude */
+            longitude?: number | null;
             /** Name */
             name?: string | null;
             /** Phone */
             phone?: string | null;
+            /** Postal Code */
+            postal_code?: string | null;
             /** Source System */
             source_system?: string | null;
+            /** State */
+            state?: string | null;
+            /** Timezone */
+            timezone?: string | null;
         };
         /** FhirOrganizationListResponse */
         FhirOrganizationListResponse: {
@@ -16660,6 +16738,42 @@ export interface components {
              * @description Minimum valid value for numerical metrics. Pipeline drops values outside range.
              */
             valid_range_min?: number | null;
+        };
+        /** MetricEvaluateRequest */
+        MetricEvaluateRequest: {
+            /**
+             * As Of
+             * @description Optional point-in-time cutoff for selecting the call intelligence snapshot.
+             */
+            as_of?: string | null;
+            /**
+             * Persist
+             * @description On-demand metric evaluation never writes to metrics.metric_values.
+             * @default false
+             * @constant
+             */
+            persist?: false;
+            /**
+             * Subject Id
+             * @description CallSid, call UUID, or simulation session id
+             */
+            subject_id: string;
+        };
+        /** MetricEvaluateResponse */
+        MetricEvaluateResponse: {
+            /**
+             * Evaluated At
+             * Format: date-time
+             */
+            evaluated_at: string;
+            /** Metric */
+            metric: components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"];
+            /**
+             * Persisted
+             * @default false
+             * @constant
+             */
+            persisted?: false;
         };
         /** MetricListResponse */
         MetricListResponse: {
@@ -23090,7 +23204,7 @@ export interface components {
                 [key: string]: unknown;
             }[] | null;
             /** Page Context */
-            page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+            page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
             /** Panels */
             panels?: {
                 [key: string]: unknown;
@@ -28618,6 +28732,80 @@ export interface operations {
             };
         };
     };
+    "list-call-metric-values": {
+        parameters: {
+            query?: {
+                /** @description Max metric values to return */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                call_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-call-timeline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                call_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlaybackTimeline"];
+                };
+            };
+            /** @description Call not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "get-call-trace-analysis": {
         parameters: {
             query?: never;
@@ -29600,7 +29788,7 @@ export interface operations {
     list_dashboards_v1__workspace_id__dashboards_get: {
         parameters: {
             query?: {
-                page_context?: ("home" | "patients" | "calls" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
+                page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
                 limit?: number;
                 continuation_token?: number;
             };
@@ -33376,7 +33564,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                metric_key: string;
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
                 workspace_id: string;
             };
             cookie?: never;
@@ -33410,6 +33599,69 @@ export interface operations {
             };
         };
     };
+    "evaluate-metric": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetricEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricEvaluateResponse"];
+                };
+            };
+            /** @description Metric or call intelligence not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Metric cannot be evaluated on demand */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Metric preview query failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Analytics warehouse not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "get-metric-trend": {
         parameters: {
             query?: {
@@ -33424,7 +33676,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                metric_key: string;
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
                 workspace_id: string;
             };
             cookie?: never;

@@ -42,6 +42,15 @@ export class CallsResource extends WorkspaceScopedResource {
     )
   }
 
+  /** Get the canonical playback timeline for a call */
+  async getTimeline(callId: string) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/calls/{call_id}/timeline', {
+        params: { path: { workspace_id: this.workspaceId, call_id: callId } },
+      }),
+    )
+  }
+
   /** Get AI intelligence for a call */
   async getIntelligence(callId: string) {
     return extractData(
