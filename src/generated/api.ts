@@ -1662,6 +1662,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/calls/{call_id}/metrics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Call metric values
+         * @description Latest per-call Universal Metric Store values for the call detail sidebar.
+         */
+        get: operations["list-call-metric-values"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
         parameters: {
             query?: never;
@@ -3910,6 +3930,26 @@ export interface paths {
         get: operations["get-metric-values"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metrics/{metric_key}/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate a metric once without storing it
+         * @description Execute one metric definition without persisting to UMS.
+         */
+        post: operations["evaluate-metric"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9077,6 +9117,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9096,6 +9140,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -9794,6 +9849,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9813,6 +9872,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -16631,6 +16701,42 @@ export interface components {
              */
             valid_range_min?: number | null;
         };
+        /** MetricEvaluateRequest */
+        MetricEvaluateRequest: {
+            /**
+             * As Of
+             * @description Optional point-in-time cutoff for selecting the call intelligence snapshot.
+             */
+            as_of?: string | null;
+            /**
+             * Persist
+             * @description On-demand metric evaluation never writes to metrics.metric_values.
+             * @default false
+             * @constant
+             */
+            persist?: false;
+            /**
+             * Subject Id
+             * @description CallSid, call UUID, or simulation session id
+             */
+            subject_id: string;
+        };
+        /** MetricEvaluateResponse */
+        MetricEvaluateResponse: {
+            /**
+             * Evaluated At
+             * Format: date-time
+             */
+            evaluated_at: string;
+            /** Metric */
+            metric: components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"];
+            /**
+             * Persisted
+             * @default false
+             * @constant
+             */
+            persisted?: false;
+        };
         /** MetricListResponse */
         MetricListResponse: {
             /** Metrics */
@@ -16852,6 +16958,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -16871,6 +16981,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -18425,9 +18546,9 @@ export interface components {
             total_entities?: number;
             /**
              * Total Events
-             * @default 0
+             * @description Read-model event count for the last 7 days. Null means the read model is empty or unavailable; zero means the read model is ready and has no events.
              */
-            total_events?: number;
+            total_events?: number | null;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
         };
@@ -24259,14 +24380,14 @@ export interface components {
             event_read_model_synced_at?: string | null;
             /**
              * Events 24H
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_24h?: number;
+            events_24h?: number | null;
             /**
              * Events 7D
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_7d?: number;
+            events_7d?: number | null;
             /** Sources */
             sources?: components["schemas"]["SourceBreakdownItem"][];
         };
@@ -28478,6 +28599,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-call-metric-values": {
+        parameters: {
+            query?: {
+                /** @description Max metric values to return */
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                call_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricListResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -33159,7 +33315,15 @@ export interface operations {
     };
     "list-metrics": {
         parameters: {
-            query?: never;
+            query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
+            };
             header?: never;
             path: {
                 workspace_id: string;
@@ -33175,6 +33339,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetricListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
             /** @description Rate limited */
@@ -33218,13 +33391,21 @@ export interface operations {
     "get-metric-values": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 date_from?: string | null;
                 date_to?: string | null;
                 limit?: number;
             };
             header?: never;
             path: {
-                metric_key: string;
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
                 workspace_id: string;
             };
             cookie?: never;
@@ -33258,14 +33439,85 @@ export interface operations {
             };
         };
     };
+    "evaluate-metric": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MetricEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricEvaluateResponse"];
+                };
+            };
+            /** @description Metric or call intelligence not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Metric cannot be evaluated on demand */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Metric preview query failed */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Analytics warehouse not configured */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "get-metric-trend": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 days?: number;
             };
             header?: never;
             path: {
-                metric_key: string;
+                /** @description Metric key */
+                metric_key: components["schemas"]["SlugString"];
                 workspace_id: string;
             };
             cookie?: never;

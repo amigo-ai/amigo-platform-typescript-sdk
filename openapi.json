@@ -3111,6 +3111,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -3132,6 +3154,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -5045,6 +5105,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -5066,6 +5148,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -21942,6 +22062,85 @@
         "title": "MetricDefinition",
         "type": "object"
       },
+      "MetricEvaluateRequest": {
+        "properties": {
+          "as_of": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional point-in-time cutoff for selecting the call intelligence snapshot.",
+            "title": "As Of"
+          },
+          "persist": {
+            "const": false,
+            "default": false,
+            "description": "On-demand metric evaluation never writes to metrics.metric_values.",
+            "title": "Persist",
+            "type": "boolean"
+          },
+          "subject_id": {
+            "description": "CallSid, call UUID, or simulation session id",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_id"
+        ],
+        "title": "MetricEvaluateRequest",
+        "type": "object"
+      },
+      "MetricEvaluateResponse": {
+        "properties": {
+          "evaluated_at": {
+            "format": "date-time",
+            "title": "Evaluated At",
+            "type": "string"
+          },
+          "metric": {
+            "discriminator": {
+              "mapping": {
+                "boolean": "#/components/schemas/BooleanMetricValueResponse",
+                "categorical": "#/components/schemas/CategoricalMetricValueResponse",
+                "numerical": "#/components/schemas/NumericalMetricValueResponse"
+              },
+              "propertyName": "metric_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NumericalMetricValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/CategoricalMetricValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/BooleanMetricValueResponse"
+              }
+            ],
+            "title": "Metric"
+          },
+          "persisted": {
+            "const": false,
+            "default": false,
+            "title": "Persisted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "metric",
+          "evaluated_at"
+        ],
+        "title": "MetricEvaluateResponse",
+        "type": "object"
+      },
       "MetricListResponse": {
         "properties": {
           "metrics": {
@@ -22566,6 +22765,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -22587,6 +22808,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -26933,9 +27192,16 @@
             "type": "integer"
           },
           "total_events": {
-            "default": 0,
-            "title": "Total Events",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Read-model event count for the last 7 days. Null means the read model is empty or unavailable; zero means the read model is ready and has no events.",
+            "title": "Total Events"
           },
           "uptime_seconds": {
             "anyOf": [
@@ -42173,16 +42439,30 @@
             "title": "Event Read Model Synced At"
           },
           "events_24h": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Events 24H",
-            "type": "integer"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Event count from the Lakebase read model; null when the projection is empty or unavailable.",
+            "title": "Events 24H"
           },
           "events_7d": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Events 7D",
-            "type": "integer"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Event count from the Lakebase read model; null when the projection is empty or unavailable.",
+            "title": "Events 7D"
           },
           "sources": {
             "items": {
@@ -48658,6 +48938,66 @@
           }
         },
         "summary": "Call intelligence profile (Layer 4 narrative)",
+        "tags": [
+          "Calls"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/calls/{call_id}/metrics": {
+      "get": {
+        "description": "Latest per-call Universal Metric Store values for the call detail sidebar.",
+        "operationId": "list-call-metric-values",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$",
+              "title": "Call Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max metric values to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "Max metric values to return",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call metric values",
         "tags": [
           "Calls"
         ]
@@ -55715,6 +56055,123 @@
       "get": {
         "description": "List the latest value for each metric in the workspace.\n\nPermissions: authenticated (any role).",
         "operationId": "list-metrics",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -55725,6 +56182,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           },
           "429": {
             "description": "Rate limited"
@@ -55767,12 +56234,128 @@
         "operationId": "get-metric-values",
         "parameters": [
           {
+            "description": "Metric key",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "title": "Metric Key",
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
             }
           },
           {
@@ -55853,18 +56436,193 @@
         ]
       }
     },
+    "/v1/{workspace_id}/metrics/{metric_key}/evaluate": {
+      "post": {
+        "description": "Execute one metric definition without persisting to UMS.",
+        "operationId": "evaluate-metric",
+        "parameters": [
+          {
+            "description": "Metric key",
+            "in": "path",
+            "name": "metric_key",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricEvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricEvaluateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Metric or call intelligence not found"
+          },
+          "422": {
+            "description": "Metric cannot be evaluated on demand"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "502": {
+            "description": "Metric preview query failed"
+          },
+          "503": {
+            "description": "Analytics warehouse not configured"
+          }
+        },
+        "summary": "Evaluate a metric once without storing it",
+        "tags": [
+          "Metrics"
+        ]
+      }
+    },
     "/v1/{workspace_id}/metrics/{metric_key}/trend": {
       "get": {
         "description": "Get time-series trend for a specific metric.\n\nPermissions: authenticated (any role).",
         "operationId": "get-metric-trend",
         "parameters": [
           {
+            "description": "Metric key",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "title": "Metric Key",
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
             }
           },
           {
