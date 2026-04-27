@@ -35089,8 +35089,68 @@
         "title": "ThroughputBucket",
         "type": "object"
       },
+      "TimelineActor": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "agent",
+              "human",
+              "operator",
+              "system",
+              "tool"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "participant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Id"
+          },
+          "role": {
+            "enum": [
+              "agent",
+              "caller",
+              "operator",
+              "runtime",
+              "state",
+              "tool"
+            ],
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "role",
+          "label"
+        ],
+        "title": "TimelineActor",
+        "type": "object"
+      },
       "TimelineSegment": {
         "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Actor responsible for the segment. Inferred for legacy producers."
+          },
           "audio_ttfb_ms": {
             "anyOf": [
               {
@@ -35199,6 +35259,14 @@
             "type": "string"
           },
           "lane": {
+            "enum": [
+              "agent",
+              "caller",
+              "events",
+              "operator",
+              "system",
+              "tool"
+            ],
             "title": "Lane",
             "type": "string"
           },
@@ -35283,11 +35351,44 @@
             ],
             "title": "Tool Name"
           },
+          "track": {
+            "anyOf": [
+              {
+                "enum": [
+                  "agent",
+                  "caller",
+                  "operator",
+                  "system",
+                  "tool"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Actor-semantic display track for the segment. Inferred for legacy producers.",
+            "title": "Track"
+          },
           "turn_index": {
             "title": "Turn Index",
             "type": "integer"
           },
           "type": {
+            "enum": [
+              "agent_speech",
+              "barge_in",
+              "caller_speech",
+              "filler_hesitation",
+              "filler_nav",
+              "greeting",
+              "interrupted_speech",
+              "processing_gap",
+              "silence",
+              "silence_check",
+              "state_transition",
+              "tool_call"
+            ],
             "title": "Type",
             "type": "string"
           },
@@ -64922,7 +65023,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/runs": {
       "get": {
-        "description": "Execution history \u2014 query Delta world_events for this trigger's lifecycle events.",
+        "description": "Execution history from the Lakebase entity-event timeline read model.",
         "operationId": "list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get",
         "parameters": [
           {
@@ -66243,7 +66344,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries": {
       "get": {
-        "description": "Delivery history \u2014 query Delta world_events for this destination's webhook receives.",
+        "description": "Delivery history from the Lakebase entity-event timeline read model.",
         "operationId": "list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get",
         "parameters": [
           {

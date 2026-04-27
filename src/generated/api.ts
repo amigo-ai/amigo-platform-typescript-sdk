@@ -6964,7 +6964,7 @@ export interface paths {
         };
         /**
          * List Trigger Runs
-         * @description Execution history — query Delta world_events for this trigger's lifecycle events.
+         * @description Execution history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
         put?: never;
@@ -7303,7 +7303,7 @@ export interface paths {
         };
         /**
          * List Deliveries
-         * @description Delivery history — query Delta world_events for this destination's webhook receives.
+         * @description Delivery history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
         put?: never;
@@ -21909,8 +21909,27 @@ export interface components {
             /** Source System */
             source_system?: string | null;
         };
+        /** TimelineActor */
+        TimelineActor: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "agent" | "human" | "operator" | "system" | "tool";
+            /** Label */
+            label: string;
+            /** Participant Id */
+            participant_id?: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "agent" | "caller" | "operator" | "runtime" | "state" | "tool";
+        };
         /** TimelineSegment */
         TimelineSegment: {
+            /** @description Actor responsible for the segment. Inferred for legacy producers. */
+            actor?: components["schemas"]["TimelineActor"] | null;
             /** Audio Ttfb Ms */
             audio_ttfb_ms?: number | null;
             /** Audio Window End */
@@ -21933,8 +21952,11 @@ export interface components {
             from_state?: string | null;
             /** Label */
             label: string;
-            /** Lane */
-            lane: string;
+            /**
+             * Lane
+             * @enum {string}
+             */
+            lane: "agent" | "caller" | "events" | "operator" | "system" | "tool";
             /** Nav Ms */
             nav_ms?: number | null;
             /** Render Ms */
@@ -21951,10 +21973,18 @@ export interface components {
             to_state?: string | null;
             /** Tool Name */
             tool_name?: string | null;
+            /**
+             * Track
+             * @description Actor-semantic display track for the segment. Inferred for legacy producers.
+             */
+            track?: ("agent" | "caller" | "operator" | "system" | "tool") | null;
             /** Turn Index */
             turn_index: number;
-            /** Type */
-            type: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "agent_speech" | "barge_in" | "caller_speech" | "filler_hesitation" | "filler_nav" | "greeting" | "interrupted_speech" | "processing_gap" | "silence" | "silence_check" | "state_transition" | "tool_call";
             /** Valence */
             valence?: number | null;
         };
