@@ -35,6 +35,51 @@ const CALL_DETAIL_FIXTURE = {
   escalation: null,
   safety: { flagged: false, categories: [] },
   recording: { available: true, duration_seconds: 342 },
+  timeline: {
+    duration_seconds: 4,
+    timebase: { unit: 'seconds', origin: 'media_start', start: 0, end: 4 },
+    lanes: [
+      {
+        id: 'tool:payer:eligibility:eligibility_lookup',
+        track: 'tool',
+        label: 'eligibility',
+        order: 0,
+        actor: {
+          kind: 'tool',
+          role: 'tool',
+          label: 'eligibility',
+          participant_id: 'payer:eligibility:eligibility_lookup',
+        },
+      },
+    ],
+    segments: [
+      {
+        type: 'tool_call',
+        lane: 'events',
+        lane_id: 'tool:payer:eligibility:eligibility_lookup',
+        track: 'tool',
+        actor: {
+          kind: 'tool',
+          role: 'tool',
+          label: 'eligibility',
+          participant_id: 'payer:eligibility:eligibility_lookup',
+        },
+        start: 1,
+        end: 3,
+        label: 'eligibility_lookup',
+        turn_index: 0,
+        order: 0,
+        tool_name: 'eligibility_lookup',
+        call_id: 'call-tool-1',
+        integration_name: 'payer',
+        endpoint_name: 'eligibility',
+        protocol: 'rest',
+        duration_ms: 2000,
+        succeeded: true,
+      },
+    ],
+    turns: [{ turn_index: 0, seek_to: 0, active_start: 0, active_end: 4 }],
+  },
 }
 
 const INTELLIGENCE_FIXTURE = {
@@ -125,6 +170,9 @@ describe('CallsResource', () => {
     expect(result.id).toBe(CALL_ID)
     expect(result.turns).toHaveLength(2)
     expect(result.call_duration_seconds).toBe(342)
+    expect(result.timeline?.timebase?.end).toBe(4)
+    expect(result.timeline?.lanes?.[0]?.id).toBe('tool:payer:eligibility:eligibility_lookup')
+    expect(result.timeline?.segments[0]?.lane_id).toBe('tool:payer:eligibility:eligibility_lookup')
   })
 
   it('throws NotFoundError for missing call', async () => {

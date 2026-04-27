@@ -3111,6 +3111,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -3132,6 +3154,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -5045,6 +5105,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -5066,6 +5148,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -22566,6 +22686,28 @@
             ],
             "title": "Computed At"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Type"
+          },
           "event_count": {
             "title": "Event Count",
             "type": "integer"
@@ -22587,6 +22729,44 @@
           "period_start": {
             "format": "date-time",
             "title": "Period Start",
+            "type": "string"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source": {
+            "default": "production",
+            "title": "Source",
             "type": "string"
           },
           "unit": {
@@ -26933,9 +27113,16 @@
             "type": "integer"
           },
           "total_events": {
-            "default": 0,
-            "title": "Total Events",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Read-model event count for the last 7 days. Null means the read model is empty or unavailable; zero means the read model is ready and has no events.",
+            "title": "Total Events"
           },
           "uptime_seconds": {
             "anyOf": [
@@ -27013,6 +27200,15 @@
             "title": "Duration Seconds",
             "type": "number"
           },
+          "lanes": {
+            "default": [],
+            "description": "Canonical actor/system lane model. Every segment lane_id resolves against this collection.",
+            "items": {
+              "$ref": "#/components/schemas/TimelineLaneDefinition"
+            },
+            "title": "Lanes",
+            "type": "array"
+          },
           "max_processing_gap_ms": {
             "anyOf": [
               {
@@ -27030,6 +27226,17 @@
             },
             "title": "Segments",
             "type": "array"
+          },
+          "timebase": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineTimebase"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical timebase shared by waveform, overlays, seek state, zoom, and scroll transforms."
           },
           "total_agent_speech_seconds": {
             "default": 0.0,
@@ -35138,6 +35345,58 @@
         "title": "TimelineActor",
         "type": "object"
       },
+      "TimelineLaneDefinition": {
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TimelineActor"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Actor represented by this lane when applicable."
+          },
+          "id": {
+            "description": "Stable canonical lane id used by timeline visualizations. Segments attach via TimelineSegment.lane_id; consumers should not re-infer lanes from CSS or pixel positions.",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "description": "Display label for the lane.",
+            "title": "Label",
+            "type": "string"
+          },
+          "order": {
+            "description": "Stable vertical order within the timeline lane model.",
+            "title": "Order",
+            "type": "integer"
+          },
+          "track": {
+            "description": "High-level actor-semantic track for styling and grouping.",
+            "enum": [
+              "agent",
+              "caller",
+              "operator",
+              "system",
+              "tool"
+            ],
+            "title": "Track",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "track",
+          "label",
+          "order"
+        ],
+        "title": "TimelineLaneDefinition",
+        "type": "object"
+      },
       "TimelineSegment": {
         "properties": {
           "actor": {
@@ -35184,6 +35443,17 @@
             ],
             "title": "Audio Window Start"
           },
+          "call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id"
+          },
           "duration_ms": {
             "anyOf": [
               {
@@ -35221,6 +35491,17 @@
             "title": "End",
             "type": "number"
           },
+          "endpoint_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Endpoint Name"
+          },
           "engine_ms": {
             "anyOf": [
               {
@@ -35254,6 +35535,17 @@
             ],
             "title": "From State"
           },
+          "integration_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Integration Name"
+          },
           "label": {
             "title": "Label",
             "type": "string"
@@ -35270,6 +35562,20 @@
             "title": "Lane",
             "type": "string"
           },
+          "lane_id": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical lane id. Must match PlaybackTimeline.lanes[].id after platform normalization.",
+            "title": "Lane Id"
+          },
           "nav_ms": {
             "anyOf": [
               {
@@ -35280,6 +35586,40 @@
               }
             ],
             "title": "Nav Ms"
+          },
+          "order": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical event order after platform time/lane normalization.",
+            "title": "Order"
+          },
+          "parent_call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Call Id"
+          },
+          "protocol": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Protocol"
           },
           "render_ms": {
             "anyOf": [
@@ -35413,6 +35753,42 @@
           "turn_index"
         ],
         "title": "TimelineSegment",
+        "type": "object"
+      },
+      "TimelineTimebase": {
+        "properties": {
+          "end": {
+            "default": 0.0,
+            "description": "Visible/canonical timeline range end in seconds.",
+            "title": "End",
+            "type": "number"
+          },
+          "origin": {
+            "default": "media_start",
+            "description": "Zero point used for segment start/end offsets.",
+            "enum": [
+              "media_start",
+              "call_start",
+              "synthetic"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "start": {
+            "default": 0.0,
+            "description": "Visible/canonical timeline range start in seconds.",
+            "title": "Start",
+            "type": "number"
+          },
+          "unit": {
+            "const": "seconds",
+            "default": "seconds",
+            "description": "Timeline offsets are always seconds.",
+            "title": "Unit",
+            "type": "string"
+          }
+        },
+        "title": "TimelineTimebase",
         "type": "object"
       },
       "ToolCall": {
@@ -42173,16 +42549,30 @@
             "title": "Event Read Model Synced At"
           },
           "events_24h": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Events 24H",
-            "type": "integer"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Event count from the Lakebase read model; null when the projection is empty or unavailable.",
+            "title": "Events 24H"
           },
           "events_7d": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Events 7D",
-            "type": "integer"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Event count from the Lakebase read model; null when the projection is empty or unavailable.",
+            "title": "Events 7D"
           },
           "sources": {
             "items": {
@@ -55715,6 +56105,123 @@
       "get": {
         "description": "List the latest value for each metric in the workspace.\n\nPermissions: authenticated (any role).",
         "operationId": "list-metrics",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -55725,6 +56232,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           },
           "429": {
             "description": "Rate limited"
@@ -55773,6 +56290,121 @@
             "schema": {
               "title": "Metric Key",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
             }
           },
           {
@@ -55865,6 +56497,121 @@
             "schema": {
               "title": "Metric Key",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "default": "production",
+              "enum": [
+                "production",
+                "simulation",
+                "all"
+              ],
+              "title": "Source",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "scope",
+            "required": false,
+            "schema": {
+              "default": "aggregate",
+              "enum": [
+                "aggregate",
+                "entity",
+                "all"
+              ],
+              "title": "Scope",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Entity Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "run_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 64,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Run Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "session_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Session Id"
             }
           },
           {
