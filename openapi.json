@@ -34537,7 +34537,7 @@
             "items": {
               "$ref": "#/components/schemas/SurfaceField"
             },
-            "maxItems": 100,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Fields",
             "type": "array"
