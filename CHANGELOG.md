@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.0] - 2026-04-27
+
+### Maintenance
+
+- sync API types from platform call timeline
+
 ## [0.8.0] - 2026-04-27
 
 ### Improvements
