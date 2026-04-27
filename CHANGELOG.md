@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.10.0] - 2026-04-27
+
+### Bug Fixes
+
+- harden release test workflow lookup
+
+### Maintenance
+
+- sync API types from platform (d02115a1)
+
 ## [0.9.3] - 2026-04-27
 
 ### Features
