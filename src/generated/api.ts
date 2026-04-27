@@ -6964,7 +6964,7 @@ export interface paths {
         };
         /**
          * List Trigger Runs
-         * @description Execution history — query Delta world_events for this trigger's lifecycle events.
+         * @description Execution history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
         put?: never;
@@ -7303,7 +7303,7 @@ export interface paths {
         };
         /**
          * List Deliveries
-         * @description Delivery history — query Delta world_events for this destination's webhook receives.
+         * @description Delivery history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
         put?: never;
@@ -9077,6 +9077,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9096,6 +9100,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -9794,6 +9809,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9813,6 +9832,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -16852,6 +16882,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -16871,6 +16905,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -18425,9 +18470,9 @@ export interface components {
             total_entities?: number;
             /**
              * Total Events
-             * @default 0
+             * @description Read-model event count for the last 7 days. Null means the read model is empty or unavailable; zero means the read model is ready and has no events.
              */
-            total_events?: number;
+            total_events?: number | null;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
         };
@@ -21909,8 +21954,27 @@ export interface components {
             /** Source System */
             source_system?: string | null;
         };
+        /** TimelineActor */
+        TimelineActor: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "agent" | "human" | "operator" | "system" | "tool";
+            /** Label */
+            label: string;
+            /** Participant Id */
+            participant_id?: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "agent" | "caller" | "operator" | "runtime" | "state" | "tool";
+        };
         /** TimelineSegment */
         TimelineSegment: {
+            /** @description Actor responsible for the segment. Inferred for legacy producers. */
+            actor?: components["schemas"]["TimelineActor"] | null;
             /** Audio Ttfb Ms */
             audio_ttfb_ms?: number | null;
             /** Audio Window End */
@@ -21933,8 +21997,11 @@ export interface components {
             from_state?: string | null;
             /** Label */
             label: string;
-            /** Lane */
-            lane: string;
+            /**
+             * Lane
+             * @enum {string}
+             */
+            lane: "agent" | "caller" | "events" | "operator" | "system" | "tool";
             /** Nav Ms */
             nav_ms?: number | null;
             /** Render Ms */
@@ -21951,10 +22018,18 @@ export interface components {
             to_state?: string | null;
             /** Tool Name */
             tool_name?: string | null;
+            /**
+             * Track
+             * @description Actor-semantic display track for the segment. Inferred for legacy producers.
+             */
+            track?: ("agent" | "caller" | "operator" | "system" | "tool") | null;
             /** Turn Index */
             turn_index: number;
-            /** Type */
-            type: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "agent_speech" | "barge_in" | "caller_speech" | "filler_hesitation" | "filler_nav" | "greeting" | "interrupted_speech" | "processing_gap" | "silence" | "silence_check" | "state_transition" | "tool_call";
             /** Valence */
             valence?: number | null;
         };
@@ -24229,14 +24304,14 @@ export interface components {
             event_read_model_synced_at?: string | null;
             /**
              * Events 24H
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_24h?: number;
+            events_24h?: number | null;
             /**
              * Events 7D
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_7d?: number;
+            events_7d?: number | null;
             /** Sources */
             sources?: components["schemas"]["SourceBreakdownItem"][];
         };
@@ -33129,7 +33204,14 @@ export interface operations {
     };
     "list-metrics": {
         parameters: {
-            query?: never;
+            query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
+            };
             header?: never;
             path: {
                 workspace_id: string;
@@ -33145,6 +33227,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetricListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
             /** @description Rate limited */
@@ -33188,6 +33279,12 @@ export interface operations {
     "get-metric-values": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 date_from?: string | null;
                 date_to?: string | null;
                 limit?: number;
@@ -33231,6 +33328,12 @@ export interface operations {
     "get-metric-trend": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 days?: number;
             };
             header?: never;
