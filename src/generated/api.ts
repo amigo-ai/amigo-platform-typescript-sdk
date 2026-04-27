@@ -1502,6 +1502,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/brief": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Latest Workspace Brief
+         * @description Return the latest workspace-level Self-Image brief (null shape if none).
+         */
+        get: operations["get_latest_workspace_brief_v1__workspace_id__brief_get"];
+        put?: never;
+        /**
+         * Generate Workspace Brief
+         * @description Generate a workspace-level Self-Image brief (Opus 4.7).
+         */
+        post: operations["generate_workspace_brief_v1__workspace_id__brief_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/calls": {
         parameters: {
             query?: never;
@@ -2476,7 +2500,7 @@ export interface paths {
         put?: never;
         /**
          * Generate Brief
-         * @description Generate a Self-Image brief for the target entity (PR1: patient only).
+         * @description Generate a Self-Image brief for the target entity (patient, cohort, territory, emirate, or district).
          */
         post: operations["generate_brief_v1__workspace_id__entities__entity_id__brief_post"];
         delete?: never;
@@ -9324,9 +9348,9 @@ export interface components {
             target_entity_id: string;
             /**
              * Target Entity Type
-             * @constant
+             * @enum {string}
              */
-            target_entity_type: "patient";
+            target_entity_type: "patient" | "cohort" | "workspace" | "territory" | "emirate" | "district";
             /**
              * Truncated
              * @default false
@@ -28423,6 +28447,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_latest_workspace_brief_v1__workspace_id__brief_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefResponse"];
+                };
+            };
+        };
+    };
+    generate_workspace_brief_v1__workspace_id__brief_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BriefResponse"];
                 };
             };
         };
