@@ -3320,26 +3320,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download an uploaded file
-         * @description Proxy the raw file bytes from the UC Volume back to the caller.
-         */
-        get: operations["download-intake-upload"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -3884,6 +3864,35 @@ export interface paths {
         get: operations["get-entity-memory-facts"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metering/emit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Emit Metering Event
+         * @description Emit one metering event for the calling workspace.
+         *
+         *     Scope: workspace-scoped via path param; auth via API key (same as every
+         *     other workspace route). 202 on success — emission is fire-and-forget.
+         *
+         *     ``event_type`` is a free-form string (regex-validated). Aggregation
+         *     into ``customer_meter_values`` is handled by SDP materialized views
+         *     in ``databricks/pipelines/billing.py``; an event_type with no matching
+         *     MV still lands in ``world_events`` but doesn't roll up into invoices
+         *     until someone adds an MV for it.
+         */
+        post: operations["emit-metering-event"];
         delete?: never;
         options?: never;
         head?: never;
@@ -16507,6 +16516,25 @@ export interface components {
              */
             value: string;
         };
+        /** MeteringEmitRequest */
+        MeteringEmitRequest: {
+            /** Event Type */
+            event_type: string;
+            /**
+             * Metering Metadata
+             * @description Optional audit/dispute breadcrumbs.
+             */
+            metering_metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /** Metering Quantity */
+            metering_quantity: number;
+            /**
+             * Metering Unit
+             * @description Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.
+             */
+            metering_unit?: string | null;
+        };
         /** MetricCatalogEntry */
         MetricCatalogEntry: {
             /** Builtin */
@@ -18298,8 +18326,18 @@ export interface components {
             umap_y: number;
             /** Workspace Id */
             workspace_id: string;
+            /** Y Hat Asthma 12Mo */
+            y_hat_asthma_12mo?: number | null;
+            /** Y Hat Chf 90D */
+            y_hat_chf_90d?: number | null;
+            /** Y Hat Ckd 1Yr */
+            y_hat_ckd_1yr?: number | null;
             /** Y Hat Composite */
             y_hat_composite?: number | null;
+            /** Y Hat Copd 12Mo */
+            y_hat_copd_12mo?: number | null;
+            /** Y Hat Htn 1Yr */
+            y_hat_htn_1yr?: number | null;
             /** Y Hat T2D 1Yr */
             y_hat_t2d_1yr?: number | null;
         };
@@ -32424,46 +32462,6 @@ export interface operations {
             };
         };
     };
-    "download-intake-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                link_id: string;
-                upload_id: string;
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description File bytes with Content-Disposition: attachment */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/octet-stream": string;
-                };
-            };
-            /** @description Link, upload, or file not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "list-integrations": {
         parameters: {
             query?: {
@@ -33493,6 +33491,43 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "emit-metering-event": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MeteringEmitRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
