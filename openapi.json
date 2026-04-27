@@ -7904,6 +7904,7 @@
                   "home",
                   "patients",
                   "calls",
+                  "data",
                   "analytics",
                   "pipeline",
                   "operators",
@@ -16349,6 +16350,17 @@
             ],
             "title": "Address"
           },
+          "address_line": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Address Line"
+          },
           "canonical_id": {
             "anyOf": [
               {
@@ -16360,6 +16372,28 @@
             ],
             "title": "Canonical Id"
           },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
           "entity_id": {
             "title": "Entity Id",
             "type": "string"
@@ -16368,6 +16402,17 @@
             "default": 0,
             "title": "Event Count",
             "type": "integer"
+          },
+          "facility_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Facility Id"
           },
           "hours": {
             "anyOf": [
@@ -16392,6 +16437,28 @@
             ],
             "title": "Last Event At"
           },
+          "latitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latitude"
+          },
+          "longitude": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Longitude"
+          },
           "name": {
             "anyOf": [
               {
@@ -16414,6 +16481,17 @@
             ],
             "title": "Phone"
           },
+          "postal_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Postal Code"
+          },
           "source_system": {
             "anyOf": [
               {
@@ -16424,6 +16502,28 @@
               }
             ],
             "title": "Source System"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
           }
         },
         "required": [
@@ -22060,6 +22160,85 @@
           "event_types"
         ],
         "title": "MetricDefinition",
+        "type": "object"
+      },
+      "MetricEvaluateRequest": {
+        "properties": {
+          "as_of": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional point-in-time cutoff for selecting the call intelligence snapshot.",
+            "title": "As Of"
+          },
+          "persist": {
+            "const": false,
+            "default": false,
+            "description": "On-demand metric evaluation never writes to metrics.metric_values.",
+            "title": "Persist",
+            "type": "boolean"
+          },
+          "subject_id": {
+            "description": "CallSid, call UUID, or simulation session id",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Subject Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject_id"
+        ],
+        "title": "MetricEvaluateRequest",
+        "type": "object"
+      },
+      "MetricEvaluateResponse": {
+        "properties": {
+          "evaluated_at": {
+            "format": "date-time",
+            "title": "Evaluated At",
+            "type": "string"
+          },
+          "metric": {
+            "discriminator": {
+              "mapping": {
+                "boolean": "#/components/schemas/BooleanMetricValueResponse",
+                "categorical": "#/components/schemas/CategoricalMetricValueResponse",
+                "numerical": "#/components/schemas/NumericalMetricValueResponse"
+              },
+              "propertyName": "metric_type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/NumericalMetricValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/CategoricalMetricValueResponse"
+              },
+              {
+                "$ref": "#/components/schemas/BooleanMetricValueResponse"
+              }
+            ],
+            "title": "Metric"
+          },
+          "persisted": {
+            "const": false,
+            "default": false,
+            "title": "Persisted",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "metric",
+          "evaluated_at"
+        ],
+        "title": "MetricEvaluateResponse",
         "type": "object"
       },
       "MetricListResponse": {
@@ -38111,6 +38290,7 @@
                   "home",
                   "patients",
                   "calls",
+                  "data",
                   "analytics",
                   "pipeline",
                   "operators",
@@ -49053,6 +49233,66 @@
         ]
       }
     },
+    "/v1/{workspace_id}/calls/{call_id}/metrics": {
+      "get": {
+        "description": "Latest per-call Universal Metric Store values for the call detail sidebar.",
+        "operationId": "list-call-metric-values",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "call_id",
+            "required": true,
+            "schema": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]*$",
+              "title": "Call Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Max metric values to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "Max metric values to return",
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Call metric values",
+        "tags": [
+          "Calls"
+        ]
+      }
+    },
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
       "get": {
         "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 15 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).",
@@ -50377,6 +50617,7 @@
                     "home",
                     "patients",
                     "calls",
+                    "data",
                     "analytics",
                     "pipeline",
                     "operators",
@@ -56284,12 +56525,13 @@
         "operationId": "get-metric-values",
         "parameters": [
           {
+            "description": "Metric key",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "title": "Metric Key",
-              "type": "string"
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
             }
           },
           {
@@ -56485,18 +56727,78 @@
         ]
       }
     },
+    "/v1/{workspace_id}/metrics/{metric_key}/evaluate": {
+      "post": {
+        "description": "Execute one metric definition without persisting to UMS.",
+        "operationId": "evaluate-metric",
+        "parameters": [
+          {
+            "description": "Metric key",
+            "in": "path",
+            "name": "metric_key",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MetricEvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MetricEvaluateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Metric or call intelligence not found"
+          },
+          "422": {
+            "description": "Metric cannot be evaluated on demand"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "502": {
+            "description": "Metric preview query failed"
+          },
+          "503": {
+            "description": "Analytics warehouse not configured"
+          }
+        },
+        "summary": "Evaluate a metric once without storing it",
+        "tags": [
+          "Metrics"
+        ]
+      }
+    },
     "/v1/{workspace_id}/metrics/{metric_key}/trend": {
       "get": {
         "description": "Get time-series trend for a specific metric.\n\nPermissions: authenticated (any role).",
         "operationId": "get-metric-trend",
         "parameters": [
           {
+            "description": "Metric key",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "title": "Metric Key",
-              "type": "string"
+              "$ref": "#/components/schemas/SlugString",
+              "description": "Metric key"
             }
           },
           {
