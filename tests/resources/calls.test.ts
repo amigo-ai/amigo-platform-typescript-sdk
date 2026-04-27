@@ -125,6 +125,8 @@ const client = new AmigoClient({
 
     [`GET ${BASE}/calls/${CALL_ID}`]: () => Response.json(CALL_DETAIL_FIXTURE),
 
+    [`GET ${BASE}/calls/${CALL_ID}/timeline`]: () => Response.json(CALL_DETAIL_FIXTURE.timeline),
+
     [`GET ${BASE}/calls/not-found`]: () =>
       Response.json({ detail: 'Call not found', error_code: 'not_found' }, { status: 404 }),
 
@@ -177,6 +179,13 @@ describe('CallsResource', () => {
 
   it('throws NotFoundError for missing call', async () => {
     await expect(client.calls.get('not-found')).rejects.toThrow(NotFoundError)
+  })
+
+  it('gets a call timeline by id', async () => {
+    const result = await client.calls.getTimeline(CALL_ID)
+    expect(result.timebase?.end).toBe(4)
+    expect(result.lanes?.[0]?.id).toBe('tool:payer:eligibility:eligibility_lookup')
+    expect(result.segments[0]?.lane_id).toBe('tool:payer:eligibility:eligibility_lookup')
   })
 
   it('gets call intelligence', async () => {

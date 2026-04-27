@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.9.1] - 2026-04-27
+
+### Improvements
+
+- Add typed `client.calls.getTimeline(callId)` for the canonical call playback timeline endpoint.
+
 ## [0.9.0] - 2026-04-27
 
 ### Maintenance
