@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.9.3] - 2026-04-27
+
+### Features
+
+- publish scribe clinical settings in sdk (#99)
+
+### Improvements
+
+- Sync platform API types
+
 ## [0.9.1] - 2026-04-27
 
 ### Improvements
