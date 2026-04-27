@@ -6964,7 +6964,7 @@ export interface paths {
         };
         /**
          * List Trigger Runs
-         * @description Execution history — query Delta world_events for this trigger's lifecycle events.
+         * @description Execution history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
         put?: never;
@@ -7303,7 +7303,7 @@ export interface paths {
         };
         /**
          * List Deliveries
-         * @description Delivery history — query Delta world_events for this destination's webhook receives.
+         * @description Delivery history from the Lakebase entity-event timeline read model.
          */
         get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
         put?: never;

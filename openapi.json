@@ -64922,7 +64922,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/runs": {
       "get": {
-        "description": "Execution history \u2014 query Delta world_events for this trigger's lifecycle events.",
+        "description": "Execution history from the Lakebase entity-event timeline read model.",
         "operationId": "list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get",
         "parameters": [
           {
@@ -66243,7 +66243,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries": {
       "get": {
-        "description": "Delivery history \u2014 query Delta world_events for this destination's webhook receives.",
+        "description": "Delivery history from the Lakebase entity-event timeline read model.",
         "operationId": "list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get",
         "parameters": [
           {
