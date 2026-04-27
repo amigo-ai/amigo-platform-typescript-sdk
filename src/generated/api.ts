@@ -9077,6 +9077,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9096,6 +9100,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -9794,6 +9809,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -9813,6 +9832,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -16852,6 +16882,10 @@ export interface components {
             avg_confidence?: number | null;
             /** Computed At */
             computed_at?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Entity Type */
+            entity_type?: string | null;
             /** Event Count */
             event_count: number;
             /** Metric Key */
@@ -16871,6 +16905,17 @@ export interface components {
              * Format: date-time
              */
             period_start: string;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             */
+            source?: string;
             /** Unit */
             unit?: string | null;
             /** Value */
@@ -18425,9 +18470,9 @@ export interface components {
             total_entities?: number;
             /**
              * Total Events
-             * @default 0
+             * @description Read-model event count for the last 7 days. Null means the read model is empty or unavailable; zero means the read model is ready and has no events.
              */
-            total_events?: number;
+            total_events?: number | null;
             /** Uptime Seconds */
             uptime_seconds?: number | null;
         };
@@ -18453,10 +18498,18 @@ export interface components {
             avg_processing_gap_ms?: number | null;
             /** Duration Seconds */
             duration_seconds: number;
+            /**
+             * Lanes
+             * @description Canonical actor/system lane model. Every segment lane_id resolves against this collection.
+             * @default []
+             */
+            lanes?: components["schemas"]["TimelineLaneDefinition"][];
             /** Max Processing Gap Ms */
             max_processing_gap_ms?: number | null;
             /** Segments */
             segments: components["schemas"]["TimelineSegment"][];
+            /** @description Canonical timebase shared by waveform, overlays, seek state, zoom, and scroll transforms. */
+            timebase?: components["schemas"]["TimelineTimebase"] | null;
             /**
              * Total Agent Speech Seconds
              * @default 0
@@ -21926,6 +21979,32 @@ export interface components {
              */
             role: "agent" | "caller" | "operator" | "runtime" | "state" | "tool";
         };
+        /** TimelineLaneDefinition */
+        TimelineLaneDefinition: {
+            /** @description Actor represented by this lane when applicable. */
+            actor?: components["schemas"]["TimelineActor"] | null;
+            /**
+             * Id
+             * @description Stable canonical lane id used by timeline visualizations. Segments attach via TimelineSegment.lane_id; consumers should not re-infer lanes from CSS or pixel positions.
+             */
+            id: string;
+            /**
+             * Label
+             * @description Display label for the lane.
+             */
+            label: string;
+            /**
+             * Order
+             * @description Stable vertical order within the timeline lane model.
+             */
+            order: number;
+            /**
+             * Track
+             * @description High-level actor-semantic track for styling and grouping.
+             * @enum {string}
+             */
+            track: "agent" | "caller" | "operator" | "system" | "tool";
+        };
         /** TimelineSegment */
         TimelineSegment: {
             /** @description Actor responsible for the segment. Inferred for legacy producers. */
@@ -21936,6 +22015,8 @@ export interface components {
             audio_window_end?: number | null;
             /** Audio Window Start */
             audio_window_start?: number | null;
+            /** Call Id */
+            call_id?: string | null;
             /** Duration Ms */
             duration_ms?: number | null;
             /** E2E Ttfb Ms */
@@ -21944,12 +22025,16 @@ export interface components {
             emotion?: string | null;
             /** End */
             end: number;
+            /** Endpoint Name */
+            endpoint_name?: string | null;
             /** Engine Ms */
             engine_ms?: number | null;
             /** Eot Confidence */
             eot_confidence?: number | null;
             /** From State */
             from_state?: string | null;
+            /** Integration Name */
+            integration_name?: string | null;
             /** Label */
             label: string;
             /**
@@ -21957,8 +22042,22 @@ export interface components {
              * @enum {string}
              */
             lane: "agent" | "caller" | "events" | "operator" | "system" | "tool";
+            /**
+             * Lane Id
+             * @description Canonical lane id. Must match PlaybackTimeline.lanes[].id after platform normalization.
+             */
+            lane_id?: string | null;
             /** Nav Ms */
             nav_ms?: number | null;
+            /**
+             * Order
+             * @description Canonical event order after platform time/lane normalization.
+             */
+            order?: number | null;
+            /** Parent Call Id */
+            parent_call_id?: string | null;
+            /** Protocol */
+            protocol?: string | null;
             /** Render Ms */
             render_ms?: number | null;
             /** Start */
@@ -21987,6 +22086,35 @@ export interface components {
             type: "agent_speech" | "barge_in" | "caller_speech" | "filler_hesitation" | "filler_nav" | "greeting" | "interrupted_speech" | "processing_gap" | "silence" | "silence_check" | "state_transition" | "tool_call";
             /** Valence */
             valence?: number | null;
+        };
+        /** TimelineTimebase */
+        TimelineTimebase: {
+            /**
+             * End
+             * @description Visible/canonical timeline range end in seconds.
+             * @default 0
+             */
+            end?: number;
+            /**
+             * Origin
+             * @description Zero point used for segment start/end offsets.
+             * @default media_start
+             * @enum {string}
+             */
+            origin?: "media_start" | "call_start" | "synthetic";
+            /**
+             * Start
+             * @description Visible/canonical timeline range start in seconds.
+             * @default 0
+             */
+            start?: number;
+            /**
+             * Unit
+             * @description Timeline offsets are always seconds.
+             * @default seconds
+             * @constant
+             */
+            unit?: "seconds";
         };
         /** ToolCall */
         ToolCall: {
@@ -24259,14 +24387,14 @@ export interface components {
             event_read_model_synced_at?: string | null;
             /**
              * Events 24H
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_24h?: number;
+            events_24h?: number | null;
             /**
              * Events 7D
-             * @default 0
+             * @description Event count from the Lakebase read model; null when the projection is empty or unavailable.
              */
-            events_7d?: number;
+            events_7d?: number | null;
             /** Sources */
             sources?: components["schemas"]["SourceBreakdownItem"][];
         };
@@ -33159,7 +33287,15 @@ export interface operations {
     };
     "list-metrics": {
         parameters: {
-            query?: never;
+            query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
+            };
             header?: never;
             path: {
                 workspace_id: string;
@@ -33175,6 +33311,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetricListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
             /** @description Rate limited */
@@ -33218,6 +33363,13 @@ export interface operations {
     "get-metric-values": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 date_from?: string | null;
                 date_to?: string | null;
                 limit?: number;
@@ -33261,6 +33413,13 @@ export interface operations {
     "get-metric-trend": {
         parameters: {
             query?: {
+                source?: "production" | "simulation" | "all";
+                scope?: "aggregate" | "entity" | "all";
+                entity_type?: string | null;
+                entity_id?: string | null;
+                service_id?: string | null;
+                run_id?: string | null;
+                session_id?: string | null;
                 days?: number;
             };
             header?: never;
