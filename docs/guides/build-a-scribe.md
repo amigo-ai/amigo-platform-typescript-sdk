@@ -37,19 +37,24 @@ const client = new AmigoClient({
 const settings = await client.settings.scribe.get()
 console.log('Scribe enabled:', settings.enabled)
 console.log('SOAP style:', settings.soap_style)
+console.log('Language:', settings.language)
+console.log('STT keyterms:', settings.keyterms)
 console.log('Authorized clinicians:', settings.authorized_clinicians.length)
 
-// Enable scribe and add a clinician
+// Enable scribe, clinical STT controls, and clinician access.
 await client.settings.scribe.update({
   enabled: true,
   soap_style: 'detailed',
+  language: 'es',
+  keyterms: ['metformin', 'Ozempic', 'Dr. Ramirez'],
+  specialty: 'Primary care',
+  custom_instructions: 'Prefer concise assessment bullets and preserve quoted patient goals.',
   voice_auth_enabled: true,
   authorized_clinicians: [
     {
       email: 'dr.smith@clinic.com',
       name: 'Dr. Sarah Smith',
-      npi: '1234567890',
-      specialty: 'Internal Medicine',
+      role: 'clinician',
     },
   ],
 })
