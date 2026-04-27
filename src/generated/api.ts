@@ -19941,12 +19941,22 @@ export interface components {
             /** Authorized Clinicians */
             authorized_clinicians?: components["schemas"]["ScribeClinician"][] | null;
             cds?: components["schemas"]["ScribeCdsConfig"] | null;
+            /** Custom Instructions */
+            custom_instructions?: string | null;
             /** Enabled */
             enabled?: boolean | null;
+            /** Keyterms */
+            keyterms?: string[] | null;
+            /** Language */
+            language?: string | null;
             post_encounter?: components["schemas"]["ScribePostEncounterConfig"] | null;
             safety?: components["schemas"]["ScribeSafetyConfig"] | null;
             /** Soap Style */
             soap_style?: ("concise" | "detailed" | "structured") | null;
+            /** Specialty */
+            specialty?: string | null;
+            /** Tools Enabled */
+            tools_enabled?: string[] | null;
             /** Voice Auth Enabled */
             voice_auth_enabled?: boolean | null;
         };
@@ -19955,8 +19965,17 @@ export interface components {
             /** Authorized Clinicians */
             authorized_clinicians: components["schemas"]["ScribeClinician"][];
             cds?: components["schemas"]["ScribeCdsConfig"];
+            /** Custom Instructions */
+            custom_instructions?: string | null;
             /** Enabled */
             enabled: boolean;
+            /** Keyterms */
+            keyterms?: string[];
+            /**
+             * Language
+             * @default en
+             */
+            language?: string;
             post_encounter?: components["schemas"]["ScribePostEncounterConfig"];
             safety?: components["schemas"]["ScribeSafetyConfig"];
             /**
@@ -19965,6 +19984,10 @@ export interface components {
              * @enum {string}
              */
             soap_style?: "concise" | "detailed" | "structured";
+            /** Specialty */
+            specialty?: string | null;
+            /** Tools Enabled */
+            tools_enabled?: string[] | null;
             /**
              * Voice Auth Enabled
              * @default false

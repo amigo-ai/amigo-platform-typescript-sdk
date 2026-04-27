@@ -41,6 +41,36 @@ const SECURITY_FIXTURE = {
   voice_auth_enabled: true,
 }
 
+const SCRIBE_SETTINGS_FIXTURE = {
+  enabled: true,
+  authorized_clinicians: [{ email: 'doctor@example.com', name: 'Dr. Example', role: 'clinician' }],
+  language: 'en',
+  keyterms: ['metformin', 'A1C'],
+  specialty: 'Primary care',
+  custom_instructions: null,
+  soap_style: 'structured',
+  safety: {
+    drug_interaction_checking: true,
+    allergy_cross_reference: true,
+    crisis_detection: true,
+    vital_range_alerting: true,
+  },
+  cds: {
+    care_gap_surfacing: true,
+    icd10_auto_suggest: true,
+    guideline_matching: false,
+    documentation_completeness: true,
+  },
+  post_encounter: {
+    auto_polish_note: true,
+    order_preparation: false,
+    education_materials: false,
+    follow_up_surface: false,
+  },
+  tools_enabled: null,
+  voice_auth_enabled: true,
+}
+
 const RETENTION_FIXTURE = {
   call_recordings_days: 365,
   call_transcripts_days: 730,
@@ -111,6 +141,11 @@ const client = new AmigoClient({
     [`GET ${BASE}/settings/security`]: () => Response.json(SECURITY_FIXTURE),
 
     [`PUT ${BASE}/settings/security`]: () => Response.json({ voice_auth_enabled: false }),
+
+    [`GET ${BASE}/settings/scribe`]: () => Response.json(SCRIBE_SETTINGS_FIXTURE),
+
+    [`PUT ${BASE}/settings/scribe`]: () =>
+      Response.json({ ...SCRIBE_SETTINGS_FIXTURE, language: 'es', keyterms: ['Ozempic'] }),
 
     [`GET ${BASE}/settings/retention`]: () => Response.json(RETENTION_FIXTURE),
 
@@ -192,6 +227,25 @@ describe('SettingsResource', () => {
     it('updates security settings', async () => {
       const result = await client.settings.security.update({ voice_auth_enabled: false } as never)
       expect(result.voice_auth_enabled).toBe(false)
+    })
+  })
+
+  describe('scribe', () => {
+    it('gets clinical scribe settings', async () => {
+      const result = await client.settings.scribe.get()
+      expect(result.enabled).toBe(true)
+      expect(result.language).toBe('en')
+      expect(result.keyterms).toEqual(['metformin', 'A1C'])
+      expect(result.soap_style).toBe('structured')
+    })
+
+    it('updates clinical scribe ASR controls', async () => {
+      const result = await client.settings.scribe.update({
+        language: 'es',
+        keyterms: ['Ozempic'],
+      })
+      expect(result.language).toBe('es')
+      expect(result.keyterms).toEqual(['Ozempic'])
     })
   })
 

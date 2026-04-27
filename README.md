@@ -483,7 +483,13 @@ Build ambient clinical documentation tools. The SDK covers encounter review acti
 ```typescript
 // Configure scribe settings
 const settings = await client.settings.scribe.get()
-await client.settings.scribe.update({ enabled: true, soap_style: 'detailed' })
+await client.settings.scribe.update({
+  enabled: true,
+  soap_style: 'detailed',
+  language: 'es',
+  keyterms: ['metformin', 'Ozempic', 'Dr. Ramirez'],
+  specialty: 'Primary care',
+})
 
 // Approve ICD-10 codes after physician review
 await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve', {

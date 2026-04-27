@@ -30196,6 +30196,18 @@
               }
             ]
           },
+          "custom_instructions": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Instructions"
+          },
           "enabled": {
             "anyOf": [
               {
@@ -30206,6 +30218,32 @@
               }
             ],
             "title": "Enabled"
+          },
+          "keyterms": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyterms"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
           },
           "post_encounter": {
             "anyOf": [
@@ -30243,6 +30281,32 @@
             ],
             "title": "Soap Style"
           },
+          "specialty": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialty"
+          },
+          "tools_enabled": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tools Enabled"
+          },
           "voice_auth_enabled": {
             "anyOf": [
               {
@@ -30270,9 +30334,34 @@
           "cds": {
             "$ref": "#/components/schemas/ScribeCdsConfig"
           },
+          "custom_instructions": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Custom Instructions"
+          },
           "enabled": {
             "title": "Enabled",
             "type": "boolean"
+          },
+          "keyterms": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Keyterms",
+            "type": "array"
+          },
+          "language": {
+            "default": "en",
+            "maxLength": 16,
+            "title": "Language",
+            "type": "string"
           },
           "post_encounter": {
             "$ref": "#/components/schemas/ScribePostEncounterConfig"
@@ -30289,6 +30378,32 @@
             ],
             "title": "Soap Style",
             "type": "string"
+          },
+          "specialty": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specialty"
+          },
+          "tools_enabled": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tools Enabled"
           },
           "voice_auth_enabled": {
             "default": false,
