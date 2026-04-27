@@ -63,7 +63,7 @@ import { SafetyResource } from './resources/safety.js'
 import { ComplianceResource } from './resources/compliance.js'
 import { FunctionsResource } from './resources/functions.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
-import type { paths } from './generated/api.js'
+import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
 import { withResponse, type AmigoResponse } from './core/utils.js'
 
@@ -470,6 +470,20 @@ export type {
 } from './resources/metrics.js'
 /** @deprecated Use `MetricValue` instead. */
 export type MetricValueResponse = MetricValueAlias
+
+export type CallSummary = components['schemas']['CallSummary']
+export type CallDetail = components['schemas']['CallDetailResponse']
+export type CallTurn = components['schemas']['Turn']
+export type CallToolCall = components['schemas']['ToolCall']
+export type PlaybackTimeline = components['schemas']['PlaybackTimeline']
+export type TimelineActor = components['schemas']['TimelineActor']
+export type TimelineSegment = components['schemas']['TimelineSegment']
+export type TurnTimeline = components['schemas']['TurnTimeline']
+export type TimelineSegmentType = TimelineSegment['type']
+export type TimelineLane = TimelineSegment['lane']
+export type TimelineTrack = NonNullable<TimelineSegment['track']>
+export type TimelineActorKind = TimelineActor['kind']
+export type TimelineActorRole = TimelineActor['role']
 
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'
