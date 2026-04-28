@@ -70,9 +70,9 @@ async function main() {
   console.log(`\nAuthenticated for workspace ${result.workspaceId}`)
   console.log(`Token expires at ${new Date(result.expiresAt * 1000).toISOString()}`)
 
-  // Use the token with AmigoClient
+  // Use the token with AmigoClient (JWT is passed as apiKey — Bearer auth)
   const client = new AmigoClient({
-    accessToken: result.accessToken,
+    apiKey: result.accessToken,
     workspaceId: result.workspaceId,
   })
 

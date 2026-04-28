@@ -116,7 +116,7 @@ const tokens = new TokenManager({ storage: new FileTokenStorage() })
 await tokens.store(result)
 
 // Use the token
-const client = new AmigoClient({ accessToken: result.accessToken, workspaceId: result.workspaceId })
+const client = new AmigoClient({ apiKey: result.accessToken, workspaceId: result.workspaceId })
 ```
 
 See [`examples/auth/device-code-login.ts`](./examples/auth/device-code-login.ts) for a complete working example.
@@ -125,8 +125,7 @@ See [`examples/auth/device-code-login.ts`](./examples/auth/device-code-login.ts)
 
 | Option        | Type           | Required | Description                                                          |
 | ------------- | -------------- | -------- | -------------------------------------------------------------------- |
-| `apiKey`      | `string`       | \*       | Your Platform API key — create one at Workspace Settings > API Keys  |
-| `accessToken` | `string`       | \*       | JWT from device code flow or token exchange (\*one of apiKey/accessToken required) |
+| `apiKey`      | `string`       | Yes      | API key or JWT from device code flow (Bearer auth)                   |
 | `workspaceId` | `string`       | Yes      | Your workspace ID — all resource operations are scoped to this       |
 | `baseUrl`     | `string`       | No       | Override the API base URL (default: `https://api.platform.amigo.ai`) |
 | `retry`       | `RetryOptions` | No       | Retry configuration for transient failures                           |
