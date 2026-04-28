@@ -104,7 +104,7 @@ describe('ConversationsResource', () => {
 
     expect(url.protocol).toBe('wss:')
     expect(url.host).toBe('api.example.com')
-    expect(url.pathname).toBe('/voice-agent/agent/text-stream')
+    expect(url.pathname).toBe('/agent/text-stream')
     expect(url.searchParams.get('workspace_id')).toBe(TEST_WORKSPACE_ID)
     expect(url.searchParams.get('service_id')).toBe('svc-1')
     expect(url.searchParams.get('conversation_id')).toBe('00000000-0000-4000-8000-000000000001')
@@ -122,7 +122,7 @@ describe('ConversationsResource', () => {
 
     expect(url.protocol).toBe('ws:')
     expect(url.host).toBe('localhost:8000')
-    expect(url.pathname).toBe('/voice-agent/agent/text-stream')
+    expect(url.pathname).toBe('/agent/text-stream')
   })
 
   it('supports preview/custom text-stream URL overrides', () => {
@@ -135,7 +135,7 @@ describe('ConversationsResource', () => {
     const url = new URL(
       client.conversations.textStreamUrl({
         serviceId: 'svc-1',
-        textStreamUrl: 'wss://preview-123.platform.example.com/voice-agent/agent/text-stream',
+        textStreamUrl: 'wss://preview-123.platform.example.com/agent/text-stream',
       }),
     )
 
@@ -174,7 +174,7 @@ describe('ConversationsResource', () => {
       client.conversations.textStreamUrl({
         serviceId: 'svc-1',
         textStreamUrl:
-          'wss://preview-123.platform.example.com/voice-agent/agent/text-stream?workspace_id=wrong&service_id=wrong&conversation_id=wrong#frag',
+          'wss://preview-123.platform.example.com/agent/text-stream?workspace_id=wrong&service_id=wrong&conversation_id=wrong#frag',
       }),
     )
 
@@ -206,7 +206,7 @@ describe('ConversationsResource', () => {
     expect(() =>
       client.conversations.textStreamUrl({
         serviceId: 'svc-1',
-        textStreamUrl: '/voice-agent/agent/text-stream',
+        textStreamUrl: '/agent/text-stream',
       }),
     ).toThrow(ConfigurationError)
   })

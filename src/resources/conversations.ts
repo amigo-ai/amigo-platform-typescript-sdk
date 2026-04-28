@@ -22,7 +22,7 @@ export interface TextStreamUrlParams {
   token?: string
   /**
    * Full text-stream URL override for preview/custom ingress.
-   * Defaults to `${baseUrl origin}/voice-agent/agent/text-stream` with
+   * Defaults to `${baseUrl origin}/agent/text-stream` with
    * `http` mapped to `ws` and `https` mapped to `wss`.
    */
   textStreamUrl?: string
@@ -150,7 +150,7 @@ function deriveTextStreamUrl(baseUrl: string): URL {
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
   // Text streaming is served by agent-engine ingress, regardless of any REST
   // API path segments on the configured base URL.
-  url.pathname = '/voice-agent/agent/text-stream'
+  url.pathname = '/agent/text-stream'
   url.search = ''
   url.hash = ''
   return url
