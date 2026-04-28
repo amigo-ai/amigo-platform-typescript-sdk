@@ -53,7 +53,7 @@ export type DeviceCodeStatus =
   | 'slow_down'
 
 export interface DeviceCodeLoginOptions {
-  /** Identity service base URL. Default: https://identity.platform.amigo.ai */
+  /** Identity service base URL. Default: https://api.platform.amigo.ai */
   identityBaseUrl?: string
   /** Pre-select workspace (skips workspace selection prompt) */
   workspaceId?: string
@@ -124,7 +124,7 @@ export class LoginCancelledError extends AmigoError {
 
 // --- Identity Client ---
 
-const DEFAULT_IDENTITY_URL = 'https://identity.platform.amigo.ai'
+const DEFAULT_IDENTITY_URL = 'https://api.platform.amigo.ai'
 
 async function identityPost(
   baseUrl: string,
