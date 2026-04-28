@@ -160,7 +160,9 @@ async function requestDeviceCode(
 
   if (res.status === 429) {
     const retryAfter = parseInt(res.headers.get('Retry-After') ?? '', 10)
-    throw new RateLimitError('Rate limited', { retryAfter: isNaN(retryAfter) ? undefined : retryAfter })
+    throw new RateLimitError('Rate limited', {
+      retryAfter: isNaN(retryAfter) ? undefined : retryAfter,
+    })
   }
   if (!res.ok) {
     const err = (await res.json().catch(() => ({}))) as Record<string, string>
@@ -193,7 +195,8 @@ async function pollDeviceCode(
 
   if (res.status === 300)
     return { type: 'multi_workspace', data: (await res.json()) as MultiWorkspaceResponse }
-  if (res.status === 200) return { type: 'token', data: (await res.json()) as IdentityTokenResponse }
+  if (res.status === 200)
+    return { type: 'token', data: (await res.json()) as IdentityTokenResponse }
 
   if (res.status === 400) {
     const err = (await res.json().catch(() => ({ error: 'unknown' }))) as Record<string, string>
@@ -277,7 +280,11 @@ function toAuthResult(token: IdentityTokenResponse, workspaceIdOverride?: string
     accessToken: token.access_token,
     refreshToken: token.refresh_token ?? '',
     workspaceId,
-    expiresAt: (claims?.exp as number) ?? (token.expires_in ? Math.floor(Date.now() / 1000) + token.expires_in : Math.floor(Date.now() / 1000) + 900),
+    expiresAt:
+      (claims?.exp as number) ??
+      (token.expires_in
+        ? Math.floor(Date.now() / 1000) + token.expires_in
+        : Math.floor(Date.now() / 1000) + 900),
     scope: token.scope,
   }
 }
@@ -331,7 +338,11 @@ async function resolveWorkspaceFromBootstrap(
   if (workspaces.length === 1 && workspaces[0]) {
     const scoped = await doRefreshToken(
       baseUrl,
-      { refreshToken: token.refresh_token, workspaceId: workspaces[0].workspace_id, scope: options.scope },
+      {
+        refreshToken: token.refresh_token,
+        workspaceId: workspaces[0].workspace_id,
+        scope: options.scope,
+      },
       fetchFn,
     )
     return toAuthResult(scoped, workspaces[0].workspace_id)
@@ -353,7 +364,9 @@ async function resolveWorkspaceFromMulti(
   fetchFn: typeof globalThis.fetch,
 ): Promise<AuthResult> {
   if (!multi.refresh_token) {
-    throw new AmigoError('Multi-workspace response missing refresh_token', { errorCode: 'server_error' })
+    throw new AmigoError('Multi-workspace response missing refresh_token', {
+      errorCode: 'server_error',
+    })
   }
 
   const workspaceId = await options.onWorkspaceRequired(multi.workspaces)
@@ -391,7 +404,13 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
     options.onStatus?.('polling')
 
     try {
-      const result = await pollDeviceCode(baseUrl, issuance.device_code, options.scope, options.workspaceId, fetchFn)
+      const result = await pollDeviceCode(
+        baseUrl,
+        issuance.device_code,
+        options.scope,
+        options.workspaceId,
+        fetchFn,
+      )
 
       if (result.type === 'pending') {
         options.onStatus?.('authorization_pending')
@@ -409,13 +428,17 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
 
       if (result.type === 'token') {
         const claims = decodeJwtPayload(result.data.access_token)
-        const isBootstrap = claims?.workspace_bootstrap || !(claims?.workspace_id)
+        const isBootstrap = claims?.workspace_bootstrap || !claims?.workspace_id
         if (isBootstrap && result.data.refresh_token) {
           // Bootstrap token — need workspace selection via refresh_token exchange
           if (options.workspaceId) {
             const scoped = await doRefreshToken(
               baseUrl,
-              { refreshToken: result.data.refresh_token, workspaceId: options.workspaceId, scope: options.scope },
+              {
+                refreshToken: result.data.refresh_token,
+                workspaceId: options.workspaceId,
+                scope: options.scope,
+              },
               fetchFn,
             )
             return toAuthResult(scoped, options.workspaceId)
@@ -520,7 +543,11 @@ export class TokenManager {
     try {
       const response = await doRefreshToken(
         this._baseUrl,
-        { refreshToken: current.refresh_token, workspaceId: current.workspace_id, scope: current.scope },
+        {
+          refreshToken: current.refresh_token,
+          workspaceId: current.workspace_id,
+          scope: current.scope,
+        },
         this._fetch,
       )
       const claims = decodeJwtPayload(response.access_token)
@@ -535,7 +562,10 @@ export class TokenManager {
       await this._storage.save(refreshed)
       return refreshed
     } catch (err) {
-      if (err instanceof AmigoError && (err.statusCode === 401 || err.errorCode === 'invalid_grant')) {
+      if (
+        err instanceof AmigoError &&
+        (err.statusCode === 401 || err.errorCode === 'invalid_grant')
+      ) {
         await this.clear()
         throw new RefreshTokenExpiredError()
       }

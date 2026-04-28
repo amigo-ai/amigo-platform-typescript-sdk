@@ -45,6 +45,11 @@ const clientMethods = collectPublicMethodNames(clientClass).filter(
   (name) => name === 'withOptions' || name === name.toUpperCase(),
 )
 const exportMap = collectExportMap(indexSource)
+const conversationHelperExports = requireExportNames(
+  exportMap.values,
+  './resources/conversations.js',
+)
+const conversationTypeExports = requireExportNames(exportMap.types, './resources/conversations.js')
 const resourceEntries = clientFields
   .filter((field) => !['workspaceId', 'baseUrl'].includes(field.name))
   .map((field) => {
@@ -95,6 +100,8 @@ const markdown = await prettier.format(
     `- Request option types: ${formatNames(exportMap.types.get('./core/request-options.js'))}`,
     `- Webhooks: ${formatNames(exportMap.values.get('./core/webhooks.js'))}`,
     `- Pagination and response helpers: ${formatNames(exportMap.values.get('./core/utils.js'))}`,
+    `- Conversation helpers: ${formatNames(conversationHelperExports)}`,
+    `- Conversation types: ${formatConversationTypeNames(conversationTypeExports)}`,
     `- Response and hook types: ${formatNames(
       [
         ...(exportMap.types.get('./core/utils.js') ?? []),
@@ -258,4 +265,24 @@ function filterNames(names = [], predicate) {
 
 function formatNames(names = []) {
   return names.map((name) => `\`${name}\``).join(', ')
+}
+
+function formatConversationTypeNames(names = []) {
+  return names
+    .map((name) =>
+      name === 'TextStreamAuthProtocols'
+        ? `\`${name}\` (WebSocket constructor subprotocol tuple)`
+        : `\`${name}\``,
+    )
+    .join(', ')
+}
+
+function requireExportNames(map, moduleName) {
+  const names = map.get(moduleName)
+  if (!names?.length) {
+    throw new Error(
+      `Expected public exports from ${moduleName}; known modules: ${[...map.keys()].join(', ')}`,
+    )
+  }
+  return names
 }
