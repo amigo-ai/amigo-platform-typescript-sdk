@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.17.0] - 2026-04-28
+
+### Features
+
+- add toolEvents SDK param and text-chat reference app
+- add text chat reference example and guide (#123)
+
+### Bug Fixes
+
+- add @types/ws dev dependency for example typechecking
+
 ## [0.16.0] - 2026-04-28
 
 ### Features
