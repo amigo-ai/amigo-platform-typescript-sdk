@@ -10144,6 +10144,15 @@ export interface components {
             status: "accepted" | "skipped";
         };
         /**
+         * ChannelKind
+         * @description HSM execution channel type.
+         *
+         *     Determines how the HSM engine communicates with end users.
+         *     Each kind maps to one or more providers.
+         * @enum {string}
+         */
+        ChannelKind: "voice" | "sms" | "whatsapp" | "imessage" | "email" | "web" | "scribe";
+        /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
          */
@@ -10909,6 +10918,35 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** ConversationActorStartFailedRequest */
+        ConversationActorStartFailedRequest: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+        };
+        /** ConversationActorStartFailedResponse */
+        ConversationActorStartFailedResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Rolled Back */
+            rolled_back: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** ConversationConfig */
         ConversationConfig: {
             /** Agent Id */
@@ -10938,6 +10976,64 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** ConversationReactivationResponse */
+        ConversationReactivationResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "reactivated";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** ConversationStateSaveRequest */
+        ConversationStateSaveRequest: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Resume At */
+            resume_at?: string | null;
+            /** State */
+            state: {
+                [key: string]: unknown;
+            };
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+        };
+        /** ConversationStateSaveResponse */
+        ConversationStateSaveResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /**
          * ConversationSummary
          * @description Conversation flow metrics.
@@ -10966,6 +11062,51 @@ export interface components {
              * @default 0
              */
             topic_changes?: number;
+        };
+        /** ConversationThreadRequest */
+        ConversationThreadRequest: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            /** Entity Id */
+            entity_id?: string | null;
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+        };
+        /** ConversationThreadResponse */
+        ConversationThreadResponse: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Created */
+            created: boolean;
+            /** Created At */
+            created_at: number;
+            /** Entity Id */
+            entity_id?: string | null;
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+            /** Reactivated */
+            reactivated: boolean;
+            /** State */
+            state: {
+                [key: string]: unknown;
+            };
+            /**
+             * Status
+             * @constant
+             */
+            status: "active";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** ConvertEnvironmentRequest */
         ConvertEnvironmentRequest: {
@@ -19169,6 +19310,15 @@ export interface components {
             /** Trigger Delay Ms */
             trigger_delay_ms?: number | null;
         };
+        /**
+         * ProviderType
+         * @description Messaging provider that implements a channel.
+         *
+         *     Multiple providers can serve the same ChannelKind (e.g., Twilio and
+         *     Infobip both support SMS).
+         * @enum {string}
+         */
+        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];

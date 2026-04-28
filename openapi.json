@@ -5625,6 +5625,20 @@
         "title": "ChannelEventResponse",
         "type": "object"
       },
+      "ChannelKind": {
+        "description": "HSM execution channel type.\n\nDetermines how the HSM engine communicates with end users.\nEach kind maps to one or more providers.",
+        "enum": [
+          "voice",
+          "sms",
+          "whatsapp",
+          "imessage",
+          "email",
+          "web",
+          "scribe"
+        ],
+        "title": "ChannelKind",
+        "type": "string"
+      },
       "ChannelOverride": {
         "description": "Per-channel behavior override for a state.",
         "properties": {
@@ -7499,6 +7513,69 @@
         "title": "ContextGraphVersionResponse",
         "type": "object"
       },
+      "ConversationActorStartFailedRequest": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel_kind",
+          "provider",
+          "provider_thread_id"
+        ],
+        "title": "ConversationActorStartFailedRequest",
+        "type": "object"
+      },
+      "ConversationActorStartFailedResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "rolled_back": {
+            "title": "Rolled Back",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version",
+          "rolled_back"
+        ],
+        "title": "ConversationActorStartFailedResponse",
+        "type": "object"
+      },
       "ConversationConfig": {
         "properties": {
           "agent_id": {
@@ -7616,6 +7693,129 @@
         "title": "ConversationMessage",
         "type": "object"
       },
+      "ConversationReactivationResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "reactivated"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version"
+        ],
+        "title": "ConversationReactivationResponse",
+        "type": "object"
+      },
+      "ConversationStateSaveRequest": {
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "resume_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume At"
+          },
+          "state": {
+            "additionalProperties": true,
+            "title": "State",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 0.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "state",
+          "version",
+          "status"
+        ],
+        "title": "ConversationStateSaveRequest",
+        "type": "object"
+      },
+      "ConversationStateSaveResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version"
+        ],
+        "title": "ConversationStateSaveResponse",
+        "type": "object"
+      },
       "ConversationSummary": {
         "description": "Conversation flow metrics.",
         "properties": {
@@ -7651,6 +7851,120 @@
           }
         },
         "title": "ConversationSummary",
+        "type": "object"
+      },
+      "ConversationThreadRequest": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel_kind",
+          "provider",
+          "provider_thread_id"
+        ],
+        "title": "ConversationThreadRequest",
+        "type": "object"
+      },
+      "ConversationThreadResponse": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "created": {
+            "title": "Created",
+            "type": "boolean"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          },
+          "reactivated": {
+            "title": "Reactivated",
+            "type": "boolean"
+          },
+          "state": {
+            "additionalProperties": true,
+            "title": "State",
+            "type": "object"
+          },
+          "status": {
+            "const": "active",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "channel_kind",
+          "provider",
+          "provider_thread_id",
+          "status",
+          "state",
+          "version",
+          "created_at",
+          "created",
+          "reactivated"
+        ],
+        "title": "ConversationThreadResponse",
         "type": "object"
       },
       "ConvertEnvironmentRequest": {
@@ -28646,6 +28960,18 @@
         },
         "title": "ProgressHint",
         "type": "object"
+      },
+      "ProviderType": {
+        "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
+        "enum": [
+          "twilio",
+          "infobip",
+          "sendblue",
+          "gmail",
+          "websocket"
+        ],
+        "title": "ProviderType",
+        "type": "string"
       },
       "ProvisionResponse": {
         "properties": {
