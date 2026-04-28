@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.14.0] - 2026-04-28
+
+### Features
+
+- add text conversation resource (#115)
+
 ## [0.13.0] - 2026-04-28
 
 ### Maintenance
