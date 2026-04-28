@@ -397,9 +397,11 @@ socket.addEventListener('open', () => {
 ```
 
 If a browser rejects your API key as a WebSocket subprotocol value, use the
-query-token fallback only in trusted contexts where URLs are not logged:
+query-token fallback only in trusted contexts. URL tokens can appear in browser
+history, server access logs, HTTP proxy logs, and referrer headers:
 
 ```typescript
+// WARNING: query tokens can be captured by URL logs and browser history.
 const url = client.conversations.textStreamUrl({ serviceId: 'service-id', token: apiKey })
 const socket = new WebSocket(url)
 ```

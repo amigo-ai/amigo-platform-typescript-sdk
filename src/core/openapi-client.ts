@@ -9,7 +9,7 @@
 import createClientImport, { type HeadersOptions, type Middleware } from 'openapi-fetch'
 import type { paths } from '../generated/api.js'
 import { createAuthMiddleware } from './auth.js'
-import { createApiError, NetworkError, RequestTimeoutError } from './errors.js'
+import { createApiError, ConfigurationError, NetworkError, RequestTimeoutError } from './errors.js'
 import { parseRateLimitHeaders } from './rate-limit.js'
 import {
   stripRequestControls,
@@ -66,6 +66,7 @@ type RequestTransport = (input: Request) => Promise<Response>
 interface PlatformClientContext {
   transport: RequestTransport
   defaults: RequestControlOptions
+  baseUrl: string
 }
 
 const platformClientContext = new WeakMap<PlatformFetch, PlatformClientContext>()
@@ -84,7 +85,7 @@ export function createPlatformClient(config: ClientConfig): PlatformFetch {
     headers: config.headers,
   })
 
-  platformClientContext.set(client, { transport, defaults })
+  platformClientContext.set(client, { transport, defaults, baseUrl: config.baseUrl })
 
   // Error middleware — convert HTTP errors to typed AmigoError subclasses
   const errorMiddleware: Middleware = {
@@ -170,6 +171,15 @@ export function applyPlatformRequestOptions<Operation>(
     ...stripped,
     fetch,
   } as AmigoRequestOptions<Operation>
+}
+
+/** @internal */
+export function getPlatformClientBaseUrl(client: PlatformFetch): string {
+  const context = platformClientContext.get(client)
+  if (!context) {
+    throw new ConfigurationError('Platform client baseUrl is unavailable')
+  }
+  return context.baseUrl
 }
 
 function createRetryingFetch(

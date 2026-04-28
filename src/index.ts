@@ -308,7 +308,7 @@ export class AmigoClient {
     mutable.dataSources = new DataSourcesResource(client, workspaceId)
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
-    mutable.conversations = new ConversationsResource(client, workspaceId, baseUrl)
+    mutable.conversations = new ConversationsResource(client, workspaceId)
     mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)

@@ -101,7 +101,7 @@ const markdown = await prettier.format(
     `- Webhooks: ${formatNames(exportMap.values.get('./core/webhooks.js'))}`,
     `- Pagination and response helpers: ${formatNames(exportMap.values.get('./core/utils.js'))}`,
     `- Conversation helpers: ${formatNames(conversationHelperExports)}`,
-    `- Conversation types: ${formatNames(conversationTypeExports)}`,
+    `- Conversation types: ${formatConversationTypeNames(conversationTypeExports)}`,
     `- Response and hook types: ${formatNames(
       [
         ...(exportMap.types.get('./core/utils.js') ?? []),
@@ -267,10 +267,22 @@ function formatNames(names = []) {
   return names.map((name) => `\`${name}\``).join(', ')
 }
 
+function formatConversationTypeNames(names = []) {
+  return names
+    .map((name) =>
+      name === 'TextStreamAuthProtocols'
+        ? `\`${name}\` (WebSocket constructor subprotocol tuple)`
+        : `\`${name}\``,
+    )
+    .join(', ')
+}
+
 function requireExportNames(map, moduleName) {
   const names = map.get(moduleName)
-  if (!names) {
-    throw new Error(`Expected public exports from ${moduleName}`)
+  if (!names?.length) {
+    throw new Error(
+      `Expected public exports from ${moduleName}; known modules: ${[...map.keys()].join(', ')}`,
+    )
   }
   return names
 }

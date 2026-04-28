@@ -7,7 +7,11 @@
  */
 
 import type { Middleware } from 'openapi-fetch'
-import { applyPlatformRequestOptions, type PlatformFetch } from '../core/openapi-client.js'
+import {
+  applyPlatformRequestOptions,
+  getPlatformClientBaseUrl,
+  type PlatformFetch,
+} from '../core/openapi-client.js'
 import {
   mergeRequestOptions,
   mergeScopedRequestOptions,
@@ -25,6 +29,11 @@ export abstract class WorkspaceScopedResource {
     protected readonly client: PlatformFetch,
     protected readonly workspaceId: string,
   ) {}
+
+  protected get platformBaseUrl(): string {
+    const { baseClient } = resolveScopedPlatformClient(this.client)
+    return getPlatformClientBaseUrl(baseClient)
+  }
 
   withOptions(options: ScopedRequestOptions): this {
     const ResourceCtor = this.constructor as new (
