@@ -11,14 +11,13 @@ import {
   AmigoError,
   NetworkError,
   RateLimitError,
-  decodeJwtPayload,
-  refreshToken,
   formatDeviceCodeInstructions,
   formatDeviceCodeLink,
   formatWorkspaceList,
   openBrowser,
   type AuthResult,
 } from '../../src/index.js'
+import { decodeJwtPayload } from '../../src/core/device-code.js'
 
 function makeJwt(claims: Record<string, unknown>): string {
   const h = Buffer.from(JSON.stringify({ alg: 'RS256' })).toString('base64url')
@@ -160,6 +159,32 @@ describe('loginWithDeviceCode', () => {
         identityBaseUrl: 'https://id.test',
       }),
     ).rejects.toThrow(DeviceCodeDeniedError)
+  })
+
+  it('handles slow_down by reporting status', async () => {
+    vi.useFakeTimers()
+    const onStatus = vi.fn()
+
+    const loginPromise = loginWithDeviceCode({
+      onCode: vi.fn(),
+      onWorkspaceRequired: vi.fn(),
+      onStatus,
+      fetch: createFetchSequence([
+        { status: 200, body: ISSUANCE },
+        { status: 400, body: { error: 'slow_down' } },
+        { status: 200, body: TOKEN },
+      ]),
+      identityBaseUrl: 'https://id.test',
+    })
+
+    // Advance past the initial poll interval + the slow_down-increased interval
+    await vi.advanceTimersByTimeAsync(10_000)
+
+    const result = await loginPromise
+    expect(onStatus).toHaveBeenCalledWith('slow_down')
+    expect(result.workspaceId).toBe('ws1')
+
+    vi.useRealTimers()
   })
 
   it('cancels via AbortSignal', async () => {
@@ -323,41 +348,41 @@ describe('formatDeviceCodeLink', () => {
 
 describe('openBrowser', () => {
   it('returns false on unsupported platform', async () => {
-    const originalPlatform = process.platform
-    Object.defineProperty(process, 'platform', { value: 'freebsd' })
+    const desc = Object.getOwnPropertyDescriptor(process, 'platform')!
+    Object.defineProperty(process, 'platform', { value: 'freebsd', configurable: true })
     try {
       expect(await openBrowser('https://example.com')).toBe(false)
     } finally {
-      Object.defineProperty(process, 'platform', { value: originalPlatform })
+      Object.defineProperty(process, 'platform', desc)
     }
+  })
+
+  it('returns boolean on current platform', async () => {
+    const result = await openBrowser('https://example.com')
+    expect(typeof result).toBe('boolean')
   })
 })
 
-// --- refreshToken ---
+// --- redirect: manual ---
 
-describe('refreshToken', () => {
-  it('returns token on 200', async () => {
-    const token = { access_token: 'jwt', token_type: 'Bearer', expires_in: 900, scope: 'ws:read' }
-    const result = await refreshToken(
-      'https://id.test',
-      { refreshToken: 'rt' },
-      mockFetch(200, token),
-    )
-    expect(result.access_token).toBe('jwt')
-  })
+describe('identity requests use redirect: manual', () => {
+  it('fetch is called with redirect manual to observe HTTP 300', async () => {
+    const fetch = createFetchSequence([
+      { status: 200, body: ISSUANCE },
+      { status: 200, body: TOKEN },
+    ])
 
-  it('throws AmigoError on 401', async () => {
-    await expect(
-      refreshToken('https://id.test', { refreshToken: 'rt' }, mockFetch(401, { error: 'invalid_grant' })),
-    ).rejects.toThrow(AmigoError)
-  })
+    await loginWithDeviceCode({
+      onCode: vi.fn(),
+      onWorkspaceRequired: vi.fn(),
+      fetch,
+      identityBaseUrl: 'https://id.test',
+    })
 
-  it('passes workspace_id and scope', async () => {
-    const fetch = mockFetch(200, { access_token: 'jwt', token_type: 'Bearer', expires_in: 900, scope: 'ws:read' })
-    await refreshToken('https://id.test', { refreshToken: 'rt', workspaceId: 'ws1', scope: 'ws:read' }, fetch)
-    const body = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string
-    expect(body).toContain('workspace_id=ws1')
-    expect(body).toContain('scope=ws%3Aread')
+    const calls = (fetch as ReturnType<typeof vi.fn>).mock.calls
+    for (const call of calls) {
+      expect(call[1]!.redirect).toBe('manual')
+    }
   })
 })
 

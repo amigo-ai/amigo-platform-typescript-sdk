@@ -131,10 +131,14 @@ async function identityPost(
   fetchFn: typeof globalThis.fetch,
 ): Promise<Response> {
   try {
+    // redirect: 'manual' is required because the identity service uses HTTP 300
+    // (non-standard) for multi-workspace selection. Without it, fetch follows
+    // the redirect automatically and the caller never sees the 300.
     return await fetchFn(`${baseUrl}${path}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
+      redirect: 'manual',
     })
   } catch (err) {
     throw new NetworkError('Network error contacting identity service', err)
@@ -170,6 +174,7 @@ type PollResult =
   | { type: 'token'; data: IdentityTokenResponse }
   | { type: 'multi_workspace'; data: MultiWorkspaceResponse }
   | { type: 'pending' }
+  | { type: 'slow_down' }
 
 async function pollDeviceCode(
   baseUrl: string,
@@ -188,8 +193,8 @@ async function pollDeviceCode(
 
   if (res.status === 400) {
     const err = (await res.json().catch(() => ({ error: 'unknown' }))) as Record<string, string>
-    if (err.error === 'authorization_pending' || err.error === 'slow_down')
-      return { type: 'pending' }
+    if (err.error === 'authorization_pending') return { type: 'pending' }
+    if (err.error === 'slow_down') return { type: 'slow_down' }
     throw new AmigoError(err.error_description ?? err.error ?? `Identity error (400)`, {
       statusCode: 400,
       errorCode: err.error,
@@ -199,7 +204,7 @@ async function pollDeviceCode(
   throw new AmigoError(`Identity error (${res.status})`, { statusCode: res.status })
 }
 
-export async function refreshToken(
+async function doRefreshToken(
   baseUrl: string,
   params: { refreshToken: string; workspaceId?: string; scope?: string },
   fetchFn: typeof globalThis.fetch,
@@ -268,7 +273,7 @@ function toAuthResult(token: IdentityTokenResponse, workspaceIdOverride?: string
     accessToken: token.access_token,
     refreshToken: token.refresh_token ?? '',
     workspaceId,
-    expiresAt: (claims?.exp as number) ?? Math.floor(Date.now() / 1000) + token.expires_in,
+    expiresAt: (claims?.exp as number) ?? (token.expires_in ? Math.floor(Date.now() / 1000) + token.expires_in : Math.floor(Date.now() / 1000) + 900),
     scope: token.scope,
   }
 }
@@ -306,6 +311,13 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
         continue
       }
 
+      // RFC 8628 §3.5: increase interval by 5 seconds on slow_down
+      if (result.type === 'slow_down') {
+        interval += 5000
+        options.onStatus?.('slow_down')
+        continue
+      }
+
       options.onStatus?.('approved')
 
       if (result.type === 'token') {
@@ -321,7 +333,7 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
         })
       }
 
-      const tokenResponse = await refreshToken(
+      const tokenResponse = await doRefreshToken(
         baseUrl,
         { refreshToken: result.data.refresh_token, workspaceId, scope: options.scope },
         fetchFn,
@@ -335,11 +347,6 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
       if (err instanceof AmigoError && err.errorCode === 'access_denied') {
         options.onStatus?.('denied')
         throw new DeviceCodeDeniedError()
-      }
-      if (err instanceof AmigoError && err.errorCode === 'slow_down') {
-        interval += 5000
-        options.onStatus?.('slow_down')
-        continue
       }
       throw err
     }
@@ -423,7 +430,7 @@ export class TokenManager {
     if (!current.refresh_token) throw new RefreshTokenExpiredError('No refresh token available')
 
     try {
-      const response = await refreshToken(
+      const response = await doRefreshToken(
         this._baseUrl,
         { refreshToken: current.refresh_token, workspaceId: current.workspace_id, scope: current.scope },
         this._fetch,
@@ -495,6 +502,7 @@ export class FileTokenStorage implements TokenStorage {
     const filePath = await this._filePath()
     await fs.mkdir(path.dirname(filePath), { recursive: true, mode: 0o700 })
     await fs.writeFile(filePath, JSON.stringify(credentials, null, 2) + '\n', { mode: 0o600 })
+    await fs.chmod(filePath, 0o600)
   }
 
   async clear(): Promise<void> {
@@ -545,22 +553,24 @@ export function formatDeviceCodeLink(issuance: DeviceCodeIssuance): string {
 }
 
 export async function openBrowser(url: string): Promise<boolean> {
-  const { exec } = await import('node:child_process')
-  const { promisify } = await import('node:util')
-  const execAsync = promisify(exec)
-  const commands: Record<string, string> = {
-    darwin: `open "${url}"`,
-    win32: `start "" "${url}"`,
-    linux: `xdg-open "${url}"`,
+  const { spawn } = await import('node:child_process')
+
+  const openers: Record<string, { cmd: string; args: string[] }> = {
+    darwin: { cmd: 'open', args: [url] },
+    win32: { cmd: 'cmd', args: ['/c', 'start', '', url] },
+    linux: { cmd: 'xdg-open', args: [url] },
   }
-  const cmd = commands[process.platform]
-  if (!cmd) return false
-  try {
-    await execAsync(cmd)
-    return true
-  } catch {
-    return false
-  }
+
+  const opener = openers[process.platform]
+  if (!opener) return false
+
+  return new Promise((resolve) => {
+    // shell: false prevents command injection from malformed URLs
+    const child = spawn(opener.cmd, opener.args, { stdio: 'ignore', shell: false, detached: true })
+    child.on('error', () => resolve(false))
+    child.on('close', (code) => resolve(code === 0))
+    child.unref()
+  })
 }
 
 export function formatWorkspaceList(workspaces: WorkspaceChoice[]): string {

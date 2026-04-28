@@ -497,8 +497,6 @@ export {
   DeviceCodeDeniedError,
   RefreshTokenExpiredError,
   LoginCancelledError,
-  refreshToken,
-  decodeJwtPayload,
   formatDeviceCodeInstructions,
   formatDeviceCodeLink,
   formatWorkspaceList,
