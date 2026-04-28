@@ -8,9 +8,15 @@ import {
   DeviceCodeDeniedError,
   RefreshTokenExpiredError,
   LoginCancelledError,
+  AmigoError,
+  NetworkError,
+  RateLimitError,
   decodeJwtPayload,
+  refreshToken,
   formatDeviceCodeInstructions,
+  formatDeviceCodeLink,
   formatWorkspaceList,
+  openBrowser,
   type AuthResult,
 } from '../../src/index.js'
 
@@ -287,7 +293,7 @@ describe('formatDeviceCodeInstructions', () => {
 })
 
 describe('formatWorkspaceList', () => {
-  it('formats numbered list', () => {
+  it('formats numbered list with names and roles', () => {
     const text = formatWorkspaceList([
       { workspace_id: 'ws-1', name: 'Org One', role: 'admin' },
       { workspace_id: 'ws-2', name: 'Org Two' },
@@ -295,5 +301,164 @@ describe('formatWorkspaceList', () => {
     expect(text).toContain('1. Org One (admin)')
     expect(text).toContain('2. Org Two')
     expect(text).toContain('ws-1')
+  })
+
+  it('falls back to workspace_id when name is absent', () => {
+    const text = formatWorkspaceList([{ workspace_id: 'ws-no-name' }])
+    expect(text).toContain('1. ws-no-name')
+  })
+})
+
+// --- formatDeviceCodeLink ---
+
+describe('formatDeviceCodeLink', () => {
+  it('returns OSC 8 hyperlink', () => {
+    const link = formatDeviceCodeLink(ISSUANCE)
+    expect(link).toContain(ISSUANCE.verification_uri_complete)
+    expect(link).toContain('\x1b]8;;')
+  })
+})
+
+// --- openBrowser ---
+
+describe('openBrowser', () => {
+  it('returns false on unsupported platform', async () => {
+    const originalPlatform = process.platform
+    Object.defineProperty(process, 'platform', { value: 'freebsd' })
+    try {
+      expect(await openBrowser('https://example.com')).toBe(false)
+    } finally {
+      Object.defineProperty(process, 'platform', { value: originalPlatform })
+    }
+  })
+})
+
+// --- refreshToken ---
+
+describe('refreshToken', () => {
+  it('returns token on 200', async () => {
+    const token = { access_token: 'jwt', token_type: 'Bearer', expires_in: 900, scope: 'ws:read' }
+    const result = await refreshToken(
+      'https://id.test',
+      { refreshToken: 'rt' },
+      mockFetch(200, token),
+    )
+    expect(result.access_token).toBe('jwt')
+  })
+
+  it('throws AmigoError on 401', async () => {
+    await expect(
+      refreshToken('https://id.test', { refreshToken: 'rt' }, mockFetch(401, { error: 'invalid_grant' })),
+    ).rejects.toThrow(AmigoError)
+  })
+
+  it('passes workspace_id and scope', async () => {
+    const fetch = mockFetch(200, { access_token: 'jwt', token_type: 'Bearer', expires_in: 900, scope: 'ws:read' })
+    await refreshToken('https://id.test', { refreshToken: 'rt', workspaceId: 'ws1', scope: 'ws:read' }, fetch)
+    const body = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]![1]!.body as string
+    expect(body).toContain('workspace_id=ws1')
+    expect(body).toContain('scope=ws%3Aread')
+  })
+})
+
+// --- Network errors ---
+
+describe('network errors', () => {
+  it('loginWithDeviceCode throws NetworkError on fetch failure', async () => {
+    await expect(
+      loginWithDeviceCode({
+        onCode: vi.fn(),
+        onWorkspaceRequired: vi.fn(),
+        fetch: vi.fn().mockRejectedValue(new TypeError('fetch failed')),
+        identityBaseUrl: 'https://id.test',
+      }),
+    ).rejects.toThrow(NetworkError)
+  })
+})
+
+// --- Rate limiting ---
+
+describe('rate limiting', () => {
+  it('loginWithDeviceCode throws RateLimitError on 429', async () => {
+    const fetch = vi.fn().mockResolvedValue({
+      status: 429,
+      ok: false,
+      headers: new Headers({ 'Retry-After': '30' }),
+      json: vi.fn().mockResolvedValue({ error: 'slow_down' }),
+    })
+    await expect(
+      loginWithDeviceCode({
+        onCode: vi.fn(),
+        onWorkspaceRequired: vi.fn(),
+        fetch,
+        identityBaseUrl: 'https://id.test',
+      }),
+    ).rejects.toThrow(RateLimitError)
+  })
+})
+
+// --- Token missing workspace_id ---
+
+describe('toAuthResult edge cases', () => {
+  it('throws when token has no workspace_id', async () => {
+    const noWsToken = {
+      access_token: makeJwt({ sub: 'e1', exp: 9999999999 }),
+      token_type: 'Bearer',
+      expires_in: 900,
+      scope: 'ws:read',
+      refresh_token: 'rt',
+    }
+    await expect(
+      loginWithDeviceCode({
+        onCode: vi.fn(),
+        onWorkspaceRequired: vi.fn(),
+        fetch: createFetchSequence([
+          { status: 200, body: ISSUANCE },
+          { status: 200, body: noWsToken },
+        ]),
+        identityBaseUrl: 'https://id.test',
+      }),
+    ).rejects.toThrow(AmigoError)
+  })
+})
+
+// --- TokenManager: no refresh token ---
+
+describe('TokenManager edge cases', () => {
+  it('throws RefreshTokenExpiredError when no refresh token', async () => {
+    const storage = new MemoryTokenStorage()
+    const mgr = new TokenManager({ storage })
+    await mgr.store({
+      accessToken: makeJwt({ sub: 'e1', workspace_id: 'ws1', exp: Math.floor(Date.now() / 1000) + 10 }),
+      refreshToken: '',
+      workspaceId: 'ws1',
+      expiresAt: Math.floor(Date.now() / 1000) + 10,
+    })
+    await expect(mgr.getAccessToken()).rejects.toThrow(RefreshTokenExpiredError)
+  })
+})
+
+// --- FileTokenStorage: clear nonexistent is idempotent ---
+
+describe('FileTokenStorage edge cases', () => {
+  it('clear on nonexistent file does not throw', async () => {
+    const s = new FileTokenStorage('/tmp/nonexistent-amigo-test-' + Date.now() + '/creds.json')
+    await s.clear()
+  })
+
+  it('load returns null for valid JSON missing required fields', async () => {
+    const fs = await import('node:fs/promises')
+    const os = await import('node:os')
+    const path = await import('node:path')
+    const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'sdk-test-'))
+    const filePath = path.join(dir, 'creds.json')
+    try {
+      await fs.mkdir(path.dirname(filePath), { recursive: true })
+      await fs.writeFile(filePath, JSON.stringify({ access_token: 'only' }))
+      const s = new FileTokenStorage(filePath)
+      expect(await s.load()).toBeNull()
+    } finally {
+      await fs.rm(dir, { recursive: true, force: true })
+    }
   })
 })
