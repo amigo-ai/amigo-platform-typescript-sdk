@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1] - 2026-04-28
+
+### Bug Fixes
+
+- address PR #118 review feedback
+- correct device code default identity URL to api.platform.amigo.ai (#119)
+
 ## [0.15.0] - 2026-04-28
 
 ### Maintenance
