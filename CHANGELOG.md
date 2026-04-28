@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.13.0] - 2026-04-28
+
+### Maintenance
+
+- sync API types from platform ac4311cb
+
 ## [0.12.0] - 2026-04-28
 
 ### Maintenance
