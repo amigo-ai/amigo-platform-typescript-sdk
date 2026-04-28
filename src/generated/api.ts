@@ -1961,6 +1961,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/conversations/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a text message and receive the agent's response
+         * @description Process a single text message through the agent and return the response synchronously. If `conversation_id` is omitted, a new conversation is created. If provided, the existing conversation is resumed from its frozen state (prior context and commitments are preserved). For real-time streaming, use the WebSocket endpoint at `ws /agent/text-stream`.
+         */
+        post: operations["send_message_v1__workspace_id__conversations_messages_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/crm/companies": {
         parameters: {
             query?: never;
@@ -9941,6 +9961,152 @@ export interface components {
             /** Value */
             value: string | null;
         };
+        /** ChannelEmailBouncedEvent */
+        ChannelEmailBouncedEvent: {
+            /**
+             * Bounce Subtype
+             * @default null
+             */
+            bounce_subtype?: string | null;
+            /**
+             * Bounce Type
+             * @default null
+             */
+            bounce_type?: string | null;
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_bounced";
+            /** From Address */
+            from_address: string;
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailClickedEvent */
+        ChannelEmailClickedEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_clicked";
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailComplainedEvent */
+        ChannelEmailComplainedEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_complained";
+            /** From Address */
+            from_address: string;
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailDelayedEvent */
+        ChannelEmailDelayedEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_delayed";
+            /** From Address */
+            from_address: string;
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailDeliveredEvent */
+        ChannelEmailDeliveredEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_delivered";
+            /** From Address */
+            from_address: string;
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailOpenedEvent */
+        ChannelEmailOpenedEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_opened";
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEmailRejectedEvent */
+        ChannelEmailRejectedEvent: {
+            /** Email Id */
+            email_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_rejected";
+            /** From Address */
+            from_address: string;
+            /** To Address */
+            to_address: string;
+        };
+        /** ChannelEventRequest */
+        ChannelEventRequest: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "email" | "sms" | "voice";
+            /** Data */
+            data?: {
+                [key: string]: unknown;
+            };
+            /** Email Id */
+            email_id?: string | null;
+            /** Event Type */
+            event_type: string;
+            /** From Address */
+            from_address?: string | null;
+            /**
+             * Occurred At
+             * Format: date-time
+             */
+            occurred_at: string;
+            /** Phone Number */
+            phone_number?: string | null;
+            /**
+             * Setup Id
+             * Format: uuid
+             */
+            setup_id: string;
+            /** To Address */
+            to_address?: string | null;
+        };
+        /** ChannelEventResponse */
+        ChannelEventResponse: {
+            /** Event Id */
+            event_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "accepted" | "skipped";
+        };
         /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
@@ -10726,6 +10892,16 @@ export interface components {
             /** Navigation Model */
             navigation_model?: string | null;
         };
+        /** ConversationMessage */
+        ConversationMessage: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "agent" | "user" | "system";
+            /** Text */
+            text: string;
+        };
         /**
          * ConversationSummary
          * @description Conversation flow metrics.
@@ -11322,6 +11498,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Is Active
              * @default true
@@ -14008,6 +14185,34 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * EscalationPolicy
+         * @description Per-service routing for engine-detected escalation triggers.
+         *
+         *     Each trigger source maps to one EscalationAction. The three enumerated
+         *     fields below are the trigger_sources actually emitted by the agent-engine
+         *     today; new triggers can be added as fields without breaking back-compat.
+         *
+         *     Partial policies are intentional: every field defaults to OperatorAction,
+         *     so a PUT body like ``{"context_window_exhaustion": {"type": "forward"}}``
+         *     overrides only that trigger and leaves the others on the operator default.
+         *     To opt the entire service back to today's behavior, set
+         *     ``Service.escalation_policy = None`` (caveat: the platform-api Service
+         *     update path uses ``exclude_none=True`` and currently has no clears-via-null
+         *     branch, so this requires a direct config edit; see follow-up issue).
+         *
+         *     Resolution lookup is done against ``model_fields``: a trigger_source that
+         *     is not an enumerated field name falls through to OperatorAction, never
+         *     a non-Action Pydantic internal.
+         */
+        EscalationPolicy: {
+            /** Context Window Exhaustion */
+            context_window_exhaustion?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+            /** Conversation Monitor */
+            conversation_monitor?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+            /** Risk Scorer */
+            risk_scorer?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
+        };
         /** EscalationState */
         EscalationState: {
             /** Agent Confidence */
@@ -15016,6 +15221,26 @@ export interface components {
             /** Templates */
             templates: components["schemas"]["FormTemplate-Input"][];
         };
+        /**
+         * ForwardAction
+         * @description Cold-transfer the caller to the inbound phone number's configured
+         *     forwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).
+         *
+         *     No agent-side decision and no operator dashboard required — the engine
+         *     invokes the same forwarding callback used by the LLM-driven `forward_call`
+         *     tool, with no location override, which falls through to the static
+         *     `ForwardingMap` populated from the phone-number config.
+         *
+         *     If forwarding is not configured for the inbound phone number, the
+         *     dispatcher falls back to the operator path (audit event + SSE only).
+         */
+        ForwardAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "forward";
+        };
         /** ForwardCallResolvedEvent */
         ForwardCallResolvedEvent: {
             /**
@@ -15353,6 +15578,17 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HangupAction
+         * @description End the call gracefully via the existing speaker-drain hangup path.
+         */
+        HangupAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "hangup";
         };
         /**
          * HardEscalationRule
@@ -17100,6 +17336,18 @@ export interface components {
              * @description Optional list of field keys to extract
              */
             target_fields?: string[] | null;
+        };
+        /**
+         * OperatorAction
+         * @description Today's behavior — write escalation.requested + publish SSE, wait for a
+         *     human operator to join via the dashboard. No-op if no operators are staffed.
+         */
+        OperatorAction: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "operator";
         };
         /**
          * OperatorIntelligenceSummary
@@ -20107,6 +20355,41 @@ export interface components {
              */
             status: "delivered" | "failed";
         };
+        /** SendMessageRequest */
+        SendMessageRequest: {
+            /**
+             * Conversation Id
+             * @description Existing conversation ID to resume. Omit to start a new conversation.
+             */
+            conversation_id?: string | null;
+            /**
+             * Entity Id
+             * @description Patient entity ID for context loading.
+             */
+            entity_id?: string | null;
+            /**
+             * Message
+             * @description User message text
+             */
+            message: string;
+            /**
+             * Service Id
+             * @description Agent service ID
+             */
+            service_id: string;
+        };
+        /** SendMessageResponse */
+        SendMessageResponse: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Messages */
+            messages: components["schemas"]["ConversationMessage"][];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "completed" | "error";
+        };
         /**
          * Service
          * @description A service links an agent + context graph + version sets.
@@ -20132,6 +20415,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Hard Escalation Rules
              * @default []
@@ -20197,6 +20481,7 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /** Id */
             id: string;
             /** Is Active */
@@ -23445,6 +23730,7 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             /** Environment */
             environment?: ("sandbox" | "production") | null;
+            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Keyterms */
@@ -24537,6 +24823,47 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** WorkspaceInvitationAcceptedEvent */
+        WorkspaceInvitationAcceptedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "workspace.invitation_accepted";
+            /** Role */
+            role: string;
+        };
+        /** WorkspaceInvitationSentEvent */
+        WorkspaceInvitationSentEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "workspace.invitation_sent";
+            /** Invitation Id */
+            invitation_id: string;
+            /**
+             * Resent
+             * @default false
+             */
+            resent?: boolean;
+            /** Role */
+            role: string;
+        };
+        /** WorkspaceMemberAddedEvent */
+        WorkspaceMemberAddedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "workspace.member_added";
+            /** Role */
+            role: string;
+        };
         /** WorkspaceResponse */
         WorkspaceResponse: {
             /** Backend Org Id */
@@ -24566,7 +24893,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -29605,6 +29932,41 @@ export interface operations {
             };
         };
     };
+    send_message_v1__workspace_id__conversations_messages_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SendMessageRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SendMessageResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "crm-company-search": {
         parameters: {
             query?: {
@@ -31800,6 +32162,20 @@ export interface operations {
                 q?: string | null;
                 /** @description Scope to data source */
                 data_source_id?: string | null;
+                /** @description Slot status (e.g. 'free', 'busy') */
+                status?: string | null;
+                /** @description Start date YYYY-MM-DD (filters slots on or after this date) */
+                date?: string | null;
+                /** @description Number of days forward from date (default 7) */
+                days?: number;
+                /** @description Provider name (partial match, e.g. 'Woloski') */
+                provider?: string | null;
+                /** @description Specialty (partial match, e.g. 'Psychiatry') */
+                specialty?: string | null;
+                /** @description Visit/service type name (partial match, e.g. 'Follow-up') */
+                service_type?: string | null;
+                /** @description Facility ID */
+                facility_id?: string | null;
                 limit?: number;
                 offset?: number;
             };

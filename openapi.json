@@ -5229,6 +5229,346 @@
         "title": "CategoricalMetricValueResponse",
         "type": "object"
       },
+      "ChannelEmailBouncedEvent": {
+        "properties": {
+          "bounce_subtype": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bounce Subtype"
+          },
+          "bounce_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bounce Type"
+          },
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_bounced",
+            "default": "channel.email_bounced",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address",
+          "from_address"
+        ],
+        "title": "ChannelEmailBouncedEvent",
+        "type": "object"
+      },
+      "ChannelEmailClickedEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_clicked",
+            "default": "channel.email_clicked",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address"
+        ],
+        "title": "ChannelEmailClickedEvent",
+        "type": "object"
+      },
+      "ChannelEmailComplainedEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_complained",
+            "default": "channel.email_complained",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address",
+          "from_address"
+        ],
+        "title": "ChannelEmailComplainedEvent",
+        "type": "object"
+      },
+      "ChannelEmailDelayedEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_delayed",
+            "default": "channel.email_delayed",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address",
+          "from_address"
+        ],
+        "title": "ChannelEmailDelayedEvent",
+        "type": "object"
+      },
+      "ChannelEmailDeliveredEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_delivered",
+            "default": "channel.email_delivered",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address",
+          "from_address"
+        ],
+        "title": "ChannelEmailDeliveredEvent",
+        "type": "object"
+      },
+      "ChannelEmailOpenedEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_opened",
+            "default": "channel.email_opened",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address"
+        ],
+        "title": "ChannelEmailOpenedEvent",
+        "type": "object"
+      },
+      "ChannelEmailRejectedEvent": {
+        "properties": {
+          "email_id": {
+            "title": "Email Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "channel.email_rejected",
+            "default": "channel.email_rejected",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "email_id",
+          "to_address",
+          "from_address"
+        ],
+        "title": "ChannelEmailRejectedEvent",
+        "type": "object"
+      },
+      "ChannelEventRequest": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "sms",
+              "voice"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "data": {
+            "additionalProperties": true,
+            "title": "Data",
+            "type": "object"
+          },
+          "email_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email Id"
+          },
+          "event_type": {
+            "maxLength": 64,
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "anyOf": [
+              {
+                "maxLength": 320,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Address"
+          },
+          "occurred_at": {
+            "format": "date-time",
+            "title": "Occurred At",
+            "type": "string"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone Number"
+          },
+          "setup_id": {
+            "format": "uuid",
+            "title": "Setup Id",
+            "type": "string"
+          },
+          "to_address": {
+            "anyOf": [
+              {
+                "maxLength": 320,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "To Address"
+          }
+        },
+        "required": [
+          "channel",
+          "event_type",
+          "setup_id",
+          "occurred_at"
+        ],
+        "title": "ChannelEventRequest",
+        "type": "object"
+      },
+      "ChannelEventResponse": {
+        "properties": {
+          "event_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "status": {
+            "enum": [
+              "accepted",
+              "skipped"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ChannelEventResponse",
+        "type": "object"
+      },
       "ChannelOverride": {
         "description": "Per-channel behavior override for a state.",
         "properties": {
@@ -7197,6 +7537,29 @@
         "title": "ConversationConfig",
         "type": "object"
       },
+      "ConversationMessage": {
+        "properties": {
+          "role": {
+            "enum": [
+              "agent",
+              "user",
+              "system"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "role",
+          "text"
+        ],
+        "title": "ConversationMessage",
+        "type": "object"
+      },
       "ConversationSummary": {
         "description": "Conversation flow metrics.",
         "properties": {
@@ -8659,6 +9022,16 @@
             ],
             "title": "Environment",
             "type": "string"
+          },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "is_active": {
             "default": true,
@@ -15391,6 +15764,79 @@
         "title": "EscalationEventResponse",
         "type": "object"
       },
+      "EscalationPolicy": {
+        "description": "Per-service routing for engine-detected escalation triggers.\n\nEach trigger source maps to one EscalationAction. The three enumerated\nfields below are the trigger_sources actually emitted by the agent-engine\ntoday; new triggers can be added as fields without breaking back-compat.\n\nPartial policies are intentional: every field defaults to OperatorAction,\nso a PUT body like ``{\"context_window_exhaustion\": {\"type\": \"forward\"}}``\noverrides only that trigger and leaves the others on the operator default.\nTo opt the entire service back to today's behavior, set\n``Service.escalation_policy = None`` (caveat: the platform-api Service\nupdate path uses ``exclude_none=True`` and currently has no clears-via-null\nbranch, so this requires a direct config edit; see follow-up issue).\n\nResolution lookup is done against ``model_fields``: a trigger_source that\nis not an enumerated field name falls through to OperatorAction, never\na non-Action Pydantic internal.",
+        "properties": {
+          "context_window_exhaustion": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Context Window Exhaustion"
+          },
+          "conversation_monitor": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Conversation Monitor"
+          },
+          "risk_scorer": {
+            "discriminator": {
+              "mapping": {
+                "forward": "#/components/schemas/ForwardAction",
+                "hangup": "#/components/schemas/HangupAction",
+                "operator": "#/components/schemas/OperatorAction"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/OperatorAction"
+              },
+              {
+                "$ref": "#/components/schemas/ForwardAction"
+              },
+              {
+                "$ref": "#/components/schemas/HangupAction"
+              }
+            ],
+            "title": "Risk Scorer"
+          }
+        },
+        "title": "EscalationPolicy",
+        "type": "object"
+      },
       "EscalationState": {
         "properties": {
           "agent_confidence": {
@@ -18522,6 +18968,19 @@
         "title": "FormTemplateUpdateRequest",
         "type": "object"
       },
+      "ForwardAction": {
+        "description": "Cold-transfer the caller to the inbound phone number's configured\nforwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven `forward_call`\ntool, with no location override, which falls through to the static\n`ForwardingMap` populated from the phone-number config.\n\nIf forwarding is not configured for the inbound phone number, the\ndispatcher falls back to the operator path (audit event + SSE only).",
+        "properties": {
+          "type": {
+            "const": "forward",
+            "default": "forward",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "ForwardAction",
+        "type": "object"
+      },
       "ForwardCallResolvedEvent": {
         "properties": {
           "error": {
@@ -19244,6 +19703,19 @@
           }
         },
         "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "HangupAction": {
+        "description": "End the call gracefully via the existing speaker-drain hangup path.",
+        "properties": {
+          "type": {
+            "const": "hangup",
+            "default": "hangup",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "HangupAction",
         "type": "object"
       },
       "HardEscalationRule": {
@@ -23157,6 +23629,19 @@
           "image"
         ],
         "title": "OcrRequest",
+        "type": "object"
+      },
+      "OperatorAction": {
+        "description": "Today's behavior \u2014 write escalation.requested + publish SSE, wait for a\nhuman operator to join via the dashboard. No-op if no operators are staffed.",
+        "properties": {
+          "type": {
+            "const": "operator",
+            "default": "operator",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "OperatorAction",
         "type": "object"
       },
       "OperatorIntelligenceSummary": {
@@ -30653,6 +31138,85 @@
         "title": "SendGuidanceResponse",
         "type": "object"
       },
+      "SendMessageRequest": {
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Existing conversation ID to resume. Omit to start a new conversation.",
+            "title": "Conversation Id"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Patient entity ID for context loading.",
+            "title": "Entity Id"
+          },
+          "message": {
+            "description": "User message text",
+            "maxLength": 10000,
+            "title": "Message",
+            "type": "string"
+          },
+          "service_id": {
+            "description": "Agent service ID",
+            "maxLength": 64,
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id",
+          "message"
+        ],
+        "title": "SendMessageRequest",
+        "type": "object"
+      },
+      "SendMessageResponse": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "completed",
+              "error"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "messages",
+          "status"
+        ],
+        "title": "SendMessageResponse",
+        "type": "object"
+      },
       "Service": {
         "description": "A service links an agent + context graph + version sets.",
         "properties": {
@@ -30698,6 +31262,16 @@
             ],
             "title": "Environment",
             "type": "string"
+          },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "hard_escalation_rules": {
             "default": [],
@@ -30867,6 +31441,16 @@
             ],
             "title": "Environment",
             "type": "string"
+          },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "id": {
             "title": "Id",
@@ -34537,7 +35121,7 @@
             "items": {
               "$ref": "#/components/schemas/SurfaceField"
             },
-            "maxItems": 100,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Fields",
             "type": "array"
@@ -39427,6 +40011,16 @@
             ],
             "title": "Environment"
           },
+          "escalation_policy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EscalationPolicy"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "is_active": {
             "anyOf": [
               {
@@ -42707,6 +43301,83 @@
         "title": "WorkspaceConnectorConfigResponse",
         "type": "object"
       },
+      "WorkspaceInvitationAcceptedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "workspace.invitation_accepted",
+            "default": "workspace.invitation_accepted",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "role"
+        ],
+        "title": "WorkspaceInvitationAcceptedEvent",
+        "type": "object"
+      },
+      "WorkspaceInvitationSentEvent": {
+        "properties": {
+          "event_type": {
+            "const": "workspace.invitation_sent",
+            "default": "workspace.invitation_sent",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "invitation_id": {
+            "title": "Invitation Id",
+            "type": "string"
+          },
+          "resent": {
+            "default": false,
+            "title": "Resent",
+            "type": "boolean"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "invitation_id",
+          "role"
+        ],
+        "title": "WorkspaceInvitationSentEvent",
+        "type": "object"
+      },
+      "WorkspaceMemberAddedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "workspace.member_added",
+            "default": "workspace.member_added",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "role"
+        ],
+        "title": "WorkspaceMemberAddedEvent",
+        "type": "object"
+      },
       "WorkspaceResponse": {
         "properties": {
           "backend_org_id": {
@@ -42795,6 +43466,13 @@
             "call.ended": "#/components/schemas/CallEndedEvent",
             "call.escalated": "#/components/schemas/CallEscalatedEvent",
             "call.started": "#/components/schemas/CallStartedEvent",
+            "channel.email_bounced": "#/components/schemas/ChannelEmailBouncedEvent",
+            "channel.email_clicked": "#/components/schemas/ChannelEmailClickedEvent",
+            "channel.email_complained": "#/components/schemas/ChannelEmailComplainedEvent",
+            "channel.email_delayed": "#/components/schemas/ChannelEmailDelayedEvent",
+            "channel.email_delivered": "#/components/schemas/ChannelEmailDeliveredEvent",
+            "channel.email_opened": "#/components/schemas/ChannelEmailOpenedEvent",
+            "channel.email_rejected": "#/components/schemas/ChannelEmailRejectedEvent",
             "encounter.updated": "#/components/schemas/EncounterUpdatedEvent",
             "operator.joined_call": "#/components/schemas/OperatorJoinedCallEvent",
             "operator.left_call": "#/components/schemas/OperatorLeftCallEvent",
@@ -42823,7 +43501,10 @@
             "text.started": "#/components/schemas/TextStartedEvent",
             "trigger.completed": "#/components/schemas/TriggerCompletedEvent",
             "trigger.failed": "#/components/schemas/TriggerFailedEvent",
-            "trigger.fired": "#/components/schemas/TriggerFiredEvent"
+            "trigger.fired": "#/components/schemas/TriggerFiredEvent",
+            "workspace.invitation_accepted": "#/components/schemas/WorkspaceInvitationAcceptedEvent",
+            "workspace.invitation_sent": "#/components/schemas/WorkspaceInvitationSentEvent",
+            "workspace.member_added": "#/components/schemas/WorkspaceMemberAddedEvent"
           },
           "propertyName": "event_type"
         },
@@ -42923,6 +43604,36 @@
           },
           {
             "$ref": "#/components/schemas/OperatorWrapUpEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkspaceMemberAddedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkspaceInvitationSentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkspaceInvitationAcceptedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailDeliveredEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailBouncedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailComplainedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailRejectedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailDelayedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailOpenedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailClickedEvent"
           }
         ]
       },
@@ -50447,6 +51158,48 @@
         ]
       }
     },
+    "/v1/{workspace_id}/conversations/messages": {
+      "post": {
+        "description": "Process a single text message through the agent and return the response synchronously. If `conversation_id` is omitted, a new conversation is created. If provided, the existing conversation is resumed from its frozen state (prior context and commitments are preserved). For real-time streaming, use the WebSocket endpoint at `ws /agent/text-stream`.",
+        "operationId": "send_message_v1__workspace_id__conversations_messages_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendMessageResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send a text message and receive the agent's response",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/crm/companies": {
       "get": {
         "description": "Search companies from CRM sources. Filter by name. Paginated.",
@@ -54272,6 +55025,128 @@
               ],
               "description": "Scope to data source",
               "title": "Data Source Id"
+            }
+          },
+          {
+            "description": "Slot status (e.g. 'free', 'busy')",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Slot status (e.g. 'free', 'busy')",
+              "title": "Status"
+            }
+          },
+          {
+            "description": "Start date YYYY-MM-DD (filters slots on or after this date)",
+            "in": "query",
+            "name": "date",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Start date YYYY-MM-DD (filters slots on or after this date)",
+              "title": "Date"
+            }
+          },
+          {
+            "description": "Number of days forward from date (default 7)",
+            "in": "query",
+            "name": "days",
+            "required": false,
+            "schema": {
+              "default": 7,
+              "description": "Number of days forward from date (default 7)",
+              "maximum": 90,
+              "minimum": 1,
+              "title": "Days",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Provider name (partial match, e.g. 'Woloski')",
+            "in": "query",
+            "name": "provider",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Provider name (partial match, e.g. 'Woloski')",
+              "title": "Provider"
+            }
+          },
+          {
+            "description": "Specialty (partial match, e.g. 'Psychiatry')",
+            "in": "query",
+            "name": "specialty",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Specialty (partial match, e.g. 'Psychiatry')",
+              "title": "Specialty"
+            }
+          },
+          {
+            "description": "Visit/service type name (partial match, e.g. 'Follow-up')",
+            "in": "query",
+            "name": "service_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Visit/service type name (partial match, e.g. 'Follow-up')",
+              "title": "Service Type"
+            }
+          },
+          {
+            "description": "Facility ID",
+            "in": "query",
+            "name": "facility_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Facility ID",
+              "title": "Facility Id"
             }
           },
           {
