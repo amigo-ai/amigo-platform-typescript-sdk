@@ -278,6 +278,76 @@ function toAuthResult(token: IdentityTokenResponse, workspaceIdOverride?: string
   }
 }
 
+async function fetchWorkspaces(
+  baseUrl: string,
+  accessToken: string,
+  fetchFn: typeof globalThis.fetch,
+): Promise<WorkspaceChoice[]> {
+  const res = await fetchFn(`${baseUrl}/self`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!res.ok) {
+    throw new AmigoError(`Failed to fetch workspaces (${res.status})`, { statusCode: res.status })
+  }
+  const data = (await res.json()) as {
+    workspaces?: Array<{ workspace_id: string; role?: string; name?: string }>
+  }
+  return (data.workspaces ?? []).map((ws) => ({
+    workspace_id: ws.workspace_id,
+    role: ws.role,
+    name: ws.name,
+  }))
+}
+
+async function resolveWorkspaceFromBootstrap(
+  baseUrl: string,
+  token: IdentityTokenResponse,
+  options: DeviceCodeLoginOptions,
+  fetchFn: typeof globalThis.fetch,
+): Promise<AuthResult> {
+  if (!token.refresh_token) {
+    throw new AmigoError('Bootstrap token missing refresh_token', { errorCode: 'server_error' })
+  }
+
+  const workspaces = await fetchWorkspaces(baseUrl, token.access_token, fetchFn)
+
+  if (workspaces.length === 1 && workspaces[0]) {
+    const scoped = await doRefreshToken(
+      baseUrl,
+      { refreshToken: token.refresh_token, workspaceId: workspaces[0].workspace_id, scope: options.scope },
+      fetchFn,
+    )
+    return toAuthResult(scoped, workspaces[0].workspace_id)
+  }
+
+  const workspaceId = await options.onWorkspaceRequired(workspaces)
+  const scoped = await doRefreshToken(
+    baseUrl,
+    { refreshToken: token.refresh_token, workspaceId, scope: options.scope },
+    fetchFn,
+  )
+  return toAuthResult(scoped, workspaceId)
+}
+
+async function resolveWorkspaceFromMulti(
+  baseUrl: string,
+  multi: MultiWorkspaceResponse,
+  options: DeviceCodeLoginOptions,
+  fetchFn: typeof globalThis.fetch,
+): Promise<AuthResult> {
+  if (!multi.refresh_token) {
+    throw new AmigoError('Multi-workspace response missing refresh_token', { errorCode: 'server_error' })
+  }
+
+  const workspaceId = await options.onWorkspaceRequired(multi.workspaces)
+  const scoped = await doRefreshToken(
+    baseUrl,
+    { refreshToken: multi.refresh_token, workspaceId, scope: options.scope },
+    fetchFn,
+  )
+  return toAuthResult(scoped, workspaceId)
+}
+
 export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Promise<AuthResult> {
   const baseUrl = (options.identityBaseUrl ?? DEFAULT_IDENTITY_URL).replace(/\/+$/, '')
   const fetchFn = options.fetch ?? globalThis.fetch
@@ -321,24 +391,18 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
       options.onStatus?.('approved')
 
       if (result.type === 'token') {
+        // Check for bootstrap token (no workspace assigned yet)
+        const claims = decodeJwtPayload(result.data.access_token)
+        if (claims?.workspace_bootstrap || !(claims?.workspace_id)) {
+          return await resolveWorkspaceFromBootstrap(
+            baseUrl, result.data, options, fetchFn,
+          )
+        }
         return toAuthResult(result.data)
       }
 
-      // multi_workspace — ask developer which workspace
-      const workspaceId = await options.onWorkspaceRequired(result.data.workspaces)
-
-      if (!result.data.refresh_token) {
-        throw new AmigoError('Multi-workspace response missing refresh_token', {
-          errorCode: 'server_error',
-        })
-      }
-
-      const tokenResponse = await doRefreshToken(
-        baseUrl,
-        { refreshToken: result.data.refresh_token, workspaceId, scope: options.scope },
-        fetchFn,
-      )
-      return toAuthResult(tokenResponse, workspaceId)
+      // multi_workspace (HTTP 300) — workspace list included in response
+      return await resolveWorkspaceFromMulti(baseUrl, result.data, options, fetchFn)
     } catch (err) {
       if (err instanceof AmigoError && err.errorCode === 'expired_token') {
         options.onStatus?.('expired')
