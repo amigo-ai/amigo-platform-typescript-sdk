@@ -1,0 +1,569 @@
+/**
+ * RFC 8628 Device Authorization Grant for desktop and CLI apps.
+ *
+ * Authenticates users via the identity service's device code flow:
+ * the app displays a code, the user approves in their browser,
+ * and the app receives a workspace-scoped JWT.
+ */
+
+import { AmigoError, AuthenticationError, NetworkError, RateLimitError } from './errors.js'
+
+// --- Types ---
+
+export interface DeviceCodeIssuance {
+  device_code: string
+  user_code: string
+  verification_uri: string
+  verification_uri_complete: string
+  expires_in: number
+  interval: number
+}
+
+export interface IdentityTokenResponse {
+  access_token: string
+  token_type: 'Bearer' | 'DPoP'
+  expires_in: number
+  scope: string
+  session_id?: string
+  refresh_token?: string
+}
+
+export interface WorkspaceChoice {
+  workspace_id: string
+  role?: string
+  name?: string
+}
+
+export interface MultiWorkspaceResponse {
+  error: 'workspace_selection_required'
+  workspaces: WorkspaceChoice[]
+  access_token?: string
+  token_type?: string
+  expires_in?: number
+  scope?: string
+  refresh_token?: string
+}
+
+export type DeviceCodeStatus =
+  | 'authorization_pending'
+  | 'polling'
+  | 'approved'
+  | 'expired'
+  | 'denied'
+  | 'slow_down'
+
+export interface DeviceCodeLoginOptions {
+  /** Identity service base URL. Default: https://identity.platform.amigo.ai */
+  identityBaseUrl?: string
+  /** Client description for audit logs */
+  clientDescription?: string
+  /** OAuth scope to request */
+  scope?: string
+  /** Called when device code is issued — display instructions to user */
+  onCode: (issuance: DeviceCodeIssuance) => void | Promise<void>
+  /** Called with polling status updates */
+  onStatus?: (status: DeviceCodeStatus) => void
+  /** Called when user must select a workspace — return the chosen workspace_id */
+  onWorkspaceRequired: (workspaces: WorkspaceChoice[]) => Promise<string>
+  /** AbortSignal to cancel the login flow */
+  signal?: AbortSignal
+  /** Custom fetch implementation */
+  fetch?: typeof globalThis.fetch
+}
+
+export interface AuthResult {
+  accessToken: string
+  refreshToken: string
+  workspaceId: string
+  expiresAt: number
+  scope?: string
+}
+
+export interface StoredCredentials {
+  access_token: string
+  refresh_token: string
+  workspace_id: string
+  expires_at: number
+  scope?: string
+  identity_base_url?: string
+}
+
+export interface TokenStorage {
+  load(): Promise<StoredCredentials | null>
+  save(credentials: StoredCredentials): Promise<void>
+  clear(): Promise<void>
+}
+
+// --- Errors ---
+
+export class DeviceCodeExpiredError extends AmigoError {
+  constructor(message = 'Device code expired. Please restart the login flow.') {
+    super(message, { errorCode: 'device_code_expired' })
+  }
+}
+
+export class DeviceCodeDeniedError extends AmigoError {
+  constructor(message = 'Authorization request was denied.') {
+    super(message, { errorCode: 'device_code_denied' })
+  }
+}
+
+export class RefreshTokenExpiredError extends AuthenticationError {
+  constructor(message = 'Refresh token expired. Please log in again.') {
+    super(message, { errorCode: 'refresh_token_expired' })
+  }
+}
+
+export class LoginCancelledError extends AmigoError {
+  constructor() {
+    super('Login cancelled', { errorCode: 'login_cancelled' })
+  }
+}
+
+// --- Identity Client ---
+
+const DEFAULT_IDENTITY_URL = 'https://identity.platform.amigo.ai'
+
+async function identityPost(
+  baseUrl: string,
+  path: string,
+  body: URLSearchParams,
+  fetchFn: typeof globalThis.fetch,
+): Promise<Response> {
+  try {
+    return await fetchFn(`${baseUrl}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    })
+  } catch (err) {
+    throw new NetworkError('Network error contacting identity service', err)
+  }
+}
+
+async function requestDeviceCode(
+  baseUrl: string,
+  params: { clientDescription?: string; scope?: string },
+  fetchFn: typeof globalThis.fetch,
+): Promise<DeviceCodeIssuance> {
+  const body = new URLSearchParams()
+  if (params.clientDescription) body.set('client_description', params.clientDescription)
+  if (params.scope) body.set('scope', params.scope)
+
+  const res = await identityPost(baseUrl, '/device/code', body, fetchFn)
+
+  if (res.status === 429) {
+    const retryAfter = parseInt(res.headers.get('Retry-After') ?? '', 10)
+    throw new RateLimitError('Rate limited', { retryAfter: isNaN(retryAfter) ? undefined : retryAfter })
+  }
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as Record<string, string>
+    throw new AmigoError(err.error_description ?? `Identity error (${res.status})`, {
+      statusCode: res.status,
+      errorCode: err.error,
+    })
+  }
+  return (await res.json()) as DeviceCodeIssuance
+}
+
+type PollResult =
+  | { type: 'token'; data: IdentityTokenResponse }
+  | { type: 'multi_workspace'; data: MultiWorkspaceResponse }
+  | { type: 'pending' }
+
+async function pollDeviceCode(
+  baseUrl: string,
+  deviceCode: string,
+  scope: string | undefined,
+  fetchFn: typeof globalThis.fetch,
+): Promise<PollResult> {
+  const body = new URLSearchParams({ grant_type: 'device_code', device_code: deviceCode })
+  if (scope) body.set('scope', scope)
+
+  const res = await identityPost(baseUrl, '/token', body, fetchFn)
+
+  if (res.status === 300)
+    return { type: 'multi_workspace', data: (await res.json()) as MultiWorkspaceResponse }
+  if (res.status === 200) return { type: 'token', data: (await res.json()) as IdentityTokenResponse }
+
+  if (res.status === 400) {
+    const err = (await res.json().catch(() => ({ error: 'unknown' }))) as Record<string, string>
+    if (err.error === 'authorization_pending' || err.error === 'slow_down')
+      return { type: 'pending' }
+    throw new AmigoError(err.error_description ?? err.error ?? `Identity error (400)`, {
+      statusCode: 400,
+      errorCode: err.error,
+    })
+  }
+
+  throw new AmigoError(`Identity error (${res.status})`, { statusCode: res.status })
+}
+
+export async function refreshToken(
+  baseUrl: string,
+  params: { refreshToken: string; workspaceId?: string; scope?: string },
+  fetchFn: typeof globalThis.fetch,
+): Promise<IdentityTokenResponse> {
+  const body = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: params.refreshToken,
+  })
+  if (params.workspaceId) body.set('workspace_id', params.workspaceId)
+  if (params.scope) body.set('scope', params.scope)
+
+  const res = await identityPost(baseUrl, '/token', body, fetchFn)
+
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as Record<string, string>
+    throw new AmigoError(err.error_description ?? `Identity error (${res.status})`, {
+      statusCode: res.status,
+      errorCode: err.error,
+    })
+  }
+  return (await res.json()) as IdentityTokenResponse
+}
+
+// --- JWT decode (no verification — server validates) ---
+
+export function decodeJwtPayload(jwt: string): Record<string, unknown> | null {
+  try {
+    const parts = jwt.split('.')
+    if (parts.length !== 3 || !parts[1]) return null
+    const payload = Buffer.from(parts[1], 'base64url').toString()
+    return JSON.parse(payload) as Record<string, unknown>
+  } catch {
+    return null
+  }
+}
+
+// --- Device Code Login ---
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new LoginCancelledError())
+      return
+    }
+    const timer = setTimeout(resolve, ms)
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer)
+        reject(new LoginCancelledError())
+      },
+      { once: true },
+    )
+  })
+}
+
+function toAuthResult(token: IdentityTokenResponse, workspaceIdOverride?: string): AuthResult {
+  const claims = decodeJwtPayload(token.access_token)
+  const workspaceId = workspaceIdOverride ?? (claims?.workspace_id as string) ?? ''
+  if (!workspaceId) {
+    throw new AmigoError('Token does not contain a workspace_id claim', {
+      errorCode: 'missing_workspace',
+    })
+  }
+  return {
+    accessToken: token.access_token,
+    refreshToken: token.refresh_token ?? '',
+    workspaceId,
+    expiresAt: (claims?.exp as number) ?? Math.floor(Date.now() / 1000) + token.expires_in,
+    scope: token.scope,
+  }
+}
+
+export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Promise<AuthResult> {
+  const baseUrl = (options.identityBaseUrl ?? DEFAULT_IDENTITY_URL).replace(/\/+$/, '')
+  const fetchFn = options.fetch ?? globalThis.fetch
+
+  const issuance = await requestDeviceCode(
+    baseUrl,
+    { clientDescription: options.clientDescription, scope: options.scope },
+    fetchFn,
+  )
+
+  await options.onCode(issuance)
+
+  // Poll loop
+  let interval = issuance.interval * 1000
+  const deadline = Date.now() + issuance.expires_in * 1000
+
+  while (Date.now() < deadline) {
+    if (options.signal?.aborted) throw new LoginCancelledError()
+
+    await sleep(interval, options.signal)
+
+    if (options.signal?.aborted) throw new LoginCancelledError()
+
+    options.onStatus?.('polling')
+
+    try {
+      const result = await pollDeviceCode(baseUrl, issuance.device_code, options.scope, fetchFn)
+
+      if (result.type === 'pending') {
+        options.onStatus?.('authorization_pending')
+        continue
+      }
+
+      options.onStatus?.('approved')
+
+      if (result.type === 'token') {
+        return toAuthResult(result.data)
+      }
+
+      // multi_workspace — ask developer which workspace
+      const workspaceId = await options.onWorkspaceRequired(result.data.workspaces)
+
+      if (!result.data.refresh_token) {
+        throw new AmigoError('Multi-workspace response missing refresh_token', {
+          errorCode: 'server_error',
+        })
+      }
+
+      const tokenResponse = await refreshToken(
+        baseUrl,
+        { refreshToken: result.data.refresh_token, workspaceId, scope: options.scope },
+        fetchFn,
+      )
+      return toAuthResult(tokenResponse, workspaceId)
+    } catch (err) {
+      if (err instanceof AmigoError && err.errorCode === 'expired_token') {
+        options.onStatus?.('expired')
+        throw new DeviceCodeExpiredError()
+      }
+      if (err instanceof AmigoError && err.errorCode === 'access_denied') {
+        options.onStatus?.('denied')
+        throw new DeviceCodeDeniedError()
+      }
+      if (err instanceof AmigoError && err.errorCode === 'slow_down') {
+        interval += 5000
+        options.onStatus?.('slow_down')
+        continue
+      }
+      throw err
+    }
+  }
+
+  options.onStatus?.('expired')
+  throw new DeviceCodeExpiredError()
+}
+
+// --- Token Manager ---
+
+const REFRESH_BUFFER_SECONDS = 60
+
+export interface TokenManagerConfig {
+  storage?: TokenStorage
+  identityBaseUrl?: string
+  fetch?: typeof globalThis.fetch
+}
+
+export class TokenManager {
+  private readonly _storage: TokenStorage
+  private readonly _baseUrl: string
+  private readonly _fetch: typeof globalThis.fetch
+  private _cached: StoredCredentials | null = null
+  private _refreshPromise: Promise<StoredCredentials> | null = null
+
+  constructor(config: TokenManagerConfig = {}) {
+    this._storage = config.storage ?? new FileTokenStorage()
+    this._baseUrl = (config.identityBaseUrl ?? DEFAULT_IDENTITY_URL).replace(/\/+$/, '')
+    this._fetch = config.fetch ?? globalThis.fetch
+  }
+
+  async store(result: AuthResult): Promise<void> {
+    const creds: StoredCredentials = {
+      access_token: result.accessToken,
+      refresh_token: result.refreshToken,
+      workspace_id: result.workspaceId,
+      expires_at: result.expiresAt,
+      scope: result.scope,
+    }
+    this._cached = creds
+    await this._storage.save(creds)
+  }
+
+  async getAccessToken(): Promise<{ token: string; workspaceId: string } | null> {
+    const creds = await this._loadCached()
+    if (!creds) return null
+    if (creds.expires_at - Math.floor(Date.now() / 1000) >= REFRESH_BUFFER_SECONDS) {
+      return { token: creds.access_token, workspaceId: creds.workspace_id }
+    }
+    const refreshed = await this._refresh(creds)
+    return { token: refreshed.access_token, workspaceId: refreshed.workspace_id }
+  }
+
+  async hasCredentials(): Promise<boolean> {
+    return (await this._loadCached()) !== null
+  }
+
+  async clear(): Promise<void> {
+    this._cached = null
+    this._refreshPromise = null
+    await this._storage.clear()
+  }
+
+  private async _loadCached(): Promise<StoredCredentials | null> {
+    if (this._cached) return this._cached
+    const loaded = await this._storage.load()
+    if (loaded) this._cached = loaded
+    return loaded
+  }
+
+  private async _refresh(current: StoredCredentials): Promise<StoredCredentials> {
+    if (this._refreshPromise) return this._refreshPromise
+    this._refreshPromise = this._doRefresh(current).finally(() => {
+      this._refreshPromise = null
+    })
+    return this._refreshPromise
+  }
+
+  private async _doRefresh(current: StoredCredentials): Promise<StoredCredentials> {
+    if (!current.refresh_token) throw new RefreshTokenExpiredError('No refresh token available')
+
+    try {
+      const response = await refreshToken(
+        this._baseUrl,
+        { refreshToken: current.refresh_token, workspaceId: current.workspace_id, scope: current.scope },
+        this._fetch,
+      )
+      const claims = decodeJwtPayload(response.access_token)
+      const refreshed: StoredCredentials = {
+        access_token: response.access_token,
+        refresh_token: response.refresh_token ?? current.refresh_token,
+        workspace_id: current.workspace_id,
+        expires_at: (claims?.exp as number) ?? Math.floor(Date.now() / 1000) + response.expires_in,
+        scope: response.scope ?? current.scope,
+      }
+      this._cached = refreshed
+      await this._storage.save(refreshed)
+      return refreshed
+    } catch (err) {
+      if (err instanceof AmigoError && (err.statusCode === 401 || err.errorCode === 'invalid_grant')) {
+        await this.clear()
+        throw new RefreshTokenExpiredError()
+      }
+      throw err
+    }
+  }
+}
+
+// --- Token Storage ---
+
+export class FileTokenStorage implements TokenStorage {
+  private readonly _filePath: string
+
+  constructor(filePath?: string) {
+    this._filePath = filePath ?? FileTokenStorage.defaultPath()
+  }
+
+  static defaultPath(): string {
+    const os = require('node:os') as typeof import('node:os')
+    const path = require('node:path') as typeof import('node:path')
+    return path.join(os.homedir(), '.amigo', 'credentials.json')
+  }
+
+  async load(): Promise<StoredCredentials | null> {
+    const fs = await import('node:fs/promises')
+    try {
+      const raw = await fs.readFile(this._filePath, 'utf-8')
+      const data = JSON.parse(raw)
+      if (
+        typeof data.access_token === 'string' &&
+        typeof data.refresh_token === 'string' &&
+        typeof data.workspace_id === 'string' &&
+        typeof data.expires_at === 'number'
+      ) {
+        return data as StoredCredentials
+      }
+      return null
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') return null
+      throw err
+    }
+  }
+
+  async save(credentials: StoredCredentials): Promise<void> {
+    const fs = await import('node:fs/promises')
+    const path = await import('node:path')
+    await fs.mkdir(path.dirname(this._filePath), { recursive: true, mode: 0o700 })
+    await fs.writeFile(this._filePath, JSON.stringify(credentials, null, 2) + '\n', { mode: 0o600 })
+  }
+
+  async clear(): Promise<void> {
+    const fs = await import('node:fs/promises')
+    try {
+      await fs.unlink(this._filePath)
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') return
+      throw err
+    }
+  }
+}
+
+export class MemoryTokenStorage implements TokenStorage {
+  private _credentials: StoredCredentials | null = null
+  async load(): Promise<StoredCredentials | null> {
+    return this._credentials
+  }
+  async save(credentials: StoredCredentials): Promise<void> {
+    this._credentials = { ...credentials }
+  }
+  async clear(): Promise<void> {
+    this._credentials = null
+  }
+}
+
+// --- CLI Helpers ---
+
+export function formatDeviceCodeInstructions(issuance: DeviceCodeIssuance): string {
+  return [
+    '',
+    '  To sign in, open your browser and visit:',
+    '',
+    `    ${issuance.verification_uri}`,
+    '',
+    '  Then enter this code:',
+    '',
+    `    ${issuance.user_code}`,
+    '',
+    `  This code expires in ${Math.floor(issuance.expires_in / 60)} minutes.`,
+    '',
+  ].join('\n')
+}
+
+export function formatDeviceCodeLink(issuance: DeviceCodeIssuance): string {
+  return `\x1b]8;;${issuance.verification_uri_complete}\x07Open browser to approve\x1b]8;;\x07`
+}
+
+export async function openBrowser(url: string): Promise<boolean> {
+  const { exec } = await import('node:child_process')
+  const { promisify } = await import('node:util')
+  const execAsync = promisify(exec)
+  const commands: Record<string, string> = {
+    darwin: `open "${url}"`,
+    win32: `start "" "${url}"`,
+    linux: `xdg-open "${url}"`,
+  }
+  const cmd = commands[process.platform]
+  if (!cmd) return false
+  try {
+    await execAsync(cmd)
+    return true
+  } catch {
+    return false
+  }
+}
+
+export function formatWorkspaceList(workspaces: WorkspaceChoice[]): string {
+  const lines = ['', '  Available workspaces:', '']
+  workspaces.forEach((ws, i) => {
+    const name = ws.name ?? ws.workspace_id
+    const role = ws.role ? ` (${ws.role})` : ''
+    lines.push(`    ${i + 1}. ${name}${role}`)
+    if (ws.name) lines.push(`       ${ws.workspace_id}`)
+  })
+  lines.push('')
+  return lines.join('\n')
+}

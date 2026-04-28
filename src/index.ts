@@ -487,6 +487,36 @@ export type TimelineTrack = NonNullable<TimelineSegment['track']>
 export type TimelineActorKind = TimelineActor['kind']
 export type TimelineActorRole = TimelineActor['role']
 
+// Device code auth (desktop / CLI login)
+export {
+  loginWithDeviceCode,
+  TokenManager,
+  FileTokenStorage,
+  MemoryTokenStorage,
+  DeviceCodeExpiredError,
+  DeviceCodeDeniedError,
+  RefreshTokenExpiredError,
+  LoginCancelledError,
+  refreshToken,
+  decodeJwtPayload,
+  formatDeviceCodeInstructions,
+  formatDeviceCodeLink,
+  formatWorkspaceList,
+  openBrowser,
+} from './core/device-code.js'
+export type {
+  DeviceCodeIssuance,
+  IdentityTokenResponse,
+  WorkspaceChoice,
+  MultiWorkspaceResponse,
+  DeviceCodeLoginOptions,
+  DeviceCodeStatus,
+  AuthResult,
+  StoredCredentials,
+  TokenStorage,
+  TokenManagerConfig,
+} from './core/device-code.js'
+
 // Generated OpenAPI types — consumers can import specific schemas
 export type { paths, components, operations } from './generated/api.js'
 

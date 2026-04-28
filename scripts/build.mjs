@@ -4,7 +4,15 @@ const shared = {
   entryPoints: ['src/index.ts'],
   bundle: true,
   sourcemap: true,
-  external: ['openapi-fetch', 'node:crypto'],
+  external: [
+    'openapi-fetch',
+    'node:crypto',
+    'node:os',
+    'node:path',
+    'node:fs/promises',
+    'node:child_process',
+    'node:util',
+  ],
   target: 'node20',
 }
 
