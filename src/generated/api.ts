@@ -5415,6 +5415,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/scribe/recordings/transcribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Transcribe Scribe Recording
+         * @description Transcribe a completed Superscribe clinical recording.
+         */
+        post: operations["transcribe-scribe-recording"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/sensorium/connector-health": {
         parameters: {
             query?: never;
@@ -9156,6 +9176,22 @@ export interface components {
              * Format: uuid
              */
             use_case_id: string;
+        };
+        /** Body_transcribe-scribe-recording */
+        "Body_transcribe-scribe-recording": {
+            /** Audio */
+            audio: string;
+            /** Keyterms */
+            keyterms?: string | null;
+            /** Language */
+            language?: string | null;
+            /** Patient Entity Id */
+            patient_entity_id?: string | null;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
         };
         /** Body_verify-voiceprint */
         "Body_verify-voiceprint": {
@@ -20303,6 +20339,55 @@ export interface components {
              * @default false
              */
             voice_auth_enabled?: boolean;
+        };
+        /** ScribeTranscriptionChunk */
+        ScribeTranscriptionChunk: {
+            /** Confidence */
+            confidence?: number | null;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
+            /** End Seconds */
+            end_seconds: number;
+            /** Index */
+            index: number;
+            /** Start Seconds */
+            start_seconds: number;
+            /** Text */
+            text: string;
+        };
+        /** ScribeTranscriptionResponse */
+        ScribeTranscriptionResponse: {
+            /** Chunk Count */
+            chunk_count: number;
+            /** Chunks */
+            chunks?: components["schemas"]["ScribeTranscriptionChunk"][];
+            /** Confidence */
+            confidence?: number | null;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Keyterm Count */
+            keyterm_count: number;
+            /** Language */
+            language: string;
+            /** Model */
+            model: string;
+            /** Segments */
+            segments?: components["schemas"]["ScribeTranscriptionSegment"][];
+            /** Transcript */
+            transcript: string;
+        };
+        /** ScribeTranscriptionSegment */
+        ScribeTranscriptionSegment: {
+            /** Confidence */
+            confidence?: number | null;
+            /** End Seconds */
+            end_seconds?: number | null;
+            /** Speaker */
+            speaker?: number | null;
+            /** Start Seconds */
+            start_seconds?: number | null;
+            /** Text */
+            text: string;
         };
         /** SearchAvailableNumbersResponse */
         SearchAvailableNumbersResponse: {
@@ -37376,6 +37461,41 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "transcribe-scribe-recording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_transcribe-scribe-recording"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScribeTranscriptionResponse"];
                 };
             };
             /** @description Validation Error */

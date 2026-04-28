@@ -3025,6 +3025,62 @@
         "title": "Body_send-voicemail",
         "type": "object"
       },
+      "Body_transcribe-scribe-recording": {
+        "properties": {
+          "audio": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Audio",
+            "type": "string"
+          },
+          "keyterms": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Keyterms"
+          },
+          "language": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language"
+          },
+          "patient_entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Patient Entity Id"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "audio",
+          "service_id"
+        ],
+        "title": "Body_transcribe-scribe-recording",
+        "type": "object"
+      },
       "Body_verify-voiceprint": {
         "properties": {
           "audio": {
@@ -31028,6 +31084,176 @@
         "title": "ScribeSettingsResponse",
         "type": "object"
       },
+      "ScribeTranscriptionChunk": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
+          },
+          "end_seconds": {
+            "title": "End Seconds",
+            "type": "number"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "start_seconds": {
+            "title": "Start Seconds",
+            "type": "number"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "index",
+          "start_seconds",
+          "end_seconds",
+          "text"
+        ],
+        "title": "ScribeTranscriptionChunk",
+        "type": "object"
+      },
+      "ScribeTranscriptionResponse": {
+        "properties": {
+          "chunk_count": {
+            "title": "Chunk Count",
+            "type": "integer"
+          },
+          "chunks": {
+            "items": {
+              "$ref": "#/components/schemas/ScribeTranscriptionChunk"
+            },
+            "title": "Chunks",
+            "type": "array"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "duration_seconds": {
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "keyterm_count": {
+            "title": "Keyterm Count",
+            "type": "integer"
+          },
+          "language": {
+            "title": "Language",
+            "type": "string"
+          },
+          "model": {
+            "title": "Model",
+            "type": "string"
+          },
+          "segments": {
+            "items": {
+              "$ref": "#/components/schemas/ScribeTranscriptionSegment"
+            },
+            "title": "Segments",
+            "type": "array"
+          },
+          "transcript": {
+            "title": "Transcript",
+            "type": "string"
+          }
+        },
+        "required": [
+          "transcript",
+          "duration_seconds",
+          "model",
+          "language",
+          "chunk_count",
+          "keyterm_count"
+        ],
+        "title": "ScribeTranscriptionResponse",
+        "type": "object"
+      },
+      "ScribeTranscriptionSegment": {
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "end_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Seconds"
+          },
+          "speaker": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Speaker"
+          },
+          "start_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start Seconds"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "ScribeTranscriptionSegment",
+        "type": "object"
+      },
       "SearchAvailableNumbersResponse": {
         "properties": {
           "numbers": {
@@ -31169,12 +31395,14 @@
           "message": {
             "description": "User message text",
             "maxLength": 10000,
+            "minLength": 1,
             "title": "Message",
             "type": "string"
           },
           "service_id": {
             "description": "Agent service ID",
             "maxLength": 64,
+            "minLength": 1,
             "title": "Service Id",
             "type": "string"
           }
@@ -62547,6 +62775,48 @@
           }
         },
         "summary": "Edit Soap",
+        "tags": [
+          "Scribe"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/scribe/recordings/transcribe": {
+      "post": {
+        "description": "Transcribe a completed Superscribe clinical recording.",
+        "operationId": "transcribe-scribe-recording",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_transcribe-scribe-recording"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScribeTranscriptionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Transcribe Scribe Recording",
         "tags": [
           "Scribe"
         ]
