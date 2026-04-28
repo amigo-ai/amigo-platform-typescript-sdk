@@ -11215,6 +11215,27 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** ConversationToolCallDetail */
+        ConversationToolCallDetail: {
+            /** Call Id */
+            call_id: string;
+            /** Input */
+            input?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Result
+             * @default
+             */
+            result?: string;
+            /**
+             * Succeeded
+             * @default true
+             */
+            succeeded?: boolean;
+            /** Tool Name */
+            tool_name: string;
+        };
         /** ConversationTurn */
         ConversationTurn: {
             /**
@@ -23853,6 +23874,11 @@ export interface components {
             input: components["schemas"]["ConversationTurn"];
             /** Output */
             output: components["schemas"]["ConversationTurn"][];
+            /**
+             * Tool Calls
+             * @default []
+             */
+            tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
             /** Turn Id */
             turn_id: string;
         };
@@ -30631,7 +30657,10 @@ export interface operations {
     };
     create_turn_v1__workspace_id__conversations__conversation_id__turns_post: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Include tool call details in response */
+                include_tool_calls?: boolean;
+            };
             header?: never;
             path: {
                 conversation_id: string;
@@ -34764,8 +34793,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description Metric key */
-                metric_key: components["schemas"]["SlugString"];
+                /** @description Metric key (lowercase alphanumeric + underscores) */
+                metric_key: string;
                 workspace_id: string;
             };
             cookie?: never;
@@ -34804,8 +34833,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description Metric key */
-                metric_key: components["schemas"]["SlugString"];
+                /** @description Metric key (lowercase alphanumeric + underscores) */
+                metric_key: string;
                 workspace_id: string;
             };
             cookie?: never;
@@ -34876,8 +34905,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                /** @description Metric key */
-                metric_key: components["schemas"]["SlugString"];
+                /** @description Metric key (lowercase alphanumeric + underscores) */
+                metric_key: string;
                 workspace_id: string;
             };
             cookie?: never;

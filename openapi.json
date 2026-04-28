@@ -8237,6 +8237,39 @@
         "title": "ConversationThreadResponse",
         "type": "object"
       },
+      "ConversationToolCallDetail": {
+        "properties": {
+          "call_id": {
+            "title": "Call Id",
+            "type": "string"
+          },
+          "input": {
+            "additionalProperties": true,
+            "title": "Input",
+            "type": "object"
+          },
+          "result": {
+            "default": "",
+            "title": "Result",
+            "type": "string"
+          },
+          "succeeded": {
+            "default": true,
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_name",
+          "call_id"
+        ],
+        "title": "ConversationToolCallDetail",
+        "type": "object"
+      },
       "ConversationTurn": {
         "properties": {
           "role": {
@@ -39625,6 +39658,14 @@
             "title": "Output",
             "type": "array"
           },
+          "tool_calls": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ConversationToolCallDetail"
+            },
+            "title": "Tool Calls",
+            "type": "array"
+          },
           "turn_id": {
             "title": "Turn Id",
             "type": "string"
@@ -52874,6 +52915,18 @@
               "title": "Conversation Id",
               "type": "string"
             }
+          },
+          {
+            "description": "Include tool call details in response",
+            "in": "query",
+            "name": "include_tool_calls",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Include tool call details in response",
+              "title": "Include Tool Calls",
+              "type": "boolean"
+            }
           }
         ],
         "requestBody": {
@@ -59433,13 +59486,17 @@
         "operationId": "get-metric-values",
         "parameters": [
           {
-            "description": "Metric key",
+            "description": "Metric key (lowercase alphanumeric + underscores)",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/SlugString",
-              "description": "Metric key"
+              "description": "Metric key (lowercase alphanumeric + underscores)",
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "title": "Metric Key",
+              "type": "string"
             }
           },
           {
@@ -59641,13 +59698,17 @@
         "operationId": "evaluate-metric",
         "parameters": [
           {
-            "description": "Metric key",
+            "description": "Metric key (lowercase alphanumeric + underscores)",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/SlugString",
-              "description": "Metric key"
+              "description": "Metric key (lowercase alphanumeric + underscores)",
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "title": "Metric Key",
+              "type": "string"
             }
           }
         ],
@@ -59700,13 +59761,17 @@
         "operationId": "get-metric-trend",
         "parameters": [
           {
-            "description": "Metric key",
+            "description": "Metric key (lowercase alphanumeric + underscores)",
             "in": "path",
             "name": "metric_key",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/SlugString",
-              "description": "Metric key"
+              "description": "Metric key (lowercase alphanumeric + underscores)",
+              "maxLength": 64,
+              "minLength": 1,
+              "pattern": "^[a-z][a-z0-9_]*$",
+              "title": "Metric Key",
+              "type": "string"
             }
           },
           {
