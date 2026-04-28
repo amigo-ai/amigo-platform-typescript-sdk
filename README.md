@@ -87,11 +87,46 @@ const stats = await client.analytics.getCalls({ days: 30 })
 console.log(stats.total_calls, stats.avg_duration_seconds)
 ```
 
+## Authentication
+
+### API key (server-to-server)
+
+Pass `apiKey` and `workspaceId` to `AmigoClient`. Best for backend services and scripts.
+
+### Device code flow (CLI and desktop apps)
+
+For interactive apps where users sign in via the browser, use `loginWithDeviceCode`:
+
+```typescript
+import { loginWithDeviceCode, openBrowser, formatDeviceCodeInstructions, TokenManager, FileTokenStorage } from '@amigo-ai/platform-sdk'
+
+const result = await loginWithDeviceCode({
+  onCode: async (issuance) => {
+    console.log(formatDeviceCodeInstructions(issuance))
+    await openBrowser(issuance.verification_uri_complete)
+  },
+  onWorkspaceRequired: async (workspaces) => {
+    // Prompt user to pick a workspace
+    return workspaces[0].workspace_id
+  },
+})
+
+// Persist credentials across runs
+const tokens = new TokenManager({ storage: new FileTokenStorage() })
+await tokens.store(result)
+
+// Use the token
+const client = new AmigoClient({ accessToken: result.accessToken, workspaceId: result.workspaceId })
+```
+
+See [`examples/auth/device-code-login.ts`](./examples/auth/device-code-login.ts) for a complete working example.
+
 ## Configuration
 
 | Option        | Type           | Required | Description                                                          |
 | ------------- | -------------- | -------- | -------------------------------------------------------------------- |
-| `apiKey`      | `string`       | Yes      | Your Platform API key — create one at Workspace Settings > API Keys  |
+| `apiKey`      | `string`       | \*       | Your Platform API key — create one at Workspace Settings > API Keys  |
+| `accessToken` | `string`       | \*       | JWT from device code flow or token exchange (\*one of apiKey/accessToken required) |
 | `workspaceId` | `string`       | Yes      | Your workspace ID — all resource operations are scoped to this       |
 | `baseUrl`     | `string`       | No       | Override the API base URL (default: `https://api.platform.amigo.ai`) |
 | `retry`       | `RetryOptions` | No       | Retry configuration for transient failures                           |
