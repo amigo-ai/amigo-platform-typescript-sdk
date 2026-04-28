@@ -5479,6 +5479,48 @@
         "title": "ChannelEmailOpenedEvent",
         "type": "object"
       },
+      "ChannelEmailReceivedEvent": {
+        "description": "Inbound email persisted to channel.inbound_emails as a reply to one of\nour outbound sends. ``in_reply_to_email_id`` is the outbound row this\ninbound threads against.",
+        "properties": {
+          "event_type": {
+            "const": "channel.email_received",
+            "default": "channel.email_received",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "from_address": {
+            "title": "From Address",
+            "type": "string",
+            "x-phi": true
+          },
+          "in_reply_to_email_id": {
+            "title": "In Reply To Email Id",
+            "type": "string"
+          },
+          "inbound_email_id": {
+            "title": "Inbound Email Id",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          },
+          "to_address": {
+            "title": "To Address",
+            "type": "string",
+            "x-phi": true
+          }
+        },
+        "required": [
+          "inbound_email_id",
+          "in_reply_to_email_id",
+          "from_address",
+          "to_address",
+          "subject"
+        ],
+        "title": "ChannelEmailReceivedEvent",
+        "type": "object"
+      },
       "ChannelEmailRejectedEvent": {
         "properties": {
           "email_id": {
@@ -5687,6 +5729,43 @@
         ],
         "title": "ChannelType",
         "type": "string"
+      },
+      "ChannelVoicemailStatusEvent": {
+        "description": "Ringless voicemail status callback projected from VoiceDrop. ``status``\nmirrors the channel.voicedrop_ringless_voicemails enum: delivered,\nskipped, failed, or not_delivered (pending is the row's initial state and\nis never emitted as an event).",
+        "properties": {
+          "event_type": {
+            "const": "channel.voicemail_status",
+            "default": "channel.voicemail_status",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "recipient_phone_number": {
+            "title": "Recipient Phone Number",
+            "type": "string",
+            "x-phi": true
+          },
+          "status": {
+            "enum": [
+              "delivered",
+              "skipped",
+              "failed",
+              "not_delivered"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "voicemail_id": {
+            "title": "Voicemail Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "voicemail_id",
+          "status",
+          "recipient_phone_number"
+        ],
+        "title": "ChannelVoicemailStatusEvent",
+        "type": "object"
       },
       "CharlsonCategoryFlags": {
         "description": "Quan 2005 ICD-10 Charlson category flags (0/1).",
@@ -7672,13 +7751,75 @@
       },
       "ConversationDetail": {
         "properties": {
+          "call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Sid"
+          },
+          "caller_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caller Id"
+          },
           "channel_kind": {
+            "enum": [
+              "voice",
+              "sms",
+              "whatsapp",
+              "web",
+              "email"
+            ],
             "title": "Channel Kind",
             "type": "string"
+          },
+          "completion_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Reason"
           },
           "created_at": {
             "title": "Created At",
             "type": "string"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
           },
           "entity_id": {
             "anyOf": [
@@ -7691,9 +7832,53 @@
             ],
             "title": "Entity Id"
           },
+          "escalation_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escalation Status"
+          },
+          "final_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final State"
+          },
+          "has_recording": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Recording"
+          },
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone Number"
           },
           "plan": {
             "anyOf": [
@@ -7706,11 +7891,47 @@
             ],
             "title": "Plan"
           },
+          "quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Score"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
           "status": {
             "enum": [
               "active",
               "frozen",
-              "closed"
+              "closed",
+              "completed",
+              "in-progress",
+              "failed"
             ],
             "title": "Status",
             "type": "string"
@@ -7731,6 +7952,16 @@
           "updated_at": {
             "title": "Updated At",
             "type": "string"
+          },
+          "voice": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VoiceDetail"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -9140,6 +9371,30 @@
       "CreateOutboundCallRequest": {
         "description": "Request body for creating an outbound call.\n\nExactly one of ``phone_from`` or ``use_case_id`` is required.\nWhen ``use_case_id`` is provided, channel-manager selects the optimal\noutbound phone number for that use case.",
         "properties": {
+          "derived_from_call_sid": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Prior call_sid if this is a callback from a previous call.",
+            "title": "Derived From Call Sid"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "What the call should accomplish. Injected into agent context."
+          },
           "idempotency_key": {
             "anyOf": [
               {
@@ -9153,6 +9408,21 @@
             "description": "Client-provided idempotency key. Auto-generated if omitted.",
             "title": "Idempotency Key"
           },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Arbitrary key-value pairs for external system correlation.",
+            "title": "Metadata"
+          },
           "outbound_task_entity_id": {
             "anyOf": [
               {
@@ -9165,6 +9435,12 @@
             ],
             "description": "World model outbound_task entity ID for completion feedback.",
             "title": "Outbound Task Entity Id"
+          },
+          "patient_entity_id": {
+            "description": "Patient entity in the world model. Must exist in workspace as a person entity.",
+            "format": "uuid",
+            "title": "Patient Entity Id",
+            "type": "string"
           },
           "phone_from": {
             "anyOf": [
@@ -9184,6 +9460,10 @@
             "maxLength": 16,
             "title": "Phone To",
             "type": "string"
+          },
+          "reason": {
+            "$ref": "#/components/schemas/NameString",
+            "description": "Why the call is being made (e.g. appointment_reminder, follow_up, lab_results)."
           },
           "service_id": {
             "anyOf": [
@@ -9211,6 +9491,22 @@
             "description": "Optional system prompt override for this call.",
             "title": "System Prompt"
           },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "maxItems": 10,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Classification tags for analytics.",
+            "title": "Tags"
+          },
           "use_case_id": {
             "anyOf": [
               {
@@ -9226,7 +9522,9 @@
           }
         },
         "required": [
-          "phone_to"
+          "phone_to",
+          "patient_entity_id",
+          "reason"
         ],
         "title": "CreateOutboundCallRequest",
         "type": "object"
@@ -9238,6 +9536,19 @@
             "description": "Twilio call SID for the outbound call",
             "title": "Call Sid",
             "type": "string"
+          },
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "World event ID for the outbound.initiated event.",
+            "title": "Event Id"
           },
           "phone_from": {
             "anyOf": [
@@ -14200,6 +14511,21 @@
               }
             ],
             "title": "Barge In Count"
+          },
+          "compound_emotions": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compound Emotions"
           },
           "dominant_emotion": {
             "anyOf": [
@@ -38917,6 +39243,21 @@
             ],
             "title": "Audio Window Start Ms"
           },
+          "compound_emotions": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Compound Emotions"
+          },
           "emotion_label": {
             "anyOf": [
               {
@@ -39141,7 +39482,10 @@
             "enum": [
               "active",
               "frozen",
-              "closed"
+              "closed",
+              "completed",
+              "in-progress",
+              "failed"
             ],
             "title": "Status",
             "type": "string"
@@ -42190,6 +42534,254 @@
         "title": "VoiceContextAppliedEvent",
         "type": "object"
       },
+      "VoiceDetail": {
+        "properties": {
+          "barge_in_events": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Barge In Events",
+            "type": "array"
+          },
+          "call_analysis": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Analysis"
+          },
+          "config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Config"
+          },
+          "conversation_metrics": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Metrics"
+          },
+          "emotional_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Emotional Summary"
+          },
+          "escalation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escalation"
+          },
+          "forwarding": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Forwarding"
+          },
+          "has_recording": {
+            "default": false,
+            "title": "Has Recording",
+            "type": "boolean"
+          },
+          "latency_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Summary"
+          },
+          "operator_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator Summary"
+          },
+          "participants": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Participants",
+            "type": "array"
+          },
+          "quality_breakdown": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Breakdown"
+          },
+          "recording_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Recording Path"
+          },
+          "risk_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Summary"
+          },
+          "safety": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety"
+          },
+          "safety_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Summary"
+          },
+          "states_visited": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "States Visited",
+            "type": "array"
+          },
+          "tool_summary": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Summary"
+          },
+          "transcript_accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transcript Accuracy"
+          },
+          "twilio_recording_duration": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twilio Recording Duration"
+          },
+          "twilio_recording_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Twilio Recording Sid"
+          },
+          "verified_transcript": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verified Transcript"
+          }
+        },
+        "title": "VoiceDetail",
+        "type": "object"
+      },
       "VoiceJudgeRecentResponse": {
         "properties": {
           "count": {
@@ -44122,7 +44714,9 @@
             "channel.email_delayed": "#/components/schemas/ChannelEmailDelayedEvent",
             "channel.email_delivered": "#/components/schemas/ChannelEmailDeliveredEvent",
             "channel.email_opened": "#/components/schemas/ChannelEmailOpenedEvent",
+            "channel.email_received": "#/components/schemas/ChannelEmailReceivedEvent",
             "channel.email_rejected": "#/components/schemas/ChannelEmailRejectedEvent",
+            "channel.voicemail_status": "#/components/schemas/ChannelVoicemailStatusEvent",
             "encounter.updated": "#/components/schemas/EncounterUpdatedEvent",
             "operator.joined_call": "#/components/schemas/OperatorJoinedCallEvent",
             "operator.left_call": "#/components/schemas/OperatorLeftCallEvent",
@@ -44284,6 +44878,12 @@
           },
           {
             "$ref": "#/components/schemas/ChannelEmailClickedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelEmailReceivedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ChannelVoicemailStatusEvent"
           }
         ]
       },
@@ -44638,13 +45238,75 @@
       },
       "src__routes__conversations__ConversationSummary": {
         "properties": {
+          "call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Sid"
+          },
+          "caller_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caller Id"
+          },
           "channel_kind": {
+            "enum": [
+              "voice",
+              "sms",
+              "whatsapp",
+              "web",
+              "email"
+            ],
             "title": "Channel Kind",
             "type": "string"
+          },
+          "completion_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Reason"
           },
           "created_at": {
             "title": "Created At",
             "type": "string"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Direction"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
           },
           "entity_id": {
             "anyOf": [
@@ -44657,15 +45319,95 @@
             ],
             "title": "Entity Id"
           },
+          "escalation_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Escalation Status"
+          },
+          "final_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Final State"
+          },
+          "has_recording": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Has Recording"
+          },
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "phone_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone Number"
+          },
+          "quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Quality Score"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
           },
           "status": {
             "enum": [
               "active",
               "frozen",
-              "closed"
+              "closed",
+              "completed",
+              "in-progress",
+              "failed"
             ],
             "title": "Status",
             "type": "string"
@@ -51904,6 +52646,32 @@
         "operationId": "list_conversations_v1__workspace_id__conversations_get",
         "parameters": [
           {
+            "description": "Filter by channel",
+            "in": "query",
+            "name": "channel_kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "voice",
+                    "sms",
+                    "whatsapp",
+                    "web",
+                    "email"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by channel",
+              "title": "Channel Kind"
+            }
+          },
+          {
+            "description": "Filter by status",
             "in": "query",
             "name": "status",
             "required": false,
@@ -51913,7 +52681,10 @@
                   "enum": [
                     "active",
                     "frozen",
-                    "closed"
+                    "closed",
+                    "completed",
+                    "in-progress",
+                    "failed"
                   ],
                   "type": "string"
                 },
@@ -51921,6 +52692,7 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
             }
           },
@@ -51970,7 +52742,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "List conversations",
+        "summary": "List all conversations (voice + text)",
         "tags": [
           "conversations"
         ]
@@ -52009,7 +52781,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create a new conversation",
+        "summary": "Create a new text conversation",
         "tags": [
           "conversations"
         ]
@@ -52084,7 +52856,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Get conversation detail with turns",
+        "summary": "Get conversation detail (voice or text)",
         "tags": [
           "conversations"
         ]

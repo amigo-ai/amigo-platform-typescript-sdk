@@ -37,7 +37,7 @@ describe('ConversationsResource', () => {
     const apiResponse: ConversationListResponse = {
       items: [
         {
-          channel_kind: 'text',
+          channel_kind: 'web',
           created_at: '2026-01-01T00:00:00Z',
           id: '00000000-0000-4000-8000-000000000001',
           status: 'active',
@@ -68,7 +68,7 @@ describe('ConversationsResource', () => {
     let authorization: string | null = null
     const apiResponse: ConversationDetail = {
       id: '00000000-0000-4000-8000-000000000001',
-      channel_kind: 'text',
+      channel_kind: 'web',
       status: 'active',
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:00:00Z',
@@ -101,7 +101,7 @@ describe('ConversationsResource', () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const apiResponse: ConversationDetail = {
       id: conversationId,
-      channel_kind: 'text',
+      channel_kind: 'web',
       status: 'active',
       turn_count: 2,
       turns: [],
@@ -198,9 +198,9 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    await expect(
-      client.conversations.create({ service_id: '' }),
-    ).rejects.toBeInstanceOf(ValidationError)
+    await expect(client.conversations.create({ service_id: '' })).rejects.toBeInstanceOf(
+      ValidationError,
+    )
   })
 
   it('routes DELETE failures through the central error pipeline', async () => {
@@ -314,7 +314,7 @@ describe('ConversationsResource', () => {
           scopedHeader = request.headers.get('x-request-scope')
           return Response.json({
             id: conversationId,
-            channel_kind: 'text',
+            channel_kind: 'web',
             status: 'active',
             created_at: '2026-01-01T00:00:00Z',
             updated_at: '2026-01-01T00:00:00Z',

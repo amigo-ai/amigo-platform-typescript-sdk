@@ -1968,10 +1968,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List conversations */
+        /** List all conversations (voice + text) */
         get: operations["list_conversations_v1__workspace_id__conversations_get"];
         put?: never;
-        /** Create a new conversation */
+        /** Create a new text conversation */
         post: operations["create_conversation_v1__workspace_id__conversations_post"];
         delete?: never;
         options?: never;
@@ -1986,7 +1986,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get conversation detail with turns */
+        /** Get conversation detail (voice or text) */
         get: operations["get_conversation_v1__workspace_id__conversations__conversation_id__get"];
         put?: never;
         post?: never;
@@ -10120,6 +10120,29 @@ export interface components {
             /** To Address */
             to_address: string;
         };
+        /**
+         * ChannelEmailReceivedEvent
+         * @description Inbound email persisted to channel.inbound_emails as a reply to one of
+         *     our outbound sends. ``in_reply_to_email_id`` is the outbound row this
+         *     inbound threads against.
+         */
+        ChannelEmailReceivedEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.email_received";
+            /** From Address */
+            from_address: string;
+            /** In Reply To Email Id */
+            in_reply_to_email_id: string;
+            /** Inbound Email Id */
+            inbound_email_id: string;
+            /** Subject */
+            subject: string;
+            /** To Address */
+            to_address: string;
+        };
         /** ChannelEmailRejectedEvent */
         ChannelEmailRejectedEvent: {
             /** Email Id */
@@ -10205,6 +10228,29 @@ export interface components {
          * @enum {string}
          */
         ChannelType: "sms" | "whatsapp" | "imessage" | "email" | "voice" | "web";
+        /**
+         * ChannelVoicemailStatusEvent
+         * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
+         *     mirrors the channel.voicedrop_ringless_voicemails enum: delivered,
+         *     skipped, failed, or not_delivered (pending is the row's initial state and
+         *     is never emitted as an event).
+         */
+        ChannelVoicemailStatusEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "channel.voicemail_status";
+            /** Recipient Phone Number */
+            recipient_phone_number: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "delivered" | "skipped" | "failed" | "not_delivered";
+            /** Voicemail Id */
+            voicemail_id: string;
+        };
         /**
          * CharlsonCategoryFlags
          * @description Quan 2005 ICD-10 Charlson category flags (0/1).
@@ -11001,21 +11047,48 @@ export interface components {
         };
         /** ConversationDetail */
         ConversationDetail: {
-            /** Channel Kind */
-            channel_kind: string;
+            /** Call Sid */
+            call_sid?: string | null;
+            /** Caller Id */
+            caller_id?: string | null;
+            /**
+             * Channel Kind
+             * @enum {string}
+             */
+            channel_kind: "voice" | "sms" | "whatsapp" | "web" | "email";
+            /** Completion Reason */
+            completion_reason?: string | null;
             /** Created At */
             created_at: string;
+            /** Direction */
+            direction?: string | null;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Entity Id */
             entity_id?: string | null;
+            /** Escalation Status */
+            escalation_status?: string | null;
+            /** Final State */
+            final_state?: string | null;
+            /** Has Recording */
+            has_recording?: boolean | null;
             /** Id */
             id: string;
+            /** Phone Number */
+            phone_number?: string | null;
             /** Plan */
             plan?: string | null;
+            /** Quality Score */
+            quality_score?: number | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Source */
+            source?: string | null;
             /**
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed";
+            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -11028,6 +11101,7 @@ export interface components {
             turns?: components["schemas"]["ConversationTurn"][];
             /** Updated At */
             updated_at: string;
+            voice?: components["schemas"]["VoiceDetail"] | null;
         };
         /** ConversationListResponse */
         ConversationListResponse: {
@@ -11567,15 +11641,35 @@ export interface components {
          */
         CreateOutboundCallRequest: {
             /**
+             * Derived From Call Sid
+             * @description Prior call_sid if this is a callback from a previous call.
+             */
+            derived_from_call_sid?: string | null;
+            /** @description What the call should accomplish. Injected into agent context. */
+            goal?: components["schemas"]["DescriptionString"] | null;
+            /**
              * Idempotency Key
              * @description Client-provided idempotency key. Auto-generated if omitted.
              */
             idempotency_key?: string | null;
             /**
+             * Metadata
+             * @description Arbitrary key-value pairs for external system correlation.
+             */
+            metadata?: {
+                [key: string]: string;
+            } | null;
+            /**
              * Outbound Task Entity Id
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
+            /**
+             * Patient Entity Id
+             * Format: uuid
+             * @description Patient entity in the world model. Must exist in workspace as a person entity.
+             */
+            patient_entity_id: string;
             /**
              * Phone From
              * @description Caller ID phone number in E.164 format. Must belong to this workspace.
@@ -11586,6 +11680,8 @@ export interface components {
              * @description Destination phone number in E.164 format.
              */
             phone_to: string;
+            /** @description Why the call is being made (e.g. appointment_reminder, follow_up, lab_results). */
+            reason: components["schemas"]["NameString"];
             /**
              * Service Id
              * @description Service ID for the voice agent to use.
@@ -11596,6 +11692,11 @@ export interface components {
              * @description Optional system prompt override for this call.
              */
             system_prompt?: string | null;
+            /**
+             * Tags
+             * @description Classification tags for analytics.
+             */
+            tags?: string[] | null;
             /**
              * Use Case Id
              * @description Channel-manager use case ID. When provided, channel-manager selects the optimal outbound phone number for this use case.
@@ -11612,6 +11713,11 @@ export interface components {
              * @description Twilio call SID for the outbound call
              */
             call_sid: string;
+            /**
+             * Event Id
+             * @description World event ID for the outbound.initiated event.
+             */
+            event_id?: string | null;
             /**
              * Phone From
              * @description Resolved caller ID when use_case_id was used.
@@ -13589,6 +13695,10 @@ export interface components {
             average_valence?: number | null;
             /** Barge In Count */
             barge_in_count?: number | null;
+            /** Compound Emotions */
+            compound_emotions?: {
+                [key: string]: unknown;
+            }[] | null;
             /** Dominant Emotion */
             dominant_emotion?: string | null;
             /** Emotional Shifts */
@@ -23599,6 +23709,10 @@ export interface components {
             audio_window_end_ms?: number | null;
             /** Audio Window Start Ms */
             audio_window_start_ms?: number | null;
+            /** Compound Emotions */
+            compound_emotions?: {
+                [key: string]: unknown;
+            }[] | null;
             /** Emotion Label */
             emotion_label?: string | null;
             /** Emotion Valence */
@@ -23668,7 +23782,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed";
+            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
             /** Turn Count */
             turn_count: number;
             /** Updated At */
@@ -24467,6 +24581,95 @@ export interface components {
              */
             type: "voice_context_applied";
         };
+        /** VoiceDetail */
+        VoiceDetail: {
+            /**
+             * Barge In Events
+             * @default []
+             */
+            barge_in_events?: {
+                [key: string]: unknown;
+            }[];
+            /** Call Analysis */
+            call_analysis?: {
+                [key: string]: unknown;
+            } | null;
+            /** Config */
+            config?: {
+                [key: string]: unknown;
+            } | null;
+            /** Conversation Metrics */
+            conversation_metrics?: {
+                [key: string]: unknown;
+            } | null;
+            /** Emotional Summary */
+            emotional_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Escalation */
+            escalation?: {
+                [key: string]: unknown;
+            } | null;
+            /** Forwarding */
+            forwarding?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Has Recording
+             * @default false
+             */
+            has_recording?: boolean;
+            /** Latency Summary */
+            latency_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Operator Summary */
+            operator_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Participants
+             * @default []
+             */
+            participants?: {
+                [key: string]: unknown;
+            }[];
+            /** Quality Breakdown */
+            quality_breakdown?: {
+                [key: string]: unknown;
+            } | null;
+            /** Recording Path */
+            recording_path?: string | null;
+            /** Risk Summary */
+            risk_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Safety */
+            safety?: {
+                [key: string]: unknown;
+            } | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * States Visited
+             * @default []
+             */
+            states_visited?: string[];
+            /** Tool Summary */
+            tool_summary?: {
+                [key: string]: unknown;
+            } | null;
+            /** Transcript Accuracy */
+            transcript_accuracy?: number | null;
+            /** Twilio Recording Duration */
+            twilio_recording_duration?: number | null;
+            /** Twilio Recording Sid */
+            twilio_recording_sid?: string | null;
+            /** Verified Transcript */
+            verified_transcript?: string | null;
+        };
         /** VoiceJudgeRecentResponse */
         VoiceJudgeRecentResponse: {
             /** Count */
@@ -25173,7 +25376,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -25360,19 +25563,46 @@ export interface components {
         };
         /** ConversationSummary */
         src__routes__conversations__ConversationSummary: {
-            /** Channel Kind */
-            channel_kind: string;
+            /** Call Sid */
+            call_sid?: string | null;
+            /** Caller Id */
+            caller_id?: string | null;
+            /**
+             * Channel Kind
+             * @enum {string}
+             */
+            channel_kind: "voice" | "sms" | "whatsapp" | "web" | "email";
+            /** Completion Reason */
+            completion_reason?: string | null;
             /** Created At */
             created_at: string;
+            /** Direction */
+            direction?: string | null;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Entity Id */
             entity_id?: string | null;
+            /** Escalation Status */
+            escalation_status?: string | null;
+            /** Final State */
+            final_state?: string | null;
+            /** Has Recording */
+            has_recording?: boolean | null;
             /** Id */
             id: string;
+            /** Phone Number */
+            phone_number?: string | null;
+            /** Quality Score */
+            quality_score?: number | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Source */
+            source?: string | null;
             /**
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed";
+            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -30267,7 +30497,10 @@ export interface operations {
     list_conversations_v1__workspace_id__conversations_get: {
         parameters: {
             query?: {
-                status?: ("active" | "frozen" | "closed") | null;
+                /** @description Filter by channel */
+                channel_kind?: ("voice" | "sms" | "whatsapp" | "web" | "email") | null;
+                /** @description Filter by status */
+                status?: ("active" | "frozen" | "closed" | "completed" | "in-progress" | "failed") | null;
                 limit?: number;
                 offset?: number;
             };

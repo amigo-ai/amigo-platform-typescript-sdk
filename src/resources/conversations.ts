@@ -95,15 +95,12 @@ export class ConversationsResource extends WorkspaceScopedResource {
 
   async createTurn(conversationId: string, request: TurnRequest): Promise<TurnResponse> {
     return extractData(
-      await this.client.POST(
-        '/v1/{workspace_id}/conversations/{conversation_id}/turns',
-        {
-          params: {
-            path: { workspace_id: this.workspaceId, conversation_id: conversationId },
-          },
-          body: request,
+      await this.client.POST('/v1/{workspace_id}/conversations/{conversation_id}/turns', {
+        params: {
+          path: { workspace_id: this.workspaceId, conversation_id: conversationId },
         },
-      ),
+        body: request,
+      }),
     )
   }
 

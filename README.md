@@ -98,7 +98,13 @@ Pass `apiKey` and `workspaceId` to `AmigoClient`. Best for backend services and 
 For interactive apps where users sign in via the browser, use `loginWithDeviceCode`:
 
 ```typescript
-import { loginWithDeviceCode, openBrowser, formatDeviceCodeInstructions, TokenManager, FileTokenStorage } from '@amigo-ai/platform-sdk'
+import {
+  loginWithDeviceCode,
+  openBrowser,
+  formatDeviceCodeInstructions,
+  TokenManager,
+  FileTokenStorage,
+} from '@amigo-ai/platform-sdk'
 
 const result = await loginWithDeviceCode({
   onCode: async (issuance) => {
