@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.16.0] - 2026-04-28
+
+### Features
+
+- sync API types from platform 90bb35099
+
+### Documentation
+
+- add device code authentication docs and example (#121)
+
 ## [0.15.1] - 2026-04-28
 
 ### Bug Fixes
