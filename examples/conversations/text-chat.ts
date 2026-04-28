@@ -23,13 +23,13 @@ const client = new AmigoClient({ apiKey, workspaceId })
 // Build the WebSocket URL with tool_events enabled
 const wsUrl = client.conversations.textStreamUrl({
   serviceId,
+  toolEvents: true,
   token: apiKey,
-}) + '&tool_events=true'
+})
 
 console.log(`Connecting to ${wsUrl.replace(apiKey, '***')}`)
 
-const protocols = textStreamAuthProtocols(apiKey)
-const ws = new WebSocket(wsUrl, protocols)
+const ws = new WebSocket(wsUrl, [...textStreamAuthProtocols(apiKey)])
 
 ws.on('open', () => {
   console.log('Connected. Waiting for session_started...')

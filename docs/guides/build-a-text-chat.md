@@ -59,7 +59,7 @@ const client = new AmigoClient({
 const url = client.conversations.textStreamUrl({
   serviceId: SERVICE_ID,
   conversationId: conversation.id, // optional — omit for new conversation
-  entityId: ENTITY_ID,             // optional — patient context
+  entityId: ENTITY_ID, // optional — patient context
 })
 
 // Authenticate via subprotocol (keeps token out of URL)
@@ -74,22 +74,23 @@ import WebSocket from 'ws'
 
 const url = client.conversations.textStreamUrl({
   serviceId: SERVICE_ID,
+  toolEvents: true,
   token: API_KEY, // query param fallback for Node.js
 })
 
-const ws = new WebSocket(url + '&tool_events=true')
+const ws = new WebSocket(url)
 ```
 
 ### Query parameters
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `workspace_id` | Yes | Workspace ID |
-| `service_id` | Yes | Which agent to talk to |
-| `token` | Yes* | API key or JWT (*or use subprotocol auth) |
-| `conversation_id` | No | Resume a frozen conversation |
-| `entity_id` | No | Patient entity ID for world model context |
-| `tool_events` | No | `true` to receive tool call frames (default `false`) |
+| Parameter         | Required | Description                                          |
+| ----------------- | -------- | ---------------------------------------------------- |
+| `workspace_id`    | Yes      | Workspace ID                                         |
+| `service_id`      | Yes      | Which agent to talk to                               |
+| `token`           | Yes\*    | API key or JWT (\*or use subprotocol auth)           |
+| `conversation_id` | No       | Resume a frozen conversation                         |
+| `entity_id`       | No       | Patient entity ID for world model context            |
+| `tool_events`     | No       | `true` to receive tool call frames (default `false`) |
 
 ## Step 3: Handle streaming events
 
@@ -97,22 +98,22 @@ const ws = new WebSocket(url + '&tool_events=true')
 
 **Client sends:**
 
-| Frame | Description |
-|-------|-------------|
+| Frame                                | Description         |
+| ------------------------------------ | ------------------- |
 | `{"type": "message", "text": "..."}` | Send a user message |
-| `{"type": "stop"}` | End the session |
+| `{"type": "stop"}`                   | End the session     |
 
 **Server sends:**
 
-| Frame | When |
-|-------|------|
-| `{"type": "session_started", "session_id": "...", "conversation_id": "..."}` | First frame after connection |
-| `{"type": "typing"}` | Agent is thinking |
-| `{"type": "tool_call_started", "tool_name": "...", "call_id": "...", "input": {...}}` | Agent started a tool (requires `tool_events=true`) |
-| `{"type": "tool_call_completed", "tool_name": "...", "call_id": "...", "result": "...", "succeeded": true}` | Tool finished (requires `tool_events=true`) |
-| `{"type": "message", "text": "..."}` | Agent's response |
-| `{"type": "error", "message": "..."}` | Error (connection stays open) |
-| `{"type": "session_ended", "reason": "..."}` | Session ended, socket closing |
+| Frame                                                                                                       | When                                               |
+| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| `{"type": "session_started", "session_id": "...", "conversation_id": "..."}`                                | First frame after connection                       |
+| `{"type": "typing"}`                                                                                        | Agent is thinking                                  |
+| `{"type": "tool_call_started", "tool_name": "...", "call_id": "...", "input": {...}}`                       | Agent started a tool (requires `tool_events=true`) |
+| `{"type": "tool_call_completed", "tool_name": "...", "call_id": "...", "result": "...", "succeeded": true}` | Tool finished (requires `tool_events=true`)        |
+| `{"type": "message", "text": "..."}`                                                                        | Agent's response                                   |
+| `{"type": "error", "message": "..."}`                                                                       | Error (connection stays open)                      |
+| `{"type": "session_ended", "reason": "..."}`                                                                | Session ended, socket closing                      |
 
 ### Event sequence for a turn with tool calls
 
@@ -234,220 +235,369 @@ Copy this HTML file, fill in your credentials, and open it in a browser. It demo
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Amigo Text Chat</title>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: system-ui, sans-serif; background: #f5f5f5; height: 100vh; display: flex; flex-direction: column; }
-  .config { padding: 12px 16px; background: #fff; border-bottom: 1px solid #ddd; display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
-  .config label { font-size: 12px; color: #666; display: flex; flex-direction: column; gap: 2px; }
-  .config input { padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; width: 180px; }
-  .config button { padding: 6px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
-  .config .connect { background: #2563eb; color: #fff; }
-  .config .disconnect { background: #dc2626; color: #fff; }
-  .status { font-size: 12px; padding: 4px 8px; border-radius: 12px; align-self: center; }
-  .status.connected { background: #dcfce7; color: #166534; }
-  .status.disconnected { background: #fee2e2; color: #991b1b; }
-  .chat { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
-  .msg { max-width: 70%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.4; white-space: pre-wrap; }
-  .msg.user { align-self: flex-end; background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
-  .msg.agent { align-self: flex-start; background: #fff; border: 1px solid #e5e7eb; border-bottom-left-radius: 4px; }
-  .msg.system { align-self: center; background: #f3f4f6; color: #6b7280; font-size: 12px; border-radius: 8px; }
-  .tool-card { align-self: stretch; background: #fefce8; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 12px; font-size: 13px; }
-  .tool-card.success { background: #f0fdf4; border-color: #bbf7d0; }
-  .tool-card.failure { background: #fef2f2; border-color: #fecaca; }
-  .tool-card .name { font-weight: 600; }
-  .tool-card .result { color: #374151; margin-top: 4px; font-size: 12px; max-height: 80px; overflow: hidden; }
-  .typing { align-self: flex-start; color: #9ca3af; font-size: 13px; padding: 4px 0; }
-  .input-bar { padding: 12px 16px; background: #fff; border-top: 1px solid #ddd; display: flex; gap: 8px; }
-  .input-bar input { flex: 1; padding: 10px 14px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
-  .input-bar button { padding: 10px 20px; background: #2563eb; color: #fff; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; }
-  .input-bar button:disabled { background: #93c5fd; cursor: not-allowed; }
-</style>
-</head>
-<body>
-<div class="config">
-  <label>API URL <input id="apiUrl" value="wss://api.platform.amigo.ai"></label>
-  <label>Token <input id="token" type="password"></label>
-  <label>Workspace <input id="workspace"></label>
-  <label>Service <input id="service"></label>
-  <label>Conversation ID <input id="convId" placeholder="(optional — resume)"></label>
-  <label>Entity ID <input id="entityId" placeholder="(optional)"></label>
-  <button class="connect" onclick="connect()">Connect</button>
-  <button class="disconnect" onclick="disconnect()">Disconnect</button>
-  <span id="status" class="status disconnected">Disconnected</span>
-</div>
-<div class="chat" id="chat"></div>
-<div class="input-bar">
-  <input id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')send()" disabled>
-  <button id="sendBtn" onclick="send()" disabled>Send</button>
-</div>
-<script>
-let ws = null
-let conversationId = null
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amigo Text Chat</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+        background: #f5f5f5;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .config {
+        padding: 12px 16px;
+        background: #fff;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: end;
+      }
+      .config label {
+        font-size: 12px;
+        color: #666;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .config input {
+        padding: 6px 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 13px;
+        width: 180px;
+      }
+      .config button {
+        padding: 6px 16px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      .config .connect {
+        background: #2563eb;
+        color: #fff;
+      }
+      .config .disconnect {
+        background: #dc2626;
+        color: #fff;
+      }
+      .status {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        align-self: center;
+      }
+      .status.connected {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .status.disconnected {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .chat {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .msg {
+        max-width: 70%;
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+      }
+      .msg.user {
+        align-self: flex-end;
+        background: #2563eb;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+      .msg.agent {
+        align-self: flex-start;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-bottom-left-radius: 4px;
+      }
+      .msg.system {
+        align-self: center;
+        background: #f3f4f6;
+        color: #6b7280;
+        font-size: 12px;
+        border-radius: 8px;
+      }
+      .tool-card {
+        align-self: stretch;
+        background: #fefce8;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+      .tool-card.success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+      }
+      .tool-card.failure {
+        background: #fef2f2;
+        border-color: #fecaca;
+      }
+      .tool-card .name {
+        font-weight: 600;
+      }
+      .tool-card .result {
+        color: #374151;
+        margin-top: 4px;
+        font-size: 12px;
+        max-height: 80px;
+        overflow: hidden;
+      }
+      .typing {
+        align-self: flex-start;
+        color: #9ca3af;
+        font-size: 13px;
+        padding: 4px 0;
+      }
+      .input-bar {
+        padding: 12px 16px;
+        background: #fff;
+        border-top: 1px solid #ddd;
+        display: flex;
+        gap: 8px;
+      }
+      .input-bar input {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      .input-bar button {
+        padding: 10px 20px;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .input-bar button:disabled {
+        background: #93c5fd;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="config">
+      <label>API URL <input id="apiUrl" value="wss://api.platform.amigo.ai" /></label>
+      <label>Token <input id="token" type="password" /></label>
+      <label>Workspace <input id="workspace" /></label>
+      <label>Service <input id="service" /></label>
+      <label>Conversation ID <input id="convId" placeholder="(optional — resume)" /></label>
+      <label>Entity ID <input id="entityId" placeholder="(optional)" /></label>
+      <button class="connect" onclick="connect()">Connect</button>
+      <button class="disconnect" onclick="disconnect()">Disconnect</button>
+      <span id="status" class="status disconnected">Disconnected</span>
+    </div>
+    <div class="chat" id="chat"></div>
+    <div class="input-bar">
+      <input
+        id="msgInput"
+        placeholder="Type a message..."
+        onkeydown="if(event.key==='Enter')send()"
+        disabled
+      />
+      <button id="sendBtn" onclick="send()" disabled>Send</button>
+    </div>
+    <script>
+      let ws = null
+      let conversationId = null
 
-function connect() {
-  const base = document.getElementById('apiUrl').value
-  const token = document.getElementById('token').value
-  const workspace = document.getElementById('workspace').value
-  const service = document.getElementById('service').value
-  const convId = document.getElementById('convId').value
-  const entityId = document.getElementById('entityId').value
-  if (!token || !workspace || !service) return alert('Token, workspace, and service are required')
+      function connect() {
+        const base = document.getElementById('apiUrl').value
+        const token = document.getElementById('token').value
+        const workspace = document.getElementById('workspace').value
+        const service = document.getElementById('service').value
+        const convId = document.getElementById('convId').value
+        const entityId = document.getElementById('entityId').value
+        if (!token || !workspace || !service)
+          return alert('Token, workspace, and service are required')
 
-  const url = new URL(base.replace(/^http/, 'ws') + '/agent/text-stream')
-  url.searchParams.set('token', token)
-  url.searchParams.set('workspace_id', workspace)
-  url.searchParams.set('service_id', service)
-  url.searchParams.set('tool_events', 'true')
-  if (convId) url.searchParams.set('conversation_id', convId)
-  if (entityId) url.searchParams.set('entity_id', entityId)
+        const url = new URL(base.replace(/^http/, 'ws') + '/agent/text-stream')
+        url.searchParams.set('token', token)
+        url.searchParams.set('workspace_id', workspace)
+        url.searchParams.set('service_id', service)
+        url.searchParams.set('tool_events', 'true')
+        if (convId) url.searchParams.set('conversation_id', convId)
+        if (entityId) url.searchParams.set('entity_id', entityId)
 
-  ws = new WebSocket(url.toString())
-  setStatus('connecting')
+        ws = new WebSocket(url.toString())
+        setStatus('connecting')
 
-  ws.onopen = () => setStatus('connected')
-  ws.onclose = (e) => {
-    setStatus('disconnected')
-    addSystem(`Disconnected (${e.code}: ${e.reason || 'clean'})`)
-    document.getElementById('msgInput').disabled = true
-    document.getElementById('sendBtn').disabled = true
-  }
-  ws.onerror = () => addSystem('WebSocket error')
-  ws.onmessage = (e) => {
-    const f = JSON.parse(e.data)
-    switch (f.type) {
-      case 'session_started':
-        conversationId = f.conversation_id
-        document.getElementById('convId').value = conversationId
-        addSystem(`Session ${f.session_id} | Conversation ${f.conversation_id}`)
-        document.getElementById('msgInput').disabled = false
-        document.getElementById('sendBtn').disabled = false
-        document.getElementById('msgInput').focus()
-        break
-      case 'typing':
-        showTyping()
-        break
-      case 'tool_call_started':
-        hideTyping()
-        addToolStart(f.call_id, f.tool_name, f.input)
-        break
-      case 'tool_call_completed':
-        updateTool(f.call_id, f.result, f.succeeded)
-        break
-      case 'message':
-        hideTyping()
-        addAgent(f.text)
-        break
-      case 'error':
-        addSystem('Error: ' + f.message)
-        break
-      case 'session_ended':
-        addSystem('Session ended: ' + f.reason)
-        document.getElementById('msgInput').disabled = true
-        document.getElementById('sendBtn').disabled = true
-        break
-    }
-  }
-}
+        ws.onopen = () => setStatus('connected')
+        ws.onclose = (e) => {
+          setStatus('disconnected')
+          addSystem(`Disconnected (${e.code}: ${e.reason || 'clean'})`)
+          document.getElementById('msgInput').disabled = true
+          document.getElementById('sendBtn').disabled = true
+        }
+        ws.onerror = () => addSystem('WebSocket error')
+        ws.onmessage = (e) => {
+          const f = JSON.parse(e.data)
+          switch (f.type) {
+            case 'session_started':
+              conversationId = f.conversation_id
+              document.getElementById('convId').value = conversationId
+              addSystem(`Session ${f.session_id} | Conversation ${f.conversation_id}`)
+              document.getElementById('msgInput').disabled = false
+              document.getElementById('sendBtn').disabled = false
+              document.getElementById('msgInput').focus()
+              break
+            case 'typing':
+              showTyping()
+              break
+            case 'tool_call_started':
+              hideTyping()
+              addToolStart(f.call_id, f.tool_name, f.input)
+              break
+            case 'tool_call_completed':
+              updateTool(f.call_id, f.result, f.succeeded)
+              break
+            case 'message':
+              hideTyping()
+              addAgent(f.text)
+              break
+            case 'error':
+              addSystem('Error: ' + f.message)
+              break
+            case 'session_ended':
+              addSystem('Session ended: ' + f.reason)
+              document.getElementById('msgInput').disabled = true
+              document.getElementById('sendBtn').disabled = true
+              break
+          }
+        }
+      }
 
-function disconnect() {
-  if (ws) { ws.send(JSON.stringify({type:'stop'})); ws.close() }
-}
+      function disconnect() {
+        if (ws) {
+          ws.send(JSON.stringify({ type: 'stop' }))
+          ws.close()
+        }
+      }
 
-function send() {
-  const input = document.getElementById('msgInput')
-  const text = input.value.trim()
-  if (!text || !ws || ws.readyState !== 1) return
-  ws.send(JSON.stringify({ type: 'message', text }))
-  addUser(text)
-  input.value = ''
-}
+      function send() {
+        const input = document.getElementById('msgInput')
+        const text = input.value.trim()
+        if (!text || !ws || ws.readyState !== 1) return
+        ws.send(JSON.stringify({ type: 'message', text }))
+        addUser(text)
+        input.value = ''
+      }
 
-function setStatus(s) {
-  const el = document.getElementById('status')
-  el.textContent = s.charAt(0).toUpperCase() + s.slice(1)
-  el.className = 'status ' + (s === 'connected' ? 'connected' : 'disconnected')
-}
+      function setStatus(s) {
+        const el = document.getElementById('status')
+        el.textContent = s.charAt(0).toUpperCase() + s.slice(1)
+        el.className = 'status ' + (s === 'connected' ? 'connected' : 'disconnected')
+      }
 
-function addUser(text) {
-  const d = document.createElement('div')
-  d.className = 'msg user'
-  d.textContent = text
-  document.getElementById('chat').appendChild(d)
-  scrollBottom()
-}
+      function addUser(text) {
+        const d = document.createElement('div')
+        d.className = 'msg user'
+        d.textContent = text
+        document.getElementById('chat').appendChild(d)
+        scrollBottom()
+      }
 
-function addAgent(text) {
-  const d = document.createElement('div')
-  d.className = 'msg agent'
-  d.textContent = text
-  document.getElementById('chat').appendChild(d)
-  scrollBottom()
-}
+      function addAgent(text) {
+        const d = document.createElement('div')
+        d.className = 'msg agent'
+        d.textContent = text
+        document.getElementById('chat').appendChild(d)
+        scrollBottom()
+      }
 
-function addSystem(text) {
-  const d = document.createElement('div')
-  d.className = 'msg system'
-  d.textContent = text
-  document.getElementById('chat').appendChild(d)
-  scrollBottom()
-}
+      function addSystem(text) {
+        const d = document.createElement('div')
+        d.className = 'msg system'
+        d.textContent = text
+        document.getElementById('chat').appendChild(d)
+        scrollBottom()
+      }
 
-function addToolStart(callId, name, input) {
-  const d = document.createElement('div')
-  d.className = 'tool-card'
-  d.id = 'tool-' + callId
-  d.innerHTML = '<span class="name">' + name + '</span> <span style="color:#6b7280">running...</span>' +
-    '<div class="result" style="color:#92400e">' + JSON.stringify(input) + '</div>'
-  document.getElementById('chat').appendChild(d)
-  scrollBottom()
-}
+      function addToolStart(callId, name, input) {
+        const d = document.createElement('div')
+        d.className = 'tool-card'
+        d.id = 'tool-' + callId
+        d.innerHTML =
+          '<span class="name">' +
+          name +
+          '</span> <span style="color:#6b7280">running...</span>' +
+          '<div class="result" style="color:#92400e">' +
+          JSON.stringify(input) +
+          '</div>'
+        document.getElementById('chat').appendChild(d)
+        scrollBottom()
+      }
 
-function updateTool(callId, result, succeeded) {
-  const d = document.getElementById('tool-' + callId)
-  if (!d) return
-  d.className = 'tool-card ' + (succeeded ? 'success' : 'failure')
-  const label = succeeded ? 'done' : 'failed'
-  d.querySelector('span:last-of-type').textContent = label
-  d.querySelector('.result').textContent = result.slice(0, 300)
-}
+      function updateTool(callId, result, succeeded) {
+        const d = document.getElementById('tool-' + callId)
+        if (!d) return
+        d.className = 'tool-card ' + (succeeded ? 'success' : 'failure')
+        const label = succeeded ? 'done' : 'failed'
+        d.querySelector('span:last-of-type').textContent = label
+        d.querySelector('.result').textContent = result.slice(0, 300)
+      }
 
-let typingEl = null
-function showTyping() {
-  if (typingEl) return
-  typingEl = document.createElement('div')
-  typingEl.className = 'typing'
-  typingEl.textContent = 'Agent is typing...'
-  document.getElementById('chat').appendChild(typingEl)
-  scrollBottom()
-}
-function hideTyping() {
-  if (typingEl) { typingEl.remove(); typingEl = null }
-}
+      let typingEl = null
+      function showTyping() {
+        if (typingEl) return
+        typingEl = document.createElement('div')
+        typingEl.className = 'typing'
+        typingEl.textContent = 'Agent is typing...'
+        document.getElementById('chat').appendChild(typingEl)
+        scrollBottom()
+      }
+      function hideTyping() {
+        if (typingEl) {
+          typingEl.remove()
+          typingEl = null
+        }
+      }
 
-function scrollBottom() {
-  const c = document.getElementById('chat')
-  c.scrollTop = c.scrollHeight
-}
-</script>
-</body>
+      function scrollBottom() {
+        const c = document.getElementById('chat')
+        c.scrollTop = c.scrollHeight
+      }
+    </script>
+  </body>
 </html>
 ```
 
 ## Error handling
 
-| Close code | Meaning | Action |
-|------------|---------|--------|
-| `1000` | Normal close | Session ended cleanly |
-| `4001` | Missing params or bad token | Check credentials |
-| `4003` | Token workspace mismatch | Token doesn't match workspace_id |
-| `4200` | Engine init failed | Retry once, then investigate |
-| `4400` | Invalid conversation_id | Must be a valid UUID |
-| `4404` | Conversation not found | Wrong ID or different workspace |
-| `4409` | Conversation already active | Another client owns it — wait or use a new conversation |
+| Close code | Meaning                     | Action                                                  |
+| ---------- | --------------------------- | ------------------------------------------------------- |
+| `1000`     | Normal close                | Session ended cleanly                                   |
+| `4001`     | Missing params or bad token | Check credentials                                       |
+| `4003`     | Token workspace mismatch    | Token doesn't match workspace_id                        |
+| `4200`     | Engine init failed          | Retry once, then investigate                            |
+| `4400`     | Invalid conversation_id     | Must be a valid UUID                                    |
+| `4404`     | Conversation not found      | Wrong ID or different workspace                         |
+| `4409`     | Conversation already active | Another client owns it — wait or use a new conversation |
 
 ## Reconnection
 

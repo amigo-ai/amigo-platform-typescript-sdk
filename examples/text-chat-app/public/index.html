@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Amigo Text Chat</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f5f5f5;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      header {
+        background: #1a1a2e;
+        color: #fff;
+        padding: 12px 20px;
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      header .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #666;
+        transition: background 0.3s;
+      }
+
+      header .dot.connected {
+        background: #4caf50;
+      }
+
+      #messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .msg {
+        max-width: 72%;
+        padding: 10px 14px;
+        border-radius: 16px;
+        font-size: 14px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .msg.user {
+        align-self: flex-end;
+        background: #1a1a2e;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+      }
+
+      .msg.agent {
+        align-self: flex-start;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 4px;
+      }
+
+      .msg.error {
+        align-self: center;
+        background: #fff3f3;
+        border: 1px solid #e57373;
+        color: #c62828;
+        font-size: 13px;
+      }
+
+      .msg.system {
+        align-self: center;
+        color: #999;
+        font-size: 12px;
+        padding: 4px 0;
+      }
+
+      /* Typing indicator */
+      .typing {
+        align-self: flex-start;
+        display: none;
+        gap: 4px;
+        padding: 12px 16px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        border-bottom-left-radius: 4px;
+      }
+
+      .typing.visible {
+        display: flex;
+      }
+
+      .typing span {
+        width: 6px;
+        height: 6px;
+        background: #999;
+        border-radius: 50%;
+        animation: bounce 1.4s ease-in-out infinite;
+      }
+
+      .typing span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .typing span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes bounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* Tool call cards */
+      .tool-card {
+        align-self: flex-start;
+        max-width: 72%;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        font-size: 13px;
+      }
+
+      .tool-card .tool-header {
+        padding: 8px 12px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+      }
+
+      .tool-card .tool-header .status-icon {
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .tool-card .tool-header .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #e0e0e0;
+        border-top-color: #1a1a2e;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .tool-card .tool-body {
+        padding: 8px 12px;
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        font-size: 12px;
+        color: #555;
+        white-space: pre-wrap;
+        word-break: break-all;
+        max-height: 200px;
+        overflow-y: auto;
+      }
+
+      .tool-card .tool-body.result {
+        border-top: 1px solid #e0e0e0;
+        background: #f8f9fa;
+      }
+
+      .tool-card.succeeded .tool-header {
+        color: #2e7d32;
+      }
+      .tool-card.failed .tool-header {
+        color: #c62828;
+      }
+
+      /* Input area */
+      #input-area {
+        padding: 12px 20px;
+        background: #fff;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 10px;
+      }
+
+      #input-area textarea {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid #ddd;
+        border-radius: 20px;
+        font-size: 14px;
+        font-family: inherit;
+        resize: none;
+        outline: none;
+        max-height: 120px;
+        line-height: 1.4;
+      }
+
+      #input-area textarea:focus {
+        border-color: #1a1a2e;
+      }
+
+      #input-area button {
+        padding: 0 20px;
+        background: #1a1a2e;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        font-size: 14px;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      #input-area button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="dot" id="status-dot"></div>
+      <span>Amigo Text Chat</span>
+      <span id="session-info" style="margin-left: auto; font-size: 12px; color: #aaa"></span>
+    </header>
+
+    <div id="messages">
+      <div class="typing" id="typing"><span></span><span></span><span></span></div>
+    </div>
+
+    <div id="input-area">
+      <textarea id="input" rows="1" placeholder="Type a message..." disabled></textarea>
+      <button id="send" disabled>Send</button>
+    </div>
+
+    <script>
+      ;(function () {
+        const messagesEl = document.getElementById('messages')
+        const typingEl = document.getElementById('typing')
+        const inputEl = document.getElementById('input')
+        const sendBtn = document.getElementById('send')
+        const statusDot = document.getElementById('status-dot')
+        const sessionInfo = document.getElementById('session-info')
+
+        let ws = null
+        let sessionReady = false
+        const toolCards = new Map()
+
+        // --- WebSocket connection ---
+
+        function connect() {
+          const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+          ws = new WebSocket(`${protocol}//${location.host}/ws`)
+
+          ws.onopen = function () {
+            statusDot.classList.add('connected')
+          }
+
+          ws.onmessage = function (event) {
+            const frame = JSON.parse(event.data)
+            handleFrame(frame)
+          }
+
+          ws.onclose = function (event) {
+            statusDot.classList.remove('connected')
+            sessionReady = false
+            inputEl.disabled = true
+            sendBtn.disabled = true
+            addSystem('Disconnected (' + (event.reason || event.code) + ')')
+
+            // Reconnect after a short delay
+            setTimeout(connect, 2000)
+          }
+
+          ws.onerror = function () {
+            addError('Connection error')
+          }
+        }
+
+        // --- Frame handlers ---
+
+        function handleFrame(frame) {
+          switch (frame.type) {
+            case 'connected':
+              // Local proxy connected to platform
+              break
+
+            case 'session_started':
+              sessionReady = true
+              inputEl.disabled = false
+              sendBtn.disabled = false
+              sessionInfo.textContent = 'Session: ' + frame.session_id.slice(0, 12) + '...'
+              inputEl.focus()
+              break
+
+            case 'typing':
+              showTyping()
+              break
+
+            case 'tool_call_started':
+              hideTyping()
+              addToolCallStarted(frame)
+              break
+
+            case 'tool_call_completed':
+              updateToolCallCompleted(frame)
+              break
+
+            case 'message':
+              hideTyping()
+              addAgent(frame.text)
+              break
+
+            case 'error':
+              hideTyping()
+              addError(frame.message)
+              break
+
+            case 'session_ended':
+              hideTyping()
+              addSystem('Session ended: ' + frame.reason)
+              sessionReady = false
+              break
+          }
+        }
+
+        // --- UI helpers ---
+
+        function addUser(text) {
+          const el = document.createElement('div')
+          el.className = 'msg user'
+          el.textContent = text
+          messagesEl.insertBefore(el, typingEl)
+          scrollToBottom()
+        }
+
+        function addAgent(text) {
+          const el = document.createElement('div')
+          el.className = 'msg agent'
+          el.textContent = text
+          messagesEl.insertBefore(el, typingEl)
+          scrollToBottom()
+        }
+
+        function addError(text) {
+          const el = document.createElement('div')
+          el.className = 'msg error'
+          el.textContent = text
+          messagesEl.insertBefore(el, typingEl)
+          scrollToBottom()
+        }
+
+        function addSystem(text) {
+          const el = document.createElement('div')
+          el.className = 'msg system'
+          el.textContent = text
+          messagesEl.insertBefore(el, typingEl)
+          scrollToBottom()
+        }
+
+        function addToolCallStarted(frame) {
+          const card = document.createElement('div')
+          card.className = 'tool-card'
+          card.innerHTML =
+            '<div class="tool-header">' +
+            '<div class="status-icon"><div class="spinner"></div></div>' +
+            '<span>' +
+            escapeHtml(frame.tool_name) +
+            '</span>' +
+            '</div>' +
+            '<div class="tool-body">' +
+            escapeHtml(formatJson(frame.input)) +
+            '</div>'
+          messagesEl.insertBefore(card, typingEl)
+          toolCards.set(frame.call_id, card)
+          scrollToBottom()
+        }
+
+        function updateToolCallCompleted(frame) {
+          const card = toolCards.get(frame.call_id)
+          if (!card) return
+
+          card.classList.add(frame.succeeded ? 'succeeded' : 'failed')
+
+          const icon = card.querySelector('.status-icon')
+          icon.innerHTML = frame.succeeded ? '&#10003;' : '&#10007;'
+
+          const resultBody = document.createElement('div')
+          resultBody.className = 'tool-body result'
+          resultBody.textContent = truncate(frame.result, 500)
+          card.appendChild(resultBody)
+
+          toolCards.delete(frame.call_id)
+          scrollToBottom()
+        }
+
+        function showTyping() {
+          typingEl.classList.add('visible')
+          scrollToBottom()
+        }
+
+        function hideTyping() {
+          typingEl.classList.remove('visible')
+        }
+
+        function scrollToBottom() {
+          messagesEl.scrollTop = messagesEl.scrollHeight
+        }
+
+        function escapeHtml(str) {
+          const div = document.createElement('div')
+          div.textContent = str
+          return div.innerHTML
+        }
+
+        function formatJson(obj) {
+          if (obj == null) return ''
+          try {
+            return JSON.stringify(obj, null, 2)
+          } catch {
+            return String(obj)
+          }
+        }
+
+        function truncate(str, max) {
+          if (!str) return ''
+          return str.length > max ? str.slice(0, max) + '...' : str
+        }
+
+        // --- Send message ---
+
+        function send() {
+          const text = inputEl.value.trim()
+          if (!text || !sessionReady) return
+
+          addUser(text)
+          ws.send(JSON.stringify({ type: 'message', text: text }))
+          inputEl.value = ''
+          inputEl.style.height = 'auto'
+          inputEl.focus()
+        }
+
+        sendBtn.addEventListener('click', send)
+
+        inputEl.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault()
+            send()
+          }
+        })
+
+        // Auto-resize textarea
+        inputEl.addEventListener('input', function () {
+          this.style.height = 'auto'
+          this.style.height = Math.min(this.scrollHeight, 120) + 'px'
+        })
+
+        // Start
+        connect()
+      })()
+    </script>
+  </body>
+</html>

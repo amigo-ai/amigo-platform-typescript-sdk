@@ -355,6 +355,65 @@ describe('ConversationsResource', () => {
     expect([...url.searchParams.keys()]).toEqual(['workspace_id', 'service_id', 'token'])
   })
 
+  it('includes tool_events=true when toolEvents is enabled', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    const url = new URL(
+      client.conversations.textStreamUrl({
+        serviceId: 'svc-1',
+        toolEvents: true,
+      }),
+    )
+
+    expect(url.searchParams.get('tool_events')).toBe('true')
+    expect([...url.searchParams.keys()]).toEqual(['workspace_id', 'service_id', 'tool_events'])
+  })
+
+  it('omits tool_events when toolEvents is false or undefined', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    const urlFalse = new URL(
+      client.conversations.textStreamUrl({ serviceId: 'svc-1', toolEvents: false }),
+    )
+    const urlUndefined = new URL(client.conversations.textStreamUrl({ serviceId: 'svc-1' }))
+
+    expect(urlFalse.searchParams.has('tool_events')).toBe(false)
+    expect(urlUndefined.searchParams.has('tool_events')).toBe(false)
+  })
+
+  it('places tool_events before token in query parameter order', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    const url = new URL(
+      client.conversations.textStreamUrl({
+        serviceId: 'svc-1',
+        conversationId: '00000000-0000-4000-8000-000000000001',
+        toolEvents: true,
+        token: 'test-key',
+      }),
+    )
+
+    expect([...url.searchParams.keys()]).toEqual([
+      'workspace_id',
+      'service_id',
+      'conversation_id',
+      'tool_events',
+      'token',
+    ])
+  })
+
   it('rejects caller-supplied query parameters on text-stream URL overrides', () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,

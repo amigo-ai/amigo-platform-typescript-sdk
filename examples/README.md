@@ -31,6 +31,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - [examples/surfaces/render-form.ts](./surfaces/render-form.ts): fetch a surface spec by token and display the field structure (uses public token routes)
 - [examples/scribe/encounter-review.ts](./scribe/encounter-review.ts): fetch an encounter entity, approve ICD-10 codes, edit SOAP notes, and finalize
 - [examples/conversations/text-chat.ts](./conversations/text-chat.ts): connect to a text agent via WebSocket, send a message, and display streaming tool calls + responses
+- [examples/text-chat-app/](./text-chat-app/): self-contained reference app with browser frontend showing streaming responses, tool call events, and the full WebSocket frame protocol
 
 For full walkthroughs, see the guides:
 

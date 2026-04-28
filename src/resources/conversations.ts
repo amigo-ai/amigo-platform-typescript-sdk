@@ -25,6 +25,12 @@ export interface TextStreamUrlParams {
   conversationId?: string
   entityId?: string
   /**
+   * Enable `tool_call_started` and `tool_call_completed` frames on the
+   * text-stream WebSocket so the client can render tool invocations in
+   * real time.
+   */
+  toolEvents?: boolean
+  /**
    * Bearer token query-param fallback for clients whose API key cannot be sent
    * as a WebSocket subprotocol token. Prefer textStreamAuthProtocols() when
    * the token is subprotocol-safe so secrets do not appear in URLs. The SDK
@@ -140,6 +146,7 @@ function buildTextStreamUrl({
   serviceId,
   conversationId,
   entityId,
+  toolEvents,
   token,
   textStreamUrl: textStreamUrlOverride,
 }: TextStreamUrlParams & { baseUrl: string; workspaceId: string }): URL {
@@ -150,6 +157,7 @@ function buildTextStreamUrl({
   url.searchParams.set('service_id', serviceId)
   if (conversationId) url.searchParams.set('conversation_id', conversationId)
   if (entityId) url.searchParams.set('entity_id', entityId)
+  if (toolEvents) url.searchParams.set('tool_events', 'true')
   if (token !== undefined)
     url.searchParams.set('token', validateTextStreamAuthToken(token, 'token'))
   return url
