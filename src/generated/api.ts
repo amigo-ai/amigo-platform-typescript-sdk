@@ -10938,6 +10938,26 @@ export interface components {
             /** Text */
             text: string;
         };
+        /** ConversationReactivationResponse */
+        ConversationReactivationResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "reactivated";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /**
          * ConversationSummary
          * @description Conversation flow metrics.

@@ -7616,6 +7616,40 @@
         "title": "ConversationMessage",
         "type": "object"
       },
+      "ConversationReactivationResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "reactivated"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version"
+        ],
+        "title": "ConversationReactivationResponse",
+        "type": "object"
+      },
       "ConversationSummary": {
         "description": "Conversation flow metrics.",
         "properties": {
