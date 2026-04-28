@@ -46,6 +46,7 @@ import { ContextGraphsResource } from './resources/context-graphs.js'
 import { DataSourcesResource } from './resources/data-sources.js'
 import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
+import { ConversationsResource } from './resources/conversations.js'
 import { PhoneNumbersResource } from './resources/phone-numbers.js'
 import { IntegrationsResource } from './resources/integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
@@ -158,6 +159,7 @@ export class AmigoClient {
   readonly dataSources!: DataSourcesResource
   readonly world!: WorldResource
   readonly calls!: CallsResource
+  readonly conversations!: ConversationsResource
   readonly phoneNumbers!: PhoneNumbersResource
   readonly integrations!: IntegrationsResource
   readonly analytics!: AnalyticsResource
@@ -306,6 +308,7 @@ export class AmigoClient {
     mutable.dataSources = new DataSourcesResource(client, workspaceId)
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
+    mutable.conversations = new ConversationsResource(client, workspaceId, baseUrl)
     mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
@@ -486,6 +489,15 @@ export type TimelineLane = TimelineSegment['lane']
 export type TimelineTrack = NonNullable<TimelineSegment['track']>
 export type TimelineActorKind = TimelineActor['kind']
 export type TimelineActorRole = TimelineActor['role']
+
+export { textStreamAuthProtocols } from './resources/conversations.js'
+export type {
+  ConversationMessage,
+  SendMessageRequest,
+  SendMessageResponse,
+  TextStreamAuthProtocols,
+  TextStreamUrlParams,
+} from './resources/conversations.js'
 
 // Device code auth (desktop / CLI login)
 export {

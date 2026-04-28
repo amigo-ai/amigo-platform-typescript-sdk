@@ -206,7 +206,11 @@ describe('loginWithDeviceCode', () => {
 describe('TokenManager', () => {
   let storage: MemoryTokenStorage
   const validResult: AuthResult = {
-    accessToken: makeJwt({ sub: 'e1', workspace_id: 'ws1', exp: Math.floor(Date.now() / 1000) + 600 }),
+    accessToken: makeJwt({
+      sub: 'e1',
+      workspace_id: 'ws1',
+      exp: Math.floor(Date.now() / 1000) + 600,
+    }),
     refreshToken: 'rt_abc',
     workspaceId: 'ws1',
     expiresAt: Math.floor(Date.now() / 1000) + 600,
@@ -229,7 +233,11 @@ describe('TokenManager', () => {
   })
 
   it('auto-refreshes expiring tokens', async () => {
-    const newToken = makeJwt({ sub: 'e1', workspace_id: 'ws1', exp: Math.floor(Date.now() / 1000) + 900 })
+    const newToken = makeJwt({
+      sub: 'e1',
+      workspace_id: 'ws1',
+      exp: Math.floor(Date.now() / 1000) + 900,
+    })
     const mgr = new TokenManager({
       storage,
       identityBaseUrl: 'https://id.test',
@@ -281,7 +289,12 @@ describe('FileTokenStorage', () => {
     const filePath = path.join(dir, 'creds.json')
     try {
       const s = new FileTokenStorage(filePath)
-      const creds = { access_token: 'at', refresh_token: 'rt', workspace_id: 'ws', expires_at: 1700000000 }
+      const creds = {
+        access_token: 'at',
+        refresh_token: 'rt',
+        workspace_id: 'ws',
+        expires_at: 1700000000,
+      }
       await s.save(creds)
       expect(await s.load()).toEqual(creds)
       await s.clear()
@@ -298,7 +311,12 @@ describe('MemoryTokenStorage', () => {
   it('round-trips', async () => {
     const s = new MemoryTokenStorage()
     expect(await s.load()).toBeNull()
-    const creds = { access_token: 'at', refresh_token: 'rt', workspace_id: 'ws', expires_at: 1700000000 }
+    const creds = {
+      access_token: 'at',
+      refresh_token: 'rt',
+      workspace_id: 'ws',
+      expires_at: 1700000000,
+    }
     await s.save(creds)
     expect(await s.load()).toEqual(creds)
     await s.clear()
@@ -454,7 +472,11 @@ describe('TokenManager edge cases', () => {
     const storage = new MemoryTokenStorage()
     const mgr = new TokenManager({ storage })
     await mgr.store({
-      accessToken: makeJwt({ sub: 'e1', workspace_id: 'ws1', exp: Math.floor(Date.now() / 1000) + 10 }),
+      accessToken: makeJwt({
+        sub: 'e1',
+        workspace_id: 'ws1',
+        exp: Math.floor(Date.now() / 1000) + 10,
+      }),
       refreshToken: '',
       workspaceId: 'ws1',
       expiresAt: Math.floor(Date.now() / 1000) + 10,
