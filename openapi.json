@@ -4435,7 +4435,7 @@
           "conversation_summary": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ConversationSummary"
+                "$ref": "#/components/schemas/src__routes__calls__ConversationSummary"
               },
               {
                 "type": "null"
@@ -5624,6 +5624,20 @@
         ],
         "title": "ChannelEventResponse",
         "type": "object"
+      },
+      "ChannelKind": {
+        "description": "HSM execution channel type.\n\nDetermines how the HSM engine communicates with end users.\nEach kind maps to one or more providers.",
+        "enum": [
+          "voice",
+          "sms",
+          "whatsapp",
+          "imessage",
+          "email",
+          "web",
+          "scribe"
+        ],
+        "title": "ChannelKind",
+        "type": "string"
       },
       "ChannelOverride": {
         "description": "Per-channel behavior override for a state.",
@@ -7499,6 +7513,69 @@
         "title": "ContextGraphVersionResponse",
         "type": "object"
       },
+      "ConversationActorStartFailedRequest": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel_kind",
+          "provider",
+          "provider_thread_id"
+        ],
+        "title": "ConversationActorStartFailedRequest",
+        "type": "object"
+      },
+      "ConversationActorStartFailedResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "rolled_back": {
+            "title": "Rolled Back",
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version",
+          "rolled_back"
+        ],
+        "title": "ConversationActorStartFailedResponse",
+        "type": "object"
+      },
       "ConversationConfig": {
         "properties": {
           "agent_id": {
@@ -7593,7 +7670,343 @@
         "title": "ConversationConfig",
         "type": "object"
       },
-      "ConversationMessage": {
+      "ConversationDetail": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "plan": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Plan"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
+          "turns": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ConversationTurn"
+            },
+            "title": "Turns",
+            "type": "array"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "channel_kind",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ConversationDetail",
+        "type": "object"
+      },
+      "ConversationListResponse": {
+        "properties": {
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/src__routes__conversations__ConversationSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "has_more"
+        ],
+        "title": "ConversationListResponse",
+        "type": "object"
+      },
+      "ConversationReactivationResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "reactivated"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version"
+        ],
+        "title": "ConversationReactivationResponse",
+        "type": "object"
+      },
+      "ConversationStateSaveRequest": {
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "resume_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume At"
+          },
+          "state": {
+            "additionalProperties": true,
+            "title": "State",
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 0.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "state",
+          "version",
+          "status"
+        ],
+        "title": "ConversationStateSaveRequest",
+        "type": "object"
+      },
+      "ConversationStateSaveResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "status",
+          "version"
+        ],
+        "title": "ConversationStateSaveResponse",
+        "type": "object"
+      },
+      "ConversationThreadRequest": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel_kind",
+          "provider",
+          "provider_thread_id"
+        ],
+        "title": "ConversationThreadRequest",
+        "type": "object"
+      },
+      "ConversationThreadResponse": {
+        "properties": {
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "created": {
+            "title": "Created",
+            "type": "boolean"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "number"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "provider_thread_id": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Provider Thread Id",
+            "type": "string"
+          },
+          "reactivated": {
+            "title": "Reactivated",
+            "type": "boolean"
+          },
+          "state": {
+            "additionalProperties": true,
+            "title": "State",
+            "type": "object"
+          },
+          "status": {
+            "const": "active",
+            "title": "Status",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "workspace_id",
+          "channel_kind",
+          "provider",
+          "provider_thread_id",
+          "status",
+          "state",
+          "version",
+          "created_at",
+          "created",
+          "reactivated"
+        ],
+        "title": "ConversationThreadResponse",
+        "type": "object"
+      },
+      "ConversationTurn": {
         "properties": {
           "role": {
             "enum": [
@@ -7607,50 +8020,24 @@
           "text": {
             "title": "Text",
             "type": "string"
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timestamp"
           }
         },
         "required": [
           "role",
           "text"
         ],
-        "title": "ConversationMessage",
-        "type": "object"
-      },
-      "ConversationSummary": {
-        "description": "Conversation flow metrics.",
-        "properties": {
-          "avg_turn_duration_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Average turn duration",
-            "title": "Avg Turn Duration Seconds"
-          },
-          "barge_in_count": {
-            "default": 0,
-            "description": "Number of caller interruptions",
-            "title": "Barge In Count",
-            "type": "integer"
-          },
-          "loop_count": {
-            "default": 0,
-            "description": "Number of detected conversation loops",
-            "title": "Loop Count",
-            "type": "integer"
-          },
-          "topic_changes": {
-            "default": 0,
-            "description": "Number of topic transitions",
-            "title": "Topic Changes",
-            "type": "integer"
-          }
-        },
-        "title": "ConversationSummary",
+        "title": "ConversationTurn",
         "type": "object"
       },
       "ConvertEnvironmentRequest": {
@@ -8242,6 +8629,33 @@
           "terminal_state"
         ],
         "title": "CreateContextGraphVersionRequest",
+        "type": "object"
+      },
+      "CreateConversationRequest": {
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "service_id": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id"
+        ],
+        "title": "CreateConversationRequest",
         "type": "object"
       },
       "CreateCustomerRequest": {
@@ -28647,6 +29061,18 @@
         "title": "ProgressHint",
         "type": "object"
       },
+      "ProviderType": {
+        "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
+        "enum": [
+          "twilio",
+          "infobip",
+          "sendblue",
+          "gmail",
+          "websocket"
+        ],
+        "title": "ProviderType",
+        "type": "string"
+      },
       "ProvisionResponse": {
         "properties": {
           "workspace": {
@@ -31362,87 +31788,6 @@
           "call_sid"
         ],
         "title": "SendGuidanceResponse",
-        "type": "object"
-      },
-      "SendMessageRequest": {
-        "properties": {
-          "conversation_id": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Existing conversation ID to resume. Omit to start a new conversation.",
-            "title": "Conversation Id"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Patient entity ID for context loading.",
-            "title": "Entity Id"
-          },
-          "message": {
-            "description": "User message text",
-            "maxLength": 10000,
-            "minLength": 1,
-            "title": "Message",
-            "type": "string"
-          },
-          "service_id": {
-            "description": "Agent service ID",
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "Service Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "service_id",
-          "message"
-        ],
-        "title": "SendMessageRequest",
-        "type": "object"
-      },
-      "SendMessageResponse": {
-        "properties": {
-          "conversation_id": {
-            "title": "Conversation Id",
-            "type": "string"
-          },
-          "messages": {
-            "items": {
-              "$ref": "#/components/schemas/ConversationMessage"
-            },
-            "title": "Messages",
-            "type": "array"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "completed",
-              "error"
-            ],
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "conversation_id",
-          "messages",
-          "status"
-        ],
-        "title": "SendMessageResponse",
         "type": "object"
       },
       "Service": {
@@ -38786,6 +39131,39 @@
         "title": "Turn",
         "type": "object"
       },
+      "TurnConversationSnapshot": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "turn_count": {
+            "title": "Turn Count",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "turn_count",
+          "updated_at"
+        ],
+        "title": "TurnConversationSnapshot",
+        "type": "object"
+      },
       "TurnPolicy": {
         "description": "Voice pipeline parameters declared per HSM state.\n\nLives on ActionState/DecisionState alongside guardrails, wait_for, and\nchannel_overrides.  The HSM state IS the policy \u2014 no shadow state machine.\nAll fields optional with safe defaults (production behavior unchanged\nwhen no turn_policy is set).",
         "properties": {
@@ -38871,6 +39249,50 @@
           }
         },
         "title": "TurnPolicy",
+        "type": "object"
+      },
+      "TurnRequest": {
+        "properties": {
+          "message": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "TurnRequest",
+        "type": "object"
+      },
+      "TurnResponse": {
+        "properties": {
+          "conversation": {
+            "$ref": "#/components/schemas/TurnConversationSnapshot"
+          },
+          "input": {
+            "$ref": "#/components/schemas/ConversationTurn"
+          },
+          "output": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationTurn"
+            },
+            "title": "Output",
+            "type": "array"
+          },
+          "turn_id": {
+            "title": "Turn Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "turn_id",
+          "input",
+          "output",
+          "conversation"
+        ],
+        "title": "TurnResponse",
         "type": "object"
       },
       "TurnTimeline": {
@@ -44175,6 +44597,97 @@
           "resource_type"
         ],
         "title": "AuditEventResponse",
+        "type": "object"
+      },
+      "src__routes__calls__ConversationSummary": {
+        "description": "Conversation flow metrics.",
+        "properties": {
+          "avg_turn_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average turn duration",
+            "title": "Avg Turn Duration Seconds"
+          },
+          "barge_in_count": {
+            "default": 0,
+            "description": "Number of caller interruptions",
+            "title": "Barge In Count",
+            "type": "integer"
+          },
+          "loop_count": {
+            "default": 0,
+            "description": "Number of detected conversation loops",
+            "title": "Loop Count",
+            "type": "integer"
+          },
+          "topic_changes": {
+            "default": 0,
+            "description": "Number of topic transitions",
+            "title": "Topic Changes",
+            "type": "integer"
+          }
+        },
+        "title": "ConversationSummary",
+        "type": "object"
+      },
+      "src__routes__conversations__ConversationSummary": {
+        "properties": {
+          "channel_kind": {
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "frozen",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "channel_kind",
+          "status",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ConversationSummary",
         "type": "object"
       },
       "src__routes__desktop_sessions__CreateSessionRequest": {
@@ -51386,26 +51899,61 @@
         ]
       }
     },
-    "/v1/{workspace_id}/conversations/messages": {
-      "post": {
-        "description": "Process a single text message through the agent and return the response synchronously. If `conversation_id` is omitted, a new conversation is created. If provided, the existing conversation is resumed from its frozen state (prior context and commitments are preserved). For real-time streaming, use the WebSocket endpoint at `ws /agent/text-stream`.",
-        "operationId": "send_message_v1__workspace_id__conversations_messages_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendMessageRequest"
-              }
+    "/v1/{workspace_id}/conversations": {
+      "get": {
+        "operationId": "list_conversations_v1__workspace_id__conversations_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "active",
+                    "frozen",
+                    "closed"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
             }
           },
-          "required": true
-        },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SendMessageResponse"
+                  "$ref": "#/components/schemas/ConversationListResponse"
                 }
               }
             },
@@ -51422,7 +51970,173 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Send a text message and receive the agent's response",
+        "summary": "List conversations",
+        "tags": [
+          "conversations"
+        ]
+      },
+      "post": {
+        "operationId": "create_conversation_v1__workspace_id__conversations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateConversationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create a new conversation",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}": {
+      "delete": {
+        "operationId": "close_conversation_v1__workspace_id__conversations__conversation_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Close a conversation",
+        "tags": [
+          "conversations"
+        ]
+      },
+      "get": {
+        "operationId": "get_conversation_v1__workspace_id__conversations__conversation_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get conversation detail with turns",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
+      "post": {
+        "operationId": "create_turn_v1__workspace_id__conversations__conversation_id__turns_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send a message and get the agent's response",
         "tags": [
           "conversations"
         ]
