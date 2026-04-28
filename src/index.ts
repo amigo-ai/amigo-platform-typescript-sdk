@@ -492,11 +492,16 @@ export type TimelineActorRole = TimelineActor['role']
 
 export { textStreamAuthProtocols } from './resources/conversations.js'
 export type {
-  ConversationMessage,
-  SendMessageRequest,
-  SendMessageResponse,
+  ConversationDetail,
+  ConversationListResponse,
+  ConversationSummary,
+  ConversationTurn,
+  CreateConversationRequest,
+  ListConversationsParams,
   TextStreamAuthProtocols,
   TextStreamUrlParams,
+  TurnRequest,
+  TurnResponse,
 } from './resources/conversations.js'
 
 // Device code auth (desktop / CLI login)

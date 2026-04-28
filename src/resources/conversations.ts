@@ -3,9 +3,14 @@ import { type PlatformFetch } from '../core/openapi-client.js'
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-export type ConversationMessage = components['schemas']['ConversationMessage']
-export type SendMessageRequest = components['schemas']['SendMessageRequest']
-export type SendMessageResponse = components['schemas']['SendMessageResponse']
+export type ConversationDetail = components['schemas']['ConversationDetail']
+export type ConversationListResponse = components['schemas']['ConversationListResponse']
+export type ConversationSummary =
+  components['schemas']['src__routes__conversations__ConversationSummary']
+export type ConversationTurn = components['schemas']['ConversationTurn']
+export type CreateConversationRequest = components['schemas']['CreateConversationRequest']
+export type TurnRequest = components['schemas']['TurnRequest']
+export type TurnResponse = components['schemas']['TurnResponse']
 
 /**
  * Hand-authored because the text-stream WebSocket endpoint is intentionally
@@ -43,19 +48,64 @@ const MAX_AUTH_TOKEN_CHARS = 4096
 const TEXT_STREAM_AUTH_TOKEN_RE = /^[-A-Za-z0-9._+=/:]+$/
 const WEB_SOCKET_PROTOCOL_TOKEN_RE = /^[!#$%&'*+\-.^_`|~A-Za-z0-9]+$/
 
+export interface ListConversationsParams {
+  status?: 'active' | 'frozen' | 'closed'
+  limit?: number
+  offset?: number
+}
+
 /** Access text conversation APIs and text-stream URL helpers. */
 export class ConversationsResource extends WorkspaceScopedResource {
   constructor(client: PlatformFetch, workspaceId: string) {
     super(client, workspaceId)
   }
 
-  /** Send one user-first text message and receive synchronous agent responses. */
-  async sendMessage(request: SendMessageRequest): Promise<SendMessageResponse> {
+  async list(params?: ListConversationsParams): Promise<ConversationListResponse> {
     return extractData(
-      await this.client.POST('/v1/{workspace_id}/conversations/messages', {
+      await this.client.GET('/v1/{workspace_id}/conversations', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
+    )
+  }
+
+  async create(request: CreateConversationRequest): Promise<ConversationDetail> {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/conversations', {
         params: { path: { workspace_id: this.workspaceId } },
         body: request,
       }),
+    )
+  }
+
+  async get(conversationId: string): Promise<ConversationDetail> {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/conversations/{conversation_id}', {
+        params: {
+          path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+        },
+      }),
+    )
+  }
+
+  async close(conversationId: string): Promise<void> {
+    await this.client.DELETE('/v1/{workspace_id}/conversations/{conversation_id}', {
+      params: {
+        path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+      },
+    })
+  }
+
+  async createTurn(conversationId: string, request: TurnRequest): Promise<TurnResponse> {
+    return extractData(
+      await this.client.POST(
+        '/v1/{workspace_id}/conversations/{conversation_id}/turns',
+        {
+          params: {
+            path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+          },
+          body: request,
+        },
+      ),
     )
   }
 

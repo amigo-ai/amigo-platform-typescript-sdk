@@ -1,11 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import {
   AmigoClient,
-  BadRequestError,
   ConfigurationError,
+  NotFoundError,
   textStreamAuthProtocols,
 } from '../../src/index.js'
-import type { SendMessageRequest, SendMessageResponse } from '../../src/index.js'
+import type {
+  ConversationDetail,
+  ConversationListResponse,
+  CreateConversationRequest,
+  TurnRequest,
+  TurnResponse,
+} from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -25,77 +31,155 @@ function mockFetch(
 }
 
 describe('ConversationsResource', () => {
-  it('sends a user-first text message through the generated endpoint', async () => {
-    let requestBody: unknown
-    let authorization: string | null = null
-    const apiResponse: SendMessageResponse = {
-      conversation_id: '00000000-0000-4000-8000-000000000001',
-      status: 'active',
-      messages: [{ role: 'agent', text: 'Hello, how can I help?' }],
+  it('lists conversations with optional status filter', async () => {
+    const apiResponse: ConversationListResponse = {
+      items: [
+        {
+          channel_kind: 'text',
+          created_at: '2026-01-01T00:00:00Z',
+          id: '00000000-0000-4000-8000-000000000001',
+          status: 'active',
+          turn_count: 3,
+          updated_at: '2026-01-01T00:01:00Z',
+        },
+      ],
+      has_more: false,
+      total: 1,
     }
-    const request: SendMessageRequest = {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/conversations`]: () => Response.json(apiResponse),
+      }),
+    })
+
+    const result = await client.conversations.list({ status: 'active' })
+
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.status).toBe('active')
+    expect(result.total).toBe(1)
+  })
+
+  it('creates a new conversation', async () => {
+    let requestBody: unknown
+    const apiResponse: ConversationDetail = {
+      id: '00000000-0000-4000-8000-000000000001',
+      channel_kind: 'text',
+      status: 'active',
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    }
+    const request: CreateConversationRequest = {
       service_id: 'svc-00000000-0000-0000-0000-000000000001',
-      message: 'Hello',
-      conversation_id: '00000000-0000-4000-8000-000000000001',
       entity_id: 'ent-00000000-0000-0000-0000-000000000001',
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/messages`]: async (request) => {
-          authorization = request.headers.get('authorization')
-          requestBody = await request.json()
+        [`POST ${BASE}/conversations`]: async (req) => {
+          requestBody = await req.json()
+          return Response.json(apiResponse, { status: 201 })
+        },
+      }),
+    })
+
+    const result = await client.conversations.create(request)
+
+    expect(requestBody).toEqual(request)
+    expect(result.id).toBe('00000000-0000-4000-8000-000000000001')
+    expect(result.status).toBe('active')
+  })
+
+  it('gets a conversation by ID', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const apiResponse: ConversationDetail = {
+      id: conversationId,
+      channel_kind: 'text',
+      status: 'active',
+      turn_count: 2,
+      turns: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:01:00Z',
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/conversations/${conversationId}`]: () => Response.json(apiResponse),
+      }),
+    })
+
+    const result = await client.conversations.get(conversationId)
+
+    expect(result.id).toBe(conversationId)
+    expect(result.turn_count).toBe(2)
+  })
+
+  it('closes a conversation', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let deleteCalled = false
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`DELETE ${BASE}/conversations/${conversationId}`]: () => {
+          deleteCalled = true
+          return new Response(null, { status: 204 })
+        },
+      }),
+    })
+
+    await client.conversations.close(conversationId)
+
+    expect(deleteCalled).toBe(true)
+  })
+
+  it('creates a turn in a conversation', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestBody: unknown
+    const turnRequest: TurnRequest = { message: 'Hello' }
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-001',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
+      output: [{ role: 'agent', text: 'How can I help?', timestamp: '2026-01-01T00:00:01Z' }],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
+          requestBody = await req.json()
           return Response.json(apiResponse)
         },
       }),
     })
 
-    const result = await client.conversations.sendMessage(request)
+    const result = await client.conversations.createTurn(conversationId, turnRequest)
 
-    expect(authorization).toBe(`Bearer ${TEST_API_KEY}`)
-    expect(requestBody).toEqual({
-      service_id: 'svc-00000000-0000-0000-0000-000000000001',
-      message: 'Hello',
-      conversation_id: '00000000-0000-4000-8000-000000000001',
-      entity_id: 'ent-00000000-0000-0000-0000-000000000001',
-    })
-    expect(result.conversation_id).toBe('00000000-0000-4000-8000-000000000001')
-    expect(result.status).toBe('active')
-    expect(result.messages).toHaveLength(1)
-    expect(result.messages[0]?.text).toBe('Hello, how can I help?')
-    expect(result).toMatchObject(apiResponse)
+    expect(requestBody).toEqual({ message: 'Hello' })
+    expect(result.turn_id).toBe('turn-001')
+    expect(result.output).toHaveLength(1)
   })
 
-  it('routes sendMessage failures through the central error pipeline', async () => {
-    let handlerCalls = 0
+  it('routes conversation failures through the central error pipeline', async () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/messages`]: () => {
-          handlerCalls += 1
-          return Response.json({ detail: 'Invalid message' }, { status: 400 })
-        },
+        [`GET ${BASE}/conversations/nonexistent`]: () =>
+          Response.json({ detail: 'Not found' }, { status: 404 }),
       }),
     })
 
-    await expect(
-      client.conversations.sendMessage({
-        service_id: 'svc-00000000-0000-0000-0000-000000000001',
-        message: 'Hello',
-      }),
-    ).rejects.toMatchObject({
-      statusCode: 400,
-      detail: 'Invalid message',
-    })
-    await expect(
-      client.conversations.sendMessage({
-        service_id: 'svc-00000000-0000-0000-0000-000000000001',
-        message: 'Hello',
-      }),
-    ).rejects.toBeInstanceOf(BadRequestError)
-    expect(handlerCalls).toBe(2)
+    await expect(client.conversations.get('nonexistent')).rejects.toBeInstanceOf(NotFoundError)
   })
 
   it('builds a text-stream URL from the client baseUrl', () => {
@@ -170,17 +254,20 @@ describe('ConversationsResource', () => {
 
   it('applies scoped request options while preserving text-stream URL derivation', async () => {
     let scopedHeader: string | null = null
+    const conversationId = '00000000-0000-4000-8000-000000000001'
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/messages`]: (request) => {
+        [`GET ${BASE}/conversations/${conversationId}`]: (request) => {
           scopedHeader = request.headers.get('x-request-scope')
           return Response.json({
-            conversation_id: '00000000-0000-4000-8000-000000000001',
+            id: conversationId,
+            channel_kind: 'text',
             status: 'active',
-            messages: [],
+            created_at: '2026-01-01T00:00:00Z',
+            updated_at: '2026-01-01T00:00:00Z',
           })
         },
       }),
@@ -190,7 +277,7 @@ describe('ConversationsResource', () => {
       headers: { 'x-request-scope': 'conversation' },
     })
     const url = new URL(scoped.textStreamUrl({ serviceId: 'svc-1' }))
-    await scoped.sendMessage({ service_id: 'svc-1', message: 'Hello' })
+    await scoped.get(conversationId)
 
     expect(scopedHeader).toBe('conversation')
     expect(url.protocol).toBe('wss:')

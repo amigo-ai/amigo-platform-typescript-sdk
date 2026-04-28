@@ -1961,7 +1961,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/conversations/messages": {
+    "/v1/{workspace_id}/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List conversations */
+        get: operations["list_conversations_v1__workspace_id__conversations_get"];
+        put?: never;
+        /** Create a new conversation */
+        post: operations["create_conversation_v1__workspace_id__conversations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get conversation detail with turns */
+        get: operations["get_conversation_v1__workspace_id__conversations__conversation_id__get"];
+        put?: never;
+        post?: never;
+        /** Close a conversation */
+        delete: operations["close_conversation_v1__workspace_id__conversations__conversation_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
         parameters: {
             query?: never;
             header?: never;
@@ -1970,11 +2006,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Send a text message and receive the agent's response
-         * @description Process a single text message through the agent and return the response synchronously. If `conversation_id` is omitted, a new conversation is created. If provided, the existing conversation is resumed from its frozen state (prior context and commitments are preserved). For real-time streaming, use the WebSocket endpoint at `ws /agent/text-stream`.
-         */
-        post: operations["send_message_v1__workspace_id__conversations_messages_post"];
+        /** Send a message and get the agent's response */
+        post: operations["create_turn_v1__workspace_id__conversations__conversation_id__turns_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9659,7 +9692,7 @@ export interface components {
              */
             completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /** @description Conversation flow metrics */
-            conversation_summary?: components["schemas"]["ConversationSummary"] | null;
+            conversation_summary?: components["schemas"]["src__routes__calls__ConversationSummary"] | null;
             /**
              * Created At
              * @description When intelligence was computed
@@ -10143,6 +10176,15 @@ export interface components {
              */
             status: "accepted" | "skipped";
         };
+        /**
+         * ChannelKind
+         * @description HSM execution channel type.
+         *
+         *     Determines how the HSM engine communicates with end users.
+         *     Each kind maps to one or more providers.
+         * @enum {string}
+         */
+        ChannelKind: "voice" | "sms" | "whatsapp" | "imessage" | "email" | "web" | "scribe";
         /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
@@ -10909,6 +10951,35 @@ export interface components {
             /** Workspace Id */
             workspace_id: string;
         };
+        /** ConversationActorStartFailedRequest */
+        ConversationActorStartFailedRequest: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+        };
+        /** ConversationActorStartFailedResponse */
+        ConversationActorStartFailedResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Rolled Back */
+            rolled_back: boolean;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** ConversationConfig */
         ConversationConfig: {
             /** Agent Id */
@@ -10928,8 +10999,150 @@ export interface components {
             /** Navigation Model */
             navigation_model?: string | null;
         };
-        /** ConversationMessage */
-        ConversationMessage: {
+        /** ConversationDetail */
+        ConversationDetail: {
+            /** Channel Kind */
+            channel_kind: string;
+            /** Created At */
+            created_at: string;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Id */
+            id: string;
+            /** Plan */
+            plan?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
+            /**
+             * Turns
+             * @default []
+             */
+            turns?: components["schemas"]["ConversationTurn"][];
+            /** Updated At */
+            updated_at: string;
+        };
+        /** ConversationListResponse */
+        ConversationListResponse: {
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["src__routes__conversations__ConversationSummary"][];
+            /** Total */
+            total: number;
+        };
+        /** ConversationReactivationResponse */
+        ConversationReactivationResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "reactivated";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** ConversationStateSaveRequest */
+        ConversationStateSaveRequest: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Resume At */
+            resume_at?: string | null;
+            /** State */
+            state: {
+                [key: string]: unknown;
+            };
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+        };
+        /** ConversationStateSaveResponse */
+        ConversationStateSaveResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** ConversationThreadRequest */
+        ConversationThreadRequest: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            /** Entity Id */
+            entity_id?: string | null;
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+        };
+        /** ConversationThreadResponse */
+        ConversationThreadResponse: {
+            channel_kind: components["schemas"]["ChannelKind"];
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Created */
+            created: boolean;
+            /** Created At */
+            created_at: number;
+            /** Entity Id */
+            entity_id?: string | null;
+            provider: components["schemas"]["ProviderType"];
+            /** Provider Thread Id */
+            provider_thread_id: string;
+            /** Reactivated */
+            reactivated: boolean;
+            /** State */
+            state: {
+                [key: string]: unknown;
+            };
+            /**
+             * Status
+             * @constant
+             */
+            status: "active";
+            /** Version */
+            version: number;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** ConversationTurn */
+        ConversationTurn: {
             /**
              * Role
              * @enum {string}
@@ -10937,35 +11150,8 @@ export interface components {
             role: "agent" | "user" | "system";
             /** Text */
             text: string;
-        };
-        /**
-         * ConversationSummary
-         * @description Conversation flow metrics.
-         */
-        ConversationSummary: {
-            /**
-             * Avg Turn Duration Seconds
-             * @description Average turn duration
-             */
-            avg_turn_duration_seconds?: number | null;
-            /**
-             * Barge In Count
-             * @description Number of caller interruptions
-             * @default 0
-             */
-            barge_in_count?: number;
-            /**
-             * Loop Count
-             * @description Number of detected conversation loops
-             * @default 0
-             */
-            loop_count?: number;
-            /**
-             * Topic Changes
-             * @description Number of topic transitions
-             * @default 0
-             */
-            topic_changes?: number;
+            /** Timestamp */
+            timestamp?: string | null;
         };
         /** ConvertEnvironmentRequest */
         ConvertEnvironmentRequest: {
@@ -11188,6 +11374,13 @@ export interface components {
             terminal_state: string;
             /** Topology Description */
             topology_description?: string | null;
+        };
+        /** CreateConversationRequest */
+        CreateConversationRequest: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Service Id */
+            service_id: string;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -19169,6 +19362,15 @@ export interface components {
             /** Trigger Delay Ms */
             trigger_delay_ms?: number | null;
         };
+        /**
+         * ProviderType
+         * @description Messaging provider that implements a channel.
+         *
+         *     Multiple providers can serve the same ChannelKind (e.g., Twilio and
+         *     Infobip both support SMS).
+         * @enum {string}
+         */
+        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -20439,41 +20641,6 @@ export interface components {
              * @enum {string}
              */
             status: "delivered" | "failed";
-        };
-        /** SendMessageRequest */
-        SendMessageRequest: {
-            /**
-             * Conversation Id
-             * @description Existing conversation ID to resume. Omit to start a new conversation.
-             */
-            conversation_id?: string | null;
-            /**
-             * Entity Id
-             * @description Patient entity ID for context loading.
-             */
-            entity_id?: string | null;
-            /**
-             * Message
-             * @description User message text
-             */
-            message: string;
-            /**
-             * Service Id
-             * @description Agent service ID
-             */
-            service_id: string;
-        };
-        /** SendMessageResponse */
-        SendMessageResponse: {
-            /** Conversation Id */
-            conversation_id: string;
-            /** Messages */
-            messages: components["schemas"]["ConversationMessage"][];
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "completed" | "error";
         };
         /**
          * Service
@@ -23493,6 +23660,20 @@ export interface components {
             /** User Transcript */
             user_transcript?: string | null;
         };
+        /** TurnConversationSnapshot */
+        TurnConversationSnapshot: {
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /** Turn Count */
+            turn_count: number;
+            /** Updated At */
+            updated_at: string;
+        };
         /**
          * TurnPolicy
          * @description Voice pipeline parameters declared per HSM state.
@@ -23546,6 +23727,20 @@ export interface components {
             stt_eot_threshold?: number | null;
             /** Stt Eot Timeout Ms */
             stt_eot_timeout_ms?: number | null;
+        };
+        /** TurnRequest */
+        TurnRequest: {
+            /** Message */
+            message: string;
+        };
+        /** TurnResponse */
+        TurnResponse: {
+            conversation: components["schemas"]["TurnConversationSnapshot"];
+            input: components["schemas"]["ConversationTurn"];
+            /** Output */
+            output: components["schemas"]["ConversationTurn"][];
+            /** Turn Id */
+            turn_id: string;
         };
         /** TurnTimeline */
         TurnTimeline: {
@@ -25133,6 +25328,58 @@ export interface components {
              * @description Workspace that owns this audit event
              */
             workspace_id: string;
+        };
+        /**
+         * ConversationSummary
+         * @description Conversation flow metrics.
+         */
+        src__routes__calls__ConversationSummary: {
+            /**
+             * Avg Turn Duration Seconds
+             * @description Average turn duration
+             */
+            avg_turn_duration_seconds?: number | null;
+            /**
+             * Barge In Count
+             * @description Number of caller interruptions
+             * @default 0
+             */
+            barge_in_count?: number;
+            /**
+             * Loop Count
+             * @description Number of detected conversation loops
+             * @default 0
+             */
+            loop_count?: number;
+            /**
+             * Topic Changes
+             * @description Number of topic transitions
+             * @default 0
+             */
+            topic_changes?: number;
+        };
+        /** ConversationSummary */
+        src__routes__conversations__ConversationSummary: {
+            /** Channel Kind */
+            channel_kind: string;
+            /** Created At */
+            created_at: string;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "frozen" | "closed";
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
+            /** Updated At */
+            updated_at: string;
         };
         /** CreateSessionRequest */
         src__routes__desktop_sessions__CreateSessionRequest: {
@@ -30017,7 +30264,42 @@ export interface operations {
             };
         };
     };
-    send_message_v1__workspace_id__conversations_messages_post: {
+    list_conversations_v1__workspace_id__conversations_get: {
+        parameters: {
+            query?: {
+                status?: ("active" | "frozen" | "closed") | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_conversation_v1__workspace_id__conversations_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -30028,7 +30310,105 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["SendMessageRequest"];
+                "application/json": components["schemas"]["CreateConversationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_conversation_v1__workspace_id__conversations__conversation_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    close_conversation_v1__workspace_id__conversations__conversation_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_turn_v1__workspace_id__conversations__conversation_id__turns_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conversation_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnRequest"];
             };
         };
         responses: {
@@ -30038,7 +30418,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["SendMessageResponse"];
+                    "application/json": components["schemas"]["TurnResponse"];
                 };
             };
             /** @description Validation Error */

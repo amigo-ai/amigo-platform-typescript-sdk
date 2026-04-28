@@ -51,7 +51,7 @@ Notes:
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
 - Conversation helpers: `textStreamAuthProtocols`
-- Conversation types: `ConversationMessage`, `SendMessageRequest`, `SendMessageResponse`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`
+- Conversation types: `ConversationDetail`, `ConversationListResponse`, `ConversationSummary`, `ConversationTurn`, `CreateConversationRequest`, `ListConversationsParams`, `TurnRequest`, `TurnResponse`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
 - Generated OpenAPI types: `paths`, `components`, `operations`
 - Generated API types are produced with `npm run gen-types` from the committed `openapi.json` snapshot.
@@ -230,7 +230,11 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `conversations`
 
-- `sendMessage`
+- `list`
+- `create`
+- `get`
+- `close`
+- `createTurn`
 - `textStreamUrl`
 
 ### `phoneNumbers`
