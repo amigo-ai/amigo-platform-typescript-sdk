@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1] - 2026-04-28
+
+### Bug Fixes
+
+- handle bootstrap token with workspaceId + add /self/profile path
+- handle bootstrap token in device code flow
+
 ## [0.11.0] - 2026-04-28
 
 ### Features
