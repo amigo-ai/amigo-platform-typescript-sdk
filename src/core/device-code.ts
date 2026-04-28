@@ -55,6 +55,8 @@ export type DeviceCodeStatus =
 export interface DeviceCodeLoginOptions {
   /** Identity service base URL. Default: https://identity.platform.amigo.ai */
   identityBaseUrl?: string
+  /** Pre-select workspace (skips workspace selection prompt) */
+  workspaceId?: string
   /** Client description for audit logs */
   clientDescription?: string
   /** OAuth scope to request */
@@ -180,10 +182,12 @@ async function pollDeviceCode(
   baseUrl: string,
   deviceCode: string,
   scope: string | undefined,
+  workspaceId: string | undefined,
   fetchFn: typeof globalThis.fetch,
 ): Promise<PollResult> {
   const body = new URLSearchParams({ grant_type: 'device_code', device_code: deviceCode })
   if (scope) body.set('scope', scope)
+  if (workspaceId) body.set('workspace_id', workspaceId)
 
   const res = await identityPost(baseUrl, '/token', body, fetchFn)
 
@@ -283,20 +287,26 @@ async function fetchWorkspaces(
   accessToken: string,
   fetchFn: typeof globalThis.fetch,
 ): Promise<WorkspaceChoice[]> {
-  const res = await fetchFn(`${baseUrl}/self`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
-  if (!res.ok) {
-    throw new AmigoError(`Failed to fetch workspaces (${res.status})`, { statusCode: res.status })
+  // Try /self/profile first (identity service direct route)
+  for (const path of ['/self/profile', '/self']) {
+    const res = await fetchFn(`${baseUrl}${path}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    if (res.ok) {
+      const data = (await res.json()) as {
+        workspaces?: Array<{ workspace_id: string; role?: string; name?: string }>
+      }
+      return (data.workspaces ?? []).map((ws) => ({
+        workspace_id: ws.workspace_id,
+        role: ws.role,
+        name: ws.name,
+      }))
+    }
+    if (res.status !== 404) {
+      throw new AmigoError(`Failed to fetch workspaces (${res.status})`, { statusCode: res.status })
+    }
   }
-  const data = (await res.json()) as {
-    workspaces?: Array<{ workspace_id: string; role?: string; name?: string }>
-  }
-  return (data.workspaces ?? []).map((ws) => ({
-    workspace_id: ws.workspace_id,
-    role: ws.role,
-    name: ws.name,
-  }))
+  return []
 }
 
 async function resolveWorkspaceFromBootstrap(
@@ -310,6 +320,13 @@ async function resolveWorkspaceFromBootstrap(
   }
 
   const workspaces = await fetchWorkspaces(baseUrl, token.access_token, fetchFn)
+
+  if (workspaces.length === 0) {
+    throw new AmigoError(
+      'No workspace memberships found. Create a workspace or request an invitation.',
+      { errorCode: 'no_workspaces' },
+    )
+  }
 
   if (workspaces.length === 1 && workspaces[0]) {
     const scoped = await doRefreshToken(
@@ -374,7 +391,7 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
     options.onStatus?.('polling')
 
     try {
-      const result = await pollDeviceCode(baseUrl, issuance.device_code, options.scope, fetchFn)
+      const result = await pollDeviceCode(baseUrl, issuance.device_code, options.scope, options.workspaceId, fetchFn)
 
       if (result.type === 'pending') {
         options.onStatus?.('authorization_pending')
@@ -391,12 +408,19 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
       options.onStatus?.('approved')
 
       if (result.type === 'token') {
-        // Check for bootstrap token (no workspace assigned yet)
         const claims = decodeJwtPayload(result.data.access_token)
-        if (claims?.workspace_bootstrap || !(claims?.workspace_id)) {
-          return await resolveWorkspaceFromBootstrap(
-            baseUrl, result.data, options, fetchFn,
-          )
+        const isBootstrap = claims?.workspace_bootstrap || !(claims?.workspace_id)
+        if (isBootstrap && result.data.refresh_token) {
+          // Bootstrap token — need workspace selection via refresh_token exchange
+          if (options.workspaceId) {
+            const scoped = await doRefreshToken(
+              baseUrl,
+              { refreshToken: result.data.refresh_token, workspaceId: options.workspaceId, scope: options.scope },
+              fetchFn,
+            )
+            return toAuthResult(scoped, options.workspaceId)
+          }
+          return await resolveWorkspaceFromBootstrap(baseUrl, result.data, options, fetchFn)
         }
         return toAuthResult(result.data)
       }
