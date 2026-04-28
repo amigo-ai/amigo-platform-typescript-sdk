@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.11.0] - 2026-04-28
+
+### Features
+
+- device code login for desktop and CLI apps (#112)
+
 ## [0.10.0] - 2026-04-27
 
 ### Bug Fixes
