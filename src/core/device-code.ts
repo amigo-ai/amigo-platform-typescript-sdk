@@ -452,22 +452,27 @@ export class TokenManager {
 // --- Token Storage ---
 
 export class FileTokenStorage implements TokenStorage {
-  private readonly _filePath: string
+  private readonly _explicitPath: string | undefined
+  private _resolvedPath: string | undefined
 
   constructor(filePath?: string) {
-    this._filePath = filePath ?? FileTokenStorage.defaultPath()
+    this._explicitPath = filePath
   }
 
-  static defaultPath(): string {
-    const os = require('node:os') as typeof import('node:os')
-    const path = require('node:path') as typeof import('node:path')
-    return path.join(os.homedir(), '.amigo', 'credentials.json')
+  private async _filePath(): Promise<string> {
+    if (this._explicitPath) return this._explicitPath
+    if (this._resolvedPath) return this._resolvedPath
+    const os = await import('node:os')
+    const path = await import('node:path')
+    this._resolvedPath = path.join(os.homedir(), '.amigo', 'credentials.json')
+    return this._resolvedPath
   }
 
   async load(): Promise<StoredCredentials | null> {
     const fs = await import('node:fs/promises')
+    const filePath = await this._filePath()
     try {
-      const raw = await fs.readFile(this._filePath, 'utf-8')
+      const raw = await fs.readFile(filePath, 'utf-8')
       const data = JSON.parse(raw)
       if (
         typeof data.access_token === 'string' &&
@@ -487,14 +492,16 @@ export class FileTokenStorage implements TokenStorage {
   async save(credentials: StoredCredentials): Promise<void> {
     const fs = await import('node:fs/promises')
     const path = await import('node:path')
-    await fs.mkdir(path.dirname(this._filePath), { recursive: true, mode: 0o700 })
-    await fs.writeFile(this._filePath, JSON.stringify(credentials, null, 2) + '\n', { mode: 0o600 })
+    const filePath = await this._filePath()
+    await fs.mkdir(path.dirname(filePath), { recursive: true, mode: 0o700 })
+    await fs.writeFile(filePath, JSON.stringify(credentials, null, 2) + '\n', { mode: 0o600 })
   }
 
   async clear(): Promise<void> {
     const fs = await import('node:fs/promises')
+    const filePath = await this._filePath()
     try {
-      await fs.unlink(this._filePath)
+      await fs.unlink(filePath)
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'code' in err && err.code === 'ENOENT') return
       throw err
