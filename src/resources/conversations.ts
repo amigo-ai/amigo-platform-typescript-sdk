@@ -1,6 +1,6 @@
 import { ConfigurationError } from '../core/errors.js'
 import { type PlatformFetch } from '../core/openapi-client.js'
-import type { components } from '../generated/api.js'
+import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
 export type ConversationDetail = components['schemas']['ConversationDetail']
@@ -48,11 +48,9 @@ const MAX_AUTH_TOKEN_CHARS = 4096
 const TEXT_STREAM_AUTH_TOKEN_RE = /^[-A-Za-z0-9._+=/:]+$/
 const WEB_SOCKET_PROTOCOL_TOKEN_RE = /^[!#$%&'*+\-.^_`|~A-Za-z0-9]+$/
 
-export interface ListConversationsParams {
-  status?: 'active' | 'frozen' | 'closed'
-  limit?: number
-  offset?: number
-}
+export type ListConversationsParams = NonNullable<
+  operations['list_conversations_v1__workspace_id__conversations_get']['parameters']['query']
+>
 
 /** Access text conversation APIs and text-stream URL helpers. */
 export class ConversationsResource extends WorkspaceScopedResource {

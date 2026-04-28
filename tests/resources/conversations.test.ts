@@ -1,8 +1,10 @@
 import { describe, it, expect } from 'vitest'
 import {
   AmigoClient,
+  BadRequestError,
   ConfigurationError,
   NotFoundError,
+  ValidationError,
   textStreamAuthProtocols,
 } from '../../src/index.js'
 import type {
@@ -61,8 +63,9 @@ describe('ConversationsResource', () => {
     expect(result.total).toBe(1)
   })
 
-  it('creates a new conversation', async () => {
+  it('creates a new conversation and forwards auth header', async () => {
     let requestBody: unknown
+    let authorization: string | null = null
     const apiResponse: ConversationDetail = {
       id: '00000000-0000-4000-8000-000000000001',
       channel_kind: 'text',
@@ -79,6 +82,7 @@ describe('ConversationsResource', () => {
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`POST ${BASE}/conversations`]: async (req) => {
+          authorization = req.headers.get('authorization')
           requestBody = await req.json()
           return Response.json(apiResponse, { status: 201 })
         },
@@ -87,6 +91,7 @@ describe('ConversationsResource', () => {
 
     const result = await client.conversations.create(request)
 
+    expect(authorization).toBe(`Bearer ${TEST_API_KEY}`)
     expect(requestBody).toEqual(request)
     expect(result.id).toBe('00000000-0000-4000-8000-000000000001')
     expect(result.status).toBe('active')
@@ -131,9 +136,10 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    await client.conversations.close(conversationId)
+    const result = await client.conversations.close(conversationId)
 
     expect(deleteCalled).toBe(true)
+    expect(result).toBeUndefined()
   })
 
   it('creates a turn in a conversation', async () => {
@@ -169,7 +175,7 @@ describe('ConversationsResource', () => {
     expect(result.output).toHaveLength(1)
   })
 
-  it('routes conversation failures through the central error pipeline', async () => {
+  it('routes GET failures through the central error pipeline', async () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
@@ -180,6 +186,50 @@ describe('ConversationsResource', () => {
     })
 
     await expect(client.conversations.get('nonexistent')).rejects.toBeInstanceOf(NotFoundError)
+  })
+
+  it('routes POST failures through the central error pipeline', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations`]: () =>
+          Response.json({ detail: [{ msg: 'service_id required' }] }, { status: 422 }),
+      }),
+    })
+
+    await expect(
+      client.conversations.create({ service_id: '' }),
+    ).rejects.toBeInstanceOf(ValidationError)
+  })
+
+  it('routes DELETE failures through the central error pipeline', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`DELETE ${BASE}/conversations/nonexistent`]: () =>
+          Response.json({ detail: 'Not found' }, { status: 404 }),
+      }),
+    })
+
+    await expect(client.conversations.close('nonexistent')).rejects.toBeInstanceOf(NotFoundError)
+  })
+
+  it('routes createTurn failures through the central error pipeline', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          Response.json({ detail: 'Bad request' }, { status: 400 }),
+      }),
+    })
+
+    await expect(
+      client.conversations.createTurn(conversationId, { message: '' }),
+    ).rejects.toBeInstanceOf(BadRequestError)
   })
 
   it('builds a text-stream URL from the client baseUrl', () => {
