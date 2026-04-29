@@ -91,7 +91,6 @@
         padding: 4px 0;
       }
 
-      /* Typing indicator */
       .typing {
         align-self: flex-start;
         display: none;
@@ -133,7 +132,6 @@
         }
       }
 
-      /* Tool call cards */
       .tool-card {
         align-self: flex-start;
         max-width: 72%;
@@ -200,7 +198,6 @@
         color: #c62828;
       }
 
-      /* Input area */
       #input-area {
         padding: 12px 20px;
         background: #fff;
@@ -261,227 +258,162 @@
 
     <script>
       ;(function () {
-        const messagesEl = document.getElementById('messages')
-        const typingEl = document.getElementById('typing')
-        const inputEl = document.getElementById('input')
-        const sendBtn = document.getElementById('send')
-        const statusDot = document.getElementById('status-dot')
-        const sessionInfo = document.getElementById('session-info')
+        var messagesEl = document.getElementById('messages')
+        var typingEl = document.getElementById('typing')
+        var inputEl = document.getElementById('input')
+        var sendBtn = document.getElementById('send')
+        var statusDot = document.getElementById('status-dot')
+        var sessionInfo = document.getElementById('session-info')
 
-        let ws = null
-        let sessionReady = false
-        const toolCards = new Map()
-
-        // --- WebSocket connection ---
+        var ws = null
+        var ready = false
+        var toolCards = {}
 
         function connect() {
-          const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
-          ws = new WebSocket(`${protocol}//${location.host}/ws`)
+          if (ws) {
+            ws.onclose = null
+            ws.onerror = null
+            ws.onmessage = null
+            try {
+              ws.close()
+            } catch (e) {}
+          }
+
+          ready = false
+          inputEl.disabled = true
+          sendBtn.disabled = true
+
+          var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:'
+          ws = new WebSocket(protocol + '//' + location.host + '/ws')
 
           ws.onopen = function () {
             statusDot.classList.add('connected')
           }
 
           ws.onmessage = function (event) {
-            const frame = JSON.parse(event.data)
-            handleFrame(frame)
+            var frame = JSON.parse(event.data)
+
+            switch (frame.type) {
+              case 'connected':
+                break
+
+              case 'session_started':
+                sessionInfo.textContent = 'Session: ' + frame.session_id.slice(0, 12) + '...'
+                ready = true
+                inputEl.disabled = false
+                sendBtn.disabled = false
+                inputEl.focus()
+                break
+
+              case 'typing':
+                typingEl.classList.add('visible')
+                messagesEl.scrollTop = messagesEl.scrollHeight
+                break
+
+              case 'tool_call_started':
+                typingEl.classList.remove('visible')
+                var card = document.createElement('div')
+                card.className = 'tool-card'
+                card.innerHTML =
+                  '<div class="tool-header">' +
+                  '<div class="status-icon"><div class="spinner"></div></div>' +
+                  '<span>' + esc(frame.tool_name) + '</span>' +
+                  '</div>' +
+                  '<div class="tool-body">' + esc(pretty(frame.input)) + '</div>'
+                messagesEl.insertBefore(card, typingEl)
+                if (frame.call_id) toolCards[frame.call_id] = card
+                messagesEl.scrollTop = messagesEl.scrollHeight
+                break
+
+              case 'tool_call_completed':
+                typingEl.classList.remove('visible')
+                var tc = frame.call_id && toolCards[frame.call_id]
+                if (tc) {
+                  tc.classList.add(frame.succeeded ? 'succeeded' : 'failed')
+                  tc.querySelector('.status-icon').innerHTML = frame.succeeded ? '&#10003;' : '&#10007;'
+                  var rb = document.createElement('div')
+                  rb.className = 'tool-body result'
+                  rb.textContent = (frame.result || '').slice(0, 500)
+                  tc.appendChild(rb)
+                  delete toolCards[frame.call_id]
+                }
+                messagesEl.scrollTop = messagesEl.scrollHeight
+                break
+
+              case 'message':
+                typingEl.classList.remove('visible')
+                addBubble('agent', frame.text)
+                break
+
+              case 'error':
+                typingEl.classList.remove('visible')
+                addBubble('error', frame.message)
+                break
+
+              case 'session_ended':
+                typingEl.classList.remove('visible')
+                ready = false
+                inputEl.disabled = true
+                sendBtn.disabled = true
+                addBubble('system', 'Session ended — refresh to start a new chat')
+                break
+            }
           }
 
-          ws.onclose = function (event) {
+          ws.onclose = function () {
             statusDot.classList.remove('connected')
-            sessionReady = false
+            ready = false
             inputEl.disabled = true
             sendBtn.disabled = true
-            addSystem('Disconnected (' + (event.reason || event.code) + ')')
-
-            // Reconnect after a short delay
-            setTimeout(connect, 2000)
           }
 
-          ws.onerror = function () {
-            addError('Connection error')
-          }
+          ws.onerror = function () {}
         }
 
-        // --- Frame handlers ---
-
-        function handleFrame(frame) {
-          switch (frame.type) {
-            case 'connected':
-              // Local proxy connected to platform
-              break
-
-            case 'session_started':
-              sessionReady = true
-              inputEl.disabled = false
-              sendBtn.disabled = false
-              sessionInfo.textContent = 'Session: ' + frame.session_id.slice(0, 12) + '...'
-              inputEl.focus()
-              break
-
-            case 'typing':
-              showTyping()
-              break
-
-            case 'tool_call_started':
-              hideTyping()
-              addToolCallStarted(frame)
-              break
-
-            case 'tool_call_completed':
-              updateToolCallCompleted(frame)
-              break
-
-            case 'message':
-              hideTyping()
-              addAgent(frame.text)
-              break
-
-            case 'error':
-              hideTyping()
-              addError(frame.message)
-              break
-
-            case 'session_ended':
-              hideTyping()
-              addSystem('Session ended: ' + frame.reason)
-              sessionReady = false
-              break
-          }
-        }
-
-        // --- UI helpers ---
-
-        function addUser(text) {
-          const el = document.createElement('div')
-          el.className = 'msg user'
+        function addBubble(cls, text) {
+          var el = document.createElement('div')
+          el.className = 'msg ' + cls
           el.textContent = text
           messagesEl.insertBefore(el, typingEl)
-          scrollToBottom()
-        }
-
-        function addAgent(text) {
-          const el = document.createElement('div')
-          el.className = 'msg agent'
-          el.textContent = text
-          messagesEl.insertBefore(el, typingEl)
-          scrollToBottom()
-        }
-
-        function addError(text) {
-          const el = document.createElement('div')
-          el.className = 'msg error'
-          el.textContent = text
-          messagesEl.insertBefore(el, typingEl)
-          scrollToBottom()
-        }
-
-        function addSystem(text) {
-          const el = document.createElement('div')
-          el.className = 'msg system'
-          el.textContent = text
-          messagesEl.insertBefore(el, typingEl)
-          scrollToBottom()
-        }
-
-        function addToolCallStarted(frame) {
-          const card = document.createElement('div')
-          card.className = 'tool-card'
-          card.innerHTML =
-            '<div class="tool-header">' +
-            '<div class="status-icon"><div class="spinner"></div></div>' +
-            '<span>' +
-            escapeHtml(frame.tool_name) +
-            '</span>' +
-            '</div>' +
-            '<div class="tool-body">' +
-            escapeHtml(formatJson(frame.input)) +
-            '</div>'
-          messagesEl.insertBefore(card, typingEl)
-          toolCards.set(frame.call_id, card)
-          scrollToBottom()
-        }
-
-        function updateToolCallCompleted(frame) {
-          const card = toolCards.get(frame.call_id)
-          if (!card) return
-
-          card.classList.add(frame.succeeded ? 'succeeded' : 'failed')
-
-          const icon = card.querySelector('.status-icon')
-          icon.innerHTML = frame.succeeded ? '&#10003;' : '&#10007;'
-
-          const resultBody = document.createElement('div')
-          resultBody.className = 'tool-body result'
-          resultBody.textContent = truncate(frame.result, 500)
-          card.appendChild(resultBody)
-
-          toolCards.delete(frame.call_id)
-          scrollToBottom()
-        }
-
-        function showTyping() {
-          typingEl.classList.add('visible')
-          scrollToBottom()
-        }
-
-        function hideTyping() {
-          typingEl.classList.remove('visible')
-        }
-
-        function scrollToBottom() {
           messagesEl.scrollTop = messagesEl.scrollHeight
         }
 
-        function escapeHtml(str) {
-          const div = document.createElement('div')
-          div.textContent = str
-          return div.innerHTML
-        }
-
-        function formatJson(obj) {
-          if (obj == null) return ''
-          try {
-            return JSON.stringify(obj, null, 2)
-          } catch {
-            return String(obj)
-          }
-        }
-
-        function truncate(str, max) {
-          if (!str) return ''
-          return str.length > max ? str.slice(0, max) + '...' : str
-        }
-
-        // --- Send message ---
-
         function send() {
-          const text = inputEl.value.trim()
-          if (!text || !sessionReady) return
-
-          addUser(text)
+          var text = inputEl.value.trim()
+          if (!text || !ready || !ws || ws.readyState !== 1) return
+          addBubble('user', text)
           ws.send(JSON.stringify({ type: 'message', text: text }))
           inputEl.value = ''
           inputEl.style.height = 'auto'
           inputEl.focus()
         }
 
-        sendBtn.addEventListener('click', send)
+        function esc(s) {
+          var d = document.createElement('div')
+          d.textContent = s
+          return d.innerHTML
+        }
 
-        inputEl.addEventListener('keydown', function (e) {
+        function pretty(obj) {
+          try {
+            return JSON.stringify(obj, null, 2)
+          } catch (e) {
+            return String(obj)
+          }
+        }
+
+        sendBtn.onclick = send
+        inputEl.onkeydown = function (e) {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault()
             send()
           }
-        })
-
-        // Auto-resize textarea
-        inputEl.addEventListener('input', function () {
+        }
+        inputEl.oninput = function () {
           this.style.height = 'auto'
           this.style.height = Math.min(this.scrollHeight, 120) + 'px'
-        })
+        }
 
-        // Start
         connect()
       })()
     </script>

@@ -32,7 +32,7 @@ const client = new AmigoClient({
 
 const indexHtml = readFileSync(join(import.meta.dirname, 'public', 'index.html'))
 
-const httpServer = createServer((req: IncomingMessage, res: ServerResponse) => {
+const httpServer = createServer((_req: IncomingMessage, res: ServerResponse) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' })
   res.end(indexHtml)
 })
@@ -47,37 +47,46 @@ wss.on('connection', (browserWs: WebSocket) => {
   })
 
   const platformWs = new WebSocket(wsUrl, [...textStreamAuthProtocols(apiKey)])
+  let open = false
 
   platformWs.on('open', () => {
+    open = true
     browserWs.send(JSON.stringify({ type: 'connected' }))
   })
 
-  platformWs.on('message', (data: Buffer) => {
+  platformWs.on('message', (data) => {
     if (browserWs.readyState === WebSocket.OPEN) {
-      browserWs.send(data.toString())
+      browserWs.send(String(data))
     }
   })
 
-  platformWs.on('close', (code: number, reason: Buffer) => {
-    browserWs.close(code, reason.toString())
+  platformWs.on('close', (code, reason) => {
+    open = false
+    if (browserWs.readyState === WebSocket.OPEN) {
+      browserWs.close(code, String(reason))
+    }
   })
 
-  platformWs.on('error', (err: Error) => {
-    browserWs.send(JSON.stringify({ type: 'error', message: err.message }))
-    browserWs.close()
+  platformWs.on('error', () => {
+    open = false
+    if (browserWs.readyState === WebSocket.OPEN) {
+      browserWs.send(JSON.stringify({ type: 'error', message: 'Platform connection failed' }))
+      browserWs.close()
+    }
   })
 
-  browserWs.on('message', (data: Buffer) => {
-    if (platformWs.readyState === WebSocket.OPEN) {
-      platformWs.send(data.toString())
+  browserWs.on('message', (data) => {
+    if (open && platformWs.readyState === WebSocket.OPEN) {
+      platformWs.send(String(data))
     }
   })
 
   browserWs.on('close', () => {
-    if (platformWs.readyState === WebSocket.OPEN) {
+    if (open && platformWs.readyState === WebSocket.OPEN) {
       platformWs.send(JSON.stringify({ type: 'stop' }))
       platformWs.close()
     }
+    open = false
   })
 })
 
