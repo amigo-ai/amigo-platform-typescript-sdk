@@ -3959,15 +3959,6 @@ export interface paths {
         /**
          * Emit Metering Event
          * @description Emit one metering event for the calling workspace.
-         *
-         *     Scope: workspace-scoped via path param; auth via API key (same as every
-         *     other workspace route). 202 on success — emission is fire-and-forget.
-         *
-         *     ``event_type`` is a free-form string (regex-validated). Aggregation
-         *     into ``customer_meter_values`` is handled by SDP materialized views
-         *     in ``databricks/pipelines/billing.py``; an event_type with no matching
-         *     MV still lands in ``world_events`` but doesn't roll up into invoices
-         *     until someone adds an MV for it.
          */
         post: operations["emit-metering-event"];
         delete?: never;
@@ -16626,6 +16617,11 @@ export interface components {
         /**
          * InvoiceLineItem
          * @description A single line item on an invoice.
+         *
+         *     ``metering_source`` defaults to ``"production"`` for backward
+         *     compatibility with invoices generated before the metering_source
+         *     dimension was introduced — those invoices were production-only by
+         *     definition. New invoices always carry an explicit value.
          */
         InvoiceLineItem: {
             /**
@@ -16639,6 +16635,13 @@ export interface components {
              * @description Meter identifier
              */
             meter_key: string;
+            /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
             /**
              * Quantity
              * @description Usage quantity
@@ -17081,6 +17084,13 @@ export interface components {
              */
             meter_key: string;
             /**
+             * Metering Source
+             * @description Traffic class — production or simulation, billed separately
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
+            /**
              * Unit
              * @description Unit of measurement (e.g. minutes, calls)
              */
@@ -17111,6 +17121,13 @@ export interface components {
              */
             meter_key: string;
             /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
+            /**
              * Period End
              * @description Period end (ISO-8601)
              */
@@ -17138,21 +17155,26 @@ export interface components {
         };
         /** MeteringEmitRequest */
         MeteringEmitRequest: {
+            /**
+             * Effective At
+             * @description When the event happened. Defaults to ingest time.
+             */
+            effective_at?: string | null;
             /** Event Type */
             event_type: string;
-            /**
-             * Metering Metadata
-             * @description Optional audit/dispute breadcrumbs.
-             */
+            /** Metering Metadata */
             metering_metadata?: {
                 [key: string]: unknown;
             } | null;
             /** Metering Quantity */
             metering_quantity: number;
             /**
-             * Metering Unit
-             * @description Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.
+             * Metering Source
+             * @description Traffic class — 'production' or 'simulation'.
+             * @enum {string}
              */
+            metering_source: "production" | "simulation";
+            /** Metering Unit */
             metering_unit?: string | null;
         };
         /** MetricCatalogEntry */
@@ -24420,6 +24442,13 @@ export interface components {
              */
             meter_key: string;
             /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
+            /**
              * Period End
              * @description Period end date (ISO-8601)
              */
@@ -25373,6 +25402,20 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** WorkspaceMemberRoleUpdatedEvent */
+        WorkspaceMemberRoleUpdatedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "workspace.member_role_updated";
+            /** Previous Role */
+            previous_role: string;
+            /** Role */
+            role: string;
+        };
         /** WorkspaceResponse */
         WorkspaceResponse: {
             /** Backend Org Id */
@@ -25402,7 +25445,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
