@@ -9,7 +9,7 @@
  *     npx tsx examples/conversations/text-chat.ts "Hello, what appointments are available?"
  */
 
-import { AmigoClient, textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@amigo-ai/platform-sdk'
 import WebSocket from 'ws'
 import { requireEnv } from '../shared.js'
 
@@ -18,18 +18,19 @@ const workspaceId = requireEnv('AMIGO_WORKSPACE_ID')
 const serviceId = requireEnv('AMIGO_SERVICE_ID')
 const message = process.argv[2] || 'Hello'
 
-const client = new AmigoClient({ apiKey, workspaceId })
-
-// Build the WebSocket URL with tool_events enabled
-const wsUrl = client.conversations.textStreamUrl({
-  serviceId,
-  toolEvents: true,
-  token: apiKey,
+const client = new AmigoClient({
+  apiKey,
+  workspaceId,
+  baseUrl: process.env.AMIGO_BASE_URL,
 })
+
+// Build the WebSocket URL — token in query param for Node.js
+const wsUrl =
+  client.conversations.textStreamUrl({ serviceId, token: apiKey }) + '&tool_events=true'
 
 console.log(`Connecting to ${wsUrl.replace(apiKey, '***')}`)
 
-const ws = new WebSocket(wsUrl, [...textStreamAuthProtocols(apiKey)])
+const ws = new WebSocket(wsUrl)
 
 ws.on('open', () => {
   console.log('Connected. Waiting for session_started...')
