@@ -60,8 +60,11 @@ export type ListConversationsParams = NonNullable<
 
 /** Access text conversation APIs and text-stream URL helpers. */
 export class ConversationsResource extends WorkspaceScopedResource {
-  constructor(client: PlatformFetch, workspaceId: string) {
+  private readonly agentBaseUrl: string | undefined
+
+  constructor(client: PlatformFetch, workspaceId: string, agentBaseUrl?: string) {
     super(client, workspaceId)
+    this.agentBaseUrl = agentBaseUrl
   }
 
   async list(params?: ListConversationsParams): Promise<ConversationListResponse> {
@@ -113,7 +116,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
   /** Build the real-time text WebSocket URL for browser or custom clients. */
   textStreamUrl(params: TextStreamUrlParams): string {
     const url = buildTextStreamUrl({
-      baseUrl: this.platformBaseUrl,
+      baseUrl: this.agentBaseUrl ?? this.platformBaseUrl,
       workspaceId: this.workspaceId,
       ...params,
     })
@@ -200,22 +203,25 @@ function parseTextStreamUrlOverride(textStreamUrl: string): URL {
 function deriveTextStreamUrl(baseUrl: string): URL {
   if (!/^[a-z][a-z\d+.-]*:\/\//i.test(baseUrl)) {
     throw new ConfigurationError(
-      'textStreamUrl cannot be derived from a relative baseUrl; pass textStreamUrl explicitly',
+      'textStreamUrl cannot be derived from a relative baseUrl; pass agentBaseUrl or textStreamUrl explicitly',
     )
   }
 
   const url = new URL(baseUrl)
-  if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+  if (url.protocol === 'ws:' || url.protocol === 'wss:') {
+    // Already a WebSocket URL (e.g. from agentBaseUrl) — use directly
+  } else if (url.protocol === 'http:' || url.protocol === 'https:') {
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  } else {
     throw new ConfigurationError(
-      'textStreamUrl can only be derived from an http or https baseUrl; pass textStreamUrl explicitly',
+      'textStreamUrl can only be derived from an http, https, ws, or wss baseUrl; pass textStreamUrl explicitly',
     )
   }
   if (url.pathname !== '/' && url.pathname !== '') {
     throw new ConfigurationError(
-      'textStreamUrl can only be derived from an origin-only http or https baseUrl; pass textStreamUrl explicitly when using path-prefixed gateways',
+      'textStreamUrl can only be derived from an origin-only baseUrl; pass agentBaseUrl as an origin or textStreamUrl explicitly when using path-prefixed gateways',
     )
   }
-  url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
   // Text streaming is served by agent-engine ingress, regardless of any REST
   // API path segments on the configured base URL.
   url.pathname = '/agent/text-stream'

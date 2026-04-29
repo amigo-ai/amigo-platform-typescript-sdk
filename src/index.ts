@@ -141,11 +141,35 @@ export interface AmigoClientConfig {
    * through this function instead of globalThis.fetch.
    */
   fetch?: typeof globalThis.fetch
+
+  /**
+   * Base URL for the agent engine (voice-agent) WebSocket endpoints.
+   *
+   * Required when `baseUrl` points to a BFF proxy or a different host
+   * than the agent engine — WebSockets cannot traverse HTTP proxies.
+   * Used by `conversations.textStreamUrl()` to build the `ws://` URL.
+   *
+   * Accepts `http://` or `https://` (auto-mapped to `ws://` / `wss://`)
+   * or direct `ws://` / `wss://` URLs.
+   *
+   * Defaults to deriving from `baseUrl` (works when REST API and agent
+   * engine share the same origin).
+   *
+   * ```ts
+   * new AmigoClient({
+   *   baseUrl: '/api/platform',  // BFF proxy for REST
+   *   agentBaseUrl: 'wss://api.platform.amigo.ai',  // direct for WS
+   *   ...
+   * })
+   * ```
+   */
+  agentBaseUrl?: string
 }
 
 export class AmigoClient {
   readonly workspaceId!: string
   readonly baseUrl!: string
+  readonly agentBaseUrl!: string | undefined
   readonly workspaces!: WorkspacesResource
   readonly apiKeys!: ApiKeysResource
   readonly agents!: AgentsResource
@@ -200,7 +224,7 @@ export class AmigoClient {
       fetch: config.fetch,
     })
 
-    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl)
+    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl, config.agentBaseUrl)
   }
 
   withOptions(options: ScopedRequestOptions): AmigoClient {
@@ -208,6 +232,7 @@ export class AmigoClient {
       scopePlatformClient(this.api, options),
       this.workspaceId,
       this.baseUrl,
+      this.agentBaseUrl,
     )
   }
 
@@ -278,9 +303,10 @@ export class AmigoClient {
     client: PlatformFetch,
     workspaceId: string,
     baseUrl: string,
+    agentBaseUrl?: string,
   ): AmigoClient {
     const instance = Object.create(AmigoClient.prototype) as AmigoClient
-    AmigoClient.hydrate(instance, client, workspaceId, baseUrl)
+    AmigoClient.hydrate(instance, client, workspaceId, baseUrl, agentBaseUrl)
     return instance
   }
 
@@ -289,11 +315,13 @@ export class AmigoClient {
     client: PlatformFetch,
     workspaceId: string,
     baseUrl: string,
+    agentBaseUrl?: string,
   ): void {
     const mutable = target as Mutable<AmigoClient>
 
     mutable.workspaceId = workspaceId
     mutable.baseUrl = baseUrl
+    mutable.agentBaseUrl = agentBaseUrl
     ;(target as unknown as { api: PlatformFetch }).api = client
 
     mutable.workspaces = new WorkspacesResource(client, workspaceId)
@@ -308,7 +336,7 @@ export class AmigoClient {
     mutable.dataSources = new DataSourcesResource(client, workspaceId)
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
-    mutable.conversations = new ConversationsResource(client, workspaceId)
+    mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
     mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
