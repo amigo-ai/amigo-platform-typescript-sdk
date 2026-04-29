@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.17.2] - 2026-04-29
+
+### Features
+
+- add agentBaseUrl for split-host WebSocket connections
+
+### Bug Fixes
+
+- add clxxa to CODEOWNERS (#124)
+
+### Documentation
+
+- regenerate api.md for agentBaseUrl
+
 ## [0.17.1] - 2026-04-29
 
 ### Features
