@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.17.1] - 2026-04-29
+
+### Features
+
+- sync API types from platform — add TurnResponse.tool_calls
+
+### Bug Fixes
+
+- clean up text-chat-app proxy and frontend
+- make text-chat example interactive instead of one-shot
+- use token query param auth (not dual), respect AMIGO_BASE_URL
+
 ## [0.17.0] - 2026-04-28
 
 ### Features
