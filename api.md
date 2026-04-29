@@ -19,6 +19,7 @@ Configuration fields:
 - `headers?: HeadersOptions`
 - `hooks?: ClientHooks`
 - `fetch?: typeof globalThis.fetch`
+- `agentBaseUrl?: string`
 
 Instance fields:
 
@@ -60,6 +61,8 @@ Notes:
 ## Resources
 
 All workspace-scoped resources also expose `withOptions(options)`.
+
+### `agentBaseUrl`
 
 ### `workspaces`
 
