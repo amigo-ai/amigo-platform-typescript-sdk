@@ -3397,6 +3397,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download an uploaded file
+         * @description Proxy the raw file bytes from the UC Volume back to the caller.
+         */
+        get: operations["download-intake-upload"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -3959,15 +3979,6 @@ export interface paths {
         /**
          * Emit Metering Event
          * @description Emit one metering event for the calling workspace.
-         *
-         *     Scope: workspace-scoped via path param; auth via API key (same as every
-         *     other workspace route). 202 on success — emission is fire-and-forget.
-         *
-         *     ``event_type`` is a free-form string (regex-validated). Aggregation
-         *     into ``customer_meter_values`` is handled by SDP materialized views
-         *     in ``databricks/pipelines/billing.py``; an event_type with no matching
-         *     MV still lands in ``world_events`` but doesn't roll up into invoices
-         *     until someone adds an MV for it.
          */
         post: operations["emit-metering-event"];
         delete?: never;
@@ -8802,7 +8813,8 @@ export interface components {
          * @description Authentication configuration for an integration.
          *
          *     Supports api_key_header, bearer_token, oauth2_client_credentials,
-         *     oauth2_jwt_bearer, and gcp_wif.
+         *     oauth2_jwt_bearer, gcp_wif, smart_backend_services, and
+         *     bearer_token_exchange.
          */
         AuthConfig: {
             /** Assertion Algorithm */
@@ -8824,6 +8836,34 @@ export interface components {
             client_id?: string | null;
             /** Client Secret Ssm Param Path */
             client_secret_ssm_param_path?: string | null;
+            /**
+             * Exchange Default Ttl Seconds
+             * @default 3600
+             */
+            exchange_default_ttl_seconds?: number;
+            /** Exchange Expires In Field */
+            exchange_expires_in_field?: string | null;
+            /** Exchange Param Headers */
+            exchange_param_headers?: components["schemas"]["ExchangeHeaderMapping"][];
+            /**
+             * Exchange Secret Format
+             * @default {secret}
+             */
+            exchange_secret_format?: string;
+            /**
+             * Exchange Secret Header
+             * @default X-API-KEY
+             */
+            exchange_secret_header?: string;
+            /** Exchange Secret Ssm Param Path */
+            exchange_secret_ssm_param_path?: string | null;
+            /**
+             * Exchange Token Field
+             * @default token
+             */
+            exchange_token_field?: string;
+            /** Exchange Url */
+            exchange_url?: string | null;
             /** Gcp Scopes */
             gcp_scopes?: string[] | null;
             /** Header Name */
@@ -8847,7 +8887,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
         };
         /**
          * AuthConfigWithSecrets
@@ -8879,6 +8919,35 @@ export interface components {
             /** Client Secret Ssm Param Path */
             client_secret_ssm_param_path?: string | null;
             client_secret_value?: components["schemas"]["SecretInput"] | null;
+            /**
+             * Exchange Default Ttl Seconds
+             * @default 3600
+             */
+            exchange_default_ttl_seconds?: number;
+            /** Exchange Expires In Field */
+            exchange_expires_in_field?: string | null;
+            /** Exchange Param Headers */
+            exchange_param_headers?: components["schemas"]["ExchangeHeaderMapping"][];
+            /**
+             * Exchange Secret Format
+             * @default {secret}
+             */
+            exchange_secret_format?: string;
+            /**
+             * Exchange Secret Header
+             * @default X-API-KEY
+             */
+            exchange_secret_header?: string;
+            /** Exchange Secret Ssm Param Path */
+            exchange_secret_ssm_param_path?: string | null;
+            exchange_secret_value?: components["schemas"]["SecretInput"] | null;
+            /**
+             * Exchange Token Field
+             * @default token
+             */
+            exchange_token_field?: string;
+            /** Exchange Url */
+            exchange_url?: string | null;
             /** Gcp Scopes */
             gcp_scopes?: string[] | null;
             /** Header Name */
@@ -8903,7 +8972,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
         };
         /** AuthInfoResponse */
         AuthInfoResponse: {
@@ -10882,6 +10951,29 @@ export interface components {
             /** Connectors */
             connectors: components["schemas"]["ConnectorDef"][];
         };
+        /**
+         * ContentPartPayload
+         * @description HTTP/WebSocket shape for a modality-neutral conversation content part.
+         */
+        ContentPartPayload: {
+            /** Media Type */
+            media_type?: string | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Provider Id */
+            provider_id?: string | null;
+            /** Text */
+            text?: string | null;
+            /**
+             * Type
+             * @default text
+             */
+            type?: string;
+            /** Url */
+            url?: string | null;
+        };
         /** ContextGraphResponse */
         ContextGraphResponse: {
             /**
@@ -11072,7 +11164,10 @@ export interface components {
             final_state?: string | null;
             /** Has Recording */
             has_recording?: boolean | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Phone Number */
             phone_number?: string | null;
@@ -11162,6 +11257,11 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "frozen" | "closed";
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
             /** Version */
             version: number;
             /**
@@ -11178,6 +11278,8 @@ export interface components {
             provider: components["schemas"]["ProviderType"];
             /** Provider Thread Id */
             provider_thread_id: string;
+            /** Service Id */
+            service_id?: string | null;
         };
         /** ConversationThreadResponse */
         ConversationThreadResponse: {
@@ -11198,6 +11300,8 @@ export interface components {
             provider_thread_id: string;
             /** Reactivated */
             reactivated: boolean;
+            /** Service Id */
+            service_id?: string | null;
             /** State */
             state: {
                 [key: string]: unknown;
@@ -11207,6 +11311,11 @@ export interface components {
              * @constant
              */
             status: "active";
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
             /** Version */
             version: number;
             /**
@@ -11238,6 +11347,11 @@ export interface components {
         };
         /** ConversationTurn */
         ConversationTurn: {
+            /**
+             * Content
+             * @default []
+             */
+            content?: components["schemas"]["ContentPartPayload"][];
             /**
              * Role
              * @enum {string}
@@ -11472,9 +11586,17 @@ export interface components {
         };
         /** CreateConversationRequest */
         CreateConversationRequest: {
+            /**
+             * Auto Greet
+             * @default true
+             */
+            auto_greet?: boolean;
             /** Entity Id */
             entity_id?: string | null;
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
         };
         /** CreateCustomerRequest */
@@ -11565,7 +11687,7 @@ export interface components {
              * Endpoints
              * @default []
              */
-            endpoints?: components["schemas"]["EndpointConfig"][];
+            endpoints?: components["schemas"]["EndpointConfig-Input"][];
             /** Mcp Args */
             mcp_args?: string[] | null;
             /** Mcp Command */
@@ -13775,7 +13897,81 @@ export interface components {
          * EndpointConfig
          * @description Configuration for a single integration endpoint.
          */
-        EndpointConfig: {
+        "EndpointConfig-Input": {
+            auth?: components["schemas"]["AuthConfig"] | null;
+            /** Base Url */
+            base_url?: string | null;
+            /**
+             * Body Format
+             * @default json
+             * @enum {string}
+             */
+            body_format?: "json" | "form";
+            /** Description */
+            description: string;
+            /**
+             * Headers
+             * @default {}
+             */
+            headers?: {
+                [key: string]: string;
+            };
+            /**
+             * Input Schema
+             * @default {}
+             */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Max Result Length
+             * @default 0
+             */
+            max_result_length?: number;
+            /**
+             * Method
+             * @default POST
+             * @enum {string}
+             */
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /** Name */
+            name: string;
+            /** Path */
+            path: string;
+            /** Response Filter */
+            response_filter?: string[] | null;
+            /** Response Mapping */
+            response_mapping?: {
+                [key: string]: string;
+            } | null;
+            /**
+             * Result Delivery
+             * @default interrupt
+             * @enum {string}
+             */
+            result_delivery?: "interrupt" | "queue";
+            /** Result Key */
+            result_key?: string | null;
+            /** Result Template */
+            result_template?: string | null;
+            /**
+             * @default {
+             *       "max_retries": 2,
+             *       "retry_on_status": [
+             *         429,
+             *         502,
+             *         503,
+             *         504
+             *       ]
+             *     }
+             */
+            retry_config?: components["schemas"]["RetryConfig"];
+        };
+        /**
+         * EndpointConfig
+         * @description Configuration for a single integration endpoint.
+         */
+        "EndpointConfig-Output": {
             auth?: components["schemas"]["AuthConfig"] | null;
             /** Base Url */
             base_url?: string | null;
@@ -14740,6 +14936,35 @@ export interface components {
             /** Sources */
             sources: string[];
         };
+        /**
+         * ExchangeHeaderMapping
+         * @description One header on a token-exchange request, sourced from a request param.
+         *
+         *     Used by ``bearer_token_exchange`` auth type. Each mapping declares which
+         *     request param feeds which exchange-call header. The same param values
+         *     also form the per-call cache key, so distinct (e.g.) user_ids yield
+         *     distinct cached tokens.
+         *
+         *     Examples:
+         *         ``ExchangeHeaderMapping(header_name="X-USER-ID", param_name="user_id")``
+         *         ``ExchangeHeaderMapping(header_name="X-Org-ID", param_name="org_id")``
+         */
+        ExchangeHeaderMapping: {
+            /**
+             * Consume
+             * @default true
+             */
+            consume?: boolean;
+            /** Header Name */
+            header_name: string;
+            /** Param Name */
+            param_name: string;
+            /**
+             * Required
+             * @default true
+             */
+            required?: boolean;
+        };
         /** ExecutePanelRequest */
         ExecutePanelRequest: {
             /**
@@ -14871,6 +15096,8 @@ export interface components {
             bundle: {
                 [key: string]: unknown;
             };
+            /** Data Source Id */
+            data_source_id?: string | null;
             /**
              * Source
              * @default fhir_import
@@ -15294,6 +15521,8 @@ export interface components {
             data: {
                 [key: string]: unknown;
             };
+            /** Data Source Id */
+            data_source_id?: string | null;
         };
         /** FieldSaveRequest */
         FieldSaveRequest: {
@@ -16237,7 +16466,7 @@ export interface components {
              * Endpoints
              * @description Configured endpoints
              */
-            endpoints?: components["schemas"]["EndpointConfig"][];
+            endpoints?: components["schemas"]["EndpointConfig-Output"][];
             /**
              * Id
              * @description Integration ID
@@ -16371,7 +16600,7 @@ export interface components {
              * Endpoints
              * @default []
              */
-            endpoints?: components["schemas"]["EndpointConfig"][];
+            endpoints?: components["schemas"]["EndpointConfig-Output"][];
             /** Id */
             id: string;
             /** Mcp Args */
@@ -16626,6 +16855,11 @@ export interface components {
         /**
          * InvoiceLineItem
          * @description A single line item on an invoice.
+         *
+         *     ``metering_source`` defaults to ``"production"`` for backward
+         *     compatibility with invoices generated before the metering_source
+         *     dimension was introduced — those invoices were production-only by
+         *     definition. New invoices always carry an explicit value.
          */
         InvoiceLineItem: {
             /**
@@ -16639,6 +16873,13 @@ export interface components {
              * @description Meter identifier
              */
             meter_key: string;
+            /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
             /**
              * Quantity
              * @description Usage quantity
@@ -17081,6 +17322,13 @@ export interface components {
              */
             meter_key: string;
             /**
+             * Metering Source
+             * @description Traffic class — production or simulation, billed separately
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
+            /**
              * Unit
              * @description Unit of measurement (e.g. minutes, calls)
              */
@@ -17111,6 +17359,13 @@ export interface components {
              */
             meter_key: string;
             /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
+            /**
              * Period End
              * @description Period end (ISO-8601)
              */
@@ -17138,21 +17393,26 @@ export interface components {
         };
         /** MeteringEmitRequest */
         MeteringEmitRequest: {
+            /**
+             * Effective At
+             * @description When the event happened. Defaults to ingest time.
+             */
+            effective_at?: string | null;
             /** Event Type */
             event_type: string;
-            /**
-             * Metering Metadata
-             * @description Optional audit/dispute breadcrumbs.
-             */
+            /** Metering Metadata */
             metering_metadata?: {
                 [key: string]: unknown;
             } | null;
             /** Metering Quantity */
             metering_quantity: number;
             /**
-             * Metering Unit
-             * @description Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.
+             * Metering Source
+             * @description Traffic class — 'production' or 'simulation'.
+             * @enum {string}
              */
+            metering_source: "production" | "simulation";
+            /** Metering Unit */
             metering_unit?: string | null;
         };
         /** MetricCatalogEntry */
@@ -21255,6 +21515,8 @@ export interface components {
             status: "running" | "completed" | "failed";
             /** Tags */
             tags?: string[];
+            /** Total Scenarios Requested */
+            total_scenarios_requested?: number | null;
             /**
              * Total Sessions
              * @default 0
@@ -23797,15 +24059,21 @@ export interface components {
         };
         /** TurnConversationSnapshot */
         TurnConversationSnapshot: {
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Status
              * @enum {string}
              */
             status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
-            /** Turn Count */
-            turn_count: number;
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
             /** Updated At */
             updated_at: string;
         };
@@ -23865,6 +24133,12 @@ export interface components {
         };
         /** TurnRequest */
         TurnRequest: {
+            /** Content */
+            content?: components["schemas"]["ContentPartPayload"][] | null;
+            /** Media Type */
+            media_type?: string | null;
+            /** Media Url */
+            media_url?: string | null;
             /** Message */
             message: string;
         };
@@ -24034,7 +24308,7 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
             /** Endpoints */
-            endpoints?: components["schemas"]["EndpointConfig"][] | null;
+            endpoints?: components["schemas"]["EndpointConfig-Input"][] | null;
             /** Mcp Args */
             mcp_args?: string[] | null;
             /** Mcp Command */
@@ -24419,6 +24693,13 @@ export interface components {
              * @description Meter identifier
              */
             meter_key: string;
+            /**
+             * Metering Source
+             * @description Traffic class
+             * @default production
+             * @enum {string}
+             */
+            metering_source?: "production" | "simulation";
             /**
              * Period End
              * @description Period end date (ISO-8601)
@@ -25373,6 +25654,20 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** WorkspaceMemberRoleUpdatedEvent */
+        WorkspaceMemberRoleUpdatedEvent: {
+            /** Entity Id */
+            entity_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "workspace.member_role_updated";
+            /** Previous Role */
+            previous_role: string;
+            /** Role */
+            role: string;
+        };
         /** WorkspaceResponse */
         WorkspaceResponse: {
             /** Backend Org Id */
@@ -25402,7 +25697,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -25614,7 +25909,10 @@ export interface components {
             final_state?: string | null;
             /** Has Recording */
             has_recording?: boolean | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Phone Number */
             phone_number?: string | null;
@@ -33630,6 +33928,53 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "download-intake-upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                link_id: string;
+                upload_id: string;
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File bytes with Content-Disposition: attachment */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description Link, upload, or file not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description UC Volume storage backend unavailable */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
