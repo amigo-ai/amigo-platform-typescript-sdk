@@ -85,6 +85,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "deliver-surface",
   "detach-billing-workspace",
   "discover-catalog",
+  "download-intake-upload",
   "download-recording-file",
   "edit-encounter-soap",
   "emit-metering-event",
