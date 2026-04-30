@@ -11,10 +11,19 @@ import type { ListParams } from '../core/utils.js'
  * while get, update, and archive operate on a specific workspace.
  */
 export class WorkspacesResource extends WorkspaceScopedResource {
-  /** Create a new workspace */
+  /** Create a new workspace (unauthenticated — no owner membership created) */
   async create(body: components['schemas']['CreateWorkspaceRequest']) {
     return extractData(
       await this.client.POST('/v1/workspaces', {
+        body,
+      }),
+    )
+  }
+
+  /** Create a workspace for the authenticated user and attach owner access */
+  async createSelfService(body: components['schemas']['CreateWorkspaceRequest']) {
+    return extractData(
+      await this.client.POST('/v1/workspaces/self-service', {
         body,
       }),
     )
