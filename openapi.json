@@ -7277,6 +7277,75 @@
         "title": "ConnectorSettingsResponse",
         "type": "object"
       },
+      "ContentPartPayload": {
+        "description": "HTTP/WebSocket shape for a modality-neutral conversation content part.",
+        "properties": {
+          "media_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "maxProperties": 50,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "type": {
+            "default": "text",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9._-]*$",
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "title": "ContentPartPayload",
+        "type": "object"
+      },
       "ContextGraphResponse": {
         "properties": {
           "created_at": {
@@ -7824,6 +7893,7 @@
           "entity_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -7866,6 +7936,7 @@
             "title": "Has Recording"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -7905,6 +7976,7 @@
           "service_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -8104,6 +8176,11 @@
             "title": "Status",
             "type": "string"
           },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
           "version": {
             "title": "Version",
             "type": "integer"
@@ -8148,6 +8225,18 @@
             "minLength": 1,
             "title": "Provider Thread Id",
             "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
           }
         },
         "required": [
@@ -8201,6 +8290,18 @@
             "title": "Reactivated",
             "type": "boolean"
           },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
           "state": {
             "additionalProperties": true,
             "title": "State",
@@ -8210,6 +8311,11 @@
             "const": "active",
             "title": "Status",
             "type": "string"
+          },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
           },
           "version": {
             "title": "Version",
@@ -8272,6 +8378,14 @@
       },
       "ConversationTurn": {
         "properties": {
+          "content": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ContentPartPayload"
+            },
+            "title": "Content",
+            "type": "array"
+          },
           "role": {
             "enum": [
               "agent",
@@ -8900,7 +9014,7 @@
           "entity_id": {
             "anyOf": [
               {
-                "maxLength": 64,
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -8910,8 +9024,7 @@
             "title": "Entity Id"
           },
           "service_id": {
-            "maxLength": 64,
-            "minLength": 1,
+            "format": "uuid",
             "title": "Service Id",
             "type": "string"
           }
@@ -10243,7 +10356,7 @@
             "items": {
               "$ref": "#/components/schemas/SurfaceField"
             },
-            "maxItems": 100,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Fields",
             "type": "array"
@@ -17516,6 +17629,18 @@
             "title": "Bundle",
             "type": "object"
           },
+          "data_source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Id"
+          },
           "source": {
             "default": "fhir_import",
             "maxLength": 128,
@@ -19006,6 +19131,18 @@
             "additionalProperties": true,
             "title": "Data",
             "type": "object"
+          },
+          "data_source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Id"
           }
         },
         "required": [
@@ -21973,7 +22110,7 @@
         "type": "object"
       },
       "InvoiceLineItem": {
-        "description": "A single line item on an invoice.",
+        "description": "A single line item on an invoice.\n\n``metering_source`` defaults to ``\"production\"`` for backward\ncompatibility with invoices generated before the metering_source\ndimension was introduced \u2014 those invoices were production-only by\ndefinition. New invoices always carry an explicit value.",
         "properties": {
           "description": {
             "default": "",
@@ -21984,6 +22121,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "quantity": {
@@ -22897,6 +23044,16 @@
             "title": "Meter Key",
             "type": "string"
           },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class \u2014 production or simulation, billed separately",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
+            "type": "string"
+          },
           "unit": {
             "description": "Unit of measurement (e.g. minutes, calls)",
             "title": "Unit",
@@ -22936,6 +23093,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "period_end": {
@@ -22987,6 +23154,19 @@
       },
       "MeteringEmitRequest": {
         "properties": {
+          "effective_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the event happened. Defaults to ingest time.",
+            "title": "Effective At"
+          },
           "event_type": {
             "maxLength": 64,
             "minLength": 1,
@@ -23004,13 +23184,21 @@
                 "type": "null"
               }
             ],
-            "description": "Optional audit/dispute breadcrumbs.",
             "title": "Metering Metadata"
           },
           "metering_quantity": {
             "minimum": 0.0,
             "title": "Metering Quantity",
             "type": "number"
+          },
+          "metering_source": {
+            "description": "Traffic class \u2014 'production' or 'simulation'.",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
+            "type": "string"
           },
           "metering_unit": {
             "anyOf": [
@@ -23023,13 +23211,13 @@
                 "type": "null"
               }
             ],
-            "description": "Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.",
             "title": "Metering Unit"
           }
         },
         "required": [
           "event_type",
-          "metering_quantity"
+          "metering_quantity",
+          "metering_source"
         ],
         "title": "MeteringEmitRequest",
         "type": "object"
@@ -33343,6 +33531,17 @@
             "title": "Tags",
             "type": "array"
           },
+          "total_scenarios_requested": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Scenarios Requested"
+          },
           "total_sessions": {
             "default": 0,
             "title": "Total Sessions",
@@ -36918,7 +37117,7 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 20,
+            "maxItems": 100,
             "title": "Numbers",
             "type": "array"
           }
@@ -39508,6 +39707,7 @@
       "TurnConversationSnapshot": {
         "properties": {
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -39524,6 +39724,7 @@
             "type": "string"
           },
           "turn_count": {
+            "default": 0,
             "title": "Turn Count",
             "type": "integer"
           },
@@ -39535,7 +39736,6 @@
         "required": [
           "id",
           "status",
-          "turn_count",
           "updated_at"
         ],
         "title": "TurnConversationSnapshot",
@@ -39630,6 +39830,45 @@
       },
       "TurnRequest": {
         "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ContentPartPayload"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "media_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Url"
+          },
           "message": {
             "maxLength": 10000,
             "minLength": 1,
@@ -41563,7 +41802,7 @@
                 "items": {
                   "$ref": "#/components/schemas/SurfaceField"
                 },
-                "maxItems": 100,
+                "maxItems": 200,
                 "minItems": 1,
                 "type": "array"
               },
@@ -42127,6 +42366,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "period_end": {
@@ -44661,6 +44910,35 @@
         "title": "WorkspaceMemberAddedEvent",
         "type": "object"
       },
+      "WorkspaceMemberRoleUpdatedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "workspace.member_role_updated",
+            "default": "workspace.member_role_updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "previous_role": {
+            "title": "Previous Role",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "role",
+          "previous_role"
+        ],
+        "title": "WorkspaceMemberRoleUpdatedEvent",
+        "type": "object"
+      },
       "WorkspaceResponse": {
         "properties": {
           "backend_org_id": {
@@ -44789,7 +45067,8 @@
             "trigger.fired": "#/components/schemas/TriggerFiredEvent",
             "workspace.invitation_accepted": "#/components/schemas/WorkspaceInvitationAcceptedEvent",
             "workspace.invitation_sent": "#/components/schemas/WorkspaceInvitationSentEvent",
-            "workspace.member_added": "#/components/schemas/WorkspaceMemberAddedEvent"
+            "workspace.member_added": "#/components/schemas/WorkspaceMemberAddedEvent",
+            "workspace.member_role_updated": "#/components/schemas/WorkspaceMemberRoleUpdatedEvent"
           },
           "propertyName": "event_type"
         },
@@ -44892,6 +45171,9 @@
           },
           {
             "$ref": "#/components/schemas/WorkspaceMemberAddedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkspaceMemberRoleUpdatedEvent"
           },
           {
             "$ref": "#/components/schemas/WorkspaceInvitationSentEvent"
@@ -45352,6 +45634,7 @@
           "entity_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -45394,6 +45677,7 @@
             "title": "Has Recording"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -45422,6 +45706,7 @@
           "service_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -52837,6 +53122,7 @@
             "name": "conversation_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Conversation Id",
               "type": "string"
             }
@@ -52912,6 +53198,7 @@
             "name": "conversation_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Conversation Id",
               "type": "string"
             }
@@ -59259,7 +59546,7 @@
     },
     "/v1/{workspace_id}/metering/emit": {
       "post": {
-        "description": "Emit one metering event for the calling workspace.\n\nScope: workspace-scoped via path param; auth via API key (same as every\nother workspace route). 202 on success \u2014 emission is fire-and-forget.\n\n``event_type`` is a free-form string (regex-validated). Aggregation\ninto ``customer_meter_values`` is handled by SDP materialized views\nin ``databricks/pipelines/billing.py``; an event_type with no matching\nMV still lands in ``world_events`` but doesn't roll up into invoices\nuntil someone adds an MV for it.",
+        "description": "Emit one metering event for the calling workspace.",
         "operationId": "emit-metering-event",
         "requestBody": {
           "content": {
