@@ -1934,7 +1934,7 @@
         "type": "object"
       },
       "AuthConfig": {
-        "description": "Authentication configuration for an integration.\n\nSupports api_key_header, bearer_token, oauth2_client_credentials,\noauth2_jwt_bearer, and gcp_wif.",
+        "description": "Authentication configuration for an integration.\n\nSupports api_key_header, bearer_token, oauth2_client_credentials,\noauth2_jwt_bearer, gcp_wif, smart_backend_services, and\nbearer_token_exchange.",
         "properties": {
           "assertion_algorithm": {
             "anyOf": [
@@ -2021,6 +2021,79 @@
               }
             ],
             "title": "Client Secret Ssm Param Path"
+          },
+          "exchange_default_ttl_seconds": {
+            "default": 3600,
+            "minimum": 120.0,
+            "title": "Exchange Default Ttl Seconds",
+            "type": "integer"
+          },
+          "exchange_expires_in_field": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Expires In Field"
+          },
+          "exchange_param_headers": {
+            "items": {
+              "$ref": "#/components/schemas/ExchangeHeaderMapping"
+            },
+            "maxItems": 20,
+            "title": "Exchange Param Headers",
+            "type": "array"
+          },
+          "exchange_secret_format": {
+            "default": "{secret}",
+            "maxLength": 128,
+            "minLength": 8,
+            "pattern": "^[^{}]*\\{secret\\}[^{}]*$",
+            "title": "Exchange Secret Format",
+            "type": "string"
+          },
+          "exchange_secret_header": {
+            "default": "X-API-KEY",
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9!#$%&'*+\\-.^_`|~]+$",
+            "title": "Exchange Secret Header",
+            "type": "string"
+          },
+          "exchange_secret_ssm_param_path": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Secret Ssm Param Path"
+          },
+          "exchange_token_field": {
+            "default": "token",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Exchange Token Field",
+            "type": "string"
+          },
+          "exchange_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Url"
           },
           "gcp_scopes": {
             "anyOf": [
@@ -2117,7 +2190,8 @@
               "oauth2_client_credentials",
               "oauth2_jwt_bearer",
               "gcp_wif",
-              "smart_backend_services"
+              "smart_backend_services",
+              "bearer_token_exchange"
             ],
             "title": "Type",
             "type": "string"
@@ -2248,6 +2322,89 @@
               }
             ]
           },
+          "exchange_default_ttl_seconds": {
+            "default": 3600,
+            "minimum": 120.0,
+            "title": "Exchange Default Ttl Seconds",
+            "type": "integer"
+          },
+          "exchange_expires_in_field": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Expires In Field"
+          },
+          "exchange_param_headers": {
+            "items": {
+              "$ref": "#/components/schemas/ExchangeHeaderMapping"
+            },
+            "maxItems": 20,
+            "title": "Exchange Param Headers",
+            "type": "array"
+          },
+          "exchange_secret_format": {
+            "default": "{secret}",
+            "maxLength": 128,
+            "minLength": 8,
+            "pattern": "^[^{}]*\\{secret\\}[^{}]*$",
+            "title": "Exchange Secret Format",
+            "type": "string"
+          },
+          "exchange_secret_header": {
+            "default": "X-API-KEY",
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9!#$%&'*+\\-.^_`|~]+$",
+            "title": "Exchange Secret Header",
+            "type": "string"
+          },
+          "exchange_secret_ssm_param_path": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Secret Ssm Param Path"
+          },
+          "exchange_secret_value": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SecretInput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "exchange_token_field": {
+            "default": "token",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Exchange Token Field",
+            "type": "string"
+          },
+          "exchange_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exchange Url"
+          },
           "gcp_scopes": {
             "anyOf": [
               {
@@ -2353,7 +2510,8 @@
               "oauth2_client_credentials",
               "oauth2_jwt_bearer",
               "gcp_wif",
-              "smart_backend_services"
+              "smart_backend_services",
+              "bearer_token_exchange"
             ],
             "title": "Type",
             "type": "string"
@@ -7277,6 +7435,75 @@
         "title": "ConnectorSettingsResponse",
         "type": "object"
       },
+      "ContentPartPayload": {
+        "description": "HTTP/WebSocket shape for a modality-neutral conversation content part.",
+        "properties": {
+          "media_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "metadata": {
+            "additionalProperties": true,
+            "maxProperties": 50,
+            "title": "Metadata",
+            "type": "object"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          },
+          "type": {
+            "default": "text",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9._-]*$",
+            "title": "Type",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          }
+        },
+        "title": "ContentPartPayload",
+        "type": "object"
+      },
       "ContextGraphResponse": {
         "properties": {
           "created_at": {
@@ -7824,6 +8051,7 @@
           "entity_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -7866,6 +8094,7 @@
             "title": "Has Recording"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -7905,6 +8134,7 @@
           "service_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -8104,6 +8334,11 @@
             "title": "Status",
             "type": "string"
           },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
           "version": {
             "title": "Version",
             "type": "integer"
@@ -8148,6 +8383,18 @@
             "minLength": 1,
             "title": "Provider Thread Id",
             "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
           }
         },
         "required": [
@@ -8201,6 +8448,18 @@
             "title": "Reactivated",
             "type": "boolean"
           },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
           "state": {
             "additionalProperties": true,
             "title": "State",
@@ -8210,6 +8469,11 @@
             "const": "active",
             "title": "Status",
             "type": "string"
+          },
+          "turn_count": {
+            "default": 0,
+            "title": "Turn Count",
+            "type": "integer"
           },
           "version": {
             "title": "Version",
@@ -8272,6 +8536,14 @@
       },
       "ConversationTurn": {
         "properties": {
+          "content": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ContentPartPayload"
+            },
+            "title": "Content",
+            "type": "array"
+          },
           "role": {
             "enum": [
               "agent",
@@ -8897,10 +9169,15 @@
       },
       "CreateConversationRequest": {
         "properties": {
+          "auto_greet": {
+            "default": true,
+            "title": "Auto Greet",
+            "type": "boolean"
+          },
           "entity_id": {
             "anyOf": [
               {
-                "maxLength": 64,
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -8910,8 +9187,7 @@
             "title": "Entity Id"
           },
           "service_id": {
-            "maxLength": 64,
-            "minLength": 1,
+            "format": "uuid",
             "title": "Service Id",
             "type": "string"
           }
@@ -9166,7 +9442,7 @@
           "endpoints": {
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig"
+              "$ref": "#/components/schemas/EndpointConfig-Input"
             },
             "title": "Endpoints",
             "type": "array"
@@ -10243,7 +10519,7 @@
             "items": {
               "$ref": "#/components/schemas/SurfaceField"
             },
-            "maxItems": 100,
+            "maxItems": 200,
             "minItems": 1,
             "title": "Fields",
             "type": "array"
@@ -14709,7 +14985,163 @@
         "title": "EncounterUpdatedEvent",
         "type": "object"
       },
-      "EndpointConfig": {
+      "EndpointConfig-Input": {
+        "description": "Configuration for a single integration endpoint.",
+        "properties": {
+          "auth": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AuthConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "base_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Base Url"
+          },
+          "body_format": {
+            "default": "json",
+            "enum": [
+              "json",
+              "form"
+            ],
+            "title": "Body Format",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "title": "Headers",
+            "type": "object"
+          },
+          "input_schema": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Input Schema",
+            "type": "object"
+          },
+          "max_result_length": {
+            "default": 0,
+            "title": "Max Result Length",
+            "type": "integer"
+          },
+          "method": {
+            "default": "POST",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ],
+            "title": "Method",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "path": {
+            "title": "Path",
+            "type": "string"
+          },
+          "response_filter": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Filter"
+          },
+          "response_mapping": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Mapping"
+          },
+          "result_delivery": {
+            "default": "interrupt",
+            "enum": [
+              "interrupt",
+              "queue"
+            ],
+            "title": "Result Delivery",
+            "type": "string"
+          },
+          "result_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Key"
+          },
+          "result_template": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Template"
+          },
+          "retry_config": {
+            "$ref": "#/components/schemas/RetryConfig",
+            "default": {
+              "max_retries": 2,
+              "retry_on_status": [
+                429,
+                502,
+                503,
+                504
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "path"
+        ],
+        "title": "EndpointConfig",
+        "type": "object"
+      },
+      "EndpointConfig-Output": {
         "description": "Configuration for a single integration endpoint.",
         "properties": {
           "auth": {
@@ -17144,6 +17576,41 @@
         "title": "EventTypeSummary",
         "type": "object"
       },
+      "ExchangeHeaderMapping": {
+        "description": "One header on a token-exchange request, sourced from a request param.\n\nUsed by ``bearer_token_exchange`` auth type. Each mapping declares which\nrequest param feeds which exchange-call header. The same param values\nalso form the per-call cache key, so distinct (e.g.) user_ids yield\ndistinct cached tokens.\n\nExamples:\n    ``ExchangeHeaderMapping(header_name=\"X-USER-ID\", param_name=\"user_id\")``\n    ``ExchangeHeaderMapping(header_name=\"X-Org-ID\", param_name=\"org_id\")``",
+        "properties": {
+          "consume": {
+            "default": true,
+            "title": "Consume",
+            "type": "boolean"
+          },
+          "header_name": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9!#$%&'*+\\-.^_`|~]+$",
+            "title": "Header Name",
+            "type": "string"
+          },
+          "param_name": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_\\-]+$",
+            "title": "Param Name",
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "header_name",
+          "param_name"
+        ],
+        "title": "ExchangeHeaderMapping",
+        "type": "object"
+      },
       "ExecutePanelRequest": {
         "properties": {
           "filter_values": {
@@ -17515,6 +17982,18 @@
             "additionalProperties": true,
             "title": "Bundle",
             "type": "object"
+          },
+          "data_source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Id"
           },
           "source": {
             "default": "fhir_import",
@@ -19006,6 +19485,18 @@
             "additionalProperties": true,
             "title": "Data",
             "type": "object"
+          },
+          "data_source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data Source Id"
           }
         },
         "required": [
@@ -21203,7 +21694,7 @@
           "endpoints": {
             "description": "Configured endpoints",
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig"
+              "$ref": "#/components/schemas/EndpointConfig-Output"
             },
             "title": "Endpoints",
             "type": "array"
@@ -21466,7 +21957,7 @@
           "endpoints": {
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig"
+              "$ref": "#/components/schemas/EndpointConfig-Output"
             },
             "title": "Endpoints",
             "type": "array"
@@ -21973,7 +22464,7 @@
         "type": "object"
       },
       "InvoiceLineItem": {
-        "description": "A single line item on an invoice.",
+        "description": "A single line item on an invoice.\n\n``metering_source`` defaults to ``\"production\"`` for backward\ncompatibility with invoices generated before the metering_source\ndimension was introduced \u2014 those invoices were production-only by\ndefinition. New invoices always carry an explicit value.",
         "properties": {
           "description": {
             "default": "",
@@ -21984,6 +22475,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "quantity": {
@@ -22897,6 +23398,16 @@
             "title": "Meter Key",
             "type": "string"
           },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class \u2014 production or simulation, billed separately",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
+            "type": "string"
+          },
           "unit": {
             "description": "Unit of measurement (e.g. minutes, calls)",
             "title": "Unit",
@@ -22936,6 +23447,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "period_end": {
@@ -22987,6 +23508,19 @@
       },
       "MeteringEmitRequest": {
         "properties": {
+          "effective_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the event happened. Defaults to ingest time.",
+            "title": "Effective At"
+          },
           "event_type": {
             "maxLength": 64,
             "minLength": 1,
@@ -23004,13 +23538,21 @@
                 "type": "null"
               }
             ],
-            "description": "Optional audit/dispute breadcrumbs.",
             "title": "Metering Metadata"
           },
           "metering_quantity": {
             "minimum": 0.0,
             "title": "Metering Quantity",
             "type": "number"
+          },
+          "metering_source": {
+            "description": "Traffic class \u2014 'production' or 'simulation'.",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
+            "type": "string"
           },
           "metering_unit": {
             "anyOf": [
@@ -23023,13 +23565,13 @@
                 "type": "null"
               }
             ],
-            "description": "Optional unit string ('pages', 'minutes', 'tokens') describing what metering_quantity represents.",
             "title": "Metering Unit"
           }
         },
         "required": [
           "event_type",
-          "metering_quantity"
+          "metering_quantity",
+          "metering_source"
         ],
         "title": "MeteringEmitRequest",
         "type": "object"
@@ -33343,6 +33885,17 @@
             "title": "Tags",
             "type": "array"
           },
+          "total_scenarios_requested": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Scenarios Requested"
+          },
           "total_sessions": {
             "default": 0,
             "title": "Total Sessions",
@@ -34689,6 +35242,161 @@
           }
         },
         "title": "SqlQueryResponse",
+        "type": "object"
+      },
+      "StartSessionRequest": {
+        "properties": {
+          "channel_kind": {
+            "enum": [
+              "sms",
+              "whatsapp",
+              "web"
+            ],
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "greeting": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Custom greeting. Agent auto-greets if omitted.",
+            "title": "Greeting"
+          },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Client-provided idempotency key for SMS/WhatsApp.",
+            "title": "Idempotency Key"
+          },
+          "phone_to": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "E.164 phone override for SMS/WhatsApp. Resolved from entity if omitted.",
+            "title": "Phone To"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "surface_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Surface to deliver inline in the conversation.",
+            "title": "Surface Id"
+          }
+        },
+        "required": [
+          "service_id",
+          "entity_id",
+          "channel_kind"
+        ],
+        "title": "StartSessionRequest",
+        "type": "object"
+      },
+      "StartSessionResponse": {
+        "properties": {
+          "channel_kind": {
+            "enum": [
+              "sms",
+              "whatsapp",
+              "web"
+            ],
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "phone_from": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone From"
+          },
+          "phone_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone To"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_status": {
+            "enum": [
+              "created",
+              "resumed",
+              "already_active"
+            ],
+            "title": "Session Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "session_status",
+          "channel_kind",
+          "entity_id",
+          "service_id",
+          "created_at"
+        ],
+        "title": "StartSessionResponse",
         "type": "object"
       },
       "StateRiskOverride": {
@@ -36918,7 +37626,7 @@
             "items": {
               "type": "string"
             },
-            "maxItems": 20,
+            "maxItems": 100,
             "title": "Numbers",
             "type": "array"
           }
@@ -39508,6 +40216,7 @@
       "TurnConversationSnapshot": {
         "properties": {
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -39524,6 +40233,7 @@
             "type": "string"
           },
           "turn_count": {
+            "default": 0,
             "title": "Turn Count",
             "type": "integer"
           },
@@ -39535,7 +40245,6 @@
         "required": [
           "id",
           "status",
-          "turn_count",
           "updated_at"
         ],
         "title": "TurnConversationSnapshot",
@@ -39630,6 +40339,45 @@
       },
       "TurnRequest": {
         "properties": {
+          "content": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ContentPartPayload"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "media_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Type"
+          },
+          "media_url": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Media Url"
+          },
           "message": {
             "maxLength": 10000,
             "minLength": 1,
@@ -40365,7 +41113,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/EndpointConfig"
+                  "$ref": "#/components/schemas/EndpointConfig-Input"
                 },
                 "type": "array"
               },
@@ -41563,7 +42311,7 @@
                 "items": {
                   "$ref": "#/components/schemas/SurfaceField"
                 },
-                "maxItems": 100,
+                "maxItems": 200,
                 "minItems": 1,
                 "type": "array"
               },
@@ -42127,6 +42875,16 @@
           "meter_key": {
             "description": "Meter identifier",
             "title": "Meter Key",
+            "type": "string"
+          },
+          "metering_source": {
+            "default": "production",
+            "description": "Traffic class",
+            "enum": [
+              "production",
+              "simulation"
+            ],
+            "title": "Metering Source",
             "type": "string"
           },
           "period_end": {
@@ -44661,6 +45419,35 @@
         "title": "WorkspaceMemberAddedEvent",
         "type": "object"
       },
+      "WorkspaceMemberRoleUpdatedEvent": {
+        "properties": {
+          "entity_id": {
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "workspace.member_role_updated",
+            "default": "workspace.member_role_updated",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "previous_role": {
+            "title": "Previous Role",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "required": [
+          "entity_id",
+          "role",
+          "previous_role"
+        ],
+        "title": "WorkspaceMemberRoleUpdatedEvent",
+        "type": "object"
+      },
       "WorkspaceResponse": {
         "properties": {
           "backend_org_id": {
@@ -44789,7 +45576,8 @@
             "trigger.fired": "#/components/schemas/TriggerFiredEvent",
             "workspace.invitation_accepted": "#/components/schemas/WorkspaceInvitationAcceptedEvent",
             "workspace.invitation_sent": "#/components/schemas/WorkspaceInvitationSentEvent",
-            "workspace.member_added": "#/components/schemas/WorkspaceMemberAddedEvent"
+            "workspace.member_added": "#/components/schemas/WorkspaceMemberAddedEvent",
+            "workspace.member_role_updated": "#/components/schemas/WorkspaceMemberRoleUpdatedEvent"
           },
           "propertyName": "event_type"
         },
@@ -44892,6 +45680,9 @@
           },
           {
             "$ref": "#/components/schemas/WorkspaceMemberAddedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/WorkspaceMemberRoleUpdatedEvent"
           },
           {
             "$ref": "#/components/schemas/WorkspaceInvitationSentEvent"
@@ -45352,6 +46143,7 @@
           "entity_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -45394,6 +46186,7 @@
             "title": "Has Recording"
           },
           "id": {
+            "format": "uuid",
             "title": "Id",
             "type": "string"
           },
@@ -45422,6 +46215,7 @@
           "service_id": {
             "anyOf": [
               {
+                "format": "uuid",
                 "type": "string"
               },
               {
@@ -52837,6 +53631,7 @@
             "name": "conversation_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Conversation Id",
               "type": "string"
             }
@@ -52912,6 +53707,7 @@
             "name": "conversation_id",
             "required": true,
             "schema": {
+              "format": "uuid",
               "title": "Conversation Id",
               "type": "string"
             }
@@ -57794,6 +58590,67 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
+      "get": {
+        "description": "Proxy the raw file bytes from the UC Volume back to the caller.",
+        "operationId": "download-intake-upload",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "link_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Link Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "upload_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Upload Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            },
+            "description": "File bytes with Content-Disposition: attachment"
+          },
+          "404": {
+            "description": "Link, upload, or file not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "description": "UC Volume storage backend unavailable"
+          }
+        },
+        "summary": "Download an uploaded file",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/integrations": {
       "get": {
         "description": "List integrations for a workspace with pagination. Optionally filter by enabled status. Requires `Integration.view` permission.",
@@ -59259,7 +60116,7 @@
     },
     "/v1/{workspace_id}/metering/emit": {
       "post": {
-        "description": "Emit one metering event for the calling workspace.\n\nScope: workspace-scoped via path param; auth via API key (same as every\nother workspace route). 202 on success \u2014 emission is fire-and-forget.\n\n``event_type`` is a free-form string (regex-validated). Aggregation\ninto ``customer_meter_values`` is handled by SDP materialized views\nin ``databricks/pipelines/billing.py``; an event_type with no matching\nMV still lands in ``world_events`` but doesn't roll up into invoices\nuntil someone adds an MV for it.",
+        "description": "Emit one metering event for the calling workspace.",
         "operationId": "emit-metering-event",
         "requestBody": {
           "content": {
@@ -65013,6 +65870,50 @@
           }
         },
         "summary": "List active voice sessions",
+        "tags": [
+          "Sessions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/sessions/start": {
+      "post": {
+        "description": "Start an SMS, WhatsApp, or web text session with a world model entity. Resolves contact info from the entity, picks the workspace outbound number, and creates or resumes a conversation. Returns conversation_id for subsequent turns via POST /v1/{ws}/conversations/{id}/turns.",
+        "operationId": "start_text_session_v1__workspace_id__sessions_start_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartSessionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Service or entity not found."
+          },
+          "409": {
+            "description": "No outbound-capable phone number in workspace."
+          },
+          "422": {
+            "description": "Entity has no phone for SMS/WhatsApp channel."
+          },
+          "503": {
+            "description": "Agent service unavailable."
+          }
+        },
+        "summary": "Start a text conversation session with an entity",
         "tags": [
           "Sessions"
         ]
