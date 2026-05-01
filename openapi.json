@@ -29712,6 +29712,20 @@
             "title": "Caller Id",
             "type": "string"
           },
+          "caller_phone": {
+            "anyOf": [
+              {
+                "maxLength": 16,
+                "pattern": "^\\+[1-9]\\d{1,14}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Caller E.164 phone number for console clients",
+            "title": "Caller Phone"
+          },
           "current_emotion": {
             "anyOf": [
               {
@@ -29738,6 +29752,15 @@
               }
             ],
             "title": "Current Valence"
+          },
+          "data_quality_flags": {
+            "default": [],
+            "items": {
+              "const": "invalid_direction",
+              "type": "string"
+            },
+            "title": "Data Quality Flags",
+            "type": "array"
           },
           "direction": {
             "default": "inbound",
@@ -29784,10 +29807,28 @@
             "type": "array"
           },
           "priority_score": {
+            "description": "Priority score normalized to 0.0-1.0",
             "maximum": 1.0,
             "minimum": 0.0,
             "title": "Priority Score",
             "type": "number"
+          },
+          "risk_level": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "critical"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Risk Level"
           },
           "risk_score": {
             "anyOf": [
@@ -29805,6 +29846,30 @@
             "description": "Service ID handling the call",
             "title": "Service Id",
             "type": "string"
+          },
+          "service_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NameString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Human-readable service name when available"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the active call started",
+            "title": "Started At"
           },
           "turn_count": {
             "default": 0,
@@ -61395,6 +61460,56 @@
         "operationId": "list-audit-log",
         "parameters": [
           {
+            "description": "Filter by operator entity UUID.",
+            "in": "query",
+            "name": "operator_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by operator entity UUID.",
+              "title": "Operator Id"
+            }
+          },
+          {
+            "description": "Filter by exact operator audit event type.",
+            "in": "query",
+            "name": "action",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "operator.registered",
+                    "operator.status_changed",
+                    "operator.profile_updated",
+                    "operator.joined_call",
+                    "operator.mode_changed",
+                    "operator.mode_switched",
+                    "operator.left_call",
+                    "operator.access_token_generated",
+                    "operator.guidance_sent",
+                    "operator.wrap_up",
+                    "operator.viewed_transcript"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by exact operator audit event type.",
+              "title": "Action"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -61638,6 +61753,11 @@
             "schema": {
               "default": "day",
               "description": "Time period: day, week, or month.",
+              "enum": [
+                "day",
+                "week",
+                "month"
+              ],
               "title": "Period",
               "type": "string"
             }
@@ -61650,6 +61770,11 @@
             "schema": {
               "default": "status",
               "description": "Grouping dimension: status, trigger, or operator.",
+              "enum": [
+                "status",
+                "trigger",
+                "operator"
+              ],
               "title": "Group By",
               "type": "string"
             }

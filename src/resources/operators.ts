@@ -1,5 +1,9 @@
-import type { components } from '../generated/api.js'
+import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
+
+export type EscalationStatsParams = NonNullable<
+  operations['escalation-stats']['parameters']['query']
+>
 
 export class OperatorsResource extends WorkspaceScopedResource {
   async list(params?: { status?: string; limit?: number; offset?: number }) {
@@ -85,7 +89,7 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  async getEscalationStats(params?: { period?: string; group_by?: string }) {
+  async getEscalationStats(params?: EscalationStatsParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/operators/escalations/stats', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
