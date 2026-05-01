@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.19.0] - 2026-05-01
+
+### Features
+
+- add TurnStreamEvent types + createTurnStream (v0.18.0) (#140)
+
 ## [0.17.2] - 2026-04-29
 
 ### Features
