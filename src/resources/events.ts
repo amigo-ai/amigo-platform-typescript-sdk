@@ -48,6 +48,65 @@ export type WorkspaceSSEEvent = components['schemas']['WorkspaceSSEEvent']
 export type WorkspaceSSEEventType = WorkspaceSSEEvent['event_type']
 
 /**
+ * Reason taxonomy for {@link WorkspaceEventStreamError}. The platform-api
+ * stream encodes a stable ``code`` in every error / control frame so
+ * consumers can branch deterministically without parsing free-form text.
+ *
+ *   * ``too_many_streams`` — workspace exceeded its concurrent-stream cap
+ *     (``error`` frame with ``code=too_many_streams``). Do NOT auto-retry —
+ *     close another tab first.
+ *   * ``stream_unavailable`` — Valkey or downstream pubsub is unreachable.
+ *     Retryable, but not until the platform recovers.
+ *   * ``stream_error`` — generic server-side stream failure.
+ *   * ``auth`` — 401/403 returned at connect time. Terminal.
+ *   * ``transport_exhausted`` — reconnect budget exhausted.
+ *   * ``aborted`` — caller aborted via signal / ``unsubscribe()``.
+ *   * ``unknown`` — fallback when the server returns an error frame the SDK
+ *     does not recognize.
+ */
+export type WorkspaceEventStreamErrorCode =
+  | 'too_many_streams'
+  | 'stream_unavailable'
+  | 'stream_error'
+  | 'auth'
+  | 'transport_exhausted'
+  | 'aborted'
+  | 'unknown'
+
+/**
+ * Structured error surfaced through {@link SubscribeToWorkspaceOptions.onError}.
+ *
+ * Subclasses ``Error`` so existing consumers using ``err.message`` continue
+ * to work, while adding ``code`` + ``retryable`` + raw ``frame`` for
+ * deterministic branching. Inspect with ``isWorkspaceEventStreamError``.
+ */
+export class WorkspaceEventStreamError extends Error {
+  readonly code: WorkspaceEventStreamErrorCode
+  readonly retryable: boolean
+  /** Raw decoded ``error`` frame body (or ``undefined`` for transport errors). */
+  readonly frame: Record<string, unknown> | undefined
+
+  constructor(
+    message: string,
+    code: WorkspaceEventStreamErrorCode,
+    retryable: boolean,
+    frame?: Record<string, unknown>,
+  ) {
+    super(message)
+    this.name = 'WorkspaceEventStreamError'
+    this.code = code
+    this.retryable = retryable
+    this.frame = frame
+  }
+}
+
+export function isWorkspaceEventStreamError(
+  value: unknown,
+): value is WorkspaceEventStreamError {
+  return value instanceof WorkspaceEventStreamError
+}
+
+/**
  * Options for {@link EventsResource.subscribeToWorkspace}.
  */
 export interface SubscribeToWorkspaceOptions {
@@ -218,6 +277,33 @@ type StreamOutcome =
   | { kind: 'aborted' }
   | { kind: 'auth-error'; error: Error }
   | { kind: 'transport-error'; reason: string }
+  | {
+      kind: 'terminal-server-error'
+      code: WorkspaceEventStreamErrorCode
+      message: string
+      retryable: boolean
+      frame: Record<string, unknown>
+    }
+
+/**
+ * Server-sent ``error`` event frames that the SDK should treat as terminal
+ * (do NOT auto-retry). Mirror the ``code`` taxonomy emitted by
+ * ``platform-api/src/routes/event_stream.py``.
+ */
+const TERMINAL_SERVER_ERROR_CODES: Record<string, WorkspaceEventStreamErrorCode> = {
+  too_many_streams: 'too_many_streams',
+}
+
+/**
+ * Server-sent ``error`` event frames that are recoverable — surface them as
+ * transport errors so the reconnect loop kicks in. ``stream_unavailable``
+ * fires when Valkey is down; ``stream_error`` is the generic catch-all from
+ * the server-side ``except Exception`` branch.
+ */
+const RECOVERABLE_SERVER_ERROR_CODES: Record<string, WorkspaceEventStreamErrorCode> = {
+  stream_unavailable: 'stream_unavailable',
+  stream_error: 'stream_error',
+}
 
 async function runSubscription(
   client: PlatformFetch,
@@ -269,7 +355,9 @@ async function runSubscription(
       })
     } catch (err) {
       // runOneConnection surfaces only terminal auth errors via throw;
-      // everything else is a StreamOutcome.
+      // everything else is a StreamOutcome. Preserve the original Error
+      // (typically ``AuthenticationError`` with ``statusCode``) so consumers
+      // that branch on ``err.statusCode`` keep working.
       reportError(err instanceof Error ? err : new Error(String(err)))
       return
     }
@@ -280,15 +368,35 @@ async function runSubscription(
 
     if (outcome.kind === 'auth-error') {
       // 401 / 403 — never auto-retry. The token is invalid and the
-      // stream cannot succeed without operator intervention.
+      // stream cannot succeed without operator intervention. Surface the
+      // original ``AuthenticationError`` so consumers checking
+      // ``err.statusCode`` keep working.
       reportError(outcome.error)
+      return
+    }
+
+    if (outcome.kind === 'terminal-server-error') {
+      // Server emitted a structured ``error`` frame with a code that the
+      // SDK recognizes as terminal (e.g., ``too_many_streams``). Surface
+      // it as a typed ``WorkspaceEventStreamError`` so consumers can branch
+      // on ``error.code`` without parsing free-form text.
+      reportError(
+        new WorkspaceEventStreamError(
+          outcome.message,
+          outcome.code,
+          outcome.retryable,
+          outcome.frame,
+        ),
+      )
       return
     }
 
     if (attempt >= maxReconnects) {
       reportError(
-        new Error(
+        new WorkspaceEventStreamError(
           `SSE subscription exhausted reconnect budget (${maxReconnects}): ${outcome.reason}`,
+          'transport_exhausted',
+          true,
         ),
       )
       return
@@ -357,6 +465,24 @@ async function runOneConnection(args: RunOneConnectionArgs): Promise<StreamOutco
       }
       if (frame.id !== undefined) {
         args.onIdAdvance(frame.id)
+      }
+      if (frame.event === 'error' && frame.data !== undefined) {
+        // Structured error frame — branch on ``code`` from the server. We
+        // distinguish three buckets: terminal (don't retry), recoverable
+        // (let the reconnect loop run), and unknown (default to recoverable
+        // so a future server code does not strand consumers without auto-
+        // retry).
+        const errOutcome = interpretServerErrorFrame(frame.data)
+        if (errOutcome.terminal) {
+          return {
+            kind: 'terminal-server-error',
+            code: errOutcome.code,
+            message: errOutcome.message,
+            retryable: errOutcome.retryable,
+            frame: errOutcome.frame,
+          }
+        }
+        return { kind: 'transport-error', reason: errOutcome.message }
       }
       if (frame.event && frame.data !== undefined) {
         const event = parseWorkspaceFrame(frame.event, frame.data)
@@ -535,6 +661,79 @@ function parseWorkspaceFrame(eventName: string, dataJson: string): WorkspaceSSEE
     ...(payload as Record<string, unknown>),
     event_type: eventName,
   } as WorkspaceSSEEvent
+}
+
+/**
+ * Decode a server-sent ``error`` frame body into either a terminal or
+ * recoverable outcome.
+ *
+ * The platform-api event stream emits these shapes:
+ *
+ *   { code: "too_many_streams", message: "...", max_streams: 50 }
+ *   { code: "stream_unavailable", message: "Event streaming unavailable" }
+ *   { code: "stream_error", message: "Stream error, please reconnect" }
+ *
+ * Unknown codes default to recoverable so a server-side addition does not
+ * strand SDK consumers without auto-retry.
+ */
+function interpretServerErrorFrame(dataJson: string): {
+  terminal: boolean
+  code: WorkspaceEventStreamErrorCode
+  message: string
+  retryable: boolean
+  frame: Record<string, unknown>
+} {
+  let payload: unknown
+  try {
+    payload = JSON.parse(dataJson)
+  } catch {
+    return {
+      terminal: false,
+      code: 'stream_error',
+      message: 'Server sent malformed error frame',
+      retryable: true,
+      frame: {},
+    }
+  }
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return {
+      terminal: false,
+      code: 'stream_error',
+      message: 'Server sent non-object error frame',
+      retryable: true,
+      frame: {},
+    }
+  }
+  const obj = payload as Record<string, unknown>
+  const rawCode = typeof obj['code'] === 'string' ? (obj['code'] as string) : ''
+  const message =
+    typeof obj['message'] === 'string' ? (obj['message'] as string) : 'Stream error'
+
+  if (rawCode in TERMINAL_SERVER_ERROR_CODES) {
+    return {
+      terminal: true,
+      code: TERMINAL_SERVER_ERROR_CODES[rawCode]!,
+      message,
+      retryable: false,
+      frame: obj,
+    }
+  }
+  if (rawCode in RECOVERABLE_SERVER_ERROR_CODES) {
+    return {
+      terminal: false,
+      code: RECOVERABLE_SERVER_ERROR_CODES[rawCode]!,
+      message,
+      retryable: true,
+      frame: obj,
+    }
+  }
+  return {
+    terminal: false,
+    code: 'unknown',
+    message: rawCode ? `${message} (code=${rawCode})` : message,
+    retryable: true,
+    frame: obj,
+  }
 }
 
 function readStatus(error: unknown): number | undefined {
