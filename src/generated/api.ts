@@ -8115,7 +8115,10 @@ export interface components {
             jwt_credentials_note: string;
             /** Total Credentials */
             total_credentials: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -8414,13 +8417,16 @@ export interface components {
              */
             scenario?: string;
             /** Service Id */
-            service_id: string;
+            service_id?: string | null;
             /** Workspace Id */
-            workspace_id: string;
+            workspace_id?: string | null;
         };
         /** AgentAnalyticsEntry */
         AgentAnalyticsEntry: {
-            /** Agent Id */
+            /**
+             * Agent Id
+             * Format: uuid
+             */
             agent_id: string;
             /** Agent Name */
             agent_name: string;
@@ -8466,7 +8472,10 @@ export interface components {
             created_at: string;
             /** Description */
             description: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Latest Version
@@ -8480,7 +8489,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** AgentTranscriptDeltaEvent */
@@ -8538,7 +8550,10 @@ export interface components {
          * @description A version of an Agent document.
          */
         AgentVersion: {
-            /** Agent Id */
+            /**
+             * Agent Id
+             * Format: uuid
+             */
             agent_id: string;
             /** Background */
             background: string;
@@ -8548,7 +8563,10 @@ export interface components {
             communication_patterns: string[];
             /** Created At */
             created_at?: string | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             identity: components["schemas"]["Identity"];
             /** Initials */
@@ -8563,7 +8581,10 @@ export interface components {
         };
         /** AgentVersionResponse */
         AgentVersionResponse: {
-            /** Agent Id */
+            /**
+             * Agent Id
+             * Format: uuid
+             */
             agent_id: string;
             /** Background */
             background: string;
@@ -8576,7 +8597,10 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             identity: components["schemas"]["Identity"];
             /** Initials */
@@ -8591,7 +8615,10 @@ export interface components {
             /** Version */
             version: number;
             voice_config: components["schemas"]["VoiceConfig"] | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -8617,7 +8644,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["AnomalyAlertRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** AnomalyAlertRow */
@@ -8644,7 +8674,10 @@ export interface components {
             slice_label: string;
             /** Stats Json */
             stats_json?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ApiKeyResponse */
@@ -8663,7 +8696,10 @@ export interface components {
              * Format: date-time
              */
             expires_at: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Key Id */
             key_id: string;
@@ -8680,7 +8716,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ApplyTemplateRequest */
@@ -8718,7 +8757,10 @@ export interface components {
              * @constant
              */
             status: "archived";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** ArchiveWorkspaceRequest */
@@ -9010,7 +9052,10 @@ export interface components {
             key_id: string;
             /** Name */
             name: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** AvailableNumber */
@@ -9232,6 +9277,7 @@ export interface components {
             top_meters: components["schemas"]["MeterSummary"][];
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace ID
              */
             workspace_id: string;
@@ -9640,7 +9686,10 @@ export interface components {
              * @default []
              */
             human_segments?: components["schemas"]["HumanSegment"][];
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Media Start Time */
             media_start_time?: string | null;
@@ -9707,11 +9756,8 @@ export interface components {
             verified_words?: {
                 [key: string]: unknown;
             }[] | null;
-            /**
-             * Workspace Id
-             * @default
-             */
-            workspace_id?: string;
+            /** Workspace Id */
+            workspace_id?: string | null;
         };
         /** CallEndedEvent */
         CallEndedEvent: {
@@ -9863,7 +9909,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "call.started";
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
         };
         /** CallStatsResponse */
@@ -9902,6 +9951,7 @@ export interface components {
             total_duration_seconds: number;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace identifier
              */
             workspace_id: string;
@@ -9935,6 +9985,7 @@ export interface components {
             duration_seconds?: number | null;
             /**
              * Entity Id
+             * Format: uuid
              * @description World entity ID for this call
              */
             entity_id: string;
@@ -10340,7 +10391,10 @@ export interface components {
              * @enum {string}
              */
             status: "delivered" | "skipped" | "failed" | "not_delivered";
-            /** Voicemail Id */
+            /**
+             * Voicemail Id
+             * Format: uuid
+             */
             voicemail_id: string;
         };
         /**
@@ -10466,7 +10520,10 @@ export interface components {
             t: number;
             /** Upper 95 */
             upper_95?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
             /** Ym */
             ym?: string | null;
@@ -10477,7 +10534,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ClusterForecastPointRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ClusterSummaryResponse */
@@ -10486,7 +10546,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ClusterSummaryRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ClusterSummaryRow */
@@ -10544,7 +10607,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["CohortDriverRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** CohortDriverRow */
@@ -10577,7 +10643,10 @@ export interface components {
             spr_ci_upper?: number | null;
             /** Workspace Baseline Rate */
             workspace_baseline_rate?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
             /** Workspace Patients With Condition */
             workspace_patients_with_condition?: number | null;
@@ -10624,7 +10693,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ColumnInfo"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** CommandCenterAlert */
@@ -10696,7 +10768,10 @@ export interface components {
              *     }
              */
             voice?: components["schemas"]["VoiceMetrics"];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** CompletionCriteria */
@@ -10874,7 +10949,10 @@ export interface components {
         ConnectorHeartbeat: {
             /** Alive */
             alive: boolean;
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Last Seen */
             last_seen?: string | null;
@@ -10885,7 +10963,10 @@ export interface components {
         ConnectorOverviewItem: {
             /** Connector Type */
             connector_type: string;
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Display Name */
             display_name?: string | null;
@@ -11006,7 +11087,10 @@ export interface components {
             created_at: string;
             /** Description */
             description: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Latest Version
@@ -11025,7 +11109,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         "ContextGraphState-Input": components["schemas"]["ActionState-Input"] | components["schemas"]["DecisionState-Input"] | components["schemas"]["AnnotationState"] | components["schemas"]["DataCollectionState-Input"];
@@ -11035,7 +11122,10 @@ export interface components {
          * @description A version of a hierarchical state machine (context graph).
          */
         ContextGraphVersion: {
-            /** Context Graph Id */
+            /**
+             * Context Graph Id
+             * Format: uuid
+             */
             context_graph_id: string;
             /** Created At */
             created_at?: string | null;
@@ -11056,7 +11146,10 @@ export interface components {
              * @default []
              */
             global_intra_state_navigation_guidelines?: string[];
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** New User Initial State */
             new_user_initial_state: string;
@@ -11075,7 +11168,10 @@ export interface components {
         };
         /** ContextGraphVersionResponse */
         ContextGraphVersionResponse: {
-            /** Context Graph Id */
+            /**
+             * Context Graph Id
+             * Format: uuid
+             */
             context_graph_id: string;
             /**
              * Created At
@@ -11090,7 +11186,10 @@ export interface components {
             global_boundary_constraints: string[];
             /** Global Intra State Navigation Guidelines */
             global_intra_state_navigation_guidelines: string[];
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** New User Initial State */
             new_user_initial_state: string;
@@ -11109,7 +11208,10 @@ export interface components {
             updated_at: string;
             /** Version */
             version: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ConversationActorStartFailedRequest */
@@ -11402,7 +11504,10 @@ export interface components {
             items: components["schemas"]["CooccurrenceRow"][];
             /** Sort By */
             sort_by: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** CooccurrenceRow */
@@ -11437,7 +11542,10 @@ export interface components {
             n_patients_both: number;
             /** Pmi */
             pmi?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -12206,15 +12314,24 @@ export interface components {
             created_at: string;
             /** Description */
             description?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Expires At */
             expires_at: string;
             /** Fields Count */
             fields_count: number;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Status
@@ -12333,7 +12450,10 @@ export interface components {
             description?: string | null;
             /** Direction */
             direction?: string | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Occurred At */
             occurred_at?: string | null;
@@ -12349,7 +12469,10 @@ export interface components {
         CrmActivityTimelineResponse: {
             /** Activities */
             activities: components["schemas"]["CrmActivityItem"][];
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Has More
@@ -12372,7 +12495,10 @@ export interface components {
             created_at?: string | null;
             /** Domain */
             domain?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -12437,7 +12563,10 @@ export interface components {
             created_at?: string | null;
             /** Email */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -12497,7 +12626,10 @@ export interface components {
             created_at?: string | null;
             /** Email */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -12552,7 +12684,10 @@ export interface components {
             created_at?: string | null;
             /** Deal Type */
             deal_type?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -13039,6 +13174,7 @@ export interface components {
             total_events: number;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace identifier
              */
             workspace_id: string;
@@ -13080,7 +13216,10 @@ export interface components {
              * @enum {string}
              */
             health_status: "unknown" | "healthy" | "degraded";
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -13113,12 +13252,18 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** DataSourceStatusResponse */
         DataSourceStatusResponse: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Event Count */
             event_count: number;
@@ -13144,7 +13289,10 @@ export interface components {
         };
         /** DataSourceSyncHistoryResponse */
         DataSourceSyncHistoryResponse: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Name */
             name: string;
@@ -13354,7 +13502,10 @@ export interface components {
              * @enum {string}
              */
             status: "delivered" | "pending_review";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
             /** Url */
             url?: string | null;
@@ -13434,7 +13585,10 @@ export interface components {
             started_at: string;
             /** Task Id */
             task_id: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         DescriptionString: string;
@@ -13509,7 +13663,10 @@ export interface components {
         DimensionScoresResponse: {
             /** Dimensions */
             dimensions: components["schemas"]["DimensionScore"][];
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Total Facts */
             total_facts: number;
@@ -13525,7 +13682,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["DistrictMetricsRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** DistrictMetricsRow */
@@ -13554,7 +13714,10 @@ export interface components {
             unmet_demand_score?: number | null;
             /** Updated At */
             updated_at?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -13602,7 +13765,10 @@ export interface components {
             spr_ci_upper?: number | null;
             /** Window Days */
             window_days?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** DriversResponse */
@@ -13617,7 +13783,10 @@ export interface components {
             outcome_key: string;
             /** Sort By */
             sort_by: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** EditSoapRequest */
@@ -13906,7 +14075,10 @@ export interface components {
         };
         /** EncounterUpdatedEvent */
         EncounterUpdatedEvent: {
-            /** Encounter Entity Id */
+            /**
+             * Encounter Entity Id
+             * Format: uuid
+             */
             encounter_entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -14594,7 +14766,10 @@ export interface components {
             display_name: string | null;
             /** Entity Type */
             entity_type: string | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** State */
             state: {
@@ -14907,6 +15082,7 @@ export interface components {
             total_events: number;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace identifier
              */
             workspace_id: string;
@@ -14933,7 +15109,10 @@ export interface components {
             fhir_resource_id: string | null;
             /** Fhir Resource Type */
             fhir_resource_type: string | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Review Status
@@ -15049,7 +15228,10 @@ export interface components {
             n_total: number;
             /** N Y1 */
             n_y1: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** FeaturesResponse */
@@ -15058,7 +15240,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["FeatureDef"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** FhirAppointmentListResponse */
@@ -15087,7 +15272,10 @@ export interface components {
             duration_minutes?: number | null;
             /** End */
             end?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15178,7 +15366,10 @@ export interface components {
             city?: string | null;
             /** Country */
             country?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15234,7 +15425,10 @@ export interface components {
             canonical_id?: string | null;
             /** Domain */
             domain?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15297,7 +15491,10 @@ export interface components {
             created_at?: string | null;
             /** Email */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15357,7 +15554,10 @@ export interface components {
             canonical_id?: string | null;
             /** Email */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15397,7 +15597,10 @@ export interface components {
             effective_at?: string | null;
             /** Entity Id */
             entity_id?: string | null;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Event Type */
             event_type: string;
@@ -15478,7 +15681,10 @@ export interface components {
             canonical_id?: string | null;
             /** End */
             end?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -15586,7 +15792,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ForecastDrawPoint"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ForecastFanPointRow */
@@ -15610,7 +15819,10 @@ export interface components {
             t: number;
             /** Upper 95 */
             upper_95?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
             /** Ym */
             ym?: string | null;
@@ -15621,7 +15833,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ForecastFanPointRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ForkAlternative */
@@ -16291,7 +16506,10 @@ export interface components {
             retention_policy: {
                 [key: string]: unknown;
             };
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** HistogramBin */
@@ -16492,6 +16710,7 @@ export interface components {
             endpoints?: components["schemas"]["EndpointConfig-Output"][];
             /**
              * Id
+             * Format: uuid
              * @description Integration ID
              */
             id: string;
@@ -16541,6 +16760,7 @@ export interface components {
             updated_at: string;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace ID
              */
             workspace_id: string;
@@ -16624,7 +16844,10 @@ export interface components {
              * @default []
              */
             endpoints?: components["schemas"]["EndpointConfig-Output"][];
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Mcp Args */
             mcp_args?: string[] | null;
@@ -16645,7 +16868,10 @@ export interface components {
              * @default rest
              */
             protocol?: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** InternalIntegrationsListResponse */
@@ -16712,7 +16938,10 @@ export interface components {
              * @enum {string}
              */
             execution_tier?: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Input Schema
@@ -16788,7 +17017,10 @@ export interface components {
              * @default 1
              */
             version?: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** InternalSkillsListResponse */
@@ -16951,6 +17183,7 @@ export interface components {
             mode: "listen" | "takeover";
             /**
              * Operator Entity Id
+             * Format: uuid
              * @description World entity ID of the operator
              */
             operator_entity_id: string;
@@ -17151,7 +17384,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["CatalogEntry"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** MarkSyncedRequest */
@@ -17279,7 +17515,10 @@ export interface components {
         MemoryFactsResponse: {
             /** Dimension */
             dimension: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Facts */
             facts: components["schemas"]["MemoryFact"][];
@@ -17735,7 +17974,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["ModelRegistryRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ModelRegistryRow */
@@ -17760,7 +18002,10 @@ export interface components {
             training_set_size?: number | null;
             /** Version */
             version?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** MonitorConceptResponse */
@@ -17782,7 +18027,10 @@ export interface components {
             };
             /** Has Embedding */
             has_embedding: boolean;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Name */
             name: string;
@@ -17797,7 +18045,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         NameString: string;
@@ -17807,14 +18058,20 @@ export interface components {
             confidence: number;
             /** Event Count */
             event_count: number;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
             event_type: "self_image.brief_generated";
-            /** Target Entity Id */
+            /**
+             * Target Entity Id
+             * Format: uuid
+             */
             target_entity_id: string;
             /** Target Entity Type */
             target_entity_type: string;
@@ -17909,7 +18166,10 @@ export interface components {
             top_symptoms: components["schemas"]["NoteRollupCategoryEntry"][];
             /** Total Notes */
             total_notes: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** NoteRollupSdoh */
@@ -18023,7 +18283,10 @@ export interface components {
              * @enum {string}
              */
             mode: "listen" | "takeover";
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
         };
         /** OperatorLeftCallEvent */
@@ -18040,7 +18303,10 @@ export interface components {
              * @default null
              */
             human_segment_turn_count?: number | null;
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
         };
         /** OperatorModeChangedEvent */
@@ -18057,7 +18323,10 @@ export interface components {
              * @enum {string}
              */
             mode: "listen" | "takeover";
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
         };
         /** OperatorPerformanceItem */
@@ -18184,7 +18453,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.profile_updated";
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
         };
         /** OperatorRegisteredEvent */
@@ -18194,7 +18466,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.registered";
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
             /**
              * Timestamp
@@ -18300,7 +18575,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "operator.status_changed";
-            /** Operator Id */
+            /**
+             * Operator Id
+             * Format: uuid
+             */
             operator_id: string;
             /**
              * Status
@@ -18350,9 +18628,15 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Sync Error */
             sync_error?: string | null;
@@ -18361,7 +18645,10 @@ export interface components {
         };
         /** OutboundSinkSummary */
         OutboundSinkSummary: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Data Source Name */
             data_source_name: string;
@@ -18953,11 +19240,17 @@ export interface components {
             n_lifetime_distinct_codes?: number | null;
             /** Oldest Active Onset Date */
             oldest_active_onset_date?: string | null;
-            /** Patient Entity Id */
+            /**
+             * Patient Entity Id
+             * Format: uuid
+             */
             patient_entity_id: string;
             /** Recent Onset Count 365D */
             recent_onset_count_365d?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PatientBurdenResponse */
@@ -18968,7 +19261,10 @@ export interface components {
             items: components["schemas"]["PatientBurdenRow"][];
             /** Sort By */
             sort_by: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PatientBurdenRow */
@@ -19003,11 +19299,17 @@ export interface components {
             n_lifetime_distinct_codes?: number | null;
             /** Oldest Active Onset Date */
             oldest_active_onset_date?: string | null;
-            /** Patient Entity Id */
+            /**
+             * Patient Entity Id
+             * Format: uuid
+             */
             patient_entity_id: string;
             /** Recent Onset Count 365D */
             recent_onset_count_365d?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PatientLabRow */
@@ -19031,7 +19333,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["PatientLabRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -19049,7 +19354,10 @@ export interface components {
              * @description Primary email address
              */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * Event Count
@@ -19117,7 +19425,10 @@ export interface components {
             note_text: string;
             /** Patient Id */
             patient_id: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PatientSearchResponse */
@@ -19148,7 +19459,10 @@ export interface components {
              * @description Primary email address
              */
             email?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Entity Type */
             entity_type: string;
@@ -19187,7 +19501,10 @@ export interface components {
         };
         /** PatientTimelineResponse */
         PatientTimelineResponse: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Events */
             events: {
@@ -19202,7 +19519,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["PatientTopologyRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PatientTopologyRow */
@@ -19239,7 +19559,10 @@ export interface components {
             umap_x: number;
             /** Umap Y */
             umap_y: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
             /** Y Hat Asthma 12Mo */
             y_hat_asthma_12mo?: number | null;
@@ -19310,6 +19633,7 @@ export interface components {
             developed_by: string;
             /**
              * Id
+             * Format: uuid
              * @description Unique persona identifier
              */
             id: string;
@@ -19331,6 +19655,7 @@ export interface components {
             updated_at: string;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace that owns this persona
              */
             workspace_id: string;
@@ -19379,7 +19704,10 @@ export interface components {
             created_at: string;
             /** Display Name */
             display_name: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Phone Number */
             phone_number: string;
@@ -19387,7 +19715,10 @@ export interface components {
             provider_phone_sid: string;
             /** Status */
             status: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PhoneNumberResponse */
@@ -19404,7 +19735,10 @@ export interface components {
             /** Display Name */
             display_name: string;
             forwarding: components["schemas"]["ForwardingConfigResponse"] | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Inbound Service Id */
             inbound_service_id: string | null;
@@ -19423,12 +19757,18 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PipelineErrorEvent */
         PipelineErrorEvent: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Error */
             error: string;
@@ -19545,7 +19885,10 @@ export interface components {
         };
         /** PipelineSyncCompletedEvent */
         PipelineSyncCompletedEvent: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Duration Ms */
             duration_ms: number;
@@ -19601,7 +19944,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["PositiveSignalRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PositiveSignalRow */
@@ -19622,7 +19968,10 @@ export interface components {
             signal_id: string;
             /** Updated At */
             updated_at?: string | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PrevalenceResponse */
@@ -19631,7 +19980,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["PrevalenceRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** PrevalenceRow */
@@ -19660,7 +20012,10 @@ export interface components {
             prevalence_ci_upper_pct?: number | null;
             /** Prevalence Pct */
             prevalence_pct?: number | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -19839,7 +20194,10 @@ export interface components {
             edges_deleted: number;
             /** Entity Deleted */
             entity_deleted: boolean;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Events Deleted */
             events_deleted: number;
@@ -19954,7 +20312,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["RankedAnomalyRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** RankedAnomalyRow */
@@ -20105,7 +20466,7 @@ export interface components {
              * Service Id
              * @description Service (agent) that handled the call
              */
-            service_id: string;
+            service_id?: string | null;
             /**
              * Tts Provider
              * @description Text-to-speech provider used for the call
@@ -20113,6 +20474,7 @@ export interface components {
             tts_provider: string;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace that owns this recording
              */
             workspace_id: string;
@@ -20325,7 +20687,10 @@ export interface components {
              * @enum {string}
              */
             status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /**
@@ -20381,7 +20746,10 @@ export interface components {
             event_ids: string[];
             /** Events */
             events?: components["schemas"]["EventSummary"][] | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Judge Analysis */
             judge_analysis: {
@@ -20398,7 +20766,10 @@ export interface components {
              * @enum {string}
              */
             status: "pending" | "in_progress" | "completed" | "rejected";
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ReviewMetrics */
@@ -20738,7 +21109,10 @@ export interface components {
         SampleFact: {
             /** Confidence */
             confidence: number;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Extracted Text */
             extracted_text: string;
@@ -20751,7 +21125,10 @@ export interface components {
             items: {
                 [key: string]: unknown;
             }[];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** Scenario */
@@ -21083,7 +21460,10 @@ export interface components {
          * @description A service links an agent + context graph + version sets.
          */
         Service: {
-            /** Agent Id */
+            /**
+             * Agent Id
+             * Format: uuid
+             */
             agent_id: string;
             /**
              * Channel Type
@@ -21091,7 +21471,10 @@ export interface components {
              * @enum {string}
              */
             channel_type?: "voice" | "text" | "scribe";
-            /** Context Graph Id */
+            /**
+             * Context Graph Id
+             * Format: uuid
+             */
             context_graph_id: string;
             /** Created At */
             created_at?: string | null;
@@ -21109,7 +21492,10 @@ export interface components {
              * @default []
              */
             hard_escalation_rules?: components["schemas"]["HardEscalationRule"][];
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -21142,7 +21528,10 @@ export interface components {
         };
         /** ServiceResponse */
         ServiceResponse: {
-            /** Agent Id */
+            /**
+             * Agent Id
+             * Format: uuid
+             */
             agent_id: string;
             /** Agent Name */
             agent_name?: string | null;
@@ -21152,7 +21541,10 @@ export interface components {
              * @enum {string}
              */
             channel_type?: "voice" | "text" | "scribe";
-            /** Context Graph Id */
+            /**
+             * Context Graph Id
+             * Format: uuid
+             */
             context_graph_id: string;
             /** Context Graph Name */
             context_graph_name?: string | null;
@@ -21170,7 +21562,10 @@ export interface components {
              */
             environment?: "sandbox" | "production";
             escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -21206,7 +21601,10 @@ export interface components {
                 [key: string]: components["schemas"]["VersionSet"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** ServiceTag */
@@ -21747,7 +22145,10 @@ export interface components {
             is_terminal: boolean;
             /** Run Id */
             run_id: string;
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
             /** Session Id */
             session_id: string;
@@ -21780,7 +22181,10 @@ export interface components {
         };
         /** SkillContextGraphReference */
         SkillContextGraphReference: {
-            /** Context Graph Id */
+            /**
+             * Context Graph Id
+             * Format: uuid
+             */
             context_graph_id: string;
             /** Context Graph Name */
             context_graph_name: string;
@@ -21795,7 +22199,10 @@ export interface components {
             context_graph_references: components["schemas"]["SkillContextGraphReference"][];
             /** Service References */
             service_references: string[];
-            /** Skill Id */
+            /**
+             * Skill Id
+             * Format: uuid
+             */
             skill_id: string;
             /** Skill Slug */
             skill_slug: string;
@@ -21835,7 +22242,10 @@ export interface components {
              * @enum {string}
              */
             execution_tier: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Input Schema */
             input_schema: {
@@ -21880,7 +22290,10 @@ export interface components {
             use_structured_output: boolean;
             /** Version */
             version: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** SkillStateReference */
@@ -21917,7 +22330,10 @@ export interface components {
             entity_type?: string | null;
             /** Event Type */
             event_type: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /**
              * Ingested At
@@ -21931,7 +22347,10 @@ export interface components {
         };
         /** SourceFailureItem */
         SourceFailureItem: {
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Event Type */
             event_type: string;
@@ -21965,7 +22384,10 @@ export interface components {
              * @enum {string}
              */
             health_status: "unknown" | "healthy" | "degraded";
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -22001,7 +22423,10 @@ export interface components {
              * @enum {string}
              */
             health_status: "unknown" | "healthy" | "degraded";
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -22051,7 +22476,10 @@ export interface components {
              * @default 0
              */
             consecutive_errors?: number;
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /** Last Error */
             last_error?: string | null;
@@ -22074,7 +22502,10 @@ export interface components {
             source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir";
             /** Status */
             status: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** SpeakerAcoustics */
@@ -22316,7 +22747,7 @@ export interface components {
             /** Region */
             region: string;
             /** Workspace Id */
-            workspace_id: string;
+            workspace_id: string | "labs";
         };
         /** StratifiedFitsResponse */
         StratifiedFitsResponse: {
@@ -22324,7 +22755,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["StratifiedFitRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         StrippedNonemptyString: string;
@@ -22355,7 +22789,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** SubToolLog */
@@ -22432,7 +22869,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.archived";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceCreatedEvent */
@@ -22442,7 +22882,10 @@ export interface components {
              * @default null
              */
             channel?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -22469,7 +22912,10 @@ export interface components {
              * @default null
              */
             source?: string | null;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceDeliveredEvent */
@@ -22486,7 +22932,10 @@ export interface components {
              * @default null
              */
             delivery_status?: string | null;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -22503,7 +22952,10 @@ export interface components {
              * @default null
              */
             short_url?: string | null;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /**
@@ -22548,7 +23000,10 @@ export interface components {
         };
         /** SurfaceFieldSavedEvent */
         SurfaceFieldSavedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -22557,24 +23012,36 @@ export interface components {
             event_type: "surface.field_saved";
             /** Field Key */
             field_key: string;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceOpenedEvent */
         SurfaceOpenedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
             event_type: "surface.opened";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfacePendingReviewEvent */
         SurfacePendingReviewEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -22596,7 +23063,10 @@ export interface components {
              * @default null
              */
             source?: string | null;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceProgressResponse */
@@ -22611,7 +23081,10 @@ export interface components {
             filled_keys: string[];
             /** Required Empty Keys */
             required_empty_keys: string[];
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
             /** Total Fields */
             total_fields: number;
@@ -22623,9 +23096,15 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.reshaped";
-            /** Original Surface Id */
+            /**
+             * Original Surface Id
+             * Format: uuid
+             */
             original_surface_id: string;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceResponse */
@@ -22651,7 +23130,10 @@ export interface components {
             description?: string | null;
             /** Entity Id */
             entity_id?: string | null;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Expires At */
             expires_at?: string | null;
@@ -22664,7 +23146,10 @@ export interface components {
             }[];
             /** Fields Count */
             fields_count: number;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Opened At */
             opened_at?: string | null;
@@ -22691,7 +23176,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.review_approved";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceReviewRejectedEvent */
@@ -22706,7 +23194,10 @@ export interface components {
              * @default null
              */
             reason?: string | null;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /**
@@ -22768,7 +23259,10 @@ export interface components {
         };
         /** SurfaceSubmittedEvent */
         SurfaceSubmittedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -22785,7 +23279,10 @@ export interface components {
              * @default null
              */
             submitted_at?: string | null;
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /** SurfaceUpdatedEvent */
@@ -22795,7 +23292,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "surface.updated";
-            /** Surface Id */
+            /**
+             * Surface Id
+             * Format: uuid
+             */
             surface_id: string;
         };
         /**
@@ -22887,7 +23387,10 @@ export interface components {
         SyncFailureEntry: {
             /** Created At */
             created_at: string | null;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Event Type */
             event_type: string;
@@ -22908,7 +23411,10 @@ export interface components {
             };
             /** Entity Id */
             entity_id?: string | null;
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Event Type */
             event_type: string;
@@ -22958,7 +23464,10 @@ export interface components {
         };
         /** SyncRetryResponse */
         SyncRetryResponse: {
-            /** Event Id */
+            /**
+             * Event Id
+             * Format: uuid
+             */
             event_id: string;
             /** Status */
             status: string;
@@ -23032,7 +23541,10 @@ export interface components {
              * @enum {string}
              */
             tier: "direct" | "companion" | "desktop" | "computer_use";
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** TestCallerNumbersRequest */
@@ -23194,7 +23706,10 @@ export interface components {
              * @enum {string}
              */
             event_type: "text.started";
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
             /** Session Id */
             session_id: string;
@@ -23516,6 +24031,7 @@ export interface components {
             };
             /**
              * Service Id
+             * Format: uuid
              * @description Service ID that owns the HSM
              */
             service_id: string;
@@ -23570,11 +24086,17 @@ export interface components {
         };
         /** ToolResolveResponse */
         ToolResolveResponse: {
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
             /** Tools */
             tools: components["schemas"]["ResolvedToolItem"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /**
@@ -23855,7 +24377,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["TrendRow"][];
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** TrendRow */
@@ -23874,7 +24399,10 @@ export interface components {
             gender?: string | null;
             /** Incident Patients */
             incident_patients: number;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
             /** Year Month */
             year_month: string;
@@ -23888,7 +24416,10 @@ export interface components {
             event_type: "trigger.completed";
             /** Status */
             status: string;
-            /** Trigger Id */
+            /**
+             * Trigger Id
+             * Format: uuid
+             */
             trigger_id: string;
             /** Trigger Name */
             trigger_name: string;
@@ -23902,7 +24433,10 @@ export interface components {
             event_type: "trigger.failed";
             /** Status */
             status: string;
-            /** Trigger Id */
+            /**
+             * Trigger Id
+             * Format: uuid
+             */
             trigger_id: string;
             /** Trigger Name */
             trigger_name: string;
@@ -23938,7 +24472,10 @@ export interface components {
              * @default false
              */
             manual?: boolean;
-            /** Trigger Id */
+            /**
+             * Trigger Id
+             * Format: uuid
+             */
             trigger_id: string;
             /** Trigger Name */
             trigger_name: string;
@@ -24080,7 +24617,10 @@ export interface components {
         };
         /** TriggerSyncResponse */
         TriggerSyncResponse: {
-            /** Data Source Id */
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
             data_source_id: string;
             /**
              * Status
@@ -24196,7 +24736,10 @@ export interface components {
         };
         /** TurnDoneEvent */
         TurnDoneEvent: {
-            /** Conversation Id */
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
             conversation_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -24392,7 +24935,10 @@ export interface components {
             description: string | null;
             /** Events Processed */
             events_processed: number;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Is Active */
             is_active: boolean;
@@ -24415,7 +24961,10 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Workspace Id */
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
             workspace_id: string;
         };
         /** UpdateAgentRequest */
@@ -24888,6 +25437,7 @@ export interface components {
             total_events: number;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace identifier
              */
             workspace_id: string;
@@ -25189,7 +25739,10 @@ export interface components {
             count: number;
             /** Items */
             items: components["schemas"]["VoiceJudgeResultRow"][];
-            /** Service Id */
+            /**
+             * Service Id
+             * Format: uuid
+             */
             service_id: string;
         };
         /**
@@ -25388,14 +25941,20 @@ export interface components {
             updated_at: string;
             /** Use Case Id */
             use_case_id: string;
-            /** Voicemail Id */
+            /**
+             * Voicemail Id
+             * Format: uuid
+             */
             voicemail_id: string;
         };
         /** VoicemailSentResponse */
         VoicemailSentResponse: {
             /** Sender Phone Number */
             sender_phone_number: string;
-            /** Voicemail Id */
+            /**
+             * Voicemail Id
+             * Format: uuid
+             */
             voicemail_id: string;
         };
         /** VoiceprintEnrollResponse */
@@ -25410,7 +25969,10 @@ export interface components {
              * @default true
              */
             enrolled?: boolean;
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Model Id */
             model_id: string;
@@ -25426,7 +25988,10 @@ export interface components {
         };
         /** VoiceprintVerifyResponse */
         VoiceprintVerifyResponse: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /** Similarity */
             similarity: number;
@@ -25821,7 +26386,10 @@ export interface components {
         };
         /** WorkspaceInvitationAcceptedEvent */
         WorkspaceInvitationAcceptedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -25850,7 +26418,10 @@ export interface components {
         };
         /** WorkspaceMemberAddedEvent */
         WorkspaceMemberAddedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -25862,7 +26433,10 @@ export interface components {
         };
         /** WorkspaceMemberRoleUpdatedEvent */
         WorkspaceMemberRoleUpdatedEvent: {
-            /** Entity Id */
+            /**
+             * Entity Id
+             * Format: uuid
+             */
             entity_id: string;
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -25887,7 +26461,10 @@ export interface components {
             created_at: string;
             /** Environment */
             environment: string;
-            /** Id */
+            /**
+             * Id
+             * Format: uuid
+             */
             id: string;
             /** Name */
             name: string;
@@ -26002,6 +26579,7 @@ export interface components {
             actor_entity_id?: string | null;
             /**
              * Id
+             * Format: uuid
              * @description Unique audit event identifier
              */
             id: string;
@@ -26055,6 +26633,7 @@ export interface components {
             user_agent?: string | null;
             /**
              * Workspace Id
+             * Format: uuid
              * @description Workspace that owns this audit event
              */
             workspace_id: string;
@@ -28086,8 +28665,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                agent_id: string;
                 workspace_id: string;
+                agent_id: string;
             };
             cookie?: never;
         };
@@ -28139,8 +28718,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                agent_id: string;
                 workspace_id: string;
+                agent_id: string;
             };
             cookie?: never;
         };
@@ -28201,8 +28780,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                agent_id: string;
                 workspace_id: string;
+                agent_id: string;
             };
             cookie?: never;
         };
@@ -28256,8 +28835,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                agent_id: string;
                 workspace_id: string;
+                agent_id: string;
             };
             cookie?: never;
         };
@@ -28309,8 +28888,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                agent_id: string;
                 workspace_id: string;
+                agent_id: string;
             };
             cookie?: never;
         };
@@ -28371,9 +28950,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 agent_id: string;
                 version: number | string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -29027,8 +29606,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -29287,8 +29866,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key_id: string;
                 workspace_id: string;
+                key_id: string;
             };
             cookie?: never;
         };
@@ -29338,8 +29917,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key_id: string;
                 workspace_id: string;
+                key_id: string;
             };
             cookie?: never;
         };
@@ -29463,8 +30042,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -29747,8 +30326,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                invoice_id: string;
                 workspace_id: string;
+                invoice_id: string;
             };
             cookie?: never;
         };
@@ -29781,8 +30360,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                invoice_id: string;
                 workspace_id: string;
+                invoice_id: string;
             };
             cookie?: never;
         };
@@ -30207,8 +30786,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_id: string;
                 workspace_id: string;
+                call_id: string;
             };
             cookie?: never;
         };
@@ -30246,8 +30825,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_id: string;
                 workspace_id: string;
+                call_id: string;
             };
             cookie?: never;
         };
@@ -30288,8 +30867,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                call_id: string;
                 workspace_id: string;
+                call_id: string;
             };
             cookie?: never;
         };
@@ -30320,8 +30899,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_id: string;
                 workspace_id: string;
+                call_id: string;
             };
             cookie?: never;
         };
@@ -30359,8 +30938,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_id: string;
                 workspace_id: string;
+                call_id: string;
             };
             cookie?: never;
         };
@@ -30690,8 +31269,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                context_graph_id: string;
                 workspace_id: string;
+                context_graph_id: string;
             };
             cookie?: never;
         };
@@ -30743,8 +31322,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                context_graph_id: string;
                 workspace_id: string;
+                context_graph_id: string;
             };
             cookie?: never;
         };
@@ -30805,8 +31384,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                context_graph_id: string;
                 workspace_id: string;
+                context_graph_id: string;
             };
             cookie?: never;
         };
@@ -30860,8 +31439,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                context_graph_id: string;
                 workspace_id: string;
+                context_graph_id: string;
             };
             cookie?: never;
         };
@@ -30913,8 +31492,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                context_graph_id: string;
                 workspace_id: string;
+                context_graph_id: string;
             };
             cookie?: never;
         };
@@ -30975,9 +31554,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 context_graph_id: string;
                 version: number | string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -31102,8 +31681,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                conversation_id: string;
                 workspace_id: string;
+                conversation_id: string;
             };
             cookie?: never;
         };
@@ -31134,8 +31713,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                conversation_id: string;
                 workspace_id: string;
+                conversation_id: string;
             };
             cookie?: never;
         };
@@ -31167,8 +31746,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                conversation_id: string;
                 workspace_id: string;
+                conversation_id: string;
             };
             cookie?: never;
         };
@@ -31240,8 +31819,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                company_id: string;
                 workspace_id: string;
+                company_id: string;
             };
             cookie?: never;
         };
@@ -31317,8 +31896,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                contact_id: string;
                 workspace_id: string;
+                contact_id: string;
             };
             cookie?: never;
         };
@@ -31357,8 +31936,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                contact_id: string;
                 workspace_id: string;
+                contact_id: string;
             };
             cookie?: never;
         };
@@ -31454,8 +32033,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                deal_id: string;
                 workspace_id: string;
+                deal_id: string;
             };
             cookie?: never;
         };
@@ -31583,8 +32162,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                slug: string;
                 workspace_id: string;
+                slug: string;
             };
             cookie?: never;
         };
@@ -31615,8 +32194,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                dashboard_id: string;
                 workspace_id: string;
+                dashboard_id: string;
             };
             cookie?: never;
         };
@@ -31647,8 +32226,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                dashboard_id: string;
                 workspace_id: string;
+                dashboard_id: string;
             };
             cookie?: never;
         };
@@ -31683,8 +32262,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                dashboard_id: string;
                 workspace_id: string;
+                dashboard_id: string;
             };
             cookie?: never;
         };
@@ -31713,8 +32292,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                dashboard_id: string;
                 workspace_id: string;
+                dashboard_id: string;
             };
             cookie?: never;
         };
@@ -31844,8 +32423,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -31890,8 +32469,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -31934,8 +32513,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -31984,8 +32563,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -32030,8 +32609,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -32108,8 +32687,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -32281,8 +32860,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -32313,8 +32892,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -32349,8 +32928,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -32381,8 +32960,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -32413,9 +32992,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Target entity UUID */
                 entity_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -32446,9 +33025,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Target entity UUID */
                 entity_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -32591,8 +33170,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                patient_entity_id: string;
                 workspace_id: string;
+                patient_entity_id: string;
             };
             cookie?: never;
         };
@@ -32815,8 +33394,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                patient_id: string;
                 workspace_id: string;
+                patient_id: string;
             };
             cookie?: never;
         };
@@ -32851,8 +33430,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                patient_id: string;
                 workspace_id: string;
+                patient_id: string;
             };
             cookie?: never;
         };
@@ -32894,8 +33473,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                resource_type: string;
                 workspace_id: string;
+                resource_type: string;
             };
             cookie?: never;
         };
@@ -32933,8 +33512,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                resource_type: string;
                 workspace_id: string;
+                resource_type: string;
             };
             cookie?: never;
         };
@@ -32976,9 +33555,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 resource_type: string;
                 resource_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -33023,9 +33602,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 resource_type: string;
                 resource_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -33077,9 +33656,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 resource_type: string;
                 resource_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -33641,8 +34220,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                function_name: string;
                 workspace_id: string;
+                function_name: string;
             };
             cookie?: never;
         };
@@ -33689,8 +34268,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                function_name: string;
                 workspace_id: string;
+                function_name: string;
             };
             cookie?: never;
         };
@@ -33846,9 +34425,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Session ID */
                 session_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -33881,9 +34460,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Session ID */
                 session_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -34081,8 +34660,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                link_id: string;
                 workspace_id: string;
+                link_id: string;
             };
             cookie?: never;
         };
@@ -34111,8 +34690,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                link_id: string;
                 workspace_id: string;
+                link_id: string;
             };
             cookie?: never;
         };
@@ -34143,9 +34722,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 link_id: string;
                 upload_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -34327,8 +34906,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                integration_id: string;
                 workspace_id: string;
+                integration_id: string;
             };
             cookie?: never;
         };
@@ -34380,8 +34959,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                integration_id: string;
                 workspace_id: string;
+                integration_id: string;
             };
             cookie?: never;
         };
@@ -34435,8 +35014,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                integration_id: string;
                 workspace_id: string;
+                integration_id: string;
             };
             cookie?: never;
         };
@@ -34486,9 +35065,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 integration_id: string;
                 endpoint_name: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -34633,8 +35212,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                table: string;
                 workspace_id: string;
+                table: string;
             };
             cookie?: never;
         };
@@ -34667,8 +35246,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                table: string;
                 workspace_id: string;
+                table: string;
             };
             cookie?: never;
         };
@@ -34993,8 +35572,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                patient_id: string;
                 workspace_id: string;
+                patient_id: string;
             };
             cookie?: never;
         };
@@ -35025,8 +35604,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                patient_id: string;
                 workspace_id: string;
+                patient_id: string;
             };
             cookie?: never;
         };
@@ -35141,9 +35720,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Entity UUID */
                 entity_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -35184,9 +35763,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Entity UUID */
                 entity_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -35345,9 +35924,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Metric key (lowercase alphanumeric + underscores) */
                 metric_key: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -35385,9 +35964,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Metric key (lowercase alphanumeric + underscores) */
                 metric_key: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -35457,9 +36036,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Metric key (lowercase alphanumeric + underscores) */
                 metric_key: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -35587,8 +36166,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                concept_id: string;
                 workspace_id: string;
+                concept_id: string;
             };
             cookie?: never;
         };
@@ -35633,8 +36212,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                concept_id: string;
                 workspace_id: string;
+                concept_id: string;
             };
             cookie?: never;
         };
@@ -35677,8 +36256,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                concept_id: string;
                 workspace_id: string;
+                concept_id: string;
             };
             cookie?: never;
         };
@@ -35877,8 +36456,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_sid: string;
                 workspace_id: string;
+                call_sid: string;
             };
             cookie?: never;
         };
@@ -36093,8 +36672,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36132,8 +36711,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36175,8 +36754,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36225,8 +36804,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36275,8 +36854,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36332,8 +36911,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36382,8 +36961,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36432,8 +37011,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36482,8 +37061,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                operator_id: string;
                 workspace_id: string;
+                operator_id: string;
             };
             cookie?: never;
         };
@@ -36608,8 +37187,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                persona_id: string;
                 workspace_id: string;
+                persona_id: string;
             };
             cookie?: never;
         };
@@ -36654,8 +37233,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                persona_id: string;
                 workspace_id: string;
+                persona_id: string;
             };
             cookie?: never;
         };
@@ -36700,8 +37279,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                persona_id: string;
                 workspace_id: string;
+                persona_id: string;
             };
             cookie?: never;
         };
@@ -36921,8 +37500,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -36974,8 +37553,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -37029,8 +37608,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -37080,8 +37659,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -37135,8 +37714,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -37251,8 +37830,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -37378,8 +37957,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                source_id: string;
                 workspace_id: string;
+                source_id: string;
             };
             cookie?: never;
         };
@@ -37422,8 +38001,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                source_id: string;
                 workspace_id: string;
+                source_id: string;
             };
             cookie?: never;
         };
@@ -37461,8 +38040,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                source_id: string;
                 workspace_id: string;
+                source_id: string;
             };
             cookie?: never;
         };
@@ -37587,9 +38166,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 schema: string;
                 table: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -37620,9 +38199,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 call_sid: string;
                 filename: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -37674,8 +38253,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_sid: string;
                 workspace_id: string;
+                call_sid: string;
             };
             cookie?: never;
         };
@@ -37720,8 +38299,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_sid: string;
                 workspace_id: string;
+                call_sid: string;
             };
             cookie?: never;
         };
@@ -38065,8 +38644,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38097,8 +38676,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38133,8 +38712,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38165,8 +38744,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38201,8 +38780,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38233,8 +38812,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38265,8 +38844,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38301,8 +38880,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                item_id: string;
                 workspace_id: string;
+                item_id: string;
             };
             cookie?: never;
         };
@@ -38433,8 +39012,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                template_id: string;
                 workspace_id: string;
+                template_id: string;
             };
             cookie?: never;
         };
@@ -38479,8 +39058,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                template_id: string;
                 workspace_id: string;
+                template_id: string;
             };
             cookie?: never;
         };
@@ -38529,8 +39108,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                encounter_id: string;
                 workspace_id: string;
+                encounter_id: string;
             };
             cookie?: never;
         };
@@ -38563,8 +39142,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                encounter_id: string;
                 workspace_id: string;
+                encounter_id: string;
             };
             cookie?: never;
         };
@@ -38601,8 +39180,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                encounter_id: string;
                 workspace_id: string;
+                encounter_id: string;
             };
             cookie?: never;
         };
@@ -38639,8 +39218,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                encounter_id: string;
                 workspace_id: string;
+                encounter_id: string;
             };
             cookie?: never;
         };
@@ -38887,8 +39466,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -38940,8 +39519,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -39002,8 +39581,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -39053,8 +39632,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -39106,10 +39685,10 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 service_id: string;
                 /** @description Version set name (e.g. 'release') */
                 name: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -39171,9 +39750,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 /** @description Service UUID */
                 service_id: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -39211,8 +39790,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -39338,8 +39917,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                call_sid: string;
                 workspace_id: string;
+                call_sid: string;
             };
             cookie?: never;
         };
@@ -39761,8 +40340,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                template_id: string;
                 workspace_id: string;
+                template_id: string;
             };
             cookie?: never;
         };
@@ -39793,8 +40372,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                template_id: string;
                 workspace_id: string;
+                template_id: string;
             };
             cookie?: never;
         };
@@ -40843,8 +41422,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                run_id: string;
                 workspace_id: string;
+                run_id: string;
             };
             cookie?: never;
         };
@@ -40877,8 +41456,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                run_id: string;
                 workspace_id: string;
+                run_id: string;
             };
             cookie?: never;
         };
@@ -40911,8 +41490,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                run_id: string;
                 workspace_id: string;
+                run_id: string;
             };
             cookie?: never;
         };
@@ -40950,8 +41529,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -40984,8 +41563,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -41020,8 +41599,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -41057,8 +41636,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -41096,8 +41675,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                service_id: string;
                 workspace_id: string;
+                service_id: string;
             };
             cookie?: never;
         };
@@ -41235,8 +41814,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41267,8 +41846,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41299,8 +41878,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41337,8 +41916,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41369,8 +41948,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41407,8 +41986,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41443,8 +42022,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                session_id: string;
                 workspace_id: string;
+                session_id: string;
             };
             cookie?: never;
         };
@@ -41590,8 +42169,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                skill_id: string;
                 workspace_id: string;
+                skill_id: string;
             };
             cookie?: never;
         };
@@ -41643,8 +42222,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                skill_id: string;
                 workspace_id: string;
+                skill_id: string;
             };
             cookie?: never;
         };
@@ -41698,8 +42277,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                skill_id: string;
                 workspace_id: string;
+                skill_id: string;
             };
             cookie?: never;
         };
@@ -41749,8 +42328,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                skill_id: string;
                 workspace_id: string;
+                skill_id: string;
             };
             cookie?: never;
         };
@@ -41802,8 +42381,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                skill_id: string;
                 workspace_id: string;
+                skill_id: string;
             };
             cookie?: never;
         };
@@ -41987,8 +42566,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42033,8 +42612,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42086,8 +42665,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42141,8 +42720,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42194,8 +42773,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42249,8 +42828,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42295,8 +42874,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42352,8 +42931,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                surface_id: string;
                 workspace_id: string;
+                surface_id: string;
             };
             cookie?: never;
         };
@@ -42600,8 +43179,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42632,8 +43211,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42668,8 +43247,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42698,8 +43277,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42734,8 +43313,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42766,8 +43345,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42801,8 +43380,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                trigger_id: string;
                 workspace_id: string;
+                trigger_id: string;
             };
             cookie?: never;
         };
@@ -42953,8 +43532,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                phone_number_id: string;
                 workspace_id: string;
+                phone_number_id: string;
             };
             cookie?: never;
         };
@@ -43185,8 +43764,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
                 workspace_id: string;
+                rule_id: string;
             };
             cookie?: never;
         };
@@ -43231,8 +43810,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
                 workspace_id: string;
+                rule_id: string;
             };
             cookie?: never;
         };
@@ -43275,8 +43854,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                rule_id: string;
                 workspace_id: string;
+                rule_id: string;
             };
             cookie?: never;
         };
@@ -43435,8 +44014,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                use_case_id: string;
                 workspace_id: string;
+                use_case_id: string;
             };
             cookie?: never;
         };
@@ -43716,8 +44295,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -43817,8 +44396,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                destination_id: string;
                 workspace_id: string;
+                destination_id: string;
             };
             cookie?: never;
         };
@@ -43849,8 +44428,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                destination_id: string;
                 workspace_id: string;
+                destination_id: string;
             };
             cookie?: never;
         };
@@ -43885,8 +44464,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                destination_id: string;
                 workspace_id: string;
+                destination_id: string;
             };
             cookie?: never;
         };
@@ -43918,8 +44497,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                destination_id: string;
                 workspace_id: string;
+                destination_id: string;
             };
             cookie?: never;
         };
@@ -43950,8 +44529,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                destination_id: string;
                 workspace_id: string;
+                destination_id: string;
             };
             cookie?: never;
         };
@@ -44011,8 +44590,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -44055,8 +44634,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                data_source_id: string;
                 workspace_id: string;
+                data_source_id: string;
             };
             cookie?: never;
         };
@@ -44206,8 +44785,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key_id: string;
                 workspace_id: string;
+                key_id: string;
             };
             cookie?: never;
         };
@@ -44250,8 +44829,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                key_id: string;
                 workspace_id: string;
+                key_id: string;
             };
             cookie?: never;
         };
@@ -44400,8 +44979,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44453,8 +45032,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44492,9 +45071,9 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                workspace_id: string;
                 entity_id: string;
                 key: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -44552,9 +45131,9 @@ export interface operations {
             };
             header?: never;
             path: {
+                workspace_id: string;
                 entity_id: string;
                 key: string;
-                workspace_id: string;
             };
             cookie?: never;
         };
@@ -44592,8 +45171,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44640,8 +45219,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44688,8 +45267,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44734,8 +45313,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44785,8 +45364,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -44843,8 +45422,8 @@ export interface operations {
             };
             header?: never;
             path: {
-                entity_id: string;
                 workspace_id: string;
+                entity_id: string;
             };
             cookie?: never;
         };
@@ -45217,8 +45796,8 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                event_id: string;
                 workspace_id: string;
+                event_id: string;
             };
             cookie?: never;
         };
