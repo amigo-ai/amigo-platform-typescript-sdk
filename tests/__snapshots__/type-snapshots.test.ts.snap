@@ -55,7 +55,6 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "create-test-conversation",
   "create-unification-rule",
   "create-use-case",
-  "create-workspace",
   "crm-company-detail",
   "crm-company-search",
   "crm-contact-detail",

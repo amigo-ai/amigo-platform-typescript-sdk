@@ -560,11 +560,7 @@ export interface paths {
          */
         get: operations["list-workspaces"];
         put?: never;
-        /**
-         * Create a workspace
-         * @description Bootstrap a new workspace. No authentication required.
-         */
-        post: operations["create-workspace"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -11814,10 +11810,7 @@ export interface components {
              * @default true
              */
             enabled?: boolean;
-            /**
-             * Endpoints
-             * @default []
-             */
+            /** Endpoints */
             endpoints?: components["schemas"]["EndpointConfig-Input"][];
             /** Mcp Args */
             mcp_args?: string[] | null;
@@ -11831,7 +11824,10 @@ export interface components {
             mcp_transport?: ("stdio" | "sse" | "http") | null;
             /** Mcp Url */
             mcp_url?: string | null;
-            /** Name */
+            /**
+             * Name
+             * @description Slug-like identifier, lowercase alphanumeric + hyphens/underscores.
+             */
             name: string;
             /**
              * Protocol
@@ -21413,6 +21409,10 @@ export interface components {
         /**
          * SecretInput
          * @description Inline secret value — auto-provisioned to SSM on create/update.
+         *
+         *     Bounded to 8192 chars: large enough for a PEM RSA-4096 private key
+         *     plus a short cert chain, small enough that an adversary cannot
+         *     push a 100 MB "secret" through to SSM.
          */
         SecretInput: {
             /** Value */
@@ -23559,10 +23559,7 @@ export interface components {
         };
         /** TestEndpointRequest */
         TestEndpointRequest: {
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
@@ -28097,44 +28094,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "create-workspace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateWorkspaceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceResponse"];
-                };
-            };
-            /** @description Workspace slug already taken. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
