@@ -34,7 +34,7 @@ describe('resource surface smoke tests', () => {
   it('covers the untested public resource wrappers end-to-end', async () => {
     const { client, requests, fetchImpl } = createClientWithRecorder()
 
-    await client.workspaces.create(EMPTY_BODY)
+    await client.workspaces.createSelfService(EMPTY_BODY)
     await client.workspaces.list({ limit: 5 })
     await client.workspaces.get()
     await client.workspaces.update(EMPTY_BODY)

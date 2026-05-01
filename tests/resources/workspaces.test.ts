@@ -45,7 +45,7 @@ const client = new AmigoClient({
     [`GET /v1/workspaces`]: () =>
       Response.json({ items: [WORKSPACE_FIXTURE], has_more: false, continuation_token: null }),
 
-    [`POST /v1/workspaces`]: () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
+    [`POST /v1/workspaces/self-service`]: () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
 
     [`GET /v1/workspaces/${TEST_WORKSPACE_ID}`]: () => Response.json(WORKSPACE_FIXTURE),
 
@@ -80,8 +80,8 @@ describe('WorkspacesResource', () => {
     expect(result.items[0]?.name).toBe('Acme Health')
   })
 
-  it('creates a workspace', async () => {
-    const result = await client.workspaces.create({ name: 'Acme Health' } as never)
+  it('creates a workspace via self-service', async () => {
+    const result = await client.workspaces.createSelfService({ name: 'Acme Health' } as never)
     expect(result.id).toBe(TEST_WORKSPACE_ID)
     expect(result.name).toBe('Acme Health')
   })

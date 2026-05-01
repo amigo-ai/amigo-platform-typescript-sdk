@@ -66,7 +66,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `workspaces`
 
-- `create`
 - `createSelfService`
 - `list`
 - `listAutoPaging`

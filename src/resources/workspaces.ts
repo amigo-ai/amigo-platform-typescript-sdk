@@ -7,19 +7,12 @@ import type { ListParams } from '../core/utils.js'
  * Manage Amigo Platform workspaces.
  * Workspaces are the top-level tenancy boundary for all resources.
  *
- * Note: list and create operate at account level (/v1/workspaces),
- * while get, update, and archive operate on a specific workspace.
+ * Note: list operates at account level (/v1/workspaces); creation goes
+ * through the authenticated self-service flow. The unauthenticated
+ * ``POST /v1/workspaces`` was removed in platform-api PR #2378 (orphan-
+ * maker). Get/update/archive/provision operate on a specific workspace.
  */
 export class WorkspacesResource extends WorkspaceScopedResource {
-  /** Create a new workspace (unauthenticated — no owner membership created) */
-  async create(body: components['schemas']['CreateWorkspaceRequest']) {
-    return extractData(
-      await this.client.POST('/v1/workspaces', {
-        body,
-      }),
-    )
-  }
-
   /** Create a workspace for the authenticated user and attach owner access */
   async createSelfService(body: components['schemas']['CreateWorkspaceRequest']) {
     return extractData(
