@@ -62,6 +62,7 @@ import { AuditResource } from './resources/audit.js'
 import { WebhookDestinationsResource } from './resources/webhook-destinations.js'
 import { SafetyResource } from './resources/safety.js'
 import { ComplianceResource } from './resources/compliance.js'
+import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
@@ -199,6 +200,7 @@ export class AmigoClient {
   readonly webhookDestinations!: WebhookDestinationsResource
   readonly safety!: SafetyResource
   readonly compliance!: ComplianceResource
+  readonly events!: EventsResource
   readonly functions!: FunctionsResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
@@ -352,6 +354,7 @@ export class AmigoClient {
     mutable.webhookDestinations = new WebhookDestinationsResource(client, workspaceId)
     mutable.safety = new SafetyResource(client, workspaceId)
     mutable.compliance = new ComplianceResource(client, workspaceId)
+    mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
   }
 
@@ -518,10 +521,14 @@ export type TimelineTrack = NonNullable<TimelineSegment['track']>
 export type TimelineActorKind = TimelineActor['kind']
 export type TimelineActorRole = TimelineActor['role']
 
-export {
-  sessionConnectAuthProtocols,
-  textStreamAuthProtocols,
-} from './resources/conversations.js'
+export type {
+  SubscribeToWorkspaceOptions,
+  SubscriptionHandle,
+  WorkspaceSSEEvent,
+  WorkspaceSSEEventType,
+} from './resources/events.js'
+
+export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
 export type {
   ConversationDetail,
   ConversationListResponse,
