@@ -240,6 +240,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `close`
 - `createTurn`
 - `createTurnStream`
+- `streamTurn`
 - `textStreamUrl`
 - `sessionConnectUrl`
 
