@@ -417,6 +417,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getHipaa`
 - `getAccessReview`
 
+### `events`
+
+- `subscribeToWorkspace`
+
 ### `functions`
 
 - `list`

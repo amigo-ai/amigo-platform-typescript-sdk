@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.24.0] - 2026-05-01
+
+### Features
+
+- Add `client.events.subscribeToWorkspace()` — typed SSE consumer for `WorkspaceSSEEvent`. Wraps `GET /v1/{workspace_id}/events/stream` with automatic reconnect (exponential backoff with full jitter, honoring server-sent `retry:` directives), gapless replay via `Last-Event-ID`, and discriminated-union dispatch (no `any`/`unknown` casts at the consumer). Honors `AbortSignal` for cleanup. Drift-tolerant: malformed or unknown frames are dropped silently. Observer WebSocket helper deferred — see follow-up issue.
+
 ## [0.23.0] - 2026-05-01
 
 ### Improvements
