@@ -1,10 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
-import {
-  WorkspaceEventStreamError,
-  isWorkspaceEventStreamError,
-} from '../../src/index.js'
-import type { WorkspaceSSEEvent } from '../../src/index.js'
+import { AmigoClient, isWorkspaceEventStreamError } from '../../src/index.js'
+import type { WorkspaceEventStreamError, WorkspaceSSEEvent } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'

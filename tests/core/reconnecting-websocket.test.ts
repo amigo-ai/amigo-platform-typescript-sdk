@@ -24,7 +24,7 @@ class FakeWebSocket {
   readonly protocols: string | string[] | undefined
   readyState = 0 // CONNECTING
   sent: unknown[] = []
-  private listeners = new Map<string, Set<(ev: any) => void>>()
+  private listeners = new Map<string, Set<(ev: unknown) => void>>()
   private autoOpen: boolean
 
   constructor(url: string, protocols?: string | string[], autoOpen = true) {
@@ -38,7 +38,7 @@ class FakeWebSocket {
     }
   }
 
-  addEventListener(type: string, fn: (ev: any) => void): void {
+  addEventListener(type: string, fn: (ev: unknown) => void): void {
     let bucket = this.listeners.get(type)
     if (!bucket) {
       bucket = new Set()
@@ -47,7 +47,7 @@ class FakeWebSocket {
     bucket.add(fn)
   }
 
-  removeEventListener(type: string, fn: (ev: any) => void): void {
+  removeEventListener(type: string, fn: (ev: unknown) => void): void {
     this.listeners.get(type)?.delete(fn)
   }
 

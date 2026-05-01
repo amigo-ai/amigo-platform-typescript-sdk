@@ -17,7 +17,7 @@ class FakeWebSocket {
   readonly protocols: string | string[] | undefined
   readyState = 0
   sent: unknown[] = []
-  private listeners = new Map<string, Set<(ev: any) => void>>()
+  private listeners = new Map<string, Set<(ev: unknown) => void>>()
 
   constructor(url: string, protocols?: string | string[]) {
     this.url = url
@@ -29,12 +29,12 @@ class FakeWebSocket {
     })
   }
 
-  addEventListener(t: string, fn: (e: any) => void): void {
+  addEventListener(t: string, fn: (e: unknown) => void): void {
     let b = this.listeners.get(t)
     if (!b) this.listeners.set(t, (b = new Set()))
     b.add(fn)
   }
-  removeEventListener(t: string, fn: (e: any) => void): void {
+  removeEventListener(t: string, fn: (e: unknown) => void): void {
     this.listeners.get(t)?.delete(fn)
   }
   send(d: unknown): void {
