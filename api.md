@@ -239,6 +239,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `close`
 - `createTurn`
+- `createTurnStream`
 - `textStreamUrl`
 
 ### `phoneNumbers`
