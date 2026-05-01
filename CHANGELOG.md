@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.21.0] - 2026-05-01
+
+### Features
+
+- add sessionConnectUrl helper for /v1/{ws}/sessions/connect (v0.20.0)
+
+### Maintenance
+
+- sync API types from platform (2c9cf6d9) (#142)
+- sync API types from platform (74bd55d2) (#141)
+
 ## [0.19.0] - 2026-05-01
 
 ### Features
