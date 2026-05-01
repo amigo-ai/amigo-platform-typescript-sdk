@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.22.0] - 2026-05-01
+
+### Improvements
+
+- Add includeToolCalls option to ConversationsResource.createTurn (#143)
+
 ## [0.21.0] - 2026-05-01
 
 ### Features
