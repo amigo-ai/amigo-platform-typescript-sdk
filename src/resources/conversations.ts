@@ -11,6 +11,14 @@ export type ConversationTurn = components['schemas']['ConversationTurn']
 export type CreateConversationRequest = components['schemas']['CreateConversationRequest']
 export type TurnRequest = components['schemas']['TurnRequest']
 export type TurnResponse = components['schemas']['TurnResponse']
+export type TurnStreamEvent = components['schemas']['TurnStreamEvent']
+export type TurnTokenEvent = components['schemas']['TurnTokenEvent']
+export type TurnToolCallStartedEvent = components['schemas']['TurnToolCallStartedEvent']
+export type TurnToolCallCompletedEvent = components['schemas']['TurnToolCallCompletedEvent']
+export type TurnThinkingEvent = components['schemas']['TurnThinkingEvent']
+export type TurnMessageEvent = components['schemas']['TurnMessageEvent']
+export type TurnDoneEvent = components['schemas']['TurnDoneEvent']
+export type TurnErrorEvent = components['schemas']['TurnErrorEvent']
 
 /**
  * Hand-authored because the text-stream WebSocket endpoint is intentionally
@@ -109,8 +117,50 @@ export class ConversationsResource extends WorkspaceScopedResource {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
         },
         body: request,
+        headers: { Accept: 'application/json' },
       }),
+    ) as TurnResponse
+  }
+
+  /**
+   * Send a message and receive the agent's response as an SSE stream.
+   *
+   * Returns a `ReadableStream` of SSE bytes. Use `EventSourceParserStream`
+   * (from `eventsource-parser/stream`) to parse into typed `TurnStreamEvent`.
+   *
+   * @example
+   * ```ts
+   * const stream = await client.conversations.createTurnStream(convId, { message: "Hello" });
+   * const events = stream
+   *   .pipeThrough(new TextDecoderStream())
+   *   .pipeThrough(new EventSourceParserStream());
+   * for await (const event of events) {
+   *   const parsed = JSON.parse(event.data) as TurnStreamEvent;
+   *   if (parsed.event === "token") console.log(parsed.text);
+   * }
+   * ```
+   */
+  async createTurnStream(
+    conversationId: string,
+    request: TurnRequest,
+    options?: { signal?: AbortSignal },
+  ): Promise<ReadableStream<Uint8Array>> {
+    const result = await this.client.POST(
+      '/v1/{workspace_id}/conversations/{conversation_id}/turns',
+      {
+        params: {
+          path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+        },
+        body: request,
+        headers: { Accept: 'text/event-stream' },
+        parseAs: 'stream',
+        signal: options?.signal,
+      },
     )
+    if (result.error !== undefined) {
+      throw new Error(`API error: ${JSON.stringify(result.error)}`)
+    }
+    return result.data as ReadableStream<Uint8Array>
   }
 
   /** Build the real-time text WebSocket URL for browser or custom clients. */
