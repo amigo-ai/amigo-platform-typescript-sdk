@@ -19681,6 +19681,11 @@ export interface components {
              * @default
              */
             caller_id?: string;
+            /**
+             * Caller Phone
+             * @description Caller E.164 phone number for console clients
+             */
+            caller_phone?: string | null;
             /** Current Emotion */
             current_emotion?: string | null;
             /**
@@ -19690,6 +19695,11 @@ export interface components {
             current_state?: string;
             /** Current Valence */
             current_valence?: number | null;
+            /**
+             * Data Quality Flags
+             * @default []
+             */
+            data_quality_flags?: "invalid_direction"[];
             /**
              * Direction
              * @description Call direction
@@ -19709,8 +19719,13 @@ export interface components {
              * @default []
              */
             priority_reasons?: ("high_risk" | "long_wait" | "negative_emotion" | "safety_concern" | "looping")[];
-            /** Priority Score */
+            /**
+             * Priority Score
+             * @description Priority score normalized to 0.0-1.0
+             */
             priority_score: number;
+            /** Risk Level */
+            risk_level?: ("low" | "medium" | "high" | "critical") | null;
             /** Risk Score */
             risk_score?: number | null;
             /**
@@ -19719,6 +19734,13 @@ export interface components {
              * @default
              */
             service_id?: string;
+            /** @description Human-readable service name when available */
+            service_name?: components["schemas"]["NameString"] | null;
+            /**
+             * Started At
+             * @description When the active call started
+             */
+            started_at?: string | null;
             /**
              * Turn Count
              * @default 0
@@ -35815,6 +35837,10 @@ export interface operations {
     "list-audit-log": {
         parameters: {
             query?: {
+                /** @description Filter by operator entity UUID. */
+                operator_id?: string | null;
+                /** @description Filter by exact operator audit event type. */
+                action?: ("operator.registered" | "operator.status_changed" | "operator.profile_updated" | "operator.joined_call" | "operator.mode_changed" | "operator.mode_switched" | "operator.left_call" | "operator.access_token_generated" | "operator.guidance_sent" | "operator.wrap_up" | "operator.viewed_transcript") | null;
                 limit?: number;
                 continuation_token?: number;
             };
@@ -35979,9 +36005,9 @@ export interface operations {
         parameters: {
             query?: {
                 /** @description Time period: day, week, or month. */
-                period?: string;
+                period?: "day" | "week" | "month";
                 /** @description Grouping dimension: status, trigger, or operator. */
-                group_by?: string;
+                group_by?: "status" | "trigger" | "operator";
             };
             header?: never;
             path: {
