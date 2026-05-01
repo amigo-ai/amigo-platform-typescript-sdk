@@ -142,11 +142,26 @@ export class ConversationsResource extends WorkspaceScopedResource {
     })
   }
 
-  async createTurn(conversationId: string, request: TurnRequest): Promise<TurnResponse> {
+  /**
+   * Send a user message and receive the agent's synchronous JSON response.
+   *
+   * Pass `options.includeToolCalls: true` to request tool-call metadata
+   * alongside the response turns. Server-side default is `false` — without
+   * this opt-in the `tool_calls` array on the `TurnResponse` will be empty
+   * even when the agent invoked tools during the turn.
+   */
+  async createTurn(
+    conversationId: string,
+    request: TurnRequest,
+    options?: { includeToolCalls?: boolean },
+  ): Promise<TurnResponse> {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/conversations/{conversation_id}/turns', {
         params: {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+          ...(options?.includeToolCalls !== undefined && {
+            query: { include_tool_calls: options.includeToolCalls },
+          }),
         },
         body: request,
         headers: { Accept: 'application/json' },

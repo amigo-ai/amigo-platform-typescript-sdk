@@ -176,6 +176,78 @@ describe('ConversationsResource', () => {
     expect(result.output).toHaveLength(1)
   })
 
+  it('forwards include_tool_calls when requested via createTurn options', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-001',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
+      output: [{ role: 'agent', text: 'How can I help?', timestamp: '2026-01-01T00:00:01Z' }],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+          requestUrl = req.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: 'Hello' },
+      { includeToolCalls: true },
+    )
+
+    expect(requestUrl).toBeDefined()
+    const url = new URL(requestUrl as string)
+    // Server defaults `include_tool_calls` to `false`; the SDK MUST forward
+    // the opt-in or the response's `tool_calls` array stays empty even when
+    // the agent invoked tools. Caller-visible regression if dropped.
+    expect(url.searchParams.get('include_tool_calls')).toBe('true')
+  })
+
+  it('omits include_tool_calls from the URL when the option is not provided', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-001',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
+      output: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+          requestUrl = req.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(conversationId, { message: 'Hello' })
+
+    expect(requestUrl).toBeDefined()
+    const url = new URL(requestUrl as string)
+    expect(url.searchParams.has('include_tool_calls')).toBe(false)
+  })
+
   it('routes GET failures through the central error pipeline', async () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
