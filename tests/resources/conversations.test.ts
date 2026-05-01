@@ -5,6 +5,7 @@ import {
   ConfigurationError,
   NotFoundError,
   ValidationError,
+  sessionConnectAuthProtocols,
   textStreamAuthProtocols,
 } from '../../src/index.js'
 import type {
@@ -521,5 +522,121 @@ describe('ConversationsResource', () => {
     expect(() =>
       client.conversations.textStreamUrl({ serviceId: 'svc-1', token: 'abc\r\nx-evil: y' }),
     ).toThrow(ConfigurationError)
+  })
+
+  it('builds a session-connect URL from the client baseUrl', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    const url = new URL(
+      client.conversations.sessionConnectUrl({
+        serviceId: 'svc-1',
+        entityId: '00000000-0000-4000-8000-000000000010',
+        conversationId: '00000000-0000-4000-8000-000000000001',
+      }),
+    )
+
+    expect(url.protocol).toBe('wss:')
+    expect(url.host).toBe('api.example.com')
+    expect(url.pathname).toBe(`/v1/${TEST_WORKSPACE_ID}/sessions/connect`)
+    expect(url.searchParams.get('service_id')).toBe('svc-1')
+    expect(url.searchParams.get('entity_id')).toBe('00000000-0000-4000-8000-000000000010')
+    expect(url.searchParams.get('conversation_id')).toBe('00000000-0000-4000-8000-000000000001')
+    // tool_events param is omitted on default (server defaults to true)
+    expect(url.searchParams.has('tool_events')).toBe(false)
+    // Query key order is deliberate so callers can assert exact URLs.
+    expect([...url.searchParams.keys()]).toEqual(['service_id', 'entity_id', 'conversation_id'])
+  })
+
+  it('maps non-TLS REST base URLs to ws session-connect URLs', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'http://localhost:8000',
+    })
+
+    const url = new URL(
+      client.conversations.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
+    )
+
+    expect(url.protocol).toBe('ws:')
+    expect(url.host).toBe('localhost:8000')
+    expect(url.pathname).toBe(`/v1/${TEST_WORKSPACE_ID}/sessions/connect`)
+  })
+
+  it('emits tool_events=false only when explicitly disabled', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    const enabled = new URL(
+      client.conversations.sessionConnectUrl({ serviceId: 's', entityId: 'e', toolEvents: true }),
+    )
+    expect(enabled.searchParams.has('tool_events')).toBe(false)
+
+    const disabled = new URL(
+      client.conversations.sessionConnectUrl({ serviceId: 's', entityId: 'e', toolEvents: false }),
+    )
+    expect(disabled.searchParams.get('tool_events')).toBe('false')
+  })
+
+  it('supports preview/custom session-connect URL overrides', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: '/api/platform',
+    })
+
+    const url = new URL(
+      client.conversations.sessionConnectUrl({
+        serviceId: 'svc-1',
+        entityId: 'ent-1',
+        sessionConnectUrl: `wss://preview-123.platform.example.com/v1/${TEST_WORKSPACE_ID}/sessions/connect`,
+      }),
+    )
+
+    expect(url.host).toBe('preview-123.platform.example.com')
+    expect(url.pathname).toBe(`/v1/${TEST_WORKSPACE_ID}/sessions/connect`)
+    expect(url.searchParams.get('service_id')).toBe('svc-1')
+    expect(url.searchParams.get('entity_id')).toBe('ent-1')
+  })
+
+  it('rejects session-connect URL overrides with query strings or fragments', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: 'https://api.example.com',
+    })
+
+    expect(() =>
+      client.conversations.sessionConnectUrl({
+        serviceId: 'svc-1',
+        entityId: 'ent-1',
+        sessionConnectUrl: 'wss://example.com/v1/x/sessions/connect?leak=1',
+      }),
+    ).toThrow(ConfigurationError)
+  })
+
+  it('rejects relative baseUrl when no session-connect URL override is provided', () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: '/api/platform',
+    })
+
+    expect(() =>
+      client.conversations.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
+    ).toThrow(ConfigurationError)
+  })
+
+  it('sessionConnectAuthProtocols mirrors textStreamAuthProtocols', () => {
+    expect(sessionConnectAuthProtocols(TEST_API_KEY)).toEqual(['auth', TEST_API_KEY])
+    expect(() => sessionConnectAuthProtocols('')).toThrow(/apiKey is required/)
+    expect(() => sessionConnectAuthProtocols('workspace:secret')).toThrow(/":"/)
   })
 })

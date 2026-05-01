@@ -58,6 +58,38 @@ export interface TextStreamUrlParams {
 /** @beta The text-stream WebSocket contract may evolve independently of the REST API. */
 export type TextStreamAuthProtocols = readonly ['auth', string]
 
+/**
+ * Hand-authored because the workspace-scoped session-connect WebSocket is
+ * intentionally outside the generated OpenAPI REST snapshot.
+ *
+ * Path: ``WS /v1/{workspace_id}/sessions/connect``. Authentication is delivered
+ * via the ``Sec-WebSocket-Protocol: auth, <token>`` subprotocol header — the
+ * server rejects query-param tokens to keep credentials out of URLs and proxy
+ * logs. ``serviceId`` and ``entityId`` are required path/query inputs.
+ *
+ * @beta The session-connect WebSocket contract may evolve independently of the REST API.
+ */
+export interface SessionConnectUrlParams {
+  serviceId: string
+  entityId: string
+  conversationId?: string
+  /**
+   * Emit ``tool_call_started`` and ``tool_call_completed`` frames so the client
+   * can render tool invocations in real time. Server defaults to ``true`` when
+   * the param is omitted; the SDK only sets it explicitly when the caller asks
+   * to disable tool events.
+   */
+  toolEvents?: boolean
+  /**
+   * Full session-connect URL override for preview/custom ingress. Defaults to
+   * ``${baseUrl origin}/v1/{workspace_id}/sessions/connect`` with ``http`` mapped
+   * to ``ws`` and ``https`` mapped to ``wss``. The override must be an
+   * absolute ws/wss URL with no query string or fragment — SDK-managed query
+   * params are appended by the helper.
+   */
+  sessionConnectUrl?: string
+}
+
 const MAX_AUTH_TOKEN_CHARS = 4096
 const TEXT_STREAM_AUTH_TOKEN_RE = /^[-A-Za-z0-9._+=/:]+$/
 const WEB_SOCKET_PROTOCOL_TOKEN_RE = /^[!#$%&'*+\-.^_`|~A-Za-z0-9]+$/
@@ -172,6 +204,33 @@ export class ConversationsResource extends WorkspaceScopedResource {
     })
     return url.toString()
   }
+
+  /**
+   * Build the URL for the workspace-scoped session-connect WebSocket
+   * (``WS /v1/{workspace_id}/sessions/connect``).
+   *
+   * Pair the returned URL with {@link sessionConnectAuthProtocols} so the
+   * bearer token is delivered via the ``Sec-WebSocket-Protocol`` header — the
+   * endpoint rejects query-param tokens to keep credentials out of URLs.
+   *
+   * @example
+   * ```ts
+   * const url = client.conversations.sessionConnectUrl({
+   *   serviceId: SERVICE_ID,
+   *   entityId: ENTITY_ID,
+   *   conversationId: existingConversationId, // optional resume
+   * });
+   * const ws = new WebSocket(url, sessionConnectAuthProtocols(apiKey));
+   * ```
+   */
+  sessionConnectUrl(params: SessionConnectUrlParams): string {
+    const url = buildSessionConnectUrl({
+      baseUrl: this.platformBaseUrl,
+      workspaceId: this.workspaceId,
+      ...params,
+    })
+    return url.toString()
+  }
 }
 
 /**
@@ -191,6 +250,27 @@ export function textStreamAuthProtocols(apiKey: string): TextStreamAuthProtocols
     )
   }
   return ['auth', token] as const
+}
+
+/**
+ * Build browser WebSocket subprotocols for the workspace-scoped session-connect
+ * endpoint (``WS /v1/{workspace_id}/sessions/connect``).
+ *
+ * The wire format is identical to {@link textStreamAuthProtocols} — both
+ * endpoints expect ``Sec-WebSocket-Protocol: auth, <token>`` — but the
+ * session-connect endpoint has no query-param token fallback, so the API key
+ * MUST round-trip through this subprotocol pair. Keys containing characters
+ * browsers reject in subprotocols (e.g. ``:``, ``/``, ``=``) cannot be used
+ * with the session-connect endpoint and must instead use the legacy
+ * ``textStreamUrl`` path.
+ *
+ * @remarks The returned tuple contains the raw API key. Do not log, persist,
+ * serialize, or otherwise expose this value.
+ *
+ * @security The second subprotocol entry is the bearer secret.
+ */
+export function sessionConnectAuthProtocols(apiKey: string): TextStreamAuthProtocols {
+  return textStreamAuthProtocols(apiKey)
 }
 
 function buildTextStreamUrl({
@@ -275,6 +355,76 @@ function deriveTextStreamUrl(baseUrl: string): URL {
   // Text streaming is served by agent-engine ingress, regardless of any REST
   // API path segments on the configured base URL.
   url.pathname = '/agent/text-stream'
+  url.search = ''
+  url.hash = ''
+  return url
+}
+
+function buildSessionConnectUrl({
+  baseUrl,
+  workspaceId,
+  serviceId,
+  entityId,
+  conversationId,
+  toolEvents,
+  sessionConnectUrl: sessionConnectUrlOverride,
+}: SessionConnectUrlParams & { baseUrl: string; workspaceId: string }): URL {
+  const url = sessionConnectUrlOverride
+    ? parseSessionConnectUrlOverride(sessionConnectUrlOverride)
+    : deriveSessionConnectUrl(baseUrl, workspaceId)
+  url.searchParams.set('service_id', serviceId)
+  url.searchParams.set('entity_id', entityId)
+  if (conversationId) url.searchParams.set('conversation_id', conversationId)
+  // Server defaults tool_events to true. Only emit the param when the caller
+  // explicitly disables it, so default URLs stay minimal and existing tests
+  // can assert exact URLs without incidental query keys.
+  if (toolEvents === false) url.searchParams.set('tool_events', 'false')
+  return url
+}
+
+function parseSessionConnectUrlOverride(sessionConnectUrl: string): URL {
+  try {
+    const url = new URL(sessionConnectUrl)
+    if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
+      throw new ConfigurationError('sessionConnectUrl overrides must use ws: or wss: URLs')
+    }
+    if (url.search || url.hash) {
+      throw new ConfigurationError(
+        'sessionConnectUrl overrides must not include query parameters or fragments; pass SDK-managed fields through sessionConnectUrl() options',
+      )
+    }
+    return url
+  } catch (cause) {
+    if (cause instanceof ConfigurationError) throw cause
+    throw new ConfigurationError(
+      `sessionConnectUrl must be an absolute URL for session-connect overrides: ${String(cause)}`,
+    )
+  }
+}
+
+function deriveSessionConnectUrl(baseUrl: string, workspaceId: string): URL {
+  if (!/^[a-z][a-z\d+.-]*:\/\//i.test(baseUrl)) {
+    throw new ConfigurationError(
+      'sessionConnectUrl cannot be derived from a relative baseUrl; pass sessionConnectUrl explicitly',
+    )
+  }
+
+  const url = new URL(baseUrl)
+  if (url.protocol === 'ws:' || url.protocol === 'wss:') {
+    // Already a WebSocket URL — use directly.
+  } else if (url.protocol === 'http:' || url.protocol === 'https:') {
+    url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:'
+  } else {
+    throw new ConfigurationError(
+      'sessionConnectUrl can only be derived from an http, https, ws, or wss baseUrl; pass sessionConnectUrl explicitly',
+    )
+  }
+  if (url.pathname !== '/' && url.pathname !== '') {
+    throw new ConfigurationError(
+      'sessionConnectUrl can only be derived from an origin-only baseUrl; pass sessionConnectUrl explicitly when using path-prefixed gateways',
+    )
+  }
+  url.pathname = `/v1/${workspaceId}/sessions/connect`
   url.search = ''
   url.hash = ''
   return url

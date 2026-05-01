@@ -518,7 +518,10 @@ export type TimelineTrack = NonNullable<TimelineSegment['track']>
 export type TimelineActorKind = TimelineActor['kind']
 export type TimelineActorRole = TimelineActor['role']
 
-export { textStreamAuthProtocols } from './resources/conversations.js'
+export {
+  sessionConnectAuthProtocols,
+  textStreamAuthProtocols,
+} from './resources/conversations.js'
 export type {
   ConversationDetail,
   ConversationListResponse,
@@ -526,10 +529,19 @@ export type {
   ConversationTurn,
   CreateConversationRequest,
   ListConversationsParams,
+  SessionConnectUrlParams,
   TextStreamAuthProtocols,
   TextStreamUrlParams,
+  TurnDoneEvent,
+  TurnErrorEvent,
+  TurnMessageEvent,
   TurnRequest,
   TurnResponse,
+  TurnStreamEvent,
+  TurnThinkingEvent,
+  TurnTokenEvent,
+  TurnToolCallCompletedEvent,
+  TurnToolCallStartedEvent,
 } from './resources/conversations.js'
 
 // Device code auth (desktop / CLI login)
