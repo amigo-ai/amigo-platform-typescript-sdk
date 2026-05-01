@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.23.0] - 2026-05-01
+
+### Improvements
+
+- Add streamTurn async iterator (typed TurnStreamEvent stream) (#144)
+
 ## [0.22.0] - 2026-05-01
 
 ### Improvements
