@@ -711,4 +711,169 @@ describe('ConversationsResource', () => {
     expect(() => sessionConnectAuthProtocols('')).toThrow(/apiKey is required/)
     expect(() => sessionConnectAuthProtocols('workspace:secret')).toThrow(/":"/)
   })
+
+  // Helpers shared across the streamTurn tests.
+  function sseStream(frames: string[]): ReadableStream<Uint8Array> {
+    const encoder = new TextEncoder()
+    return new ReadableStream({
+      start(controller) {
+        for (const frame of frames) controller.enqueue(encoder.encode(frame))
+        controller.close()
+      },
+    })
+  }
+
+  it('streamTurn yields typed TurnStreamEvents end-to-end', async () => {
+    // Cover every variant of the discriminated union so a future SDK regen
+    // that adds a new event type breaks the exhaustive switch in the
+    // consumer (per `TurnStreamEvent['event']`).
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const stream = sseStream([
+      'event: token\ndata: {"text":"Hello"}\n\n',
+      'event: token\ndata: {"text":" "}\n\n',
+      'event: token\ndata: {"text":"world"}\n\n',
+      'event: thinking\ndata: {"tier":1,"tier_name":"fast"}\n\n',
+      'event: tool_call_started\ndata: {"tool_name":"lookup","call_id":"call-1","input":"{}"}\n\n',
+      'event: tool_call_completed\ndata: {"tool_name":"lookup","call_id":"call-1","result":"ok","succeeded":true}\n\n',
+      'event: message\ndata: {"role":"agent","text":"Hello world"}\n\n',
+      'event: done\ndata: {"conversation_id":"00000000-0000-4000-8000-000000000001","status":"active","turn_count":2}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          new Response(stream, {
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+      }),
+    })
+
+    const events = []
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      events.push(event)
+    }
+
+    expect(events.map((e) => e.event)).toEqual([
+      'token',
+      'token',
+      'token',
+      'thinking',
+      'tool_call_started',
+      'tool_call_completed',
+      'message',
+      'done',
+    ])
+    // Spot-check payloads to confirm the JSON body's fields land on the
+    // typed union member alongside the discriminator.
+    const tokens = events.filter((e) => e.event === 'token')
+    expect(tokens.map((e) => (e as { event: 'token'; text: string }).text)).toEqual([
+      'Hello',
+      ' ',
+      'world',
+    ])
+  })
+
+  it('streamTurn forwards include_tool_calls=true on the stream URL', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+          requestUrl = req.url
+          return new Response(sseStream(['event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n']), {
+            headers: { 'content-type': 'text/event-stream' },
+          })
+        },
+      }),
+    })
+
+    // Drain the generator so the underlying request is issued and the URL
+    // captured by the mock fetch above. We don't read the events themselves —
+    // the assertion is on the request URL's `include_tool_calls` query param.
+    for await (const _ of client.conversations.streamTurn(
+      conversationId,
+      { message: 'hi' },
+      { includeToolCalls: true },
+    )) {
+      void _
+    }
+
+    expect(requestUrl).toBeDefined()
+    expect(new URL(requestUrl as string).searchParams.get('include_tool_calls')).toBe('true')
+  })
+
+  it('streamTurn drops malformed and unknown frames silently', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const stream = sseStream([
+      // Unknown event discriminator — drift-tolerant skip.
+      'event: future_variant\ndata: {"foo":"bar"}\n\n',
+      // Bad JSON — drop, do not throw.
+      'event: token\ndata: not-json\n\n',
+      // No `data:` field — drop.
+      'event: token\n\n',
+      // Comment line is ignored, valid frame after.
+      ': keep-alive\nevent: token\ndata: {"text":"ok"}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          new Response(stream, {
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+      }),
+    })
+
+    const events = []
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      events.push(event)
+    }
+
+    // Only the well-formed token frame survives.
+    expect(events).toHaveLength(1)
+    expect(events[0]?.event).toBe('token')
+  })
+
+  it('streamTurn parses frames split across chunk boundaries', async () => {
+    // Real streams arrive in network-sized chunks that often split a frame
+    // mid-data. The internal buffer must concatenate decoded text until a
+    // blank-line terminator before yielding.
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const stream = sseStream([
+      'event: tok',
+      'en\ndata: {"te',
+      'xt":"streamed"}\n\n',
+      'event: done\nda',
+      'ta: {"conversation_id":"x","status":"active","turn_count":1}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          new Response(stream, {
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+      }),
+    })
+
+    const events = []
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      events.push(event)
+    }
+
+    expect(events).toHaveLength(2)
+    expect(events[0]).toMatchObject({ event: 'token', text: 'streamed' })
+    expect(events[1]).toMatchObject({ event: 'done', conversation_id: 'x' })
+  })
 })
