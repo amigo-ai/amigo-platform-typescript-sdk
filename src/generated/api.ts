@@ -9054,6 +9054,32 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** AvailabilityDate */
+        AvailabilityDate: {
+            /** Date */
+            date: string;
+            /** Slots */
+            slots?: components["schemas"]["AvailabilitySlot"][];
+        };
+        /**
+         * AvailabilityResponse
+         * @description Available appointment slots grouped by date.
+         */
+        AvailabilityResponse: {
+            /** Dates */
+            dates?: components["schemas"]["AvailabilityDate"][];
+        };
+        /** AvailabilitySlot */
+        AvailabilitySlot: {
+            /** End */
+            end: string;
+            /** Id */
+            id: string;
+            /** Provider */
+            provider?: string | null;
+            /** Start */
+            start: string;
+        };
         /** AvailableNumber */
         AvailableNumber: {
             /**
@@ -9386,6 +9412,22 @@ export interface components {
              * @description The FHIR Slot ID to book
              */
             slot_id: string;
+        };
+        /**
+         * BookingResponse
+         * @description Acknowledgement returned when a booking request is accepted.
+         */
+        BookingResponse: {
+            /** Message */
+            message: string;
+            /** Slot Id */
+            slot_id: string;
+            /**
+             * Status
+             * @description Booking lifecycle status.
+             * @constant
+             */
+            status: "pending";
         };
         /** BooleanMetricValueResponse */
         BooleanMetricValueResponse: {
@@ -11810,7 +11852,10 @@ export interface components {
              * @default true
              */
             enabled?: boolean;
-            /** Endpoints */
+            /**
+             * Endpoints
+             * @default []
+             */
             endpoints?: components["schemas"]["EndpointConfig-Input"][];
             /** Mcp Args */
             mcp_args?: string[] | null;
@@ -16459,6 +16504,15 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** HealFieldResponse */
+        HealFieldResponse: {
+            /** Confidence */
+            confidence: number;
+            /** Corrected Value */
+            corrected_value: string;
+            /** Explanation */
+            explanation?: string | null;
+        };
         /** HealthSyncResponse */
         HealthSyncResponse: {
             /** Connector Heartbeats */
@@ -17325,6 +17379,59 @@ export interface components {
         LeaveCallResponse: {
             /** Success */
             success: boolean;
+        };
+        /**
+         * LinkErrorResponse
+         * @description Error envelope returned for token / link validation failures.
+         */
+        LinkErrorResponse: {
+            /**
+             * Error Code
+             * @description Machine-readable error code.
+             * @enum {string}
+             */
+            error_code: "invalid_token" | "link_not_found" | "link_expired" | "link_exhausted";
+            /**
+             * Message
+             * @description Human-readable error message.
+             */
+            message: string;
+        };
+        /**
+         * LinkInfoResponse
+         * @description Public metadata for an intake upload link, returned to the forms app.
+         */
+        LinkInfoResponse: {
+            /**
+             * Allowed Content Types
+             * @description Allowed Content-Type values for uploads, sorted lexicographically.
+             */
+            allowed_content_types?: string[];
+            /**
+             * Customer Slug
+             * @description Stable URL-safe customer identifier.
+             */
+            customer_slug: string;
+            /**
+             * Display Name
+             * @description Human-readable display name (falls back to customer slug).
+             */
+            display_name: string;
+            /**
+             * Max Upload Bytes
+             * @description Maximum allowed upload size in bytes.
+             */
+            max_upload_bytes: number;
+        };
+        /**
+         * LookupResponse
+         * @description Autocompletion results for a surface lookup field.
+         */
+        LookupResponse: {
+            /** Results */
+            results?: {
+                [key: string]: unknown;
+            }[];
         };
         /** LoopLatencyPointItem */
         LoopLatencyPointItem: {
@@ -18235,6 +18342,18 @@ export interface components {
              * @description Optional list of field keys to extract
              */
             target_fields?: string[] | null;
+        };
+        /**
+         * OcrResponse
+         * @description Structured field extraction result for an uploaded image.
+         */
+        OcrResponse: {
+            /** Confidence */
+            confidence: number;
+            /** Extracted Fields */
+            extracted_fields?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * OperatorAction
@@ -19494,6 +19613,47 @@ export interface components {
             state?: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * PatientSurfaceSpec
+         * @description Patient-facing surface spec — what forms-app renders.
+         *
+         *     Free-form by design: ``fields``/``sections``/``branding`` are forwarded
+         *     from the upstream surface document as raw dicts. Renamed from
+         *     ``SurfaceSpec`` to avoid an OpenAPI schema-name collision with
+         *     ``platform_lib.surfaces.models.SurfaceSpec`` (which would otherwise
+         *     force FastAPI to namespace both classes and rename the existing
+         *     ``SurfaceSpec`` schema in the committed openapi.json).
+         */
+        PatientSurfaceSpec: {
+            /** Branding */
+            branding?: {
+                [key: string]: unknown;
+            } | null;
+            /** Completion Action Url */
+            completion_action_url?: string | null;
+            /** Completion Message */
+            completion_message?: string | null;
+            /** Completion Title */
+            completion_title?: string | null;
+            /** Context */
+            context?: {
+                [key: string]: unknown;
+            } | null;
+            /** Description */
+            description?: string | null;
+            /** Fields */
+            fields?: {
+                [key: string]: unknown;
+            }[];
+            /** Sections */
+            sections?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Submit Button Text */
+            submit_button_text?: string | null;
+            /** Title */
+            title?: string | null;
         };
         /** PatientTimelineResponse */
         PatientTimelineResponse: {
@@ -21126,6 +21286,18 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * SaveFieldResponse
+         * @description Acknowledgement returned when a field is auto-saved.
+         */
+        SaveFieldResponse: {
+            /**
+             * Status
+             * @default saved
+             * @constant
+             */
+            status?: "saved";
         };
         /** Scenario */
         Scenario: {
@@ -22959,6 +23131,39 @@ export interface components {
             surface_id: string;
         };
         /**
+         * SurfaceErrorResponse
+         * @description Error envelope returned by patient-facing surface JSON endpoints.
+         *
+         *     Frontend (forms-app) reads ``error_code`` for branching and ``message``
+         *     for user-visible copy. ``reason`` is a debug-only field set by the token
+         *     validator. ``details`` is set when a request body fails server-side
+         *     validation.
+         */
+        SurfaceErrorResponse: {
+            /**
+             * Details
+             * @description Optional structured validation details for 422 responses.
+             */
+            details?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Error Code
+             * @description Machine-readable error code.
+             */
+            error_code: string;
+            /**
+             * Message
+             * @description Human-readable error message. Omitted for token-validator errors that only carry ``reason``.
+             */
+            message?: string | null;
+            /**
+             * Reason
+             * @description Debug detail from the token validator (e.g. ``token expired``).
+             */
+            reason?: string | null;
+        };
+        /**
          * SurfaceField
          * @description A single data collection field in a surface spec.
          *
@@ -23256,6 +23461,23 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title: components["schemas"]["NameString"];
+        };
+        /**
+         * SurfaceSpecResponse
+         * @description Surface render bundle returned to forms-app SSR.
+         */
+        SurfaceSpecResponse: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Saved Values */
+            saved_values?: {
+                [key: string]: unknown;
+            };
+            spec: components["schemas"]["PatientSurfaceSpec"];
+            /** Status */
+            status?: string | null;
+            /** Surface Id */
+            surface_id?: string | null;
         };
         /** SurfaceSubmittedEvent */
         SurfaceSubmittedEvent: {
@@ -23559,7 +23781,10 @@ export interface components {
         };
         /** TestEndpointRequest */
         TestEndpointRequest: {
-            /** Params */
+            /**
+             * Params
+             * @default {}
+             */
             params?: {
                 [key: string]: unknown;
             };
@@ -25375,6 +25600,55 @@ export interface components {
             /** Region */
             region?: ("us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1") | null;
         };
+        /**
+         * UploadDuplicateInfo
+         * @description Pointer to an existing upload row when content-hash dedup fires.
+         */
+        UploadDuplicateInfo: {
+            /**
+             * Id
+             * @description UUID of the existing upload row.
+             */
+            id: string;
+            /**
+             * Received At
+             * @description ISO-8601 timestamp the original upload was received.
+             */
+            received_at: string;
+        };
+        /**
+         * UploadFileResponse
+         * @description Receipt for a successful upload via an intake link.
+         */
+        UploadFileResponse: {
+            /** @description Set when this upload's content hash matched a prior upload; otherwise null. */
+            duplicate_of?: components["schemas"]["UploadDuplicateInfo"] | null;
+            /**
+             * Filename
+             * @description Stored filename.
+             */
+            filename: string;
+            /**
+             * Id
+             * @description UUID of the newly created upload row.
+             */
+            id: string;
+            /**
+             * Scan Status
+             * @description Virus-scan status (e.g. ``clean``, ``skipped``).
+             */
+            scan_status: string;
+            /**
+             * Sha256
+             * @description SHA-256 of the uploaded bytes (lowercase hex).
+             */
+            sha256: string;
+            /**
+             * Size Bytes
+             * @description Stored size in bytes.
+             */
+            size_bytes: number;
+        };
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
             version_set: components["schemas"]["VersionSet"];
@@ -26978,7 +27252,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["AvailabilityResponse"];
                 };
             };
             /** @description Invalid token */
@@ -26986,21 +27260,27 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Token expired */
             410: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Invalid date format */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Rate limited */
             429: {
@@ -27032,7 +27312,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["BookingResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27040,22 +27320,44 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
+            };
+            /** @description Slot not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
+            };
+            /** @description Slot unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Token expired */
             410: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
-            /** @description Validation Error */
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
                 };
             };
             /** @description Rate limited */
@@ -27089,7 +27391,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SaveFieldResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27097,14 +27399,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Payload too large */
             413: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -27127,7 +27433,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
         };
     };
@@ -27152,7 +27460,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["HealFieldResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27160,7 +27468,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -27200,7 +27510,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["LookupResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27208,14 +27518,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Invalid lookup type */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Rate limited */
             429: {
@@ -27247,7 +27561,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["OcrResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27255,7 +27569,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -27292,7 +27608,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["SurfaceSpecResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27300,28 +27616,36 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Surface not found */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Already submitted */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Token expired or surface archived */
             410: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["SurfaceErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -27414,21 +27738,14 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
             /** @description File uploaded successfully */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UploadFileResponse"];
+                };
             };
             /** @description Link not found */
             404: {
@@ -27491,7 +27808,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": components["schemas"]["LinkInfoResponse"];
                 };
             };
             /** @description Invalid token */
@@ -27499,21 +27816,27 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LinkErrorResponse"];
+                };
             };
             /** @description Link not found */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LinkErrorResponse"];
+                };
             };
-            /** @description Link expired */
+            /** @description Link expired or exhausted */
             410: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["LinkErrorResponse"];
+                };
             };
             /** @description Validation Error */
             422: {
@@ -27524,7 +27847,7 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Upload limit reached */
+            /** @description Rate limited */
             429: {
                 headers: {
                     [name: string]: unknown;
