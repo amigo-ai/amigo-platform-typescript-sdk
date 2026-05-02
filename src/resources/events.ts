@@ -48,65 +48,6 @@ export type WorkspaceSSEEvent = components['schemas']['WorkspaceSSEEvent']
 export type WorkspaceSSEEventType = WorkspaceSSEEvent['event_type']
 
 /**
- * Reason taxonomy for {@link WorkspaceEventStreamError}. The platform-api
- * stream encodes a stable ``code`` in every error / control frame so
- * consumers can branch deterministically without parsing free-form text.
- *
- *   * ``too_many_streams`` — workspace exceeded its concurrent-stream cap
- *     (``error`` frame with ``code=too_many_streams``). Do NOT auto-retry —
- *     close another tab first.
- *   * ``stream_unavailable`` — Valkey or downstream pubsub is unreachable.
- *     Retryable, but not until the platform recovers.
- *   * ``stream_error`` — generic server-side stream failure.
- *   * ``auth`` — 401/403 returned at connect time. Terminal.
- *   * ``transport_exhausted`` — reconnect budget exhausted.
- *   * ``aborted`` — caller aborted via signal / ``unsubscribe()``.
- *   * ``unknown`` — fallback when the server returns an error frame the SDK
- *     does not recognize.
- */
-export type WorkspaceEventStreamErrorCode =
-  | 'too_many_streams'
-  | 'stream_unavailable'
-  | 'stream_error'
-  | 'auth'
-  | 'transport_exhausted'
-  | 'aborted'
-  | 'unknown'
-
-/**
- * Structured error surfaced through {@link SubscribeToWorkspaceOptions.onError}.
- *
- * Subclasses ``Error`` so existing consumers using ``err.message`` continue
- * to work, while adding ``code`` + ``retryable`` + raw ``frame`` for
- * deterministic branching. Inspect with ``isWorkspaceEventStreamError``.
- */
-export class WorkspaceEventStreamError extends Error {
-  readonly code: WorkspaceEventStreamErrorCode
-  readonly retryable: boolean
-  /** Raw decoded ``error`` frame body (or ``undefined`` for transport errors). */
-  readonly frame: Record<string, unknown> | undefined
-
-  constructor(
-    message: string,
-    code: WorkspaceEventStreamErrorCode,
-    retryable: boolean,
-    frame?: Record<string, unknown>,
-  ) {
-    super(message)
-    this.name = 'WorkspaceEventStreamError'
-    this.code = code
-    this.retryable = retryable
-    this.frame = frame
-  }
-}
-
-export function isWorkspaceEventStreamError(
-  value: unknown,
-): value is WorkspaceEventStreamError {
-  return value instanceof WorkspaceEventStreamError
-}
-
-/**
  * Options for {@link EventsResource.subscribeToWorkspace}.
  */
 export interface SubscribeToWorkspaceOptions {
@@ -776,4 +717,63 @@ async function abortableSleep(ms: number, signal: AbortSignal): Promise<boolean>
     }
     signal.addEventListener('abort', onAbort, { once: true })
   })
+}
+
+/**
+ * Reason taxonomy for {@link WorkspaceEventStreamError}. The platform-api
+ * stream encodes a stable ``code`` in every error / control frame so
+ * consumers can branch deterministically without parsing free-form text.
+ *
+ *   * ``too_many_streams`` — workspace exceeded its concurrent-stream cap
+ *     (``error`` frame with ``code=too_many_streams``). Do NOT auto-retry —
+ *     close another tab first.
+ *   * ``stream_unavailable`` — Valkey or downstream pubsub is unreachable.
+ *     Retryable, but not until the platform recovers.
+ *   * ``stream_error`` — generic server-side stream failure.
+ *   * ``auth`` — 401/403 returned at connect time. Terminal.
+ *   * ``transport_exhausted`` — reconnect budget exhausted.
+ *   * ``aborted`` — caller aborted via signal / ``unsubscribe()``.
+ *   * ``unknown`` — fallback when the server returns an error frame the SDK
+ *     does not recognize.
+ */
+export type WorkspaceEventStreamErrorCode =
+  | 'too_many_streams'
+  | 'stream_unavailable'
+  | 'stream_error'
+  | 'auth'
+  | 'transport_exhausted'
+  | 'aborted'
+  | 'unknown'
+
+/**
+ * Structured error surfaced through {@link SubscribeToWorkspaceOptions.onError}.
+ *
+ * Subclasses ``Error`` so existing consumers using ``err.message`` continue
+ * to work, while adding ``code`` + ``retryable`` + raw ``frame`` for
+ * deterministic branching. Inspect with ``isWorkspaceEventStreamError``.
+ */
+export class WorkspaceEventStreamError extends Error {
+  readonly code: WorkspaceEventStreamErrorCode
+  readonly retryable: boolean
+  /** Raw decoded ``error`` frame body (or ``undefined`` for transport errors). */
+  readonly frame: Record<string, unknown> | undefined
+
+  constructor(
+    message: string,
+    code: WorkspaceEventStreamErrorCode,
+    retryable: boolean,
+    frame?: Record<string, unknown>,
+  ) {
+    super(message)
+    this.name = 'WorkspaceEventStreamError'
+    this.code = code
+    this.retryable = retryable
+    this.frame = frame
+  }
+}
+
+export function isWorkspaceEventStreamError(
+  value: unknown,
+): value is WorkspaceEventStreamError {
+  return value instanceof WorkspaceEventStreamError
 }

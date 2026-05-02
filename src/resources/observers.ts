@@ -37,6 +37,13 @@ import { WorkspaceScopedResource } from './base.js'
 /**
  * Discriminated union of every observer stream event variant. Members carry
  * their own ``type`` literal — narrow with ``switch (event.type)``.
+ *
+ * **Spec backing:** ``ObserverSSEEvent`` is derived from the platform-api
+ * OpenAPI snapshot (`openapi.json` → `components.schemas.ObserverSSEEvent`).
+ * The wire URL and auth subprotocol for the observer WebSocket itself live
+ * outside `openapi.json` (it's a streaming transport, not a REST surface),
+ * matching the established pattern of {@link TextStreamUrlParams} and
+ * {@link SessionConnectUrlParams} in conversations.ts.
  */
 export type ObserverSSEEvent = components['schemas']['ObserverSSEEvent']
 
@@ -292,10 +299,23 @@ function deriveFromBase(baseUrl: string, workspaceId: string, callSid: string): 
     )
   }
   // Map http(s) to ws(s) — the agent-engine ALB serves both on the same host.
+  // Plaintext ``ws://`` is only allowed for local-dev hosts; otherwise the
+  // bearer token would travel in cleartext over the wire.
+  const isLocalHost =
+    parsed.hostname === 'localhost' ||
+    parsed.hostname === '127.0.0.1' ||
+    parsed.hostname === '::1'
   let scheme: string
-  if (parsed.protocol === 'https:' || parsed.protocol === 'wss:') scheme = 'wss:'
-  else if (parsed.protocol === 'http:' || parsed.protocol === 'ws:') scheme = 'ws:'
-  else {
+  if (parsed.protocol === 'https:' || parsed.protocol === 'wss:') {
+    scheme = 'wss:'
+  } else if (parsed.protocol === 'http:' || parsed.protocol === 'ws:') {
+    if (!isLocalHost) {
+      throw new ConfigurationError(
+        `observerUrl refuses plaintext ws:// to non-localhost host (${parsed.hostname}); use https:// or wss:// to keep the bearer token off the wire`,
+      )
+    }
+    scheme = 'ws:'
+  } else {
     throw new ConfigurationError(
       `observerUrl can only be derived from an http, https, ws, or wss baseUrl: ${baseUrl}`,
     )

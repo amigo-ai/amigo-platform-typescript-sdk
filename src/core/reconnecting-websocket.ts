@@ -25,6 +25,8 @@
  * @see EventsResource for the analogous SSE-based helper
  */
 
+import { AmigoError } from './errors.js'
+
 /** Lifecycle states reported via {@link ReconnectingWebSocketOptions.onStateChange}. */
 export type ReconnectingWebSocketState =
   | 'connecting'
@@ -46,8 +48,16 @@ export type ReconnectingWebSocketErrorReason =
   | 'open_failed'
   | 'unknown'
 
-/** Structured terminal error surfaced to consumers. */
-export class ReconnectingWebSocketError extends Error {
+/**
+ * Structured terminal error surfaced to consumers.
+ *
+ * Extends {@link AmigoError} so a single ``catch (err: AmigoError)`` block
+ * uniformly handles both HTTP-pipeline failures and WebSocket-pipeline
+ * failures. The WebSocket reconnect loop cannot reuse the HTTP retry
+ * infrastructure (different transport, different terminal-code semantics),
+ * but the surfaced error type is unified.
+ */
+export class ReconnectingWebSocketError extends AmigoError {
   readonly reason: ReconnectingWebSocketErrorReason
   readonly closeCode: number | undefined
   readonly closeReason: string | undefined
@@ -60,8 +70,12 @@ export class ReconnectingWebSocketError extends Error {
     closeReason: string | undefined,
     attempts: number,
   ) {
-    super(message)
-    this.name = 'ReconnectingWebSocketError'
+    super(message, {
+      // ``errorCode`` doubles as a lightweight discriminator for catch
+      // blocks that want to branch without ``instanceof``.
+      errorCode: `websocket.${reason}`,
+      detail: closeReason,
+    })
     this.reason = reason
     this.closeCode = closeCode
     this.closeReason = closeReason

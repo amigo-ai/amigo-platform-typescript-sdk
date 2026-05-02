@@ -419,6 +419,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `events`
 
+- `subscribeToWorkspace`
+
 ### `functions`
 
 - `list`
