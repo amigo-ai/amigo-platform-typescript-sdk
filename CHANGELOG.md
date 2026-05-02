@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.25.0] - 2026-05-01
+
+### Features
+
+- **Typed error bodies** — `AmigoError` now carries a discriminated `errorBody` (`HttpExceptionBody | HttpValidationErrorBody | UnparseableErrorBody`) plus a verbatim `rawBody` (truncated to 8 KB). New body type guards — `isHttpException`, `isHttpValidationError`, `isUnparseableErrorBody` — let consumers narrow the union without `any`/`unknown` casts. Status-class type guards added: `isPermissionError`, `isConflictError`, `isValidationError`, `isServerError`, `isNetworkError`. Backward compat preserved: existing `err.message` / `err.detail` / `err.errorCode` / `err.requestId` and the legacy `ParseError.body: string` still work unchanged.
+- **`createApiError` parse-failure handling hardened** — body reads no longer throw on malformed JSON, empty bodies, or connection-drop mid-read. The factory always returns an `AmigoError` subclass; the unparseable fallback puts the verbatim text on `errorBody.raw_body` for diagnostics.
+- **`client.defineRoute(method, path)` path helper** — captures a path literal at definition time, returning a fully-typed callable that survives reassignment, export, and composition across modules. Solves the CLAUDE.md "explicit `as const` on path params" footgun by making the literal-path constraint structural at the call site, with full request/response inference. Workspace IDs continue to be auto-injected; runtime behavior is identical to calling the matching `client.GET/POST/PUT/...` directly.
+
 ## [0.24.0] - 2026-05-01
 
 ### Features
