@@ -488,12 +488,12 @@ For per-call voice observation (`agent_transcript_delta`, `latency`, `session_*`
 `participant_*`, etc.), use the WebSocket-based observer helper:
 
 ```typescript
-const handle = client.observers.subscribe({
+const observerHandle = client.observers.subscribe({
   callSid: 'CAxxx',
   token: bearerToken,
   onEvent: (event) => {
     switch (event.type) {
-      case 'agent_transcript_delta': renderAgentDelta(event.text); break
+      case 'agent_transcript_delta': renderAgentDelta(event.delta); break
       case 'session_end': showSummary(event); break
     }
   },
