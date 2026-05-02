@@ -5905,6 +5905,7 @@
           "email_id": {
             "anyOf": [
               {
+                "maxLength": 256,
                 "type": "string"
               },
               {
@@ -9562,6 +9563,8 @@
           },
           "entity_types": {
             "items": {
+              "maxLength": 64,
+              "minLength": 1,
               "type": "string"
             },
             "maxItems": 100,
@@ -9595,6 +9598,7 @@
           "sync_schedule": {
             "anyOf": [
               {
+                "maxLength": 256,
                 "type": "string"
               },
               {
@@ -9854,13 +9858,12 @@
           "phone_number": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/PhoneE164"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Phone Number"
+            ]
           },
           "role": {
             "default": "operator",
@@ -9874,8 +9877,11 @@
           },
           "skills": {
             "items": {
+              "maxLength": 64,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 50,
             "title": "Skills",
             "type": "array"
           },
@@ -10764,6 +10770,7 @@
           "resource_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -10991,6 +10998,7 @@
           "created_by": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -11042,6 +11050,7 @@
           "source_event_type": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -11053,6 +11062,7 @@
           "target_entity_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -14917,9 +14927,21 @@
         "type": "object"
       },
       "EmotionSummary": {
-        "description": "Aggregated emotional analysis across the call.",
+        "description": "Aggregated emotional analysis across the call.\n\nFree-form residual on the raw ``emotion_summary`` JSONB:\n``compound_emotions: list[{name, score}]``. Not exposed via this\ntyped shape \u2014 readers wanting it consume the JSONB endpoint.",
         "properties": {
-          "avg_valence": {
+          "average_arousal": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average emotional arousal 0.0 to 1.0",
+            "title": "Average Arousal"
+          },
+          "average_valence": {
             "anyOf": [
               {
                 "type": "number"
@@ -14929,31 +14951,38 @@
               }
             ],
             "description": "Average emotional valence -1.0 to 1.0",
-            "title": "Avg Valence"
+            "title": "Average Valence"
           },
-          "caller_distress_detected": {
-            "default": false,
-            "description": "Whether caller distress was detected",
-            "title": "Caller Distress Detected",
-            "type": "boolean"
+          "barge_in_count": {
+            "default": 0,
+            "description": "Number of caller interruptions (emotion-tagged)",
+            "title": "Barge In Count",
+            "type": "integer"
           },
           "dominant_emotion": {
             "anyOf": [
               {
+                "maxLength": 256,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Most frequent emotion",
+            "description": "Most frequent emotion (e.g. 'neutral', 'happy', 'angry')",
             "title": "Dominant Emotion"
           },
-          "emotion_shifts": {
-            "default": 0,
-            "description": "Number of significant emotion transitions",
-            "title": "Emotion Shifts",
-            "type": "integer"
+          "peak_negative_valence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Most negative valence observed",
+            "title": "Peak Negative Valence"
           }
         },
         "title": "EmotionSummary",
@@ -23116,8 +23145,56 @@
         "type": "object"
       },
       "LatencySummary": {
-        "description": "Audio latency and silence metrics.",
+        "description": "Audio + engine latency metrics (one entry per turn averaged).",
         "properties": {
+          "avg_audio_ttfb_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average audio time-to-first-byte (ms)",
+            "title": "Avg Audio Ttfb Ms"
+          },
+          "avg_engine_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average reasoning-engine latency (ms)",
+            "title": "Avg Engine Ms"
+          },
+          "avg_nav_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average navigation latency (ms)",
+            "title": "Avg Nav Ms"
+          },
+          "avg_render_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average render latency (ms)",
+            "title": "Avg Render Ms"
+          },
           "p50_audio_ttfb_ms": {
             "anyOf": [
               {
@@ -23127,8 +23204,20 @@
                 "type": "null"
               }
             ],
-            "description": "Median audio time-to-first-byte (ms)",
+            "description": "Median audio TTFB (ms)",
             "title": "P50 Audio Ttfb Ms"
+          },
+          "p50_engine_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Median engine latency (ms)",
+            "title": "P50 Engine Ms"
           },
           "p95_audio_ttfb_ms": {
             "anyOf": [
@@ -23142,6 +23231,18 @@
             "description": "95th percentile audio TTFB (ms)",
             "title": "P95 Audio Ttfb Ms"
           },
+          "p95_engine_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "95th percentile engine latency (ms)",
+            "title": "P95 Engine Ms"
+          },
           "silence_ratio": {
             "anyOf": [
               {
@@ -23154,17 +23255,17 @@
             "description": "Fraction of call spent in silence",
             "title": "Silence Ratio"
           },
-          "total_silence_seconds": {
+          "turn_count": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "integer"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Total silence duration in seconds",
-            "title": "Total Silence Seconds"
+            "description": "Number of turns the latency averages were computed over",
+            "title": "Turn Count"
           }
         },
         "title": "LatencySummary",
@@ -25507,25 +25608,25 @@
         "type": "object"
       },
       "OperatorIntelligenceSummary": {
-        "description": "Operator intervention summary.",
+        "description": "Operator intervention summary.\n\nThree-valued semantics on ``operator_active``:\n- ``True``  \u2014 escalation occurred and an operator was active.\n- ``False`` \u2014 escalation occurred but no operator picked up.\n- ``None``  \u2014 no escalation occurred (producer omits the key).\n  Readers must distinguish; do not coerce ``None`` \u2192 ``False``.",
         "properties": {
           "escalated": {
             "default": false,
-            "description": "Whether the call was escalated",
+            "description": "Whether the call was escalated to a human operator",
             "title": "Escalated",
             "type": "boolean"
           },
-          "operator_handle_time_seconds": {
+          "operator_active": {
             "anyOf": [
               {
-                "type": "number"
+                "type": "boolean"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Operator handle time",
-            "title": "Operator Handle Time Seconds"
+            "description": "Whether an operator was active during escalation. True = active; False = escalation occurred but no operator picked up; None = no escalation occurred (do NOT coerce to False).",
+            "title": "Operator Active"
           }
         },
         "title": "OperatorIntelligenceSummary",
@@ -32223,21 +32324,13 @@
         "type": "object"
       },
       "RiskSummary": {
-        "description": "Aggregated risk signals across the call.",
+        "description": "Aggregated risk signals across the call.\n\nFree-form residual on the raw ``risk_summary`` JSONB:\n``signals: list[{name, raw_score, weight, weighted_score, detail}]``\n\u2014 the per-signal breakdown that aggregates into ``composite_score``.\nNot exposed via this typed shape; consumers needing per-signal\ndetail read the JSONB endpoint.",
         "properties": {
           "composite_score": {
             "default": 0.0,
             "description": "Overall risk score 0.0 to 1.0",
             "title": "Composite Score",
             "type": "number"
-          },
-          "flags": {
-            "description": "Specific risk flags raised",
-            "items": {
-              "type": "string"
-            },
-            "title": "Flags",
-            "type": "array"
           },
           "level": {
             "default": "low",
@@ -32464,16 +32557,8 @@
         "type": "object"
       },
       "SafetySummary": {
-        "description": "Safety filter results.",
+        "description": "Safety filter results.\n\nFree-form residual on the raw ``safety_summary`` JSONB:\n``actions: dict | list`` \u2014 escalation handler actions taken\nwhen ``match_count > 0``. Not exposed via this typed shape.",
         "properties": {
-          "categories": {
-            "description": "Safety categories matched",
-            "items": {
-              "type": "string"
-            },
-            "title": "Categories",
-            "type": "array"
-          },
           "match_count": {
             "default": 0,
             "description": "Number of safety filter matches",
@@ -37381,6 +37466,7 @@
           "resource_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -39878,7 +39964,7 @@
         "type": "object"
       },
       "ToolSummary": {
-        "description": "Tool usage statistics.",
+        "description": "Tool usage statistics.\n\nFree-form residual on the raw ``tool_summary`` JSONB:\n``by_tool: list[{name, calls, succeeded, failed, avg_duration_ms}]``\n\u2014 per-tool breakdown. Not exposed via this typed shape.",
         "properties": {
           "failed": {
             "default": 0,
@@ -39891,6 +39977,12 @@
             "description": "Tool failure rate 0.0 to 1.0",
             "title": "Failure Rate",
             "type": "number"
+          },
+          "succeeded": {
+            "default": 0,
+            "description": "Successful tool invocations",
+            "title": "Succeeded",
+            "type": "integer"
           },
           "total_calls": {
             "default": 0,
@@ -42250,6 +42342,8 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 64,
+                  "minLength": 1,
                   "type": "string"
                 },
                 "maxItems": 100,
@@ -42287,6 +42381,7 @@
           "sync_schedule": {
             "anyOf": [
               {
+                "maxLength": 256,
                 "type": "string"
               },
               {
@@ -42595,13 +42690,12 @@
           "phone_number": {
             "anyOf": [
               {
-                "type": "string"
+                "$ref": "#/components/schemas/PhoneE164"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Phone Number"
+            ]
           },
           "role": {
             "anyOf": [
@@ -42623,8 +42717,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 64,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -43616,6 +43713,7 @@
           "resource_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -43881,6 +43979,7 @@
           "source_event_type": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -43892,6 +43991,7 @@
           "target_entity_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -45245,8 +45345,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -45259,8 +45362,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 200,
                 "type": "array"
               },
               {
@@ -45272,6 +45378,7 @@
           "language": {
             "anyOf": [
               {
+                "maxLength": 32,
                 "type": "string"
               },
               {
@@ -45308,6 +45415,7 @@
           "pronunciation_dict_id": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -45320,8 +45428,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -45344,6 +45455,7 @@
           "tone": {
             "anyOf": [
               {
+                "maxLength": 2000,
                 "type": "string"
               },
               {
@@ -45394,6 +45506,7 @@
           "voice_id": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -47424,20 +47537,8 @@
         "type": "object"
       },
       "src__routes__calls__ConversationSummary": {
-        "description": "Conversation flow metrics.",
+        "description": "Conversation flow metrics.\n\nFree-form residual on the raw ``conversation_summary`` JSONB:\n``text_intelligence: dict`` (text-channel intelligence\nsub-payload), and on the simulation path ``transcript_text:\nstr`` (PHI), ``tool_calls: list``, ``score``,\n``score_rationale``, ``terminal_reached``, ``states_visited``.\nNot exposed via this typed shape.",
         "properties": {
-          "avg_turn_duration_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Average turn duration",
-            "title": "Avg Turn Duration Seconds"
-          },
           "barge_in_count": {
             "default": 0,
             "description": "Number of caller interruptions",
@@ -47446,14 +47547,26 @@
           },
           "loop_count": {
             "default": 0,
-            "description": "Number of detected conversation loops",
+            "description": "Number of detected state loops",
             "title": "Loop Count",
             "type": "integer"
           },
-          "topic_changes": {
+          "states_visited_count": {
             "default": 0,
-            "description": "Number of topic transitions",
-            "title": "Topic Changes",
+            "description": "Number of states visited (including repeats)",
+            "title": "States Visited Count",
+            "type": "integer"
+          },
+          "turn_count": {
+            "default": 0,
+            "description": "Total turn count for the call",
+            "title": "Turn Count",
+            "type": "integer"
+          },
+          "unique_states": {
+            "default": 0,
+            "description": "Number of distinct states visited",
+            "title": "Unique States",
             "type": "integer"
           }
         },
