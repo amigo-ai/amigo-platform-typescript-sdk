@@ -17,6 +17,14 @@ import {
   isRateLimitError,
   isAuthenticationError,
   isRequestTimeoutError,
+  isPermissionError,
+  isConflictError,
+  isValidationError,
+  isServerError,
+  isNetworkError,
+  isHttpException,
+  isHttpValidationError,
+  isUnparseableErrorBody,
   createApiError,
 } from '../../src/core/errors.js'
 
@@ -134,5 +142,218 @@ describe('createApiError', () => {
         },
       },
     })
+  })
+
+  it('captures errorBody for FastAPI HTTPException shape', async () => {
+    const error = await createApiError(
+      new Response(JSON.stringify({ detail: 'Agent not found', error_code: 'agent_missing' }), {
+        status: 404,
+      }),
+    )
+
+    expect(error).toBeInstanceOf(NotFoundError)
+    expect(error.errorBody).toEqual({ detail: 'Agent not found', error_code: 'agent_missing' })
+    expect(isHttpException(error)).toBe(true)
+    expect(isHttpValidationError(error)).toBe(false)
+    expect(isUnparseableErrorBody(error)).toBe(false)
+    if (isHttpException(error)) {
+      // Type narrowed: errorBody.detail is string | object | array
+      expect(error.errorBody.detail).toBe('Agent not found')
+      expect(error.errorBody.error_code).toBe('agent_missing')
+    }
+  })
+
+  it('captures errorBody for HTTPValidationError shape (FastAPI 422)', async () => {
+    const error = await createApiError(
+      new Response(
+        JSON.stringify({
+          detail: [
+            { loc: ['body', 'name'], msg: 'field required', type: 'value_error.missing' },
+            { loc: ['body', 'email'], msg: 'invalid email', type: 'value_error.email' },
+          ],
+        }),
+        { status: 422 },
+      ),
+    )
+
+    expect(error).toBeInstanceOf(ValidationError)
+    expect(isHttpValidationError(error)).toBe(true)
+    expect(isHttpException(error)).toBe(false)
+    expect(isUnparseableErrorBody(error)).toBe(false)
+    if (isHttpValidationError(error)) {
+      // Type narrowed: errorBody.detail is ValidationError[]
+      expect(error.errorBody.detail).toHaveLength(2)
+      expect(error.errorBody.detail?.[0]?.loc).toEqual(['body', 'name'])
+      expect(error.errorBody.detail?.[1]?.msg).toBe('invalid email')
+    }
+  })
+
+  it('handles malformed JSON body without bubbling parse error', async () => {
+    const error = await createApiError(
+      new Response('<!DOCTYPE html>this is not json', {
+        status: 502,
+        statusText: 'Bad Gateway',
+      }),
+    )
+
+    expect(error).toBeInstanceOf(ServerError)
+    expect(error.statusCode).toBe(502)
+    expect(isUnparseableErrorBody(error)).toBe(true)
+    expect(isHttpException(error)).toBe(false)
+    expect(isHttpValidationError(error)).toBe(false)
+    if (isUnparseableErrorBody(error)) {
+      expect(error.errorBody.detail).toBe('Bad Gateway')
+      expect(error.errorBody.raw_body).toBe('<!DOCTYPE html>this is not json')
+    }
+    expect(error.rawBody).toBe('<!DOCTYPE html>this is not json')
+  })
+
+  it('handles empty body without throwing', async () => {
+    const error = await createApiError(
+      new Response('', { status: 500, statusText: 'Internal Server Error' }),
+    )
+
+    expect(error).toBeInstanceOf(ServerError)
+    expect(isUnparseableErrorBody(error)).toBe(true)
+    if (isUnparseableErrorBody(error)) {
+      expect(error.errorBody.detail).toBe('Internal Server Error')
+      expect(error.errorBody.raw_body).toBe('')
+    }
+    expect(error.rawBody).toBe('')
+  })
+
+  it('handles connection-drop mid-read without throwing', async () => {
+    // Build a Response-like object with a rejecting text() to simulate
+    // connection drop after status was read. We use a fake object instead
+    // of a real Response since `Response.text` is read-only.
+    const broken = {
+      status: 503,
+      statusText: 'Service Unavailable',
+      url: 'https://api.example.com/x',
+      headers: new Headers(),
+      text: () => Promise.reject(new Error('connection reset by peer')),
+    } as unknown as Response
+
+    const error = await createApiError(broken)
+
+    expect(error.statusCode).toBe(503)
+    expect(isUnparseableErrorBody(error)).toBe(true)
+    if (isUnparseableErrorBody(error)) {
+      expect(error.errorBody.raw_body).toBe('')
+    }
+  })
+
+  it('truncates oversized raw body to 8 KB', async () => {
+    const huge = 'x'.repeat(100_000)
+    const error = await createApiError(
+      new Response(huge, { status: 500, statusText: 'Internal Server Error' }),
+    )
+
+    expect(error.rawBody?.length).toBe(8 * 1024)
+    if (isUnparseableErrorBody(error)) {
+      expect(error.errorBody.raw_body.length).toBe(8 * 1024)
+    }
+  })
+
+  it('handles JSON body that parses to a non-object (e.g. literal null)', async () => {
+    const error = await createApiError(
+      new Response('null', { status: 500, statusText: 'Internal Server Error' }),
+    )
+
+    // JSON parsed but isn't object — surface as unparseable
+    expect(isUnparseableErrorBody(error)).toBe(true)
+    expect(isHttpException(error)).toBe(false)
+  })
+
+  it('preserves backward-compat fields on legacy error shape', async () => {
+    const error = await createApiError(
+      new Response(
+        JSON.stringify({
+          message: 'Legacy message',
+          detail: 'Legacy detail',
+          error_code: 'LEGACY_CODE',
+          request_id: 'req-legacy-1',
+        }),
+        { status: 400 },
+      ),
+    )
+
+    expect(error).toBeInstanceOf(BadRequestError)
+    // Legacy flat fields still exposed
+    expect(error.message).toBe('Legacy message')
+    expect(error.detail).toBe('Legacy detail')
+    expect(error.errorCode).toBe('LEGACY_CODE')
+    expect(error.requestId).toBe('req-legacy-1')
+    // And the typed body is also surfaced
+    expect(isHttpException(error)).toBe(true)
+    if (isHttpException(error)) {
+      expect(error.errorBody.detail).toBe('Legacy detail')
+      expect(error.errorBody.error_code).toBe('LEGACY_CODE')
+    }
+  })
+
+  it('stringifies non-string detail values', async () => {
+    const detailObj = { code: 'X', extra: { nested: true } }
+    const error = await createApiError(
+      new Response(JSON.stringify({ detail: detailObj }), { status: 400 }),
+    )
+
+    // Flat .detail is the JSON-stringified form for backward compat
+    expect(error.detail).toBe(JSON.stringify(detailObj))
+    // But errorBody.detail preserves the structure
+    expect(isHttpException(error)).toBe(true)
+    if (isHttpException(error)) {
+      expect(error.errorBody.detail).toEqual(detailObj)
+    }
+  })
+})
+
+describe('Body type guards', () => {
+  it('isHttpException — false on non-AmigoError', () => {
+    expect(isHttpException(new Error('x'))).toBe(false)
+    expect(isHttpException(null)).toBe(false)
+    expect(isHttpException({ errorBody: { detail: 'x' } })).toBe(false)
+  })
+
+  it('isHttpValidationError — only true when detail is array', () => {
+    const stringDetail = new BadRequestError('x', {
+      errorBody: { detail: 'string detail' },
+    })
+    expect(isHttpValidationError(stringDetail)).toBe(false)
+    expect(isHttpException(stringDetail)).toBe(true)
+
+    const arrayDetail = new ValidationError('x', {
+      errorBody: { detail: [{ loc: ['x'], msg: 'y', type: 'z' }] },
+    })
+    expect(isHttpValidationError(arrayDetail)).toBe(true)
+    expect(isHttpException(arrayDetail)).toBe(false)
+  })
+
+  it('isUnparseableErrorBody — true only for raw_body shape', () => {
+    const unparseable = new ServerError('x', {
+      errorBody: { detail: 'fallback', raw_body: 'invalid' },
+    })
+    expect(isUnparseableErrorBody(unparseable)).toBe(true)
+    expect(isHttpException(unparseable)).toBe(false)
+
+    const httpErr = new BadRequestError('x', { errorBody: { detail: 'real' } })
+    expect(isUnparseableErrorBody(httpErr)).toBe(false)
+  })
+
+  it('all status-class guards', () => {
+    expect(isPermissionError(new PermissionError('x'))).toBe(true)
+    expect(isPermissionError(new NotFoundError('x'))).toBe(false)
+
+    expect(isConflictError(new ConflictError('x'))).toBe(true)
+    expect(isConflictError(new ValidationError('x'))).toBe(false)
+
+    expect(isValidationError(new ValidationError('x'))).toBe(true)
+    expect(isValidationError(new BadRequestError('x'))).toBe(false)
+
+    expect(isServerError(new ServerError('x'))).toBe(true)
+    expect(isServerError(new BadRequestError('x'))).toBe(false)
+
+    expect(isNetworkError(new NetworkError('x'))).toBe(true)
+    expect(isNetworkError(new BadRequestError('x'))).toBe(false)
   })
 })

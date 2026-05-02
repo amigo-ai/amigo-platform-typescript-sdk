@@ -308,6 +308,77 @@ export class AmigoClient {
     }) as AmigoResponse<OperationResponse<Path, 'options'>>
   }
 
+  /**
+   * Bind a path literal + method to a fully-typed callable.
+   *
+   * Captures the path as a literal type at definition time, so the returned
+   * callable keeps full request/response inference even when stored,
+   * exported, or composed across modules. Solves the "explicit `as const` on
+   * path params" footgun: consumers who store a path in a `string` variable
+   * lose path inference and the SDK collapses to `unknown`.
+   *
+   * ```ts
+   * const getCall = client.defineRoute('GET', '/v1/{workspace_id}/calls/{call_id}')
+   * const call = await getCall({ params: { path: { call_id } } })
+   * // call.data: CallDetailResponse | undefined  (fully typed)
+   * ```
+   *
+   * Workspace IDs are still auto-injected by the underlying dispatchers — the
+   * helper is purely a type-level convenience. Runtime behavior is identical
+   * to calling the matching method directly, so retries, hooks, error
+   * conversion, and timeout handling all apply.
+   */
+  defineRoute<Path extends PathForMethod<'get'>>(
+    method: 'GET',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'get'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'get'>>>
+  defineRoute<Path extends PathForMethod<'post'>>(
+    method: 'POST',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'post'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'post'>>>
+  defineRoute<Path extends PathForMethod<'put'>>(
+    method: 'PUT',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'put'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'put'>>>
+  defineRoute<Path extends PathForMethod<'patch'>>(
+    method: 'PATCH',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'patch'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'patch'>>>
+  defineRoute<Path extends PathForMethod<'delete'>>(
+    method: 'DELETE',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'delete'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'delete'>>>
+  defineRoute<Path extends PathForMethod<'head'>>(
+    method: 'HEAD',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'head'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'head'>>>
+  defineRoute<Path extends PathForMethod<'options'>>(
+    method: 'OPTIONS',
+    path: Path,
+  ): (
+    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'options'>>>
+  ) => Promise<AmigoResponse<OperationResponse<Path, 'options'>>>
+  defineRoute(
+    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS',
+    path: string,
+  ): (init?: AmigoRequestOptions<unknown>) => Promise<AmigoResponse<unknown>> {
+    type AnyDispatcher = (p: string, i?: unknown) => Promise<AmigoResponse<unknown>>
+    const dispatcher = this[method] as unknown as AnyDispatcher
+    return (init?: AmigoRequestOptions<unknown>) => dispatcher.call(this, path, init)
+  }
+
   private static fromPlatformClient(
     client: PlatformFetch,
     workspaceId: string,
@@ -424,6 +495,23 @@ export {
   isRateLimitError,
   isAuthenticationError,
   isRequestTimeoutError,
+  isPermissionError,
+  isConflictError,
+  isValidationError,
+  isServerError,
+  isNetworkError,
+  isHttpException,
+  isHttpValidationError,
+  isUnparseableErrorBody,
+} from './core/errors.js'
+
+export type {
+  ErrorContext,
+  PlatformErrorBody,
+  HttpExceptionBody,
+  HttpValidationErrorBody,
+  UnparseableErrorBody,
+  AmigoErrorWithBody,
 } from './core/errors.js'
 
 export type {
