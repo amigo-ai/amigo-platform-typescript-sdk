@@ -69,6 +69,10 @@ import { FhirResource } from './resources/fhir.js'
 import { InsightsResource } from './resources/insights.js'
 import { MonitorConceptsResource } from './resources/monitor-concepts.js'
 import { UnificationRulesResource } from './resources/unification-rules.js'
+import { CrmResource } from './resources/crm.js'
+import { CommandCenterResource } from './resources/command-center.js'
+import { SensoriumResource } from './resources/sensorium.js'
+import { DataQueryResource } from './resources/data-query.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -221,6 +225,14 @@ export class AmigoClient {
   readonly monitorConcepts!: MonitorConceptsResource
   /** Entity unification rules (declarative deduplication of world-model entities) */
   readonly unificationRules!: UnificationRulesResource
+  /** CRM — contacts, companies, deals, pipeline (sync from connected CRM integration) */
+  readonly crm!: CrmResource
+  /** Command Center — rolled-up workspace homepage snapshot */
+  readonly commandCenter!: CommandCenterResource
+  /** Sensorium — operator-facing live agent loop observability */
+  readonly sensorium!: SensoriumResource
+  /** Generic data query against whitelisted workspace datasets */
+  readonly dataQuery!: DataQueryResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -451,6 +463,10 @@ export class AmigoClient {
     mutable.insights = new InsightsResource(client, workspaceId)
     mutable.monitorConcepts = new MonitorConceptsResource(client, workspaceId)
     mutable.unificationRules = new UnificationRulesResource(client, workspaceId)
+    mutable.crm = new CrmResource(client, workspaceId)
+    mutable.commandCenter = new CommandCenterResource(client, workspaceId)
+    mutable.sensorium = new SensoriumResource(client, workspaceId)
+    mutable.dataQuery = new DataQueryResource(client, workspaceId)
   }
 
   private async resolveApiRequest<

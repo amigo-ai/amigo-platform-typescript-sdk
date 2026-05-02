@@ -151,6 +151,14 @@ const client = new AmigoClient({
         status: 'ready',
         summary: 'Patient called to schedule a follow-up appointment.',
       }),
+
+    [`GET ${BASE}/calls/traces`]: () =>
+      Response.json({ items: [], has_more: false, continuation_token: null }),
+
+    [`GET ${BASE}/calls/${CALL_ID}/metrics`]: () => Response.json({ metrics: [] }),
+
+    [`POST ${BASE}/calls/outbound`]: () =>
+      Response.json({ call_id: CALL_ID }, { status: 202 }),
   }),
 })
 
@@ -210,5 +218,24 @@ describe('CallsResource', () => {
     const result = await client.calls.getTraceAnalysis(CALL_ID)
     expect(result.call_sid).toBe('CA1234567890abcdef1234567890abcdef')
     expect(result.summary).toContain('follow-up appointment')
+  })
+
+  it('lists traces (workspace-scoped feed)', async () => {
+    const result = await client.calls.listTraces()
+    expect(result?.items).toEqual([])
+  })
+
+  it('gets per-call metric values', async () => {
+    const result = await client.calls.getMetrics(CALL_ID, { limit: 50 })
+    expect(result?.metrics).toEqual([])
+  })
+
+  it('places an outbound call', async () => {
+    const result = await client.calls.createOutbound({
+      patient_entity_id: 'pat-1',
+      phone_to: '+15551234567',
+      reason: 'Appointment reminder',
+    } as Parameters<typeof client.calls.createOutbound>[0])
+    expect(result).toMatchObject({ call_id: CALL_ID })
   })
 })

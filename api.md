@@ -232,6 +232,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getBenchmarks`
 - `getPhoneVolume`
 - `getTraceAnalysis`
+- `listTraces`
+- `getMetrics`
+- `createOutbound`
 
 ### `conversations`
 
@@ -495,5 +498,30 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `update`
 - `delete`
+
+### `crm`
+
+- `getStatus`
+- `contacts.list`
+- `contacts.get`
+- `contacts.getTimeline`
+- `companies.list`
+- `companies.get`
+- `deals.list`
+- `deals.get`
+- `deals.getPipeline`
+
+### `commandCenter`
+
+- `get`
+
+### `sensorium`
+
+- `getConnectorHealth`
+- `getLoopLatency`
+
+### `dataQuery`
+
+- `run`
 
 ### `api`
