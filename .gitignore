@@ -4,3 +4,6 @@ dist/
 .env
 .env.local
 coverage/
+
+# Claude Code local state
+.claude/
