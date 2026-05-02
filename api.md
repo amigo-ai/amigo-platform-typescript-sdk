@@ -263,6 +263,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `update`
 - `delete`
 - `testEndpoint`
+- `testConnection`
 - `getHealthCheck`
 
 ### `analytics`
