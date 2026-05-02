@@ -936,19 +936,24 @@
         "properties": {
           "action_space": {
             "items": {
+              "maxLength": 64,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 20,
             "title": "Action Space",
             "type": "array"
           },
           "model": {
             "default": "gemini-2.5-flash",
+            "maxLength": 128,
             "title": "Model",
             "type": "string"
           },
           "system_prompt": {
             "anyOf": [
               {
+                "maxLength": 10000,
                 "type": "string"
               },
               {
@@ -959,6 +964,8 @@
           },
           "timeout_s": {
             "default": 3.0,
+            "maximum": 60.0,
+            "minimum": 0.1,
             "title": "Timeout S",
             "type": "number"
           }
@@ -9102,18 +9109,20 @@
             "default": ""
           },
           "behaviors": {
-            "default": [],
             "items": {
+              "maxLength": 2000,
               "type": "string"
             },
+            "maxItems": 200,
             "title": "Behaviors",
             "type": "array"
           },
           "communication_patterns": {
-            "default": [],
             "items": {
+              "maxLength": 2000,
               "type": "string"
             },
+            "maxItems": 200,
             "title": "Communication Patterns",
             "type": "array"
           },
@@ -9793,18 +9802,25 @@
           },
           "standalone_threshold": {
             "default": 0.85,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Standalone Threshold",
             "type": "number"
           },
           "tags": {
             "items": {
+              "maxLength": 64,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 50,
             "title": "Tags",
             "type": "array"
           },
           "threshold": {
             "default": 0.4,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Threshold",
             "type": "number"
           }
@@ -9958,21 +9974,17 @@
           "phone_from": {
             "anyOf": [
               {
-                "maxLength": 16,
-                "type": "string"
+                "$ref": "#/components/schemas/PhoneE164"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Caller ID phone number in E.164 format. Must belong to this workspace.",
-            "title": "Phone From"
+            "description": "Caller ID phone number in E.164 format. Must belong to this workspace."
           },
           "phone_to": {
-            "description": "Destination phone number in E.164 format.",
-            "maxLength": 16,
-            "title": "Phone To",
-            "type": "string"
+            "$ref": "#/components/schemas/PhoneE164",
+            "description": "Destination phone number in E.164 format."
           },
           "reason": {
             "$ref": "#/components/schemas/NameString",
@@ -10144,8 +10156,13 @@
               "outbound"
             ],
             "items": {
+              "enum": [
+                "inbound",
+                "outbound"
+              ],
               "type": "string"
             },
+            "maxItems": 2,
             "title": "Capabilities",
             "type": "array"
           },
@@ -10196,8 +10213,7 @@
             "type": "string"
           },
           "phone_number": {
-            "title": "Phone Number",
-            "type": "string"
+            "$ref": "#/components/schemas/PhoneE164"
           },
           "provider": {
             "default": "twilio",
@@ -10211,6 +10227,7 @@
           "provider_phone_sid": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -10333,10 +10350,12 @@
             "type": "boolean"
           },
           "keyterms": {
-            "default": [],
             "items": {
+              "maxLength": 128,
+              "minLength": 1,
               "type": "string"
             },
+            "maxItems": 500,
             "title": "Keyterms",
             "type": "array"
           },
@@ -10361,10 +10380,10 @@
             "type": "boolean"
           },
           "tags": {
-            "default": [],
             "items": {
               "$ref": "#/components/schemas/ServiceTag"
             },
+            "maxItems": 50,
             "title": "Tags",
             "type": "array"
           },
@@ -10437,6 +10456,8 @@
           },
           "browser_allowed_domains": {
             "items": {
+              "maxLength": 253,
+              "minLength": 1,
               "type": "string"
             },
             "maxItems": 50,
@@ -10517,21 +10538,25 @@
             "type": "object"
           },
           "integration_tools": {
-            "default": [],
             "items": {
               "$ref": "#/components/schemas/IntegrationToolRef-Input"
             },
+            "maxItems": 50,
             "title": "Integration Tools",
             "type": "array"
           },
           "max_agent_turns": {
             "default": 20,
+            "maximum": 200.0,
+            "minimum": 1.0,
             "title": "Max Agent Turns",
             "type": "integer"
           },
           "max_input_tokens": {
             "anyOf": [
               {
+                "maximum": 2000000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -10542,11 +10567,15 @@
           },
           "max_result_chars": {
             "default": 2000,
+            "maximum": 200000.0,
+            "minimum": 1.0,
             "title": "Max Result Chars",
             "type": "integer"
           },
           "max_tokens": {
             "default": 4096,
+            "maximum": 200000.0,
+            "minimum": 1.0,
             "title": "Max Tokens",
             "type": "integer"
           },
@@ -10577,10 +10606,10 @@
             "type": "string"
           },
           "static_tools": {
-            "default": [],
             "items": {
               "$ref": "#/components/schemas/StaticToolDef-Input"
             },
+            "maxItems": 50,
             "title": "Static Tools",
             "type": "array"
           },
@@ -10612,11 +10641,15 @@
           },
           "timeout_s": {
             "default": 60.0,
+            "maximum": 900.0,
+            "minimum": 0.1,
             "title": "Timeout S",
             "type": "number"
           },
           "urgency_keywords": {
             "items": {
+              "maxLength": 128,
+              "minLength": 1,
               "type": "string"
             },
             "maxItems": 50,
@@ -17122,16 +17155,19 @@
           },
           "operator_type": {
             "default": "crisis_counselor",
+            "maxLength": 64,
             "title": "Operator Type",
             "type": "string"
           },
           "reason": {
             "default": "",
+            "maxLength": 2000,
             "title": "Reason",
             "type": "string"
           },
           "regulatory_basis": {
             "default": "",
+            "maxLength": 2000,
             "title": "Regulatory Basis",
             "type": "string"
           }
@@ -20617,8 +20653,7 @@
             "type": "boolean"
           },
           "forward_to": {
-            "title": "Forward To",
-            "type": "string"
+            "$ref": "#/components/schemas/PhoneE164"
           },
           "should_disconnect": {
             "default": true,
@@ -23979,6 +24014,29 @@
           "metering_source"
         ],
         "title": "MeteringEmitRequest",
+        "type": "object"
+      },
+      "MeteringEmitResponse": {
+        "properties": {
+          "event_type": {
+            "description": "Echo of the emitted event_type.",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Event Type",
+            "type": "string"
+          },
+          "status": {
+            "const": "accepted",
+            "description": "Emission outcome. Always 'accepted' on 202.",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "event_type"
+        ],
+        "title": "MeteringEmitResponse",
         "type": "object"
       },
       "MetricCatalogEntry": {
@@ -29441,6 +29499,11 @@
         "title": "PersonaResponse",
         "type": "object"
       },
+      "PhoneE164": {
+        "maxLength": 16,
+        "minLength": 2,
+        "type": "string"
+      },
       "PhoneNumberCallVolume": {
         "properties": {
           "avg_duration_seconds": {
@@ -30660,6 +30723,7 @@
               ],
               "type": "string"
             },
+            "maxItems": 2,
             "title": "Capabilities",
             "type": "array"
           },
@@ -30670,9 +30734,7 @@
             "type": "string"
           },
           "phone_number": {
-            "maxLength": 16,
-            "title": "Phone Number",
-            "type": "string"
+            "$ref": "#/components/schemas/PhoneE164"
           }
         },
         "required": [
@@ -36009,15 +36071,13 @@
           "phone_to": {
             "anyOf": [
               {
-                "maxLength": 16,
-                "type": "string"
+                "$ref": "#/components/schemas/PhoneE164"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "E.164 phone override for SMS/WhatsApp. Resolved from entity if omitted.",
-            "title": "Phone To"
+            "description": "E.164 phone override for SMS/WhatsApp. Resolved from entity if omitted."
           },
           "service_id": {
             "format": "uuid",
@@ -41225,7 +41285,19 @@
         "type": "object"
       },
       "TurnErrorEvent": {
+        "description": "Terminal error frame on the turn stream.\n\nCarries a stable ``code`` so SDK consumers can branch deterministically\nwithout parsing free-form ``message`` text. ``retryable`` tells the\nconsumer whether issuing the same turn again is likely to succeed.\n``status_code`` is the upstream HTTP status when the error originated\nfrom a downstream service (agent-engine), and is otherwise omitted.",
         "properties": {
+          "code": {
+            "default": "unknown",
+            "enum": [
+              "upstream_error",
+              "stream_interrupted",
+              "client_error",
+              "unknown"
+            ],
+            "title": "Code",
+            "type": "string"
+          },
           "event": {
             "const": "error",
             "default": "error",
@@ -41235,6 +41307,23 @@
           "message": {
             "title": "Message",
             "type": "string"
+          },
+          "retryable": {
+            "default": false,
+            "title": "Retryable",
+            "type": "boolean"
+          },
+          "status_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Status Code"
           }
         },
         "required": [
@@ -42420,6 +42509,8 @@
           "standalone_threshold": {
             "anyOf": [
               {
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -42432,8 +42523,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 64,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -42445,6 +42539,8 @@
           "threshold": {
             "anyOf": [
               {
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -42649,8 +42745,13 @@
             "anyOf": [
               {
                 "items": {
+                  "enum": [
+                    "inbound",
+                    "outbound"
+                  ],
                   "type": "string"
                 },
+                "maxItems": 4,
                 "type": "array"
               },
               {
@@ -42735,6 +42836,7 @@
           "provider_phone_sid": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -42984,8 +43086,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 500,
                 "type": "array"
               },
               {
@@ -43033,6 +43138,7 @@
                 "items": {
                   "$ref": "#/components/schemas/ServiceTag"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -43099,8 +43205,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 253,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -43112,6 +43221,7 @@
           "browser_auth_integration": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -43123,6 +43233,7 @@
           "browser_start_url": {
             "anyOf": [
               {
+                "maxLength": 2048,
                 "type": "string"
               },
               {
@@ -43236,6 +43347,7 @@
                 "items": {
                   "$ref": "#/components/schemas/IntegrationToolRef-Input"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -43247,6 +43359,8 @@
           "max_agent_turns": {
             "anyOf": [
               {
+                "maximum": 200.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -43258,6 +43372,8 @@
           "max_input_tokens": {
             "anyOf": [
               {
+                "maximum": 2000000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -43269,6 +43385,8 @@
           "max_result_chars": {
             "anyOf": [
               {
+                "maximum": 200000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -43280,6 +43398,8 @@
           "max_tokens": {
             "anyOf": [
               {
+                "maximum": 200000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -43291,6 +43411,7 @@
           "model": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -43327,6 +43448,7 @@
                 "items": {
                   "$ref": "#/components/schemas/StaticToolDef-Input"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -43364,6 +43486,8 @@
           "timeout_s": {
             "anyOf": [
               {
+                "maximum": 900.0,
+                "minimum": 0.1,
                 "type": "number"
               },
               {
@@ -43376,8 +43500,11 @@
             "anyOf": [
               {
                 "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
                   "type": "string"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -63992,11 +64119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Emit-Metering-Event",
-                  "type": "object"
+                  "$ref": "#/components/schemas/MeteringEmitResponse"
                 }
               }
             },
