@@ -73,6 +73,14 @@ import { CrmResource } from './resources/crm.js'
 import { CommandCenterResource } from './resources/command-center.js'
 import { SensoriumResource } from './resources/sensorium.js'
 import { DataQueryResource } from './resources/data-query.js'
+import { BriefsResource } from './resources/briefs.js'
+import { DesktopSessionsResource } from './resources/desktop-sessions.js'
+import { IntakeResource } from './resources/intake.js'
+import { NetworkResource } from './resources/network.js'
+import { PipelineResource } from './resources/pipeline.js'
+import { TasksResource } from './resources/tasks.js'
+import { ToolsResource } from './resources/tools.js'
+import { SurfacesResource } from './resources/surfaces.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -233,6 +241,22 @@ export class AmigoClient {
   readonly sensorium!: SensoriumResource
   /** Generic data query against whitelisted workspace datasets */
   readonly dataQuery!: DataQueryResource
+  /** AI-generated entity briefs (workspace-level + per-entity) */
+  readonly briefs!: BriefsResource
+  /** Remote-controlled desktop sessions for driving GUI-only third-party apps */
+  readonly desktopSessions!: DesktopSessionsResource
+  /** Patient intake — signed upload links + uploads */
+  readonly intake!: IntakeResource
+  /** Workspace network metadata (egress IP allowlist) */
+  readonly network!: NetworkResource
+  /** Data ingestion pipeline observability (sources, throughput, review backlog) */
+  readonly pipeline!: PipelineResource
+  /** Long-running async tasks (poll by id or list by call) */
+  readonly tasks!: TasksResource
+  /** Manual tool execution + per-service tool resolution */
+  readonly tools!: ToolsResource
+  /** Surfaces — short-lived form/intake experiences (lifecycle: create→deliver→review→approve) */
+  readonly surfaces!: SurfacesResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -467,6 +491,14 @@ export class AmigoClient {
     mutable.commandCenter = new CommandCenterResource(client, workspaceId)
     mutable.sensorium = new SensoriumResource(client, workspaceId)
     mutable.dataQuery = new DataQueryResource(client, workspaceId)
+    mutable.briefs = new BriefsResource(client, workspaceId)
+    mutable.desktopSessions = new DesktopSessionsResource(client, workspaceId)
+    mutable.intake = new IntakeResource(client, workspaceId)
+    mutable.network = new NetworkResource(client, workspaceId)
+    mutable.pipeline = new PipelineResource(client, workspaceId)
+    mutable.tasks = new TasksResource(client, workspaceId)
+    mutable.tools = new ToolsResource(client, workspaceId)
+    mutable.surfaces = new SurfacesResource(client, workspaceId)
   }
 
   private async resolveApiRequest<

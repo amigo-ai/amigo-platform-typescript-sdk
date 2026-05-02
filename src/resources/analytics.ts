@@ -184,4 +184,40 @@ export class AnalyticsResource extends WorkspaceScopedResource {
       }),
     )
   }
+
+  /**
+   * Surfaces analytics — completion rates, channel effectiveness, field
+   * abandonment, and per-entity breakdowns. Used by the developer console's
+   * surfaces analytics tab.
+   */
+  readonly surfaces = {
+    getCompletionRates: async (params?: { days?: number }) =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/analytics/surfaces/completion-rates', {
+          params: { path: { workspace_id: this.workspaceId }, query: params },
+        }),
+      ),
+
+    getChannelEffectiveness: async (params?: { days?: number }) =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/analytics/surfaces/channel-effectiveness', {
+          params: { path: { workspace_id: this.workspaceId }, query: params },
+        }),
+      ),
+
+    getFieldAbandonment: async (params?: { days?: number }) =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/analytics/surfaces/field-abandonment', {
+          params: { path: { workspace_id: this.workspaceId }, query: params },
+        }),
+      ),
+
+    /** Per-entity surfaces analytics (which surfaces a specific entity has seen) */
+    getForEntity: async (entityId: string) =>
+      extractData(
+        await this.client.GET('/v1/{workspace_id}/analytics/surfaces/entity/{entity_id}', {
+          params: { path: { workspace_id: this.workspaceId, entity_id: entityId } },
+        }),
+      ),
+  }
 }

@@ -287,6 +287,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getOperatorPerformance`
 - `getAdvancedCallStats`
 - `compareCallPeriods`
+- `surfaces.getCompletionRates`
+- `surfaces.getChannelEffectiveness`
+- `surfaces.getFieldAbandonment`
+- `surfaces.getForEntity`
 
 ### `simulations`
 
@@ -523,5 +527,70 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `dataQuery`
 
 - `run`
+
+### `briefs`
+
+- `get`
+- `regenerate`
+- `getForEntity`
+- `regenerateForEntity`
+
+### `desktopSessions`
+
+- `create`
+- `disconnect`
+- `sendAction`
+- `getScreenshot`
+- `getStatus`
+
+### `intake`
+
+- `links.list`
+- `links.create`
+- `links.delete`
+- `links.listUploads`
+- `links.downloadUpload`
+
+### `network`
+
+- `getEgressIps`
+
+### `pipeline`
+
+- `getStatus`
+- `getThroughput`
+- `getReview`
+- `getEntityResolution`
+- `outbound.list`
+- `outbound.getLog`
+- `sources.list`
+- `sources.getOverview`
+- `sources.listEvents`
+- `sources.getHistory`
+
+### `tasks`
+
+- `get`
+- `listByCall`
+
+### `tools`
+
+- `execute`
+- `resolveForService`
+
+### `surfaces`
+
+- `list`
+- `listAutoPaging`
+- `listForReview`
+- `create`
+- `get`
+- `update`
+- `archive`
+- `deliver`
+- `getProgress`
+- `approve`
+- `reject`
+- `reshape`
 
 ### `api`
