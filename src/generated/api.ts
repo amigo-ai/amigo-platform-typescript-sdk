@@ -11955,8 +11955,7 @@ export interface components {
              */
             email: string;
             name: components["schemas"]["NameString"];
-            /** Phone Number */
-            phone_number?: string | null;
+            phone_number?: components["schemas"]["PhoneE164"] | null;
             /**
              * Role
              * @default operator
@@ -25424,8 +25423,7 @@ export interface components {
             /** Email */
             email?: string | null;
             name?: components["schemas"]["NameString"] | null;
-            /** Phone Number */
-            phone_number?: string | null;
+            phone_number?: components["schemas"]["PhoneE164"] | null;
             /** Role */
             role?: ("operator" | "supervisor" | "admin") | null;
             /** Skills */
