@@ -24,6 +24,7 @@ const NUMERICAL_METRIC_VALUE = {
   avg_confidence: 0.91,
   unit: 'score',
   computed_at: '2026-04-26T12:00:00Z',
+  source: 'production',
 } satisfies NumericalMetricValue
 
 const CATEGORICAL_METRIC_VALUE = {
@@ -36,6 +37,7 @@ const CATEGORICAL_METRIC_VALUE = {
   avg_confidence: null,
   unit: null,
   computed_at: null,
+  source: 'production',
 } satisfies CategoricalMetricValue
 
 const BOOLEAN_METRIC_VALUE = {
@@ -48,6 +50,7 @@ const BOOLEAN_METRIC_VALUE = {
   avg_confidence: null,
   unit: null,
   computed_at: null,
+  source: 'production',
 } satisfies BooleanMetricValue
 
 const METRIC_LIST_FIXTURE: MetricListResponse = {
@@ -81,6 +84,7 @@ const METRIC_HISTORY_VALUE = {
   avg_confidence: 0.94,
   unit: 'score',
   computed_at: '2026-04-25T12:00:00Z',
+  source: 'production',
 } satisfies NumericalMetricValue
 
 const METRIC_VALUES_FIXTURE: MetricListResponse = {
@@ -97,6 +101,7 @@ const METRIC_TREND_VALUE = {
   avg_confidence: 0.88,
   unit: 'score',
   computed_at: '2026-04-13T12:00:00Z',
+  source: 'production',
 } satisfies NumericalMetricValue
 
 const METRIC_TREND_FIXTURE: MetricListResponse = {

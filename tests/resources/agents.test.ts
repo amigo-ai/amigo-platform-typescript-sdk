@@ -142,7 +142,7 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent', async () => {
-    const result = await client.agents.create({ name: 'My Agent' })
+    const result = await client.agents.create({ name: 'My Agent', description: '' })
     expect(result.name).toBe('My Agent')
   })
 
@@ -167,6 +167,10 @@ describe('AgentsResource', () => {
   it('creates an agent version', async () => {
     const body: CreateAgentVersionRequest = {
       name: 'My Agent v2',
+      background: '',
+      behaviors: [],
+      communication_patterns: [],
+      initials: '',
       identity: {
         name: 'My Agent',
         role: 'Assistant',

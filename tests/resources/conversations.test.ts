@@ -71,12 +71,15 @@ describe('ConversationsResource', () => {
       id: '00000000-0000-4000-8000-000000000001',
       channel_kind: 'web',
       status: 'active',
+      turn_count: 0,
+      turns: [],
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:00:00Z',
     }
     const request: CreateConversationRequest = {
       service_id: 'svc-00000000-0000-0000-0000-000000000001',
       entity_id: 'ent-00000000-0000-0000-0000-000000000001',
+      auto_greet: false,
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -155,8 +158,21 @@ describe('ConversationsResource', () => {
         turn_count: 1,
         updated_at: '2026-01-01T00:00:01Z',
       },
-      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
-      output: [{ role: 'agent', text: 'How can I help?', timestamp: '2026-01-01T00:00:01Z' }],
+      input: {
+        role: 'user',
+        text: 'Hello',
+        timestamp: '2026-01-01T00:00:00Z',
+        content: [{ type: 'text', text: 'Hello' }],
+      },
+      output: [
+        {
+          role: 'agent',
+          text: 'How can I help?',
+          timestamp: '2026-01-01T00:00:01Z',
+          content: [{ type: 'text', text: 'How can I help?' }],
+        },
+      ],
+      tool_calls: [],
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -187,8 +203,20 @@ describe('ConversationsResource', () => {
         turn_count: 1,
         updated_at: '2026-01-01T00:00:01Z',
       },
-      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
-      output: [{ role: 'agent', text: 'How can I help?', timestamp: '2026-01-01T00:00:01Z' }],
+      input: {
+        role: 'user',
+        text: 'Hello',
+        timestamp: '2026-01-01T00:00:00Z',
+        content: [{ type: 'text', text: 'Hello' }],
+      },
+      output: [
+        {
+          role: 'agent',
+          text: 'How can I help?',
+          timestamp: '2026-01-01T00:00:01Z',
+          content: [{ type: 'text', text: 'How can I help?' }],
+        },
+      ],
       tool_calls: [],
     }
     const client = new AmigoClient({
@@ -227,8 +255,14 @@ describe('ConversationsResource', () => {
         turn_count: 1,
         updated_at: '2026-01-01T00:00:01Z',
       },
-      input: { role: 'user', text: 'Hello', timestamp: '2026-01-01T00:00:00Z' },
+      input: {
+        role: 'user',
+        text: 'Hello',
+        timestamp: '2026-01-01T00:00:00Z',
+        content: [{ type: 'text', text: 'Hello' }],
+      },
       output: [],
+      tool_calls: [],
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -271,9 +305,9 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    await expect(client.conversations.create({ service_id: '' })).rejects.toBeInstanceOf(
-      ValidationError,
-    )
+    await expect(
+      client.conversations.create({ service_id: '', auto_greet: false }),
+    ).rejects.toBeInstanceOf(ValidationError)
   })
 
   it('routes DELETE failures through the central error pipeline', async () => {
@@ -870,9 +904,17 @@ describe('ConversationsResource', () => {
     const event = events[0]!
     expect(event.event).toBe('error')
     if (event.event === 'error') {
-      expect(event.code).toBe('upstream_error')
-      expect(event.retryable).toBe(true)
-      expect(event.status_code).toBe(503)
+      // PR #152 regenerated openapi types dropped these fields from the
+      // SDK-typed shape; the wire format still carries them on real upstream
+      // failures. Cast to access the parsed-but-untyped properties.
+      const wire = event as typeof event & {
+        code?: string
+        retryable?: boolean
+        status_code?: number
+      }
+      expect(wire.code).toBe('upstream_error')
+      expect(wire.retryable).toBe(true)
+      expect(wire.status_code).toBe(503)
       expect(event.message).toBe('agent unreachable')
     }
   })
@@ -911,9 +953,14 @@ describe('ConversationsResource', () => {
       expect(event.message).toBe('legacy')
       // code/retryable absent on legacy frames; consumers must defensively
       // ?? them. Asserting the underlying shape rather than a default-
-      // injected value keeps the contract honest.
-      expect(event.code).toBeUndefined()
-      expect(event.retryable).toBeUndefined()
+      // injected value keeps the contract honest. Cast since PR #152 dropped
+      // these fields from the typed shape.
+      const wire = event as typeof event & {
+        code?: string
+        retryable?: boolean
+      }
+      expect(wire.code).toBeUndefined()
+      expect(wire.retryable).toBeUndefined()
     }
   })
 

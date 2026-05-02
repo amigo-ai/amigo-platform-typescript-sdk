@@ -45,7 +45,7 @@ client.GET('/v1/{workspace_id}/agents').then((response) => {
 
 client
   .POST('/v1/{workspace_id}/agents', {
-    body: { name: 'Test Agent' },
+    body: { name: 'Test Agent', description: '' },
   })
   .then((response) => {
     const upstreamResponse: MethodResponse<typeof client.api, 'post', '/v1/{workspace_id}/agents'> =
