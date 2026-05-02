@@ -92,6 +92,38 @@ export class IntegrationsResource extends WorkspaceScopedResource {
     )
   }
 
+
+  /**
+   * Probe an integration's connection + auth without invoking any specific
+   * endpoint. Exercises auth resolution end-to-end (SSM lookups, OAuth2 token
+   * mints, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR)
+   * or ``mcp_url`` (MCP). Safe on production integrations — HEAD carries no
+   * side effects.
+   *
+   * The most recent probe outcome is persisted on the integration so
+   * subsequent ``get`` / ``list`` responses surface ``last_tested_at`` +
+   * ``last_test_status`` without re-probing.
+   *
+   * @returns ``status`` is one of ``healthy`` / ``auth_failed`` /
+   *   ``unreachable`` / ``timeout`` / ``ssl_error`` / ``misconfigured``,
+   *   each mapping to a distinct, actionable user message.
+   */
+  async testConnection(integrationId: IntegrationId | string) {
+    return extractData(
+      await this.client.POST(
+        '/v1/{workspace_id}/integrations/{integration_id}/test-connection',
+        {
+          params: {
+            path: {
+              workspace_id: this.workspaceId,
+              integration_id: integrationId,
+            },
+          },
+        },
+      ),
+    )
+  }
+
   /** Check health of all integrations in the workspace */
   async getHealthCheck() {
     return extractData(

@@ -1838,12 +1838,14 @@
           "action": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "Filter by action type.",
             "title": "Action"
           },
           "date_from": {
@@ -1864,12 +1866,14 @@
           "service": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
                 "type": "null"
               }
             ],
+            "description": "Filter by service name.",
             "title": "Service"
           }
         },
@@ -3281,6 +3285,7 @@
             "type": "string"
           },
           "recipient_phone_number": {
+            "maxLength": 16,
             "pattern": "^\\+1\\d{10}$",
             "title": "Recipient Phone Number",
             "type": "string"
@@ -6187,6 +6192,9 @@
       "ChatRequest": {
         "properties": {
           "message": {
+            "description": "Insights chat user message.",
+            "maxLength": 16000,
+            "minLength": 1,
             "title": "Message",
             "type": "string"
           }
@@ -9150,7 +9158,7 @@
           "name": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/StrippedNonemptyString"
+                "$ref": "#/components/schemas/NameString"
               },
               {
                 "type": "null"
@@ -9158,14 +9166,17 @@
             ]
           },
           "permissions": {
+            "description": "Permission names. Max 128 entries; each entry up to 128 chars.",
             "items": {
               "type": "string"
             },
+            "maxItems": 128,
             "title": "Permissions",
             "type": "array"
           },
           "role": {
             "default": "member",
+            "maxLength": 64,
             "title": "Role",
             "type": "string"
           }
@@ -9633,6 +9644,7 @@
             "items": {
               "$ref": "#/components/schemas/EndpointConfig-Input"
             },
+            "maxItems": 50,
             "title": "Endpoints",
             "type": "array"
           },
@@ -9705,6 +9717,9 @@
             "title": "Mcp Url"
           },
           "name": {
+            "description": "Slug-like identifier, lowercase alphanumeric + hyphens/underscores.",
+            "maxLength": 128,
+            "minLength": 2,
             "title": "Name",
             "type": "string"
           },
@@ -21970,6 +21985,39 @@
             "title": "Id",
             "type": "string"
           },
+          "last_test_status": {
+            "anyOf": [
+              {
+                "enum": [
+                  "healthy",
+                  "auth_failed",
+                  "unreachable",
+                  "timeout",
+                  "ssl_error",
+                  "misconfigured"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Status of the most recent connection probe. ``None`` if never tested.",
+            "title": "Last Test Status"
+          },
+          "last_tested_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When this integration was last successfully or unsuccessfully tested (server UTC).",
+            "title": "Last Tested At"
+          },
           "mcp_args": {
             "anyOf": [
               {
@@ -33246,9 +33294,11 @@
         "type": "string"
       },
       "SecretInput": {
-        "description": "Inline secret value \u2014 auto-provisioned to SSM on create/update.",
+        "description": "Inline secret value \u2014 auto-provisioned to SSM on create/update.\n\nBounded to 8192 chars: large enough for a PEM RSA-4096 private key\nplus a short cert chain, small enough that an adversary cannot\npush a 100 MB \"secret\" through to SSM.",
         "properties": {
           "value": {
+            "maxLength": 8192,
+            "minLength": 1,
             "title": "Value",
             "type": "string"
           }
@@ -35858,6 +35908,9 @@
       "SqlQueryRequest": {
         "properties": {
           "sql": {
+            "description": "Read-only SQL query against Databricks.",
+            "maxLength": 50000,
+            "minLength": 1,
             "title": "Sql",
             "type": "string"
           }
@@ -38469,6 +38522,66 @@
         "title": "TestCallerNumbersResponse",
         "type": "object"
       },
+      "TestConnectionResponse": {
+        "description": "Result of a pre-flight connection probe.\n\nExercised by the developer-console \"Test Connection\" button. Probes\nauth resolution + upstream reachability without invoking any\nspecific endpoint, so it's safe to run on production integrations.",
+        "properties": {
+          "auth_resolved": {
+            "default": false,
+            "description": "True if the auth credential successfully resolved (SSM lookup, OAuth2 token mint, JWT signing). False does not necessarily mean the auth is wrong \u2014 for ``bearer_token_exchange`` it can mean per-call params weren't supplied.",
+            "title": "Auth Resolved",
+            "type": "boolean"
+          },
+          "duration_ms": {
+            "default": 0,
+            "description": "End-to-end probe duration in milliseconds.",
+            "title": "Duration Ms",
+            "type": "number"
+          },
+          "http_status": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "HTTP status code from the upstream HEAD probe (REST/FHIR/MCP-http only).",
+            "title": "Http Status"
+          },
+          "message": {
+            "default": "",
+            "description": "Human-readable summary suitable for direct display to the user.",
+            "title": "Message",
+            "type": "string"
+          },
+          "status": {
+            "description": "Coarse classification of the probe outcome. The console maps each value to a distinct remediation message: ``healthy`` is green, ``auth_failed`` prompts re-auth, ``unreachable`` / ``timeout`` suggest checking the URL or VPN, ``ssl_error`` calls out cert issues, ``misconfigured`` highlights missing required fields.",
+            "enum": [
+              "healthy",
+              "auth_failed",
+              "unreachable",
+              "timeout",
+              "ssl_error",
+              "misconfigured"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tested_at": {
+            "description": "When the probe ran (server time, UTC).",
+            "format": "date-time",
+            "title": "Tested At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "tested_at"
+        ],
+        "title": "TestConnectionResponse",
+        "type": "object"
+      },
       "TestEndpointRequest": {
         "properties": {
           "params": {
@@ -38551,14 +38664,19 @@
         "properties": {
           "input": {
             "additionalProperties": true,
+            "description": "Input parameters to pass to the skill executor.",
             "title": "Input",
             "type": "object"
           },
           "static_tool_mocks": {
             "additionalProperties": {
-              "type": "string"
+              "$ref": "#/components/schemas/_ToolMockValue"
             },
-            "default": {},
+            "description": "Map of static tool name (max 128 chars) to mocked output string (max 16 KB). Up to 64 entries.",
+            "maxProperties": 64,
+            "propertyNames": {
+              "$ref": "#/components/schemas/_ToolMockKey"
+            },
             "title": "Static Tool Mocks",
             "type": "object"
           }
@@ -41107,19 +41225,7 @@
         "type": "object"
       },
       "TurnErrorEvent": {
-        "description": "Terminal error frame on the turn stream.\n\nCarries a stable ``code`` so SDK consumers can branch deterministically\nwithout parsing free-form ``message`` text. ``retryable`` tells the\nconsumer whether issuing the same turn again is likely to succeed.\n``status_code`` is the upstream HTTP status when the error originated\nfrom a downstream service (agent-engine), and is otherwise omitted.",
         "properties": {
-          "code": {
-            "default": "unknown",
-            "enum": [
-              "upstream_error",
-              "stream_interrupted",
-              "client_error",
-              "unknown"
-            ],
-            "title": "Code",
-            "type": "string"
-          },
           "event": {
             "const": "error",
             "default": "error",
@@ -41129,23 +41235,6 @@
           "message": {
             "title": "Message",
             "type": "string"
-          },
-          "retryable": {
-            "default": false,
-            "title": "Retryable",
-            "type": "boolean"
-          },
-          "status_code": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Status Code"
           }
         },
         "required": [
@@ -42189,6 +42278,7 @@
                 "items": {
                   "$ref": "#/components/schemas/EndpointConfig-Input"
                 },
+                "maxItems": 50,
                 "type": "array"
               },
               {
@@ -42778,6 +42868,7 @@
           "triage_model": {
             "anyOf": [
               {
+                "maxLength": 128,
                 "type": "string"
               },
               {
@@ -47008,6 +47099,15 @@
         "title": "WrapUpResponse",
         "type": "object"
       },
+      "_ToolMockKey": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "_ToolMockValue": {
+        "maxLength": 16384,
+        "type": "string"
+      },
       "src__models__IntegrationToolRef": {
         "description": "Reference to an integration endpoint by integration + endpoint name.",
         "properties": {
@@ -48412,6 +48512,7 @@
             "name": "link_token",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Link Token",
               "type": "string"
             }
@@ -48421,6 +48522,7 @@
             "name": "x-amigo-intake-filename",
             "required": true,
             "schema": {
+              "maxLength": 256,
               "title": "X-Amigo-Intake-Filename",
               "type": "string"
             }
@@ -48430,6 +48532,7 @@
             "name": "x-amigo-intake-content-type",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "X-Amigo-Intake-Content-Type",
               "type": "string"
             }
@@ -48480,6 +48583,7 @@
             "name": "link_token",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Link Token",
               "type": "string"
             }
@@ -50645,6 +50749,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -50769,6 +50874,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -50951,6 +51057,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -50968,6 +51075,10 @@
             "schema": {
               "anyOf": [
                 {
+                  "enum": [
+                    "inbound",
+                    "outbound"
+                  ],
                   "type": "string"
                 },
                 {
@@ -51082,6 +51193,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -51327,6 +51439,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -51509,6 +51622,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -51635,6 +51749,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -51759,6 +51874,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -52272,6 +52388,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -52654,6 +52771,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -52672,6 +52790,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 128,
                   "type": "string"
                 },
                 {
@@ -52709,6 +52828,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -53046,6 +53166,20 @@
               "title": "Workspace Id",
               "type": "string"
             }
+          },
+          {
+            "description": "Max exports to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "description": "Max exports to return",
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -53058,6 +53192,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           },
           "429": {
             "description": "Rate limited"
@@ -55946,6 +56090,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -56028,6 +56173,7 @@
             "name": "company_id",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Company Id",
               "type": "string"
             }
@@ -56080,6 +56226,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -56098,6 +56245,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 320,
                   "type": "string"
                 },
                 {
@@ -56116,6 +56264,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 32,
                   "type": "string"
                 },
                 {
@@ -56198,6 +56347,7 @@
             "name": "contact_id",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Contact Id",
               "type": "string"
             }
@@ -56247,6 +56397,7 @@
             "name": "contact_id",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Contact Id",
               "type": "string"
             }
@@ -56322,6 +56473,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -56440,6 +56592,7 @@
             "name": "deal_id",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Deal Id",
               "type": "string"
             }
@@ -59183,6 +59336,7 @@
             "name": "resource_type",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Resource Type",
               "type": "string"
             }
@@ -59217,6 +59371,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -59233,6 +59388,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -59249,6 +59405,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 32,
                   "type": "string"
                 },
                 {
@@ -59265,6 +59422,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 32,
                   "type": "string"
                 },
                 {
@@ -59281,6 +59439,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 128,
                   "type": "string"
                 },
                 {
@@ -59297,6 +59456,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 64,
                   "type": "string"
                 },
                 {
@@ -59314,6 +59474,7 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 200,
                   "type": "string"
                 },
                 {
@@ -59374,6 +59535,7 @@
             "name": "resource_type",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Resource Type",
               "type": "string"
             }
@@ -59440,6 +59602,7 @@
             "name": "resource_type",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Resource Type",
               "type": "string"
             }
@@ -59449,6 +59612,7 @@
             "name": "resource_id",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "Resource Id",
               "type": "string"
             }
@@ -59506,6 +59670,7 @@
             "name": "resource_type",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Resource Type",
               "type": "string"
             }
@@ -59515,6 +59680,7 @@
             "name": "resource_id",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "Resource Id",
               "type": "string"
             }
@@ -59584,6 +59750,7 @@
             "name": "resource_type",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "Resource Type",
               "type": "string"
             }
@@ -59593,6 +59760,7 @@
             "name": "resource_id",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "Resource Id",
               "type": "string"
             }
@@ -61074,6 +61242,7 @@
             "required": true,
             "schema": {
               "description": "Session ID",
+              "maxLength": 64,
               "title": "Session Id",
               "type": "string"
             }
@@ -61131,6 +61300,7 @@
             "required": true,
             "schema": {
               "description": "Session ID",
+              "maxLength": 64,
               "title": "Session Id",
               "type": "string"
             }
@@ -61279,6 +61449,7 @@
             "name": "x-amigo-intake-sha256",
             "required": true,
             "schema": {
+              "maxLength": 64,
               "title": "X-Amigo-Intake-Sha256",
               "type": "string"
             }
@@ -61288,6 +61459,7 @@
             "name": "x-amigo-intake-timestamp",
             "required": true,
             "schema": {
+              "maxLength": 20,
               "title": "X-Amigo-Intake-Timestamp",
               "type": "string"
             }
@@ -61297,6 +61469,7 @@
             "name": "x-amigo-intake-signature",
             "required": true,
             "schema": {
+              "maxLength": 512,
               "title": "X-Amigo-Intake-Signature",
               "type": "string"
             }
@@ -61306,6 +61479,7 @@
             "name": "x-amigo-intake-customer-slug",
             "required": true,
             "schema": {
+              "maxLength": 63,
               "title": "X-Amigo-Intake-Customer-Slug",
               "type": "string"
             }
@@ -61315,6 +61489,7 @@
             "name": "x-amigo-intake-filename",
             "required": true,
             "schema": {
+              "maxLength": 256,
               "title": "X-Amigo-Intake-Filename",
               "type": "string"
             }
@@ -61325,6 +61500,7 @@
             "required": false,
             "schema": {
               "default": "application/octet-stream",
+              "maxLength": 128,
               "title": "X-Amigo-Intake-Content-Type",
               "type": "string"
             }
@@ -61380,6 +61556,29 @@
               "default": false,
               "title": "Include Expired",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
@@ -61535,6 +61734,29 @@
               "format": "uuid",
               "title": "Link Id",
               "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
@@ -62133,6 +62355,69 @@
         ]
       }
     },
+    "/v1/{workspace_id}/integrations/{integration_id}/test-connection": {
+      "post": {
+        "description": "Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations \u2014 HEAD requests carry no side effects. Requires `Integration.view` permission.",
+        "operationId": "test-integration-connection",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "integration_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Integration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestConnectionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Integration not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Probe an integration's connection + auth",
+        "tags": [
+          "Integrations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/m42/anomalies/ranked": {
       "get": {
         "description": "Ranked anomalies for a single indicator (default ``t2d_risk``). Includes inline decomposition + district centroids for the map. Schema-probes the alerts table so it works pre- and post-multi-indicator pipeline expansion.",
@@ -62164,6 +62449,29 @@
                 }
               ],
               "title": "Indicator"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
@@ -62240,6 +62548,17 @@
               "maximum": 500,
               "minimum": 1,
               "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
               "type": "integer"
             }
           }
@@ -62460,6 +62779,29 @@
               ],
               "title": "Focus Area"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 1000,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -62504,6 +62846,29 @@
               "title": "Workspace Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -62516,6 +62881,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Cluster Summary",
@@ -62538,6 +62913,29 @@
               "title": "Workspace Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -62550,6 +62948,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List District Metrics",
@@ -62712,6 +63120,29 @@
               ],
               "title": "Scenario"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 1000,
+              "maximum": 5000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -62836,6 +63267,29 @@
               "title": "Workspace Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -62848,6 +63302,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Model Registry",
@@ -63064,6 +63528,29 @@
               "title": "Patient Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 500,
+              "maximum": 2000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -63163,6 +63650,29 @@
               "title": "Workspace Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -63175,6 +63685,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "summary": "List Positive Signals",
@@ -63214,6 +63734,29 @@
                 }
               ],
               "title": "Outcome Key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
@@ -63604,6 +64147,29 @@
                 }
               ],
               "title": "Session Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
@@ -69082,6 +69648,7 @@
             "name": "template_id",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "Template Id",
               "type": "string"
             }
@@ -69141,6 +69708,7 @@
             "name": "template_id",
             "required": true,
             "schema": {
+              "maxLength": 128,
               "title": "Template Id",
               "type": "string"
             }
@@ -70126,6 +70694,19 @@
               "maximum": 100,
               "minimum": 1,
               "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Offset for pagination (default 0)",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Offset for pagination (default 0)",
+              "minimum": 0,
+              "title": "Offset",
               "type": "integer"
             }
           }
@@ -76342,8 +76923,16 @@
               "anyOf": [
                 {
                   "items": {
+                    "enum": [
+                      "pending",
+                      "skipped",
+                      "failed",
+                      "delivered",
+                      "not_delivered"
+                    ],
                     "type": "string"
                   },
+                  "maxItems": 20,
                   "type": "array"
                 },
                 {
@@ -76360,6 +76949,8 @@
             "schema": {
               "anyOf": [
                 {
+                  "maxLength": 16,
+                  "pattern": "^\\+1\\d{10}$",
                   "type": "string"
                 },
                 {
@@ -77348,6 +77939,33 @@
               "description": "Filter by entity type.",
               "title": "Entity Type"
             }
+          },
+          {
+            "description": "Max keys to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "description": "Max keys to return",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Page offset",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -77809,6 +78427,33 @@
               "title": "Confidence Max",
               "type": "number"
             }
+          },
+          {
+            "description": "Max edges to return",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "description": "Max edges to return",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Page offset",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -77933,6 +78578,33 @@
               "format": "uuid",
               "title": "Entity Id",
               "type": "string"
+            }
+          },
+          {
+            "description": "Max enrichment rows",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "description": "Max enrichment rows",
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Page offset",
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "description": "Page offset",
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
             }
           }
         ],
