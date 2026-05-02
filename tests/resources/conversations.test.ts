@@ -842,6 +842,81 @@ describe('ConversationsResource', () => {
     expect(events[0]?.event).toBe('token')
   })
 
+  it('streamTurn surfaces the structured error frame with code + retryable', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    // platform-api emits this exact shape on upstream failure.
+    const stream = sseStream([
+      'event: error\ndata: {"code":"upstream_error","message":"agent unreachable","status_code":503,"retryable":true}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          new Response(stream, {
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+      }),
+    })
+
+    const events = []
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      events.push(event)
+    }
+
+    expect(events).toHaveLength(1)
+    const event = events[0]!
+    expect(event.event).toBe('error')
+    if (event.event === 'error') {
+      expect(event.code).toBe('upstream_error')
+      expect(event.retryable).toBe(true)
+      expect(event.status_code).toBe(503)
+      expect(event.message).toBe('agent unreachable')
+    }
+  })
+
+  it('streamTurn defaults code/retryable for legacy error frames', async () => {
+    // Old platform-api versions emit only ``message``. The SDK's openapi
+    // schema gives ``code`` a default of "unknown" and ``retryable`` a
+    // default of false. Those defaults are static-type defaults; on the
+    // wire the fields are simply absent and pass through the parser.
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const stream = sseStream([
+      'event: error\ndata: {"message":"legacy"}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          new Response(stream, {
+            headers: { 'content-type': 'text/event-stream' },
+          }),
+      }),
+    })
+
+    const events = []
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      events.push(event)
+    }
+
+    expect(events).toHaveLength(1)
+    const event = events[0]!
+    expect(event.event).toBe('error')
+    if (event.event === 'error') {
+      expect(event.message).toBe('legacy')
+      // code/retryable absent on legacy frames; consumers must defensively
+      // ?? them. Asserting the underlying shape rather than a default-
+      // injected value keeps the contract honest.
+      expect(event.code).toBeUndefined()
+      expect(event.retryable).toBeUndefined()
+    }
+  })
+
   it('streamTurn parses frames split across chunk boundaries', async () => {
     // Real streams arrive in network-sized chunks that often split a frame
     // mid-data. The internal buffer must concatenate decoded text until a

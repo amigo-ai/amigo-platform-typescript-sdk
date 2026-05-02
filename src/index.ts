@@ -64,6 +64,7 @@ import { SafetyResource } from './resources/safety.js'
 import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
+import { ObserversResource } from './resources/observers.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -202,6 +203,12 @@ export class AmigoClient {
   readonly compliance!: ComplianceResource
   readonly events!: EventsResource
   readonly functions!: FunctionsResource
+  /**
+   * Voice-call observer real-time stream. Subscribe with
+   * ``client.observers.subscribe({ callSid, token, onEvent })``. See
+   * {@link ObserversResource}.
+   */
+  readonly observers!: ObserversResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -356,6 +363,7 @@ export class AmigoClient {
     mutable.compliance = new ComplianceResource(client, workspaceId)
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
+    mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
   }
 
   private async resolveApiRequest<
@@ -526,6 +534,11 @@ export type {
   SubscriptionHandle,
   WorkspaceSSEEvent,
   WorkspaceSSEEventType,
+  WorkspaceEventStreamErrorCode,
+} from './resources/events.js'
+export {
+  WorkspaceEventStreamError,
+  isWorkspaceEventStreamError,
 } from './resources/events.js'
 
 export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
@@ -550,6 +563,28 @@ export type {
   TurnToolCallCompletedEvent,
   TurnToolCallStartedEvent,
 } from './resources/conversations.js'
+
+// Voice-call observer real-time stream
+export { ObserversResource, observerAuthProtocols } from './resources/observers.js'
+export type {
+  ObserverAuthProtocols,
+  ObserverSSEEvent,
+  ObserverSSEEventType,
+  ObserverSubscribeOptions,
+} from './resources/observers.js'
+
+// Reconnecting WebSocket primitive (compose for custom realtime surfaces)
+export {
+  createReconnectingWebSocket,
+  ReconnectingWebSocketError,
+} from './core/reconnecting-websocket.js'
+export type {
+  ReconnectingWebSocketErrorReason,
+  ReconnectingWebSocketHandle,
+  ReconnectingWebSocketOptions,
+  ReconnectingWebSocketState,
+  WebSocketFactory,
+} from './core/reconnecting-websocket.js'
 
 // Device code auth (desktop / CLI login)
 export {

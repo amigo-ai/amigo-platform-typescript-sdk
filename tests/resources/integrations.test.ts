@@ -85,6 +85,16 @@ const client = new AmigoClient({
     [`POST ${BASE}/integrations/${INTEGRATION_ID}/endpoints/Patient/test`]: () =>
       Response.json(TEST_ENDPOINT_FIXTURE),
 
+    [`POST ${BASE}/integrations/${INTEGRATION_ID}/test-connection`]: () =>
+      Response.json({
+        status: 'healthy',
+        duration_ms: 42.5,
+        http_status: 200,
+        auth_resolved: true,
+        message: 'Connection successful (HTTP 200)',
+        tested_at: '2026-05-01T22:00:00.000Z',
+      }),
+
     [`GET ${BASE}/integrations/health-check`]: () => Response.json(HEALTH_CHECK_FIXTURE),
   }),
 })
@@ -146,5 +156,14 @@ describe('IntegrationsResource', () => {
   it('gets health check status', async () => {
     const result = await client.integrations.getHealthCheck()
     expect(result).toBeDefined()
+  })
+
+  it('testConnection probes auth + reachability', async () => {
+    const result = await client.integrations.testConnection(INTEGRATION_ID)
+    expect(result.status).toBe('healthy')
+    expect(result.http_status).toBe(200)
+    expect(result.auth_resolved).toBe(true)
+    expect(result.duration_ms).toBeGreaterThan(0)
+    expect(result.message).toContain('Connection successful')
   })
 })

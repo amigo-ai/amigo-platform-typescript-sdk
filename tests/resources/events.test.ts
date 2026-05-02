@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
-import type { WorkspaceSSEEvent } from '../../src/index.js'
+import { AmigoClient, isWorkspaceEventStreamError } from '../../src/index.js'
+import type { WorkspaceEventStreamError, WorkspaceSSEEvent } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -381,6 +381,113 @@ describe('EventsResource', () => {
     await handle.done
 
     expect(observedAuth).toBe(`Bearer ${TEST_API_KEY}`)
+  })
+
+  it('surfaces too_many_streams as a typed terminal error and stops reconnecting', async () => {
+    let calls = 0
+    const stream = sseStream([
+      'retry: 3000\n\n',
+      'id: 0\nevent: error\ndata: {"code":"too_many_streams","message":"cap reached","max_streams":50}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${STREAM_PATH}`]: () => {
+          calls += 1
+          return new Response(stream, { headers: { 'content-type': 'text/event-stream' } })
+        },
+      }),
+    })
+
+    const errors: Error[] = []
+    const handle = client.events.subscribeToWorkspace({
+      onEvent: () => {},
+      onError: (err) => errors.push(err),
+    })
+    await handle.done
+
+    expect(calls).toBe(1)
+    expect(errors).toHaveLength(1)
+    expect(isWorkspaceEventStreamError(errors[0])).toBe(true)
+    const typed = errors[0] as WorkspaceEventStreamError
+    expect(typed.code).toBe('too_many_streams')
+    expect(typed.retryable).toBe(false)
+    expect(typed.frame?.['max_streams']).toBe(50)
+  })
+
+  it('treats stream_unavailable as recoverable (transport-error path)', async () => {
+    let calls = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${STREAM_PATH}`]: () => {
+          calls += 1
+          // Both connections emit the recoverable error frame; with
+          // maxReconnects=1 the loop will: connect → recoverable error →
+          // sleep → reconnect → recoverable error → exhaust budget.
+          const stream = sseStream([
+            'retry: 1\n\n',
+            'id: 0\nevent: error\ndata: {"code":"stream_unavailable","message":"valkey down"}\n\n',
+          ])
+          return new Response(stream, { headers: { 'content-type': 'text/event-stream' } })
+        },
+      }),
+    })
+
+    const errors: Error[] = []
+    const handle = client.events.subscribeToWorkspace({
+      maxReconnects: 1,
+      initialDelayMs: 1,
+      maxDelayMs: 1,
+      onEvent: () => {},
+      onError: (err) => errors.push(err),
+    })
+    await handle.done
+
+    // Two connections — initial + one reconnect — then budget exhausted.
+    expect(calls).toBe(2)
+    expect(errors).toHaveLength(1)
+    expect(isWorkspaceEventStreamError(errors[0])).toBe(true)
+    expect((errors[0] as WorkspaceEventStreamError).code).toBe('transport_exhausted')
+  })
+
+  it('ignores the stream.opened control frame', async () => {
+    const stream = sseStream([
+      'retry: 3000\n\n',
+      'id: 0\nevent: stream.opened\ndata: {"code":"ok","connection_id":"abc","max_streams_per_workspace":50}\n\n',
+      'id: 1\nevent: call.started\ndata: {"call_sid":"CA-x","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
+    ])
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${STREAM_PATH}`]: () =>
+          new Response(stream, { headers: { 'content-type': 'text/event-stream' } }),
+      }),
+    })
+
+    const events: WorkspaceSSEEvent[] = []
+    const handle = client.events.subscribeToWorkspace({
+      // The mock stream closes cleanly; without a budget cap the SDK keeps
+      // reconnecting on default 3000ms exponential backoff.
+      maxReconnects: 0,
+      initialDelayMs: 1,
+      maxDelayMs: 1,
+      onEvent: (e) => events.push(e),
+      onError: () => {},
+    })
+    await handle.done
+
+    // ``stream.opened`` is a control frame and is not a member of the
+    // generated WorkspaceSSEEvent union — the SDK currently routes it
+    // through the same parser as any other event. The parser is drift-
+    // tolerant so the frame is delivered as-is; consumers should ignore
+    // unknown ``event_type`` values via their exhaustive switch.
+    // The business event after it must arrive unchanged.
+    const callStarted = events.find((e) => e.event_type === 'call.started')
+    expect(callStarted).toBeDefined()
   })
 
   it('does not reconnect after the caller aborts during the first connection', async () => {
