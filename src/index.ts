@@ -81,6 +81,7 @@ import { PipelineResource } from './resources/pipeline.js'
 import { TasksResource } from './resources/tasks.js'
 import { ToolsResource } from './resources/tools.js'
 import { SurfacesResource } from './resources/surfaces.js'
+import { SessionsResource } from './resources/sessions.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -257,6 +258,8 @@ export class AmigoClient {
   readonly tools!: ToolsResource
   /** Surfaces — short-lived form/intake experiences (lifecycle: create→deliver→review→approve) */
   readonly surfaces!: SurfacesResource
+  /** Live agent sessions — list active calls + inject mid-call directives */
+  readonly sessions!: SessionsResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -499,6 +502,7 @@ export class AmigoClient {
     mutable.tasks = new TasksResource(client, workspaceId)
     mutable.tools = new ToolsResource(client, workspaceId)
     mutable.surfaces = new SurfacesResource(client, workspaceId)
+    mutable.sessions = new SessionsResource(client, workspaceId)
   }
 
   private async resolveApiRequest<

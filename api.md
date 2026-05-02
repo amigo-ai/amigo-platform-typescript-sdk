@@ -338,6 +338,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `behaviors.update`
 - `gapScanner.get`
 - `gapScanner.update`
+- `gapScanner.preview`
+- `gapScanner.scan`
 - `scribe.get`
 - `scribe.update`
 - `metrics.get`
@@ -592,5 +594,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `approve`
 - `reject`
 - `reshape`
+
+### `sessions`
+
+- `listActive`
+- `inject`
 
 ### `api`

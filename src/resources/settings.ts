@@ -134,6 +134,20 @@ export class SettingsResource extends WorkspaceScopedResource {
           body,
         }),
       ),
+    /** Preview which calls would be flagged by the current gap-scanner config */
+    preview: async () =>
+      extractData(
+        await this.client.POST('/v1/{workspace_id}/settings/gap-scanner/preview', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+    /** Trigger an on-demand scan with the current gap-scanner config */
+    scan: async () =>
+      extractData(
+        await this.client.POST('/v1/{workspace_id}/settings/gap-scanner/scan', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
   }
 
   readonly scribe = {
