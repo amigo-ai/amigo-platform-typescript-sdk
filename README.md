@@ -446,6 +446,68 @@ const url = client.conversations.textStreamUrl({ serviceId: 'service-id', token:
 const socket = new WebSocket(url)
 ```
 
+### Real-time event streams
+
+For workspace-wide events (calls, surfaces, pipeline, operators, channels), use the typed SSE consumer:
+
+```typescript
+const handle = client.events.subscribeToWorkspace({
+  onEvent: (event) => {
+    switch (event.event_type) {
+      case 'call.started': console.log('call started:', event.call_sid); break
+      case 'pipeline.error': console.error('pipeline error:', event); break
+    }
+  },
+  onError: (err) => console.error('terminal:', err),
+  onReconnect: (attempt) => console.warn(`reconnect #${attempt}`),
+})
+
+// Later: handle.unsubscribe(); await handle.done
+```
+
+The helper handles automatic reconnect (exp backoff with jitter, server-sent
+`retry:` honored), gapless replay via `Last-Event-ID`, and discriminated-union
+dispatch. Server emits a structured `error` frame with a stable `code` on
+terminal failures — narrow with the typed error guard:
+
+```typescript
+import { isWorkspaceEventStreamError } from '@amigo-ai/platform-sdk'
+
+onError: (err) => {
+  if (isWorkspaceEventStreamError(err)) {
+    if (err.code === 'too_many_streams') {
+      // workspace has too many open streams; close another tab
+    } else if (err.retryable) {
+      // SDK already retried up to maxReconnects; safe to try again later
+    }
+  }
+}
+```
+
+For per-call voice observation (`agent_transcript_delta`, `latency`, `session_*`,
+`participant_*`, etc.), use the WebSocket-based observer helper:
+
+```typescript
+const handle = client.observers.subscribe({
+  callSid: 'CAxxx',
+  token: bearerToken,
+  onEvent: (event) => {
+    switch (event.type) {
+      case 'agent_transcript_delta': renderAgentDelta(event.text); break
+      case 'session_end': showSummary(event); break
+    }
+  },
+  onError: (err) => console.error('observer terminal:', err.reason, err.closeCode),
+})
+```
+
+Both helpers are built on the shared `ReconnectingWebSocket` primitive, which
+maps platform-specific WebSocket close codes (4001 client error, 4029 rate
+limit, 4403 auth, 4100 token expired) to a typed reason taxonomy and applies an
+idle watchdog (default 45s) so a half-dead socket forces a reconnect rather
+than hanging indefinitely. Compose it directly via `createReconnectingWebSocket`
+when you need a managed WebSocket outside these resources.
+
 ### Analytics
 
 ```typescript
