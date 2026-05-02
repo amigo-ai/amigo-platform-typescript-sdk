@@ -7,6 +7,8 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const SESSION_ID = 'sim-00000000-0000-0000-0000-000000000001'
 const AGENT_ID = 'agent-00000000-0000-0000-0000-000000000001'
+const RUN_ID = 'run-00000000-0000-0000-0000-000000000001'
+const SERVICE_ID = 'svc-00000000-0000-0000-0000-000000000001'
 
 const SESSION_FIXTURE = {
   session_id: SESSION_ID,
@@ -98,6 +100,23 @@ const client = new AmigoClient({
 
     [`GET ${BASE}/simulations/sessions/${SESSION_ID}/intelligence`]: () =>
       Response.json(INTELLIGENCE_FIXTURE),
+
+    [`GET ${BASE}/simulations/runs`]: () => Response.json({ items: [{ id: RUN_ID }] }),
+    [`POST ${BASE}/simulations/runs`]: () => Response.json({ id: RUN_ID }, { status: 201 }),
+    [`GET ${BASE}/simulations/runs/${RUN_ID}`]: () =>
+      Response.json({ id: RUN_ID, service_id: SERVICE_ID, status: 'running' }),
+    [`POST ${BASE}/simulations/runs/${RUN_ID}/complete`]: () => Response.json({ ok: true }),
+    [`POST ${BASE}/simulations/runs/${RUN_ID}/sessions`]: () => Response.json(SESSION_FIXTURE),
+
+    [`POST ${BASE}/simulations/bridge/plan`]: () => Response.json({ candidates: [] }),
+    [`POST ${BASE}/simulations/bridge`]: () => Response.json({ run_id: RUN_ID }),
+
+    [`GET ${BASE}/simulations/services/${SERVICE_ID}/graph`]: () => Response.json({ nodes: [] }),
+    [`DELETE ${BASE}/simulations/services/${SERVICE_ID}/graph`]: () => Response.json({ ok: true }),
+    [`GET ${BASE}/simulations/services/${SERVICE_ID}/graph/paths`]: () =>
+      Response.json({ paths: [] }),
+    [`GET ${BASE}/simulations/services/${SERVICE_ID}/sessions`]: () => Response.json({ items: [] }),
+    [`GET ${BASE}/simulations/services/${SERVICE_ID}/turns`]: () => Response.json({ items: [] }),
   }),
 })
 
@@ -147,5 +166,48 @@ describe('SimulationsResource', () => {
     const result = await client.simulations.getIntelligence(SESSION_ID)
     expect(result.session_id).toBe(SESSION_ID)
     expect(result.intelligence).toBeDefined()
+  })
+
+  describe('runs', () => {
+    it('lists, creates, gets, completes, and adds sessions to a run', async () => {
+      expect(await client.simulations.runs.list()).toBeDefined()
+      expect(
+        await client.simulations.runs.create({} as Parameters<
+          typeof client.simulations.runs.create
+        >[0]),
+      ).toMatchObject({ id: RUN_ID })
+      expect(await client.simulations.runs.get(RUN_ID)).toMatchObject({ id: RUN_ID })
+      expect(await client.simulations.runs.complete(RUN_ID)).toBeDefined()
+      expect(
+        await client.simulations.runs.createSession(RUN_ID, {
+          agent_id: AGENT_ID,
+        } as never),
+      ).toBeDefined()
+    })
+  })
+
+  describe('bridge', () => {
+    it('plans and runs a bridge', async () => {
+      expect(
+        await client.simulations.bridge.plan({} as Parameters<
+          typeof client.simulations.bridge.plan
+        >[0]),
+      ).toBeDefined()
+      expect(
+        await client.simulations.bridge.run({} as Parameters<
+          typeof client.simulations.bridge.run
+        >[0]),
+      ).toMatchObject({ run_id: RUN_ID })
+    })
+  })
+
+  describe('services', () => {
+    it('graphs / paths / sessions / turns', async () => {
+      expect(await client.simulations.services.getGraph(SERVICE_ID)).toBeDefined()
+      expect(await client.simulations.services.deleteGraph(SERVICE_ID)).toBeDefined()
+      expect(await client.simulations.services.getGraphPaths(SERVICE_ID)).toBeDefined()
+      expect(await client.simulations.services.listSessions(SERVICE_ID)).toBeDefined()
+      expect(await client.simulations.services.listTurns(SERVICE_ID)).toBeDefined()
+    })
   })
 })

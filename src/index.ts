@@ -65,6 +65,10 @@ import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
 import { ObserversResource } from './resources/observers.js'
+import { FhirResource } from './resources/fhir.js'
+import { InsightsResource } from './resources/insights.js'
+import { MonitorConceptsResource } from './resources/monitor-concepts.js'
+import { UnificationRulesResource } from './resources/unification-rules.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -209,6 +213,14 @@ export class AmigoClient {
    * {@link ObserversResource}.
    */
   readonly observers!: ObserversResource
+  /** FHIR / EHR data interop — sync status, imports, resources, patient views */
+  readonly fhir!: FhirResource
+  /** Natural-language insights — schema, suggestions, SQL, chat sessions */
+  readonly insights!: InsightsResource
+  /** Workspace monitor concepts (semantic patterns watched across calls) */
+  readonly monitorConcepts!: MonitorConceptsResource
+  /** Entity unification rules (declarative deduplication of world-model entities) */
+  readonly unificationRules!: UnificationRulesResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -435,6 +447,10 @@ export class AmigoClient {
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
     mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
+    mutable.fhir = new FhirResource(client, workspaceId)
+    mutable.insights = new InsightsResource(client, workspaceId)
+    mutable.monitorConcepts = new MonitorConceptsResource(client, workspaceId)
+    mutable.unificationRules = new UnificationRulesResource(client, workspaceId)
   }
 
   private async resolveApiRequest<

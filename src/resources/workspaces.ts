@@ -97,4 +97,30 @@ export class WorkspacesResource extends WorkspaceScopedResource {
       }),
     )
   }
+
+  /**
+   * Workspace-allowlisted phone numbers that can place test calls into voice
+   * agents. The list is read-mostly; writes overwrite the entire allowlist.
+   */
+  readonly testCallerNumbers = {
+    /** Get the workspace's test caller allowlist */
+    get: async (id?: WorkspaceId | string) =>
+      extractData(
+        await this.client.GET('/v1/workspaces/{workspace_id}/test-caller-numbers', {
+          params: { path: { workspace_id: id ?? this.workspaceId } },
+        }),
+      ),
+
+    /** Replace the workspace's test caller allowlist */
+    update: async (
+      body: components['schemas']['TestCallerNumbersRequest'],
+      id?: WorkspaceId | string,
+    ) =>
+      extractData(
+        await this.client.PUT('/v1/workspaces/{workspace_id}/test-caller-numbers', {
+          params: { path: { workspace_id: id ?? this.workspaceId } },
+          body,
+        }),
+      ),
+  }
 }

@@ -75,6 +75,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `provision`
 - `checkEnvironment`
 - `convertEnvironment`
+- `testCallerNumbers.get`
+- `testCallerNumbers.update`
 
 ### `apiKeys`
 
@@ -291,6 +293,18 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `step`
 - `recommend`
 - `getIntelligence`
+- `runs.list`
+- `runs.create`
+- `runs.get`
+- `runs.complete`
+- `runs.createSession`
+- `bridge.plan`
+- `bridge.run`
+- `services.getGraph`
+- `services.deleteGraph`
+- `services.getGraphPaths`
+- `services.listSessions`
+- `services.listTurns`
 
 ### `metrics`
 
@@ -433,5 +447,53 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `observers`
 
 - `subscribe`
+
+### `fhir`
+
+- `getStatus`
+- `getSyncFailures`
+- `import`
+- `searchPatients`
+- `getPatientSummary`
+- `getPatientTimeline`
+- `resources.search`
+- `resources.create`
+- `resources.get`
+- `resources.update`
+- `resources.getHistory`
+- `views.patients`
+- `views.appointments`
+- `views.practitioners`
+- `views.organizations`
+- `views.locations`
+- `views.slots`
+
+### `insights`
+
+- `getDigest`
+- `getSchema`
+- `getSuggestions`
+- `runSql`
+- `sessions.create`
+- `sessions.get`
+- `sessions.chat`
+
+### `monitorConcepts`
+
+- `create`
+- `list`
+- `listAutoPaging`
+- `get`
+- `update`
+- `delete`
+
+### `unificationRules`
+
+- `create`
+- `list`
+- `listAutoPaging`
+- `get`
+- `update`
+- `delete`
 
 ### `api`

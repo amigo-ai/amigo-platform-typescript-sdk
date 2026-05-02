@@ -9,7 +9,9 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: spec-sync-${{ github.event.client_payload.spec_sha || github.run_id }}
+  # Single rolling group: serialize every dispatch onto the one rolling branch.
+  # Same-spec no-op is enforced by the diff step below, not by the concurrency key.
+  group: spec-sync
   cancel-in-progress: false
 
 jobs:
@@ -82,7 +84,7 @@ jobs:
           npm run build
           npm test -- --reporter=dot
 
-      - name: Create PR
+      - name: Open or update rolling sync PR
         if: steps.diff.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -92,20 +94,29 @@ jobs:
           if [ -z "$SHORT_SHA" ]; then
             SHORT_SHA="${GITHUB_RUN_ID}"
           fi
-          BRANCH="chore/sync-api-types-${SHORT_SHA}"
+          # Fixed branch — one rolling PR, force-pushed each run. No SHA suffix.
+          BRANCH="chore/sync-api-types"
+
+          PLATFORM_REPO="${{ github.event.client_payload.platform_repo }}"
+          if [ -z "$PLATFORM_REPO" ]; then
+            PLATFORM_REPO="amigo-ai/amigo-platform"
+          fi
+          PLATFORM_COMMIT_URL="https://github.com/${PLATFORM_REPO}/commit/${SPEC_SHA}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$BRANCH"
+          # -B resets the branch to current HEAD (main from the checkout step), so the
+          # rolling commit is always exactly one commit on top of main with no leftover
+          # state from a prior open PR.
+          git checkout -B "$BRANCH"
           git add openapi.json src/generated/api.ts
           git commit -m "chore: sync API types from platform spec (${SHORT_SHA})"
           git push --force-with-lease origin "$BRANCH"
 
-          gh pr create \
-            --title "chore: sync API types from platform (${SHORT_SHA})" \
-            --body "$(cat <<EOF
+          PR_TITLE="chore: sync API types from platform (${SHORT_SHA})"
+          PR_BODY="$(cat <<EOF
           ## Summary
-          - Auto-synced from platform repo spec change (${SPEC_SHA})
+          - Auto-synced from platform repo spec change ([\`${SHORT_SHA}\`](${PLATFORM_COMMIT_URL}))
           - Regenerated \`src/generated/api.ts\` from latest \`openapi.json\`
           - Typecheck + build + tests verified
 
@@ -115,7 +126,29 @@ jobs:
 
           After this PR is merged, \`spec-auto-release.yml\` waits for the Test workflow on \`main\` to pass, then dispatches a minor SDK release automatically.
 
+          > This PR is force-updated in place by spec-sync each time the platform spec changes. The branch (\`${BRANCH}\`) tracks only the latest spec — older syncs are superseded, not stacked.
+
           Generated automatically by spec-sync workflow
           EOF
-          )" \
-            --base main
+          )"
+
+          EXISTING_PR=$(gh pr list \
+            --head "$BRANCH" \
+            --base main \
+            --state open \
+            --json number \
+            --jq '.[0].number')
+
+          if [ -n "$EXISTING_PR" ]; then
+            echo "Updating existing PR #${EXISTING_PR}"
+            gh pr edit "$EXISTING_PR" \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY"
+          else
+            echo "Creating new PR for branch ${BRANCH}"
+            gh pr create \
+              --title "$PR_TITLE" \
+              --body "$PR_BODY" \
+              --base main \
+              --head "$BRANCH"
+          fi
