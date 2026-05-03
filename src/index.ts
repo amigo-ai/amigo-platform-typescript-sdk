@@ -65,6 +65,23 @@ import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
 import { ObserversResource } from './resources/observers.js'
+import { FhirResource } from './resources/fhir.js'
+import { InsightsResource } from './resources/insights.js'
+import { MonitorConceptsResource } from './resources/monitor-concepts.js'
+import { UnificationRulesResource } from './resources/unification-rules.js'
+import { CrmResource } from './resources/crm.js'
+import { CommandCenterResource } from './resources/command-center.js'
+import { SensoriumResource } from './resources/sensorium.js'
+import { DataQueryResource } from './resources/data-query.js'
+import { BriefsResource } from './resources/briefs.js'
+import { DesktopSessionsResource } from './resources/desktop-sessions.js'
+import { IntakeResource } from './resources/intake.js'
+import { NetworkResource } from './resources/network.js'
+import { PipelineResource } from './resources/pipeline.js'
+import { TasksResource } from './resources/tasks.js'
+import { ToolsResource } from './resources/tools.js'
+import { SurfacesResource } from './resources/surfaces.js'
+import { SessionsResource } from './resources/sessions.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -209,6 +226,40 @@ export class AmigoClient {
    * {@link ObserversResource}.
    */
   readonly observers!: ObserversResource
+  /** FHIR / EHR data interop — sync status, imports, resources, patient views */
+  readonly fhir!: FhirResource
+  /** Natural-language insights — schema, suggestions, SQL, chat sessions */
+  readonly insights!: InsightsResource
+  /** Workspace monitor concepts (semantic patterns watched across calls) */
+  readonly monitorConcepts!: MonitorConceptsResource
+  /** Entity unification rules (declarative deduplication of world-model entities) */
+  readonly unificationRules!: UnificationRulesResource
+  /** CRM — contacts, companies, deals, pipeline (sync from connected CRM integration) */
+  readonly crm!: CrmResource
+  /** Command Center — rolled-up workspace homepage snapshot */
+  readonly commandCenter!: CommandCenterResource
+  /** Sensorium — operator-facing live agent loop observability */
+  readonly sensorium!: SensoriumResource
+  /** Generic data query against whitelisted workspace datasets */
+  readonly dataQuery!: DataQueryResource
+  /** AI-generated entity briefs (workspace-level + per-entity) */
+  readonly briefs!: BriefsResource
+  /** Remote-controlled desktop sessions for driving GUI-only third-party apps */
+  readonly desktopSessions!: DesktopSessionsResource
+  /** Patient intake — signed upload links + uploads */
+  readonly intake!: IntakeResource
+  /** Workspace network metadata (egress IP allowlist) */
+  readonly network!: NetworkResource
+  /** Data ingestion pipeline observability (sources, throughput, review backlog) */
+  readonly pipeline!: PipelineResource
+  /** Long-running async tasks (poll by id or list by call) */
+  readonly tasks!: TasksResource
+  /** Manual tool execution + per-service tool resolution */
+  readonly tools!: ToolsResource
+  /** Surfaces — short-lived form/intake experiences (lifecycle: create→deliver→review→approve) */
+  readonly surfaces!: SurfacesResource
+  /** Live agent sessions — list active calls + inject mid-call directives */
+  readonly sessions!: SessionsResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -435,6 +486,23 @@ export class AmigoClient {
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
     mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
+    mutable.fhir = new FhirResource(client, workspaceId)
+    mutable.insights = new InsightsResource(client, workspaceId)
+    mutable.monitorConcepts = new MonitorConceptsResource(client, workspaceId)
+    mutable.unificationRules = new UnificationRulesResource(client, workspaceId)
+    mutable.crm = new CrmResource(client, workspaceId)
+    mutable.commandCenter = new CommandCenterResource(client, workspaceId)
+    mutable.sensorium = new SensoriumResource(client, workspaceId)
+    mutable.dataQuery = new DataQueryResource(client, workspaceId)
+    mutable.briefs = new BriefsResource(client, workspaceId)
+    mutable.desktopSessions = new DesktopSessionsResource(client, workspaceId)
+    mutable.intake = new IntakeResource(client, workspaceId)
+    mutable.network = new NetworkResource(client, workspaceId)
+    mutable.pipeline = new PipelineResource(client, workspaceId)
+    mutable.tasks = new TasksResource(client, workspaceId)
+    mutable.tools = new ToolsResource(client, workspaceId)
+    mutable.surfaces = new SurfacesResource(client, workspaceId)
+    mutable.sessions = new SessionsResource(client, workspaceId)
   }
 
   private async resolveApiRequest<

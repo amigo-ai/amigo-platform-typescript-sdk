@@ -130,4 +130,27 @@ describe('WorkspacesResource', () => {
     })
     expect(result.name).toBe('Acme Health')
   })
+
+  describe('testCallerNumbers', () => {
+    const TCN_FIXTURE = { allowlist: ['+15551234567'] }
+    const tcnClient = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET /v1/workspaces/${TEST_WORKSPACE_ID}/test-caller-numbers`]: () =>
+          Response.json(TCN_FIXTURE),
+        [`PUT /v1/workspaces/${TEST_WORKSPACE_ID}/test-caller-numbers`]: () =>
+          Response.json(TCN_FIXTURE),
+      }),
+    })
+
+    it('reads and writes the allowlist', async () => {
+      expect(await tcnClient.workspaces.testCallerNumbers.get()).toMatchObject(TCN_FIXTURE)
+      expect(
+        await tcnClient.workspaces.testCallerNumbers.update({
+          numbers: ['+15551234567'],
+        }),
+      ).toMatchObject(TCN_FIXTURE)
+    })
+  })
 })

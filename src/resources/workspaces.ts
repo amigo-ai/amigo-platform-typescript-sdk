@@ -97,4 +97,37 @@ export class WorkspacesResource extends WorkspaceScopedResource {
       }),
     )
   }
+
+  /**
+   * Workspace-allowlisted phone numbers that can place test calls into voice
+   * agents. The list is read-mostly; writes overwrite the entire allowlist.
+   *
+   * Always operates on the bound workspace. Use `client.withOptions(...)` or
+   * construct a second `AmigoClient` if you need to act on a different
+   * workspace.
+   */
+  readonly testCallerNumbers = {
+    /** Get the workspace's test caller allowlist */
+    get: async () =>
+      extractData(
+        await this.client.GET('/v1/workspaces/{workspace_id}/test-caller-numbers', {
+          params: { path: { workspace_id: this.workspaceId } },
+        }),
+      ),
+
+    /**
+     * Replace the workspace's test caller allowlist.
+     *
+     * **Replace-all semantics:** the request body fully replaces the existing
+     * allowlist; numbers omitted from `body` are removed. Read first, mutate,
+     * then write to add/remove individual entries safely.
+     */
+    update: async (body: components['schemas']['TestCallerNumbersRequest']) =>
+      extractData(
+        await this.client.PUT('/v1/workspaces/{workspace_id}/test-caller-numbers', {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        }),
+      ),
+  }
 }

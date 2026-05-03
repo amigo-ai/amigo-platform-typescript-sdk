@@ -75,6 +75,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `provision`
 - `checkEnvironment`
 - `convertEnvironment`
+- `testCallerNumbers.get`
+- `testCallerNumbers.update`
 
 ### `apiKeys`
 
@@ -230,6 +232,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getBenchmarks`
 - `getPhoneVolume`
 - `getTraceAnalysis`
+- `listTraces`
+- `getMetrics`
+- `createOutbound`
 
 ### `conversations`
 
@@ -282,6 +287,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getOperatorPerformance`
 - `getAdvancedCallStats`
 - `compareCallPeriods`
+- `surfaces.getCompletionRates`
+- `surfaces.getChannelEffectiveness`
+- `surfaces.getFieldAbandonment`
+- `surfaces.getForEntity`
 
 ### `simulations`
 
@@ -291,6 +300,18 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `step`
 - `recommend`
 - `getIntelligence`
+- `runs.list`
+- `runs.create`
+- `runs.get`
+- `runs.complete`
+- `runs.createSession`
+- `bridge.plan`
+- `bridge.run`
+- `services.getGraph`
+- `services.deleteGraph`
+- `services.getGraphPaths`
+- `services.listSessions`
+- `services.listTurns`
 
 ### `metrics`
 
@@ -317,6 +338,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `behaviors.update`
 - `gapScanner.get`
 - `gapScanner.update`
+- `gapScanner.preview`
+- `gapScanner.scan`
 - `scribe.get`
 - `scribe.update`
 - `metrics.get`
@@ -433,5 +456,148 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `observers`
 
 - `subscribe`
+
+### `fhir`
+
+- `getStatus`
+- `getSyncFailures`
+- `import`
+- `searchPatients`
+- `getPatientSummary`
+- `getPatientTimeline`
+- `resources.search`
+- `resources.create`
+- `resources.get`
+- `resources.update`
+- `resources.getHistory`
+- `views.patients`
+- `views.appointments`
+- `views.practitioners`
+- `views.organizations`
+- `views.locations`
+- `views.slots`
+
+### `insights`
+
+- `getDigest`
+- `getSchema`
+- `getSuggestions`
+- `runSql`
+- `sessions.create`
+- `sessions.get`
+- `sessions.chat`
+
+### `monitorConcepts`
+
+- `create`
+- `list`
+- `listAutoPaging`
+- `get`
+- `update`
+- `delete`
+
+### `unificationRules`
+
+- `create`
+- `list`
+- `listAutoPaging`
+- `get`
+- `update`
+- `delete`
+
+### `crm`
+
+- `getStatus`
+- `contacts.list`
+- `contacts.get`
+- `contacts.getTimeline`
+- `companies.list`
+- `companies.get`
+- `deals.list`
+- `deals.get`
+- `deals.getPipeline`
+
+### `commandCenter`
+
+- `get`
+
+### `sensorium`
+
+- `getConnectorHealth`
+- `getLoopLatency`
+
+### `dataQuery`
+
+- `run`
+
+### `briefs`
+
+- `get`
+- `regenerate`
+- `getForEntity`
+- `regenerateForEntity`
+
+### `desktopSessions`
+
+- `create`
+- `disconnect`
+- `sendAction`
+- `getScreenshot`
+- `getStatus`
+
+### `intake`
+
+- `links.list`
+- `links.create`
+- `links.delete`
+- `links.listUploads`
+- `links.downloadUpload`
+
+### `network`
+
+- `getEgressIps`
+
+### `pipeline`
+
+- `getStatus`
+- `getThroughput`
+- `getReview`
+- `getEntityResolution`
+- `outbound.list`
+- `outbound.getLog`
+- `sources.list`
+- `sources.getOverview`
+- `sources.listEvents`
+- `sources.getHistory`
+
+### `tasks`
+
+- `get`
+- `listByCall`
+
+### `tools`
+
+- `execute`
+- `resolveForService`
+
+### `surfaces`
+
+- `list`
+- `listAutoPaging`
+- `listForReview`
+- `create`
+- `get`
+- `update`
+- `archive`
+- `deliver`
+- `getProgress`
+- `approve`
+- `reject`
+- `reshape`
+
+### `sessions`
+
+- `listActive`
+- `inject`
 
 ### `api`
