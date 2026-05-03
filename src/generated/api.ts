@@ -11955,8 +11955,7 @@ export interface components {
              */
             email: string;
             name: components["schemas"]["NameString"];
-            /** Phone Number */
-            phone_number?: string | null;
+            phone_number?: components["schemas"]["PhoneE164"] | null;
             /**
              * Role
              * @default operator
@@ -12353,11 +12352,7 @@ export interface components {
         };
         /** CreateSurfaceResponse */
         CreateSurfaceResponse: {
-            /**
-             * Channel
-             * @enum {string}
-             */
-            channel: "sms" | "whatsapp" | "imessage" | "email" | "voice" | "web";
+            channel: components["schemas"]["ChannelType"];
             /** Created At */
             created_at: string;
             /** Description */
@@ -12381,11 +12376,7 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
+            status: components["schemas"]["SurfaceStatus"];
             /** Title */
             title: string;
             /** Token */
@@ -13531,8 +13522,7 @@ export interface components {
         };
         /** DeliverSurfaceResponse */
         DeliverSurfaceResponse: {
-            /** Channel */
-            channel?: ("sms" | "whatsapp" | "imessage" | "email" | "voice" | "web") | null;
+            channel?: components["schemas"]["ChannelType"] | null;
             /** Channel Address */
             channel_address: string;
             /** Delivered At */
@@ -14007,30 +13997,38 @@ export interface components {
         /**
          * EmotionSummary
          * @description Aggregated emotional analysis across the call.
+         *
+         *     Free-form residual on the raw ``emotion_summary`` JSONB:
+         *     ``compound_emotions: list[{name, score}]``. Not exposed via this
+         *     typed shape — readers wanting it consume the JSONB endpoint.
          */
         EmotionSummary: {
             /**
-             * Avg Valence
+             * Average Arousal
+             * @description Average emotional arousal 0.0 to 1.0
+             */
+            average_arousal?: number | null;
+            /**
+             * Average Valence
              * @description Average emotional valence -1.0 to 1.0
              */
-            avg_valence?: number | null;
+            average_valence?: number | null;
             /**
-             * Caller Distress Detected
-             * @description Whether caller distress was detected
-             * @default false
+             * Barge In Count
+             * @description Number of caller interruptions (emotion-tagged)
+             * @default 0
              */
-            caller_distress_detected?: boolean;
+            barge_in_count?: number;
             /**
              * Dominant Emotion
-             * @description Most frequent emotion
+             * @description Most frequent emotion (e.g. 'neutral', 'happy', 'angry')
              */
             dominant_emotion?: string | null;
             /**
-             * Emotion Shifts
-             * @description Number of significant emotion transitions
-             * @default 0
+             * Peak Negative Valence
+             * @description Most negative valence observed
              */
-            emotion_shifts?: number;
+            peak_negative_valence?: number | null;
         };
         /**
          * EmotionalShift
@@ -17359,29 +17357,59 @@ export interface components {
         };
         /**
          * LatencySummary
-         * @description Audio latency and silence metrics.
+         * @description Audio + engine latency metrics (one entry per turn averaged).
          */
         LatencySummary: {
             /**
+             * Avg Audio Ttfb Ms
+             * @description Average audio time-to-first-byte (ms)
+             */
+            avg_audio_ttfb_ms?: number | null;
+            /**
+             * Avg Engine Ms
+             * @description Average reasoning-engine latency (ms)
+             */
+            avg_engine_ms?: number | null;
+            /**
+             * Avg Nav Ms
+             * @description Average navigation latency (ms)
+             */
+            avg_nav_ms?: number | null;
+            /**
+             * Avg Render Ms
+             * @description Average render latency (ms)
+             */
+            avg_render_ms?: number | null;
+            /**
              * P50 Audio Ttfb Ms
-             * @description Median audio time-to-first-byte (ms)
+             * @description Median audio TTFB (ms)
              */
             p50_audio_ttfb_ms?: number | null;
+            /**
+             * P50 Engine Ms
+             * @description Median engine latency (ms)
+             */
+            p50_engine_ms?: number | null;
             /**
              * P95 Audio Ttfb Ms
              * @description 95th percentile audio TTFB (ms)
              */
             p95_audio_ttfb_ms?: number | null;
             /**
+             * P95 Engine Ms
+             * @description 95th percentile engine latency (ms)
+             */
+            p95_engine_ms?: number | null;
+            /**
              * Silence Ratio
              * @description Fraction of call spent in silence
              */
             silence_ratio?: number | null;
             /**
-             * Total Silence Seconds
-             * @description Total silence duration in seconds
+             * Turn Count
+             * @description Number of turns the latency averages were computed over
              */
-            total_silence_seconds?: number | null;
+            turn_count?: number | null;
         };
         /**
          * LeaveCallRequest
@@ -18400,19 +18428,25 @@ export interface components {
         /**
          * OperatorIntelligenceSummary
          * @description Operator intervention summary.
+         *
+         *     Three-valued semantics on ``operator_active``:
+         *     - ``True``  — escalation occurred and an operator was active.
+         *     - ``False`` — escalation occurred but no operator picked up.
+         *     - ``None``  — no escalation occurred (producer omits the key).
+         *       Readers must distinguish; do not coerce ``None`` → ``False``.
          */
         OperatorIntelligenceSummary: {
             /**
              * Escalated
-             * @description Whether the call was escalated
+             * @description Whether the call was escalated to a human operator
              * @default false
              */
             escalated?: boolean;
             /**
-             * Operator Handle Time Seconds
-             * @description Operator handle time
+             * Operator Active
+             * @description Whether an operator was active during escalation. True = active; False = escalation occurred but no operator picked up; None = no escalation occurred (do NOT coerce to False).
              */
-            operator_handle_time_seconds?: number | null;
+            operator_active?: boolean | null;
         };
         /** OperatorJoinedCallEvent */
         OperatorJoinedCallEvent: {
@@ -20868,11 +20902,7 @@ export interface components {
              * @enum {string}
              */
             action: "approved" | "rejected";
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
+            status: components["schemas"]["SurfaceStatus"];
             /**
              * Surface Id
              * Format: uuid
@@ -21058,6 +21088,12 @@ export interface components {
         /**
          * RiskSummary
          * @description Aggregated risk signals across the call.
+         *
+         *     Free-form residual on the raw ``risk_summary`` JSONB:
+         *     ``signals: list[{name, raw_score, weight, weighted_score, detail}]``
+         *     — the per-signal breakdown that aggregates into ``composite_score``.
+         *     Not exposed via this typed shape; consumers needing per-signal
+         *     detail read the JSONB endpoint.
          */
         RiskSummary: {
             /**
@@ -21066,11 +21102,6 @@ export interface components {
              * @default 0
              */
             composite_score?: number;
-            /**
-             * Flags
-             * @description Specific risk flags raised
-             */
-            flags?: string[];
             /**
              * Level
              * @description Risk level
@@ -21196,13 +21227,12 @@ export interface components {
         /**
          * SafetySummary
          * @description Safety filter results.
+         *
+         *     Free-form residual on the raw ``safety_summary`` JSONB:
+         *     ``actions: dict | list`` — escalation handler actions taken
+         *     when ``match_count > 0``. Not exposed via this typed shape.
          */
         SafetySummary: {
-            /**
-             * Categories
-             * @description Safety categories matched
-             */
-            categories?: string[];
             /**
              * Match Count
              * @description Number of safety filter matches
@@ -23344,8 +23374,7 @@ export interface components {
         };
         /** SurfaceResponse */
         SurfaceResponse: {
-            /** Channel */
-            channel?: ("sms" | "whatsapp" | "imessage" | "email" | "voice" | "web") | null;
+            channel?: components["schemas"]["ChannelType"] | null;
             /**
              * Context
              * @default {}
@@ -23390,11 +23419,7 @@ export interface components {
             opened_at?: string | null;
             /** Resource Type */
             resource_type?: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
+            status: components["schemas"]["SurfaceStatus"];
             /** Submitted At */
             submitted_at?: string | null;
             /** Submitted Data */
@@ -23509,6 +23534,12 @@ export interface components {
             /** Surface Id */
             surface_id?: string | null;
         };
+        /**
+         * SurfaceStatus
+         * @description Lifecycle status of a surface.
+         * @enum {string}
+         */
+        SurfaceStatus: "created" | "pending_review" | "delivered" | "opened" | "partial" | "completed" | "expired" | "archived";
         /** SurfaceSubmittedEvent */
         SurfaceSubmittedEvent: {
             /**
@@ -24402,6 +24433,10 @@ export interface components {
         /**
          * ToolSummary
          * @description Tool usage statistics.
+         *
+         *     Free-form residual on the raw ``tool_summary`` JSONB:
+         *     ``by_tool: list[{name, calls, succeeded, failed, avg_duration_ms}]``
+         *     — per-tool breakdown. Not exposed via this typed shape.
          */
         ToolSummary: {
             /**
@@ -24416,6 +24451,12 @@ export interface components {
              * @default 0
              */
             failure_rate?: number;
+            /**
+             * Succeeded
+             * @description Successful tool invocations
+             * @default 0
+             */
+            succeeded?: number;
             /**
              * Total Calls
              * @description Total tool invocations
@@ -25424,8 +25465,7 @@ export interface components {
             /** Email */
             email?: string | null;
             name?: components["schemas"]["NameString"] | null;
-            /** Phone Number */
-            phone_number?: string | null;
+            phone_number?: components["schemas"]["PhoneE164"] | null;
             /** Role */
             role?: ("operator" | "supervisor" | "admin") | null;
             /** Skills */
@@ -27017,13 +27057,15 @@ export interface components {
         /**
          * ConversationSummary
          * @description Conversation flow metrics.
+         *
+         *     Free-form residual on the raw ``conversation_summary`` JSONB:
+         *     ``text_intelligence: dict`` (text-channel intelligence
+         *     sub-payload), and on the simulation path ``transcript_text:
+         *     str`` (PHI), ``tool_calls: list``, ``score``,
+         *     ``score_rationale``, ``terminal_reached``, ``states_visited``.
+         *     Not exposed via this typed shape.
          */
         src__routes__calls__ConversationSummary: {
-            /**
-             * Avg Turn Duration Seconds
-             * @description Average turn duration
-             */
-            avg_turn_duration_seconds?: number | null;
             /**
              * Barge In Count
              * @description Number of caller interruptions
@@ -27032,16 +27074,28 @@ export interface components {
             barge_in_count?: number;
             /**
              * Loop Count
-             * @description Number of detected conversation loops
+             * @description Number of detected state loops
              * @default 0
              */
             loop_count?: number;
             /**
-             * Topic Changes
-             * @description Number of topic transitions
+             * States Visited Count
+             * @description Number of states visited (including repeats)
              * @default 0
              */
-            topic_changes?: number;
+            states_visited_count?: number;
+            /**
+             * Turn Count
+             * @description Total turn count for the call
+             * @default 0
+             */
+            turn_count?: number;
+            /**
+             * Unique States
+             * @description Number of distinct states visited
+             * @default 0
+             */
+            unique_states?: number;
         };
         /** ConversationSummary */
         src__routes__conversations__ConversationSummary: {
