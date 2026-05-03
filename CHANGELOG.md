@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.28.0] - 2026-05-03
+
+### ⚠️ Breaking changes
+
+- **Removed `client.workspaces.createSelfService()`** — the underlying route `POST /v1/workspaces/self-service` was deleted in platform-api PR #2472. Migrate to **`client.me.createWorkspace(body)`** which calls the new `POST /v1/me/workspaces` endpoint. Request body and response shape are unchanged; only the URL moved.
+
+  Why: the legacy URL nested an account-scoped operation under `/v1/workspaces/<x>` — the developer-console BFF proxy parsed the literal `self-service` as a workspace_id and sent identity a JWT-refresh request scoped to that string, which 4xx'd before the call ever reached platform-api. Lifting the route to `/v1/me/...` (already in the BFF's global-segment allowlist) makes the failure mode structurally impossible. A platform-api hygiene test now blocks any future literal segment under `/v1/workspaces/`.
+
+  Datadog confirmed zero successful traffic on the legacy route in the 7 days before removal — no production callers exist.
+
+### Features
+
+- **`client.me`** — new `MeResource` for account-scoped operations on the authenticated identity. Initial method: `createWorkspace(body)` (replaces `client.workspaces.createSelfService`).
+
+### Maintenance
+
+- sync API types from platform (`edac384e3`) — `/v1/me/workspaces` (POST, op `create-my-workspace`, tag `Account`) added; `/v1/workspaces/self-service` removed.
+
 ## [0.27.0] - 2026-05-03
 
 ### Security
