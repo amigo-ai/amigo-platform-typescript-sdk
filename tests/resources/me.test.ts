@@ -1,86 +1,120 @@
 import { describe, expect, it } from 'vitest'
+import type { components } from '../../src/generated/api.js'
 import { AmigoClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
-const WORKSPACE_FIXTURE = {
+const WORKSPACE_FIXTURE: components['schemas']['WorkspaceResponse'] = {
   id: TEST_WORKSPACE_ID,
   name: 'Acme Health',
   slug: 'acme-health',
-  status: 'active',
   environment: 'staging',
+  backend_org_id: null,
   region: 'us-east-1',
+  connector_type: null,
+  provisioned_at: null,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
+const NOT_CAPTURED = Symbol('body not captured')
+
+interface CapturedRequest {
+  url: string
+  method: string
+  body: unknown
+}
+
+/**
+ * Build a fetch impl that records the outgoing request and returns a
+ * canned response. Captures ``url`` (full path-and-query),
+ * ``method``, and decoded JSON ``body``. ``body`` is initialized to a
+ * sentinel symbol, so a transport change that silently stops invoking
+ * the body-capture branch fails the assertion (instead of vacuously
+ * passing on ``undefined``).
+ */
+function recordingFetch(
+  cannedResponse: () => Response | Promise<Response>,
+  captured: CapturedRequest,
 ): typeof globalThis.fetch {
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    let url: string
-    let method: string
+  return async (input, init) => {
+    // openapi-fetch always emits a ``Request`` for non-GET; in that
+    // path ``init`` is undefined and the body lives on the Request.
+    // Older transports could pass ``init.body`` for a string-URL input
+    // — we don't exercise that today, but support it cheaply for
+    // forward-compatibility (the assertion above would catch a
+    // regression, since either path will set ``captured.body``).
     if (input instanceof Request) {
-      url = input.url
-      method = input.method.toUpperCase()
+      captured.url = new URL(input.url).pathname
+      captured.method = input.method.toUpperCase()
+      if (input.body) captured.body = await input.clone().json()
+      else captured.body = null
     } else {
-      url = typeof input === 'string' ? input : input.toString()
-      method = (init?.method ?? 'GET').toUpperCase()
+      const urlStr = typeof input === 'string' ? input : input.toString()
+      captured.url = new URL(urlStr).pathname
+      captured.method = (init?.method ?? 'GET').toUpperCase()
+      captured.body = init?.body ? JSON.parse(init.body as string) : null
     }
-    const pathname = new URL(url).pathname
-    for (const [pattern, handler] of Object.entries(routes)) {
-      const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
-    }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
-      status: 500,
-    })
+    return cannedResponse()
   }
 }
 
 describe('MeResource', () => {
-  it('creates a workspace via POST /v1/me/workspaces', async () => {
-    let capturedBody: unknown
-    const recordingFetch: typeof globalThis.fetch = async (input, init) => {
-      // openapi-fetch passes a Request object when a body is supplied.
-      if (input instanceof Request && input.body) {
-        capturedBody = await input.clone().json()
-      } else if (init?.body) {
-        capturedBody = JSON.parse(init.body as string)
-      }
-      return mockFetch({
-        [`POST /v1/me/workspaces`]: () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
-      })(input, init)
+  it('createWorkspace posts to exactly /v1/me/workspaces with no workspace prefix', async () => {
+    // Account-scoped routes must NOT carry a workspace prefix or an
+    // ``X-Workspace-Id``-style header derived from the bound
+    // ``workspaceId`` slot. ``MeResource`` extends
+    // ``WorkspaceScopedResource`` (for ``withOptions`` / iterator
+    // helpers) but the underlying ``PlatformFetch`` middleware does
+    // not auto-inject workspace context. This test pins the
+    // outgoing URL exactly so any future middleware change that
+    // starts injecting workspace context fails loudly here.
+    const captured: CapturedRequest = {
+      url: '',
+      method: '',
+      body: NOT_CAPTURED,
+    }
+
+    const requestBody: components['schemas']['CreateWorkspaceRequest'] = {
+      slug: 'acme-health',
+      name: 'Acme Health',
+      environment: 'staging',
+      region: 'us-east-1',
+      backend_org_id: null,
     }
 
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
-      fetch: recordingFetch,
+      fetch: recordingFetch(
+        () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
+        captured,
+      ),
     })
 
-    const result = await client.me.createWorkspace({
-      slug: 'acme-health',
-      name: 'Acme Health',
-    } as never)
+    const result = await client.me.createWorkspace(requestBody)
 
-    expect(result.id).toBe(TEST_WORKSPACE_ID)
-    expect(result.name).toBe('Acme Health')
-    // Body shape unchanged from the legacy ``createSelfService`` call
-    // — only the URL moved. Pin the request body to catch a future
-    // accidental shape change.
-    expect(capturedBody).toEqual({ slug: 'acme-health', name: 'Acme Health' })
+    // Exact-URL pin — workspace_id MUST NOT appear anywhere in the path.
+    expect(captured.url).toBe('/v1/me/workspaces')
+    expect(captured.url).not.toContain(TEST_WORKSPACE_ID)
+    expect(captured.method).toBe('POST')
+    // Sentinel check: ensure the body-capture branch actually ran.
+    expect(captured.body).not.toBe(NOT_CAPTURED)
+    expect(captured.body).toEqual(requestBody)
+    // Full response shape pin (not just a couple of fields) — catches
+    // a silent schema drop.
+    expect(result).toEqual(WORKSPACE_FIXTURE)
   })
 
   it('does not expose createSelfService on client.workspaces (regression)', () => {
-    // The legacy method was removed in SDK 0.27.0 (platform-api PR #2472
+    // The legacy method was removed in SDK 0.28.0 (platform-api PR #2472
     // deleted the underlying ``POST /v1/workspaces/self-service`` route).
     // SDK consumers must migrate to ``client.me.createWorkspace``.
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
-      fetch: mockFetch({}),
+      fetch: async () => new Response(null, { status: 500 }),
     })
     expect(
       (client.workspaces as unknown as { createSelfService?: unknown }).createSelfService,

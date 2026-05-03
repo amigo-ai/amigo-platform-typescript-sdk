@@ -11,7 +11,7 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  *
  * Workspace creation lives here, NOT on ``client.workspaces``. The
  * legacy ``client.workspaces.createSelfService`` (which posted to
- * ``/v1/workspaces/self-service``) was removed in SDK 0.27.0 because
+ * ``/v1/workspaces/self-service``) was removed in SDK 0.28.0 because
  * the route shape confused URL-parsing consumers — the developer-console
  * BFF proxy treated the literal ``self-service`` as a workspace_id
  * and sent identity a JWT-refresh request scoped to that string,
@@ -22,6 +22,13 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * iteration helpers / scoped-client wiring. The bound
  * ``workspaceId`` is unused for the routes here — typically a
  * placeholder like ``"_account"`` from the AmigoClient construction.
+ *
+ * **No workspace context is injected into the HTTP request.** The
+ * shared ``PlatformFetch`` middleware does not auto-prefix paths or
+ * inject ``X-Workspace-Id``-style headers based on the resource's
+ * ``workspaceId`` slot — the URL each method writes is the URL that
+ * leaves the client. Pinned by ``tests/resources/me.test.ts``'s
+ * exact-URL assertion.
  */
 export class MeResource extends WorkspaceScopedResource {
   /**
