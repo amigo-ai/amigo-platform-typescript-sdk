@@ -6,6 +6,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Surfaces connector health (per-integration up/down + latency) and
  * end-to-end loop latency (turn ingest → response) for diagnosing
  * production regressions in real time.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class SensoriumResource extends WorkspaceScopedResource {
   /** Per-connector health snapshot (status + latency) */

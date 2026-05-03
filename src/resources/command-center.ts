@@ -4,6 +4,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Command Center — single rolled-up snapshot used to drive the developer
  * console's homepage tiles (active calls, queue depth, alerting status,
  * recent escalations, etc.). One endpoint, refreshed on demand.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class CommandCenterResource extends WorkspaceScopedResource {
   /** Get the current command-center snapshot */

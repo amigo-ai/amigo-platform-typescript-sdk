@@ -1,16 +1,16 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface ListUnificationRulesParams extends ListParams {
-  search?: string
-  enabled?: boolean
-}
+export type ListUnificationRulesParams = NonNullable<
+  paths['/v1/{workspace_id}/unification-rules']['get']['parameters']['query']
+>
 
 /**
  * Manage entity unification rules — declarative joins that fold duplicate
  * world-model entities into a single canonical record. Rules are evaluated
  * on ingest; the surviving entity inherits properties from its merge sources.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class UnificationRulesResource extends WorkspaceScopedResource {
   /** Create a new unification rule */

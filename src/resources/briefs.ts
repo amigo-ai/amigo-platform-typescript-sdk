@@ -4,6 +4,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 /**
  * Briefs — short, AI-generated context summaries about an entity. The GET
  * variant returns a cached brief; POST regenerates it on demand.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class BriefsResource extends WorkspaceScopedResource {
   /** Get the workspace-level brief */

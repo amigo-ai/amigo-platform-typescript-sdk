@@ -1,17 +1,17 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface ListMonitorConceptsParams extends ListParams {
-  search?: string
-  status?: string
-}
+export type ListMonitorConceptsParams = NonNullable<
+  paths['/v1/{workspace_id}/monitor-concepts']['get']['parameters']['query']
+>
 
 /**
  * Manage workspace monitor concepts — semantic patterns the platform watches
  * across calls to surface emerging behavior. Each concept holds a name,
  * description, and detection rules; the platform indexes them and lights
  * them up against live and historical traffic.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class MonitorConceptsResource extends WorkspaceScopedResource {
   /** Create a new monitor concept */

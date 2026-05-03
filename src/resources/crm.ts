@@ -1,10 +1,15 @@
+import type { paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-export interface CrmSearchParams {
-  q?: string
-  limit?: number
-  offset?: number
-}
+export type CrmContactSearchParams = NonNullable<
+  paths['/v1/{workspace_id}/crm/contacts']['get']['parameters']['query']
+>
+export type CrmCompanySearchParams = NonNullable<
+  paths['/v1/{workspace_id}/crm/companies']['get']['parameters']['query']
+>
+export type CrmDealSearchParams = NonNullable<
+  paths['/v1/{workspace_id}/crm/deals']['get']['parameters']['query']
+>
 
 /**
  * CRM — read-mostly view of contacts, companies, deals, and pipeline state
@@ -13,6 +18,8 @@ export interface CrmSearchParams {
  * The platform refreshes this view in the background; the SDK exposes search
  * + detail endpoints plus a per-contact activity timeline. Writes happen
  * upstream in the CRM itself, not here.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class CrmResource extends WorkspaceScopedResource {
   /** Health/status of the workspace's CRM integration sync */
@@ -25,7 +32,7 @@ export class CrmResource extends WorkspaceScopedResource {
   }
 
   readonly contacts = {
-    list: async (params?: CrmSearchParams) =>
+    list: async (params?: CrmContactSearchParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/crm/contacts', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -49,7 +56,7 @@ export class CrmResource extends WorkspaceScopedResource {
   }
 
   readonly companies = {
-    list: async (params?: CrmSearchParams) =>
+    list: async (params?: CrmCompanySearchParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/crm/companies', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -65,7 +72,7 @@ export class CrmResource extends WorkspaceScopedResource {
   }
 
   readonly deals = {
-    list: async (params?: CrmSearchParams) =>
+    list: async (params?: CrmDealSearchParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/crm/deals', {
           params: { path: { workspace_id: this.workspaceId }, query: params },

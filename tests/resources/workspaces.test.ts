@@ -148,8 +148,8 @@ describe('WorkspacesResource', () => {
       expect(await tcnClient.workspaces.testCallerNumbers.get()).toMatchObject(TCN_FIXTURE)
       expect(
         await tcnClient.workspaces.testCallerNumbers.update({
-          allowlist: ['+15551234567'],
-        } as never),
+          numbers: ['+15551234567'],
+        }),
       ).toMatchObject(TCN_FIXTURE)
     })
   })

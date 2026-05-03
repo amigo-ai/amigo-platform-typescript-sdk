@@ -170,19 +170,22 @@ describe('SimulationsResource', () => {
 
   describe('runs', () => {
     it('lists, creates, gets, completes, and adds sessions to a run', async () => {
-      expect(await client.simulations.runs.list()).toBeDefined()
+      expect(await client.simulations.runs.list()).toMatchObject({ items: [{ id: RUN_ID }] })
       expect(
         await client.simulations.runs.create({} as Parameters<
           typeof client.simulations.runs.create
         >[0]),
       ).toMatchObject({ id: RUN_ID })
-      expect(await client.simulations.runs.get(RUN_ID)).toMatchObject({ id: RUN_ID })
-      expect(await client.simulations.runs.complete(RUN_ID)).toBeDefined()
+      expect(await client.simulations.runs.get(RUN_ID)).toMatchObject({
+        id: RUN_ID,
+        service_id: SERVICE_ID,
+      })
+      expect(await client.simulations.runs.complete(RUN_ID)).toMatchObject({ ok: true })
       expect(
         await client.simulations.runs.createSession(RUN_ID, {
           agent_id: AGENT_ID,
         } as never),
-      ).toBeDefined()
+      ).toMatchObject({ session_id: SESSION_ID })
     })
   })
 
@@ -192,7 +195,7 @@ describe('SimulationsResource', () => {
         await client.simulations.bridge.plan({} as Parameters<
           typeof client.simulations.bridge.plan
         >[0]),
-      ).toBeDefined()
+      ).toMatchObject({ candidates: [] })
       expect(
         await client.simulations.bridge.run({} as Parameters<
           typeof client.simulations.bridge.run
@@ -203,11 +206,19 @@ describe('SimulationsResource', () => {
 
   describe('services', () => {
     it('graphs / paths / sessions / turns', async () => {
-      expect(await client.simulations.services.getGraph(SERVICE_ID)).toBeDefined()
-      expect(await client.simulations.services.deleteGraph(SERVICE_ID)).toBeDefined()
-      expect(await client.simulations.services.getGraphPaths(SERVICE_ID)).toBeDefined()
-      expect(await client.simulations.services.listSessions(SERVICE_ID)).toBeDefined()
-      expect(await client.simulations.services.listTurns(SERVICE_ID)).toBeDefined()
+      expect(await client.simulations.services.getGraph(SERVICE_ID)).toMatchObject({ nodes: [] })
+      expect(await client.simulations.services.deleteGraph(SERVICE_ID)).toMatchObject({
+        ok: true,
+      })
+      expect(await client.simulations.services.getGraphPaths(SERVICE_ID)).toMatchObject({
+        paths: [],
+      })
+      expect(await client.simulations.services.listSessions(SERVICE_ID)).toMatchObject({
+        items: [],
+      })
+      expect(await client.simulations.services.listTurns(SERVICE_ID)).toMatchObject({
+        items: [],
+      })
     })
   })
 })

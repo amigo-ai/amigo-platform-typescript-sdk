@@ -4,6 +4,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Tasks — long-running async jobs the platform spawns (intake processing,
  * tool executions, voice imports). The SDK exposes get-by-id and a
  * by-call lookup for retrieving every task tied to a specific call.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class TasksResource extends WorkspaceScopedResource {
   /** Get the current state of a single task */

@@ -1,12 +1,20 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import type { ServiceId, SimulationRunId, SimulationSessionId } from '../core/branded-types.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface ListSimulationRunsParams extends ListParams {
-  service_id?: string
-  status?: string
-}
+// The platform spec currently keys this schema by its Python module path
+// because two `CreateSessionRequest` classes share the unprefixed name. The
+// alias below gives consumers a stable, ergonomic name that won't break if
+// the platform team adds a `title=` annotation upstream and the generated
+// key changes (tracked in platform follow-up).
+export type CreateSimulationSessionRequest =
+  components['schemas']['src__routes__simulations__CreateSessionRequest']
+
+export type ListSimulationRunsParams = NonNullable<
+  paths['/v1/{workspace_id}/simulations/runs']['get']['parameters']['query']
+>
+
+
 
 /**
  * Simulations — interactive agent testing via the Playground.
@@ -18,7 +26,7 @@ export interface ListSimulationRunsParams extends ListParams {
 export class SimulationsResource extends WorkspaceScopedResource {
   /** Start a simulation session — returns the agent's greeting and initial snapshot */
   async createSession(
-    body: components['schemas']['src__routes__simulations__CreateSessionRequest'],
+    body: CreateSimulationSessionRequest,
   ) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/simulations/sessions', {
@@ -85,6 +93,10 @@ export class SimulationsResource extends WorkspaceScopedResource {
    * Multi-session simulation runs — orchestrate a batch of scenarios against
    * a service to compute coverage and surface regressions. Use this when you
    * want to compare branch behavior or measure drift between versions.
+   *
+   * @beta New in this release; surface may evolve. Note: `withOptions(...)`
+   * does not propagate into this plain-object sub-resource — apply at the
+   * `client.simulations` level if you need scoped options.
    */
   readonly runs = {
     /** List simulation runs in the workspace */
@@ -123,7 +135,7 @@ export class SimulationsResource extends WorkspaceScopedResource {
     /** Spin up a session under a run (single scenario inside the run's batch) */
     createSession: async (
       runId: SimulationRunId | string,
-      body: components['schemas']['src__routes__simulations__CreateSessionRequest'],
+      body: CreateSimulationSessionRequest,
     ) =>
       extractData(
         await this.client.POST('/v1/{workspace_id}/simulations/runs/{run_id}/sessions', {

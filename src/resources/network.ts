@@ -4,6 +4,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Network — outbound networking metadata for the workspace. Currently exposes
  * the platform's egress IP allowlist that customers add to firewall rules
  * before whitelisting integration callbacks.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class NetworkResource extends WorkspaceScopedResource {
   /** Get the platform's egress IPs the workspace's outbound traffic uses */

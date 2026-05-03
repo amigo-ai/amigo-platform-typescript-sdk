@@ -1,32 +1,21 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface PatientSearchParams extends ListParams {
-  q?: string
-  identifier?: string
-  birthdate?: string
-  family?: string
-  given?: string
-}
+type Q<P extends keyof paths> = NonNullable<
+  paths[P] extends { get: { parameters: { query?: infer Query } } } ? Query : never
+>
 
-export interface FhirSearchParams extends ListParams {
-  q?: string
-  [key: string]: unknown
-}
-
-export interface FhirViewParams extends ListParams {
-  q?: string
-  [key: string]: unknown
-}
-
-export interface SyncFailuresParams extends ListParams {
-  resource_type?: string
-  since?: string
-}
+export type PatientSearchParams = Q<'/v1/{workspace_id}/fhir/patients'>
+/** Spec-defined query params for `/fhir/resources/{resource_type}` (FHIR-style search). */
+export type FhirSearchParams = Q<'/v1/{workspace_id}/fhir/resources/{resource_type}'>
+/** Per-view query params; each typed view shares the same generated query shape. */
+export type FhirViewParams = Q<'/v1/{workspace_id}/fhir/views/patients'>
+export type SyncFailuresParams = Q<'/v1/{workspace_id}/fhir/sync-failures'>
 
 /**
  * FHIR — healthcare data interop surface for connected EHR integrations.
+ *
+ * @beta New in this release; surface may evolve as the EHR adapters stabilize.
  *
  * Provides:
  *   - Sync status + failure visibility (`status`, `syncFailures`)

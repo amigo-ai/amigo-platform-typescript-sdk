@@ -6,6 +6,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Tools — manual execution of integration-backed tool calls (used by the
  * tool-testing surface in the developer console) and per-service resolution
  * of which concrete tool implementations bind to a service's tool slots.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class ToolsResource extends WorkspaceScopedResource {
   /** Manually execute a tool call against the workspace's integrations */

@@ -1,16 +1,24 @@
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
+// The platform spec currently keys this schema by its Python module path
+// because two `CreateSessionRequest` classes share the unprefixed name. The
+// alias below gives consumers a stable, ergonomic name that won't break if
+// the platform team adds a `title=` annotation upstream and the generated
+// key changes (tracked in platform follow-up).
+export type CreateDesktopSessionRequest =
+  components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
+
 /**
  * Desktop sessions — remote-controlled desktop instances the agent can use
  * to drive third-party apps (EHRs, CRMs) that lack APIs. Created on demand
  * and torn down when the agent finishes the workflow.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class DesktopSessionsResource extends WorkspaceScopedResource {
   /** Spin up a new desktop session */
-  async create(
-    body: components['schemas']['src__routes__desktop_sessions__CreateSessionRequest'],
-  ) {
+  async create(body: CreateDesktopSessionRequest) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/desktop-sessions', {
         params: { path: { workspace_id: this.workspaceId } },

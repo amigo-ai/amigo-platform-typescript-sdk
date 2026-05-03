@@ -1,17 +1,17 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface ListSurfacesParams extends ListParams {
-  status?: string
-  entity_id?: string
-  channel?: string
-}
+export type ListSurfacesParams = NonNullable<
+  paths['/v1/{workspace_id}/surfaces']['get']['parameters']['query']
+>
 
 /**
  * Surfaces — short-lived form/intake experiences the platform delivers via
  * SMS / email / web. The full lifecycle is exposed: create, deliver, monitor
  * progress, gate for review, approve / reject / reshape, and archive.
+ *
+ * @beta New in this release; surface may evolve as the operator review flow
+ * stabilizes.
  */
 export class SurfacesResource extends WorkspaceScopedResource {
   /** List surfaces in the workspace */

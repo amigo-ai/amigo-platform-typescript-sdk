@@ -101,10 +101,22 @@ jobs:
           if [ -z "$PLATFORM_REPO" ]; then
             PLATFORM_REPO="amigo-ai/amigo-platform"
           fi
+          # Sanitize: strip newlines/CR and reject characters not valid in a
+          # GitHub `owner/repo` slug so a malformed dispatch payload can't
+          # break the heredoc below or inject markdown into the PR body.
+          PLATFORM_REPO="${PLATFORM_REPO//[$'\n\r']/}"
+          if ! printf '%s' "$PLATFORM_REPO" | grep -Eq '^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$'; then
+            echo "::warning::Invalid platform_repo payload (${PLATFORM_REPO}); falling back to default."
+            PLATFORM_REPO="amigo-ai/amigo-platform"
+          fi
           PLATFORM_COMMIT_URL="https://github.com/${PLATFORM_REPO}/commit/${SPEC_SHA}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Fetch the rolling branch (if it exists) so `--force-with-lease`
+          # has a remote-tracking ref to compare against — without this, the
+          # lease is vacuously satisfied on a fresh runner checkout.
+          git fetch origin "$BRANCH" || true
           # -B resets the branch to current HEAD (main from the checkout step), so the
           # rolling commit is always exactly one commit on top of main with no leftover
           # state from a prior open PR.
@@ -139,11 +151,24 @@ jobs:
             --json number \
             --jq '.[0].number')
 
+          # If a reviewer intentionally closed the rolling PR to block syncs
+          # (e.g. mid-incident), don't silently re-open one — surface a warning
+          # and skip. The next dispatch with a different SHA will retry, and a
+          # human can reopen the closed PR to resume normal flow.
+          CLOSED_PR=$(gh pr list \
+            --head "$BRANCH" \
+            --base main \
+            --state closed \
+            --json number,closedAt \
+            --jq 'sort_by(.closedAt) | reverse | .[0].number // empty')
+
           if [ -n "$EXISTING_PR" ]; then
             echo "Updating existing PR #${EXISTING_PR}"
             gh pr edit "$EXISTING_PR" \
               --title "$PR_TITLE" \
               --body "$PR_BODY"
+          elif [ -n "$CLOSED_PR" ]; then
+            echo "::warning::Most recent rolling PR (#${CLOSED_PR}) was closed by a reviewer. Skipping recreation; reopen #${CLOSED_PR} to resume spec-sync."
           else
             echo "Creating new PR for branch ${BRANCH}"
             gh pr create \

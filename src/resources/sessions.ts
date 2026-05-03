@@ -5,6 +5,8 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * Sessions — operator visibility into live agent calls. List the currently
  * active sessions across the workspace, and inject a one-shot directive
  * (text or audio) into a specific call's session mid-flight.
+ *
+ * @beta New in this release; surface may evolve.
  */
 export class SessionsResource extends WorkspaceScopedResource {
   /** List currently active sessions across the workspace */
