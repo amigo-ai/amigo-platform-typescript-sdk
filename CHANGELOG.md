@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.27.0] - 2026-05-03
+
+### Security
+
+- close dev-console gaps with 16 typed resources + spec-sync rolling PR (#155)
+
+### Documentation
+
+- document realtime event streams (subscribeToWorkspace, observers, ReconnectingWebSocket) (#156)
+
 ## [0.26.0] - 2026-05-02
 
 ### Maintenance
