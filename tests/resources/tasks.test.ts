@@ -25,6 +25,6 @@ describe('TasksResource', () => {
   })
 
   it('lists tasks for a call', async () => {
-    expect(await client.tasks.listByCall(CALL_SID)).toBeDefined()
+    expect(await client.tasks.listByCall(CALL_SID)).toMatchObject({ tasks: [] })
   })
 })

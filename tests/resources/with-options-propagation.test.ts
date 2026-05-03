@@ -15,7 +15,10 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
  */
 describe('withOptions propagation into nested sub-resources', () => {
   it('analytics.surfaces.* sees a custom header set via withOptions', async () => {
-    const captured: Record<string, string | null> = {}
+    // Sentinel value distinguishes "fetch ran but header missing" from
+    // "fetch never ran" — the latter would otherwise silently pass through
+    // an undefined assertion.
+    const captured: Record<string, string | null> = { 'x-trace': 'NOT_CALLED' }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
@@ -35,7 +38,7 @@ describe('withOptions propagation into nested sub-resources', () => {
   })
 
   it('simulations.runs.* sees a custom header set via withOptions', async () => {
-    const captured: Record<string, string | null> = {}
+    const captured: Record<string, string | null> = { 'x-trace': 'NOT_CALLED' }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
@@ -54,7 +57,7 @@ describe('withOptions propagation into nested sub-resources', () => {
   // It should observe the scoped header. This calibrates whether the propagation
   // failure is specific to nested sub-objects or systemic.
   it('simulations.createSession (class-level) sees the scoped header', async () => {
-    const captured: Record<string, string | null> = {}
+    const captured: Record<string, string | null> = { 'x-trace': 'NOT_CALLED' }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,

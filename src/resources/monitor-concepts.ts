@@ -57,9 +57,11 @@ export class MonitorConceptsResource extends WorkspaceScopedResource {
   }
 
   /** Delete a monitor concept */
-  async delete(conceptId: string): Promise<void> {
-    await this.client.DELETE('/v1/{workspace_id}/monitor-concepts/{concept_id}', {
-      params: { path: { workspace_id: this.workspaceId, concept_id: conceptId } },
-    })
+  async delete(conceptId: string) {
+    return extractData(
+      await this.client.DELETE('/v1/{workspace_id}/monitor-concepts/{concept_id}', {
+        params: { path: { workspace_id: this.workspaceId, concept_id: conceptId } },
+      }),
+    )
   }
 }

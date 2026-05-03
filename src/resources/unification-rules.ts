@@ -56,9 +56,11 @@ export class UnificationRulesResource extends WorkspaceScopedResource {
   }
 
   /** Delete a unification rule */
-  async delete(ruleId: string): Promise<void> {
-    await this.client.DELETE('/v1/{workspace_id}/unification-rules/{rule_id}', {
-      params: { path: { workspace_id: this.workspaceId, rule_id: ruleId } },
-    })
+  async delete(ruleId: string) {
+    return extractData(
+      await this.client.DELETE('/v1/{workspace_id}/unification-rules/{rule_id}', {
+        params: { path: { workspace_id: this.workspaceId, rule_id: ruleId } },
+      }),
+    )
   }
 }

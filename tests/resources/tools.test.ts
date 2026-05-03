@@ -24,6 +24,6 @@ describe('ToolsResource', () => {
   })
 
   it('resolves bindings for a service', async () => {
-    expect(await client.tools.resolveForService(SERVICE_ID)).toBeDefined()
+    expect(await client.tools.resolveForService(SERVICE_ID)).toMatchObject({ tools: [] })
   })
 })

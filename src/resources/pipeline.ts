@@ -12,10 +12,6 @@ export type ListPipelineSourcesParams = NonNullable<
  * outbound deliveries, and per-source overviews / event histories.
  *
  * @beta New in this release; surface may evolve.
- *
- * Note: `withOptions(...)` on the parent resource does not propagate into
- * the `outbound` and `sources` plain-object sub-resources. Apply scoped
- * options at the `client.pipeline` level only.
  */
 export class PipelineResource extends WorkspaceScopedResource {
   /** Overall pipeline status (sources up/down, last successful run, etc.) */

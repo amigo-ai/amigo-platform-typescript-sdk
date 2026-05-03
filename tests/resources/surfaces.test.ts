@@ -46,8 +46,8 @@ describe('SurfacesResource', () => {
         SURFACE_ID,
         {} as Parameters<typeof client.surfaces.update>[1],
       ),
-    ).toBeDefined()
-    expect(await client.surfaces.archive(SURFACE_ID)).toBeDefined()
+    ).toMatchObject({ id: SURFACE_ID })
+    expect(await client.surfaces.archive(SURFACE_ID)).toMatchObject({ archived_at: 'now' })
   })
 
   it('delivery + lifecycle', async () => {
@@ -65,6 +65,6 @@ describe('SurfacesResource', () => {
         {} as Parameters<typeof client.surfaces.reject>[1],
       ),
     ).toMatchObject({ ok: true })
-    expect(await client.surfaces.reshape(SURFACE_ID)).toBeDefined()
+    expect(await client.surfaces.reshape(SURFACE_ID)).toMatchObject({ id: 'surf-002' })
   })
 })

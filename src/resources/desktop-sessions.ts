@@ -3,19 +3,12 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 
 // The platform spec currently keys this schema by its Python module path
 // because two `CreateSessionRequest` classes share the unprefixed name. The
-// alias below gives consumers a stable, ergonomic name that won't break if
-// the platform team adds a `title=` annotation upstream and the generated
-// key changes (tracked in platform follow-up).
+// alias below gives consumers a stable, ergonomic name; if the platform
+// team adds `title=` upstream and the generated key disappears entirely,
+// the indexed access fails the build — which is the protection we actually
+// rely on. (Tracked in platform follow-up.)
 export type CreateDesktopSessionRequest =
   components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
-// Compile-time guard: if the platform team adds `title=` upstream and the
-// generated schema key changes, the alias above resolves to `unknown` and
-// this assertion fails the build — surfacing the drift instead of silently
-// downgrading consumer types.
-type _CreateDesktopSessionRequestExists =
-  CreateDesktopSessionRequest extends Record<string, unknown> ? true : never
-const _createDesktopSessionRequestGuard: _CreateDesktopSessionRequestExists = true
-void _createDesktopSessionRequestGuard
 
 /**
  * Desktop sessions — remote-controlled desktop instances the agent can use

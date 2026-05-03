@@ -4,22 +4,15 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 
 // The platform spec currently keys this schema by its Python module path
 // because two `CreateSessionRequest` classes share the unprefixed name. The
-// alias below gives consumers a stable, ergonomic name that won't break if
-// the platform team adds a `title=` annotation upstream and the generated
-// key changes (tracked in platform follow-up).
+// alias below gives consumers a stable, ergonomic name; if the platform
+// team adds `title=` upstream and the generated key disappears entirely,
+// the indexed access fails the build. (Tracked in platform follow-up.)
 export type CreateSimulationSessionRequest =
   components['schemas']['src__routes__simulations__CreateSessionRequest']
-// Compile-time guard: see `desktop-sessions.ts` for rationale.
-type _CreateSimulationSessionRequestExists =
-  CreateSimulationSessionRequest extends Record<string, unknown> ? true : never
-const _createSimulationSessionRequestGuard: _CreateSimulationSessionRequestExists = true
-void _createSimulationSessionRequestGuard
 
 export type ListSimulationRunsParams = NonNullable<
   paths['/v1/{workspace_id}/simulations/runs']['get']['parameters']['query']
 >
-
-
 
 /**
  * Simulations — interactive agent testing via the Playground.
@@ -99,9 +92,7 @@ export class SimulationsResource extends WorkspaceScopedResource {
    * a service to compute coverage and surface regressions. Use this when you
    * want to compare branch behavior or measure drift between versions.
    *
-   * @beta New in this release; surface may evolve. Note: `withOptions(...)`
-   * does not propagate into this plain-object sub-resource — apply at the
-   * `client.simulations` level if you need scoped options.
+   * @beta New in this release; surface may evolve.
    */
   readonly runs = {
     /** List simulation runs in the workspace */

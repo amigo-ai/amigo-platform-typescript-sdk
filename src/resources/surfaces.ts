@@ -4,6 +4,10 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 export type ListSurfacesParams = NonNullable<
   paths['/v1/{workspace_id}/surfaces']['get']['parameters']['query']
 >
+/** `/surfaces/review` is a narrower paged feed without the workspace-list filters. */
+export type ListSurfacesForReviewParams = NonNullable<
+  paths['/v1/{workspace_id}/surfaces/review']['get']['parameters']['query']
+>
 
 /**
  * Surfaces — short-lived form/intake experiences the platform delivers via
@@ -28,7 +32,7 @@ export class SurfacesResource extends WorkspaceScopedResource {
   }
 
   /** Surfaces awaiting review (pending approval / rejection) */
-  async listForReview(params?: ListSurfacesParams) {
+  async listForReview(params?: ListSurfacesForReviewParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/surfaces/review', {
         params: { path: { workspace_id: this.workspaceId }, query: params },

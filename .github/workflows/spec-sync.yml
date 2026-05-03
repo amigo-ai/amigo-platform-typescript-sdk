@@ -115,28 +115,44 @@ jobs:
             echo "::warning::Invalid platform_repo payload (${PLATFORM_REPO}); falling back to default."
             PLATFORM_REPO="amigo-ai/amigo-platform"
           fi
-          PLATFORM_COMMIT_URL="https://github.com/${PLATFORM_REPO}/commit/${SPEC_SHA}"
+          # Fall back to SHORT_SHA (which already collapses to GITHUB_RUN_ID
+          # if SPEC_SHA was empty) so the link is never .../commit/ with an
+          # empty SHA.
+          COMMIT_REF="${SPEC_SHA:-$SHORT_SHA}"
+          PLATFORM_COMMIT_URL="https://github.com/${PLATFORM_REPO}/commit/${COMMIT_REF}"
 
           # Pre-flight: if a reviewer intentionally closed the rolling PR
           # (e.g. mid-incident freeze) and didn't merge it, skip the sync
-          # entirely — don't even force-push. The query filters out merged
-          # PRs (those are normal lifecycle, not a "stop syncing" signal)
-          # and only flags PRs whose `head.ref` exactly matches the rolling
-          # branch (so a PR made from a similarly-named branch can't trip it).
+          # entirely — don't even force-push. Query notes:
+          #   - `--limit 100` so a closed-but-unmerged PR doesn't fall off
+          #     the default 30-result window after a stretch of normal
+          #     merges.
+          #   - `mergedAt == null` filter so a normal merge (the common
+          #     close path) doesn't trip the pause sentinel.
+          #   - `headRefName` exact match so a PR cut from a similarly
+          #     named branch can't trip it either.
           EXISTING_PR=$(gh pr list \
             --head "$BRANCH" \
             --base main \
             --state open \
+            --limit 100 \
             --json number,headRefName \
             --jq '[.[] | select(.headRefName == "'"$BRANCH"'")] | .[0].number // empty')
           CLOSED_UNMERGED_PR=$(gh pr list \
             --head "$BRANCH" \
             --base main \
             --state closed \
+            --limit 100 \
             --json number,closedAt,mergedAt,headRefName \
             --jq '[.[] | select(.mergedAt == null and .headRefName == "'"$BRANCH"'")] | sort_by(.closedAt) | reverse | .[0].number // empty')
           if [ -z "$EXISTING_PR" ] && [ -n "$CLOSED_UNMERGED_PR" ]; then
             echo "::warning::Most recent rolling PR (#${CLOSED_UNMERGED_PR}) was closed without merging — treating as a sync-pause signal. Reopen that PR to resume; this dispatch is a no-op."
+            {
+              echo "## Spec Sync — paused"
+              echo ""
+              echo "PR #${CLOSED_UNMERGED_PR} for branch \`${BRANCH}\` is closed (not merged), so this dispatch was skipped."
+              echo "Reopen that PR to resume automatic syncing."
+            } >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 

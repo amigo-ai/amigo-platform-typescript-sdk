@@ -9,10 +9,6 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * developer console's Insights tab.
  *
  * @beta New in this release; surface may evolve.
- *
- * Note: `withOptions(...)` on the parent resource does not propagate into
- * the `sessions` plain-object sub-resource. Apply scoped options at the
- * `client.insights` level only.
  */
 export class InsightsResource extends WorkspaceScopedResource {
   /** Get the periodic insights digest for the workspace */
