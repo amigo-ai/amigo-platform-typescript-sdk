@@ -1,12 +1,16 @@
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-// The platform spec currently keys this schema by its Python module path
-// because two `CreateSessionRequest` classes share the unprefixed name. The
-// alias below gives consumers a stable, ergonomic name; if the platform
-// team adds `title=` upstream and the generated key disappears entirely,
-// the indexed access fails the build — which is the protection we actually
-// rely on. (Tracked in platform follow-up.)
+/**
+ * Internal alias over the platform-keyed schema name
+ * `src__routes__desktop_sessions__CreateSessionRequest`. The Python-module
+ * prefix is unstable — once the platform team adds a `title=` annotation
+ * the key disappears and the build fails (the safety net we actually rely
+ * on). Marked `@internal` so consumers don't import it by name and get
+ * burned by the upstream rename.
+ *
+ * @internal
+ */
 export type CreateDesktopSessionRequest =
   components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
 

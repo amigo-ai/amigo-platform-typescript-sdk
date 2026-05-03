@@ -24,16 +24,16 @@ const client = new AmigoClient({
 
 describe('IntakeResource', () => {
   it('manages links and reads uploads', async () => {
-    expect(await client.intake.links.list()).toBeDefined()
+    expect(await client.intake.links.list()).toEqual([{ id: LINK_ID }])
     expect(
       await client.intake.links.create({} as Parameters<
         typeof client.intake.links.create
       >[0]),
     ).toMatchObject({ id: LINK_ID })
-    expect(await client.intake.links.listUploads(LINK_ID)).toBeDefined()
+    expect(await client.intake.links.listUploads(LINK_ID)).toEqual([{ id: UPLOAD_ID }])
     expect(await client.intake.links.downloadUpload(LINK_ID, UPLOAD_ID)).toMatchObject({
       url: 'https://example/dl',
     })
-    await expect(client.intake.links.delete(LINK_ID)).resolves.toBeUndefined()
+    expect(await client.intake.links.delete(LINK_ID)).toBeUndefined()
   })
 })

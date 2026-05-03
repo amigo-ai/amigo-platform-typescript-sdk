@@ -31,8 +31,22 @@ describe('CrmResource', () => {
     expect(await client.crm.getStatus()).toMatchObject({ status: 'connected' })
   })
 
-  it('contacts: list/get/timeline', async () => {
-    expect(await client.crm.contacts.list({ q: 'jane' })).toMatchObject({ items: [] })
+  it('contacts: list/get/timeline (with query assertion)', async () => {
+    let observedQ: string | null = null
+    const c2 = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input) => {
+        const u = new URL(input instanceof Request ? input.url : input.toString())
+        if (u.pathname === `${BASE}/crm/contacts`) {
+          observedQ = u.searchParams.get('q')
+        }
+        return Response.json({ items: [] })
+      },
+    })
+    await c2.crm.contacts.list({ q: 'jane' })
+    expect(observedQ).toBe('jane')
+
     expect(await client.crm.contacts.get(CONTACT_ID)).toMatchObject({ id: CONTACT_ID })
     expect(await client.crm.contacts.getTimeline(CONTACT_ID)).toMatchObject({ events: [] })
   })

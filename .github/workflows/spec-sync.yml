@@ -5,6 +5,9 @@ on:
     types: [spec-updated]
 
 permissions:
+  # `contents: write` is required for the `git push --force-with-lease` of
+  # the rolling sync branch; `pull-requests: write` for the `gh pr create`
+  # / `gh pr edit` calls below.
   contents: write
   pull-requests: write
 
@@ -161,7 +164,11 @@ jobs:
           # Fetch the rolling branch (if it exists) so `--force-with-lease`
           # has a remote-tracking ref to compare against — without this, the
           # lease is vacuously satisfied on a fresh runner checkout.
-          git fetch origin "$BRANCH" || true
+          # We don't hard-fail on a missing ref (the branch genuinely may
+          # not exist yet on first run), but surface auth/network errors as
+          # a workflow warning so they're visible instead of silenced.
+          git fetch origin "$BRANCH" \
+            || echo "::warning::git fetch origin ${BRANCH} failed (branch may not exist yet, or auth/network issue); --force-with-lease may be vacuously satisfied this run."
           # -B resets the branch to current HEAD (main from the checkout step), so the
           # rolling commit is always exactly one commit on top of main with no leftover
           # state from a prior open PR.
