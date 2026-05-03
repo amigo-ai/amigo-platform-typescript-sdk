@@ -66,7 +66,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `workspaces`
 
-- `createSelfService`
 - `list`
 - `listAutoPaging`
 - `get`
@@ -77,6 +76,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `convertEnvironment`
 - `testCallerNumbers.get`
 - `testCallerNumbers.update`
+
+### `me`
+
+- `createWorkspace`
 
 ### `apiKeys`
 
