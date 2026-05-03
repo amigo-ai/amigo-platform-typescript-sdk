@@ -2,15 +2,11 @@ import type { components, paths } from '../generated/api.js'
 import type { ServiceId, SimulationRunId, SimulationSessionId } from '../core/branded-types.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-/**
- * Internal alias over the platform-keyed schema name
- * `src__routes__simulations__CreateSessionRequest`. Same rationale as
- * `CreateDesktopSessionRequest` — keep this internal until the platform
- * team stabilizes the upstream schema title.
- *
- * @internal
- */
-export type CreateSimulationSessionRequest =
+// Module-private alias over the platform-keyed schema name
+// `src__routes__simulations__CreateSessionRequest`. Same rationale as
+// `desktop-sessions.ts`: keep it unexported so the Python-module prefix
+// doesn't reach the published `.d.ts`.
+type CreateSimulationSessionRequest =
   components['schemas']['src__routes__simulations__CreateSessionRequest']
 
 export type ListSimulationRunsParams = NonNullable<

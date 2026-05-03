@@ -1,17 +1,15 @@
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-/**
- * Internal alias over the platform-keyed schema name
- * `src__routes__desktop_sessions__CreateSessionRequest`. The Python-module
- * prefix is unstable — once the platform team adds a `title=` annotation
- * the key disappears and the build fails (the safety net we actually rely
- * on). Marked `@internal` so consumers don't import it by name and get
- * burned by the upstream rename.
- *
- * @internal
- */
-export type CreateDesktopSessionRequest =
+// Internal alias over the platform-keyed schema name
+// `src__routes__desktop_sessions__CreateSessionRequest`. The Python-module
+// prefix is unstable — once the platform team adds a `title=` annotation
+// the key disappears and the build fails. Kept module-private (no `export`)
+// so it never appears in the published `.d.ts` and downstream consumers
+// can't take a transitive dependency on the upstream key. Method
+// signatures consume it inline, so the class still exposes the right
+// structural body type to callers.
+type CreateDesktopSessionRequest =
   components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
 
 /**

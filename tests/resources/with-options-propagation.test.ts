@@ -80,7 +80,9 @@ describe('withOptions propagation into nested sub-resources', () => {
 
     await client.simulations
       .withOptions({ headers: { 'x-trace': 'class' } })
-      .createSession({ service_id: 'svc-1' } as never)
+      .createSession({
+        service_id: 'svc-1',
+      } as Parameters<typeof client.simulations.createSession>[0])
 
     expect(last.trace).toBe('class')
     expect(last.url).toBe(`/v1/${TEST_WORKSPACE_ID}/simulations/sessions`)

@@ -134,13 +134,18 @@ jobs:
           #     close path) doesn't trip the pause sentinel.
           #   - `headRefName` exact match so a PR cut from a similarly
           #     named branch can't trip it either.
-          EXISTING_PR=$(gh pr list \
+          # Capture author + number for the open PR so we can verify the
+          # rolling PR is bot-owned before editing it (a collaborator-opened
+          # PR on this same branch would otherwise be silently hijacked).
+          EXISTING_PR_JSON=$(gh pr list \
             --head "$BRANCH" \
             --base main \
             --state open \
             --limit 100 \
-            --json number,headRefName \
-            --jq '[.[] | select(.headRefName == "'"$BRANCH"'")] | .[0].number // empty')
+            --json number,headRefName,author \
+            --jq '[.[] | select(.headRefName == "'"$BRANCH"'")] | .[0] // empty')
+          EXISTING_PR=$(printf '%s' "$EXISTING_PR_JSON" | jq -r '.number // empty')
+          EXISTING_PR_AUTHOR=$(printf '%s' "$EXISTING_PR_JSON" | jq -r '.author.login // empty')
           CLOSED_UNMERGED_PR=$(gh pr list \
             --head "$BRANCH" \
             --base main \
@@ -149,26 +154,43 @@ jobs:
             --json number,closedAt,mergedAt,headRefName \
             --jq '[.[] | select(.mergedAt == null and .headRefName == "'"$BRANCH"'")] | sort_by(.closedAt) | reverse | .[0].number // empty')
           if [ -z "$EXISTING_PR" ] && [ -n "$CLOSED_UNMERGED_PR" ]; then
-            echo "::warning::Most recent rolling PR (#${CLOSED_UNMERGED_PR}) was closed without merging — treating as a sync-pause signal. Reopen that PR to resume; this dispatch is a no-op."
+            # Surface as an error so the CI dashboard shows the pause
+            # instead of burying it in a warning. The job still ends in a
+            # known state (no orphaned branch update) — fail-fast over
+            # silent fallback.
+            echo "::error::Spec sync paused — PR #${CLOSED_UNMERGED_PR} on \`${BRANCH}\` is closed without merging. Reopen that PR to resume; this dispatch is a no-op."
             {
               echo "## Spec Sync — paused"
               echo ""
               echo "PR #${CLOSED_UNMERGED_PR} for branch \`${BRANCH}\` is closed (not merged), so this dispatch was skipped."
               echo "Reopen that PR to resume automatic syncing."
             } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            exit 1
+          fi
+          # Refuse to silently overwrite a non-bot PR on the rolling branch.
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR_AUTHOR" != "github-actions[bot]" ]; then
+            echo "::error::Existing PR #${EXISTING_PR} on \`${BRANCH}\` is owned by ${EXISTING_PR_AUTHOR}, not github-actions[bot]. Refusing to hijack — close or reassign it before resuming spec-sync."
+            exit 1
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           # Fetch the rolling branch (if it exists) so `--force-with-lease`
-          # has a remote-tracking ref to compare against — without this, the
-          # lease is vacuously satisfied on a fresh runner checkout.
-          # We don't hard-fail on a missing ref (the branch genuinely may
-          # not exist yet on first run), but surface auth/network errors as
-          # a workflow warning so they're visible instead of silenced.
-          git fetch origin "$BRANCH" \
-            || echo "::warning::git fetch origin ${BRANCH} failed (branch may not exist yet, or auth/network issue); --force-with-lease may be vacuously satisfied this run."
+          # has a remote-tracking ref to compare against. Distinguish "ref
+          # not found" (exit 128 — expected on first run) from any other
+          # failure (auth, network, …) and hard-fail on the latter so the
+          # lease isn't silently vacuous.
+          set +e
+          git fetch origin "$BRANCH"
+          fetch_rc=$?
+          set -e
+          if [ "$fetch_rc" -ne 0 ] && [ "$fetch_rc" -ne 128 ]; then
+            echo "::error::git fetch origin ${BRANCH} failed with exit ${fetch_rc} (auth/network); aborting to avoid a vacuous --force-with-lease."
+            exit 1
+          fi
+          if [ "$fetch_rc" -eq 128 ]; then
+            echo "::notice::Remote branch ${BRANCH} not found — first sync run; --force-with-lease will be vacuously satisfied this once."
+          fi
           # -B resets the branch to current HEAD (main from the checkout step), so the
           # rolling commit is always exactly one commit on top of main with no leftover
           # state from a prior open PR.
