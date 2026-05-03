@@ -1,5 +1,48 @@
 # Changelog
 
+## [0.28.0] - 2026-05-03
+
+### ⚠️ Breaking changes
+
+- **Removed `client.workspaces.createSelfService()`** — the underlying route `POST /v1/workspaces/self-service` was deleted in platform-api PR #2472. Migrate to **`client.me.createWorkspace(body)`** which calls the new `POST /v1/me/workspaces` endpoint. Request body and response shape are unchanged; only the URL moved.
+
+  Why: the legacy URL nested an account-scoped operation under `/v1/workspaces/<x>` — the developer-console BFF proxy parsed the literal `self-service` as a workspace_id and sent identity a JWT-refresh request scoped to that string, which 4xx'd before the call ever reached platform-api. Lifting the route to `/v1/me/...` (already in the BFF's global-segment allowlist) makes the failure mode structurally impossible. A platform-api hygiene test now blocks any future literal segment under `/v1/workspaces/`.
+
+  Datadog confirmed zero successful traffic on the legacy route in the 7 days before removal — no production callers exist.
+
+### Features
+
+- **`client.me`** — new `MeResource` for account-scoped operations on the authenticated identity. Initial method: `createWorkspace(body)` (replaces `client.workspaces.createSelfService`).
+
+### Maintenance
+
+- sync API types from platform (`edac384e3`) — `/v1/me/workspaces` (POST, op `create-my-workspace`, tag `Account`) added; `/v1/workspaces/self-service` removed.
+
+### ⚠️ Breaking changes (type-level): call-intelligence response shapes
+
+**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at *runtime* (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at *compile* time: code that references the removed names will fail type-checking against `@amigo-ai/platform-sdk@^0.28.0`.
+
+Picked up from platform-api PR 3b of the call-intelligence typed-cols program (commit `831f0e8ff`, "V091 Pydantic response alignment to producer keys"). The historical Pydantic shapes declared fields the producer never actually emitted — they were silently dropped by `extra="ignore"` and SDK consumers always saw `None` / `0` / `[]` for these fields. The renames + drops align the response shape to producer truth.
+
+Removed fields (the SDK type for these no longer compiles; consumers reading them get `undefined` at runtime today regardless):
+
+- `EmotionSummary.avg_valence` → use **`average_valence`**
+- `EmotionSummary.caller_distress_detected` (removed; never populated)
+- `EmotionSummary.emotion_shifts` (removed; never populated)
+- `RiskSummary.flags` (removed; never populated)
+- `SafetySummary.categories` (removed; never populated)
+- `ConversationSummary.topic_changes` (removed; never populated)
+- `ConversationSummary.avg_turn_duration_seconds` (removed; never populated)
+- `LatencySummary.total_silence_seconds` (removed; never populated)
+- `OperatorIntelligenceSummary.operator_handle_time_seconds` (removed; never populated)
+
+If your code references any of the above, replace with the renamed field where applicable; for the removed fields, either drop the read or compute the value yourself from the underlying call data.
+
+Type-bound additions to existing fields (non-breaking; tightening `string` schemas to `PhoneE164` / bounded-length strings):
+
+- `phone_number` fields now refer to `PhoneE164` instead of bare `string`.
+- Multiple `string` fields gained `maxLength` / `minLength` constraints (e.g. `email_id`, `entity_types`, `sync_schedule`, `skills` items). Existing valid inputs continue to compile; the SDK now rejects strings that exceed the documented bounds at type-check time.
+
 ## [0.27.0] - 2026-05-03
 
 ### Security

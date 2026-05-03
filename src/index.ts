@@ -34,6 +34,7 @@ import {
   type ScopedRequestOptions,
 } from './core/request-options.js'
 import type { RetryOptions } from './core/retry.js'
+import { MeResource } from './resources/me.js'
 import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
 import { AgentsResource } from './resources/agents.js'
@@ -190,6 +191,7 @@ export class AmigoClient {
   readonly baseUrl!: string
   readonly agentBaseUrl!: string | undefined
   readonly workspaces!: WorkspacesResource
+  readonly me!: MeResource
   readonly apiKeys!: ApiKeysResource
   readonly agents!: AgentsResource
   /** @deprecated Use `actions` instead */
@@ -456,6 +458,14 @@ export class AmigoClient {
     ;(target as unknown as { api: PlatformFetch }).api = client
 
     mutable.workspaces = new WorkspacesResource(client, workspaceId)
+    // ``MeResource`` operates on /v1/me/... — account-scoped, not
+    // workspace-scoped. Pass a sentinel literal instead of forwarding
+    // the bound ``workspaceId`` so any accidental future use of
+    // ``this.workspaceId`` inside ``MeResource`` (or its base) is
+    // visibly wrong rather than silently picking up the caller's
+    // workspace context. Pinned by the exact-URL test in
+    // ``tests/resources/me.test.ts``.
+    mutable.me = new MeResource(client, '_account')
     mutable.apiKeys = new ApiKeysResource(client, workspaceId)
     mutable.agents = new AgentsResource(client, workspaceId)
     mutable.skills = new SkillsResource(client, workspaceId)
