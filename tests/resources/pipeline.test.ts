@@ -32,22 +32,22 @@ const client = new AmigoClient({
 describe('PipelineResource', () => {
   it('gets top-level metrics', async () => {
     expect(await client.pipeline.getStatus()).toMatchObject({ healthy: true })
-    expect(await client.pipeline.getThroughput()).toBeDefined()
+    expect(await client.pipeline.getThroughput()).toMatchObject({ buckets: [] })
     expect(await client.pipeline.getReview()).toMatchObject({ pending: 0 })
     expect(await client.pipeline.getEntityResolution()).toMatchObject({ merge_rate: 0.1 })
   })
 
   it('outbound: list + log', async () => {
-    expect(await client.pipeline.outbound.list()).toBeDefined()
-    expect(await client.pipeline.outbound.getLog(DS_ID)).toBeDefined()
+    expect(await client.pipeline.outbound.list()).toEqual([])
+    expect(await client.pipeline.outbound.getLog(DS_ID)).toMatchObject({ items: [] })
   })
 
   it('sources: list / overview / events / history', async () => {
-    expect(await client.pipeline.sources.list()).toBeDefined()
+    expect(await client.pipeline.sources.list()).toEqual([])
     expect(await client.pipeline.sources.getOverview(SOURCE_ID)).toMatchObject({
       source_id: SOURCE_ID,
     })
-    expect(await client.pipeline.sources.listEvents(SOURCE_ID)).toBeDefined()
-    expect(await client.pipeline.sources.getHistory(SOURCE_ID)).toBeDefined()
+    expect(await client.pipeline.sources.listEvents(SOURCE_ID)).toMatchObject({ items: [] })
+    expect(await client.pipeline.sources.getHistory(SOURCE_ID)).toMatchObject({ entries: [] })
   })
 })

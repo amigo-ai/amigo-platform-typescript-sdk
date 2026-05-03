@@ -20,7 +20,7 @@ const client = new AmigoClient({
 
 describe('SessionsResource', () => {
   it('lists active sessions', async () => {
-    expect(await client.sessions.listActive()).toBeDefined()
+    expect(await client.sessions.listActive()).toMatchObject({ sessions: [] })
   })
 
   it('injects into a live call', async () => {

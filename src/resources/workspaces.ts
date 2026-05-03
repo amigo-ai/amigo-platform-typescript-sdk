@@ -115,7 +115,13 @@ export class WorkspacesResource extends WorkspaceScopedResource {
         }),
       ),
 
-    /** Replace the workspace's test caller allowlist */
+    /**
+     * Replace the workspace's test caller allowlist.
+     *
+     * **Replace-all semantics:** the request body fully replaces the existing
+     * allowlist; numbers omitted from `body` are removed. Read first, mutate,
+     * then write to add/remove individual entries safely.
+     */
     update: async (body: components['schemas']['TestCallerNumbersRequest']) =>
       extractData(
         await this.client.PUT('/v1/workspaces/{workspace_id}/test-caller-numbers', {

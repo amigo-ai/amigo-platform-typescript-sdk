@@ -161,6 +161,13 @@ const client = new AmigoClient({
           { name: 'wrap-up', enabled: true },
         ],
       }),
+
+    [`GET ${BASE}/settings/gap-scanner`]: () => Response.json({ enabled: true, rules: [] }),
+    [`PUT ${BASE}/settings/gap-scanner`]: () => Response.json({ enabled: false, rules: [] }),
+    [`POST ${BASE}/settings/gap-scanner/preview`]: () =>
+      Response.json({ matches: [{ call_id: 'c-1', rule: 'missing_consent' }] }),
+    [`POST ${BASE}/settings/gap-scanner/scan`]: () =>
+      Response.json({ scan_id: 'scan-1', queued_at: '2026-05-03T00:00:00Z' }),
   }),
 })
 
@@ -271,6 +278,24 @@ describe('SettingsResource', () => {
     it('updates workflow settings', async () => {
       const result = await client.settings.workflows.update({ workflows: [] } as never)
       expect(result.workflows).toHaveLength(2)
+    })
+  })
+
+  describe('gapScanner', () => {
+    it('gets and updates the rules', async () => {
+      expect(await client.settings.gapScanner.get()).toMatchObject({ enabled: true })
+      expect(
+        await client.settings.gapScanner.update({ enabled: false } as Parameters<
+          typeof client.settings.gapScanner.update
+        >[0]),
+      ).toMatchObject({ enabled: false })
+    })
+
+    it('previews and queues an on-demand scan', async () => {
+      expect(await client.settings.gapScanner.preview()).toMatchObject({
+        matches: [{ call_id: 'c-1' }],
+      })
+      expect(await client.settings.gapScanner.scan()).toMatchObject({ scan_id: 'scan-1' })
     })
   })
 })

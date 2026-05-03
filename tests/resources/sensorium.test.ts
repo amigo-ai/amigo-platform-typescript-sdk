@@ -21,7 +21,7 @@ const client = new AmigoClient({
 describe('SensoriumResource', () => {
   it('gets connector health', async () => {
     const health = await client.sensorium.getConnectorHealth()
-    expect(health).toBeDefined()
+    expect(health).toMatchObject({ connectors: [{ name: 'twilio', status: 'healthy' }] })
   })
 
   it('gets loop latency', async () => {

@@ -19,6 +19,6 @@ const client = new AmigoClient({
 describe('DataQueryResource', () => {
   it('runs a query against a whitelisted dataset', async () => {
     const result = await client.dataQuery.run('analytics', 'calls', { limit: 50 })
-    expect(result).toBeDefined()
+    expect(result).toMatchObject({ rows: [{ id: 'c1' }] })
   })
 })

@@ -8,9 +8,18 @@ type Q<P extends keyof paths> = NonNullable<
 export type PatientSearchParams = Q<'/v1/{workspace_id}/fhir/patients'>
 /** Spec-defined query params for `/fhir/resources/{resource_type}` (FHIR-style search). */
 export type FhirSearchParams = Q<'/v1/{workspace_id}/fhir/resources/{resource_type}'>
-/** Per-view query params; each typed view shares the same generated query shape. */
-export type FhirViewParams = Q<'/v1/{workspace_id}/fhir/views/patients'>
 export type SyncFailuresParams = Q<'/v1/{workspace_id}/fhir/sync-failures'>
+
+// Each typed view has its own query shape in the spec — most share `q`,
+// `data_source_id`, `limit`, `offset` but `slots` adds scheduling filters.
+// Derive each separately so consumers get the right autocomplete and a
+// spec change to any single view is a typed signal.
+export type FhirPatientsViewParams = Q<'/v1/{workspace_id}/fhir/views/patients'>
+export type FhirAppointmentsViewParams = Q<'/v1/{workspace_id}/fhir/views/appointments'>
+export type FhirPractitionersViewParams = Q<'/v1/{workspace_id}/fhir/views/practitioners'>
+export type FhirOrganizationsViewParams = Q<'/v1/{workspace_id}/fhir/views/organizations'>
+export type FhirLocationsViewParams = Q<'/v1/{workspace_id}/fhir/views/locations'>
+export type FhirSlotsViewParams = Q<'/v1/{workspace_id}/fhir/views/slots'>
 
 /**
  * FHIR — healthcare data interop surface for connected EHR integrations.
@@ -163,7 +172,7 @@ export class FhirResource extends WorkspaceScopedResource {
 
   readonly views = {
     /** List patients (typed view with computed display fields) */
-    patients: async (params?: FhirViewParams) =>
+    patients: async (params?: FhirPatientsViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/patients', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -171,7 +180,7 @@ export class FhirResource extends WorkspaceScopedResource {
       ),
 
     /** List appointments */
-    appointments: async (params?: FhirViewParams) =>
+    appointments: async (params?: FhirAppointmentsViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/appointments', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -179,7 +188,7 @@ export class FhirResource extends WorkspaceScopedResource {
       ),
 
     /** List practitioners */
-    practitioners: async (params?: FhirViewParams) =>
+    practitioners: async (params?: FhirPractitionersViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/practitioners', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -187,7 +196,7 @@ export class FhirResource extends WorkspaceScopedResource {
       ),
 
     /** List organizations */
-    organizations: async (params?: FhirViewParams) =>
+    organizations: async (params?: FhirOrganizationsViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/organizations', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -195,15 +204,18 @@ export class FhirResource extends WorkspaceScopedResource {
       ),
 
     /** List locations */
-    locations: async (params?: FhirViewParams) =>
+    locations: async (params?: FhirLocationsViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/locations', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
         }),
       ),
 
-    /** List schedule slots */
-    slots: async (params?: FhirViewParams) =>
+    /**
+     * List schedule slots — supports richer filtering than the other views
+     * (status, date window, provider, specialty, service_type, facility_id).
+     */
+    slots: async (params?: FhirSlotsViewParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/fhir/views/slots', {
           params: { path: { workspace_id: this.workspaceId }, query: params },

@@ -27,7 +27,11 @@ describe('BriefsResource', () => {
   })
 
   it('reads + regenerates per-entity brief', async () => {
-    expect(await client.briefs.getForEntity(ENTITY_ID)).toBeDefined()
-    expect(await client.briefs.regenerateForEntity(ENTITY_ID)).toBeDefined()
+    expect(await client.briefs.getForEntity(ENTITY_ID)).toMatchObject({
+      brief_text: 'Active patient.',
+    })
+    expect(await client.briefs.regenerateForEntity(ENTITY_ID)).toMatchObject({
+      brief_text: 'Active patient.',
+    })
   })
 })

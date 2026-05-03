@@ -183,8 +183,8 @@ describe('SimulationsResource', () => {
       expect(await client.simulations.runs.complete(RUN_ID)).toMatchObject({ ok: true })
       expect(
         await client.simulations.runs.createSession(RUN_ID, {
-          agent_id: AGENT_ID,
-        } as never),
+          service_id: SERVICE_ID,
+        }),
       ).toMatchObject({ session_id: SESSION_ID })
     })
   })

@@ -90,6 +90,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           SPEC_SHA="${{ github.event.client_payload.spec_sha }}"
+          # Reject anything that isn't a 7–40 char hex string before it lands
+          # in commit messages, PR titles, or branch metadata.
+          if [ -n "$SPEC_SHA" ] && ! printf '%s' "$SPEC_SHA" | grep -Eq '^[0-9a-f]{7,40}$'; then
+            echo "::error::Invalid spec_sha payload: ${SPEC_SHA}"
+            exit 1
+          fi
           SHORT_SHA="${SPEC_SHA:0:8}"
           if [ -z "$SHORT_SHA" ]; then
             SHORT_SHA="${GITHUB_RUN_ID}"
@@ -110,6 +116,29 @@ jobs:
             PLATFORM_REPO="amigo-ai/amigo-platform"
           fi
           PLATFORM_COMMIT_URL="https://github.com/${PLATFORM_REPO}/commit/${SPEC_SHA}"
+
+          # Pre-flight: if a reviewer intentionally closed the rolling PR
+          # (e.g. mid-incident freeze) and didn't merge it, skip the sync
+          # entirely — don't even force-push. The query filters out merged
+          # PRs (those are normal lifecycle, not a "stop syncing" signal)
+          # and only flags PRs whose `head.ref` exactly matches the rolling
+          # branch (so a PR made from a similarly-named branch can't trip it).
+          EXISTING_PR=$(gh pr list \
+            --head "$BRANCH" \
+            --base main \
+            --state open \
+            --json number,headRefName \
+            --jq '[.[] | select(.headRefName == "'"$BRANCH"'")] | .[0].number // empty')
+          CLOSED_UNMERGED_PR=$(gh pr list \
+            --head "$BRANCH" \
+            --base main \
+            --state closed \
+            --json number,closedAt,mergedAt,headRefName \
+            --jq '[.[] | select(.mergedAt == null and .headRefName == "'"$BRANCH"'")] | sort_by(.closedAt) | reverse | .[0].number // empty')
+          if [ -z "$EXISTING_PR" ] && [ -n "$CLOSED_UNMERGED_PR" ]; then
+            echo "::warning::Most recent rolling PR (#${CLOSED_UNMERGED_PR}) was closed without merging — treating as a sync-pause signal. Reopen that PR to resume; this dispatch is a no-op."
+            exit 0
+          fi
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -144,31 +173,11 @@ jobs:
           EOF
           )"
 
-          EXISTING_PR=$(gh pr list \
-            --head "$BRANCH" \
-            --base main \
-            --state open \
-            --json number \
-            --jq '.[0].number')
-
-          # If a reviewer intentionally closed the rolling PR to block syncs
-          # (e.g. mid-incident), don't silently re-open one — surface a warning
-          # and skip. The next dispatch with a different SHA will retry, and a
-          # human can reopen the closed PR to resume normal flow.
-          CLOSED_PR=$(gh pr list \
-            --head "$BRANCH" \
-            --base main \
-            --state closed \
-            --json number,closedAt \
-            --jq 'sort_by(.closedAt) | reverse | .[0].number // empty')
-
           if [ -n "$EXISTING_PR" ]; then
             echo "Updating existing PR #${EXISTING_PR}"
             gh pr edit "$EXISTING_PR" \
               --title "$PR_TITLE" \
               --body "$PR_BODY"
-          elif [ -n "$CLOSED_PR" ]; then
-            echo "::warning::Most recent rolling PR (#${CLOSED_PR}) was closed by a reviewer. Skipping recreation; reopen #${CLOSED_PR} to resume spec-sync."
           else
             echo "Creating new PR for branch ${BRANCH}"
             gh pr create \

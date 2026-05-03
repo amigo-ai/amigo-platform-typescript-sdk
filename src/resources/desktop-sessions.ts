@@ -8,6 +8,14 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 // key changes (tracked in platform follow-up).
 export type CreateDesktopSessionRequest =
   components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
+// Compile-time guard: if the platform team adds `title=` upstream and the
+// generated schema key changes, the alias above resolves to `unknown` and
+// this assertion fails the build — surfacing the drift instead of silently
+// downgrading consumer types.
+type _CreateDesktopSessionRequestExists =
+  CreateDesktopSessionRequest extends Record<string, unknown> ? true : never
+const _createDesktopSessionRequestGuard: _CreateDesktopSessionRequestExists = true
+void _createDesktopSessionRequestGuard
 
 /**
  * Desktop sessions — remote-controlled desktop instances the agent can use

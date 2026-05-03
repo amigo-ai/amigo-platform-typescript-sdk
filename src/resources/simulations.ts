@@ -9,6 +9,11 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 // key changes (tracked in platform follow-up).
 export type CreateSimulationSessionRequest =
   components['schemas']['src__routes__simulations__CreateSessionRequest']
+// Compile-time guard: see `desktop-sessions.ts` for rationale.
+type _CreateSimulationSessionRequestExists =
+  CreateSimulationSessionRequest extends Record<string, unknown> ? true : never
+const _createSimulationSessionRequestGuard: _CreateSimulationSessionRequestExists = true
+void _createSimulationSessionRequestGuard
 
 export type ListSimulationRunsParams = NonNullable<
   paths['/v1/{workspace_id}/simulations/runs']['get']['parameters']['query']

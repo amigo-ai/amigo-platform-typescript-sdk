@@ -32,19 +32,19 @@ describe('CrmResource', () => {
   })
 
   it('contacts: list/get/timeline', async () => {
-    expect(await client.crm.contacts.list({ q: 'jane' })).toBeDefined()
+    expect(await client.crm.contacts.list({ q: 'jane' })).toMatchObject({ items: [] })
     expect(await client.crm.contacts.get(CONTACT_ID)).toMatchObject({ id: CONTACT_ID })
-    expect(await client.crm.contacts.getTimeline(CONTACT_ID)).toBeDefined()
+    expect(await client.crm.contacts.getTimeline(CONTACT_ID)).toMatchObject({ events: [] })
   })
 
   it('companies: list/get', async () => {
-    expect(await client.crm.companies.list()).toBeDefined()
+    expect(await client.crm.companies.list()).toMatchObject({ items: [] })
     expect(await client.crm.companies.get(COMPANY_ID)).toMatchObject({ id: COMPANY_ID })
   })
 
   it('deals: list/get/pipeline', async () => {
-    expect(await client.crm.deals.list()).toBeDefined()
+    expect(await client.crm.deals.list()).toMatchObject({ items: [] })
     expect(await client.crm.deals.get(DEAL_ID)).toMatchObject({ id: DEAL_ID })
-    expect(await client.crm.deals.getPipeline()).toBeDefined()
+    expect(await client.crm.deals.getPipeline()).toMatchObject({ stages: [] })
   })
 })

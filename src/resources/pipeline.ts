@@ -1,5 +1,10 @@
+import type { paths } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
+
+export type ListPipelineSourcesParams = NonNullable<
+  paths['/v1/{workspace_id}/pipeline/sources']['get']['parameters']['query']
+>
 
 /**
  * Pipeline — observability into the workspace's data ingestion pipeline:
@@ -75,10 +80,10 @@ export class PipelineResource extends WorkspaceScopedResource {
 
   readonly sources = {
     /** List all configured pipeline sources */
-    list: async () =>
+    list: async (params?: ListPipelineSourcesParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/pipeline/sources', {
-          params: { path: { workspace_id: this.workspaceId } },
+          params: { path: { workspace_id: this.workspaceId }, query: params },
         }),
       ),
 

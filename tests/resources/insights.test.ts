@@ -25,16 +25,16 @@ const client = new AmigoClient({
 
 describe('InsightsResource', () => {
   it('gets digest, schema, suggestions', async () => {
-    expect(await client.insights.getDigest()).toBeDefined()
-    expect(await client.insights.getSchema()).toBeDefined()
-    expect(await client.insights.getSuggestions()).toBeDefined()
+    expect(await client.insights.getDigest()).toMatchObject({ summary: 'ok' })
+    expect(await client.insights.getSchema()).toMatchObject({ tables: [] })
+    expect(await client.insights.getSuggestions()).toMatchObject({ suggestions: [] })
   })
 
   it('runs ad-hoc SQL', async () => {
     const result = await client.insights.runSql({
       sql: 'select 1',
     } as Parameters<typeof client.insights.runSql>[0])
-    expect(result).toBeDefined()
+    expect(result).toMatchObject({ rows: [] })
   })
 
   it('manages chat sessions', async () => {
@@ -47,6 +47,6 @@ describe('InsightsResource', () => {
     const reply = await client.insights.sessions.chat(SESSION_ID, {
       message: 'hi',
     } as Parameters<typeof client.insights.sessions.chat>[1])
-    expect(reply).toBeDefined()
+    expect(reply).toMatchObject({ message: 'hello' })
   })
 })

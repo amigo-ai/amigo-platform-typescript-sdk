@@ -5,6 +5,10 @@
  * whose method + pathname matches is routed to the handler. Unmatched
  * requests resolve with HTTP 500 carrying the unmatched route in the body
  * so test failures surface the missing mock immediately.
+ *
+ * Pathname matching is exact — `'GET /foo'` does not match `/foo/`. If your
+ * resource builds a URL with a trailing slash (some FastAPI list endpoints
+ * do), include the slash in the route key.
  */
 export function mockFetch(
   routes: Record<string, () => Response | Promise<Response>>,
