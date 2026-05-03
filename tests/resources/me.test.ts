@@ -107,10 +107,13 @@ describe('MeResource', () => {
     expect(result).toEqual(WORKSPACE_FIXTURE)
   })
 
-  it('does not expose createSelfService on client.workspaces (regression)', () => {
+  it('does not expose createSelfService anywhere on the client (regression)', () => {
     // The legacy method was removed in SDK 0.28.0 (platform-api PR #2472
     // deleted the underlying ``POST /v1/workspaces/self-service`` route).
-    // SDK consumers must migrate to ``client.me.createWorkspace``.
+    // SDK consumers must migrate to ``client.me.createWorkspace``. Check
+    // BOTH ``client.workspaces`` and ``client.me`` so a future contributor
+    // can't accidentally re-add the legacy name on either resource and
+    // bypass this guard.
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
@@ -118,6 +121,9 @@ describe('MeResource', () => {
     })
     expect(
       (client.workspaces as unknown as { createSelfService?: unknown }).createSelfService,
+    ).toBeUndefined()
+    expect(
+      (client.me as unknown as { createSelfService?: unknown }).createSelfService,
     ).toBeUndefined()
   })
 })

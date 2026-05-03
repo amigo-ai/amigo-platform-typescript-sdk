@@ -18,6 +18,29 @@
 
 - sync API types from platform (`edac384e3`) — `/v1/me/workspaces` (POST, op `create-my-workspace`, tag `Account`) added; `/v1/workspaces/self-service` removed.
 
+### Schema changes (call-intelligence response shapes)
+
+Picked up from platform-api PR 3b of the call-intelligence typed-cols program (commit `831f0e8ff`, "V091 Pydantic response alignment to producer keys"). The historical Pydantic shapes declared fields the producer never actually emitted — they were silently dropped by `extra="ignore"` and SDK consumers always saw `None` / `0` / `[]` for these fields. The renames + drops align the response shape to producer truth.
+
+Removed fields (the SDK type for these no longer compiles; consumers reading them get `undefined` at runtime today regardless):
+
+- `EmotionSummary.avg_valence` → use **`average_valence`**
+- `EmotionSummary.caller_distress_detected` (removed; never populated)
+- `EmotionSummary.emotion_shifts` (removed; never populated)
+- `RiskSummary.flags` (removed; never populated)
+- `SafetySummary.categories` (removed; never populated)
+- `ConversationSummary.topic_changes` (removed; never populated)
+- `ConversationSummary.avg_turn_duration_seconds` (removed; never populated)
+- `LatencySummary.total_silence_seconds` (removed; never populated)
+- `OperatorIntelligenceSummary.operator_handle_time_seconds` (removed; never populated)
+
+If your code references any of the above, replace with the renamed field where applicable; for the removed fields, either drop the read or compute the value yourself from the underlying call data.
+
+Type-bound additions to existing fields (non-breaking; tightening `string` schemas to `PhoneE164` / bounded-length strings):
+
+- `phone_number` fields now refer to `PhoneE164` instead of bare `string`.
+- Multiple `string` fields gained `maxLength` / `minLength` constraints (e.g. `email_id`, `entity_types`, `sync_schedule`, `skills` items). Existing valid inputs continue to compile; the SDK now rejects strings that exceed the documented bounds at type-check time.
+
 ## [0.27.0] - 2026-05-03
 
 ### Security
