@@ -18,7 +18,9 @@
 
 - sync API types from platform (`edac384e3`) — `/v1/me/workspaces` (POST, op `create-my-workspace`, tag `Account`) added; `/v1/workspaces/self-service` removed.
 
-### Schema changes (call-intelligence response shapes)
+### ⚠️ Breaking changes (type-level): call-intelligence response shapes
+
+**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at *runtime* (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at *compile* time: code that references the removed names will fail type-checking against `@amigo-ai/platform-sdk@^0.28.0`.
 
 Picked up from platform-api PR 3b of the call-intelligence typed-cols program (commit `831f0e8ff`, "V091 Pydantic response alignment to producer keys"). The historical Pydantic shapes declared fields the producer never actually emitted — they were silently dropped by `extra="ignore"` and SDK consumers always saw `None` / `0` / `[]` for these fields. The renames + drops align the response shape to producer truth.
 
