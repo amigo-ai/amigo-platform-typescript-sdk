@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.29.0] - 2026-05-03
+
+### Features
+
+- client.me.createWorkspace; remove legacy createSelfService (0.28.0) (#165)
+
 ## [0.28.0] - 2026-05-03
 
 ### ⚠️ Breaking changes
