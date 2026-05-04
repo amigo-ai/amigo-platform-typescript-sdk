@@ -2004,9 +2004,29 @@ export interface paths {
         put?: never;
         /**
          * Send a message and get the agent's response
-         * @description Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of token, tool_call_started, tool_call_completed, message, and done events instead of the synchronous JSON response.
+         * @description Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of typed `TurnStreamEvent` frames (token, tool_call_started, tool_call_completed, thinking, message, done, error) instead of the synchronous JSON response. For new integrations prefer `POST /turns/stream`, which is always SSE.
          */
         post: operations["create_turn_v1__workspace_id__conversations__conversation_id__turns_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a message and receive a streamed agent response
+         * @description Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header — no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.
+         */
+        post: operations["create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -32228,6 +32248,65 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post: {
+        parameters: {
+            query?: {
+                /** @description Include tool_call_started / tool_call_completed frames in the stream */
+                include_tool_calls?: boolean;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnRequest"];
+            };
+        };
+        responses: {
+            /** @description SSE stream of TurnStreamEvent frames */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "text/event-stream": components["schemas"]["TurnStreamEvent"];
+                };
+            };
+            /** @description Conversation or service not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversation is closed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversation is missing or has corrupt service binding */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Agent service unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
