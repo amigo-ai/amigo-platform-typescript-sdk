@@ -6386,6 +6386,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Case
+         * @description Run the current saved simulation case through the bridge executor.
+         */
+        post: operations["run-simulation-case"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/config-to-policy": {
         parameters: {
             query?: never;
@@ -9609,6 +9629,8 @@ export interface components {
         };
         /** BridgeResponse */
         BridgeResponse: {
+            /** Case Ids */
+            case_ids?: string[];
             inferred_target_spec?: components["schemas"]["TargetSpec"] | null;
             /** Inferred Target Spec Rationale */
             inferred_target_spec_rationale?: string | null;
@@ -21145,6 +21167,26 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /** RunSimulationCaseRequest */
+        RunSimulationCaseRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Concurrency
+             * @default 1
+             */
+            concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
+            /**
+             * Max Turns
+             * @default 20
+             */
+            max_turns?: number;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+        };
         /** SafetyConfigResponse */
         SafetyConfigResponse: {
             /** Accumulation Cumulative Count */
@@ -21381,6 +21423,8 @@ export interface components {
         };
         /** Scenario */
         Scenario: {
+            /** Case Id */
+            case_id?: string | null;
             /** Description */
             description: string;
             /** Initial Message */
@@ -22203,6 +22247,10 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
+            /** Snapshot */
+            snapshot?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Status
              * @enum {string}
@@ -41945,6 +41993,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BridgePlanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BridgeResponse"];
                 };
             };
             /** @description Validation Error */
