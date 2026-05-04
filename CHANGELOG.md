@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.33.0] - 2026-05-04
+
+### Features
+
+- tighten ObserverSSEEvent tool_call schemas (#176)
+
 ## [0.32.0] - 2026-05-04
 
 ### Maintenance
