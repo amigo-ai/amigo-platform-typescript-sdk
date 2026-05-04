@@ -5418,6 +5418,62 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/scheduling-rule-sets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List scheduling rule sets
+         * @description List all scheduling rule sets for the workspace. Optional filters: `agent_kind` (tms / ketamine / general), `is_active`. Used by the agent-engine rules engine and by operators inspecting config.
+         */
+        get: operations["list-scheduling-rule-sets"];
+        put?: never;
+        /**
+         * Create a scheduling rule set
+         * @description Create one rule set for `(agent_kind, rule_kind)`. Returns 409 if a row already exists for that key — use PATCH on the existing row or DELETE first.
+         */
+        post: operations["create-scheduling-rule-set"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/scheduling-rule-sets/{rule_set_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one scheduling rule set
+         * @description Fetch one rule set by id. Returns 404 when the row doesn't exist
+         *     in this workspace (the RLS policy means cross-workspace lookups
+         *     surface as 404, never as a row from the wrong workspace).
+         *
+         *     Permissions: ``Workspace.view``.
+         */
+        get: operations["get-scheduling-rule-set"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete a scheduling rule set
+         * @description Hard-delete. The audit log retains the deletion record.
+         */
+        delete: operations["delete-scheduling-rule-set"];
+        options?: never;
+        head?: never;
+        /**
+         * Partially update a scheduling rule set
+         * @description Update `params` and/or `is_active` on an existing rule set. `agent_kind` and `rule_kind` are immutable — to change either, create a new rule set and delete the old one.
+         */
+        patch: operations["update-scheduling-rule-set"];
+        trace?: never;
+    };
     "/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize": {
         parameters: {
             query?: never;
@@ -6317,6 +6373,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/benchmarks/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get Simulation Benchmark Results
+         * @description Aggregate benchmark results over the run ids returned by benchmark start.
+         */
+        post: operations["get-simulation-benchmark-results"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/benchmarks/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Benchmark
+         * @description Run a tag-selected benchmark batch as one saved-case run per case.
+         */
+        post: operations["run-simulation-benchmark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/branches": {
         parameters: {
             query?: never;
@@ -6380,6 +6476,26 @@ export interface paths {
          *     no run is created — pure inference.
          */
         post: operations["simulation-bridge-plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Case
+         * @description Run the current saved simulation case through the bridge executor.
+         */
+        post: operations["run-simulation-case"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9609,6 +9725,8 @@ export interface components {
         };
         /** BridgeResponse */
         BridgeResponse: {
+            /** Case Ids */
+            case_ids?: string[];
             inferred_target_spec?: components["schemas"]["TargetSpec"] | null;
             /** Inferred Target Spec Rationale */
             inferred_target_spec_rationale?: string | null;
@@ -10589,6 +10707,30 @@ export interface components {
             /** Status */
             status: string;
         };
+        /**
+         * ClinicOpenHoursParams
+         * @description Workspace clinic open-hours by weekday.
+         *
+         *     Days not present mean "closed." Used by the rules engine to skip
+         *     slots outside open hours and (combined with ``weekend_skip``) by the
+         *     TMS-mapping release calculator.
+         */
+        ClinicOpenHoursParams: {
+            friday?: components["schemas"]["_DayHours"] | null;
+            monday?: components["schemas"]["_DayHours"] | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "clinic_open_hours";
+            saturday?: components["schemas"]["_DayHours"] | null;
+            sunday?: components["schemas"]["_DayHours"] | null;
+            thursday?: components["schemas"]["_DayHours"] | null;
+            /** Timezone */
+            timezone: string;
+            tuesday?: components["schemas"]["_DayHours"] | null;
+            wednesday?: components["schemas"]["_DayHours"] | null;
+        };
         /** ClusterForecastPointRow */
         ClusterForecastPointRow: {
             /** Cluster Name */
@@ -10914,6 +11056,18 @@ export interface components {
             concept: string;
             /** Similarity */
             similarity: number;
+        };
+        /**
+         * ConcurrentStartBlockParams
+         * @description Disallow two slots starting at the same time within a TMS scope.
+         *     No additional params — the discriminator is the whole config.
+         */
+        ConcurrentStartBlockParams: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "concurrent_start_block";
         };
         /** ConfidenceBucket */
         ConfidenceBucket: {
@@ -12159,6 +12313,24 @@ export interface components {
             service_id: string;
             /** Tags */
             tags?: string[];
+        };
+        /** CreateSchedulingRuleSetRequest */
+        CreateSchedulingRuleSetRequest: {
+            /**
+             * Agent Kind
+             * @enum {string}
+             */
+            agent_kind: "tms" | "ketamine" | "general";
+            /**
+             * Is Active
+             * @default true
+             */
+            is_active?: boolean;
+            /**
+             * Params
+             * @description Per-rule-kind typed parameters. The ``rule_kind`` discriminator field selects the params shape; one row per (agent_kind, rule_kind) per workspace.
+             */
+            params: components["schemas"]["ClinicOpenHoursParams"] | components["schemas"]["TMSMappingReleaseParams"] | components["schemas"]["TMSSessionGridParams"] | components["schemas"]["KetamineBlockOverlapParams"] | components["schemas"]["NinetyDayRollingParams"] | components["schemas"]["ConcurrentStartBlockParams"];
         };
         /** CreateServiceRequest */
         CreateServiceRequest: {
@@ -16450,6 +16622,11 @@ export interface components {
             /** Scan Interval Seconds */
             scan_interval_seconds: number;
         };
+        /** GetSimulationBenchmarkResultsRequest */
+        GetSimulationBenchmarkResultsRequest: {
+            /** Run Ids */
+            run_ids: string[];
+        };
         /**
          * Guardrail
          * @description Typed safety rule enforced per-state (not just global freetext guidelines).
@@ -17276,6 +17453,20 @@ export interface components {
              * @description Twilio participant call SID
              */
             participant_call_sid: string;
+        };
+        /**
+         * KetamineBlockOverlapParams
+         * @description How many days after a ketamine session to block follow-up
+         *     appointments (clinical safety window).
+         */
+        KetamineBlockOverlapParams: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "ketamine_block_overlap";
+            /** Window Days */
+            window_days: number;
         };
         /**
          * KeyMoment
@@ -18308,6 +18499,20 @@ export interface components {
              */
             used_fallback?: boolean | null;
         };
+        /**
+         * NinetyDayRollingParams
+         * @description Rolling-window cap on appointments per patient (e.g. 90 days
+         *     between TMS sessions).
+         */
+        NinetyDayRollingParams: {
+            /** Days */
+            days: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "ninety_day_rolling";
+        };
         /** NonDesiredState */
         NonDesiredState: {
             /**
@@ -19191,6 +19396,17 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["ReviewItemResponse"][];
+            /** Total */
+            total?: number | null;
+        };
+        /** PaginatedResponse[SchedulingRuleSetResponse] */
+        PaginatedResponse_SchedulingRuleSetResponse_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SchedulingRuleSetResponse"][];
             /** Total */
             total?: number | null;
         };
@@ -21145,6 +21361,53 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /** RunSimulationBenchmarkRequest */
+        RunSimulationBenchmarkRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Concurrency
+             * @default 1
+             */
+            concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
+            /**
+             * Max Cases
+             * @default 20
+             */
+            max_cases?: number;
+            /**
+             * Max Turns
+             * @default 20
+             */
+            max_turns?: number;
+            /** Required Tags */
+            required_tags?: string[];
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+        };
+        /** RunSimulationCaseRequest */
+        RunSimulationCaseRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Concurrency
+             * @default 1
+             */
+            concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
+            /**
+             * Max Turns
+             * @default 20
+             */
+            max_turns?: number;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+        };
         /** SafetyConfigResponse */
         SafetyConfigResponse: {
             /** Accumulation Cumulative Count */
@@ -21381,6 +21644,8 @@ export interface components {
         };
         /** Scenario */
         Scenario: {
+            /** Case Id */
+            case_id?: string | null;
             /** Description */
             description: string;
             /** Initial Message */
@@ -21421,6 +21686,47 @@ export interface components {
              * @default patient
              */
             role?: string;
+        };
+        /**
+         * SchedulingRuleSetResponse
+         * @description Wire shape for a single rule set. ``params`` stays as ``dict``
+         *     here (not the discriminated union) so add-a-new-kind doesn't break
+         *     older clients still on the previous SDK version — the SDK's typed
+         *     helpers can re-validate into ``RuleParams`` when needed.
+         */
+        SchedulingRuleSetResponse: {
+            /**
+             * Agent Kind
+             * @enum {string}
+             */
+            agent_kind: "tms" | "ketamine" | "general";
+            /** Created At */
+            created_at: string | null;
+            /** Created By */
+            created_by: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Active */
+            is_active: boolean;
+            /** Params */
+            params: {
+                [key: string]: unknown;
+            };
+            /**
+             * Rule Kind
+             * @enum {string}
+             */
+            rule_kind: "clinic_open_hours" | "tms_mapping_release" | "tms_session_grid" | "ketamine_block_overlap" | "ninety_day_rolling" | "concurrent_start_block";
+            /** Updated At */
+            updated_at: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** SchemaResponse */
         SchemaResponse: {
@@ -22124,6 +22430,227 @@ export interface components {
              */
             signal: string;
         };
+        /** SimulationBenchmarkAggregateSummary */
+        SimulationBenchmarkAggregateSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Failed To Start Count */
+            failed_to_start_count: number;
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Selected Count */
+            selected_count: number;
+            /** Skipped Count */
+            skipped_count: number;
+            /** Started Count */
+            started_count: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+        };
+        /** SimulationBenchmarkBreakdownSummary */
+        SimulationBenchmarkBreakdownSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /**
+             * Run Count
+             * @default 0
+             */
+            run_count?: number;
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+        };
+        /** SimulationBenchmarkCaseResult */
+        SimulationBenchmarkCaseResult: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Reason */
+            reason?: string | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            } | null;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "started" | "skipped" | "failed_to_start";
+        };
+        /** SimulationBenchmarkPerRunSummary */
+        SimulationBenchmarkPerRunSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Tags */
+            capability_tags?: string[];
+            /** Case Ids */
+            case_ids?: string[];
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Passed */
+            passed?: boolean | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Score Rationales */
+            score_rationales?: string[];
+            /**
+             * Scored Session Count
+             * @default 0
+             */
+            scored_session_count?: number;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /** Session Ids */
+            session_ids?: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed";
+            /** Tags */
+            tags?: string[];
+            /**
+             * Terminal Session Count
+             * @default 0
+             */
+            terminal_session_count?: number;
+            /**
+             * Total Sessions
+             * @default 0
+             */
+            total_sessions?: number;
+            /**
+             * Total Turns
+             * @default 0
+             */
+            total_turns?: number;
+        };
+        /** SimulationBenchmarkResultsResponse */
+        SimulationBenchmarkResultsResponse: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Breakdown */
+            capability_breakdown?: {
+                [key: string]: components["schemas"]["SimulationBenchmarkBreakdownSummary"];
+            };
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /** Missing Run Ids */
+            missing_run_ids?: string[];
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Per Run */
+            per_run?: components["schemas"]["SimulationBenchmarkPerRunSummary"][];
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Total Runs */
+            total_runs: number;
+        };
+        /** SimulationBenchmarkRunResponse */
+        SimulationBenchmarkRunResponse: {
+            aggregate_summary: components["schemas"]["SimulationBenchmarkAggregateSummary"];
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Cases */
+            cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+            /** Failed To Start Cases */
+            failed_to_start_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+            /** Required Tags */
+            required_tags: string[];
+            /** Run Ids */
+            run_ids: string[];
+            /** Selected Case Ids */
+            selected_case_ids: string[];
+            /** Skipped Cases */
+            skipped_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+        };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
             /** Intelligence */
@@ -22203,6 +22730,10 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
+            /** Snapshot */
+            snapshot?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Status
              * @enum {string}
@@ -23774,6 +24305,43 @@ export interface components {
             event_id: string;
             /** Status */
             status: string;
+        };
+        /**
+         * TMSMappingReleaseParams
+         * @description How long before a TMS mapping appointment its slot is released
+         *     back to the pool. ``weekend_skip=True`` adds Saturday + Sunday days
+         *     to the wall-clock countdown (clinic doesn't release on weekends).
+         */
+        TMSMappingReleaseParams: {
+            /** Reservation Window Hours */
+            reservation_window_hours: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "tms_mapping_release";
+            /**
+             * Weekend Skip
+             * @default true
+             */
+            weekend_skip?: boolean;
+        };
+        /**
+         * TMSSessionGridParams
+         * @description TMS sessions only start at fixed minute-of-hour boundaries
+         *     (e.g. ``:00`` and ``:30``) so the technician can run them
+         *     back-to-back without gaps.
+         */
+        TMSSessionGridParams: {
+            /** Boundary Minutes */
+            boundary_minutes: number[];
+            /** Interval Minutes */
+            interval_minutes: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            rule_kind: "tms_session_grid";
         };
         /** TargetSpec */
         TargetSpec: {
@@ -25553,6 +26121,18 @@ export interface components {
             /** Triage Timeout S */
             triage_timeout_s?: number | null;
         };
+        /**
+         * UpdateSchedulingRuleSetRequest
+         * @description Partial update — fields not provided are unchanged. ``params``
+         *     must be the full per-kind shape (no patch within params); send the
+         *     whole RuleParams or omit.
+         */
+        UpdateSchedulingRuleSetRequest: {
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Params */
+            params?: (components["schemas"]["ClinicOpenHoursParams"] | components["schemas"]["TMSMappingReleaseParams"] | components["schemas"]["TMSSessionGridParams"] | components["schemas"]["KetamineBlockOverlapParams"] | components["schemas"]["NinetyDayRollingParams"] | components["schemas"]["ConcurrentStartBlockParams"]) | null;
+        };
         /** UpdateServiceRequest */
         UpdateServiceRequest: {
             /** Agent Id */
@@ -26966,6 +27546,17 @@ export interface components {
         WrapUpResponse: {
             /** Success */
             success: boolean;
+        };
+        /**
+         * _DayHours
+         * @description Open-hours window for one weekday. Times in 24h ``HH:MM`` form,
+         *     interpreted in the rule set's ``timezone``.
+         */
+        _DayHours: {
+            /** End */
+            end: string;
+            /** Start */
+            start: string;
         };
         _ToolMockKey: string;
         _ToolMockValue: string;
@@ -39752,6 +40343,304 @@ export interface operations {
             };
         };
     };
+    "list-scheduling-rule-sets": {
+        parameters: {
+            query?: {
+                agent_kind?: ("tms" | "ketamine" | "general") | null;
+                is_active?: boolean | null;
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_SchedulingRuleSetResponse_"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-scheduling-rule-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSchedulingRuleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulingRuleSetResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rule set already exists for this (agent_kind, rule_kind). */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body or rule_kind discriminator. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-scheduling-rule-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                rule_set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulingRuleSetResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rule set not found in this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-scheduling-rule-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                rule_set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rule set not found in this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "update-scheduling-rule-set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                rule_set_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSchedulingRuleSetRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SchedulingRuleSetResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rule set not found in this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Submitted params discriminator does not match the existing rule's rule_kind. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "finalize-encounter": {
         parameters: {
             query?: never;
@@ -41827,6 +42716,76 @@ export interface operations {
             };
         };
     };
+    "get-simulation-benchmark-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GetSimulationBenchmarkResultsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationBenchmarkResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationBenchmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationBenchmarkRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-simulation-branches": {
         parameters: {
             query?: never;
@@ -41945,6 +42904,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BridgePlanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BridgeResponse"];
                 };
             };
             /** @description Validation Error */
