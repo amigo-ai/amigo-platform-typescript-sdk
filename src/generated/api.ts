@@ -7090,11 +7090,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Triggers */
-        get: operations["list_triggers_v1__workspace_id__triggers_get"];
+        /** List triggers */
+        get: operations["list-triggers"];
         put?: never;
-        /** Create Trigger */
-        post: operations["create_trigger_v1__workspace_id__triggers_post"];
+        /** Create a trigger */
+        post: operations["create-trigger"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7108,13 +7108,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Trigger */
-        get: operations["get_trigger_v1__workspace_id__triggers__trigger_id__get"];
-        /** Update Trigger */
-        put: operations["update_trigger_v1__workspace_id__triggers__trigger_id__put"];
+        /** Get a trigger */
+        get: operations["get-trigger"];
+        /** Update a trigger */
+        put: operations["update-trigger"];
         post?: never;
-        /** Delete Trigger */
-        delete: operations["delete_trigger_v1__workspace_id__triggers__trigger_id__delete"];
+        /** Delete a trigger */
+        delete: operations["delete-trigger"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7129,8 +7129,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Fire Trigger */
-        post: operations["fire_trigger_v1__workspace_id__triggers__trigger_id__fire_post"];
+        /** Manually fire a trigger now */
+        post: operations["fire-trigger"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7146,8 +7146,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Pause Trigger */
-        post: operations["pause_trigger_v1__workspace_id__triggers__trigger_id__pause_post"];
+        /** Pause a trigger */
+        post: operations["pause-trigger"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7163,8 +7163,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Resume Trigger */
-        post: operations["resume_trigger_v1__workspace_id__triggers__trigger_id__resume_post"];
+        /** Resume a trigger */
+        post: operations["resume-trigger"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7179,10 +7179,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Trigger Runs
+         * List trigger execution history
          * @description Execution history from the Lakebase entity-event timeline read model.
          */
-        get: operations["list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get"];
+        get: operations["list-trigger-runs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7480,11 +7480,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Webhook Destinations */
-        get: operations["list_webhook_destinations_v1__workspace_id__webhook_destinations_get"];
+        /** List webhook destinations */
+        get: operations["list-webhook-destinations"];
         put?: never;
-        /** Create Webhook Destination */
-        post: operations["create_webhook_destination_v1__workspace_id__webhook_destinations_post"];
+        /** Create a webhook destination */
+        post: operations["create-webhook-destination"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7498,13 +7498,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Webhook Destination */
-        get: operations["get_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__get"];
-        /** Update Webhook Destination */
-        put: operations["update_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__put"];
+        /** Get a webhook destination */
+        get: operations["get-webhook-destination"];
+        /** Update a webhook destination */
+        put: operations["update-webhook-destination"];
         post?: never;
-        /** Delete Webhook Destination */
-        delete: operations["delete_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__delete"];
+        /** Delete a webhook destination */
+        delete: operations["delete-webhook-destination"];
         options?: never;
         head?: never;
         patch?: never;
@@ -7518,10 +7518,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Deliveries
+         * List webhook delivery history
          * @description Delivery history from the Lakebase entity-event timeline read model.
          */
-        get: operations["list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get"];
+        get: operations["list-webhook-destination-deliveries"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7539,8 +7539,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Rotate Secret */
-        post: operations["rotate_secret_v1__workspace_id__webhook_destinations__destination_id__rotate_secret_post"];
+        /** Rotate the destination's HMAC signing secret */
+        post: operations["rotate-webhook-destination-secret"];
         delete?: never;
         options?: never;
         head?: never;
@@ -12396,8 +12396,7 @@ export interface components {
             event_filter?: {
                 [key: string]: unknown;
             } | null;
-            /** Event Type */
-            event_type: string;
+            event_type: components["schemas"]["EventTypeString"];
             /** Input Template */
             input_template?: {
                 [key: string]: unknown;
@@ -12436,7 +12435,7 @@ export interface components {
         /** CreateWebhookDestinationRequest */
         CreateWebhookDestinationRequest: {
             /** Accepted Event Types */
-            accepted_event_types?: string[];
+            accepted_event_types?: components["schemas"]["EventTypeString"][];
             description?: components["schemas"]["DescriptionString"] | null;
             /** Field Mapping */
             field_mapping?: {
@@ -15173,6 +15172,7 @@ export interface components {
             /** Total Events */
             total_events: number;
         };
+        EventTypeString: string;
         /** EventTypeSummary */
         EventTypeSummary: {
             /** Count */
@@ -25687,8 +25687,7 @@ export interface components {
             event_filter?: {
                 [key: string]: unknown;
             } | null;
-            /** Event Type */
-            event_type?: string | null;
+            event_type?: components["schemas"]["EventTypeString"] | null;
             /** Input Template */
             input_template?: {
                 [key: string]: unknown;
@@ -25721,7 +25720,7 @@ export interface components {
         /** UpdateWebhookDestinationRequest */
         UpdateWebhookDestinationRequest: {
             /** Accepted Event Types */
-            accepted_event_types?: string[] | null;
+            accepted_event_types?: components["schemas"]["EventTypeString"][] | null;
             description?: components["schemas"]["DescriptionString"] | null;
             /** Field Mapping */
             field_mapping?: {
@@ -43677,7 +43676,7 @@ export interface operations {
             };
         };
     };
-    list_triggers_v1__workspace_id__triggers_get: {
+    "list-triggers": {
         parameters: {
             query?: {
                 is_active?: boolean | null;
@@ -43710,9 +43709,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    create_trigger_v1__workspace_id__triggers_post: {
+    "create-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43736,18 +43742,23 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    get_trigger_v1__workspace_id__triggers__trigger_id__get: {
+    "get-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43768,6 +43779,13 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerResponse"];
                 };
             };
+            /** @description Trigger not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -43777,9 +43795,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    update_trigger_v1__workspace_id__triggers__trigger_id__put: {
+    "update-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43804,18 +43829,30 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Trigger not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    delete_trigger_v1__workspace_id__triggers__trigger_id__delete: {
+    "delete-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43843,9 +43880,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    fire_trigger_v1__workspace_id__triggers__trigger_id__fire_post: {
+    "fire-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43870,18 +43914,37 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerFireResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Trigger not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
+            };
+            /** @description Trigger scheduler not initialized */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
-    pause_trigger_v1__workspace_id__triggers__trigger_id__pause_post: {
+    "pause-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43902,18 +43965,30 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Trigger not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    resume_trigger_v1__workspace_id__triggers__trigger_id__resume_post: {
+    "resume-trigger": {
         parameters: {
             query?: never;
             header?: never;
@@ -43934,18 +44009,30 @@ export interface operations {
                     "application/json": components["schemas"]["TriggerResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Trigger not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get: {
+    "list-trigger-runs": {
         parameters: {
             query?: {
                 limit?: number;
@@ -43977,6 +44064,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -44895,7 +44989,7 @@ export interface operations {
             };
         };
     };
-    list_webhook_destinations_v1__workspace_id__webhook_destinations_get: {
+    "list-webhook-destinations": {
         parameters: {
             query?: {
                 limit?: number;
@@ -44927,9 +45021,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    create_webhook_destination_v1__workspace_id__webhook_destinations_post: {
+    "create-webhook-destination": {
         parameters: {
             query?: never;
             header?: never;
@@ -44953,18 +45054,23 @@ export interface operations {
                     "application/json": components["schemas"]["WebhookDestinationCreatedResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    get_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__get: {
+    "get-webhook-destination": {
         parameters: {
             query?: never;
             header?: never;
@@ -44985,6 +45091,13 @@ export interface operations {
                     "application/json": components["schemas"]["WebhookDestinationResponse"];
                 };
             };
+            /** @description Webhook destination not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -44994,9 +45107,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    update_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__put: {
+    "update-webhook-destination": {
         parameters: {
             query?: never;
             header?: never;
@@ -45021,18 +45141,30 @@ export interface operations {
                     "application/json": components["schemas"]["WebhookDestinationResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Webhook destination not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
-    delete_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__delete: {
+    "delete-webhook-destination": {
         parameters: {
             query?: never;
             header?: never;
@@ -45060,9 +45192,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get: {
+    "list-webhook-destination-deliveries": {
         parameters: {
             query?: {
                 limit?: number;
@@ -45095,9 +45234,16 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
-    rotate_secret_v1__workspace_id__webhook_destinations__destination_id__rotate_secret_post: {
+    "rotate-webhook-destination-secret": {
         parameters: {
             query?: never;
             header?: never;
@@ -45118,14 +45264,26 @@ export interface operations {
                     "application/json": components["schemas"]["RotateSecretResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Webhook destination not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
                 };
+                content?: never;
             };
         };
     };
