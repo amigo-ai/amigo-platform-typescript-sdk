@@ -1,13 +1,17 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import type { ActionId } from '../core/branded-types.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
-import type { ListParams } from '../core/utils.js'
 
-export interface ListActionsParams extends ListParams {
-  search?: string
-  enabled?: boolean
-  execution_tier?: string
-}
+// Derived from the generated query type so ``execution_tier`` stays in
+// sync with the platform-api Literal union (currently
+// ``"direct" | "orchestrated" | "autonomous" | "browser" | "computer_use"``)
+// and any future tier the spec adds. The pre-#175 hand-rolled
+// ``execution_tier?: string`` was too loose and broke ``tsc`` when
+// platform-api PR #2520 tightened the parameter to a Literal.
+// Mirrors the ``monitor-concepts.ts`` pattern.
+export type ListActionsParams = NonNullable<
+  paths['/v1/{workspace_id}/skills']['get']['parameters']['query']
+>
 
 /**
  * Manage actions — reusable AI capabilities that agents can call.
