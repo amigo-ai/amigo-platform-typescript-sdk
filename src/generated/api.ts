@@ -6317,6 +6317,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/benchmarks/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get Simulation Benchmark Results
+         * @description Aggregate benchmark results over the run ids returned by benchmark start.
+         */
+        post: operations["get-simulation-benchmark-results"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/benchmarks/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Benchmark
+         * @description Run a tag-selected benchmark batch as one saved-case run per case.
+         */
+        post: operations["run-simulation-benchmark"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/branches": {
         parameters: {
             query?: never;
@@ -6380,6 +6420,26 @@ export interface paths {
          *     no run is created — pure inference.
          */
         post: operations["simulation-bridge-plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Case
+         * @description Run the current saved simulation case through the bridge executor.
+         */
+        post: operations["run-simulation-case"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9609,6 +9669,8 @@ export interface components {
         };
         /** BridgeResponse */
         BridgeResponse: {
+            /** Case Ids */
+            case_ids?: string[];
             inferred_target_spec?: components["schemas"]["TargetSpec"] | null;
             /** Inferred Target Spec Rationale */
             inferred_target_spec_rationale?: string | null;
@@ -16450,6 +16512,11 @@ export interface components {
             /** Scan Interval Seconds */
             scan_interval_seconds: number;
         };
+        /** GetSimulationBenchmarkResultsRequest */
+        GetSimulationBenchmarkResultsRequest: {
+            /** Run Ids */
+            run_ids: string[];
+        };
         /**
          * Guardrail
          * @description Typed safety rule enforced per-state (not just global freetext guidelines).
@@ -21145,6 +21212,53 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /** RunSimulationBenchmarkRequest */
+        RunSimulationBenchmarkRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Concurrency
+             * @default 1
+             */
+            concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
+            /**
+             * Max Cases
+             * @default 20
+             */
+            max_cases?: number;
+            /**
+             * Max Turns
+             * @default 20
+             */
+            max_turns?: number;
+            /** Required Tags */
+            required_tags?: string[];
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+        };
+        /** RunSimulationCaseRequest */
+        RunSimulationCaseRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Concurrency
+             * @default 1
+             */
+            concurrency?: number;
+            exploration?: components["schemas"]["ExplorationConfig"] | null;
+            /**
+             * Max Turns
+             * @default 20
+             */
+            max_turns?: number;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+        };
         /** SafetyConfigResponse */
         SafetyConfigResponse: {
             /** Accumulation Cumulative Count */
@@ -21381,6 +21495,8 @@ export interface components {
         };
         /** Scenario */
         Scenario: {
+            /** Case Id */
+            case_id?: string | null;
             /** Description */
             description: string;
             /** Initial Message */
@@ -22124,6 +22240,227 @@ export interface components {
              */
             signal: string;
         };
+        /** SimulationBenchmarkAggregateSummary */
+        SimulationBenchmarkAggregateSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Failed To Start Count */
+            failed_to_start_count: number;
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Selected Count */
+            selected_count: number;
+            /** Skipped Count */
+            skipped_count: number;
+            /** Started Count */
+            started_count: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+        };
+        /** SimulationBenchmarkBreakdownSummary */
+        SimulationBenchmarkBreakdownSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /**
+             * Run Count
+             * @default 0
+             */
+            run_count?: number;
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+        };
+        /** SimulationBenchmarkCaseResult */
+        SimulationBenchmarkCaseResult: {
+            /**
+             * Case Id
+             * Format: uuid
+             */
+            case_id: string;
+            /** Reason */
+            reason?: string | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            } | null;
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "started" | "skipped" | "failed_to_start";
+        };
+        /** SimulationBenchmarkPerRunSummary */
+        SimulationBenchmarkPerRunSummary: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Tags */
+            capability_tags?: string[];
+            /** Case Ids */
+            case_ids?: string[];
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Passed */
+            passed?: boolean | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Score Rationales */
+            score_rationales?: string[];
+            /**
+             * Scored Session Count
+             * @default 0
+             */
+            scored_session_count?: number;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /** Session Ids */
+            session_ids?: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed";
+            /** Tags */
+            tags?: string[];
+            /**
+             * Terminal Session Count
+             * @default 0
+             */
+            terminal_session_count?: number;
+            /**
+             * Total Sessions
+             * @default 0
+             */
+            total_sessions?: number;
+            /**
+             * Total Turns
+             * @default 0
+             */
+            total_turns?: number;
+        };
+        /** SimulationBenchmarkResultsResponse */
+        SimulationBenchmarkResultsResponse: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Breakdown */
+            capability_breakdown?: {
+                [key: string]: components["schemas"]["SimulationBenchmarkBreakdownSummary"];
+            };
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /** Missing Run Ids */
+            missing_run_ids?: string[];
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Per Run */
+            per_run?: components["schemas"]["SimulationBenchmarkPerRunSummary"][];
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Total Runs */
+            total_runs: number;
+        };
+        /** SimulationBenchmarkRunResponse */
+        SimulationBenchmarkRunResponse: {
+            aggregate_summary: components["schemas"]["SimulationBenchmarkAggregateSummary"];
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Cases */
+            cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+            /** Failed To Start Cases */
+            failed_to_start_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+            /** Required Tags */
+            required_tags: string[];
+            /** Run Ids */
+            run_ids: string[];
+            /** Selected Case Ids */
+            selected_case_ids: string[];
+            /** Skipped Cases */
+            skipped_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+        };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
             /** Intelligence */
@@ -22203,6 +22540,10 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
+            /** Snapshot */
+            snapshot?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Status
              * @enum {string}
@@ -41827,6 +42168,76 @@ export interface operations {
             };
         };
     };
+    "get-simulation-benchmark-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GetSimulationBenchmarkResultsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationBenchmarkResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-benchmark": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationBenchmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationBenchmarkRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-simulation-branches": {
         parameters: {
             query?: never;
@@ -41945,6 +42356,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BridgePlanResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationCaseRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BridgeResponse"];
                 };
             };
             /** @description Validation Error */
