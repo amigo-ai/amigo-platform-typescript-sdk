@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.31.0] - 2026-05-04
+
+### Features
+
+- streamTurn targets explicit /turns/stream endpoint (0.30.0) (#168)
+
 ## [0.30.0] - 2026-05-04
 
 ### Features
