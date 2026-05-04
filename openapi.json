@@ -10934,9 +10934,7 @@
             "title": "Event Filter"
           },
           "event_type": {
-            "maxLength": 256,
-            "title": "Event Type",
-            "type": "string"
+            "$ref": "#/components/schemas/EventTypeString"
           },
           "input_template": {
             "additionalProperties": true,
@@ -10950,6 +10948,7 @@
             "anyOf": [
               {
                 "maxLength": 128,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -10961,6 +10960,7 @@
           "timezone": {
             "default": "UTC",
             "maxLength": 64,
+            "minLength": 1,
             "title": "Timezone",
             "type": "string"
           }
@@ -11063,8 +11063,7 @@
         "properties": {
           "accepted_event_types": {
             "items": {
-              "maxLength": 128,
-              "type": "string"
+              "$ref": "#/components/schemas/EventTypeString"
             },
             "maxItems": 50,
             "title": "Accepted Event Types",
@@ -17808,6 +17807,12 @@
         ],
         "title": "EventTypeRegistryResponse",
         "type": "object"
+      },
+      "EventTypeString": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[a-zA-Z0-9._\\-:*]+$",
+        "type": "string"
       },
       "EventTypeSummary": {
         "properties": {
@@ -43797,14 +43802,12 @@
           "event_type": {
             "anyOf": [
               {
-                "maxLength": 256,
-                "type": "string"
+                "$ref": "#/components/schemas/EventTypeString"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Event Type"
+            ]
           },
           "input_template": {
             "anyOf": [
@@ -43832,6 +43835,7 @@
             "anyOf": [
               {
                 "maxLength": 128,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -43844,6 +43848,7 @@
             "anyOf": [
               {
                 "maxLength": 64,
+                "minLength": 1,
                 "type": "string"
               },
               {
@@ -43964,8 +43969,7 @@
             "anyOf": [
               {
                 "items": {
-                  "maxLength": 128,
-                  "type": "string"
+                  "$ref": "#/components/schemas/EventTypeString"
                 },
                 "maxItems": 50,
                 "type": "array"
@@ -56182,7 +56186,7 @@
     },
     "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
       "post": {
-        "description": "Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of token, tool_call_started, tool_call_completed, message, and done events instead of the synchronous JSON response.",
+        "description": "Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of typed `TurnStreamEvent` frames (token, tool_call_started, tool_call_completed, thinking, message, done, error) instead of the synchronous JSON response. For new integrations prefer `POST /turns/stream`, which is always SSE.",
         "operationId": "create_turn_v1__workspace_id__conversations__conversation_id__turns_post",
         "parameters": [
           {
@@ -56256,6 +56260,87 @@
           }
         },
         "summary": "Send a message and get the agent's response",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/stream": {
+      "post": {
+        "description": "Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header \u2014 no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.",
+        "operationId": "create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include tool_call_started / tool_call_completed frames in the stream",
+            "in": "query",
+            "name": "include_tool_calls",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Include tool_call_started / tool_call_completed frames in the stream",
+              "title": "Include Tool Calls",
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnStreamEvent"
+                }
+              }
+            },
+            "description": "SSE stream of TurnStreamEvent frames"
+          },
+          "404": {
+            "description": "Conversation or service not found"
+          },
+          "409": {
+            "description": "Conversation is closed"
+          },
+          "422": {
+            "description": "Conversation is missing or has corrupt service binding"
+          },
+          "503": {
+            "description": "Agent service unavailable"
+          }
+        },
+        "summary": "Send a message and receive a streamed agent response",
         "tags": [
           "conversations"
         ]
@@ -75639,7 +75724,7 @@
     },
     "/v1/{workspace_id}/triggers": {
       "get": {
-        "operationId": "list_triggers_v1__workspace_id__triggers_get",
+        "operationId": "list-triggers",
         "parameters": [
           {
             "in": "path",
@@ -75710,15 +75795,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "List Triggers",
+        "summary": "List triggers",
         "tags": [
           "Triggers"
         ]
       },
       "post": {
-        "operationId": "create_trigger_v1__workspace_id__triggers_post",
+        "operationId": "create-trigger",
         "parameters": [
           {
             "in": "path",
@@ -75753,17 +75841,13 @@
             "description": "Successful Response"
           },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Create Trigger",
+        "summary": "Create a trigger",
         "tags": [
           "Triggers"
         ]
@@ -75771,7 +75855,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}": {
       "delete": {
-        "operationId": "delete_trigger_v1__workspace_id__triggers__trigger_id__delete",
+        "operationId": "delete-trigger",
         "parameters": [
           {
             "in": "path",
@@ -75807,15 +75891,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Delete Trigger",
+        "summary": "Delete a trigger",
         "tags": [
           "Triggers"
         ]
       },
       "get": {
-        "operationId": "get_trigger_v1__workspace_id__triggers__trigger_id__get",
+        "operationId": "get-trigger",
         "parameters": [
           {
             "in": "path",
@@ -75849,6 +75936,9 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Trigger not found"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -75858,15 +75948,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Get Trigger",
+        "summary": "Get a trigger",
         "tags": [
           "Triggers"
         ]
       },
       "put": {
-        "operationId": "update_trigger_v1__workspace_id__triggers__trigger_id__put",
+        "operationId": "update-trigger",
         "parameters": [
           {
             "in": "path",
@@ -75910,18 +76003,17 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Trigger not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Update Trigger",
+        "summary": "Update a trigger",
         "tags": [
           "Triggers"
         ]
@@ -75929,7 +76021,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/fire": {
       "post": {
-        "operationId": "fire_trigger_v1__workspace_id__triggers__trigger_id__fire_post",
+        "operationId": "fire-trigger",
         "parameters": [
           {
             "in": "path",
@@ -75980,18 +76072,20 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Trigger not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "503": {
+            "description": "Trigger scheduler not initialized"
           }
         },
-        "summary": "Fire Trigger",
+        "summary": "Manually fire a trigger now",
         "tags": [
           "Triggers"
         ]
@@ -75999,7 +76093,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/pause": {
       "post": {
-        "operationId": "pause_trigger_v1__workspace_id__triggers__trigger_id__pause_post",
+        "operationId": "pause-trigger",
         "parameters": [
           {
             "in": "path",
@@ -76033,18 +76127,17 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Trigger not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Pause Trigger",
+        "summary": "Pause a trigger",
         "tags": [
           "Triggers"
         ]
@@ -76052,7 +76145,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/resume": {
       "post": {
-        "operationId": "resume_trigger_v1__workspace_id__triggers__trigger_id__resume_post",
+        "operationId": "resume-trigger",
         "parameters": [
           {
             "in": "path",
@@ -76086,18 +76179,17 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Trigger not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Resume Trigger",
+        "summary": "Resume a trigger",
         "tags": [
           "Triggers"
         ]
@@ -76106,7 +76198,7 @@
     "/v1/{workspace_id}/triggers/{trigger_id}/runs": {
       "get": {
         "description": "Execution history from the Lakebase entity-event timeline read model.",
-        "operationId": "list_trigger_runs_v1__workspace_id__triggers__trigger_id__runs_get",
+        "operationId": "list-trigger-runs",
         "parameters": [
           {
             "in": "path",
@@ -76171,9 +76263,12 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "List Trigger Runs",
+        "summary": "List trigger execution history",
         "tags": [
           "Triggers"
         ]
@@ -77421,7 +77516,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations": {
       "get": {
-        "operationId": "list_webhook_destinations_v1__workspace_id__webhook_destinations_get",
+        "operationId": "list-webhook-destinations",
         "parameters": [
           {
             "in": "path",
@@ -77476,15 +77571,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "List Webhook Destinations",
+        "summary": "List webhook destinations",
         "tags": [
           "Webhook Destinations"
         ]
       },
       "post": {
-        "operationId": "create_webhook_destination_v1__workspace_id__webhook_destinations_post",
+        "operationId": "create-webhook-destination",
         "parameters": [
           {
             "in": "path",
@@ -77519,17 +77617,13 @@
             "description": "Successful Response"
           },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Create Webhook Destination",
+        "summary": "Create a webhook destination",
         "tags": [
           "Webhook Destinations"
         ]
@@ -77537,7 +77631,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations/{destination_id}": {
       "delete": {
-        "operationId": "delete_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__delete",
+        "operationId": "delete-webhook-destination",
         "parameters": [
           {
             "in": "path",
@@ -77573,15 +77667,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Delete Webhook Destination",
+        "summary": "Delete a webhook destination",
         "tags": [
           "Webhook Destinations"
         ]
       },
       "get": {
-        "operationId": "get_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__get",
+        "operationId": "get-webhook-destination",
         "parameters": [
           {
             "in": "path",
@@ -77615,6 +77712,9 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Webhook destination not found"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -77624,15 +77724,18 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Get Webhook Destination",
+        "summary": "Get a webhook destination",
         "tags": [
           "Webhook Destinations"
         ]
       },
       "put": {
-        "operationId": "update_webhook_destination_v1__workspace_id__webhook_destinations__destination_id__put",
+        "operationId": "update-webhook-destination",
         "parameters": [
           {
             "in": "path",
@@ -77676,18 +77779,17 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Webhook destination not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Update Webhook Destination",
+        "summary": "Update a webhook destination",
         "tags": [
           "Webhook Destinations"
         ]
@@ -77696,7 +77798,7 @@
     "/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries": {
       "get": {
         "description": "Delivery history from the Lakebase entity-event timeline read model.",
-        "operationId": "list_deliveries_v1__workspace_id__webhook_destinations__destination_id__deliveries_get",
+        "operationId": "list-webhook-destination-deliveries",
         "parameters": [
           {
             "in": "path",
@@ -77761,9 +77863,12 @@
               }
             },
             "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "List Deliveries",
+        "summary": "List webhook delivery history",
         "tags": [
           "Webhook Destinations"
         ]
@@ -77771,7 +77876,7 @@
     },
     "/v1/{workspace_id}/webhook-destinations/{destination_id}/rotate-secret": {
       "post": {
-        "operationId": "rotate_secret_v1__workspace_id__webhook_destinations__destination_id__rotate_secret_post",
+        "operationId": "rotate-webhook-destination-secret",
         "parameters": [
           {
             "in": "path",
@@ -77805,18 +77910,17 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Webhook destination not found"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
           }
         },
-        "summary": "Rotate Secret",
+        "summary": "Rotate the destination's HMAC signing secret",
         "tags": [
           "Webhook Destinations"
         ]
