@@ -776,7 +776,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
           new Response(stream, {
             headers: { 'content-type': 'text/event-stream' },
           }),
@@ -817,7 +817,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: (req) => {
           requestUrl = req.url
           return new Response(sseStream(['event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n']), {
             headers: { 'content-type': 'text/event-stream' },
@@ -857,7 +857,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
           new Response(stream, {
             headers: { 'content-type': 'text/event-stream' },
           }),
@@ -886,7 +886,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
           new Response(stream, {
             headers: { 'content-type': 'text/event-stream' },
           }),
@@ -932,7 +932,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
           new Response(stream, {
             headers: { 'content-type': 'text/event-stream' },
           }),
@@ -980,7 +980,7 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
           new Response(stream, {
             headers: { 'content-type': 'text/event-stream' },
           }),

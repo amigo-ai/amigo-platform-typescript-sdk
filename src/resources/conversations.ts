@@ -170,10 +170,14 @@ export class ConversationsResource extends WorkspaceScopedResource {
   }
 
   /**
-   * Send a message and receive the agent's response as an SSE stream.
+   * Send a message and receive the agent's response as an SSE byte stream.
    *
-   * Returns a `ReadableStream` of SSE bytes. Use `EventSourceParserStream`
-   * (from `eventsource-parser/stream`) to parse into typed `TurnStreamEvent`.
+   * Targets the explicit always-SSE endpoint
+   * `POST /v1/{ws}/conversations/{id}/turns/stream`, so the response is
+   * always `text/event-stream` regardless of `Accept` negotiation. Returns
+   * a `ReadableStream` of raw bytes; use `EventSourceParserStream` (from
+   * `eventsource-parser/stream`) to parse into typed `TurnStreamEvent`,
+   * or use the higher-level {@link streamTurn} which hides the parser.
    *
    * @example
    * ```ts
@@ -193,7 +197,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
     options?: { signal?: AbortSignal; includeToolCalls?: boolean },
   ): Promise<ReadableStream<Uint8Array>> {
     const result = await this.client.POST(
-      '/v1/{workspace_id}/conversations/{conversation_id}/turns',
+      '/v1/{workspace_id}/conversations/{conversation_id}/turns/stream',
       {
         params: {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
@@ -202,7 +206,6 @@ export class ConversationsResource extends WorkspaceScopedResource {
           }),
         },
         body: request,
-        headers: { Accept: 'text/event-stream' },
         parseAs: 'stream',
         signal: options?.signal,
       },

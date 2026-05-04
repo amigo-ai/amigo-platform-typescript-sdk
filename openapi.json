@@ -56182,7 +56182,7 @@
     },
     "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
       "post": {
-        "description": "Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of token, tool_call_started, tool_call_completed, message, and done events instead of the synchronous JSON response.",
+        "description": "Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of typed `TurnStreamEvent` frames (token, tool_call_started, tool_call_completed, thinking, message, done, error) instead of the synchronous JSON response. For new integrations prefer `POST /turns/stream`, which is always SSE.",
         "operationId": "create_turn_v1__workspace_id__conversations__conversation_id__turns_post",
         "parameters": [
           {
@@ -56256,6 +56256,87 @@
           }
         },
         "summary": "Send a message and get the agent's response",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/stream": {
+      "post": {
+        "description": "Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header \u2014 no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.",
+        "operationId": "create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include tool_call_started / tool_call_completed frames in the stream",
+            "in": "query",
+            "name": "include_tool_calls",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Include tool_call_started / tool_call_completed frames in the stream",
+              "title": "Include Tool Calls",
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/TurnStreamEvent"
+                }
+              }
+            },
+            "description": "SSE stream of TurnStreamEvent frames"
+          },
+          "404": {
+            "description": "Conversation or service not found"
+          },
+          "409": {
+            "description": "Conversation is closed"
+          },
+          "422": {
+            "description": "Conversation is missing or has corrupt service binding"
+          },
+          "503": {
+            "description": "Agent service unavailable"
+          }
+        },
+        "summary": "Send a message and receive a streamed agent response",
         "tags": [
           "conversations"
         ]

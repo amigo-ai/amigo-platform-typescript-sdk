@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.30.0] - 2026-05-04
+
+### Features
+
+- **`client.conversations.streamTurn` + `createTurnStream` now target the always-SSE endpoint** — `POST /v1/{ws}/conversations/{id}/turns/stream` (added in platform-api PR #2499). The Accept-sniffing variant of `POST /turns` still works against older platform-api versions, but the SDK now hits the explicit endpoint so the response is unambiguously SSE without header negotiation. Wire format and the `TurnStreamEvent` discriminated union are unchanged — consumer code does not need to change.
+
+### Maintenance
+
+- sync API types from platform — adds `POST /v1/{workspace_id}/conversations/{conversation_id}/turns/stream` (op `create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post`).
+
 ## [0.29.0] - 2026-05-03
 
 ### Features
