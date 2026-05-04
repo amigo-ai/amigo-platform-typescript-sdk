@@ -3838,6 +3838,14 @@
       },
       "BridgeResponse": {
         "properties": {
+          "case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Case Ids",
+            "type": "array"
+          },
           "inferred_target_spec": {
             "anyOf": [
               {
@@ -21268,6 +21276,25 @@
         "title": "GapScannerSettingsResponse",
         "type": "object"
       },
+      "GetSimulationBenchmarkResultsRequest": {
+        "properties": {
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Run Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_ids"
+        ],
+        "title": "GetSimulationBenchmarkResultsRequest",
+        "type": "object"
+      },
       "Guardrail": {
         "description": "Typed safety rule enforced per-state (not just global freetext guidelines).",
         "properties": {
@@ -32347,6 +32374,148 @@
         "title": "RotateSecretResponse",
         "type": "object"
       },
+      "RunSimulationBenchmarkRequest": {
+        "properties": {
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
+          "concurrency": {
+            "default": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplorationConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_cases": {
+            "default": 20,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Cases",
+            "type": "integer"
+          },
+          "max_turns": {
+            "default": 20,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Max Turns",
+            "type": "integer"
+          },
+          "required_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Required Tags",
+            "type": "array"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "RunSimulationBenchmarkRequest",
+        "type": "object"
+      },
+      "RunSimulationCaseRequest": {
+        "properties": {
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
+          "concurrency": {
+            "default": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplorationConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_turns": {
+            "default": 20,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Max Turns",
+            "type": "integer"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
       "SafetyConfigResponse": {
         "properties": {
           "accumulation_cumulative_count": {
@@ -32708,6 +32877,18 @@
       },
       "Scenario": {
         "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
           "description": {
             "maxLength": 512,
             "title": "Description",
@@ -34487,6 +34668,488 @@
         "title": "SignalResponseAlignment",
         "type": "object"
       },
+      "SimulationBenchmarkAggregateSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "failed_to_start_count": {
+            "title": "Failed To Start Count",
+            "type": "integer"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "selected_count": {
+            "title": "Selected Count",
+            "type": "integer"
+          },
+          "skipped_count": {
+            "title": "Skipped Count",
+            "type": "integer"
+          },
+          "started_count": {
+            "title": "Started Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "selected_count",
+          "started_count",
+          "skipped_count",
+          "failed_to_start_count"
+        ],
+        "title": "SimulationBenchmarkAggregateSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkBreakdownSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "completed_count": {
+            "default": 0,
+            "title": "Completed Count",
+            "type": "integer"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "failed_count": {
+            "default": 0,
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "run_count": {
+            "default": 0,
+            "title": "Run Count",
+            "type": "integer"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          }
+        },
+        "title": "SimulationBenchmarkBreakdownSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkCaseResult": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "result_pointer": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Pointer"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "status": {
+            "enum": [
+              "started",
+              "skipped",
+              "failed_to_start"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "status"
+        ],
+        "title": "SimulationBenchmarkCaseResult",
+        "type": "object"
+      },
+      "SimulationBenchmarkPerRunSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "capability_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Capability Tags",
+            "type": "array"
+          },
+          "case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Case Ids",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "passed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Passed"
+          },
+          "result_pointer": {
+            "additionalProperties": true,
+            "title": "Result Pointer",
+            "type": "object"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "score_rationales": {
+            "items": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "title": "Score Rationales",
+            "type": "array"
+          },
+          "scored_session_count": {
+            "default": 0,
+            "title": "Scored Session Count",
+            "type": "integer"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_ids": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Session Ids",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "terminal_session_count": {
+            "default": 0,
+            "title": "Terminal Session Count",
+            "type": "integer"
+          },
+          "total_sessions": {
+            "default": 0,
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "default": 0,
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "service_id",
+          "status"
+        ],
+        "title": "SimulationBenchmarkPerRunSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkResultsResponse": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "capability_breakdown": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SimulationBenchmarkBreakdownSummary"
+            },
+            "title": "Capability Breakdown",
+            "type": "object"
+          },
+          "completed_count": {
+            "default": 0,
+            "title": "Completed Count",
+            "type": "integer"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "failed_count": {
+            "default": 0,
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "missing_run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Missing Run Ids",
+            "type": "array"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "per_run": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkPerRunSummary"
+            },
+            "title": "Per Run",
+            "type": "array"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "total_runs": {
+            "title": "Total Runs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_ids",
+          "total_runs"
+        ],
+        "title": "SimulationBenchmarkResultsResponse",
+        "type": "object"
+      },
+      "SimulationBenchmarkRunResponse": {
+        "properties": {
+          "aggregate_summary": {
+            "$ref": "#/components/schemas/SimulationBenchmarkAggregateSummary"
+          },
+          "batch_id": {
+            "format": "uuid",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Cases",
+            "type": "array"
+          },
+          "failed_to_start_cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Failed To Start Cases",
+            "type": "array"
+          },
+          "required_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Required Tags",
+            "type": "array"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "selected_case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Selected Case Ids",
+            "type": "array"
+          },
+          "skipped_cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Skipped Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "batch_id",
+          "required_tags",
+          "selected_case_ids",
+          "run_ids",
+          "cases",
+          "skipped_cases",
+          "failed_to_start_cases",
+          "aggregate_summary"
+        ],
+        "title": "SimulationBenchmarkRunResponse",
+        "type": "object"
+      },
       "SimulationIntelligenceResponse": {
         "properties": {
           "intelligence": {
@@ -34683,6 +35346,18 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
           },
           "status": {
             "enum": [
@@ -72763,6 +73438,114 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/benchmarks/results": {
+      "post": {
+        "description": "Aggregate benchmark results over the run ids returned by benchmark start.",
+        "operationId": "get-simulation-benchmark-results",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSimulationBenchmarkResultsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationBenchmarkResultsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Benchmark Results",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/benchmarks/run": {
+      "post": {
+        "description": "Run a tag-selected benchmark batch as one saved-case run per case.",
+        "operationId": "run-simulation-benchmark",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSimulationBenchmarkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationBenchmarkRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Simulation Benchmark",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/simulations/branches": {
       "get": {
         "operationId": "list-simulation-branches",
@@ -72954,6 +73737,70 @@
           }
         },
         "summary": "Simulation Bridge Plan",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
+      "post": {
+        "description": "Run the current saved simulation case through the bridge executor.",
+        "operationId": "run-simulation-case",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSimulationCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Simulation Case",
         "tags": [
           "Simulations"
         ]
