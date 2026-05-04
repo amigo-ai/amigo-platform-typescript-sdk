@@ -1,12 +1,16 @@
-import type { components } from '../generated/api.js'
+import type { components, paths } from '../generated/api.js'
 import type { SkillId } from '../core/branded-types.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
+type SkillsListQuery = NonNullable<
+  NonNullable<paths['/v1/{workspace_id}/skills']['get']['parameters']['query']>
+>
+
 export interface ListSkillsParams extends ListParams {
   search?: string
   enabled?: boolean
-  execution_tier?: string
+  execution_tier?: SkillsListQuery['execution_tier']
 }
 
 /**

@@ -104,6 +104,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "fhir-get-resource",
   "fhir-get-resource-history",
   "fhir-import",
+  "fhir-import-stream",
   "fhir-locations-view",
   "fhir-organizations-view",
   "fhir-patient-search",

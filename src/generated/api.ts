@@ -2741,6 +2741,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/fhir/import-stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import FHIR resources via NDJSON streaming
+         * @description Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST send Patient resources before resources that reference them, and MUST pre-resolve any bundle-internal urn:uuid: references.
+         */
+        post: operations["fhir-import-stream"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/fhir/patients": {
         parameters: {
             query?: never;
@@ -6881,13 +6901,19 @@ export interface paths {
         get: operations["get-skill"];
         /**
          * Update a skill
-         * @description Update a skill's configuration. Increments version and creates an audit trail snapshot. Requires `Skill.update` permission.
+         * @description Update a skill's configuration. Increments version and creates an audit trail snapshot.
+         *
+         *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``browser_start_url``, ``browser_auth_integration``, ``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
+         *
+         *     Requires `Skill.update` permission.
          */
         put: operations["update-skill"];
         post?: never;
         /**
          * Delete a skill
-         * @description Delete a skill. SkillVersion audit trail is retained. Requires `Skill.delete` permission.
+         * @description Delete a skill. SkillVersion audit trail is retained.
+         *
+         *     **Not idempotent.** A second concurrent caller racing the same delete will receive ``404 Not Found`` once the row is gone — clients should treat 404 as success-equivalent for cleanup workflows. Requires `Skill.delete` permission.
          */
         delete: operations["delete-skill"];
         options?: never;
@@ -9056,8 +9082,8 @@ export interface components {
          * @description Authentication configuration for an integration.
          *
          *     Supports api_key_header, bearer_token, oauth2_client_credentials,
-         *     oauth2_jwt_bearer, gcp_wif, smart_backend_services, and
-         *     bearer_token_exchange.
+         *     json_token_exchange, oauth2_jwt_bearer, gcp_wif,
+         *     smart_backend_services, and bearer_token_exchange.
          */
         AuthConfig: {
             /** Assertion Algorithm */
@@ -9122,6 +9148,12 @@ export interface components {
              * @default 3600
              */
             token_lifetime_seconds?: number;
+            /** Token Request Client Id Field */
+            token_request_client_id_field?: string | null;
+            /** Token Request Client Secret Field */
+            token_request_client_secret_field?: string | null;
+            /** Token Response Path */
+            token_response_path?: string | null;
             /** Token Ssm Param Path */
             token_ssm_param_path?: string | null;
             /** Token Url */
@@ -9130,7 +9162,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
         };
         /**
          * AuthConfigWithSecrets
@@ -9207,6 +9239,12 @@ export interface components {
              * @default 3600
              */
             token_lifetime_seconds?: number;
+            /** Token Request Client Id Field */
+            token_request_client_id_field?: string | null;
+            /** Token Request Client Secret Field */
+            token_request_client_secret_field?: string | null;
+            /** Token Response Path */
+            token_response_path?: string | null;
             /** Token Ssm Param Path */
             token_ssm_param_path?: string | null;
             /** Token Url */
@@ -9215,7 +9253,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
         };
         /** AuthInfoResponse */
         AuthInfoResponse: {
@@ -12444,7 +12482,7 @@ export interface components {
              * @enum {string}
              */
             delivery?: "interrupt" | "queue";
-            description: components["schemas"]["StrippedNonemptyString"];
+            description: components["schemas"]["DescriptionString"];
             /**
              * Enable Caching
              * @default true
@@ -12494,7 +12532,7 @@ export interface components {
              * @default claude-sonnet-4-6
              */
             model?: string;
-            name: components["schemas"]["StrippedNonemptyString"];
+            name: components["schemas"]["NameString"];
             /** Result Schema */
             result_schema?: {
                 [key: string]: unknown;
@@ -12503,7 +12541,7 @@ export interface components {
             slug: string;
             /** Static Tools */
             static_tools?: components["schemas"]["StaticToolDef-Input"][];
-            system_prompt?: components["schemas"]["StrippedNonemptyString"] | null;
+            system_prompt?: components["schemas"]["BackgroundString"] | null;
             /** Thinking Effort */
             thinking_effort?: ("low" | "medium" | "high") | null;
             /**
@@ -22683,6 +22721,33 @@ export interface components {
              * @default 0
              */
             fail_count?: number;
+            /** Immediate Average Score */
+            immediate_average_score?: number | null;
+            /**
+             * Immediate Fail Count
+             * @default 0
+             */
+            immediate_fail_count?: number;
+            /**
+             * Immediate Pass Count
+             * @default 0
+             */
+            immediate_pass_count?: number;
+            /** Immediate Passed */
+            immediate_passed?: boolean | null;
+            /**
+             * Metric Result Count
+             * @default 0
+             */
+            metric_result_count?: number;
+            /**
+             * Metric Status
+             * @default pending
+             * @enum {string}
+             */
+            metric_status?: "pending" | "available" | "unavailable";
+            /** Metrics Last Checked At */
+            metrics_last_checked_at?: string | null;
             /**
              * Pass Count
              * @default 0
@@ -22759,6 +22824,19 @@ export interface components {
              * @default 0
              */
             failed_count?: number;
+            /**
+             * Metric Result Count
+             * @default 0
+             */
+            metric_result_count?: number;
+            /**
+             * Metric Status
+             * @default pending
+             * @enum {string}
+             */
+            metric_status?: "pending" | "available" | "unavailable";
+            /** Metrics Last Checked At */
+            metrics_last_checked_at?: string | null;
             /** Missing Run Ids */
             missing_run_ids?: string[];
             /**
@@ -22871,6 +22949,19 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Metric Result Count
+             * @default 0
+             */
+            metric_result_count?: number;
+            /**
+             * Metric Status
+             * @default pending
+             * @enum {string}
+             */
+            metric_status?: "pending" | "available" | "unavailable";
+            /** Metrics Last Checked At */
+            metrics_last_checked_at?: string | null;
             /** Objective */
             objective?: string | null;
             /** Scenarios */
@@ -24978,21 +25069,43 @@ export interface components {
         };
         /** ToolCallCompletedEvent */
         ToolCallCompletedEvent: {
+            /** Call Id */
+            call_id: string;
             /**
              * Duration Ms
              * @default null
              */
             duration_ms?: number | null;
             /**
-             * Error
+             * Endpoint Name
              * @default null
              */
-            error?: string | null;
+            endpoint_name?: string | null;
+            /**
+             * Error Message
+             * @default null
+             */
+            error_message?: string | null;
+            /**
+             * Integration Name
+             * @default null
+             */
+            integration_name?: string | null;
             /**
              * Output
              * @default null
              */
             output?: string | null;
+            /**
+             * Parent Call Id
+             * @default null
+             */
+            parent_call_id?: string | null;
+            /**
+             * Protocol
+             * @default null
+             */
+            protocol?: string | null;
             /**
              * Succeeded
              * @default true
@@ -25065,13 +25178,35 @@ export interface components {
         };
         /** ToolCallStartedEvent */
         ToolCallStartedEvent: {
+            /** Call Id */
+            call_id: string;
             /**
-             * Tool Input
+             * Endpoint Name
              * @default null
              */
-            tool_input?: {
+            endpoint_name?: string | null;
+            /**
+             * Input
+             * @default null
+             */
+            input?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
+            /**
+             * Integration Name
+             * @default null
+             */
+            integration_name?: string | null;
+            /**
+             * Parent Call Id
+             * @default null
+             */
+            parent_call_id?: string | null;
+            /**
+             * Protocol
+             * @default null
+             */
+            protocol?: string | null;
             /** Tool Name */
             tool_name: string;
             /**
@@ -26330,7 +26465,7 @@ export interface components {
             checkpoint_enabled?: boolean | null;
             /** Delivery */
             delivery?: ("interrupt" | "queue") | null;
-            description?: components["schemas"]["StrippedNonemptyString"] | null;
+            description?: components["schemas"]["DescriptionString"] | null;
             /** Enable Caching */
             enable_caching?: boolean | null;
             /** Enable Citations */
@@ -26355,14 +26490,14 @@ export interface components {
             max_tokens?: number | null;
             /** Model */
             model?: string | null;
-            name?: components["schemas"]["StrippedNonemptyString"] | null;
+            name?: components["schemas"]["NameString"] | null;
             /** Result Schema */
             result_schema?: {
                 [key: string]: unknown;
             } | null;
             /** Static Tools */
             static_tools?: components["schemas"]["StaticToolDef-Input"][] | null;
-            system_prompt?: components["schemas"]["StrippedNonemptyString"] | null;
+            system_prompt?: components["schemas"]["BackgroundString"] | null;
             /** Thinking Effort */
             thinking_effort?: ("low" | "medium" | "high") | null;
             /** Timeout S */
@@ -34604,6 +34739,48 @@ export interface operations {
                 };
             };
             /** @description Invalid bundle format. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "fhir-import-stream": {
+        parameters: {
+            query?: {
+                source?: string;
+                source_system?: string | null;
+                data_source_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FhirImportResponse"];
+                };
+            };
+            /** @description Stream exceeded line cap. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -43853,7 +44030,7 @@ export interface operations {
         parameters: {
             query?: {
                 enabled?: boolean | null;
-                execution_tier?: string | null;
+                execution_tier?: ("direct" | "orchestrated" | "autonomous" | "browser" | "computer_use") | null;
                 search?: components["schemas"]["SearchString"] | null;
                 sort_by?: string | null;
                 limit?: number;
@@ -43898,6 +44075,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -43960,6 +44144,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "get-skill": {
@@ -44012,6 +44203,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -44068,6 +44266,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "delete-skill": {
@@ -44110,6 +44315,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Skill is referenced by one or more context graphs. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -44118,6 +44330,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -44171,6 +44390,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
