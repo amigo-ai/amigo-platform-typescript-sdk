@@ -3838,6 +3838,14 @@
       },
       "BridgeResponse": {
         "properties": {
+          "case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Case Ids",
+            "type": "array"
+          },
           "inferred_target_spec": {
             "anyOf": [
               {
@@ -5384,6 +5392,11 @@
         "title": "CallTranscriptResponse",
         "type": "object"
       },
+      "CanonicalIdString": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
+      },
       "CatalogEntry": {
         "properties": {
           "description": {
@@ -6234,6 +6247,98 @@
           "status"
         ],
         "title": "ClaimResponse",
+        "type": "object"
+      },
+      "ClinicOpenHoursParams": {
+        "description": "Workspace clinic open-hours by weekday.\n\nDays not present mean \"closed.\" Used by the rules engine to skip\nslots outside open hours and (combined with ``weekend_skip``) by the\nTMS-mapping release calculator.",
+        "properties": {
+          "friday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rule_kind": {
+            "const": "clinic_open_hours",
+            "default": "clinic_open_hours",
+            "title": "Rule Kind",
+            "type": "string"
+          },
+          "saturday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "sunday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thursday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timezone": {
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Timezone",
+            "type": "string"
+          },
+          "tuesday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "wednesday": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DayHours"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "timezone"
+        ],
+        "title": "ClinicOpenHoursParams",
         "type": "object"
       },
       "ClusterForecastPointRow": {
@@ -7143,6 +7248,19 @@
           "similarity"
         ],
         "title": "ConceptMatch",
+        "type": "object"
+      },
+      "ConcurrentStartBlockParams": {
+        "description": "Disallow two slots starting at the same time within a TMS scope.\nNo additional params \u2014 the discriminator is the whole config.",
+        "properties": {
+          "rule_kind": {
+            "const": "concurrent_start_block",
+            "default": "concurrent_start_block",
+            "title": "Rule Kind",
+            "type": "string"
+          }
+        },
+        "title": "ConcurrentStartBlockParams",
         "type": "object"
       },
       "ConfidenceBucket": {
@@ -10303,6 +10421,65 @@
           "service_id"
         ],
         "title": "CreateRunRequest",
+        "type": "object"
+      },
+      "CreateSchedulingRuleSetRequest": {
+        "properties": {
+          "agent_kind": {
+            "enum": [
+              "tms",
+              "ketamine",
+              "general"
+            ],
+            "title": "Agent Kind",
+            "type": "string"
+          },
+          "is_active": {
+            "default": true,
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "params": {
+            "description": "Per-rule-kind typed parameters. The ``rule_kind`` discriminator field selects the params shape; one row per (agent_kind, rule_kind) per workspace.",
+            "discriminator": {
+              "mapping": {
+                "clinic_open_hours": "#/components/schemas/ClinicOpenHoursParams",
+                "concurrent_start_block": "#/components/schemas/ConcurrentStartBlockParams",
+                "ketamine_block_overlap": "#/components/schemas/KetamineBlockOverlapParams",
+                "ninety_day_rolling": "#/components/schemas/NinetyDayRollingParams",
+                "tms_mapping_release": "#/components/schemas/TMSMappingReleaseParams",
+                "tms_session_grid": "#/components/schemas/TMSSessionGridParams"
+              },
+              "propertyName": "rule_kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ClinicOpenHoursParams"
+              },
+              {
+                "$ref": "#/components/schemas/TMSMappingReleaseParams"
+              },
+              {
+                "$ref": "#/components/schemas/TMSSessionGridParams"
+              },
+              {
+                "$ref": "#/components/schemas/KetamineBlockOverlapParams"
+              },
+              {
+                "$ref": "#/components/schemas/NinetyDayRollingParams"
+              },
+              {
+                "$ref": "#/components/schemas/ConcurrentStartBlockParams"
+              }
+            ],
+            "title": "Params"
+          }
+        },
+        "required": [
+          "agent_kind",
+          "params"
+        ],
+        "title": "CreateSchedulingRuleSetRequest",
         "type": "object"
       },
       "CreateServiceRequest": {
@@ -16501,6 +16678,288 @@
         "title": "EntityResolutionMetrics",
         "type": "object"
       },
+      "EntityResolveExternalId": {
+        "description": "Reference to an external-system identifier.\n\n``system`` labels which system minted the value (``epic``, ``hubspot``,\n``charm``, ``revolution``, \u2026). The value is matched against any\nnested key in ``world.entities.external_ids`` whose value equals\n``value``. ``system`` is informational for scoring; it doesn't\nconstrain the lookup, since adapters disagree on naming.",
+        "properties": {
+          "system": {
+            "$ref": "#/components/schemas/ExternalSystemString",
+            "description": "External system label (lowercase, e.g. 'epic', 'hubspot')."
+          },
+          "value": {
+            "$ref": "#/components/schemas/ExternalValueString",
+            "description": "System-issued identifier."
+          }
+        },
+        "required": [
+          "system",
+          "value"
+        ],
+        "title": "EntityResolveExternalId",
+        "type": "object"
+      },
+      "EntityResolveMatch": {
+        "description": "One candidate match with provenance + confidence.",
+        "properties": {
+          "confidence": {
+            "description": "Match confidence (0-1).",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "entity_type": {
+            "title": "Entity Type",
+            "type": "string"
+          },
+          "matched_on": {
+            "description": "Identifier kinds that actually matched this row.",
+            "items": {
+              "enum": [
+                "entity_id",
+                "phone",
+                "email",
+                "canonical_id",
+                "external_id"
+              ],
+              "type": "string"
+            },
+            "title": "Matched On",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/EntityResolveSummary"
+          }
+        },
+        "required": [
+          "entity_id",
+          "entity_type",
+          "confidence",
+          "summary"
+        ],
+        "title": "EntityResolveMatch",
+        "type": "object"
+      },
+      "EntityResolveRequest": {
+        "description": "Polymorphic identifier query.\n\nProvide ``entity_type`` plus any subset of identifier fields. Each\nidentifier is OR-ed in SQL; matches are ranked by confidence and\nby the number of identifiers that actually matched the row.\nReturns at most ``limit`` candidates (default 25, max 50).\n\nFor latency-sensitive callers (inbound voice, webhook handlers),\npass exactly one identifier \u2014 the indexed lookup is sub-10ms.\nMulti-identifier queries are useful for confirming a row matches\non more than one signal (phone + email + MRN).",
+        "properties": {
+          "canonical_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CanonicalIdString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical/MRN identifier ('charm:Patient:42' or raw MRN)."
+          },
+          "email": {
+            "anyOf": [
+              {
+                "format": "email",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Primary email (case-insensitive match).",
+            "title": "Email"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Direct UUID lookup. Useful for confirming an entity exists / re-fetching summary.",
+            "title": "Entity Id"
+          },
+          "entity_type": {
+            "$ref": "#/components/schemas/EntityTypeString",
+            "description": "Required entity type filter (e.g. 'person'). Narrows the scan to the right index."
+          },
+          "external_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EntityResolveExternalId"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "External-system identifier reference."
+          },
+          "limit": {
+            "default": 25,
+            "description": "Maximum candidates to return.",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "E.164 phone number."
+          }
+        },
+        "required": [
+          "entity_type"
+        ],
+        "title": "EntityResolveRequest",
+        "type": "object"
+      },
+      "EntityResolveResponse": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/EntityResolveMatch"
+            },
+            "title": "Matches",
+            "type": "array"
+          },
+          "total": {
+            "description": "Number of candidates returned.",
+            "minimum": 0.0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "EntityResolveResponse",
+        "type": "object"
+      },
+      "EntityResolveSummary": {
+        "description": "Compact identity card returned for each match.\n\nExcludes the full ``state`` JSONB and the entity embedding \u2014 fetch\nvia ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields\nhere are the ones a UI / agent needs to confirm \"yes, that's the\nright person\" before paying for the full state read.",
+        "properties": {
+          "birth_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Birth Date"
+          },
+          "canonical_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Canonical Id"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "email": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "event_count": {
+            "default": 0,
+            "title": "Event Count",
+            "type": "integer"
+          },
+          "external_ids": {
+            "additionalProperties": true,
+            "title": "External Ids",
+            "type": "object"
+          },
+          "last_event_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Event At"
+          },
+          "mrn": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mrn"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "phone": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Phone"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "EntityResolveSummary",
+        "type": "object"
+      },
       "EntityResponse": {
         "properties": {
           "appointment_end": {
@@ -17024,6 +17483,12 @@
         ],
         "title": "EntityTypeRegistryResponse",
         "type": "object"
+      },
+      "EntityTypeString": {
+        "maxLength": 64,
+        "minLength": 1,
+        "pattern": "^[a-z0-9_]+$",
+        "type": "string"
       },
       "EntityTypeSummary": {
         "properties": {
@@ -17953,6 +18418,17 @@
         },
         "title": "ExplorationConfig",
         "type": "object"
+      },
+      "ExternalSystemString": {
+        "maxLength": 64,
+        "minLength": 1,
+        "pattern": "^[a-z0-9_\\-]+$",
+        "type": "string"
+      },
+      "ExternalValueString": {
+        "maxLength": 256,
+        "minLength": 1,
+        "type": "string"
       },
       "FeatureDef": {
         "properties": {
@@ -21268,6 +21744,25 @@
         "title": "GapScannerSettingsResponse",
         "type": "object"
       },
+      "GetSimulationBenchmarkResultsRequest": {
+        "properties": {
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Run Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "run_ids"
+        ],
+        "title": "GetSimulationBenchmarkResultsRequest",
+        "type": "object"
+      },
       "Guardrail": {
         "description": "Typed safety rule enforced per-state (not just global freetext guidelines).",
         "properties": {
@@ -22932,6 +23427,28 @@
           "operator_entity_id"
         ],
         "title": "JoinCallResponse",
+        "type": "object"
+      },
+      "KetamineBlockOverlapParams": {
+        "description": "How many days after a ketamine session to block follow-up\nappointments (clinical safety window).",
+        "properties": {
+          "rule_kind": {
+            "const": "ketamine_block_overlap",
+            "default": "ketamine_block_overlap",
+            "title": "Rule Kind",
+            "type": "string"
+          },
+          "window_days": {
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Window Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "window_days"
+        ],
+        "title": "KetamineBlockOverlapParams",
         "type": "object"
       },
       "KeyMoment": {
@@ -25136,6 +25653,28 @@
           "total_ms"
         ],
         "title": "NavTimingEvent",
+        "type": "object"
+      },
+      "NinetyDayRollingParams": {
+        "description": "Rolling-window cap on appointments per patient (e.g. 90 days\nbetween TMS sessions).",
+        "properties": {
+          "days": {
+            "maximum": 365.0,
+            "minimum": 1.0,
+            "title": "Days",
+            "type": "integer"
+          },
+          "rule_kind": {
+            "const": "ninety_day_rolling",
+            "default": "ninety_day_rolling",
+            "title": "Rule Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "title": "NinetyDayRollingParams",
         "type": "object"
       },
       "NonDesiredState": {
@@ -27476,6 +28015,49 @@
           "has_more"
         ],
         "title": "PaginatedResponse[ReviewItemResponse]",
+        "type": "object"
+      },
+      "PaginatedResponse_SchedulingRuleSetResponse_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SchedulingRuleSetResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[SchedulingRuleSetResponse]",
         "type": "object"
       },
       "PaginatedResponse_ServiceResponse_": {
@@ -32347,6 +32929,148 @@
         "title": "RotateSecretResponse",
         "type": "object"
       },
+      "RunSimulationBenchmarkRequest": {
+        "properties": {
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
+          "concurrency": {
+            "default": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplorationConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_cases": {
+            "default": 20,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Cases",
+            "type": "integer"
+          },
+          "max_turns": {
+            "default": 20,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Max Turns",
+            "type": "integer"
+          },
+          "required_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Required Tags",
+            "type": "array"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "RunSimulationBenchmarkRequest",
+        "type": "object"
+      },
+      "RunSimulationCaseRequest": {
+        "properties": {
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
+          },
+          "concurrency": {
+            "default": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Concurrency",
+            "type": "integer"
+          },
+          "exploration": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExplorationConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_turns": {
+            "default": 20,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Max Turns",
+            "type": "integer"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          }
+        },
+        "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
       "SafetyConfigResponse": {
         "properties": {
           "accumulation_cumulative_count": {
@@ -32708,6 +33432,18 @@
       },
       "Scenario": {
         "properties": {
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
           "description": {
             "maxLength": 512,
             "title": "Description",
@@ -32775,6 +33511,100 @@
           }
         },
         "title": "ScenarioPersona",
+        "type": "object"
+      },
+      "SchedulingRuleSetResponse": {
+        "description": "Wire shape for a single rule set. ``params`` stays as ``dict``\nhere (not the discriminated union) so add-a-new-kind doesn't break\nolder clients still on the previous SDK version \u2014 the SDK's typed\nhelpers can re-validate into ``RuleParams`` when needed.",
+        "properties": {
+          "agent_kind": {
+            "enum": [
+              "tms",
+              "ketamine",
+              "general"
+            ],
+            "title": "Agent Kind",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "params": {
+            "additionalProperties": true,
+            "title": "Params",
+            "type": "object"
+          },
+          "rule_kind": {
+            "enum": [
+              "clinic_open_hours",
+              "tms_mapping_release",
+              "tms_session_grid",
+              "ketamine_block_overlap",
+              "ninety_day_rolling",
+              "concurrent_start_block"
+            ],
+            "title": "Rule Kind",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "agent_kind",
+          "rule_kind",
+          "params",
+          "is_active",
+          "created_by",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SchedulingRuleSetResponse",
         "type": "object"
       },
       "SchemaResponse": {
@@ -34487,6 +35317,488 @@
         "title": "SignalResponseAlignment",
         "type": "object"
       },
+      "SimulationBenchmarkAggregateSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "failed_to_start_count": {
+            "title": "Failed To Start Count",
+            "type": "integer"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "selected_count": {
+            "title": "Selected Count",
+            "type": "integer"
+          },
+          "skipped_count": {
+            "title": "Skipped Count",
+            "type": "integer"
+          },
+          "started_count": {
+            "title": "Started Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          }
+        },
+        "required": [
+          "selected_count",
+          "started_count",
+          "skipped_count",
+          "failed_to_start_count"
+        ],
+        "title": "SimulationBenchmarkAggregateSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkBreakdownSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "completed_count": {
+            "default": 0,
+            "title": "Completed Count",
+            "type": "integer"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "failed_count": {
+            "default": 0,
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "run_count": {
+            "default": 0,
+            "title": "Run Count",
+            "type": "integer"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          }
+        },
+        "title": "SimulationBenchmarkBreakdownSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkCaseResult": {
+        "properties": {
+          "case_id": {
+            "format": "uuid",
+            "title": "Case Id",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "result_pointer": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Pointer"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "status": {
+            "enum": [
+              "started",
+              "skipped",
+              "failed_to_start"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "case_id",
+          "status"
+        ],
+        "title": "SimulationBenchmarkCaseResult",
+        "type": "object"
+      },
+      "SimulationBenchmarkPerRunSummary": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "capability_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Capability Tags",
+            "type": "array"
+          },
+          "case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Case Ids",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "passed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Passed"
+          },
+          "result_pointer": {
+            "additionalProperties": true,
+            "title": "Result Pointer",
+            "type": "object"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "score_rationales": {
+            "items": {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            "title": "Score Rationales",
+            "type": "array"
+          },
+          "scored_session_count": {
+            "default": 0,
+            "title": "Scored Session Count",
+            "type": "integer"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "session_ids": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Session Ids",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "terminal_session_count": {
+            "default": 0,
+            "title": "Terminal Session Count",
+            "type": "integer"
+          },
+          "total_sessions": {
+            "default": 0,
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "default": 0,
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "service_id",
+          "status"
+        ],
+        "title": "SimulationBenchmarkPerRunSummary",
+        "type": "object"
+      },
+      "SimulationBenchmarkResultsResponse": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "capability_breakdown": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SimulationBenchmarkBreakdownSummary"
+            },
+            "title": "Capability Breakdown",
+            "type": "object"
+          },
+          "completed_count": {
+            "default": 0,
+            "title": "Completed Count",
+            "type": "integer"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "failed_count": {
+            "default": 0,
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "missing_run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Missing Run Ids",
+            "type": "array"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "per_run": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkPerRunSummary"
+            },
+            "title": "Per Run",
+            "type": "array"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "total_runs": {
+            "title": "Total Runs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_ids",
+          "total_runs"
+        ],
+        "title": "SimulationBenchmarkResultsResponse",
+        "type": "object"
+      },
+      "SimulationBenchmarkRunResponse": {
+        "properties": {
+          "aggregate_summary": {
+            "$ref": "#/components/schemas/SimulationBenchmarkAggregateSummary"
+          },
+          "batch_id": {
+            "format": "uuid",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Cases",
+            "type": "array"
+          },
+          "failed_to_start_cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Failed To Start Cases",
+            "type": "array"
+          },
+          "required_tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Required Tags",
+            "type": "array"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "selected_case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Selected Case Ids",
+            "type": "array"
+          },
+          "skipped_cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkCaseResult"
+            },
+            "title": "Skipped Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "batch_id",
+          "required_tags",
+          "selected_case_ids",
+          "run_ids",
+          "cases",
+          "skipped_cases",
+          "failed_to_start_cases",
+          "aggregate_summary"
+        ],
+        "title": "SimulationBenchmarkRunResponse",
+        "type": "object"
+      },
       "SimulationIntelligenceResponse": {
         "properties": {
           "intelligence": {
@@ -34683,6 +35995,18 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "snapshot": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Snapshot"
           },
           "status": {
             "enum": [
@@ -38380,6 +39704,65 @@
           "status"
         ],
         "title": "SyncRetryResponse",
+        "type": "object"
+      },
+      "TMSMappingReleaseParams": {
+        "description": "How long before a TMS mapping appointment its slot is released\nback to the pool. ``weekend_skip=True`` adds Saturday + Sunday days\nto the wall-clock countdown (clinic doesn't release on weekends).",
+        "properties": {
+          "reservation_window_hours": {
+            "maximum": 720.0,
+            "minimum": 0.0,
+            "title": "Reservation Window Hours",
+            "type": "integer"
+          },
+          "rule_kind": {
+            "const": "tms_mapping_release",
+            "default": "tms_mapping_release",
+            "title": "Rule Kind",
+            "type": "string"
+          },
+          "weekend_skip": {
+            "default": true,
+            "title": "Weekend Skip",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "reservation_window_hours"
+        ],
+        "title": "TMSMappingReleaseParams",
+        "type": "object"
+      },
+      "TMSSessionGridParams": {
+        "description": "TMS sessions only start at fixed minute-of-hour boundaries\n(e.g. ``:00`` and ``:30``) so the technician can run them\nback-to-back without gaps.",
+        "properties": {
+          "boundary_minutes": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 60,
+            "minItems": 1,
+            "title": "Boundary Minutes",
+            "type": "array"
+          },
+          "interval_minutes": {
+            "maximum": 120.0,
+            "minimum": 5.0,
+            "title": "Interval Minutes",
+            "type": "integer"
+          },
+          "rule_kind": {
+            "const": "tms_session_grid",
+            "default": "tms_session_grid",
+            "title": "Rule Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "interval_minutes",
+          "boundary_minutes"
+        ],
+        "title": "TMSSessionGridParams",
         "type": "object"
       },
       "TargetSpec": {
@@ -43050,6 +44433,65 @@
         "title": "UpdateSafetyConfigRequest",
         "type": "object"
       },
+      "UpdateSchedulingRuleSetRequest": {
+        "description": "Partial update \u2014 fields not provided are unchanged. ``params``\nmust be the full per-kind shape (no patch within params); send the\nwhole RuleParams or omit.",
+        "properties": {
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "params": {
+            "anyOf": [
+              {
+                "discriminator": {
+                  "mapping": {
+                    "clinic_open_hours": "#/components/schemas/ClinicOpenHoursParams",
+                    "concurrent_start_block": "#/components/schemas/ConcurrentStartBlockParams",
+                    "ketamine_block_overlap": "#/components/schemas/KetamineBlockOverlapParams",
+                    "ninety_day_rolling": "#/components/schemas/NinetyDayRollingParams",
+                    "tms_mapping_release": "#/components/schemas/TMSMappingReleaseParams",
+                    "tms_session_grid": "#/components/schemas/TMSSessionGridParams"
+                  },
+                  "propertyName": "rule_kind"
+                },
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ClinicOpenHoursParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TMSMappingReleaseParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TMSSessionGridParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/KetamineBlockOverlapParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/NinetyDayRollingParams"
+                  },
+                  {
+                    "$ref": "#/components/schemas/ConcurrentStartBlockParams"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Params"
+          }
+        },
+        "title": "UpdateSchedulingRuleSetRequest",
+        "type": "object"
+      },
       "UpdateServiceRequest": {
         "properties": {
           "agent_id": {
@@ -47295,6 +48737,27 @@
           "success"
         ],
         "title": "WrapUpResponse",
+        "type": "object"
+      },
+      "_DayHours": {
+        "description": "Open-hours window for one weekday. Times in 24h ``HH:MM`` form,\ninterpreted in the rule set's ``timezone``.",
+        "properties": {
+          "end": {
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "End",
+            "type": "string"
+          },
+          "start": {
+            "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$",
+            "title": "Start",
+            "type": "string"
+          }
+        },
+        "required": [
+          "start",
+          "end"
+        ],
+        "title": "_DayHours",
         "type": "object"
       },
       "_ToolMockKey": {
@@ -70033,6 +71496,365 @@
         ]
       }
     },
+    "/v1/{workspace_id}/scheduling-rule-sets": {
+      "get": {
+        "description": "List all scheduling rule sets for the workspace. Optional filters: `agent_kind` (tms / ketamine / general), `is_active`. Used by the agent-engine rules engine and by operators inspecting config.",
+        "operationId": "list-scheduling-rule-sets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "agent_kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "tms",
+                    "ketamine",
+                    "general"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Agent Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "is_active",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Is Active"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "exclusiveMinimum": 0,
+              "maximum": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_SchedulingRuleSetResponse_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        },
+        "summary": "List scheduling rule sets",
+        "tags": [
+          "Scheduling Rules"
+        ]
+      },
+      "post": {
+        "description": "Create one rule set for `(agent_kind, rule_kind)`. Returns 409 if a row already exists for that key \u2014 use PATCH on the existing row or DELETE first.",
+        "operationId": "create-scheduling-rule-set",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchedulingRuleSetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulingRuleSetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "409": {
+            "description": "Rule set already exists for this (agent_kind, rule_kind)."
+          },
+          "422": {
+            "description": "Invalid request body or rule_kind discriminator."
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        },
+        "summary": "Create a scheduling rule set",
+        "tags": [
+          "Scheduling Rules"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/scheduling-rule-sets/{rule_set_id}": {
+      "delete": {
+        "description": "Hard-delete. The audit log retains the deletion record.",
+        "operationId": "delete-scheduling-rule-set",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "rule_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rule Set Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Rule set not found in this workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        },
+        "summary": "Delete a scheduling rule set",
+        "tags": [
+          "Scheduling Rules"
+        ]
+      },
+      "get": {
+        "description": "Fetch one rule set by id. Returns 404 when the row doesn't exist\nin this workspace (the RLS policy means cross-workspace lookups\nsurface as 404, never as a row from the wrong workspace).\n\nPermissions: ``Workspace.view``.",
+        "operationId": "get-scheduling-rule-set",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "rule_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rule Set Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulingRuleSetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Rule set not found in this workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        },
+        "summary": "Get one scheduling rule set",
+        "tags": [
+          "Scheduling Rules"
+        ]
+      },
+      "patch": {
+        "description": "Update `params` and/or `is_active` on an existing rule set. `agent_kind` and `rule_kind` are immutable \u2014 to change either, create a new rule set and delete the old one.",
+        "operationId": "update-scheduling-rule-set",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "rule_set_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Rule Set Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSchedulingRuleSetRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SchedulingRuleSetResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Rule set not found in this workspace."
+          },
+          "422": {
+            "description": "Submitted params discriminator does not match the existing rule's rule_kind."
+          },
+          "429": {
+            "description": "Rate limited."
+          }
+        },
+        "summary": "Partially update a scheduling rule set",
+        "tags": [
+          "Scheduling Rules"
+        ]
+      }
+    },
     "/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize": {
       "post": {
         "description": "Physician finalizes the encounter. Locks the encounter for EHR sync.",
@@ -72763,6 +74585,114 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/benchmarks/results": {
+      "post": {
+        "description": "Aggregate benchmark results over the run ids returned by benchmark start.",
+        "operationId": "get-simulation-benchmark-results",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetSimulationBenchmarkResultsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationBenchmarkResultsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Benchmark Results",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/benchmarks/run": {
+      "post": {
+        "description": "Run a tag-selected benchmark batch as one saved-case run per case.",
+        "operationId": "run-simulation-benchmark",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSimulationBenchmarkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationBenchmarkRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Simulation Benchmark",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/simulations/branches": {
       "get": {
         "operationId": "list-simulation-branches",
@@ -72954,6 +74884,70 @@
           }
         },
         "summary": "Simulation Bridge Plan",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
+      "post": {
+        "description": "Run the current saved simulation case through the bridge executor.",
+        "operationId": "run-simulation-case",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSimulationCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BridgeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Simulation Case",
         "tags": [
           "Simulations"
         ]
@@ -78783,6 +80777,66 @@
         "summary": "Get Entity Duplicates",
         "tags": [
           "Entity Intelligence"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/world/entities/resolve": {
+      "post": {
+        "description": "Polymorphic identifier \u2192 ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Uses indexed lookups (phone, email, canonical_id) and the external_ids GIN index \u2014 sub-10ms for single-identifier queries on warm pods. Returns matches ranked by confidence + number of identifiers matched.",
+        "operationId": "resolve-entity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntityResolveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityResolveResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "No identifier provided or invalid input."
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Resolve entity by identifier",
+        "tags": [
+          "World"
         ]
       }
     },
