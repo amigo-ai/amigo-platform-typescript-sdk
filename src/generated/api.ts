@@ -3428,6 +3428,12 @@ export interface paths {
          * Test invoke + persist telemetry
          * @description Test invoke — same as invoke + persists last_test_* on the version row.
          *
+         *     Returns :class:`TestInvokeResponse` so callers can render
+         *     ``status`` + ``error`` directly (the previous shape was
+         *     :class:`InvokeResponse`, which silently dropped those fields and
+         *     left the DC showing a generic "Invocation failed." even on the
+         *     catastrophic path).
+         *
          *     Permissions: admin, owner.
          */
         post: operations["test-function-v2"];
@@ -25517,6 +25523,56 @@ export interface components {
              */
             status_code?: number | null;
         };
+        /**
+         * TestInvokeResponse
+         * @description Response shape for ``POST /v1/{ws}/functions/{name}/v2/test``.
+         *
+         *     Structural superset of :class:`InvokeResponse` (inheritance makes
+         *     the relationship explicit and refactor-safe — if a field is
+         *     renamed on the base, both responses move together). Adds the
+         *     test-only telemetry the DC + SDK need to render a pass/fail
+         *     badge and an actionable error string when a deployed function
+         *     blows up at execute time. The underlying invoke uses the same
+         *     path; ``status`` / ``error`` are filled in by ``service.test``
+         *     after catching any ``ServiceUnavailableError`` from the
+         *     executor, so the route never bubbles a 5xx for a logical SQL
+         *     failure — it's still a 200 with ``status=fail`` so the caller
+         *     can show the message.
+         *
+         *     Invariant (enforced by :func:`_check_error_when_fail`):
+         *     ``status == "fail" → error is not None and len(error) > 0``. Caps
+         *     the error string length so an upstream stack trace never blows up
+         *     a ``console.log`` line in the browser.
+         */
+        TestInvokeResponse: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /** Error */
+            error?: string | null;
+            /** Result */
+            result?: unknown;
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count?: number;
+            /**
+             * Status
+             * @default pass
+             * @enum {string}
+             */
+            status?: "pass" | "fail";
+            /** Test Duration Ms */
+            test_duration_ms?: number | null;
+            /**
+             * Version
+             * @default 0
+             */
+            version?: number;
+        };
         /** TestSkillRequest */
         TestSkillRequest: {
             /**
@@ -37045,7 +37101,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InvokeResponse"];
+                    "application/json": components["schemas"]["TestInvokeResponse"];
                 };
             };
             /** @description Function not found */
