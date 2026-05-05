@@ -455,6 +455,13 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getCatalog`
 - `query`
 - `sync`
+- `deploy`
+- `listVersions`
+- `getVersion`
+- `invoke`
+- `testV2`
+- `promote`
+- `rollback`
 
 ### `observers`
 

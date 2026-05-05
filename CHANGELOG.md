@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.36.0] - 2026-05-05
+
+### Features
+
+- `client.functions(ws).deploy/listVersions/getVersion/invoke/testV2/promote/rollback` — typed surface over the V109 SQL-first platform-functions routes (amigo-ai/platform#2552, #2562, #2567).
+
+### Maintenance
+
+- sync API types from platform (V109 substrate)
+
 ## [0.34.0] - 2026-05-05
 
 ### Features
