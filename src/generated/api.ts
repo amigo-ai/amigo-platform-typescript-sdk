@@ -3106,6 +3106,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/functions/deploy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deploy (validate + register) a platform function
+         * @description Validate + register a new platform function version.
+         *
+         *     Atomic: validation + INSERT + alias rebind happen in one
+         *     transaction. The next ``version`` is allocated server-side as
+         *     ``max(existing) + 1`` per ``(workspace, name)``; concurrent
+         *     deploys race-fail on the UNIQUE constraint and surface as 409.
+         *
+         *     Permissions: admin, owner.
+         */
+        post: operations["deploy-function"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/functions/query": {
         parameters: {
             query?: never;
@@ -3183,6 +3210,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/functions/{function_name}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Execute a registered function
+         * @description Execute a registered function and return its rows.
+         *
+         *     Bound parameters are validated against the version's stored
+         *     schema; ``ws_id`` is auto-injected from the request context.
+         *     Returns the executor's shaped response (``rows`` for
+         *     ``returns=table``, scalar value for ``returns=scalar``).
+         *
+         *     Permissions: ``Workspace.view`` (read role and above). Read-only
+         *     keys are intentionally allowed here — invocation runs a stored,
+         *     pre-validated SELECT against catalogs the workspace SP already
+         *     has SELECT on; the gate on what can run is the deploy-time
+         *     validator (read-only invariant), not the per-call permission.
+         */
+        post: operations["invoke-function"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/functions/{function_name}/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rebind an alias to a specific version
+         * @description Rebind an alias to an existing version.
+         *
+         *     Verifies the version exists before rebinding.
+         *
+         *     Permissions: admin, owner.
+         */
+        post: operations["promote-function"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/functions/{function_name}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rebind latest + production to a prior version
+         * @description Rebind ``latest`` and ``production`` to a prior version.
+         *
+         *     Used when a new deploy was bad. ``staging`` stays untouched so
+         *     operator can re-promote independently.
+         *
+         *     Permissions: admin, owner.
+         */
+        post: operations["rollback-function"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/functions/{function_name}/test": {
         parameters: {
             query?: never;
@@ -3201,6 +3308,72 @@ export interface paths {
          *     Permissions: admin, owner (requires ``tools:test`` scope).
          */
         post: operations["test-function"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/functions/{function_name}/v2/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test invoke + persist telemetry
+         * @description Test invoke — same as invoke + persists last_test_* on the version row.
+         *
+         *     Permissions: admin, owner.
+         */
+        post: operations["test-function-v2"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/functions/{function_name}/version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve (name, alias) → version row
+         * @description Resolve (function_name, alias) → version row.
+         *
+         *     Permissions: ``Workspace.view`` (read role and above).
+         */
+        get: operations["get-function-version"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/functions/{function_name}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List all versions of a function
+         * @description List all versions of a registered function, newest first.
+         *
+         *     Permissions: ``Workspace.view`` (read role and above).
+         */
+        get: operations["list-function-versions"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4679,7 +4852,7 @@ export interface paths {
         put?: never;
         /**
          * Bind a channel-manager phone number
-         * @description Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and creates the binding with sub_account_sid for credential resolution. Requires PhoneNumber.create permission.
+         * @description Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and persists the local binding row in platform.phone_numbers. Credential resolution at call time flows through ChannelManagerClient (Valkey-cached, see V108). Requires PhoneNumber.create permission.
          */
         post: operations["bind-channel-phone"];
         delete?: never;
@@ -10349,6 +10522,7 @@ export interface components {
             /** Total Segments */
             total_segments: number;
         };
+        CanonicalIdLookupString: string;
         CanonicalIdString: string;
         /** CatalogEntry */
         CatalogEntry: {
@@ -12257,12 +12431,13 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
-             * Format: uuid
-             * @description Patient entity in the world model. Must exist in workspace as a person entity.
+             * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
-            patient_entity_id: string;
+            patient_entity_id?: string | null;
             /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
             phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
@@ -12348,8 +12523,6 @@ export interface components {
              *     ]
              */
             capabilities?: ("inbound" | "outbound")[];
-            /** Channel Phone Id */
-            channel_phone_id?: string | null;
             /**
              * Display Name
              * @default
@@ -12378,8 +12551,6 @@ export interface components {
              * @enum {string}
              */
             status?: "active" | "inactive";
-            /** Sub Account Sid */
-            sub_account_sid?: string | null;
         };
         /** CreateRunRequest */
         CreateRunRequest: {
@@ -14955,7 +15126,7 @@ export interface components {
          */
         EntityResolveRequest: {
             /** @description Canonical/MRN identifier ('charm:Patient:42' or raw MRN). */
-            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
+            canonical_id?: components["schemas"]["CanonicalIdLookupString"] | null;
             /**
              * Email
              * @description Primary email (case-insensitive match).
@@ -16656,6 +16827,27 @@ export interface components {
              */
             schema?: string;
         };
+        /**
+         * FunctionExample
+         * @description One example call, surfaced to the LLM and the DC test panel.
+         *
+         *     Examples are first-class metadata, not buried in a UC ``COMMENT``
+         *     clause the way Databricks' native authoring requires. The DC
+         *     tool-picker shows them; the LLM tool spec includes them inline.
+         */
+        FunctionExample: {
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /** Input */
+            input: {
+                [key: string]: unknown;
+            };
+            /** Output */
+            output: unknown;
+        };
         /** FunctionListResponse */
         FunctionListResponse: {
             /** Count */
@@ -16689,6 +16881,72 @@ export interface components {
             function_name?: string;
             /** Result */
             result?: unknown;
+        };
+        /** FunctionVersionListResponse */
+        FunctionVersionListResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["FunctionVersionResponse"][];
+        };
+        /**
+         * FunctionVersionResponse
+         * @description Single version row from ``platform.functions``.
+         */
+        FunctionVersionResponse: {
+            /** Deployed At */
+            deployed_at?: string | null;
+            /** Deployed By */
+            deployed_by?: string | null;
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /** Examples */
+            examples?: {
+                [key: string]: unknown;
+            }[];
+            /** Function Type */
+            function_type: string;
+            /** Input Schema */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /** Last Test At */
+            last_test_at?: string | null;
+            /** Last Test Duration Ms */
+            last_test_duration_ms?: number | null;
+            /** Last Test Error */
+            last_test_error?: string | null;
+            /** Last Test Status */
+            last_test_status?: string | null;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            }[];
+            /** Returns Kind */
+            returns_kind: string;
+            /** Source Hash */
+            source_hash?: string | null;
+            /** Source Path */
+            source_path?: string | null;
+            /** Sql Template */
+            sql_template: string;
+            /**
+             * Timeout Ms
+             * @default 30000
+             */
+            timeout_ms?: number;
+            /** Version */
+            version: number;
+            /**
+             * When To Use
+             * @default
+             */
+            when_to_use?: string;
         };
         /**
          * GapRequiredField
@@ -17621,6 +17879,46 @@ export interface components {
              * @description Price per unit
              */
             unit_price: string;
+        };
+        /**
+         * InvokeRequest
+         * @description Invoke a registered function with caller-supplied args.
+         */
+        InvokeRequest: {
+            /**
+             * Alias
+             * @description Alias to resolve.
+             * @default latest
+             * @enum {string}
+             */
+            alias?: "latest" | "staging" | "production";
+            /**
+             * Input
+             * @description Caller arguments matching input_schema.
+             */
+            input?: {
+                [key: string]: unknown;
+            };
+        };
+        /** InvokeResponse */
+        InvokeResponse: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /** Result */
+            result?: unknown;
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count?: number;
+            /**
+             * Version
+             * @default 0
+             */
+            version?: number;
         };
         /**
          * JoinCallRequest
@@ -19742,6 +20040,34 @@ export interface components {
              */
             rows: unknown[][];
         };
+        /**
+         * Parameter
+         * @description Typed declaration of one SQL bind parameter.
+         *
+         *     The ``name`` becomes the ``:name`` placeholder in the SQL template.
+         *     The ``description`` propagates into the LLM tool spec (this is what
+         *     Databricks' Agent Framework reads, and what Anthropic's tool-use
+         *     spec exposes to the model). Missing descriptions silently break
+         *     tool selection — the registration layer rejects empty strings.
+         */
+        Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Required
+             * @default true
+             */
+            required?: boolean;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
         /** Participant */
         Participant: {
             /** Display Name */
@@ -20820,6 +21146,25 @@ export interface components {
             /** Trigger Delay Ms */
             trigger_delay_ms?: number | null;
         };
+        /** PromoteRequest */
+        PromoteRequest: {
+            /**
+             * Alias
+             * @enum {string}
+             */
+            alias: "latest" | "staging" | "production";
+            /** Version */
+            version: number;
+        };
+        /** PromoteResponse */
+        PromoteResponse: {
+            /** Alias */
+            alias: string;
+            /** Name */
+            name: string;
+            /** Version */
+            version: number;
+        };
         /**
          * ProviderType
          * @description Messaging provider that implements a channel.
@@ -21177,6 +21522,50 @@ export interface components {
              * @constant
              */
             status?: "available";
+        };
+        /**
+         * RegisteredFunction
+         * @description The authored shape of a platform function.
+         *
+         *     Identical wire format whether it's authored as a YAML file in the
+         *     repo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy
+         *     pipeline validates this, derives the JSON Schema for the LLM tool
+         *     spec, and INSERTs a row into ``platform.functions`` with the next
+         *     monotonic ``version`` per ``(workspace_id, name)``.
+         */
+        RegisteredFunction: {
+            /** Description */
+            description: string;
+            /** Examples */
+            examples?: components["schemas"]["FunctionExample"][];
+            /**
+             * Function Type
+             * @default sql
+             * @enum {string}
+             */
+            function_type?: "sql" | "ai" | "udtf" | "python";
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters?: components["schemas"]["Parameter"][];
+            /**
+             * Returns
+             * @default table
+             * @enum {string}
+             */
+            returns?: "table" | "scalar";
+            /** Sql */
+            sql: string;
+            /**
+             * Timeout Ms
+             * @default 30000
+             */
+            timeout_ms?: number;
+            /**
+             * When To Use
+             * @default
+             */
+            when_to_use?: string;
         };
         /** RegulationTemplateResponse */
         RegulationTemplateResponse: {
@@ -21555,6 +21944,21 @@ export interface components {
              * @enum {string}
              */
             level?: "low" | "medium" | "high" | "critical";
+        };
+        /** RollbackRequest */
+        RollbackRequest: {
+            /**
+             * Version
+             * @description Prior version to rebind latest+production to.
+             */
+            version: number;
+        };
+        /** RollbackResponse */
+        RollbackResponse: {
+            /** Name */
+            name: string;
+            /** Rolled Back To Version */
+            rolled_back_to_version: number;
         };
         /** RotateApiKeyRequest */
         RotateApiKeyRequest: {
@@ -23613,6 +24017,8 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
              * @enum {string}
@@ -23620,9 +24026,9 @@ export interface components {
             channel_kind: "sms" | "whatsapp" | "web";
             /**
              * Entity Id
-             * Format: uuid
+             * @description World model entity UUID. Provide either entity_id or canonical_id.
              */
-            entity_id: string;
+            entity_id?: string | null;
             /**
              * Greeting
              * @description Custom greeting. Agent auto-greets if omitted.
@@ -24895,175 +25301,6 @@ export interface components {
             service_id: string;
             /** Session Id */
             session_id: string;
-        };
-        /**
-         * TextStreamErrorFrame
-         * @description Recoverable error mid-session. The connection MAY remain open;
-         *     for terminal errors the WebSocket is closed with a 4xxx code instead
-         *     of (or in addition to) this frame.
-         */
-        TextStreamErrorFrame: {
-            /** Message */
-            message: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "error";
-        };
-        TextStreamFrame: components["schemas"]["TextStreamSessionStartedFrame"] | components["schemas"]["TextStreamSessionEndedFrame"] | components["schemas"]["TextStreamErrorFrame"] | components["schemas"]["TextStreamPingFrame"] | components["schemas"]["TextStreamTypingFrame"] | components["schemas"]["TextStreamResponseCompleteFrame"] | components["schemas"]["TextStreamMessageFrame"] | components["schemas"]["TextStreamToolCallStartedFrame"] | components["schemas"]["TextStreamToolCallCompletedFrame"];
-        /**
-         * TextStreamMessageFrame
-         * @description Final consolidated agent message for a turn. ``role`` defaults
-         *     to ``"agent"`` because that is the only role that originates server
-         *     frames; the field is on the wire so a future bidirectional
-         *     extension (e.g. mid-turn system messages) can be added without a
-         *     schema break.
-         */
-        TextStreamMessageFrame: {
-            /**
-             * Role
-             * @default agent
-             */
-            role?: string;
-            /** Text */
-            text: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "message";
-        };
-        /**
-         * TextStreamPingFrame
-         * @description Keepalive frame emitted at the heartbeat interval. Consumers
-         *     SHOULD reset the dead-socket watchdog and otherwise ignore it.
-         */
-        TextStreamPingFrame: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "ping";
-        };
-        /**
-         * TextStreamResponseCompleteFrame
-         * @description Marks the end of an agent turn. The next user message can be
-         *     sent. ``duplicate=true`` indicates the server suppressed a repeat
-         *     response (idempotent ``message`` send-with-same-client_message_id).
-         */
-        TextStreamResponseCompleteFrame: {
-            /**
-             * Duplicate
-             * @default false
-             */
-            duplicate?: boolean;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "response_complete";
-        };
-        /**
-         * TextStreamSessionEndedFrame
-         * @description Graceful end-of-conversation. ``reason`` echoes the actor's
-         *     completion reason (``stopped``, ``completed``, ``escalated``,
-         *     ``disconnected``, ``other``).
-         */
-        TextStreamSessionEndedFrame: {
-            /**
-             * Reason
-             * @default other
-             */
-            reason?: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "session_ended";
-        };
-        /**
-         * TextStreamSessionStartedFrame
-         * @description First frame after the WebSocket handshake completes. Carries the
-         *     session_id (server-minted) and the conversation_id the actor bound
-         *     to (newly minted, or the one supplied via the ``conversation_id``
-         *     query param).
-         */
-        TextStreamSessionStartedFrame: {
-            /** Conversation Id */
-            conversation_id: string;
-            /** Session Id */
-            session_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "session_started";
-        };
-        /**
-         * TextStreamToolCallCompletedFrame
-         * @description Companion to ``TextStreamToolCallStartedFrame``. ``result`` is
-         *     the tool's stringified output; binary or large results are sent
-         *     out-of-band and not surfaced here.
-         */
-        TextStreamToolCallCompletedFrame: {
-            /** Call Id */
-            call_id: string;
-            /**
-             * Result
-             * @default
-             */
-            result?: string;
-            /**
-             * Succeeded
-             * @default true
-             */
-            succeeded?: boolean;
-            /** Tool Name */
-            tool_name: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "tool_call_completed";
-        };
-        /**
-         * TextStreamToolCallStartedFrame
-         * @description A tool-call effect from the most-recent agent turn. Both
-         *     ``tool_call_started`` and the matching ``tool_call_completed``
-         *     arrive after the tool already ran — they are post-hoc summaries,
-         *     not real-time progress events. Frontends typically animate them as
-         *     a sequence.
-         */
-        TextStreamToolCallStartedFrame: {
-            /** Call Id */
-            call_id: string;
-            /**
-             * Input
-             * @default null
-             */
-            input?: {
-                [key: string]: unknown;
-            } | string | null;
-            /** Tool Name */
-            tool_name: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "tool_call_started";
-        };
-        /**
-         * TextStreamTypingFrame
-         * @description Indicates the agent is preparing a response. Pure UX hint;
-         *     no payload.
-         */
-        TextStreamTypingFrame: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "typing";
         };
         /**
          * TextTurnRequest
@@ -26576,8 +26813,6 @@ export interface components {
         UpdatePhoneNumberRequest: {
             /** Capabilities */
             capabilities?: ("inbound" | "outbound")[] | null;
-            /** Channel Phone Id */
-            channel_phone_id?: string | null;
             /** Display Name */
             display_name?: string | null;
             forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
@@ -26591,8 +26826,6 @@ export interface components {
             provider_phone_sid?: string | null;
             /** Status */
             status?: ("active" | "inactive") | null;
-            /** Sub Account Sid */
-            sub_account_sid?: string | null;
         };
         /** UpdateSafetyConfigRequest */
         UpdateSafetyConfigRequest: {
@@ -35790,6 +36023,53 @@ export interface operations {
             };
         };
     };
+    "deploy-function": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisteredFunction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FunctionVersionResponse"];
+                };
+            };
+            /** @description Concurrent deploy raced at the same version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation failure (read-only / bind / parity) */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "query-functions": {
         parameters: {
             query?: never;
@@ -35923,6 +36203,161 @@ export interface operations {
             };
         };
     };
+    "invoke-function": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvokeResponse"];
+                };
+            };
+            /** @description Function not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bind validation failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Databricks SQL client unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "promote-function": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PromoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoteResponse"];
+                };
+            };
+            /** @description Function or version not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "rollback-function": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RollbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RollbackResponse"];
+                };
+            };
+            /** @description Function or version not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "test-function": {
         parameters: {
             query?: never;
@@ -35973,6 +36408,157 @@ export interface operations {
             };
             /** @description Agent engine unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "test-function-v2": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InvokeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InvokeResponse"];
+                };
+            };
+            /** @description Function not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Databricks SQL client unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-function-version": {
+        parameters: {
+            query?: {
+                alias?: "latest" | "staging" | "production";
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FunctionVersionResponse"];
+                };
+            };
+            /** @description Function not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-function-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                function_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FunctionVersionListResponse"];
+                };
+            };
+            /** @description Function not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
