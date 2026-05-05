@@ -149,11 +149,19 @@ export class FunctionsResource extends WorkspaceScopedResource {
    * Test invoke — same as ``invoke`` plus persists ``last_test_*``
    * telemetry on the version row so the DC tool list can show
    * health without re-running.
+   *
+   * Returns :type:`TestInvokeResponse` (superset of `InvokeResponse`)
+   * so callers can read ``status`` / ``error`` / ``test_duration_ms``
+   * directly off the response. The platform-api route catches
+   * ``ServiceUnavailableError`` and converts it into ``status='fail'``
+   * with the executor's error string in ``error`` — so even on a
+   * blown-up SQL execution the response is a 200 with the failure
+   * detail surfaced to the caller.
    */
   async testV2(
     functionName: string,
     body: components['schemas']['InvokeRequest'],
-  ) {
+  ): Promise<components['schemas']['TestInvokeResponse']> {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/functions/{function_name}/v2/test', {
         params: { path: { workspace_id: this.workspaceId, function_name: functionName } },

@@ -41381,6 +41381,63 @@
         "title": "TestEndpointResponse",
         "type": "object"
       },
+      "TestInvokeResponse": {
+        "description": "Response shape for ``POST /v1/{ws}/functions/{name}/v2/test``.\n\nStructural superset of :class:`InvokeResponse` (inheritance makes\nthe relationship explicit and refactor-safe \u2014 if a field is\nrenamed on the base, both responses move together). Adds the\ntest-only telemetry the DC + SDK need to render a pass/fail\nbadge and an actionable error string when a deployed function\nblows up at execute time. The underlying invoke uses the same\npath; ``status`` / ``error`` are filled in by ``service.test``\nafter catching any ``ServiceUnavailableError`` from the\nexecutor, so the route never bubbles a 5xx for a logical SQL\nfailure \u2014 it's still a 200 with ``status=fail`` so the caller\ncan show the message.\n\nInvariant (enforced by :func:`_check_error_when_fail`):\n``status == \"fail\" \u2192 error is not None and len(error) > 0``. Caps\nthe error string length so an upstream stack trace never blows up\na ``console.log`` line in the browser.",
+        "properties": {
+          "duration_ms": {
+            "default": 0.0,
+            "title": "Duration Ms",
+            "type": "number"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "result": {
+            "title": "Result"
+          },
+          "row_count": {
+            "default": 0,
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "status": {
+            "default": "pass",
+            "enum": [
+              "pass",
+              "fail"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "test_duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Test Duration Ms"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "title": "TestInvokeResponse",
+        "type": "object"
+      },
       "TestSkillRequest": {
         "properties": {
           "input": {
@@ -64873,7 +64930,7 @@
     },
     "/v1/{workspace_id}/functions/{function_name}/v2/test": {
       "post": {
-        "description": "Test invoke \u2014 same as invoke + persists last_test_* on the version row.\n\nPermissions: admin, owner.",
+        "description": "Test invoke \u2014 same as invoke + persists last_test_* on the version row.\n\nReturns :class:`TestInvokeResponse` so callers can render\n``status`` + ``error`` directly (the previous shape was\n:class:`InvokeResponse`, which silently dropped those fields and\nleft the DC showing a generic \"Invocation failed.\" even on the\ncatastrophic path).\n\nPermissions: admin, owner.",
         "operationId": "test-function-v2",
         "parameters": [
           {
@@ -64911,7 +64968,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/InvokeResponse"
+                  "$ref": "#/components/schemas/TestInvokeResponse"
                 }
               }
             },
