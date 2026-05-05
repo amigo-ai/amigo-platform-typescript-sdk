@@ -11,32 +11,61 @@ const RESOURCES_DIR = path.join(ROOT, 'src/resources')
 const OUTPUT_FILE = path.join(ROOT, 'api.md')
 const CHECK_MODE = process.argv.includes('--check')
 
-const resourceFiles = fs
-  .readdirSync(RESOURCES_DIR)
-  .filter((file) => file.endsWith('.ts') && file !== 'base.ts')
-  .sort()
+function collectResourceTsFiles(dir) {
+  // Recurse one level into subdirectories so nested resource namespaces
+  // (e.g. resources/channels/{index.ts,ses-setup.ts}) appear in the
+  // class-name map alongside flat resources. Returns paths relative to
+  // RESOURCES_DIR.
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  const files = []
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const subDir = path.join(dir, entry.name)
+      for (const inner of fs.readdirSync(subDir, { withFileTypes: true })) {
+        if (inner.isFile() && inner.name.endsWith('.ts')) {
+          files.push(path.join(entry.name, inner.name))
+        }
+      }
+    } else if (entry.isFile() && entry.name.endsWith('.ts') && entry.name !== 'base.ts') {
+      files.push(entry.name)
+    }
+  }
+  return files.sort()
+}
+
+const resourceFiles = collectResourceTsFiles(RESOURCES_DIR)
 
 const indexSource = loadSource(INDEX_FILE)
-const resourceClassMap = new Map(
-  resourceFiles
-    .map((file) => {
-      const fullPath = path.join(RESOURCES_DIR, file)
-      const source = loadSource(fullPath)
-      const classDeclaration = source.statements.find(ts.isClassDeclaration)
-      if (!classDeclaration?.name) {
-        return null
-      }
 
-      return [
-        classDeclaration.name.text,
-        {
-          file,
-          methods: collectResourceMethods(classDeclaration),
-        },
-      ]
-    })
-    .filter(Boolean),
+// Two-pass class discovery so the second pass can resolve sub-resource
+// references (e.g. ChannelsResource.sesSetup: SesSetupResource) regardless
+// of the order resourceFiles lists them.
+const _classDeclarations = new Map()
+for (const file of resourceFiles) {
+  const fullPath = path.join(RESOURCES_DIR, file)
+  const source = loadSource(fullPath)
+  for (const stmt of source.statements) {
+    if (ts.isClassDeclaration(stmt) && stmt.name) {
+      _classDeclarations.set(stmt.name.text, { file, classDeclaration: stmt })
+    }
+  }
+}
+
+const resourceClassMap = new Map(
+  Array.from(_classDeclarations.entries()).map(([name, { file }]) => [
+    name,
+    { file, methods: [] },
+  ]),
 )
+// First fill direct methods on every class (no sub-resource expansion).
+for (const [name, { classDeclaration }] of _classDeclarations.entries()) {
+  resourceClassMap.get(name).methods = collectResourceMethods(classDeclaration, null)
+}
+// Then expand class-based sub-resource references (e.g. ChannelsResource
+// composing SesSetupResource) using the fully-populated direct-method map.
+for (const [name, { classDeclaration }] of _classDeclarations.entries()) {
+  resourceClassMap.get(name).methods = collectResourceMethods(classDeclaration, resourceClassMap)
+}
 
 const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')
 const clientClass = getClass(indexSource, 'AmigoClient')
@@ -194,7 +223,7 @@ function collectPublicMethodNames(classDeclaration) {
     .map((member) => member.name.getText(classDeclaration.getSourceFile()))
 }
 
-function collectResourceMethods(classDeclaration) {
+function collectResourceMethods(classDeclaration, resourceClassMap) {
   const methods = []
   const sourceFile = classDeclaration.getSourceFile()
 
@@ -204,21 +233,36 @@ function collectResourceMethods(classDeclaration) {
       continue
     }
 
-    if (!ts.isPropertyDeclaration(member) || !member.initializer) {
+    if (!ts.isPropertyDeclaration(member)) {
       continue
     }
 
     const propertyName = member.name.getText(sourceFile)
-    if (!ts.isObjectLiteralExpression(member.initializer)) {
+
+    // Object-literal sub-namespace (e.g. `runs = { list: ..., create: ... }`).
+    if (member.initializer && ts.isObjectLiteralExpression(member.initializer)) {
+      for (const property of member.initializer.properties) {
+        if (
+          (ts.isMethodDeclaration(property) || ts.isPropertyAssignment(property)) &&
+          ts.isIdentifier(property.name)
+        ) {
+          methods.push(`${propertyName}.${property.name.text}`)
+        }
+      }
       continue
     }
 
-    for (const property of member.initializer.properties) {
-      if (
-        (ts.isMethodDeclaration(property) || ts.isPropertyAssignment(property)) &&
-        ts.isIdentifier(property.name)
-      ) {
-        methods.push(`${propertyName}.${property.name.text}`)
+    // Class-based sub-resource (e.g. `readonly sesSetup: SesSetupResource`
+    // composed onto ChannelsResource). Recurse into the referenced class's
+    // methods so the doc surface mirrors the runtime shape
+    // `client.<parent>.<sub>.<method>`.
+    if (resourceClassMap && member.type && ts.isTypeReferenceNode(member.type)) {
+      const typeName = member.type.typeName.getText(sourceFile)
+      const subResource = resourceClassMap.get(typeName)
+      if (subResource) {
+        for (const subMethod of subResource.methods) {
+          methods.push(`${propertyName}.${subMethod}`)
+        }
       }
     }
   }

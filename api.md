@@ -251,6 +251,15 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `textStreamUrl`
 - `sessionConnectUrl`
 
+### `channels`
+
+- `sesSetup.create`
+- `sesSetup.list`
+- `sesSetup.listAutoPaging`
+- `sesSetup.get`
+- `sesSetup.verify`
+- `sesSetup.delete`
+
 ### `phoneNumbers`
 
 - `provision`
@@ -445,6 +454,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getAccessReview`
 
 ### `events`
+
+- `subscribeToWorkspace`
 
 ### `functions`
 

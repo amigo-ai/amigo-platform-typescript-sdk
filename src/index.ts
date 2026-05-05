@@ -48,6 +48,7 @@ import { DataSourcesResource } from './resources/data-sources.js'
 import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
+import { ChannelsResource } from './resources/channels/index.js'
 import { PhoneNumbersResource } from './resources/phone-numbers.js'
 import { IntegrationsResource } from './resources/integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
@@ -205,6 +206,7 @@ export class AmigoClient {
   readonly world!: WorldResource
   readonly calls!: CallsResource
   readonly conversations!: ConversationsResource
+  readonly channels!: ChannelsResource
   readonly phoneNumbers!: PhoneNumbersResource
   readonly integrations!: IntegrationsResource
   readonly analytics!: AnalyticsResource
@@ -478,6 +480,7 @@ export class AmigoClient {
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
     mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
+    mutable.channels = new ChannelsResource(client, workspaceId)
     mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
@@ -729,6 +732,17 @@ export type {
   TurnToolCallCompletedEvent,
   TurnToolCallStartedEvent,
 } from './resources/conversations.js'
+
+// Channel-manager-backed proxies — first member is `channels.sesSetup`;
+// future siblings (twilioSetup, email, inbound) compose onto the same
+// `ChannelsResource`.
+export { ChannelsResource, SesSetupResource } from './resources/channels/index.js'
+export type {
+  CreateSesSetupRequest,
+  DnsRecord as SesSetupDnsRecord,
+  SesSetupDetail,
+  SesSetupListItem,
+} from './resources/channels/index.js'
 
 // Voice-call observer real-time stream
 export { ObserversResource, observerAuthProtocols } from './resources/observers.js'

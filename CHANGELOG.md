@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.40.0] - 2026-05-05
+
+### Features
+
+- new `client.channels.sesSetup` namespace wrapping `/v1/{ws}/channels/ses-setup` (create / list / listAutoPaging / get / verify / delete) — paired with amigo-ai/platform#2561 (LIVE in production).
+- exports `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupDnsRecord` types for direct consumer use.
+- `gen-api-docs.mjs` now recurses one level into resource subdirectories and expands class-based sub-resources (e.g. `ChannelsResource.sesSetup: SesSetupResource`) so nested namespaces appear in `api.md`.
+
 ## [0.39.0] - 2026-05-05
 
 ### Features
