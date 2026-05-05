@@ -5680,6 +5680,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/services/{service_id}/text-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Text Turn
+         * @description Run one WhatsApp-style text turn against the service's agent.
+         */
+        post: operations["text-turn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/services/{service_id}/tools/resolve": {
         parameters: {
             query?: never;
@@ -24876,6 +24896,195 @@ export interface components {
             /** Session Id */
             session_id: string;
         };
+        /**
+         * TextStreamErrorFrame
+         * @description Recoverable error mid-session. The connection MAY remain open;
+         *     for terminal errors the WebSocket is closed with a 4xxx code instead
+         *     of (or in addition to) this frame.
+         */
+        TextStreamErrorFrame: {
+            /** Message */
+            message: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "error";
+        };
+        TextStreamFrame: components["schemas"]["TextStreamSessionStartedFrame"] | components["schemas"]["TextStreamSessionEndedFrame"] | components["schemas"]["TextStreamErrorFrame"] | components["schemas"]["TextStreamPingFrame"] | components["schemas"]["TextStreamTypingFrame"] | components["schemas"]["TextStreamResponseCompleteFrame"] | components["schemas"]["TextStreamMessageFrame"] | components["schemas"]["TextStreamToolCallStartedFrame"] | components["schemas"]["TextStreamToolCallCompletedFrame"];
+        /**
+         * TextStreamMessageFrame
+         * @description Final consolidated agent message for a turn. ``role`` defaults
+         *     to ``"agent"`` because that is the only role that originates server
+         *     frames; the field is on the wire so a future bidirectional
+         *     extension (e.g. mid-turn system messages) can be added without a
+         *     schema break.
+         */
+        TextStreamMessageFrame: {
+            /**
+             * Role
+             * @default agent
+             */
+            role?: string;
+            /** Text */
+            text: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "message";
+        };
+        /**
+         * TextStreamPingFrame
+         * @description Keepalive frame emitted at the heartbeat interval. Consumers
+         *     SHOULD reset the dead-socket watchdog and otherwise ignore it.
+         */
+        TextStreamPingFrame: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "ping";
+        };
+        /**
+         * TextStreamResponseCompleteFrame
+         * @description Marks the end of an agent turn. The next user message can be
+         *     sent. ``duplicate=true`` indicates the server suppressed a repeat
+         *     response (idempotent ``message`` send-with-same-client_message_id).
+         */
+        TextStreamResponseCompleteFrame: {
+            /**
+             * Duplicate
+             * @default false
+             */
+            duplicate?: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "response_complete";
+        };
+        /**
+         * TextStreamSessionEndedFrame
+         * @description Graceful end-of-conversation. ``reason`` echoes the actor's
+         *     completion reason (``stopped``, ``completed``, ``escalated``,
+         *     ``disconnected``, ``other``).
+         */
+        TextStreamSessionEndedFrame: {
+            /**
+             * Reason
+             * @default other
+             */
+            reason?: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "session_ended";
+        };
+        /**
+         * TextStreamSessionStartedFrame
+         * @description First frame after the WebSocket handshake completes. Carries the
+         *     session_id (server-minted) and the conversation_id the actor bound
+         *     to (newly minted, or the one supplied via the ``conversation_id``
+         *     query param).
+         */
+        TextStreamSessionStartedFrame: {
+            /** Conversation Id */
+            conversation_id: string;
+            /** Session Id */
+            session_id: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "session_started";
+        };
+        /**
+         * TextStreamToolCallCompletedFrame
+         * @description Companion to ``TextStreamToolCallStartedFrame``. ``result`` is
+         *     the tool's stringified output; binary or large results are sent
+         *     out-of-band and not surfaced here.
+         */
+        TextStreamToolCallCompletedFrame: {
+            /** Call Id */
+            call_id: string;
+            /**
+             * Result
+             * @default
+             */
+            result?: string;
+            /**
+             * Succeeded
+             * @default true
+             */
+            succeeded?: boolean;
+            /** Tool Name */
+            tool_name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "tool_call_completed";
+        };
+        /**
+         * TextStreamToolCallStartedFrame
+         * @description A tool-call effect from the most-recent agent turn. Both
+         *     ``tool_call_started`` and the matching ``tool_call_completed``
+         *     arrive after the tool already ran — they are post-hoc summaries,
+         *     not real-time progress events. Frontends typically animate them as
+         *     a sequence.
+         */
+        TextStreamToolCallStartedFrame: {
+            /** Call Id */
+            call_id: string;
+            /**
+             * Input
+             * @default null
+             */
+            input?: {
+                [key: string]: unknown;
+            } | string | null;
+            /** Tool Name */
+            tool_name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "tool_call_started";
+        };
+        /**
+         * TextStreamTypingFrame
+         * @description Indicates the agent is preparing a response. Pure UX hint;
+         *     no payload.
+         */
+        TextStreamTypingFrame: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "typing";
+        };
+        /**
+         * TextTurnRequest
+         * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
+         */
+        TextTurnRequest: {
+            /** Phone Number */
+            phone_number: string;
+            /** Text */
+            text: string;
+        };
+        /**
+         * TextTurnResponse
+         * @description Response body — the agent's text reply.
+         *
+         *     Returned only on 200; 204 indicates the engine elected silence.
+         */
+        TextTurnResponse: {
+            /** Text */
+            text: string;
+        };
         /** ThroughputBucket */
         ThroughputBucket: {
             /** Bucket */
@@ -41478,6 +41687,56 @@ export interface operations {
             };
             /** @description Not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "text-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TextTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description Agent text reply */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TextTurnResponse"];
+                };
+            };
+            /** @description Agent elected silence */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Concurrent text turn in progress for this speaker */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
