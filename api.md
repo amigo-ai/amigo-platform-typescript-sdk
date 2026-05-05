@@ -256,6 +256,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `textStreamUrl`
 - `sessionConnectUrl`
 
+### `channels`
+
 ### `phoneNumbers`
 
 - `provision`
