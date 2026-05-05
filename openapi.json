@@ -40532,6 +40532,309 @@
         "title": "TextStartedEvent",
         "type": "object"
       },
+      "TextStreamErrorFrame": {
+        "description": "Recoverable error mid-session. The connection MAY remain open;\nfor terminal errors the WebSocket is closed with a 4xxx code instead\nof (or in addition to) this frame.",
+        "properties": {
+          "message": {
+            "maxLength": 2048,
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "const": "error",
+            "default": "error",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "TextStreamErrorFrame",
+        "type": "object"
+      },
+      "TextStreamFrame": {
+        "discriminator": {
+          "mapping": {
+            "error": "#/components/schemas/TextStreamErrorFrame",
+            "message": "#/components/schemas/TextStreamMessageFrame",
+            "ping": "#/components/schemas/TextStreamPingFrame",
+            "response_complete": "#/components/schemas/TextStreamResponseCompleteFrame",
+            "session_ended": "#/components/schemas/TextStreamSessionEndedFrame",
+            "session_started": "#/components/schemas/TextStreamSessionStartedFrame",
+            "tool_call_completed": "#/components/schemas/TextStreamToolCallCompletedFrame",
+            "tool_call_started": "#/components/schemas/TextStreamToolCallStartedFrame",
+            "typing": "#/components/schemas/TextStreamTypingFrame"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/TextStreamSessionStartedFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamSessionEndedFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamErrorFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamPingFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamTypingFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamResponseCompleteFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamMessageFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamToolCallStartedFrame"
+          },
+          {
+            "$ref": "#/components/schemas/TextStreamToolCallCompletedFrame"
+          }
+        ]
+      },
+      "TextStreamMessageFrame": {
+        "description": "Final consolidated agent message for a turn. ``role`` defaults\nto ``\"agent\"`` because that is the only role that originates server\nframes; the field is on the wire so a future bidirectional\nextension (e.g. mid-turn system messages) can be added without a\nschema break.",
+        "properties": {
+          "role": {
+            "default": "agent",
+            "maxLength": 32,
+            "title": "Role",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string",
+            "x-phi": true
+          },
+          "type": {
+            "const": "message",
+            "default": "message",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "TextStreamMessageFrame",
+        "type": "object"
+      },
+      "TextStreamPingFrame": {
+        "description": "Keepalive frame emitted at the heartbeat interval. Consumers\nSHOULD reset the dead-socket watchdog and otherwise ignore it.",
+        "properties": {
+          "type": {
+            "const": "ping",
+            "default": "ping",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "TextStreamPingFrame",
+        "type": "object"
+      },
+      "TextStreamResponseCompleteFrame": {
+        "description": "Marks the end of an agent turn. The next user message can be\nsent. ``duplicate=true`` indicates the server suppressed a repeat\nresponse (idempotent ``message`` send-with-same-client_message_id).",
+        "properties": {
+          "duplicate": {
+            "default": false,
+            "title": "Duplicate",
+            "type": "boolean"
+          },
+          "type": {
+            "const": "response_complete",
+            "default": "response_complete",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "TextStreamResponseCompleteFrame",
+        "type": "object"
+      },
+      "TextStreamSessionEndedFrame": {
+        "description": "Graceful end-of-conversation. ``reason`` echoes the actor's\ncompletion reason (``stopped``, ``completed``, ``escalated``,\n``disconnected``, ``other``).",
+        "properties": {
+          "reason": {
+            "default": "other",
+            "maxLength": 64,
+            "title": "Reason",
+            "type": "string"
+          },
+          "type": {
+            "const": "session_ended",
+            "default": "session_ended",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "TextStreamSessionEndedFrame",
+        "type": "object"
+      },
+      "TextStreamSessionStartedFrame": {
+        "description": "First frame after the WebSocket handshake completes. Carries the\nsession_id (server-minted) and the conversation_id the actor bound\nto (newly minted, or the one supplied via the ``conversation_id``\nquery param).",
+        "properties": {
+          "conversation_id": {
+            "maxLength": 128,
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "session_id": {
+            "maxLength": 128,
+            "title": "Session Id",
+            "type": "string"
+          },
+          "type": {
+            "const": "session_started",
+            "default": "session_started",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "session_id",
+          "conversation_id"
+        ],
+        "title": "TextStreamSessionStartedFrame",
+        "type": "object"
+      },
+      "TextStreamToolCallCompletedFrame": {
+        "description": "Companion to ``TextStreamToolCallStartedFrame``. ``result`` is\nthe tool's stringified output; binary or large results are sent\nout-of-band and not surfaced here.",
+        "properties": {
+          "call_id": {
+            "maxLength": 256,
+            "title": "Call Id",
+            "type": "string"
+          },
+          "result": {
+            "default": "",
+            "title": "Result",
+            "type": "string",
+            "x-phi": true
+          },
+          "succeeded": {
+            "default": true,
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "tool_name": {
+            "maxLength": 256,
+            "title": "Tool Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "tool_call_completed",
+            "default": "tool_call_completed",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_name",
+          "call_id"
+        ],
+        "title": "TextStreamToolCallCompletedFrame",
+        "type": "object"
+      },
+      "TextStreamToolCallStartedFrame": {
+        "description": "A tool-call effect from the most-recent agent turn. Both\n``tool_call_started`` and the matching ``tool_call_completed``\narrive after the tool already ran — they are post-hoc summaries,\nnot real-time progress events. Frontends typically animate them as\na sequence.",
+        "properties": {
+          "call_id": {
+            "maxLength": 256,
+            "title": "Call Id",
+            "type": "string"
+          },
+          "input": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Input",
+            "x-phi": true
+          },
+          "tool_name": {
+            "maxLength": 256,
+            "title": "Tool Name",
+            "type": "string"
+          },
+          "type": {
+            "const": "tool_call_started",
+            "default": "tool_call_started",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_name",
+          "call_id"
+        ],
+        "title": "TextStreamToolCallStartedFrame",
+        "type": "object"
+      },
+      "TextStreamTypingFrame": {
+        "description": "Indicates the agent is preparing a response. Pure UX hint;\nno payload.",
+        "properties": {
+          "type": {
+            "const": "typing",
+            "default": "typing",
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "title": "TextStreamTypingFrame",
+        "type": "object"
+      },
+      "TextTurnRequest": {
+        "description": "Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.",
+        "properties": {
+          "phone_number": {
+            "maxLength": 16,
+            "pattern": "^\\+[1-9]\\d{1,14}$",
+            "title": "Phone Number",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 8192,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone_number",
+          "text"
+        ],
+        "title": "TextTurnRequest",
+        "type": "object"
+      },
+      "TextTurnResponse": {
+        "description": "Response body — the agent's text reply.\n\nReturned only on 200; 204 indicates the engine elected silence.",
+        "properties": {
+          "text": {
+            "maxLength": 8192,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "TextTurnResponse",
+        "type": "object"
+      },
       "ThroughputBucket": {
         "properties": {
           "bucket": {
@@ -41167,7 +41470,6 @@
         "properties": {
           "call_id": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Call Id",
             "type": "string"
           },
@@ -41268,7 +41570,6 @@
           },
           "tool_name": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Tool Name",
             "type": "string"
           },
@@ -41392,7 +41693,6 @@
         "properties": {
           "call_id": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Call Id",
             "type": "string"
           },
@@ -41467,7 +41767,6 @@
           },
           "tool_name": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Tool Name",
             "type": "string"
           },
@@ -43404,7 +43703,6 @@
         "properties": {
           "call_id": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Call Id",
             "type": "string"
           },
@@ -43424,7 +43722,6 @@
           },
           "tool_name": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Tool Name",
             "type": "string"
           }
@@ -43442,7 +43739,6 @@
         "properties": {
           "call_id": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Call Id",
             "type": "string"
           },
@@ -43458,7 +43754,6 @@
           },
           "tool_name": {
             "maxLength": 256,
-            "minLength": 1,
             "title": "Tool Name",
             "type": "string"
           }
@@ -73039,6 +73334,76 @@
           }
         },
         "summary": "Update a service",
+        "tags": [
+          "Services"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/services/{service_id}/text-turn": {
+      "post": {
+        "description": "Run one WhatsApp-style text turn against the service's agent.",
+        "operationId": "text-turn",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TextTurnRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TextTurnResponse"
+                }
+              }
+            },
+            "description": "Agent text reply"
+          },
+          "204": {
+            "description": "Agent elected silence"
+          },
+          "409": {
+            "description": "Concurrent text turn in progress for this speaker"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Text Turn",
         "tags": [
           "Services"
         ]
