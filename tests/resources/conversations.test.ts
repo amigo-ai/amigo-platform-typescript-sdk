@@ -72,11 +72,15 @@ describe('ConversationsResource', () => {
       has_more: false,
       total: 3,
     }
+    let requestUrl: string | null = null
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`GET ${BASE}/conversations`]: () => Response.json(apiResponse),
+        [`GET ${BASE}/conversations`]: (request) => {
+          requestUrl = request.url
+          return Response.json(apiResponse)
+        },
       }),
     })
 
@@ -91,6 +95,12 @@ describe('ConversationsResource', () => {
       'dormant',
       'closed',
     ])
+    // Verify the ``status`` query parameter is actually forwarded to the
+    // request URL. Without this, a future regression that drops the
+    // filter param would still pass — the mock returns whatever it
+    // wants regardless of the query.
+    expect(requestUrl).not.toBeNull()
+    expect(new URL(requestUrl!).searchParams.get('status')).toBe('active')
   })
 
   it('creates a new conversation and forwards auth header', async () => {
@@ -156,6 +166,45 @@ describe('ConversationsResource', () => {
     expect(result.id).toBe(conversationId)
     expect(result.turn_count).toBe(2)
   })
+
+  it.each([
+    { lifecycle: 'dormant' as const, status: 'frozen' as const },
+    { lifecycle: 'closed' as const, status: 'closed' as const },
+  ])(
+    'preserves lifecycle=$lifecycle on ConversationDetail responses',
+    async ({ lifecycle, status }) => {
+      // Cycle 2 review concern: the only ConversationDetail-level
+      // lifecycle coverage was "active". A regression in detail-path
+      // decoding (e.g. a separate decoder collapsing non-active values)
+      // would not be caught by the list-level coverage above. This
+      // parametrized test covers the remaining two enum values on the
+      // detail response shape.
+      const conversationId = '00000000-0000-4000-8000-000000000099'
+      const apiResponse: ConversationDetail = {
+        id: conversationId,
+        channel_kind: 'web',
+        status,
+        lifecycle,
+        turn_count: 4,
+        turns: [],
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:01:00Z',
+      }
+      const client = new AmigoClient({
+        apiKey: TEST_API_KEY,
+        workspaceId: TEST_WORKSPACE_ID,
+        fetch: mockFetch({
+          [`GET ${BASE}/conversations/${conversationId}`]: () =>
+            Response.json(apiResponse),
+        }),
+      })
+
+      const result = await client.conversations.get(conversationId)
+
+      expect(result.lifecycle).toBe(lifecycle)
+      expect(result.status).toBe(status)
+    },
+  )
 
   it('closes a conversation', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
