@@ -39,6 +39,13 @@ describe('ConversationsResource', () => {
     // SDK's pass-through behavior is exercised across the full enum,
     // not just the happy "active" path. A future decoder that silently
     // defaults non-active values to "active" would fail here.
+    //
+    // Note: the mock intentionally ignores the ``status: 'active'``
+    // filter on the request — the filter is server-side, not client-
+    // side. The assertion below on ``searchParams.get('status')``
+    // verifies the SDK forwarded the param to the request URL; the
+    // mismatch between filter and returned items tests value
+    // pass-through, NOT client-side filtering.
     const apiResponse: ConversationListResponse = {
       items: [
         {
@@ -168,17 +175,17 @@ describe('ConversationsResource', () => {
   })
 
   it.each([
+    { lifecycle: 'active' as const, status: 'active' as const },
     { lifecycle: 'dormant' as const, status: 'frozen' as const },
     { lifecycle: 'closed' as const, status: 'closed' as const },
   ])(
     'preserves lifecycle=$lifecycle on ConversationDetail responses',
     async ({ lifecycle, status }) => {
-      // Cycle 2 review concern: the only ConversationDetail-level
-      // lifecycle coverage was "active". A regression in detail-path
-      // decoding (e.g. a separate decoder collapsing non-active values)
-      // would not be caught by the list-level coverage above. This
-      // parametrized test covers the remaining two enum values on the
-      // detail response shape.
+      // Separate parametrized coverage for the detail-response decoder
+      // path catches lifecycle regressions independently of the list
+      // path above. If a separate decoder ever collapsed non-active
+      // values to ``"active"`` on detail responses, the list-level
+      // coverage would still pass — this test would not.
       const conversationId = '00000000-0000-4000-8000-000000000099'
       const apiResponse: ConversationDetail = {
         id: conversationId,
