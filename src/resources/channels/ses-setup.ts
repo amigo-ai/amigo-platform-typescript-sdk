@@ -61,7 +61,7 @@ export class SesSetupResource extends WorkspaceScopedResource {
   }
 
   /** Auto-paginating async iterable over every SES setup in the workspace. */
-  listAutoPaging(params?: ListParams) {
+  listAutoPaging(params?: ListParams): AsyncGenerator<SesSetupListItem> {
     return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
   }
 

@@ -186,6 +186,20 @@ describe('client.channels.sesSetup', () => {
     expect(result.dns_records.every((r) => r.verified)).toBe(true)
   })
 
+  it('delete completes silently on the success path', async () => {
+    // Symmetric with the conflict path; catches a wrong path-parameter
+    // construction on the success branch (the 409 test only asserts on
+    // the error class, not the URL the request was issued against).
+    const client = new AmigoClient({
+      apiKey: FAKE_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`DELETE ${BASE}/${SETUP_ID}`]: () => new Response(null, { status: 204 }),
+      }),
+    })
+    await expect(client.channels.sesSetup.delete(SETUP_ID)).resolves.toBeUndefined()
+  })
+
   it('delete throws ConflictError when use cases still reference the setup', async () => {
     const client = new AmigoClient({
       apiKey: FAKE_API_KEY,

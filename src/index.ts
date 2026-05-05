@@ -740,6 +740,7 @@ export type {
   DnsRecord,
   SesSetupDetail,
   SesSetupListItem,
+  SesSetupListResponse,
 } from './resources/channels/index.js'
 
 // Voice-call observer real-time stream
