@@ -47,7 +47,7 @@ export class SesSetupResource extends WorkspaceScopedResource {
    */
   async list(
     params?: ListParams,
-  ): Promise<components['schemas']['ListSesSetupsResponse']> {
+  ): Promise<components['schemas']['PaginatedResponse_SesSetupListItemResponse_']> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/channels/ses-setup', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
