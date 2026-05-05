@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.40.0] - 2026-05-05
+
+### Maintenance
+
+- sync API types from platform (30ae0891) (#195)
+
 ## [0.39.0] - 2026-05-05
 
 ### Features
