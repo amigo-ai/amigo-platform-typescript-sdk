@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.39.0] - 2026-05-05
+
+### Features
+
+- client.functions.listRegistered() (v0.38.0) (#194)
+
+### Maintenance
+
+- sync API types from platform (#2581 ENG-222 follow-up)
+
 ## [0.38.0] - 2026-05-05
 
 ### Features
