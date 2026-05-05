@@ -34,17 +34,36 @@ export type SesSetupListResponse =
 // degradation that collapses the type to ``any``) fails at build time
 // rather than silently letting drift land on consumers.
 //
-// One-way ``extends`` would let ``any`` slip past, so the guard layers
-// an ``IsAny<T>`` rejection in front of the structural extends. Future
-// optional fields the generator adds (``total``, etc.) don't trigger
-// the guard — only the load-bearing ``items`` / ``has_more`` /
-// ``continuation_token`` shape is asserted.
+// Design notes for the next person to extend this:
+//
+// 1. ``IsAny<T>`` rejection comes first — a one-way ``extends`` lets
+//    ``any`` slip through (``any`` extends everything). If the
+//    generator ever degrades this schema to ``any`` we want a hard
+//    compile error rather than a silent loss of typing.
+//
+// 2. The structural check is **one-way** (``[T] extends [Shape]``)
+//    on purpose — additive optional fields the generator might
+//    introduce (``total``, ``next_cursor``, etc.) are tolerated
+//    because they don't break the SDK contract. A bidirectional
+//    "exact" check would force a guard update on every additive
+//    schema change and is the wrong semantic for forward-compatible
+//    public types.
+//
+// 3. The failure branch is a string-literal type, not ``never`` —
+//    so when the guard does fire, the TypeScript error reads
+//    "Type 'true' is not assignable to type
+//    'SesSetupListResponse no longer matches …'" instead of the
+//    opaque "Type 'boolean' is not assignable to type 'never'".
+//    Future guards in other resources should follow the same
+//    template.
 type IsAny<T> = 0 extends 1 & T ? true : false
+type GUARD_FAILURE_MESSAGE =
+  'SesSetupListResponse no longer matches the expected paginated shape ({ items, has_more, continuation_token? }) — has openapi-typescript renamed the generic encoding, or did the API drop a load-bearing field? Update the alias on line ~30 and this guard together.'
 type AssertSchemaShape<T, Shape> = IsAny<T> extends true
-  ? never
+  ? GUARD_FAILURE_MESSAGE
   : [T] extends [Shape]
     ? true
-    : never
+    : GUARD_FAILURE_MESSAGE
 const _SES_SETUP_LIST_RESPONSE_GUARD: AssertSchemaShape<
   SesSetupListResponse,
   {
