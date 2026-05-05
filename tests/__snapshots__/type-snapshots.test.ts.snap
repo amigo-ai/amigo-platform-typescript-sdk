@@ -279,6 +279,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "list-personas",
   "list-phone-numbers",
   "list-pipeline-sources",
+  "list-prompt-logs",
   "list-safety-templates",
   "list-scheduling-rule-sets",
   "list-services",
