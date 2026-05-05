@@ -10349,6 +10349,7 @@ export interface components {
             /** Total Segments */
             total_segments: number;
         };
+        CanonicalIdLookupString: string;
         CanonicalIdString: string;
         /** CatalogEntry */
         CatalogEntry: {
@@ -12257,12 +12258,13 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
-             * Format: uuid
-             * @description Patient entity in the world model. Must exist in workspace as a person entity.
+             * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
-            patient_entity_id: string;
+            patient_entity_id?: string | null;
             /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
             phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
@@ -14955,7 +14957,7 @@ export interface components {
          */
         EntityResolveRequest: {
             /** @description Canonical/MRN identifier ('charm:Patient:42' or raw MRN). */
-            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
+            canonical_id?: components["schemas"]["CanonicalIdLookupString"] | null;
             /**
              * Email
              * @description Primary email (case-insensitive match).
@@ -23613,6 +23615,8 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
              * @enum {string}
@@ -23620,9 +23624,9 @@ export interface components {
             channel_kind: "sms" | "whatsapp" | "web";
             /**
              * Entity Id
-             * Format: uuid
+             * @description World model entity UUID. Provide either entity_id or canonical_id.
              */
-            entity_id: string;
+            entity_id?: string | null;
             /**
              * Greeting
              * @description Custom greeting. Agent auto-greets if omitted.
