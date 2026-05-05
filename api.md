@@ -258,6 +258,15 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `channels`
 
+**`channels.sesSetup`**
+
+- `create`
+- `list`
+- `listAutoPaging`
+- `get`
+- `verify`
+- `delete`
+
 ### `phoneNumbers`
 
 - `provision`
@@ -452,6 +461,8 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getAccessReview`
 
 ### `events`
+
+- `subscribeToWorkspace`
 
 ### `functions`
 

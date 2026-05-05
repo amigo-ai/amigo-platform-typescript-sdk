@@ -45,7 +45,9 @@ export class SesSetupResource extends WorkspaceScopedResource {
    * Each item carries the cached ``dns_verified`` aggregate; call ``get``
    * for per-record DNS detail.
    */
-  async list(params?: ListParams) {
+  async list(
+    params?: ListParams,
+  ): Promise<components['schemas']['ListSesSetupsResponse']> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/channels/ses-setup', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -88,10 +90,17 @@ export class SesSetupResource extends WorkspaceScopedResource {
    * Tear down the upstream SES tenant + identity and soft-delete the
    * workspace binding. Throws ``ConflictError`` (HTTP 409) if any use case
    * still references the setup — delete those use cases first.
+   *
+   * Routed through ``extractData`` so 4xx/5xx responses surface as typed
+   * SDK errors (matching every other resource's ``delete``); the
+   * ``ConflictError`` mapping fires here instead of relying on the
+   * underlying client's accidental throw.
    */
   async delete(setupId: string): Promise<void> {
-    await this.client.DELETE('/v1/{workspace_id}/channels/ses-setup/{setup_id}', {
-      params: { path: { workspace_id: this.workspaceId, setup_id: setupId } },
-    })
+    extractData(
+      await this.client.DELETE('/v1/{workspace_id}/channels/ses-setup/{setup_id}', {
+        params: { path: { workspace_id: this.workspaceId, setup_id: setupId } },
+      }),
+    )
   }
 }
