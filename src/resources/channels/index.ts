@@ -6,9 +6,17 @@
  * lands in its own module; this barrel composes them onto a single
  * ``ChannelsResource`` so callers can write
  * ``client.channels.sesSetup.create(...)``.
+ *
+ * Extends ``WorkspaceScopedResource`` so ``client.channels.withOptions(...)``
+ * matches the universal pattern documented in api.md. The inherited
+ * ``withOptions`` reconstructs ``ChannelsResource`` with a scoped
+ * ``PlatformFetch`` client; the constructor below forwards that scoped
+ * client into a fresh ``SesSetupResource``, so the scoped headers /
+ * timeout / retry flow through to subresource calls automatically.
  */
 
 import type { PlatformFetch } from '../../core/openapi-client.js'
+import { WorkspaceScopedResource } from '../base.js'
 import { SesSetupResource } from './ses-setup.js'
 
 export { SesSetupResource } from './ses-setup.js'
@@ -20,10 +28,11 @@ export type {
   SesSetupListResponse,
 } from './ses-setup.js'
 
-export class ChannelsResource {
+export class ChannelsResource extends WorkspaceScopedResource {
   readonly sesSetup: SesSetupResource
 
   constructor(client: PlatformFetch, workspaceId: string) {
+    super(client, workspaceId)
     this.sesSetup = new SesSetupResource(client, workspaceId)
   }
 }

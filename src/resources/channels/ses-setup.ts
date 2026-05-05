@@ -29,6 +29,21 @@ export type DnsRecord = components['schemas']['DnsRecordResponse']
 export type SesSetupListResponse =
   components['schemas']['PaginatedResponse_SesSetupListItemResponse_']
 
+// Compile-time guard: if the generator ever renames the
+// double-underscore-encoded schema (a generator-version bump can do
+// this without any OpenAPI contract change), this type-level assertion
+// fails immediately at build time rather than letting silent drift land
+// on consumers. Forces a deliberate rename here when the generator's
+// encoding scheme changes.
+type _SesSetupListResponseShape = SesSetupListResponse extends {
+  items: SesSetupListItem[]
+  has_more: boolean
+}
+  ? true
+  : never
+const _SES_SETUP_LIST_RESPONSE_GUARD: _SesSetupListResponseShape = true
+void _SES_SETUP_LIST_RESPONSE_GUARD
+
 export class SesSetupResource extends WorkspaceScopedResource {
   /**
    * Create an SES tenant + verified domain identity for this workspace.
