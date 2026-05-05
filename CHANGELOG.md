@@ -8,6 +8,49 @@
 
 ## [0.33.0] - 2026-05-04
 
+### ⚠️ Type-level breaking changes
+
+The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [amigo-ai/platform#2535](https://github.com/amigo-ai/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
+
+| Event | Before (0.32.0) | After (0.33.0) |
+| --- | --- | --- |
+| `ToolCallStartedEvent` | `tool_input?: Record<string, unknown> \| null` | `input?: Record<string, unknown> \| null` |
+| `ToolCallStartedEvent` | `call_id?: string \| null` | `call_id: string` (now required + bounded) |
+| `ToolCallStartedEvent` | `tool_name: string` | `tool_name: string` (max 256) |
+| `ToolCallCompletedEvent` | `error?: string \| null` | `error_message?: string \| null` |
+| `ToolCallCompletedEvent` | `call_id?: string \| null` | `call_id: string` (now required + bounded) |
+| `ToolCallCompletedEvent` | `tool_name: string` | `tool_name: string` (max 256) |
+
+New optional metadata fields on both events: `parent_call_id`, `integration_name`, `endpoint_name`, `protocol`. These are additive — existing readers ignore them.
+
+#### Migration
+
+**Find every callsite** with grep:
+
+```bash
+# old field names that need renaming
+rg -n '\.tool_input\b' src/      # ToolCallStartedEvent.tool_input → .input
+rg -n '\bevent\.error\b'  src/   # ToolCallCompletedEvent.error → .error_message
+rg -n 'ToolCall(Started|Completed)Event' src/   # all consumers of the shapes
+```
+
+**Codemod (sed)** — only safe if your repo doesn't reuse `tool_input` / `event.error` for unrelated objects. Review the diff before committing:
+
+```bash
+# rename ToolCallStartedEvent.tool_input → .input
+git ls-files '*.ts' '*.tsx' | xargs sed -i.bak -E \
+    's/(\.|: ?)tool_input\b/\1input/g'
+
+# rename ToolCallCompletedEvent.error → .error_message (specific to event.error)
+git ls-files '*.ts' '*.tsx' | xargs sed -i.bak -E \
+    's/\b(toolCall|completedEvent|tool_call_completed|event)\.error\b/\1.error_message/g'
+
+# delete the .bak backups after diffing
+find . -name '*.ts.bak' -o -name '*.tsx.bak' | xargs rm
+```
+
+For developer-console specifically, this rename was applied in [amigo-ai/developer-console#864](https://github.com/amigo-ai/developer-console/pull/864) — drop the local `ObserverEventEnvelope<T, Extra>` shim and consume the SDK type directly.
+
 ### Features
 
 - tighten ObserverSSEEvent tool_call schemas (#176)
