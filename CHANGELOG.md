@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.41.0] - 2026-05-05
+
+### Features
+
+- client.promptLogs resource (list + auto-paging) (#196)
+
 ## [0.40.0] - 2026-05-05
 
 ### Maintenance
