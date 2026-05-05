@@ -10178,7 +10178,7 @@ export interface components {
             /** Caller Id */
             caller_id?: string | null;
             /** Completion Reason */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
             /** Conference Sid */
             conference_sid?: string | null;
             config?: components["schemas"]["ConversationConfig"] | null;
@@ -10288,7 +10288,7 @@ export interface components {
              * Completion Reason
              * @enum {string}
              */
-            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled";
+            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended";
             /**
              * Direction
              * @enum {string}
@@ -10493,7 +10493,7 @@ export interface components {
              * Completion Reason
              * @description Why the call ended
              */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
             /**
              * Direction
              * @description Call direction
