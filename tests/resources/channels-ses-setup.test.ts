@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { AmigoClient, ConflictError, NotFoundError } from '../../src/index.js'
 
-const TEST_API_KEY = 'test-api-key-abc123'
+const FAKE_API_KEY = 'fake-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const SETUP_ID = 'aaaaaaaa-0000-0000-0000-000000000001'
@@ -45,8 +45,10 @@ const LIST_ITEM_FIXTURE = {
   updated_at: '2026-05-05T12:00:00Z',
 }
 
+type RouteHandler = (req: { url: URL }) => Response | Promise<Response>
+
 function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
+  routes: Record<string, RouteHandler | (() => Response | Promise<Response>)>,
 ): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
@@ -58,10 +60,16 @@ function mockFetch(
       url = typeof input === 'string' ? input : input.toString()
       method = (init?.method ?? 'GET').toUpperCase()
     }
-    const pathname = new URL(url).pathname
+    const parsed = new URL(url)
+    const pathname = parsed.pathname
     for (const [pattern, handler] of Object.entries(routes)) {
       const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+      if (pMethod === method && pPathParts.join(' ') === pathname) {
+        // Pass the parsed URL so handlers can assert on query params.
+        // Older zero-arg handlers still work because JS ignores extra
+        // arguments — the cast covers both shapes.
+        return (handler as RouteHandler)({ url: parsed })
+      }
     }
     return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
       status: 500,
@@ -74,7 +82,7 @@ const BASE = `/v1/${TEST_WORKSPACE_ID}/channels/ses-setup`
 describe('client.channels.sesSetup', () => {
   it('create returns the typed detail with DNS records', async () => {
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`POST ${BASE}`]: () =>
@@ -89,13 +97,15 @@ describe('client.channels.sesSetup', () => {
       domain_identity: 'mail.acme.com',
     })
     expect(result.id).toBe(SETUP_ID)
+    expect(result.tenant_name).toBe('acme-prod')
+    expect(result.domain_identity).toBe('mail.acme.com')
     expect(result.dns_records).toHaveLength(3)
     expect(result.dns_records.map((r) => r.type).sort()).toEqual(['CNAME', 'MX', 'TXT'])
   })
 
   it('list returns paginated items', async () => {
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`GET ${BASE}`]: () =>
@@ -112,19 +122,27 @@ describe('client.channels.sesSetup', () => {
   })
 
   it('listAutoPaging streams every item across pages', async () => {
+    // Token is a string in the generated pagination envelope (URL
+    // query params serialise stringly). Asserting inside the handler
+    // that the second-page request actually carried the token guards
+    // against a regression in client-side token forwarding (which
+    // would otherwise pass silently because of the page closure).
+    const PAGE_TOKEN = 'cursor-page-2'
+    const tokenObserved: string[] = []
     let page = 0
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`GET ${BASE}`]: () => {
+        [`GET ${BASE}`]: ({ url }) => {
           page += 1
+          tokenObserved.push(url.searchParams.get('continuation_token') ?? '')
           if (page === 1) {
             return new Response(
               JSON.stringify({
                 items: [LIST_ITEM_FIXTURE],
                 has_more: true,
-                continuation_token: 10,
+                continuation_token: PAGE_TOKEN,
               }),
               { status: 200, headers: { 'content-type': 'application/json' } },
             )
@@ -145,11 +163,13 @@ describe('client.channels.sesSetup', () => {
       seen.push(item.id)
     }
     expect(seen).toEqual([SETUP_ID, 'bbbbbbbb-0000-0000-0000-000000000002'])
+    // First page request had no token; second carried the server-issued one.
+    expect(tokenObserved).toEqual(['', PAGE_TOKEN])
   })
 
   it('verify aliases get and re-runs the live DNS lookup', async () => {
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`POST ${BASE}/${SETUP_ID}/verify`]: () =>
@@ -168,7 +188,7 @@ describe('client.channels.sesSetup', () => {
 
   it('delete throws ConflictError when use cases still reference the setup', async () => {
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`DELETE ${BASE}/${SETUP_ID}`]: () =>
@@ -181,9 +201,30 @@ describe('client.channels.sesSetup', () => {
     await expect(client.channels.sesSetup.delete(SETUP_ID)).rejects.toBeInstanceOf(ConflictError)
   })
 
+  it('get returns the typed detail with current DNS verification state', async () => {
+    // Symmetric with delete/verify happy paths; catches a wrong path
+    // parameter (e.g. ``setup_id`` vs ``setupId``) that the 404 test
+    // alone could miss because it only asserts on error class.
+    const client = new AmigoClient({
+      apiKey: FAKE_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/${SETUP_ID}`]: () =>
+          new Response(JSON.stringify(DETAIL_FIXTURE), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          }),
+      }),
+    })
+    const result = await client.channels.sesSetup.get(SETUP_ID)
+    expect(result.id).toBe(SETUP_ID)
+    expect(result.tenant_name).toBe('acme-prod')
+    expect(result.dns_records).toHaveLength(3)
+  })
+
   it('get throws NotFoundError on cross-tenant probes', async () => {
     const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
+      apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
         [`GET ${BASE}/${SETUP_ID}`]: () =>

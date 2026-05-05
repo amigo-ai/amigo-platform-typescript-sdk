@@ -16,6 +16,8 @@ function collectResourceTsFiles(dir) {
   // (e.g. resources/channels/{index.ts,ses-setup.ts}) appear in the
   // class-name map alongside flat resources. Returns paths relative to
   // RESOURCES_DIR so the existing class-map shape is preserved.
+  // ``base.ts`` is excluded at every depth — it carries the
+  // workspace-scoped resource base class, not a public surface.
   const entries = fs.readdirSync(dir, { withFileTypes: true })
   const files = []
   for (const entry of entries) {
@@ -23,7 +25,7 @@ function collectResourceTsFiles(dir) {
     if (entry.isDirectory()) {
       const nested = fs
         .readdirSync(abs)
-        .filter((f) => f.endsWith('.ts'))
+        .filter((f) => f.endsWith('.ts') && f !== 'base.ts')
         .map((f) => path.relative(RESOURCES_DIR, path.join(abs, f)))
       files.push(...nested)
     } else if (entry.name.endsWith('.ts') && entry.name !== 'base.ts') {
@@ -103,11 +105,12 @@ const resourceEntries = clientFields
   .map((field) => {
     const entry = resourceClassMap.get(field.typeText)
     const methods = entry?.methods ?? []
-    // If a top-level class exposes no methods of its own, treat it as
-    // a namespace and pull in its subresources (e.g. channels →
-    // sesSetup). Methods on the namespace itself still take
-    // precedence when both shapes are present.
-    const subresources = methods.length === 0 ? collectSubresources(field.typeText) : []
+    // Always check for subresources, regardless of whether the
+    // namespace class also exposes its own methods. A future
+    // namespace-with-methods (e.g. ``channels.send`` plus a
+    // ``channels.sesSetup`` subresource) would otherwise have its
+    // subresources silently omitted from api.md.
+    const subresources = collectSubresources(field.typeText)
     return {
       name: field.name,
       methods,

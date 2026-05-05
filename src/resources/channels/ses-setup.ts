@@ -21,6 +21,13 @@ export type CreateSesSetupRequest = components['schemas']['CreateSesSetupRequest
 export type SesSetupDetail = components['schemas']['SesSetupDetailResponse']
 export type SesSetupListItem = components['schemas']['SesSetupListItemResponse']
 export type DnsRecord = components['schemas']['DnsRecordResponse']
+// Named alias for the paginated list response so consumers can annotate
+// variables with the public type rather than reaching into the generated
+// schema by string. The underlying schema name is openapi-typescript's
+// double-underscore encoding of FastAPI's parameterized generic; aliasing
+// it here gives us a stable rename point if the generator output shifts.
+export type SesSetupListResponse =
+  components['schemas']['PaginatedResponse_SesSetupListItemResponse_']
 
 export class SesSetupResource extends WorkspaceScopedResource {
   /**
@@ -45,9 +52,7 @@ export class SesSetupResource extends WorkspaceScopedResource {
    * Each item carries the cached ``dns_verified`` aggregate; call ``get``
    * for per-record DNS detail.
    */
-  async list(
-    params?: ListParams,
-  ): Promise<components['schemas']['PaginatedResponse_SesSetupListItemResponse_']> {
+  async list(params?: ListParams): Promise<SesSetupListResponse> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/channels/ses-setup', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -97,7 +102,7 @@ export class SesSetupResource extends WorkspaceScopedResource {
    * underlying client's accidental throw.
    */
   async delete(setupId: string): Promise<void> {
-    extractData(
+    return extractData(
       await this.client.DELETE('/v1/{workspace_id}/channels/ses-setup/{setup_id}', {
         params: { path: { workspace_id: this.workspaceId, setup_id: setupId } },
       }),
