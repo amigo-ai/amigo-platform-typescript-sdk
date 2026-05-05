@@ -38944,6 +38944,7 @@
           "resource_type": {
             "anyOf": [
               {
+                "maxLength": 64,
                 "type": "string"
               },
               {
