@@ -5472,9 +5472,15 @@
         "title": "CallTranscriptResponse",
         "type": "object"
       },
-      "CanonicalIdString": {
+      "CanonicalIdLookupString": {
         "maxLength": 256,
         "minLength": 1,
+        "type": "string"
+      },
+      "CanonicalIdString": {
+        "maxLength": 256,
+        "minLength": 3,
+        "pattern": "^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$",
         "type": "string"
       },
       "CatalogEntry": {
@@ -10169,11 +10175,29 @@
             "description": "World model outbound_task entity ID for completion feedback.",
             "title": "Outbound Task Entity Id"
           },
+          "patient_canonical_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CanonicalIdString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both."
+          },
           "patient_entity_id": {
-            "description": "Patient entity in the world model. Must exist in workspace as a person entity.",
-            "format": "uuid",
-            "title": "Patient Entity Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.",
+            "title": "Patient Entity Id"
           },
           "phone_from": {
             "anyOf": [
@@ -10252,7 +10276,6 @@
         },
         "required": [
           "phone_to",
-          "patient_entity_id",
           "reason"
         ],
         "title": "CreateOutboundCallRequest",
@@ -10370,18 +10393,6 @@
             "title": "Capabilities",
             "type": "array"
           },
-          "channel_phone_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Channel Phone Id"
-          },
           "display_name": {
             "default": "",
             "maxLength": 256,
@@ -10448,19 +10459,6 @@
             ],
             "title": "Status",
             "type": "string"
-          },
-          "sub_account_sid": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "pattern": "^AC[0-9a-f]{32}$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sub Account Sid"
           }
         },
         "required": [
@@ -10682,6 +10680,31 @@
           "context_graph_id"
         ],
         "title": "CreateServiceRequest",
+        "type": "object"
+      },
+      "CreateSesSetupRequest": {
+        "properties": {
+          "domain_identity": {
+            "description": "Domain to verify for both sending and receiving (e.g.\n``mail.customer.com``). A single SES identity serves both directions.",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Domain Identity",
+            "type": "string"
+          },
+          "tenant_name": {
+            "description": "Logical SES tenant name (reputation + suppression isolation boundary).\nUnique within the AWS account. Alphabet ``[A-Za-z0-9_-]``, 1-64 chars.",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Tenant Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenant_name",
+          "domain_identity"
+        ],
+        "title": "CreateSesSetupRequest",
         "type": "object"
       },
       "CreateSessionResponse": {
@@ -14519,6 +14542,42 @@
         "title": "DistrictMetricsRow",
         "type": "object"
       },
+      "DnsRecordResponse": {
+        "properties": {
+          "address": {
+            "description": "Fully-qualified hostname the DNS entry lives under.",
+            "title": "Address",
+            "type": "string"
+          },
+          "record": {
+            "description": "Target value the customer must publish at their DNS provider.",
+            "title": "Record",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "CNAME",
+              "MX",
+              "TXT"
+            ],
+            "title": "Type",
+            "type": "string"
+          },
+          "verified": {
+            "description": "Whether the live DNS lookup at the time of the GET found the entry.",
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "address",
+          "record",
+          "type",
+          "verified"
+        ],
+        "title": "DnsRecordResponse",
+        "type": "object"
+      },
       "DriverRow": {
         "description": "One SPR row — generic (outcome, feature-tuple) grain.",
         "properties": {
@@ -16835,7 +16894,7 @@
           "canonical_id": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/CanonicalIdString"
+                "$ref": "#/components/schemas/CanonicalIdLookupString"
               },
               {
                 "type": "null"
@@ -21388,6 +21447,31 @@
         "title": "FunctionDef",
         "type": "object"
       },
+      "FunctionExample": {
+        "additionalProperties": false,
+        "description": "One example call, surfaced to the LLM and the DC test panel.\n\nExamples are first-class metadata, not buried in a UC ``COMMENT``\nclause the way Databricks' native authoring requires. The DC\ntool-picker shows them; the LLM tool spec includes them inline.",
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "input": {
+            "additionalProperties": true,
+            "title": "Input",
+            "type": "object"
+          },
+          "output": {
+            "title": "Output"
+          }
+        },
+        "required": [
+          "input",
+          "output"
+        ],
+        "title": "FunctionExample",
+        "type": "object"
+      },
       "FunctionListResponse": {
         "properties": {
           "count": {
@@ -21449,6 +21533,185 @@
           }
         },
         "title": "FunctionTestResponse",
+        "type": "object"
+      },
+      "FunctionVersionListResponse": {
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FunctionVersionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ],
+        "title": "FunctionVersionListResponse",
+        "type": "object"
+      },
+      "FunctionVersionResponse": {
+        "description": "Single version row from ``platform.functions``.",
+        "properties": {
+          "deployed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployed At"
+          },
+          "deployed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployed By"
+          },
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "examples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Examples",
+            "type": "array"
+          },
+          "function_type": {
+            "title": "Function Type",
+            "type": "string"
+          },
+          "input_schema": {
+            "additionalProperties": true,
+            "title": "Input Schema",
+            "type": "object"
+          },
+          "last_test_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test At"
+          },
+          "last_test_duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Duration Ms"
+          },
+          "last_test_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Error"
+          },
+          "last_test_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Status"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "parameters": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Parameters",
+            "type": "array"
+          },
+          "returns_kind": {
+            "title": "Returns Kind",
+            "type": "string"
+          },
+          "source_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Hash"
+          },
+          "source_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Path"
+          },
+          "sql_template": {
+            "title": "Sql Template",
+            "type": "string"
+          },
+          "timeout_ms": {
+            "default": 30000,
+            "title": "Timeout Ms",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          },
+          "when_to_use": {
+            "default": "",
+            "title": "When To Use",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "function_type",
+          "returns_kind",
+          "sql_template"
+        ],
+        "title": "FunctionVersionResponse",
         "type": "object"
       },
       "GapRequiredField": {
@@ -23449,6 +23712,54 @@
           "total"
         ],
         "title": "InvoiceLineItem",
+        "type": "object"
+      },
+      "InvokeRequest": {
+        "description": "Invoke a registered function with caller-supplied args.",
+        "properties": {
+          "alias": {
+            "default": "latest",
+            "description": "Alias to resolve.",
+            "enum": [
+              "latest",
+              "staging",
+              "production"
+            ],
+            "title": "Alias",
+            "type": "string"
+          },
+          "input": {
+            "additionalProperties": true,
+            "description": "Caller arguments matching input_schema.",
+            "title": "Input",
+            "type": "object"
+          }
+        },
+        "title": "InvokeRequest",
+        "type": "object"
+      },
+      "InvokeResponse": {
+        "properties": {
+          "duration_ms": {
+            "default": 0,
+            "title": "Duration Ms",
+            "type": "number"
+          },
+          "result": {
+            "title": "Result"
+          },
+          "row_count": {
+            "default": 0,
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "version": {
+            "default": 0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "title": "InvokeResponse",
         "type": "object"
       },
       "JoinCallRequest": {
@@ -28188,6 +28499,49 @@
         "title": "PaginatedResponse[ServiceResponse]",
         "type": "object"
       },
+      "PaginatedResponse_SesSetupListItemResponse_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SesSetupListItemResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[SesSetupListItemResponse]",
+        "type": "object"
+      },
       "PaginatedResponse_SkillResponse_": {
         "properties": {
           "continuation_token": {
@@ -28575,6 +28929,67 @@
           "rows"
         ],
         "title": "PanelResultResponse",
+        "type": "object"
+      },
+      "Parameter": {
+        "additionalProperties": false,
+        "description": "Typed declaration of one SQL bind parameter.\n\nThe ``name`` becomes the ``:name`` placeholder in the SQL template.\nThe ``description`` propagates into the LLM tool spec (this is what\nDatabricks' Agent Framework reads, and what Anthropic's tool-use\nspec exposes to the model). Missing descriptions silently break\ntool selection — the registration layer rejects empty strings.",
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Default"
+          },
+          "description": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Name",
+            "type": "string"
+          },
+          "required": {
+            "default": true,
+            "title": "Required",
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "string",
+              "integer",
+              "number",
+              "boolean"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "description"
+        ],
+        "title": "Parameter",
         "type": "object"
       },
       "Participant": {
@@ -31429,6 +31844,53 @@
         "title": "ProgressHint",
         "type": "object"
       },
+      "PromoteRequest": {
+        "properties": {
+          "alias": {
+            "enum": [
+              "latest",
+              "staging",
+              "production"
+            ],
+            "title": "Alias",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "alias",
+          "version"
+        ],
+        "title": "PromoteRequest",
+        "type": "object"
+      },
+      "PromoteResponse": {
+        "properties": {
+          "alias": {
+            "title": "Alias",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "alias",
+          "version"
+        ],
+        "title": "PromoteResponse",
+        "type": "object"
+      },
       "ProviderType": {
         "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
         "enum": [
@@ -32080,6 +32542,87 @@
           "call_sid"
         ],
         "title": "RecordingUrlsResponse",
+        "type": "object"
+      },
+      "RegisteredFunction": {
+        "additionalProperties": false,
+        "description": "The authored shape of a platform function.\n\nIdentical wire format whether it's authored as a YAML file in the\nrepo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy\npipeline validates this, derives the JSON Schema for the LLM tool\nspec, and INSERTs a row into ``platform.functions`` with the next\nmonotonic ``version`` per ``(workspace_id, name)``.",
+        "properties": {
+          "description": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/FunctionExample"
+            },
+            "maxItems": 8,
+            "title": "Examples",
+            "type": "array"
+          },
+          "function_type": {
+            "default": "sql",
+            "enum": [
+              "sql",
+              "ai",
+              "udtf",
+              "python"
+            ],
+            "title": "Function Type",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Name",
+            "type": "string"
+          },
+          "parameters": {
+            "items": {
+              "$ref": "#/components/schemas/Parameter"
+            },
+            "maxItems": 32,
+            "title": "Parameters",
+            "type": "array"
+          },
+          "returns": {
+            "default": "table",
+            "enum": [
+              "table",
+              "scalar"
+            ],
+            "title": "Returns",
+            "type": "string"
+          },
+          "sql": {
+            "maxLength": 8192,
+            "minLength": 1,
+            "title": "Sql",
+            "type": "string"
+          },
+          "timeout_ms": {
+            "default": 30000,
+            "maximum": 60000,
+            "minimum": 100,
+            "title": "Timeout Ms",
+            "type": "integer"
+          },
+          "when_to_use": {
+            "default": "",
+            "maxLength": 2048,
+            "title": "When To Use",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description",
+          "sql"
+        ],
+        "title": "RegisteredFunction",
         "type": "object"
       },
       "RegulationTemplateResponse": {
@@ -32978,6 +33521,39 @@
           }
         },
         "title": "RiskSummary",
+        "type": "object"
+      },
+      "RollbackRequest": {
+        "properties": {
+          "version": {
+            "description": "Prior version to rebind latest+production to.",
+            "minimum": 1,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version"
+        ],
+        "title": "RollbackRequest",
+        "type": "object"
+      },
+      "RollbackResponse": {
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "rolled_back_to_version": {
+            "title": "Rolled Back To Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "rolled_back_to_version"
+        ],
+        "title": "RollbackResponse",
         "type": "object"
       },
       "RotateApiKeyRequest": {
@@ -35040,6 +35616,116 @@
           }
         },
         "title": "ServiceVoiceConfig",
+        "type": "object"
+      },
+      "SesSetupDetailResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dns_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dns Checked At"
+          },
+          "dns_records": {
+            "items": {
+              "$ref": "#/components/schemas/DnsRecordResponse"
+            },
+            "title": "Dns Records",
+            "type": "array"
+          },
+          "domain_identity": {
+            "title": "Domain Identity",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "tenant_name": {
+            "title": "Tenant Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_name",
+          "domain_identity",
+          "dns_checked_at",
+          "dns_records",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SesSetupDetailResponse",
+        "type": "object"
+      },
+      "SesSetupListItemResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dns_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dns Checked At"
+          },
+          "dns_verified": {
+            "description": "Aggregate of every DNS record's ``verified`` at the last refresh.",
+            "title": "Dns Verified",
+            "type": "boolean"
+          },
+          "domain_identity": {
+            "title": "Domain Identity",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "tenant_name": {
+            "title": "Tenant Name",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_name",
+          "domain_identity",
+          "dns_verified",
+          "dns_checked_at",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "SesSetupListItemResponse",
         "type": "object"
       },
       "SessionEndEvent": {
@@ -37600,6 +38286,17 @@
       },
       "StartSessionRequest": {
         "properties": {
+          "canonical_id": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CanonicalIdString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both."
+          },
           "channel_kind": {
             "enum": [
               "sms",
@@ -37610,9 +38307,17 @@
             "type": "string"
           },
           "entity_id": {
-            "format": "uuid",
-            "title": "Entity Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "World model entity UUID. Provide either entity_id or canonical_id.",
+            "title": "Entity Id"
           },
           "greeting": {
             "anyOf": [
@@ -37672,7 +38377,6 @@
         },
         "required": [
           "service_id",
-          "entity_id",
           "channel_kind"
         ],
         "title": "StartSessionRequest",
@@ -40530,271 +41234,6 @@
           "channel_kind"
         ],
         "title": "TextStartedEvent",
-        "type": "object"
-      },
-      "TextStreamErrorFrame": {
-        "description": "Recoverable error mid-session. The connection MAY remain open;\nfor terminal errors the WebSocket is closed with a 4xxx code instead\nof (or in addition to) this frame.",
-        "properties": {
-          "message": {
-            "maxLength": 2048,
-            "title": "Message",
-            "type": "string"
-          },
-          "type": {
-            "const": "error",
-            "default": "error",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "message"
-        ],
-        "title": "TextStreamErrorFrame",
-        "type": "object"
-      },
-      "TextStreamFrame": {
-        "discriminator": {
-          "mapping": {
-            "error": "#/components/schemas/TextStreamErrorFrame",
-            "message": "#/components/schemas/TextStreamMessageFrame",
-            "ping": "#/components/schemas/TextStreamPingFrame",
-            "response_complete": "#/components/schemas/TextStreamResponseCompleteFrame",
-            "session_ended": "#/components/schemas/TextStreamSessionEndedFrame",
-            "session_started": "#/components/schemas/TextStreamSessionStartedFrame",
-            "tool_call_completed": "#/components/schemas/TextStreamToolCallCompletedFrame",
-            "tool_call_started": "#/components/schemas/TextStreamToolCallStartedFrame",
-            "typing": "#/components/schemas/TextStreamTypingFrame"
-          },
-          "propertyName": "type"
-        },
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/TextStreamSessionStartedFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamSessionEndedFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamErrorFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamPingFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamTypingFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamResponseCompleteFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamMessageFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamToolCallStartedFrame"
-          },
-          {
-            "$ref": "#/components/schemas/TextStreamToolCallCompletedFrame"
-          }
-        ]
-      },
-      "TextStreamMessageFrame": {
-        "description": "Final consolidated agent message for a turn. ``role`` defaults\nto ``\"agent\"`` because that is the only role that originates server\nframes; the field is on the wire so a future bidirectional\nextension (e.g. mid-turn system messages) can be added without a\nschema break.",
-        "properties": {
-          "role": {
-            "default": "agent",
-            "maxLength": 32,
-            "title": "Role",
-            "type": "string"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string",
-            "x-phi": true
-          },
-          "type": {
-            "const": "message",
-            "default": "message",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "text"
-        ],
-        "title": "TextStreamMessageFrame",
-        "type": "object"
-      },
-      "TextStreamPingFrame": {
-        "description": "Keepalive frame emitted at the heartbeat interval. Consumers\nSHOULD reset the dead-socket watchdog and otherwise ignore it.",
-        "properties": {
-          "type": {
-            "const": "ping",
-            "default": "ping",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "TextStreamPingFrame",
-        "type": "object"
-      },
-      "TextStreamResponseCompleteFrame": {
-        "description": "Marks the end of an agent turn. The next user message can be\nsent. ``duplicate=true`` indicates the server suppressed a repeat\nresponse (idempotent ``message`` send-with-same-client_message_id).",
-        "properties": {
-          "duplicate": {
-            "default": false,
-            "title": "Duplicate",
-            "type": "boolean"
-          },
-          "type": {
-            "const": "response_complete",
-            "default": "response_complete",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "TextStreamResponseCompleteFrame",
-        "type": "object"
-      },
-      "TextStreamSessionEndedFrame": {
-        "description": "Graceful end-of-conversation. ``reason`` echoes the actor's\ncompletion reason (``stopped``, ``completed``, ``escalated``,\n``disconnected``, ``other``).",
-        "properties": {
-          "reason": {
-            "default": "other",
-            "maxLength": 64,
-            "title": "Reason",
-            "type": "string"
-          },
-          "type": {
-            "const": "session_ended",
-            "default": "session_ended",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "TextStreamSessionEndedFrame",
-        "type": "object"
-      },
-      "TextStreamSessionStartedFrame": {
-        "description": "First frame after the WebSocket handshake completes. Carries the\nsession_id (server-minted) and the conversation_id the actor bound\nto (newly minted, or the one supplied via the ``conversation_id``\nquery param).",
-        "properties": {
-          "conversation_id": {
-            "maxLength": 128,
-            "title": "Conversation Id",
-            "type": "string"
-          },
-          "session_id": {
-            "maxLength": 128,
-            "title": "Session Id",
-            "type": "string"
-          },
-          "type": {
-            "const": "session_started",
-            "default": "session_started",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "session_id",
-          "conversation_id"
-        ],
-        "title": "TextStreamSessionStartedFrame",
-        "type": "object"
-      },
-      "TextStreamToolCallCompletedFrame": {
-        "description": "Companion to ``TextStreamToolCallStartedFrame``. ``result`` is\nthe tool's stringified output; binary or large results are sent\nout-of-band and not surfaced here.",
-        "properties": {
-          "call_id": {
-            "maxLength": 256,
-            "title": "Call Id",
-            "type": "string"
-          },
-          "result": {
-            "default": "",
-            "title": "Result",
-            "type": "string",
-            "x-phi": true
-          },
-          "succeeded": {
-            "default": true,
-            "title": "Succeeded",
-            "type": "boolean"
-          },
-          "tool_name": {
-            "maxLength": 256,
-            "title": "Tool Name",
-            "type": "string"
-          },
-          "type": {
-            "const": "tool_call_completed",
-            "default": "tool_call_completed",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tool_name",
-          "call_id"
-        ],
-        "title": "TextStreamToolCallCompletedFrame",
-        "type": "object"
-      },
-      "TextStreamToolCallStartedFrame": {
-        "description": "A tool-call effect from the most-recent agent turn. Both\n``tool_call_started`` and the matching ``tool_call_completed``\narrive after the tool already ran — they are post-hoc summaries,\nnot real-time progress events. Frontends typically animate them as\na sequence.",
-        "properties": {
-          "call_id": {
-            "maxLength": 256,
-            "title": "Call Id",
-            "type": "string"
-          },
-          "input": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Input",
-            "x-phi": true
-          },
-          "tool_name": {
-            "maxLength": 256,
-            "title": "Tool Name",
-            "type": "string"
-          },
-          "type": {
-            "const": "tool_call_started",
-            "default": "tool_call_started",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tool_name",
-          "call_id"
-        ],
-        "title": "TextStreamToolCallStartedFrame",
-        "type": "object"
-      },
-      "TextStreamTypingFrame": {
-        "description": "Indicates the agent is preparing a response. Pure UX hint;\nno payload.",
-        "properties": {
-          "type": {
-            "const": "typing",
-            "default": "typing",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "TextStreamTypingFrame",
         "type": "object"
       },
       "TextTurnRequest": {
@@ -44826,18 +45265,6 @@
             ],
             "title": "Capabilities"
           },
-          "channel_phone_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Channel Phone Id"
-          },
           "display_name": {
             "anyOf": [
               {
@@ -44925,19 +45352,6 @@
               }
             ],
             "title": "Status"
-          },
-          "sub_account_sid": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "pattern": "^AC[0-9a-f]{32}$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sub Account Sid"
           }
         },
         "title": "UpdatePhoneNumberRequest",
@@ -57245,6 +57659,312 @@
         ]
       }
     },
+    "/v1/{workspace_id}/channels/ses-setup": {
+      "get": {
+        "description": "Paginated list of SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Requires ``Channel.view`` permission.",
+        "operationId": "list-ses-setups",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "exclusiveMinimum": 0,
+              "maximum": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_SesSetupListItemResponse_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List SES setups for this workspace",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "post": {
+        "description": "Create an SES tenant + verified email identity for this workspace. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Requires ``Channel.create`` permission.",
+        "operationId": "create-ses-setup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSesSetupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesSetupDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "409": {
+            "description": "Tenant name or domain identity already exists upstream."
+          },
+          "422": {
+            "description": "Invalid SES setup configuration."
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Create an SES setup",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/channels/ses-setup/{setup_id}": {
+      "delete": {
+        "description": "Tear down the upstream SES tenant + identity and soft-delete the workspace binding. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.",
+        "operationId": "delete-ses-setup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "setup_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Setup Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "SES setup not found in this workspace."
+          },
+          "409": {
+            "description": "Setup still referenced by live use cases."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Delete an SES setup",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "get": {
+        "description": "Returns full SES setup detail including per-record DNS verification status. Channel-manager re-runs ``GetEmailIdentity`` + DMARC/MX resolvers on every call, so each GET is a live check. Requires ``Channel.view`` permission.",
+        "operationId": "get-ses-setup",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "setup_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Setup Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesSetupDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "SES setup not found in this workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get an SES setup with live DNS refresh",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/channels/ses-setup/{setup_id}/verify": {
+      "post": {
+        "description": "Explicit DNS refresh endpoint. Equivalent to ``GET /ses-setup/{id}`` but exposed as a POST so UI ``Verify now`` actions read as actions rather than reads. Requires ``Channel.view`` permission.",
+        "operationId": "verify-ses-setup-dns",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "setup_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Setup Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SesSetupDetailResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "SES setup not found in this workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh SES DNS verification",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
     "/v1/{workspace_id}/command-center": {
       "get": {
         "description": "Single-pane workspace health dashboard combining voice, pipeline, data quality, and identity metrics.",
@@ -63292,6 +64012,59 @@
         ]
       }
     },
+    "/v1/{workspace_id}/functions/deploy": {
+      "post": {
+        "description": "Validate + register a new platform function version.\n\nAtomic: validation + INSERT + alias rebind happen in one\ntransaction. The next ``version`` is allocated server-side as\n``max(existing) + 1`` per ``(workspace, name)``; concurrent\ndeploys race-fail on the UNIQUE constraint and surface as 409.\n\nPermissions: admin, owner.",
+        "operationId": "deploy-function",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisteredFunction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "409": {
+            "description": "Concurrent deploy raced at the same version"
+          },
+          "422": {
+            "description": "Validation failure (read-only / bind / parity)"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Deploy (validate + register) a platform function",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
     "/v1/{workspace_id}/functions/query": {
       "post": {
         "description": "Execute an open-scope read-only SQL query via agent-engine.\n\nThe SQL is validated to be read-only (SELECT/WITH only) and executed\non a Databricks serverless warehouse. Can query world model data\n(``lakebase_production.world.*``) and analytics (``billing.public.*``).\n\nPermissions: admin, owner (requires ``tools:test`` scope).",
@@ -63455,6 +64228,209 @@
         ]
       }
     },
+    "/v1/{workspace_id}/functions/{function_name}/invoke": {
+      "post": {
+        "description": "Execute a registered function and return its rows.\n\nBound parameters are validated against the version's stored\nschema; ``ws_id`` is auto-injected from the request context.\nReturns the executor's shaped response (``rows`` for\n``returns=table``, scalar value for ``returns=scalar``).\n\nPermissions: ``Workspace.view`` (read role and above). Read-only\nkeys are intentionally allowed here — invocation runs a stored,\npre-validated SELECT against catalogs the workspace SP already\nhas SELECT on; the gate on what can run is the deploy-time\nvalidator (read-only invariant), not the per-call permission.",
+        "operationId": "invoke-function",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvokeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvokeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "422": {
+            "description": "Bind validation failure"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "503": {
+            "description": "Databricks SQL client unavailable"
+          }
+        },
+        "summary": "Execute a registered function",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/functions/{function_name}/promote": {
+      "post": {
+        "description": "Rebind an alias to an existing version.\n\nVerifies the version exists before rebinding.\n\nPermissions: admin, owner.",
+        "operationId": "promote-function",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PromoteRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoteResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function or version not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Rebind an alias to a specific version",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/functions/{function_name}/rollback": {
+      "post": {
+        "description": "Rebind ``latest`` and ``production`` to a prior version.\n\nUsed when a new deploy was bad. ``staging`` stays untouched so\noperator can re-promote independently.\n\nPermissions: admin, owner.",
+        "operationId": "rollback-function",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RollbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RollbackResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function or version not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Rebind latest + production to a prior version",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
     "/v1/{workspace_id}/functions/{function_name}/test": {
       "post": {
         "description": "Test a registered function with sample input.\n\nProxies to agent-engine's internal tool test endpoint.\n\nPermissions: admin, owner (requires ``tools:test`` scope).",
@@ -63522,6 +64498,211 @@
           }
         },
         "summary": "Test a function with sample input",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/functions/{function_name}/v2/test": {
+      "post": {
+        "description": "Test invoke — same as invoke + persists last_test_* on the version row.\n\nPermissions: admin, owner.",
+        "operationId": "test-function-v2",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvokeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvokeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          },
+          "503": {
+            "description": "Databricks SQL client unavailable"
+          }
+        },
+        "summary": "Test invoke + persist telemetry",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/functions/{function_name}/version": {
+      "get": {
+        "description": "Resolve (function_name, alias) → version row.\n\nPermissions: ``Workspace.view`` (read role and above).",
+        "operationId": "get-function-version",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alias",
+            "required": false,
+            "schema": {
+              "default": "latest",
+              "enum": [
+                "latest",
+                "staging",
+                "production"
+              ],
+              "title": "Alias",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionVersionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Resolve (name, alias) → version row",
+        "tags": [
+          "Functions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/functions/{function_name}/versions": {
+      "get": {
+        "description": "List all versions of a registered function, newest first.\n\nPermissions: ``Workspace.view`` (read role and above).",
+        "operationId": "list-function-versions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FunctionVersionListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Function not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "List all versions of a function",
         "tags": [
           "Functions"
         ]
@@ -69227,7 +70408,7 @@
     },
     "/v1/{workspace_id}/phone-numbers/bind": {
       "post": {
-        "description": "Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and creates the binding with sub_account_sid for credential resolution. Requires PhoneNumber.create permission.",
+        "description": "Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and persists the local binding row in platform.phone_numbers. Credential resolution at call time flows through ChannelManagerClient (Valkey-cached, see V108). Requires PhoneNumber.create permission.",
         "operationId": "bind-channel-phone",
         "parameters": [
           {
