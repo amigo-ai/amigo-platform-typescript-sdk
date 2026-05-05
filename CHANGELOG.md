@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.37.0] - 2026-05-05
+
+### Features
+
+- client.functions V109 surface — deploy/invoke/promote/rollback (v0.36.0) (#190)
+
 ## [0.36.0] - 2026-05-05
 
 ### Features
