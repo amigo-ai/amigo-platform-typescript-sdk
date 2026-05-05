@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.34.0] - 2026-05-05
+
+### Features
+
+- sync TextStreamFrame typed union from platform-api (#181)
+
 ## [0.33.0] - 2026-05-04
 
 ### Features
