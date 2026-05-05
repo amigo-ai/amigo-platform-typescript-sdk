@@ -3227,6 +3227,39 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/functions/registered": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List latest version of every V109 platform function in the workspace
+         * @description List the ``latest`` version of every V109-registered function
+         *     in the workspace.
+         *
+         *     Returns one row per function (the alias-pinned latest version).
+         *     The Studio + SDK use this to render a workspace-wide directory of
+         *     deployed platform functions; the per-function ``/{name}/versions``
+         *     endpoint returns history for a specific function.
+         *
+         *     Note this is **distinct** from ``GET /v1/{ws}/functions``, which
+         *     reads ``workspace.settings["functions"]`` JSONB (pre-V109 shape).
+         *     Both paths co-exist; clients should prefer this one for
+         *     V109-registered functions.
+         *
+         *     Permissions: ``Workspace.view`` (read role and above).
+         */
+        get: operations["list-registered-functions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/functions/sync": {
         parameters: {
             query?: never;
@@ -5173,6 +5206,32 @@ export interface paths {
          * @description Event throughput time series across all sources.
          */
         get: operations["get-throughput"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/prompt-logs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List prompt logs for a workspace
+         * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
+         *
+         *     **Filters**: ``call_sid``, ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
+         *
+         *     **Pagination**: peek-ahead — ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.
+         *
+         *     **Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.
+         */
+        get: operations["list-prompt-logs"];
         put?: never;
         post?: never;
         delete?: never;
@@ -10178,7 +10237,7 @@ export interface components {
             /** Caller Id */
             caller_id?: string | null;
             /** Completion Reason */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
             /** Conference Sid */
             conference_sid?: string | null;
             config?: components["schemas"]["ConversationConfig"] | null;
@@ -10288,7 +10347,7 @@ export interface components {
              * Completion Reason
              * @enum {string}
              */
-            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled";
+            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended";
             /**
              * Direction
              * @enum {string}
@@ -10493,7 +10552,7 @@ export interface components {
              * Completion Reason
              * @description Why the call ended
              */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
             /**
              * Direction
              * @description Call direction
@@ -21281,6 +21340,89 @@ export interface components {
             name: string;
             /** Version */
             version: number;
+        };
+        /**
+         * PromptLogEntry
+         * @description One ``prompt_log`` event projection — full LLM input + output for a turn.
+         *
+         *     Unbounded string fields (``system_prompt``, ``full_prompt``,
+         *     ``llm_response``) reflect the producer's payload as-is — typically
+         *     1-50 KB each, occasionally larger for long histories. SDK consumers
+         *     should not assume a max length.
+         */
+        PromptLogEntry: {
+            /** Action */
+            action?: string | null;
+            /** Call Sid */
+            call_sid?: string | null;
+            /**
+             * Data Parse Error
+             * @default false
+             */
+            data_parse_error?: boolean;
+            /** Effective At */
+            effective_at?: string | null;
+            /**
+             * Event Id
+             * Format: uuid
+             */
+            event_id: string;
+            /** Full Prompt */
+            full_prompt?: string | null;
+            /** Has Tools */
+            has_tools?: boolean | null;
+            /** History */
+            history?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Ingested At */
+            ingested_at?: string | null;
+            /** Llm Model */
+            llm_model?: string | null;
+            /** Llm Response */
+            llm_response?: string | null;
+            /** Prompt Type */
+            prompt_type?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /** Source */
+            source?: string | null;
+            /** Source System */
+            source_system?: string | null;
+            /** State Name */
+            state_name?: string | null;
+            /** System Prompt */
+            system_prompt?: string | null;
+            /** Tool Names */
+            tool_names?: string[];
+            /** Turn Index */
+            turn_index?: number | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** PromptLogListResponse */
+        PromptLogListResponse: {
+            /**
+             * Applied Time Window Days
+             * @description Auto-applied time bound (in days) when no call_sid/from_ts/to_ts was passed. Null when the caller supplied an explicit selectivity-bearing filter.
+             */
+            applied_time_window_days?: number | null;
+            /** Count */
+            count: number;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["PromptLogEntry"][];
+            /**
+             * Next Offset
+             * @description Pass back as offset to fetch the next page; null when has_more is false
+             */
+            next_offset?: number | null;
         };
         /**
          * ProviderType
@@ -36544,6 +36686,35 @@ export interface operations {
             };
         };
     };
+    "list-registered-functions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FunctionVersionListResponse"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "sync-catalog": {
         parameters: {
             query?: never;
@@ -40936,6 +41107,66 @@ export interface operations {
             };
             /** @description Rate limit exceeded */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-prompt-logs": {
+        parameters: {
+            query?: {
+                /** @description Filter to a single call (Twilio SID or simulation session id) */
+                call_sid?: string | null;
+                /** @description Filter by prompt_type (e.g. engage_user, navigation, tool) */
+                prompt_type?: string | null;
+                /** @description Filter by HSM state_name at render time */
+                state_name?: string | null;
+                /** @description Inclusive lower bound on effective_at */
+                from_ts?: string | null;
+                /** @description Exclusive upper bound on effective_at */
+                to_ts?: string | null;
+                /** @description Max rows to return (default 20, max 200) */
+                limit?: number;
+                /** @description Offset for pagination (max 10000) */
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Prompt log entries (newest first) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromptLogListResponse"];
+                };
+            };
+            /** @description Caller is not admin/owner */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Raw world event reads disabled or warehouse unavailable */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
