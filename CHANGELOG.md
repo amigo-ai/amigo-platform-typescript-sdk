@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.38.0] - 2026-05-05
+
+### Features
+
+- `client.functions(ws).listRegistered()` — list every V109-registered platform function in the workspace (latest version per name). Closes the "name-driven only" gap on the developer-console Functions Studio (amigo-ai/platform#2585).
+
+### Maintenance
+
+- sync API types from platform: 396→397 paths picking up `GET /v1/{ws}/functions/registered` and the bounded `InvokeRequest.input` (max 32 keys).
+
 ## [0.37.0] - 2026-05-05
 
 ### Features

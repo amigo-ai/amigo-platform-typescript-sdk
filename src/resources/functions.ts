@@ -82,6 +82,23 @@ export class FunctionsResource extends WorkspaceScopedResource {
   }
 
   /**
+   * List the ``latest`` version of every V109-registered platform
+   * function in the workspace. Returns one row per function (the
+   * alias-pinned latest version).
+   *
+   * Distinct from :meth:`list` which reads the legacy
+   * ``workspace.settings["functions"]`` JSONB store; both surfaces
+   * co-exist while callers migrate. Prefer this for V109 functions.
+   */
+  async listRegistered() {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/functions/registered', {
+        params: { path: { workspace_id: this.workspaceId } },
+      }),
+    )
+  }
+
+  /**
    * List all immutable versions of a registered function, newest first.
    */
   async listVersions(functionName: string) {
