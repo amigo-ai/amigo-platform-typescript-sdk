@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.43.0] - 2026-05-05
+
+### Bug Fixes
+
+- wire ChannelsResource instantiation in AmigoClient (#197)
+
 ## [0.42.0] - 2026-05-05
 
 ### Features
