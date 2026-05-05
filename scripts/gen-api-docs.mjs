@@ -11,31 +11,53 @@ const RESOURCES_DIR = path.join(ROOT, 'src/resources')
 const OUTPUT_FILE = path.join(ROOT, 'api.md')
 const CHECK_MODE = process.argv.includes('--check')
 
-const resourceFiles = fs
-  .readdirSync(RESOURCES_DIR)
-  .filter((file) => file.endsWith('.ts') && file !== 'base.ts')
-  .sort()
+function collectResourceTsFiles(dir) {
+  // Recurse one level into subdirectories so nested resource namespaces
+  // (e.g. resources/channels/{index.ts,ses-setup.ts}) appear in the
+  // class-name map alongside flat resources. Returns paths relative to
+  // RESOURCES_DIR so the existing class-map shape is preserved.
+  // ``base.ts`` is excluded at every depth — it carries the
+  // workspace-scoped resource base class, not a public surface.
+  const entries = fs.readdirSync(dir, { withFileTypes: true })
+  const files = []
+  for (const entry of entries) {
+    const abs = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      const nested = fs
+        .readdirSync(abs)
+        .filter((f) => f.endsWith('.ts') && f !== 'base.ts')
+        .map((f) => path.relative(RESOURCES_DIR, path.join(abs, f)))
+      files.push(...nested)
+    } else if (entry.name.endsWith('.ts') && entry.name !== 'base.ts') {
+      files.push(path.relative(RESOURCES_DIR, abs))
+    }
+  }
+  return files.sort()
+}
+
+const resourceFiles = collectResourceTsFiles(RESOURCES_DIR)
 
 const indexSource = loadSource(INDEX_FILE)
 const resourceClassMap = new Map(
   resourceFiles
-    .map((file) => {
+    .flatMap((file) => {
       const fullPath = path.join(RESOURCES_DIR, file)
       const source = loadSource(fullPath)
-      const classDeclaration = source.statements.find(ts.isClassDeclaration)
-      if (!classDeclaration?.name) {
-        return null
-      }
-
-      return [
-        classDeclaration.name.text,
-        {
-          file,
-          methods: collectResourceMethods(classDeclaration),
-        },
-      ]
-    })
-    .filter(Boolean),
+      // A nested resource module may export multiple classes (e.g.
+      // ``channels/index.ts`` declares ``ChannelsResource`` and
+      // re-exports ``SesSetupResource``); collect every class
+      // declaration so the class-name map covers all of them.
+      const classDeclarations = source.statements.filter(ts.isClassDeclaration)
+      return classDeclarations
+        .filter((decl) => Boolean(decl.name))
+        .map((decl) => [
+          decl.name.text,
+          {
+            file,
+            methods: collectResourceMethods(decl),
+          },
+        ])
+    }),
 )
 
 const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')
@@ -50,13 +72,49 @@ const conversationHelperExports = requireExportNames(
   './resources/conversations.js',
 )
 const conversationTypeExports = requireExportNames(exportMap.types, './resources/conversations.js')
+function collectSubresources(className) {
+  // Namespace resources (e.g. ``ChannelsResource``) carry typed
+  // subresource fields (``readonly sesSetup: SesSetupResource``) that
+  // hold the actual methods. Walk the namespace class's public fields
+  // and join in each subresource's method list so the api.md entry
+  // looks like ``channels.sesSetup.create`` rather than a bare
+  // ``channels`` header with no methods.
+  const containerClassDecl = (() => {
+    for (const file of resourceFiles) {
+      const fullPath = path.join(RESOURCES_DIR, file)
+      const source = loadSource(fullPath)
+      const decl = source.statements.find(
+        (s) => ts.isClassDeclaration(s) && s.name?.text === className,
+      )
+      if (decl) return decl
+    }
+    return null
+  })()
+  if (!containerClassDecl) return []
+  const subFields = collectPublicClassFields(containerClassDecl)
+  return subFields
+    .map((field) => {
+      const methods = resourceClassMap.get(field.typeText)?.methods ?? []
+      return { name: field.name, methods }
+    })
+    .filter((sub) => sub.methods.length > 0)
+}
+
 const resourceEntries = clientFields
   .filter((field) => !['workspaceId', 'baseUrl'].includes(field.name))
   .map((field) => {
-    const methods = resourceClassMap.get(field.typeText)?.methods ?? []
+    const entry = resourceClassMap.get(field.typeText)
+    const methods = entry?.methods ?? []
+    // Always check for subresources, regardless of whether the
+    // namespace class also exposes its own methods. A future
+    // namespace-with-methods (e.g. ``channels.send`` plus a
+    // ``channels.sesSetup`` subresource) would otherwise have its
+    // subresources silently omitted from api.md.
+    const subresources = collectSubresources(field.typeText)
     return {
       name: field.name,
       methods,
+      subresources,
     }
   })
 
@@ -118,12 +176,16 @@ const markdown = await prettier.format(
     '',
     'All workspace-scoped resources also expose `withOptions(options)`.',
     '',
-    ...resourceEntries.flatMap((resource) => [
-      `### \`${resource.name}\``,
-      '',
-      ...resource.methods.map((method) => `- \`${method}\``),
-      '',
-    ]),
+    ...resourceEntries.flatMap((resource) => {
+      const lines = [`### \`${resource.name}\``, '']
+      lines.push(...resource.methods.map((method) => `- \`${method}\``))
+      for (const sub of resource.subresources ?? []) {
+        lines.push('', `**\`${resource.name}.${sub.name}\`**`, '')
+        lines.push(...sub.methods.map((method) => `- \`${method}\``))
+      }
+      lines.push('')
+      return lines
+    }),
   ].join('\n'),
   { parser: 'markdown' },
 )

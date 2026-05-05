@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.42.0] - 2026-05-05
+
+### Features
+
+- `client.channels.sesSetup` — workspace-scoped CRUD over the channel-manager-backed SES setup proxy (`/v1/{workspace_id}/channels/ses-setup`). Methods: `create`, `list` + `listAutoPaging`, `get`, `verify`, `delete`. Workspace is injected at client construction time, not the call site. Closes the "no SDK surface for SES tenant onboarding" gap (amigo-ai/platform#2561). Types: `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupListResponse`, `DnsRecord`.
+
 ## [0.41.0] - 2026-05-05
 
 ### Features
