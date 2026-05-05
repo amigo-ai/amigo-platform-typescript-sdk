@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.44.0] - 2026-05-05
+
+### Features
+
+- sync TestInvokeResponse from platform; tighten testV2 return type (#200)
+
+### Maintenance
+
+- improve SesSetupListResponse guard error message (#199)
+
 ## [0.43.0] - 2026-05-05
 
 ### Bug Fixes
