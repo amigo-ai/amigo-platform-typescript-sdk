@@ -8246,69 +8246,6 @@
         "title": "ContextGraphVersionResponse",
         "type": "object"
       },
-      "ConversationActorStartFailedRequest": {
-        "properties": {
-          "channel_kind": {
-            "$ref": "#/components/schemas/ChannelKind"
-          },
-          "provider": {
-            "$ref": "#/components/schemas/ProviderType"
-          },
-          "provider_thread_id": {
-            "maxLength": 512,
-            "minLength": 1,
-            "title": "Provider Thread Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "channel_kind",
-          "provider",
-          "provider_thread_id"
-        ],
-        "title": "ConversationActorStartFailedRequest",
-        "type": "object"
-      },
-      "ConversationActorStartFailedResponse": {
-        "properties": {
-          "conversation_id": {
-            "format": "uuid",
-            "title": "Conversation Id",
-            "type": "string"
-          },
-          "rolled_back": {
-            "title": "Rolled Back",
-            "type": "boolean"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "frozen",
-              "closed"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "conversation_id",
-          "workspace_id",
-          "status",
-          "version",
-          "rolled_back"
-        ],
-        "title": "ConversationActorStartFailedResponse",
-        "type": "object"
-      },
       "ConversationConfig": {
         "properties": {
           "agent_id": {
@@ -8527,6 +8464,15 @@
             "title": "Id",
             "type": "string"
           },
+          "lifecycle": {
+            "enum": [
+              "active",
+              "dormant",
+              "closed"
+            ],
+            "title": "Lifecycle",
+            "type": "string"
+          },
           "phone_number": {
             "anyOf": [
               {
@@ -8627,6 +8573,7 @@
           "id",
           "channel_kind",
           "status",
+          "lifecycle",
           "created_at",
           "updated_at"
         ],
@@ -8657,40 +8604,6 @@
           "has_more"
         ],
         "title": "ConversationListResponse",
-        "type": "object"
-      },
-      "ConversationReactivationResponse": {
-        "properties": {
-          "conversation_id": {
-            "format": "uuid",
-            "title": "Conversation Id",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "reactivated"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "conversation_id",
-          "workspace_id",
-          "status",
-          "version"
-        ],
-        "title": "ConversationReactivationResponse",
         "type": "object"
       },
       "ConversationStateSaveRequest": {
@@ -50491,6 +50404,15 @@
             "title": "Id",
             "type": "string"
           },
+          "lifecycle": {
+            "enum": [
+              "active",
+              "dormant",
+              "closed"
+            ],
+            "title": "Lifecycle",
+            "type": "string"
+          },
           "phone_number": {
             "anyOf": [
               {
@@ -50562,6 +50484,7 @@
           "id",
           "channel_kind",
           "status",
+          "lifecycle",
           "created_at",
           "updated_at"
         ],

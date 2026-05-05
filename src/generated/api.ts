@@ -11837,35 +11837,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /** ConversationActorStartFailedRequest */
-        ConversationActorStartFailedRequest: {
-            channel_kind: components["schemas"]["ChannelKind"];
-            provider: components["schemas"]["ProviderType"];
-            /** Provider Thread Id */
-            provider_thread_id: string;
-        };
-        /** ConversationActorStartFailedResponse */
-        ConversationActorStartFailedResponse: {
-            /**
-             * Conversation Id
-             * Format: uuid
-             */
-            conversation_id: string;
-            /** Rolled Back */
-            rolled_back: boolean;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "frozen" | "closed";
-            /** Version */
-            version: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** ConversationConfig */
         ConversationConfig: {
             /** Agent Id */
@@ -11917,6 +11888,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Lifecycle
+             * @enum {string}
+             */
+            lifecycle: "active" | "dormant" | "closed";
             /** Phone Number */
             phone_number?: string | null;
             /** Plan */
@@ -11954,26 +11930,6 @@ export interface components {
             items: components["schemas"]["src__routes__conversations__ConversationSummary"][];
             /** Total */
             total: number;
-        };
-        /** ConversationReactivationResponse */
-        ConversationReactivationResponse: {
-            /**
-             * Conversation Id
-             * Format: uuid
-             */
-            conversation_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "reactivated";
-            /** Version */
-            version: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** ConversationStateSaveRequest */
         ConversationStateSaveRequest: {
@@ -28788,6 +28744,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Lifecycle
+             * @enum {string}
+             */
+            lifecycle: "active" | "dormant" | "closed";
             /** Phone Number */
             phone_number?: string | null;
             /** Quality Score */
