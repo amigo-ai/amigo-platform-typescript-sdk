@@ -29,19 +29,30 @@ export type DnsRecord = components['schemas']['DnsRecordResponse']
 export type SesSetupListResponse =
   components['schemas']['PaginatedResponse_SesSetupListItemResponse_']
 
-// Compile-time guard: if the generator ever renames the
-// double-underscore-encoded schema (a generator-version bump can do
-// this without any OpenAPI contract change), this type-level assertion
-// fails immediately at build time rather than letting silent drift land
-// on consumers. Forces a deliberate rename here when the generator's
-// encoding scheme changes.
-type _SesSetupListResponseShape = SesSetupListResponse extends {
-  items: SesSetupListItem[]
-  has_more: boolean
-}
-  ? true
-  : never
-const _SES_SETUP_LIST_RESPONSE_GUARD: _SesSetupListResponseShape = true
+// Compile-time guard: pin the required fields the SDK depends on so a
+// generator rename of the double-underscore-encoded schema (or a
+// degradation that collapses the type to ``any``) fails at build time
+// rather than silently letting drift land on consumers.
+//
+// One-way ``extends`` would let ``any`` slip past, so the guard layers
+// an ``IsAny<T>`` rejection in front of the structural extends. Future
+// optional fields the generator adds (``total``, etc.) don't trigger
+// the guard — only the load-bearing ``items`` / ``has_more`` /
+// ``continuation_token`` shape is asserted.
+type IsAny<T> = 0 extends 1 & T ? true : false
+type AssertSchemaShape<T, Shape> = IsAny<T> extends true
+  ? never
+  : [T] extends [Shape]
+    ? true
+    : never
+const _SES_SETUP_LIST_RESPONSE_GUARD: AssertSchemaShape<
+  SesSetupListResponse,
+  {
+    items: SesSetupListItem[]
+    has_more: boolean
+    continuation_token?: number | null
+  }
+> = true
 void _SES_SETUP_LIST_RESPONSE_GUARD
 
 export class SesSetupResource extends WorkspaceScopedResource {

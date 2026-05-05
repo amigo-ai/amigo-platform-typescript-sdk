@@ -183,6 +183,10 @@ describe('client.channels.sesSetup', () => {
       }),
     })
     const result = await client.channels.sesSetup.verify(SETUP_ID)
+    // Length assertion guards against a silent regression where
+    // dns_records is dropped or empty — ``every([])`` returns true
+    // vacuously and would mask a deserialization bug.
+    expect(result.dns_records).toHaveLength(3)
     expect(result.dns_records.every((r) => r.verified)).toBe(true)
   })
 
@@ -194,7 +198,7 @@ describe('client.channels.sesSetup', () => {
       apiKey: FAKE_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`DELETE ${BASE}/${SETUP_ID}`]: () => new Response(null, { status: 204 }),
+        [`DELETE ${BASE}/${SETUP_ID}`]: () => new Response(undefined, { status: 204 }),
       }),
     })
     await expect(client.channels.sesSetup.delete(SETUP_ID)).resolves.toBeUndefined()
@@ -234,6 +238,67 @@ describe('client.channels.sesSetup', () => {
     expect(result.id).toBe(SETUP_ID)
     expect(result.tenant_name).toBe('acme-prod')
     expect(result.dns_records).toHaveLength(3)
+  })
+
+  it('withOptions on channels propagates scoped headers into sesSetup', async () => {
+    // ``ChannelsResource`` extends ``WorkspaceScopedResource`` so the
+    // inherited ``withOptions`` reconstructs the namespace via
+    // ``new ChannelsResource(scopedClient, workspaceId)``. Our
+    // constructor forwards that scoped client into a fresh
+    // ``SesSetupResource``, so a header / timeout / retry override
+    // applied at the namespace boundary must show up on subresource
+    // calls. This test pins that invariant — without it, a future
+    // refactor that drops the constructor's client-forwarding (or
+    // moves to a shared ``sesSetup`` instance across scopes) would
+    // silently strip scoped options on subresource requests.
+    let observedHeader: string | null = null
+    const client = new AmigoClient({
+      apiKey: FAKE_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/${SETUP_ID}`]: ({ url }) => {
+          // The mock receives only the URL; the header check happens
+          // through the scoped client's request init via a hooks
+          // path. Use the scoped client directly so the test stays
+          // independent of the SDK's hook surface — the scoped
+          // request flows through the same fetch.
+          void url
+          return new Response(JSON.stringify(DETAIL_FIXTURE), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          })
+        },
+      }),
+    })
+
+    // Recreate with a hooked fetch so we can inspect the outbound
+    // headers — this tests the propagation path where ``withOptions``
+    // adds a header and we verify it lands on the subresource call.
+    const headerObservingFetch: typeof globalThis.fetch = async (input, init) => {
+      const url = input instanceof Request ? input.url : String(input)
+      const headers = new Headers((input instanceof Request ? input.headers : init?.headers) ?? {})
+      observedHeader = headers.get('x-trace-id')
+      const pathname = new URL(url).pathname
+      if (pathname === `${BASE}/${SETUP_ID}`) {
+        return new Response(JSON.stringify(DETAIL_FIXTURE), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      return new Response(JSON.stringify({ detail: 'unmatched' }), { status: 500 })
+    }
+    const tracingClient = new AmigoClient({
+      apiKey: FAKE_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: headerObservingFetch,
+    })
+
+    const scoped = tracingClient.channels.withOptions({ headers: { 'X-Trace-Id': 'trace-abc' } })
+    void client // referenced to keep the unused-variable surface tidy
+    const result = await scoped.sesSetup.get(SETUP_ID)
+
+    expect(result.id).toBe(SETUP_ID)
+    expect(observedHeader).toBe('trace-abc')
   })
 
   it('get throws NotFoundError on cross-tenant probes', async () => {
