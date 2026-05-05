@@ -10349,6 +10349,7 @@ export interface components {
             /** Total Segments */
             total_segments: number;
         };
+        CanonicalIdLookupString: string;
         CanonicalIdString: string;
         /** CatalogEntry */
         CatalogEntry: {
@@ -12257,12 +12258,13 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
-             * Format: uuid
-             * @description Patient entity in the world model. Must exist in workspace as a person entity.
+             * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
-            patient_entity_id: string;
+            patient_entity_id?: string | null;
             /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
             phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
@@ -14955,7 +14957,7 @@ export interface components {
          */
         EntityResolveRequest: {
             /** @description Canonical/MRN identifier ('charm:Patient:42' or raw MRN). */
-            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
+            canonical_id?: components["schemas"]["CanonicalIdLookupString"] | null;
             /**
              * Email
              * @description Primary email (case-insensitive match).
@@ -23613,6 +23615,8 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
              * @enum {string}
@@ -23620,9 +23624,9 @@ export interface components {
             channel_kind: "sms" | "whatsapp" | "web";
             /**
              * Entity Id
-             * Format: uuid
+             * @description World model entity UUID. Provide either entity_id or canonical_id.
              */
-            entity_id: string;
+            entity_id?: string | null;
             /**
              * Greeting
              * @description Custom greeting. Agent auto-greets if omitted.
@@ -24895,175 +24899,6 @@ export interface components {
             service_id: string;
             /** Session Id */
             session_id: string;
-        };
-        /**
-         * TextStreamErrorFrame
-         * @description Recoverable error mid-session. The connection MAY remain open;
-         *     for terminal errors the WebSocket is closed with a 4xxx code instead
-         *     of (or in addition to) this frame.
-         */
-        TextStreamErrorFrame: {
-            /** Message */
-            message: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "error";
-        };
-        TextStreamFrame: components["schemas"]["TextStreamSessionStartedFrame"] | components["schemas"]["TextStreamSessionEndedFrame"] | components["schemas"]["TextStreamErrorFrame"] | components["schemas"]["TextStreamPingFrame"] | components["schemas"]["TextStreamTypingFrame"] | components["schemas"]["TextStreamResponseCompleteFrame"] | components["schemas"]["TextStreamMessageFrame"] | components["schemas"]["TextStreamToolCallStartedFrame"] | components["schemas"]["TextStreamToolCallCompletedFrame"];
-        /**
-         * TextStreamMessageFrame
-         * @description Final consolidated agent message for a turn. ``role`` defaults
-         *     to ``"agent"`` because that is the only role that originates server
-         *     frames; the field is on the wire so a future bidirectional
-         *     extension (e.g. mid-turn system messages) can be added without a
-         *     schema break.
-         */
-        TextStreamMessageFrame: {
-            /**
-             * Role
-             * @default agent
-             */
-            role?: string;
-            /** Text */
-            text: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "message";
-        };
-        /**
-         * TextStreamPingFrame
-         * @description Keepalive frame emitted at the heartbeat interval. Consumers
-         *     SHOULD reset the dead-socket watchdog and otherwise ignore it.
-         */
-        TextStreamPingFrame: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "ping";
-        };
-        /**
-         * TextStreamResponseCompleteFrame
-         * @description Marks the end of an agent turn. The next user message can be
-         *     sent. ``duplicate=true`` indicates the server suppressed a repeat
-         *     response (idempotent ``message`` send-with-same-client_message_id).
-         */
-        TextStreamResponseCompleteFrame: {
-            /**
-             * Duplicate
-             * @default false
-             */
-            duplicate?: boolean;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "response_complete";
-        };
-        /**
-         * TextStreamSessionEndedFrame
-         * @description Graceful end-of-conversation. ``reason`` echoes the actor's
-         *     completion reason (``stopped``, ``completed``, ``escalated``,
-         *     ``disconnected``, ``other``).
-         */
-        TextStreamSessionEndedFrame: {
-            /**
-             * Reason
-             * @default other
-             */
-            reason?: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "session_ended";
-        };
-        /**
-         * TextStreamSessionStartedFrame
-         * @description First frame after the WebSocket handshake completes. Carries the
-         *     session_id (server-minted) and the conversation_id the actor bound
-         *     to (newly minted, or the one supplied via the ``conversation_id``
-         *     query param).
-         */
-        TextStreamSessionStartedFrame: {
-            /** Conversation Id */
-            conversation_id: string;
-            /** Session Id */
-            session_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "session_started";
-        };
-        /**
-         * TextStreamToolCallCompletedFrame
-         * @description Companion to ``TextStreamToolCallStartedFrame``. ``result`` is
-         *     the tool's stringified output; binary or large results are sent
-         *     out-of-band and not surfaced here.
-         */
-        TextStreamToolCallCompletedFrame: {
-            /** Call Id */
-            call_id: string;
-            /**
-             * Result
-             * @default
-             */
-            result?: string;
-            /**
-             * Succeeded
-             * @default true
-             */
-            succeeded?: boolean;
-            /** Tool Name */
-            tool_name: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "tool_call_completed";
-        };
-        /**
-         * TextStreamToolCallStartedFrame
-         * @description A tool-call effect from the most-recent agent turn. Both
-         *     ``tool_call_started`` and the matching ``tool_call_completed``
-         *     arrive after the tool already ran — they are post-hoc summaries,
-         *     not real-time progress events. Frontends typically animate them as
-         *     a sequence.
-         */
-        TextStreamToolCallStartedFrame: {
-            /** Call Id */
-            call_id: string;
-            /**
-             * Input
-             * @default null
-             */
-            input?: {
-                [key: string]: unknown;
-            } | string | null;
-            /** Tool Name */
-            tool_name: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "tool_call_started";
-        };
-        /**
-         * TextStreamTypingFrame
-         * @description Indicates the agent is preparing a response. Pure UX hint;
-         *     no payload.
-         */
-        TextStreamTypingFrame: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "typing";
         };
         /**
          * TextTurnRequest
