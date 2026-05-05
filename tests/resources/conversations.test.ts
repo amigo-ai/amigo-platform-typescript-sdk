@@ -35,6 +35,10 @@ function mockFetch(
 
 describe('ConversationsResource', () => {
   it('lists conversations with optional status filter', async () => {
+    // Mix of all three lifecycle values (active/dormant/closed) so the
+    // SDK's pass-through behavior is exercised across the full enum,
+    // not just the happy "active" path. A future decoder that silently
+    // defaults non-active values to "active" would fail here.
     const apiResponse: ConversationListResponse = {
       items: [
         {
@@ -46,9 +50,27 @@ describe('ConversationsResource', () => {
           turn_count: 3,
           updated_at: '2026-01-01T00:01:00Z',
         },
+        {
+          channel_kind: 'sms',
+          created_at: '2026-01-01T00:00:00Z',
+          id: '00000000-0000-4000-8000-000000000002',
+          status: 'frozen',
+          lifecycle: 'dormant',
+          turn_count: 7,
+          updated_at: '2025-12-31T22:00:00Z',
+        },
+        {
+          channel_kind: 'voice',
+          created_at: '2025-12-30T00:00:00Z',
+          id: '00000000-0000-4000-8000-000000000003',
+          status: 'closed',
+          lifecycle: 'closed',
+          turn_count: 12,
+          updated_at: '2025-12-30T00:05:00Z',
+        },
       ],
       has_more: false,
-      total: 1,
+      total: 3,
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -60,9 +82,15 @@ describe('ConversationsResource', () => {
 
     const result = await client.conversations.list({ status: 'active' })
 
-    expect(result.items).toHaveLength(1)
+    expect(result.items).toHaveLength(3)
     expect(result.items[0]?.status).toBe('active')
-    expect(result.total).toBe(1)
+    expect(result.total).toBe(3)
+    // SDK passes lifecycle through unmodified for every enum value.
+    expect(result.items.map((item) => item.lifecycle)).toEqual([
+      'active',
+      'dormant',
+      'closed',
+    ])
   })
 
   it('creates a new conversation and forwards auth header', async () => {
@@ -427,6 +455,7 @@ describe('ConversationsResource', () => {
             channel_kind: 'web',
             status: 'active',
             lifecycle: 'active',
+            turn_count: 0,
             created_at: '2026-01-01T00:00:00Z',
             updated_at: '2026-01-01T00:00:00Z',
           })
