@@ -32183,6 +32183,35 @@
             ],
             "description": "Pass back as offset to fetch the next page; null when has_more is false",
             "title": "Next Offset"
+          },
+          "resolved_call_sid": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.",
+            "title": "Resolved Call Sid"
+          },
+          "resolved_conversation_kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "call",
+                  "conversation"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim/scribe, ``conversation`` for text/sms/whatsapp/email). Null otherwise.",
+            "title": "Resolved Conversation Kind"
           }
         },
         "required": [
@@ -72003,7 +72032,7 @@
     },
     "/v1/{workspace_id}/prompt-logs": {
       "get": {
-        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Filters**: ``call_sid``, ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
+        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model \u2014 works uniformly across voice, text, sim, and scribe modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
         "operationId": "list-prompt-logs",
         "parameters": [
           {
@@ -72017,7 +72046,26 @@
             }
           },
           {
-            "description": "Filter to a single call (Twilio SID or simulation session id)",
+            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+            "in": "query",
+            "name": "conversation_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
             "in": "query",
             "name": "call_sid",
             "required": false,
@@ -72031,7 +72079,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Filter to a single call (Twilio SID or simulation session id)",
+              "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
               "title": "Call Sid"
             }
           },
@@ -72151,8 +72199,14 @@
             },
             "description": "Prompt log entries (newest first)"
           },
+          "400": {
+            "description": "Mutually exclusive filters supplied"
+          },
           "403": {
             "description": "Caller is not admin/owner"
+          },
+          "404": {
+            "description": "conversation_id does not match any conversation in this workspace"
           },
           "422": {
             "content": {

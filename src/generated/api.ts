@@ -5225,7 +5225,9 @@ export interface paths {
          * List prompt logs for a workspace
          * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
          *
-         *     **Filters**: ``call_sid``, ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
+         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, sim, and scribe modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
+         *
+         *     **Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
          *
          *     **Pagination**: peek-ahead — ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.
          *
@@ -21423,6 +21425,16 @@ export interface components {
              * @description Pass back as offset to fetch the next page; null when has_more is false
              */
             next_offset?: number | null;
+            /**
+             * Resolved Call Sid
+             * @description When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.
+             */
+            resolved_call_sid?: string | null;
+            /**
+             * Resolved Conversation Kind
+             * @description ``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim/scribe, ``conversation`` for text/sms/whatsapp/email). Null otherwise.
+             */
+            resolved_conversation_kind?: ("call" | "conversation") | null;
         };
         /**
          * ProviderType
@@ -41117,7 +41129,9 @@ export interface operations {
     "list-prompt-logs": {
         parameters: {
             query?: {
-                /** @description Filter to a single call (Twilio SID or simulation session id) */
+                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
+                conversation_id?: string | null;
+                /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
                 call_sid?: string | null;
                 /** @description Filter by prompt_type (e.g. engage_user, navigation, tool) */
                 prompt_type?: string | null;
@@ -41149,8 +41163,22 @@ export interface operations {
                     "application/json": components["schemas"]["PromptLogListResponse"];
                 };
             };
+            /** @description Mutually exclusive filters supplied */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Caller is not admin/owner */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description conversation_id does not match any conversation in this workspace */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
