@@ -149,6 +149,11 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getAuditLog`
 - `getAuditLogAutoPaging`
 
+### `promptLogs`
+
+- `list`
+- `listAutoPaging`
+
 ### `triggers`
 
 - `list`

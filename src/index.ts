@@ -41,6 +41,7 @@ import { AgentsResource } from './resources/agents.js'
 import { SkillsResource } from './resources/skills.js'
 import { ActionsResource } from './resources/actions.js'
 import { OperatorsResource } from './resources/operators.js'
+import { PromptLogsResource } from './resources/prompt-logs.js'
 import { TriggersResource } from './resources/triggers.js'
 import { ServicesResource } from './resources/services.js'
 import { ContextGraphsResource } from './resources/context-graphs.js'
@@ -198,6 +199,7 @@ export class AmigoClient {
   readonly skills!: SkillsResource
   readonly actions!: ActionsResource
   readonly operators!: OperatorsResource
+  readonly promptLogs!: PromptLogsResource
   readonly triggers!: TriggersResource
   readonly services!: ServicesResource
   readonly contextGraphs!: ContextGraphsResource
@@ -471,6 +473,7 @@ export class AmigoClient {
     mutable.skills = new SkillsResource(client, workspaceId)
     mutable.actions = new ActionsResource(client, workspaceId)
     mutable.operators = new OperatorsResource(client, workspaceId)
+    mutable.promptLogs = new PromptLogsResource(client, workspaceId)
     mutable.triggers = new TriggersResource(client, workspaceId)
     mutable.services = new ServicesResource(client, workspaceId)
     mutable.contextGraphs = new ContextGraphsResource(client, workspaceId)
@@ -702,10 +705,7 @@ export type {
   WorkspaceSSEEventType,
   WorkspaceEventStreamErrorCode,
 } from './resources/events.js'
-export {
-  WorkspaceEventStreamError,
-  isWorkspaceEventStreamError,
-} from './resources/events.js'
+export { WorkspaceEventStreamError, isWorkspaceEventStreamError } from './resources/events.js'
 
 export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
 export type {
