@@ -353,6 +353,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "test-integration-connection",
   "test-integration-endpoint",
   "test-skill",
+  "text-turn",
   "transcribe-scribe-recording",
   "trigger-data-source-sync",
   "update-agent",

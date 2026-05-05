@@ -5680,6 +5680,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/services/{service_id}/text-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Text Turn
+         * @description Run one WhatsApp-style text turn against the service's agent.
+         */
+        post: operations["text-turn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/services/{service_id}/tools/resolve": {
         parameters: {
             query?: never;
@@ -24876,6 +24896,26 @@ export interface components {
             /** Session Id */
             session_id: string;
         };
+        /**
+         * TextTurnRequest
+         * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
+         */
+        TextTurnRequest: {
+            /** Phone Number */
+            phone_number: string;
+            /** Text */
+            text: string;
+        };
+        /**
+         * TextTurnResponse
+         * @description Response body — the agent's text reply.
+         *
+         *     Returned only on 200; 204 indicates the engine elected silence.
+         */
+        TextTurnResponse: {
+            /** Text */
+            text: string;
+        };
         /** ThroughputBucket */
         ThroughputBucket: {
             /** Bucket */
@@ -41478,6 +41518,56 @@ export interface operations {
             };
             /** @description Not found. */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "text-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TextTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description Agent text reply */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TextTurnResponse"];
+                };
+            };
+            /** @description Agent elected silence */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Concurrent text turn in progress for this speaker */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
