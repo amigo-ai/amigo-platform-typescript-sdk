@@ -4279,15 +4279,7 @@
                   "terminal_state",
                   "warm_transfer_completed",
                   "no_inbound_audio",
-                  "cancelled",
-                  "max_duration",
-                  "idle_timeout",
-                  "client_stop",
-                  "transport_error",
-                  "disconnected",
-                  "transport_closed",
-                  "unknown",
-                  "conference_ended"
+                  "cancelled"
                 ],
                 "type": "string"
               },
@@ -4731,15 +4723,7 @@
               "terminal_state",
               "warm_transfer_completed",
               "no_inbound_audio",
-              "cancelled",
-              "max_duration",
-              "idle_timeout",
-              "client_stop",
-              "transport_error",
-              "disconnected",
-              "transport_closed",
-              "unknown",
-              "conference_ended"
+              "cancelled"
             ],
             "title": "Completion Reason",
             "type": "string"
@@ -5212,15 +5196,7 @@
                   "terminal_state",
                   "warm_transfer_completed",
                   "no_inbound_audio",
-                  "cancelled",
-                  "max_duration",
-                  "idle_timeout",
-                  "client_stop",
-                  "transport_error",
-                  "disconnected",
-                  "transport_closed",
-                  "unknown",
-                  "conference_ended"
+                  "cancelled"
                 ],
                 "type": "string"
               },
@@ -10677,42 +10653,6 @@
             "title": "Approval Required",
             "type": "boolean"
           },
-          "browser_allowed_domains": {
-            "items": {
-              "maxLength": 253,
-              "minLength": 1,
-              "type": "string"
-            },
-            "maxItems": 50,
-            "title": "Browser Allowed Domains",
-            "type": "array"
-          },
-          "browser_auth_integration": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Auth Integration"
-          },
-          "browser_start_url": {
-            "anyOf": [
-              {
-                "maxLength": 2048,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Start Url"
-          },
           "checkpoint_enabled": {
             "default": true,
             "title": "Checkpoint Enabled",
@@ -10750,8 +10690,6 @@
             "enum": [
               "direct",
               "orchestrated",
-              "autonomous",
-              "browser",
               "computer_use"
             ],
             "title": "Execution Tier",
@@ -23231,36 +23169,6 @@
             "title": "Approval Required",
             "type": "boolean"
           },
-          "browser_allowed_domains": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Browser Allowed Domains",
-            "type": "array"
-          },
-          "browser_auth_integration": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Auth Integration"
-          },
-          "browser_start_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Start Url"
-          },
           "checkpoint_enabled": {
             "default": true,
             "title": "Checkpoint Enabled",
@@ -23299,8 +23207,6 @@
             "enum": [
               "direct",
               "orchestrated",
-              "autonomous",
-              "browser",
               "computer_use"
             ],
             "title": "Execution Tier",
@@ -37606,35 +37512,6 @@
             "title": "Approval Required",
             "type": "boolean"
           },
-          "browser_allowed_domains": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Browser Allowed Domains",
-            "type": "array"
-          },
-          "browser_auth_integration": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Auth Integration"
-          },
-          "browser_start_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Start Url"
-          },
           "checkpoint_enabled": {
             "title": "Checkpoint Enabled",
             "type": "boolean"
@@ -37672,8 +37549,6 @@
             "enum": [
               "direct",
               "orchestrated",
-              "autonomous",
-              "browser",
               "computer_use"
             ],
             "title": "Execution Tier",
@@ -37827,9 +37702,6 @@
           "max_agent_turns",
           "checkpoint_enabled",
           "approval_required",
-          "browser_start_url",
-          "browser_allowed_domains",
-          "browser_auth_integration",
           "version",
           "created_at",
           "updated_at"
@@ -46041,49 +45913,6 @@
             ],
             "title": "Approval Required"
           },
-          "browser_allowed_domains": {
-            "anyOf": [
-              {
-                "items": {
-                  "maxLength": 253,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "maxItems": 50,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Allowed Domains"
-          },
-          "browser_auth_integration": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Auth Integration"
-          },
-          "browser_start_url": {
-            "anyOf": [
-              {
-                "maxLength": 2048,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Browser Start Url"
-          },
           "checkpoint_enabled": {
             "anyOf": [
               {
@@ -46159,8 +45988,6 @@
                 "enum": [
                   "direct",
                   "orchestrated",
-                  "autonomous",
-                  "browser",
                   "computer_use"
                 ],
                 "type": "string"
@@ -78850,8 +78677,6 @@
                   "enum": [
                     "direct",
                     "orchestrated",
-                    "autonomous",
-                    "browser",
                     "computer_use"
                   ],
                   "type": "string"
@@ -79141,7 +78966,7 @@
         ]
       },
       "put": {
-        "description": "Update a skill's configuration. Increments version and creates an audit trail snapshot.\n\n**Field semantics.** Omitted fields and explicit ``null`` are treated identically \u2014 both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``browser_start_url``, ``browser_auth_integration``, ``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.\n\nRequires `Skill.update` permission.",
+        "description": "Update a skill's configuration. Increments version and creates an audit trail snapshot.\n\n**Field semantics.** Omitted fields and explicit ``null`` are treated identically \u2014 both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.\n\nRequires `Skill.update` permission.",
         "operationId": "update-skill",
         "parameters": [
           {
