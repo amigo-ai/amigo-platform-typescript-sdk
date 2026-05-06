@@ -35,6 +35,17 @@ function mockFetch(
 
 describe('ConversationsResource', () => {
   it('lists conversations with optional status filter', async () => {
+    // Mix of all three lifecycle values (active/dormant/closed) so the
+    // SDK's pass-through behavior is exercised across the full enum,
+    // not just the happy "active" path. A future decoder that silently
+    // defaults non-active values to "active" would fail here.
+    //
+    // Note: the mock intentionally ignores the ``status: 'active'``
+    // filter on the request — the filter is server-side, not client-
+    // side. The assertion below on ``searchParams.get('status')``
+    // verifies the SDK forwarded the param to the request URL; the
+    // mismatch between filter and returned items tests value
+    // pass-through, NOT client-side filtering.
     const apiResponse: ConversationListResponse = {
       items: [
         {
@@ -42,26 +53,61 @@ describe('ConversationsResource', () => {
           created_at: '2026-01-01T00:00:00Z',
           id: '00000000-0000-4000-8000-000000000001',
           status: 'active',
+          lifecycle: 'active',
           turn_count: 3,
           updated_at: '2026-01-01T00:01:00Z',
         },
+        {
+          channel_kind: 'sms',
+          created_at: '2026-01-01T00:00:00Z',
+          id: '00000000-0000-4000-8000-000000000002',
+          status: 'frozen',
+          lifecycle: 'dormant',
+          turn_count: 7,
+          updated_at: '2025-12-31T22:00:00Z',
+        },
+        {
+          channel_kind: 'voice',
+          created_at: '2025-12-30T00:00:00Z',
+          id: '00000000-0000-4000-8000-000000000003',
+          status: 'closed',
+          lifecycle: 'closed',
+          turn_count: 12,
+          updated_at: '2025-12-30T00:05:00Z',
+        },
       ],
       has_more: false,
-      total: 1,
+      total: 3,
     }
+    let requestUrl: string | null = null
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`GET ${BASE}/conversations`]: () => Response.json(apiResponse),
+        [`GET ${BASE}/conversations`]: (request) => {
+          requestUrl = request.url
+          return Response.json(apiResponse)
+        },
       }),
     })
 
     const result = await client.conversations.list({ status: 'active' })
 
-    expect(result.items).toHaveLength(1)
+    expect(result.items).toHaveLength(3)
     expect(result.items[0]?.status).toBe('active')
-    expect(result.total).toBe(1)
+    expect(result.total).toBe(3)
+    // SDK passes lifecycle through unmodified for every enum value.
+    expect(result.items.map((item) => item.lifecycle)).toEqual([
+      'active',
+      'dormant',
+      'closed',
+    ])
+    // Verify the ``status`` query parameter is actually forwarded to the
+    // request URL. Without this, a future regression that drops the
+    // filter param would still pass — the mock returns whatever it
+    // wants regardless of the query.
+    expect(requestUrl).not.toBeNull()
+    expect(new URL(requestUrl!).searchParams.get('status')).toBe('active')
   })
 
   it('creates a new conversation and forwards auth header', async () => {
@@ -71,6 +117,7 @@ describe('ConversationsResource', () => {
       id: '00000000-0000-4000-8000-000000000001',
       channel_kind: 'web',
       status: 'active',
+      lifecycle: 'active',
       turn_count: 0,
       turns: [],
       created_at: '2026-01-01T00:00:00Z',
@@ -107,6 +154,7 @@ describe('ConversationsResource', () => {
       id: conversationId,
       channel_kind: 'web',
       status: 'active',
+      lifecycle: 'active',
       turn_count: 2,
       turns: [],
       created_at: '2026-01-01T00:00:00Z',
@@ -125,6 +173,45 @@ describe('ConversationsResource', () => {
     expect(result.id).toBe(conversationId)
     expect(result.turn_count).toBe(2)
   })
+
+  it.each([
+    { lifecycle: 'active' as const, status: 'active' as const },
+    { lifecycle: 'dormant' as const, status: 'frozen' as const },
+    { lifecycle: 'closed' as const, status: 'closed' as const },
+  ])(
+    'preserves lifecycle=$lifecycle on ConversationDetail responses',
+    async ({ lifecycle, status }) => {
+      // Separate parametrized coverage for the detail-response decoder
+      // path catches lifecycle regressions independently of the list
+      // path above. If a separate decoder ever collapsed non-active
+      // values to ``"active"`` on detail responses, the list-level
+      // coverage would still pass — this test would not.
+      const conversationId = '00000000-0000-4000-8000-000000000099'
+      const apiResponse: ConversationDetail = {
+        id: conversationId,
+        channel_kind: 'web',
+        status,
+        lifecycle,
+        turn_count: 4,
+        turns: [],
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:01:00Z',
+      }
+      const client = new AmigoClient({
+        apiKey: TEST_API_KEY,
+        workspaceId: TEST_WORKSPACE_ID,
+        fetch: mockFetch({
+          [`GET ${BASE}/conversations/${conversationId}`]: () =>
+            Response.json(apiResponse),
+        }),
+      })
+
+      const result = await client.conversations.get(conversationId)
+
+      expect(result.lifecycle).toBe(lifecycle)
+      expect(result.status).toBe(status)
+    },
+  )
 
   it('closes a conversation', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
@@ -423,6 +510,8 @@ describe('ConversationsResource', () => {
             id: conversationId,
             channel_kind: 'web',
             status: 'active',
+            lifecycle: 'active',
+            turn_count: 0,
             created_at: '2026-01-01T00:00:00Z',
             updated_at: '2026-01-01T00:00:00Z',
           })
