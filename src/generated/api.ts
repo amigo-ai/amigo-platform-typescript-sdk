@@ -1774,14 +1774,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List SES setups for this workspace
-         * @description Paginated list of SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Requires ``Channel.view`` permission.
+         * List SES setups
+         * @description Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.
          */
         get: operations["list-ses-setups"];
         put?: never;
         /**
          * Create an SES setup
-         * @description Create an SES tenant + verified email identity for this workspace. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Requires ``Channel.create`` permission.
+         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.
          */
         post: operations["create-ses-setup"];
         delete?: never;
@@ -1806,7 +1806,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an SES setup
-         * @description Tear down the upstream SES tenant + identity and soft-delete the workspace binding. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.
+         * @description Tear down the upstream SES tenant + identity. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.
          */
         delete: operations["delete-ses-setup"];
         options?: never;
@@ -6939,6 +6939,10 @@ export interface paths {
         /**
          * Create Simulation Session
          * @description Create a simulation session within a run. Proxies to agent-engine.
+         *
+         *     entity_id ownership: agent-engine's _resolve_caller queries the entity
+         *     with workspace_id scoping — a workspace-A entity_id resolves to None in
+         *     workspace-B, so no cross-tenant data is exposed.
          */
         post: operations["create-simulation-session"];
         delete?: never;
@@ -28873,6 +28877,11 @@ export interface components {
              */
             caller_id?: string | null;
             /**
+             * Entity Id
+             * @description Entity UUID to bind to the session for patient context resolution.
+             */
+            entity_id?: string | null;
+            /**
              * Service Id
              * Format: uuid
              */
@@ -33250,7 +33259,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33294,7 +33303,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33361,7 +33370,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
