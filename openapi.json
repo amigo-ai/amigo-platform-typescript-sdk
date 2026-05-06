@@ -28385,6 +28385,49 @@
         "title": "PaginatedResponse[SesSetupListItemResponse]",
         "type": "object"
       },
+      "PaginatedResponse_SimulationCaseResponse_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationCaseResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[SimulationCaseResponse]",
+        "type": "object"
+      },
       "PaginatedResponse_SkillResponse_": {
         "properties": {
           "continuation_token": {
@@ -36804,6 +36847,147 @@
           "aggregate_summary"
         ],
         "title": "SimulationBenchmarkRunResponse",
+        "type": "object"
+      },
+      "SimulationCaseResponse": {
+        "description": "HTTP response shape for durable simulation cases.",
+        "properties": {
+          "assertions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Assertions",
+            "type": "array"
+          },
+          "constraints": {
+            "additionalProperties": true,
+            "title": "Constraints",
+            "type": "object"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "created_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created By"
+          },
+          "description": {
+            "maxLength": 2000,
+            "title": "Description",
+            "type": "string"
+          },
+          "fixtures": {
+            "additionalProperties": true,
+            "title": "Fixtures",
+            "type": "object"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "initial_message": {
+            "maxLength": 2000,
+            "title": "Initial Message",
+            "type": "string"
+          },
+          "persona": {
+            "additionalProperties": true,
+            "title": "Persona",
+            "type": "object"
+          },
+          "provenance": {
+            "default": "manual",
+            "maxLength": 64,
+            "title": "Provenance",
+            "type": "string"
+          },
+          "scenario_instructions": {
+            "maxLength": 10000,
+            "title": "Scenario Instructions",
+            "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "target_spec": {
+            "additionalProperties": true,
+            "title": "Target Spec",
+            "type": "object"
+          },
+          "temperament": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperament"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "description",
+          "scenario_instructions",
+          "initial_message"
+        ],
+        "title": "SimulationCaseResponse",
         "type": "object"
       },
       "SimulationIntelligenceResponse": {
@@ -50526,6 +50710,19 @@
             "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
             "title": "Caller Id"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Entity UUID to bind to the session for patient context resolution.",
+            "title": "Entity Id"
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
@@ -57799,7 +57996,7 @@
     },
     "/v1/{workspace_id}/channels/ses-setup": {
       "get": {
-        "description": "Paginated list of SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Requires ``Channel.view`` permission.",
+        "description": "Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.",
         "operationId": "list-ses-setups",
         "parameters": [
           {
@@ -57860,13 +58057,13 @@
             "description": "Validation Error"
           }
         },
-        "summary": "List SES setups for this workspace",
+        "summary": "List SES setups",
         "tags": [
           "Channels"
         ]
       },
       "post": {
-        "description": "Create an SES tenant + verified email identity for this workspace. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Requires ``Channel.create`` permission.",
+        "description": "Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.",
         "operationId": "create-ses-setup",
         "parameters": [
           {
@@ -57925,7 +58122,7 @@
     },
     "/v1/{workspace_id}/channels/ses-setup/{setup_id}": {
       "delete": {
-        "description": "Tear down the upstream SES tenant + identity and soft-delete the workspace binding. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.",
+        "description": "Tear down the upstream SES tenant + identity. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.",
         "operationId": "delete-ses-setup",
         "parameters": [
           {
@@ -57957,7 +58154,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "409": {
             "description": "Setup still referenced by live use cases."
@@ -58024,7 +58221,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "422": {
             "content": {
@@ -58084,7 +58281,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "422": {
             "content": {
@@ -77235,6 +77432,167 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/cases": {
+      "get": {
+        "description": "List durable simulation cases for case-library inspection.",
+        "operationId": "list-simulation-cases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tags",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "items": {
+                    "maxLength": 128,
+                    "type": "string"
+                  },
+                  "maxItems": 20,
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tags"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "exclusiveMinimum": 0,
+              "maximum": 20,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_SimulationCaseResponse_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Simulation Cases",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/cases/{case_id}": {
+      "get": {
+        "description": "Fetch one durable simulation case for case-library inspection.",
+        "operationId": "get-simulation-case",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationCaseResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Simulation case not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Case",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
       "post": {
         "description": "Run the current saved simulation case through the bridge executor.",
@@ -77609,7 +77967,7 @@
     },
     "/v1/{workspace_id}/simulations/runs/{run_id}/sessions": {
       "post": {
-        "description": "Create a simulation session within a run. Proxies to agent-engine.",
+        "description": "Create a simulation session within a run. Proxies to agent-engine.\n\nentity_id ownership: agent-engine's _resolve_caller queries the entity\nwith workspace_id scoping \u2014 a workspace-A entity_id resolves to None in\nworkspace-B, so no cross-tenant data is exposed.",
         "operationId": "create-simulation-session",
         "parameters": [
           {
