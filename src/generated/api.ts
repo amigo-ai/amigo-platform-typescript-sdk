@@ -7231,7 +7231,7 @@ export interface paths {
          * Update a skill
          * @description Update a skill's configuration. Increments version and creates an audit trail snapshot.
          *
-         *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``browser_start_url``, ``browser_auth_integration``, ``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
+         *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
          *
          *     Requires `Skill.update` permission.
          */
@@ -12762,12 +12762,6 @@ export interface components {
              * @default false
              */
             approval_required?: boolean;
-            /** Browser Allowed Domains */
-            browser_allowed_domains?: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
             /**
              * Checkpoint Enabled
              * @default true
@@ -12800,7 +12794,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier?: "direct" | "orchestrated" | "computer_use";
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -17754,15 +17748,6 @@ export interface components {
              */
             approval_required?: boolean;
             /**
-             * Browser Allowed Domains
-             * @default []
-             */
-            browser_allowed_domains?: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
-            /**
              * Checkpoint Enabled
              * @default true
              */
@@ -17795,7 +17780,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier?: "direct" | "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -23943,12 +23928,6 @@ export interface components {
         SkillResponse: {
             /** Approval Required */
             approval_required: boolean;
-            /** Browser Allowed Domains */
-            browser_allowed_domains: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration: string | null;
-            /** Browser Start Url */
-            browser_start_url: string | null;
             /** Checkpoint Enabled */
             checkpoint_enabled: boolean;
             /**
@@ -23973,7 +23952,7 @@ export interface components {
              * Execution Tier
              * @enum {string}
              */
-            execution_tier: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier: "direct" | "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -27229,12 +27208,6 @@ export interface components {
         UpdateSkillRequest: {
             /** Approval Required */
             approval_required?: boolean | null;
-            /** Browser Allowed Domains */
-            browser_allowed_domains?: string[] | null;
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
             /** Checkpoint Enabled */
             checkpoint_enabled?: boolean | null;
             /** Delivery */
@@ -27247,7 +27220,7 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
             /** Execution Tier */
-            execution_tier?: ("direct" | "orchestrated" | "autonomous" | "browser" | "computer_use") | null;
+            execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
             /** Input Schema */
             input_schema?: {
                 [key: string]: unknown;
@@ -45576,7 +45549,7 @@ export interface operations {
         parameters: {
             query?: {
                 enabled?: boolean | null;
-                execution_tier?: ("direct" | "orchestrated" | "autonomous" | "browser" | "computer_use") | null;
+                execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
                 search?: components["schemas"]["SearchString"] | null;
                 sort_by?: string | null;
                 limit?: number;
