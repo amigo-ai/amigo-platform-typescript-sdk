@@ -57799,7 +57799,7 @@
     },
     "/v1/{workspace_id}/channels/ses-setup": {
       "get": {
-        "description": "Paginated list of SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Requires ``Channel.view`` permission.",
+        "description": "Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.",
         "operationId": "list-ses-setups",
         "parameters": [
           {
@@ -57860,13 +57860,13 @@
             "description": "Validation Error"
           }
         },
-        "summary": "List SES setups for this workspace",
+        "summary": "List SES setups",
         "tags": [
           "Channels"
         ]
       },
       "post": {
-        "description": "Create an SES tenant + verified email identity for this workspace. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Requires ``Channel.create`` permission.",
+        "description": "Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.",
         "operationId": "create-ses-setup",
         "parameters": [
           {
@@ -57925,7 +57925,7 @@
     },
     "/v1/{workspace_id}/channels/ses-setup/{setup_id}": {
       "delete": {
-        "description": "Tear down the upstream SES tenant + identity and soft-delete the workspace binding. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.",
+        "description": "Tear down the upstream SES tenant + identity. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.",
         "operationId": "delete-ses-setup",
         "parameters": [
           {
@@ -57957,7 +57957,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "409": {
             "description": "Setup still referenced by live use cases."
@@ -58024,7 +58024,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "422": {
             "content": {
@@ -58084,7 +58084,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "SES setup not found in this workspace."
+            "description": "SES setup not found."
           },
           "422": {
             "content": {
