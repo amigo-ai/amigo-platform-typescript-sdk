@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.45.0] - 2026-05-06
+
+### Bug Fixes
+
+- sync API types from platform (63b80002) + add lifecycle fixtures (#198)
+
 ## [0.44.0] - 2026-05-05
 
 ### Features
