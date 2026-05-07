@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.47.1] - 2026-05-07
+
+### Features
+
+- add WorkspaceDatabaseResource (#209)
+
 ## [0.47.0] - 2026-05-07
 
 ### Maintenance
