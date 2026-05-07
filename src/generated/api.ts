@@ -1774,14 +1774,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List SES setups for this workspace
-         * @description Paginated list of SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Requires ``Channel.view`` permission.
+         * List SES setups
+         * @description Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.
          */
         get: operations["list-ses-setups"];
         put?: never;
         /**
          * Create an SES setup
-         * @description Create an SES tenant + verified email identity for this workspace. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Requires ``Channel.create`` permission.
+         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.
          */
         post: operations["create-ses-setup"];
         delete?: never;
@@ -1806,7 +1806,7 @@ export interface paths {
         post?: never;
         /**
          * Delete an SES setup
-         * @description Tear down the upstream SES tenant + identity and soft-delete the workspace binding. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.
+         * @description Tear down the upstream SES tenant + identity. Refuses (409) if any use case still references the setup. Requires ``Channel.delete`` permission.
          */
         delete: operations["delete-ses-setup"];
         options?: never;
@@ -3117,6 +3117,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get fork status */
+        get: operations["get-fork"];
+        put?: never;
+        /** Create a Lakebase fork (sandbox) */
+        post: operations["create-fork"];
+        /** Destroy fork */
+        delete: operations["delete-fork"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/functions": {
         parameters: {
             query?: never;
@@ -3842,6 +3861,23 @@ export interface paths {
          * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
          */
         post: operations["test-integration-connection"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/lakebase/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute SQL against workspace Lakebase */
+        post: operations["execute-workspace-query"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5242,6 +5278,59 @@ export interface paths {
         get: operations["list-prompt-logs"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/query-tools": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List query tools */
+        get: operations["list-query-tools"];
+        put?: never;
+        /** Create a query tool */
+        post: operations["create-query-tool"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/query-tools/{tool_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a query tool */
+        delete: operations["delete-query-tool"];
+        options?: never;
+        head?: never;
+        /** Update a query tool */
+        patch: operations["update-query-tool"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/query-tools/{tool_id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test a query tool with sample parameters */
+        post: operations["test-query-tool"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6830,6 +6919,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Simulation Cases
+         * @description List durable simulation cases for case-library inspection.
+         */
+        get: operations["list-simulation-cases"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/cases/{case_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Case
+         * @description Fetch one durable simulation case for case-library inspection.
+         */
+        get: operations["get-simulation-case"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
         parameters: {
             query?: never;
@@ -6939,6 +7068,10 @@ export interface paths {
         /**
          * Create Simulation Session
          * @description Create a simulation session within a run. Proxies to agent-engine.
+         *
+         *     entity_id ownership: agent-engine's _resolve_caller queries the entity
+         *     with workspace_id scoping — a workspace-A entity_id resolves to None in
+         *     workspace-B, so no cross-tenant data is exposed.
          */
         post: operations["create-simulation-session"];
         delete?: never;
@@ -7231,7 +7364,7 @@ export interface paths {
          * Update a skill
          * @description Update a skill's configuration. Increments version and creates an audit trail snapshot.
          *
-         *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``browser_start_url``, ``browser_auth_integration``, ``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
+         *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
          *
          *     Requires `Skill.update` permission.
          */
@@ -7853,9 +7986,33 @@ export interface paths {
         post?: never;
         /**
          * Delete a channel use case
-         * @description Delete a use case. Fails if voice use case still has phone assignments. Requires Channel.delete permission.
+         * @description Delete a use case. Refuses (409) while any workspace has the use case bound — call DELETE `/use-cases/{id}/bindings` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.
          */
         delete: operations["delete-use-case"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/use-cases/{use_case_id}/bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bind a use case to this workspace
+         * @description Claim a use case for this workspace. Inbound webhook events for the use case will resolve to this workspace. Idempotent for the same workspace; 409 if another workspace owns the binding; revives a soft-deleted binding (after a prior unbind) and re-points it at this workspace. Requires Channel.create permission.
+         */
+        post: operations["bind-use-case"];
+        /**
+         * Unbind a use case from this workspace
+         * @description Release a use case from this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound to this workspace (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.
+         */
+        delete: operations["unbind-use-case"];
         options?: never;
         head?: never;
         patch?: never;
@@ -9894,6 +10051,18 @@ export interface components {
              */
             setup_id: string;
         };
+        /** BindingResponse */
+        BindingResponse: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "voice" | "voicemail" | "email";
+            /** Use Case Id */
+            use_case_id: string;
+            /** Workspace Id */
+            workspace_id: string;
+        };
         /** Body_enroll-voiceprint */
         "Body_enroll-voiceprint": {
             /** Audio */
@@ -10245,7 +10414,7 @@ export interface components {
             /** Caller Id */
             caller_id?: string | null;
             /** Completion Reason */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /** Conference Sid */
             conference_sid?: string | null;
             config?: components["schemas"]["ConversationConfig"] | null;
@@ -10355,7 +10524,7 @@ export interface components {
              * Completion Reason
              * @enum {string}
              */
-            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended";
+            completion_reason: "completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled";
             /**
              * Direction
              * @enum {string}
@@ -10560,7 +10729,7 @@ export interface components {
              * Completion Reason
              * @description Why the call ended
              */
-            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled" | "max_duration" | "idle_timeout" | "client_stop" | "transport_error" | "disconnected" | "transport_closed" | "unknown" | "conference_ended") | null;
+            completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /**
              * Direction
              * @description Call direction
@@ -10914,13 +11083,13 @@ export interface components {
             occurred_at: string;
             /** Phone Number */
             phone_number?: string | null;
-            /**
-             * Setup Id
-             * Format: uuid
-             */
-            setup_id: string;
             /** To Address */
             to_address?: string | null;
+            /**
+             * Use Case Id
+             * Format: uuid
+             */
+            use_case_id: string;
         };
         /** ChannelEventResponse */
         ChannelEventResponse: {
@@ -11843,35 +12012,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /** ConversationActorStartFailedRequest */
-        ConversationActorStartFailedRequest: {
-            channel_kind: components["schemas"]["ChannelKind"];
-            provider: components["schemas"]["ProviderType"];
-            /** Provider Thread Id */
-            provider_thread_id: string;
-        };
-        /** ConversationActorStartFailedResponse */
-        ConversationActorStartFailedResponse: {
-            /**
-             * Conversation Id
-             * Format: uuid
-             */
-            conversation_id: string;
-            /** Rolled Back */
-            rolled_back: boolean;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "frozen" | "closed";
-            /** Version */
-            version: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** ConversationConfig */
         ConversationConfig: {
             /** Agent Id */
@@ -11923,6 +12063,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Lifecycle
+             * @enum {string}
+             */
+            lifecycle: "active" | "dormant" | "closed";
             /** Phone Number */
             phone_number?: string | null;
             /** Plan */
@@ -11960,26 +12105,6 @@ export interface components {
             items: components["schemas"]["src__routes__conversations__ConversationSummary"][];
             /** Total */
             total: number;
-        };
-        /** ConversationReactivationResponse */
-        ConversationReactivationResponse: {
-            /**
-             * Conversation Id
-             * Format: uuid
-             */
-            conversation_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "reactivated";
-            /** Version */
-            version: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** ConversationStateSaveRequest */
         ConversationStateSaveRequest: {
@@ -12426,6 +12551,14 @@ export interface components {
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
         };
+        /** CreateForkRequest */
+        CreateForkRequest: {
+            /**
+             * Ttl Days
+             * @default 7
+             */
+            ttl_days?: number;
+        };
         /** CreateIntegrationRequest */
         CreateIntegrationRequest: {
             auth?: components["schemas"]["AuthConfigWithSecrets"] | null;
@@ -12806,12 +12939,6 @@ export interface components {
              * @default false
              */
             approval_required?: boolean;
-            /** Browser Allowed Domains */
-            browser_allowed_domains?: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
             /**
              * Checkpoint Enabled
              * @default true
@@ -12844,7 +12971,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier?: "direct" | "orchestrated" | "computer_use";
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -12975,6 +13102,24 @@ export interface components {
             token?: string | null;
             /** Url */
             url?: string | null;
+        };
+        /** CreateToolRequest */
+        CreateToolRequest: {
+            /** @default  */
+            description?: components["schemas"]["DescriptionString"];
+            name: components["schemas"]["NameString"];
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            };
+            /** Query */
+            query: string;
+            /**
+             * Target
+             * @default lakebase
+             * @constant
+             */
+            target?: "lakebase";
         };
         /** CreateTriggerRequest */
         CreateTriggerRequest: {
@@ -15967,6 +16112,11 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** ExecuteQueryRequest */
+        ExecuteQueryRequest: {
+            /** Sql */
+            sql: string;
+        };
         /** ExitCondition */
         ExitCondition: {
             /** Description */
@@ -16644,6 +16794,18 @@ export interface components {
         ForkRequest: {
             /** Alternatives */
             alternatives: components["schemas"]["ForkAlternative"][];
+        };
+        /** ForkResponse */
+        ForkResponse: {
+            /** Endpoint */
+            endpoint: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "ready" | "deleting";
+            /** Ttl Days */
+            ttl_days?: number | null;
         };
         /**
          * FormTemplate
@@ -17798,15 +17960,6 @@ export interface components {
              */
             approval_required?: boolean;
             /**
-             * Browser Allowed Domains
-             * @default []
-             */
-            browser_allowed_domains?: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
-            /**
              * Checkpoint Enabled
              * @default true
              */
@@ -17839,7 +17992,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier?: "direct" | "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -20113,6 +20266,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[SimulationCaseResponse] */
+        PaginatedResponse_SimulationCaseResponse_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SimulationCaseResponse"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[SkillResponse] */
         PaginatedResponse_SkillResponse_: {
             /** Continuation Token */
@@ -20143,6 +20307,17 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["SurfaceResponse"][];
+            /** Total */
+            total?: number | null;
+        };
+        /** PaginatedResponse[ToolResponse] */
+        PaginatedResponse_ToolResponse_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ToolResponse"][];
             /** Total */
             total?: number | null;
         };
@@ -21567,6 +21742,17 @@ export interface components {
             results?: {
                 [key: string]: unknown;
             }[];
+        };
+        /** QueryResultResponse */
+        QueryResultResponse: {
+            /** Columns */
+            columns?: string[] | null;
+            /** Row Count */
+            row_count: number;
+            /** Rows */
+            rows?: {
+                [key: string]: unknown;
+            }[] | null;
         };
         /**
          * QuietHours
@@ -23631,6 +23817,65 @@ export interface components {
             /** Skipped Cases */
             skipped_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
         };
+        /**
+         * SimulationCaseResponse
+         * @description HTTP response shape for durable simulation cases.
+         */
+        SimulationCaseResponse: {
+            /** Assertions */
+            assertions?: {
+                [key: string]: unknown;
+            }[];
+            /** Constraints */
+            constraints?: {
+                [key: string]: unknown;
+            };
+            /** Created At */
+            created_at?: string | null;
+            /** Created By */
+            created_by?: string | null;
+            /** Description */
+            description: string;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Initial Message */
+            initial_message: string;
+            /** Persona */
+            persona?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Provenance
+             * @default manual
+             */
+            provenance?: string;
+            /** Scenario Instructions */
+            scenario_instructions: string;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+            /** Target Spec */
+            target_spec?: {
+                [key: string]: unknown;
+            };
+            /** Temperament */
+            temperament?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
             /** Intelligence */
@@ -23987,12 +24232,6 @@ export interface components {
         SkillResponse: {
             /** Approval Required */
             approval_required: boolean;
-            /** Browser Allowed Domains */
-            browser_allowed_domains: string[];
-            /** Browser Auth Integration */
-            browser_auth_integration: string | null;
-            /** Browser Start Url */
-            browser_start_url: string | null;
             /** Checkpoint Enabled */
             checkpoint_enabled: boolean;
             /**
@@ -24017,7 +24256,7 @@ export interface components {
              * Execution Tier
              * @enum {string}
              */
-            execution_tier: "direct" | "orchestrated" | "autonomous" | "browser" | "computer_use";
+            execution_tier: "direct" | "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -25633,6 +25872,13 @@ export interface components {
              */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
         };
+        /** TestToolRequest */
+        TestToolRequest: {
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            };
+        };
         /** TextCompletedEvent */
         TextCompletedEvent: {
             /** Channel Kind */
@@ -26125,6 +26371,34 @@ export interface components {
              * Workspace Id
              * Format: uuid
              */
+            workspace_id: string;
+        };
+        /** ToolResponse */
+        ToolResponse: {
+            /** Created At */
+            created_at?: string | null;
+            /** Description */
+            description: string;
+            /** Enabled */
+            enabled: boolean;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters: {
+                [key: string]: unknown;
+            };
+            /** Query */
+            query: string;
+            /**
+             * Target
+             * @constant
+             */
+            target: "lakebase";
+            /** Updated At */
+            updated_at?: string | null;
+            /** Workspace Id */
             workspace_id: string;
         };
         /**
@@ -27273,12 +27547,6 @@ export interface components {
         UpdateSkillRequest: {
             /** Approval Required */
             approval_required?: boolean | null;
-            /** Browser Allowed Domains */
-            browser_allowed_domains?: string[] | null;
-            /** Browser Auth Integration */
-            browser_auth_integration?: string | null;
-            /** Browser Start Url */
-            browser_start_url?: string | null;
             /** Checkpoint Enabled */
             checkpoint_enabled?: boolean | null;
             /** Delivery */
@@ -27291,7 +27559,7 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
             /** Execution Tier */
-            execution_tier?: ("direct" | "orchestrated" | "autonomous" | "browser" | "computer_use") | null;
+            execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
             /** Input Schema */
             input_schema?: {
                 [key: string]: unknown;
@@ -27382,6 +27650,19 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** UpdateToolRequest */
+        UpdateToolRequest: {
+            description?: components["schemas"]["DescriptionString"] | null;
+            /** Enabled */
+            enabled?: boolean | null;
+            name?: components["schemas"]["NameString"] | null;
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            } | null;
+            /** Query */
+            query?: string | null;
         };
         /** UpdateTriggerRequest */
         UpdateTriggerRequest: {
@@ -28844,6 +29125,11 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /**
+             * Lifecycle
+             * @enum {string}
+             */
+            lifecycle: "active" | "dormant" | "closed";
             /** Phone Number */
             phone_number?: string | null;
             /** Quality Score */
@@ -28938,6 +29224,11 @@ export interface components {
              * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
              */
             caller_id?: string | null;
+            /**
+             * Entity Id
+             * @description Entity UUID to bind to the session for patient context resolution.
+             */
+            entity_id?: string | null;
             /**
              * Service Id
              * Format: uuid
@@ -33316,7 +33607,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33360,7 +33651,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -33427,7 +33718,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description SES setup not found in this workspace. */
+            /** @description SES setup not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -36546,6 +36837,109 @@ export interface operations {
             };
         };
     };
+    "get-fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForkResponse"] | null;
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateForkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ForkResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-fork": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "list-functions": {
         parameters: {
             query?: never;
@@ -38083,6 +38477,46 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "execute-workspace-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExecuteQueryRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueryResultResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -41251,6 +41685,213 @@ export interface operations {
             };
             /** @description Raw world event reads disabled or warehouse unavailable */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-query-tools": {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_ToolResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-query-tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateToolRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-query-tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                tool_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "update-query-tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                tool_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateToolRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolResponse"];
+                };
+            };
+            /** @description Tool not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "test-query-tool": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                tool_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestToolRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QueryResultResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -44831,6 +45472,81 @@ export interface operations {
             };
         };
     };
+    "list-simulation-cases": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+                tags?: string[] | null;
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_SimulationCaseResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationCaseResponse"];
+                };
+            };
+            /** @description Simulation case not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "run-simulation-case": {
         parameters: {
             query?: never;
@@ -45615,7 +46331,7 @@ export interface operations {
         parameters: {
             query?: {
                 enabled?: boolean | null;
-                execution_tier?: ("direct" | "orchestrated" | "autonomous" | "browser" | "computer_use") | null;
+                execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
                 search?: components["schemas"]["SearchString"] | null;
                 sort_by?: string | null;
                 limit?: number;
@@ -47746,7 +48462,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Use case has active phone assignments. */
+            /** @description Use case is bound to a workspace, or still has active phone assignments. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -47775,6 +48491,117 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "bind-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                use_case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BindingResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case is already bound to a different workspace. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "unbind-use-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                use_case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case is not bound to this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
