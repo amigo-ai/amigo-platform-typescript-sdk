@@ -3332,34 +3332,6 @@
         "title": "BindChannelPhoneRequest",
         "type": "object"
       },
-      "BindingResponse": {
-        "properties": {
-          "channel": {
-            "enum": [
-              "voice",
-              "voicemail",
-              "email"
-            ],
-            "title": "Channel",
-            "type": "string"
-          },
-          "use_case_id": {
-            "title": "Use Case Id",
-            "type": "string"
-          },
-          "workspace_id": {
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "use_case_id",
-          "workspace_id",
-          "channel"
-        ],
-        "title": "BindingResponse",
-        "type": "object"
-      },
       "Body_enroll-voiceprint": {
         "properties": {
           "audio": {
@@ -8852,6 +8824,20 @@
           "call_id": {
             "title": "Call Id",
             "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "maximum": 3600000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Omitted (null) on legacy turns that did not capture timing.",
+            "title": "Duration Ms"
           },
           "input": {
             "additionalProperties": true,
@@ -35558,6 +35544,69 @@
         "title": "Service",
         "type": "object"
       },
+      "ServiceBindingRequest": {
+        "properties": {
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id"
+        ],
+        "title": "ServiceBindingRequest",
+        "type": "object"
+      },
+      "ServiceBindingResponse": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "inbound_voice",
+              "outbound_voice",
+              "ringless_voicemail",
+              "email"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "use_case_id": {
+            "format": "uuid",
+            "title": "Use Case Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "use_case_id",
+          "service_id",
+          "workspace_id",
+          "channel",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ServiceBindingResponse",
+        "type": "object"
+      },
       "ServiceResponse": {
         "properties": {
           "agent_id": {
@@ -44793,6 +44842,21 @@
             "maxLength": 256,
             "title": "Call Id",
             "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "maximum": 3600000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Null when the upstream did not report timing (legacy/test paths).",
+            "title": "Duration Ms"
           },
           "event": {
             "const": "tool_call_completed",
@@ -82622,7 +82686,7 @@
     },
     "/v1/{workspace_id}/use-cases/{use_case_id}": {
       "delete": {
-        "description": "Delete a use case. Refuses (409) while any workspace has the use case bound \u2014 call DELETE `/use-cases/{id}/bindings` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
+        "description": "Delete a use case. Refuses (409) while any service still binds the use case \u2014 call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
         "operationId": "delete-use-case",
         "parameters": [
           {
@@ -82657,7 +82721,7 @@
             "description": "Use case not found."
           },
           "409": {
-            "description": "Use case is bound to a workspace, or still has active phone assignments."
+            "description": "Use case is bound to a service, or still has active phone assignments."
           },
           "422": {
             "content": {
@@ -82682,10 +82746,10 @@
         ]
       }
     },
-    "/v1/{workspace_id}/use-cases/{use_case_id}/bindings": {
+    "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
       "delete": {
-        "description": "Release a use case from this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound to this workspace (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
-        "operationId": "unbind-use-case",
+        "description": "Release a use case from its bound service in this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
+        "operationId": "unbind-use-case-from-service",
         "parameters": [
           {
             "in": "path",
@@ -82716,7 +82780,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "Use case is not bound to this workspace."
+            "description": "Use case is not bound to a service in this workspace."
           },
           "422": {
             "content": {
@@ -82729,14 +82793,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Unbind a use case from this workspace",
+        "summary": "Unbind a use case from its platform service",
         "tags": [
           "Use Cases"
         ]
       },
-      "post": {
-        "description": "Claim a use case for this workspace. Inbound webhook events for the use case will resolve to this workspace. Idempotent for the same workspace; 409 if another workspace owns the binding; revives a soft-deleted binding (after a prior unbind) and re-points it at this workspace. Requires Channel.create permission.",
-        "operationId": "bind-use-case",
+      "get": {
+        "description": "Return the platform service this use case is bound to in this workspace, or 404 if unbound. Requires Channel.view permission.",
+        "operationId": "get-use-case-service-binding",
         "parameters": [
           {
             "in": "path",
@@ -82760,11 +82824,11 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BindingResponse"
+                  "$ref": "#/components/schemas/ServiceBindingResponse"
                 }
               }
             },
@@ -82774,10 +82838,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "Use case not found."
-          },
-          "409": {
-            "description": "Use case is already bound to a different workspace."
+            "description": "Use case is not bound to a service in this workspace."
           },
           "422": {
             "content": {
@@ -82788,6 +82849,70 @@
               }
             },
             "description": "Validation Error"
+          }
+        },
+        "summary": "Get the service binding for a use case",
+        "tags": [
+          "Use Cases"
+        ]
+      },
+      "put": {
+        "description": "Bind this use case to a platform service in the current workspace. PUT semantics \u2014 rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.",
+        "operationId": "bind-use-case-to-service",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "use_case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Use Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceBindingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceBindingResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Use case or service not found."
+          },
+          "409": {
+            "description": "Service already has a different use case bound for this channel."
+          },
+          "422": {
+            "description": "Unsupported use case channel."
           },
           "502": {
             "description": "Channel manager unavailable."
@@ -82796,7 +82921,7 @@
             "description": "Channel manager timed out."
           }
         },
-        "summary": "Bind a use case to this workspace",
+        "summary": "Bind a use case to a platform service",
         "tags": [
           "Use Cases"
         ]
