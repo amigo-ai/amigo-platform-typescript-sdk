@@ -629,4 +629,17 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `listActive`
 - `inject`
 
+### `workspaceDatabase`
+
+- `getFork`
+- `createFork`
+- `deleteFork`
+- `executeQuery`
+- `listQueryTools`
+- `listQueryToolsAutoPaging`
+- `createQueryTool`
+- `updateQueryTool`
+- `deleteQueryTool`
+- `testQueryTool`
+
 ### `api`
