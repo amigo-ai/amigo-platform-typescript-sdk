@@ -10389,7 +10389,7 @@ export interface components {
             /** Service Id */
             service_id?: string | null;
             /** Source */
-            source?: string | null;
+            source?: ("real" | "simulation" | "playground" | "scribe") | null;
             /**
              * States Visited
              * @default []
@@ -10693,7 +10693,7 @@ export interface components {
             quality_score?: number | null;
             /**
              * Run Id
-             * @description Simulation run ID (simulated calls only)
+             * @description Simulation run ID (simulation calls only)
              */
             run_id?: string | null;
             /**
@@ -10703,9 +10703,9 @@ export interface components {
             service_id?: string | null;
             /**
              * Source
-             * @description Whether this is a real or simulated call
+             * @description Call source — real, simulation, playground, or scribe
              */
-            source?: ("real" | "simulated" | "playground" | "scribe") | null;
+            source?: ("real" | "simulation" | "playground" | "scribe") | null;
             /**
              * Started At
              * @description When the call started
