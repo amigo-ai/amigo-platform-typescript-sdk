@@ -1746,26 +1746,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/causal/drivers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Drivers
-         * @description Ranked SPR drivers for one (outcome_family, outcome_key). Byar 1978 95% CI. SPR > 1 = feature value over-indexes for this outcome vs. the workspace baseline. Filter by feature_family (demographic|comorbidity) or feature_arity (1=univariate, 2=pairwise). min_support_only=true (default) hides observed < 5 rows. This is DESCRIPTIVE attribution — v2 causal (ITS + synthetic control) lands via the analytics.public.causal_attribution pipeline in Phase 5.
-         */
-        get: operations["list_drivers_v1__workspace_id__causal_drivers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/channels/ses-setup": {
         parameters: {
             query?: never;
@@ -10389,7 +10369,7 @@ export interface components {
             /** Service Id */
             service_id?: string | null;
             /** Source */
-            source?: string | null;
+            source?: ("real" | "simulation" | "playground" | "scribe") | null;
             /**
              * States Visited
              * @default []
@@ -10693,7 +10673,7 @@ export interface components {
             quality_score?: number | null;
             /**
              * Run Id
-             * @description Simulation run ID (simulated calls only)
+             * @description Simulation run ID (simulation calls only)
              */
             run_id?: string | null;
             /**
@@ -10703,9 +10683,9 @@ export interface components {
             service_id?: string | null;
             /**
              * Source
-             * @description Whether this is a real or simulated call
+             * @description Call source — real, simulation, playground, or scribe
              */
-            source?: ("real" | "simulated" | "playground" | "scribe") | null;
+            source?: ("real" | "simulation" | "playground" | "scribe") | null;
             /**
              * Started At
              * @description When the call started
@@ -14371,75 +14351,6 @@ export interface components {
              * @description Whether the live DNS lookup at the time of the GET found the entry.
              */
             verified: boolean;
-        };
-        /**
-         * DriverRow
-         * @description One SPR row — generic (outcome, feature-tuple) grain.
-         */
-        DriverRow: {
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Expected */
-            expected?: number | null;
-            /** Feature Arity */
-            feature_arity: number;
-            /** Feature Family 1 */
-            feature_family_1: string;
-            /** Feature Family 2 */
-            feature_family_2?: string | null;
-            /** Feature Name 1 */
-            feature_name_1: string;
-            /** Feature Name 2 */
-            feature_name_2?: string | null;
-            /** Feature Population */
-            feature_population?: number | null;
-            /** Feature Value 1 */
-            feature_value_1: string;
-            /** Feature Value 2 */
-            feature_value_2?: string | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** Observed */
-            observed: number;
-            /** Outcome Code System */
-            outcome_code_system?: string | null;
-            /** Outcome Display */
-            outcome_display?: string | null;
-            /** Outcome Family */
-            outcome_family: string;
-            /** Outcome Key */
-            outcome_key: string;
-            /** Spr */
-            spr?: number | null;
-            /** Spr Ci Lower */
-            spr_ci_lower?: number | null;
-            /** Spr Ci Upper */
-            spr_ci_upper?: number | null;
-            /** Window Days */
-            window_days?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** DriversResponse */
-        DriversResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["DriverRow"][];
-            /** Outcome Family */
-            outcome_family: string;
-            /** Outcome Key */
-            outcome_key: string;
-            /** Sort By */
-            sort_by: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** EditSoapRequest */
         EditSoapRequest: {
@@ -33383,45 +33294,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    list_drivers_v1__workspace_id__causal_drivers_get: {
-        parameters: {
-            query: {
-                outcome_family: "disease_incidence";
-                outcome_key: string;
-                feature_family?: ("demographic" | "comorbidity") | null;
-                feature_arity?: (1 | 2) | null;
-                min_support_only?: boolean;
-                sort_by?: "spr" | "observed" | "feature_population";
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DriversResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
