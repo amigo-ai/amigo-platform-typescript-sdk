@@ -3332,34 +3332,6 @@
         "title": "BindChannelPhoneRequest",
         "type": "object"
       },
-      "BindingResponse": {
-        "properties": {
-          "channel": {
-            "enum": [
-              "voice",
-              "voicemail",
-              "email"
-            ],
-            "title": "Channel",
-            "type": "string"
-          },
-          "use_case_id": {
-            "title": "Use Case Id",
-            "type": "string"
-          },
-          "workspace_id": {
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "use_case_id",
-          "workspace_id",
-          "channel"
-        ],
-        "title": "BindingResponse",
-        "type": "object"
-      },
       "Body_enroll-voiceprint": {
         "properties": {
           "audio": {
@@ -8852,6 +8824,20 @@
           "call_id": {
             "title": "Call Id",
             "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "maximum": 3600000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Omitted (null) on legacy turns that did not capture timing.",
+            "title": "Duration Ms"
           },
           "input": {
             "additionalProperties": true,
@@ -28986,7 +28972,7 @@
       },
       "Parameter": {
         "additionalProperties": false,
-        "description": "Typed declaration of one SQL bind parameter.\n\nThe ``name`` becomes the ``:name`` placeholder in the SQL template.\nThe ``description`` propagates into the LLM tool spec (this is what\nDatabricks' Agent Framework reads, and what Anthropic's tool-use\nspec exposes to the model). Missing descriptions silently break\ntool selection \u2014 the registration layer rejects empty strings.",
+        "description": "Typed declaration of one input parameter.\n\nFor SQL function types, ``name`` becomes the ``:name`` placeholder\nin the SQL template. For Python function types, ``name`` becomes\nthe positional argument name in ``def main(...)`` and the input\ncolumn name on the UC UDF signature.\n\nThe ``description`` propagates into the LLM tool spec (this is\nwhat Databricks' Agent Framework reads, and what Anthropic's\ntool-use spec exposes to the model). Missing descriptions\nsilently break tool selection \u2014 the registration layer rejects\nempty strings.",
         "properties": {
           "default": {
             "anyOf": [
@@ -32948,8 +32934,14 @@
       },
       "RegisteredFunction": {
         "additionalProperties": false,
-        "description": "The authored shape of a platform function.\n\nIdentical wire format whether it's authored as a YAML file in the\nrepo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy\npipeline validates this, derives the JSON Schema for the LLM tool\nspec, and INSERTs a row into ``platform.functions`` with the next\nmonotonic ``version`` per ``(workspace_id, name)``.",
+        "description": "The authored shape of a platform function.\n\nIdentical wire format whether it's authored as a YAML file in the\nrepo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy\npipeline validates this, derives the JSON Schema for the LLM tool\nspec, and INSERTs a row into ``platform.functions`` with the next\nmonotonic ``version`` per ``(workspace_id, name)``. For\n``python`` / ``udtf`` rows, deploy ALSO issues\n``CREATE OR REPLACE FUNCTION`` against the warehouse to materialize\nthe UC UDF.",
         "properties": {
+          "body": {
+            "maxLength": 8192,
+            "minLength": 1,
+            "title": "Body",
+            "type": "string"
+          },
           "description": {
             "maxLength": 2048,
             "minLength": 1,
@@ -32999,10 +32991,23 @@
             "title": "Returns",
             "type": "string"
           },
-          "sql": {
-            "maxLength": 8192,
-            "minLength": 1,
-            "title": "Sql",
+          "returns_columns": {
+            "items": {
+              "$ref": "#/components/schemas/ReturnColumn"
+            },
+            "maxItems": 32,
+            "title": "Returns Columns",
+            "type": "array"
+          },
+          "returns_type": {
+            "default": "string",
+            "enum": [
+              "string",
+              "integer",
+              "number",
+              "boolean"
+            ],
+            "title": "Returns Type",
             "type": "string"
           },
           "timeout_ms": {
@@ -33022,7 +33027,7 @@
         "required": [
           "name",
           "description",
-          "sql"
+          "body"
         ],
         "title": "RegisteredFunction",
         "type": "object"
@@ -33427,6 +33432,41 @@
           }
         },
         "title": "RetryConfig",
+        "type": "object"
+      },
+      "ReturnColumn": {
+        "additionalProperties": false,
+        "description": "One column in a UDTF's output schema.\n\nUC ``RETURNS TABLE(<col1> <type1>, <col2> <type2>, ...)`` requires\ndeclaring the schema at deploy time. This list anchors that\nschema for ``function_type=udtf`` rows. ``name`` becomes the\ncolumn name in the result rows; ``type`` maps to a Databricks\nSQL type via the same ``ParameterType`` Literal we use for inputs.",
+        "properties": {
+          "description": {
+            "default": "",
+            "maxLength": 512,
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[a-z][a-z0-9_]*$",
+            "title": "Name",
+            "type": "string"
+          },
+          "type": {
+            "enum": [
+              "string",
+              "integer",
+              "number",
+              "boolean"
+            ],
+            "title": "Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "ReturnColumn",
         "type": "object"
       },
       "ReviewActionResponse": {
@@ -35556,6 +35596,69 @@
           "tags"
         ],
         "title": "Service",
+        "type": "object"
+      },
+      "ServiceBindingRequest": {
+        "properties": {
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "service_id"
+        ],
+        "title": "ServiceBindingRequest",
+        "type": "object"
+      },
+      "ServiceBindingResponse": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "inbound_voice",
+              "outbound_voice",
+              "ringless_voicemail",
+              "email"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "use_case_id": {
+            "format": "uuid",
+            "title": "Use Case Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "use_case_id",
+          "service_id",
+          "workspace_id",
+          "channel",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "ServiceBindingResponse",
         "type": "object"
       },
       "ServiceResponse": {
@@ -44793,6 +44896,21 @@
             "maxLength": 256,
             "title": "Call Id",
             "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "maximum": 3600000.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Null when the upstream did not report timing (legacy/test paths).",
+            "title": "Duration Ms"
           },
           "event": {
             "const": "tool_call_completed",
@@ -82622,7 +82740,7 @@
     },
     "/v1/{workspace_id}/use-cases/{use_case_id}": {
       "delete": {
-        "description": "Delete a use case. Refuses (409) while any workspace has the use case bound \u2014 call DELETE `/use-cases/{id}/bindings` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
+        "description": "Delete a use case. Refuses (409) while any service still binds the use case \u2014 call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
         "operationId": "delete-use-case",
         "parameters": [
           {
@@ -82657,7 +82775,7 @@
             "description": "Use case not found."
           },
           "409": {
-            "description": "Use case is bound to a workspace, or still has active phone assignments."
+            "description": "Use case is bound to a service, or still has active phone assignments."
           },
           "422": {
             "content": {
@@ -82682,10 +82800,10 @@
         ]
       }
     },
-    "/v1/{workspace_id}/use-cases/{use_case_id}/bindings": {
+    "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
       "delete": {
-        "description": "Release a use case from this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound to this workspace (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
-        "operationId": "unbind-use-case",
+        "description": "Release a use case from its bound service in this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
+        "operationId": "unbind-use-case-from-service",
         "parameters": [
           {
             "in": "path",
@@ -82716,7 +82834,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "Use case is not bound to this workspace."
+            "description": "Use case is not bound to a service in this workspace."
           },
           "422": {
             "content": {
@@ -82729,14 +82847,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Unbind a use case from this workspace",
+        "summary": "Unbind a use case from its platform service",
         "tags": [
           "Use Cases"
         ]
       },
-      "post": {
-        "description": "Claim a use case for this workspace. Inbound webhook events for the use case will resolve to this workspace. Idempotent for the same workspace; 409 if another workspace owns the binding; revives a soft-deleted binding (after a prior unbind) and re-points it at this workspace. Requires Channel.create permission.",
-        "operationId": "bind-use-case",
+      "get": {
+        "description": "Return the platform service this use case is bound to in this workspace, or 404 if unbound. Requires Channel.view permission.",
+        "operationId": "get-use-case-service-binding",
         "parameters": [
           {
             "in": "path",
@@ -82760,11 +82878,11 @@
           }
         ],
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BindingResponse"
+                  "$ref": "#/components/schemas/ServiceBindingResponse"
                 }
               }
             },
@@ -82774,10 +82892,7 @@
             "description": "Insufficient permissions."
           },
           "404": {
-            "description": "Use case not found."
-          },
-          "409": {
-            "description": "Use case is already bound to a different workspace."
+            "description": "Use case is not bound to a service in this workspace."
           },
           "422": {
             "content": {
@@ -82788,6 +82903,70 @@
               }
             },
             "description": "Validation Error"
+          }
+        },
+        "summary": "Get the service binding for a use case",
+        "tags": [
+          "Use Cases"
+        ]
+      },
+      "put": {
+        "description": "Bind this use case to a platform service in the current workspace. PUT semantics \u2014 rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.",
+        "operationId": "bind-use-case-to-service",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "use_case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Use Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ServiceBindingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceBindingResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Use case or service not found."
+          },
+          "409": {
+            "description": "Service already has a different use case bound for this channel."
+          },
+          "422": {
+            "description": "Unsupported use case channel."
           },
           "502": {
             "description": "Channel manager unavailable."
@@ -82796,7 +82975,7 @@
             "description": "Channel manager timed out."
           }
         },
-        "summary": "Bind a use case to this workspace",
+        "summary": "Bind a use case to a platform service",
         "tags": [
           "Use Cases"
         ]

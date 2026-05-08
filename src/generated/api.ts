@@ -7986,7 +7986,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a channel use case
-         * @description Delete a use case. Refuses (409) while any workspace has the use case bound — call DELETE `/use-cases/{id}/bindings` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.
+         * @description Delete a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.
          */
         delete: operations["delete-use-case"];
         options?: never;
@@ -7994,25 +7994,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/use-cases/{use_case_id}/bindings": {
+    "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
         /**
-         * Bind a use case to this workspace
-         * @description Claim a use case for this workspace. Inbound webhook events for the use case will resolve to this workspace. Idempotent for the same workspace; 409 if another workspace owns the binding; revives a soft-deleted binding (after a prior unbind) and re-points it at this workspace. Requires Channel.create permission.
+         * Get the service binding for a use case
+         * @description Return the platform service this use case is bound to in this workspace, or 404 if unbound. Requires Channel.view permission.
          */
-        post: operations["bind-use-case"];
+        get: operations["get-use-case-service-binding"];
         /**
-         * Unbind a use case from this workspace
-         * @description Release a use case from this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound to this workspace (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.
+         * Bind a use case to a platform service
+         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.
          */
-        delete: operations["unbind-use-case"];
+        put: operations["bind-use-case-to-service"];
+        post?: never;
+        /**
+         * Unbind a use case from its platform service
+         * @description Release a use case from its bound service in this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.
+         */
+        delete: operations["unbind-use-case-from-service"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10050,18 +10054,6 @@ export interface components {
              * @description Channel-manager Twilio setup ID that owns the phone number
              */
             setup_id: string;
-        };
-        /** BindingResponse */
-        BindingResponse: {
-            /**
-             * Channel
-             * @enum {string}
-             */
-            channel: "voice" | "voicemail" | "email";
-            /** Use Case Id */
-            use_case_id: string;
-            /** Workspace Id */
-            workspace_id: string;
         };
         /** Body_enroll-voiceprint */
         "Body_enroll-voiceprint": {
@@ -12207,6 +12199,11 @@ export interface components {
         ConversationToolCallDetail: {
             /** Call Id */
             call_id: string;
+            /**
+             * Duration Ms
+             * @description Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Omitted (null) on legacy turns that did not capture timing.
+             */
+            duration_ms?: number | null;
             /** Input */
             input?: {
                 [key: string]: unknown;
@@ -20401,13 +20398,18 @@ export interface components {
         };
         /**
          * Parameter
-         * @description Typed declaration of one SQL bind parameter.
+         * @description Typed declaration of one input parameter.
          *
-         *     The ``name`` becomes the ``:name`` placeholder in the SQL template.
-         *     The ``description`` propagates into the LLM tool spec (this is what
-         *     Databricks' Agent Framework reads, and what Anthropic's tool-use
-         *     spec exposes to the model). Missing descriptions silently break
-         *     tool selection — the registration layer rejects empty strings.
+         *     For SQL function types, ``name`` becomes the ``:name`` placeholder
+         *     in the SQL template. For Python function types, ``name`` becomes
+         *     the positional argument name in ``def main(...)`` and the input
+         *     column name on the UC UDF signature.
+         *
+         *     The ``description`` propagates into the LLM tool spec (this is
+         *     what Databricks' Agent Framework reads, and what Anthropic's
+         *     tool-use spec exposes to the model). Missing descriptions
+         *     silently break tool selection — the registration layer rejects
+         *     empty strings.
          */
         Parameter: {
             /** Default */
@@ -21994,9 +21996,14 @@ export interface components {
          *     repo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy
          *     pipeline validates this, derives the JSON Schema for the LLM tool
          *     spec, and INSERTs a row into ``platform.functions`` with the next
-         *     monotonic ``version`` per ``(workspace_id, name)``.
+         *     monotonic ``version`` per ``(workspace_id, name)``. For
+         *     ``python`` / ``udtf`` rows, deploy ALSO issues
+         *     ``CREATE OR REPLACE FUNCTION`` against the warehouse to materialize
+         *     the UC UDF.
          */
         RegisteredFunction: {
+            /** Body */
+            body: string;
             /** Description */
             description: string;
             /** Examples */
@@ -22017,8 +22024,14 @@ export interface components {
              * @enum {string}
              */
             returns?: "table" | "scalar";
-            /** Sql */
-            sql: string;
+            /** Returns Columns */
+            returns_columns?: components["schemas"]["ReturnColumn"][];
+            /**
+             * Returns Type
+             * @default string
+             * @enum {string}
+             */
+            returns_type?: "string" | "integer" | "number" | "boolean";
             /**
              * Timeout Ms
              * @default 30000
@@ -22192,6 +22205,30 @@ export interface components {
              *     ]
              */
             retry_on_status?: number[];
+        };
+        /**
+         * ReturnColumn
+         * @description One column in a UDTF's output schema.
+         *
+         *     UC ``RETURNS TABLE(<col1> <type1>, <col2> <type2>, ...)`` requires
+         *     declaring the schema at deploy time. This list anchors that
+         *     schema for ``function_type=udtf`` rows. ``name`` becomes the
+         *     column name in the result rows; ``type`` maps to a Databricks
+         *     SQL type via the same ``ParameterType`` Literal we use for inputs.
+         */
+        ReturnColumn: {
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
         };
         /** ReviewActionResponse */
         ReviewActionResponse: {
@@ -23160,6 +23197,47 @@ export interface components {
                 [key: string]: components["schemas"]["VersionSet"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
+        };
+        /** ServiceBindingRequest */
+        ServiceBindingRequest: {
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+        };
+        /** ServiceBindingResponse */
+        ServiceBindingResponse: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail" | "email";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Use Case Id
+             * Format: uuid
+             */
+            use_case_id: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** ServiceResponse */
         ServiceResponse: {
@@ -27227,6 +27305,12 @@ export interface components {
         TurnToolCallCompletedEvent: {
             /** Call Id */
             call_id: string;
+            /**
+             * Duration Ms
+             * @description Wall-clock tool execution time in milliseconds, measured at the engage_step call site. Null when the upstream did not report timing (legacy/test paths).
+             * @default null
+             */
+            duration_ms?: number | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -48462,7 +48546,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Use case is bound to a workspace, or still has active phone assignments. */
+            /** @description Use case is bound to a service, or still has active phone assignments. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -48494,7 +48578,7 @@ export interface operations {
             };
         };
     };
-    "bind-use-case": {
+    "get-use-case-service-binding": {
         parameters: {
             query?: never;
             header?: never;
@@ -48507,12 +48591,12 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["BindingResponse"];
+                    "application/json": components["schemas"]["ServiceBindingResponse"];
                 };
             };
             /** @description Insufficient permissions. */
@@ -48522,15 +48606,8 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Use case not found. */
+            /** @description Use case is not bound to a service in this workspace. */
             404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case is already bound to a different workspace. */
-            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -48544,6 +48621,61 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "bind-use-case-to-service": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                use_case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ServiceBindingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceBindingResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case or service not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Service already has a different use case bound for this channel. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unsupported use case channel. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Channel manager unavailable. */
             502: {
@@ -48561,7 +48693,7 @@ export interface operations {
             };
         };
     };
-    "unbind-use-case": {
+    "unbind-use-case-from-service": {
         parameters: {
             query?: never;
             header?: never;
@@ -48587,7 +48719,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Use case is not bound to this workspace. */
+            /** @description Use case is not bound to a service in this workspace. */
             404: {
                 headers: {
                     [name: string]: unknown;
