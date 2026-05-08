@@ -722,6 +722,8 @@ export type {
   ConversationTurn,
   CreateConversationRequest,
   ListConversationsParams,
+  SendMessageRequest,
+  SendMessageResponse,
   SessionConnectUrlParams,
   TextStreamAuthProtocols,
   TextStreamUrlParams,

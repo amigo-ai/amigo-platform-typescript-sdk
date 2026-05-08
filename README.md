@@ -404,6 +404,8 @@ const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 
 Use `client.conversations.sendMessage()` for user-first synchronous text turns. Omit
 `conversation_id` to start a new durable conversation; pass the returned ID to resume it.
+These conversations are written through `/v1/{workspace_id}/conversations` and show up
+in the developer console Conversations page.
 
 ```typescript
 const firstTurn = await client.conversations.sendMessage({
@@ -421,30 +423,29 @@ const nextTurn = await client.conversations.sendMessage({
 console.log(nextTurn.messages.map((message) => message.text))
 ```
 
-For real-time browser clients, build the text-stream URL and use WebSocket
-subprotocol auth so the token is not placed in the URL:
+For streaming responses, create the durable conversation first, then stream turns
+through the same conversations API used by the playground:
 
 ```typescript
-import { textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
-
-const apiKey = process.env.AMIGO_API_KEY!
-const url = client.conversations.textStreamUrl({ serviceId: 'service-id' })
-const socket = new WebSocket(url, textStreamAuthProtocols(apiKey))
-
-socket.addEventListener('open', () => {
-  socket.send(JSON.stringify({ type: 'message', text: 'Hello' }))
+const conversation = await client.conversations.create({
+  service_id: 'service-id',
+  entity_id: 'entity-id',
+  auto_greet: false,
 })
+
+for await (const event of client.conversations.streamTurn(
+  conversation.id,
+  { message: 'Hello, I need help scheduling' },
+  { includeToolCalls: true },
+)) {
+  if (event.event === 'token') process.stdout.write(event.text)
+  if (event.event === 'done') console.log(`\nConversation: ${event.conversation_id}`)
+}
 ```
 
-If a browser rejects your API key as a WebSocket subprotocol value, use the
-query-token fallback only in trusted contexts. URL tokens can appear in browser
-history, server access logs, HTTP proxy logs, and referrer headers:
-
-```typescript
-// WARNING: query tokens can be captured by URL logs and browser history.
-const url = client.conversations.textStreamUrl({ serviceId: 'service-id', token: apiKey })
-const socket = new WebSocket(url)
-```
+Use `client.simulations.*` only for simulation and coverage workflows. Simulation
+sessions are stored as simulated call intelligence and do not appear in
+`/[workspace]/conversations`.
 
 ### Real-time event streams
 

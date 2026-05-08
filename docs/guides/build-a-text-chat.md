@@ -1,30 +1,32 @@
 # Build a Text Chat Integration
 
-This guide walks through building a real-time text chat frontend that connects to an Amigo agent via WebSocket. By the end, you will be able to stream agent responses, display tool call activity, and resume frozen conversations.
+This guide shows the durable text-conversation flow used by the developer-console
+text playground. It creates rows through `/v1/{workspace_id}/conversations`, so
+the resulting sessions appear in `/{workspace}/conversations`.
+
+Do not use `client.simulations.*` for production/headless web chat. Simulation
+sessions are for test coverage and are stored as simulated call intelligence,
+not as conversation rows.
 
 ## Concepts
 
-**Conversations** are persistent, multi-turn text sessions with an agent. They support two transports:
+**Conversations** are persistent, multi-turn text sessions with an agent. Use
+these SDK methods for web chat:
 
-- **REST** (`POST /v1/{workspace_id}/conversations/{id}/turns`) — synchronous request-response. Good for server-to-server integrations.
-- **WebSocket** (`/agent/text-stream`) — real-time bidirectional. Good for chat UIs. This is what this guide covers.
+- `client.conversations.create()` starts a durable conversation row.
+- `client.conversations.createTurn()` sends a synchronous user turn.
+- `client.conversations.streamTurn()` sends a user turn and yields typed SSE
+  events for tokens, tool calls, messages, and completion.
+- `client.conversations.sendMessage()` is a user-first convenience helper that
+  creates a conversation when `conversation_id` is omitted, then sends the turn.
 
-Both transports share the same conversation state. You can start over REST and resume over WebSocket, or vice versa.
+After each turn, the conversation may freeze/dormant on the server until the
+next user turn resumes it. Keep the returned `conversation_id` and pass it into
+the next request.
 
-**Tool calls** happen when the agent needs to fetch data or perform actions (search appointments, check insurance, look up medications). When `tool_events=true`, the WebSocket surfaces these as `tool_call_started` and `tool_call_completed` frames so your UI can show what the agent is doing.
+## User-First Synchronous Chat
 
-### Conversation lifecycle
-
-```
-[New] --> Active --> Frozen --> Active --> ... --> Closed
-                 (turn done)        (next turn)
-```
-
-After every turn, the conversation freezes. The next message thaws it. This is invisible — just keep sending messages.
-
-## Step 1: Create a conversation
-
-Use the SDK to create a conversation. This gives you a `conversation_id` for the WebSocket connection.
+Use `sendMessage()` when your backend wants a simple request/response flow.
 
 ```typescript
 import { AmigoClient } from '@amigo-ai/platform-sdk'
@@ -34,584 +36,111 @@ const client = new AmigoClient({
   workspaceId: process.env.AMIGO_WORKSPACE_ID!,
 })
 
+const firstTurn = await client.conversations.sendMessage({
+  service_id: process.env.AMIGO_SERVICE_ID!,
+  entity_id: 'optional-patient-entity-id',
+  message: 'Hi, I need help scheduling an appointment',
+})
+
+console.log(firstTurn.conversation_id)
+console.log(firstTurn.messages.map((message) => message.text))
+
+const nextTurn = await client.conversations.sendMessage({
+  conversation_id: firstTurn.conversation_id,
+  message: 'Tuesday morning works',
+})
+```
+
+`sendMessage()` defaults the initial create call to `auto_greet: false`, so the
+conversation starts with the user's first message. That matches most embedded
+web-chat experiences.
+
+## Streaming Chat
+
+Use `create()` once, store the returned conversation ID, then call
+`streamTurn()` for every user message.
+
+```typescript
 const conversation = await client.conversations.create({
-  service_id: 'your-service-id',
-  entity_id: 'optional-patient-entity-id', // for world model context
+  service_id: process.env.AMIGO_SERVICE_ID!,
+  entity_id: 'optional-patient-entity-id',
+  auto_greet: false,
 })
 
-console.log(conversation.id) // UUID — save this
-```
-
-## Step 2: Connect via WebSocket
-
-The SDK provides `textStreamUrl()` and `textStreamAuthProtocols()` helpers.
-
-### Browser
-
-```typescript
-import { AmigoClient, textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
-
-const client = new AmigoClient({
-  apiKey: API_KEY,
-  workspaceId: WORKSPACE_ID,
-})
-
-const url = client.conversations.textStreamUrl({
-  serviceId: SERVICE_ID,
-  conversationId: conversation.id, // optional — omit for new conversation
-  entityId: ENTITY_ID, // optional — patient context
-})
-
-// Authenticate via subprotocol (keeps token out of URL)
-const protocols = textStreamAuthProtocols(API_KEY)
-const ws = new WebSocket(url, protocols)
-```
-
-### Node.js
-
-```typescript
-import WebSocket from 'ws'
-
-const url = client.conversations.textStreamUrl({
-  serviceId: SERVICE_ID,
-  toolEvents: true,
-  token: API_KEY, // query param fallback for Node.js
-})
-
-const ws = new WebSocket(url)
-```
-
-### Query parameters
-
-| Parameter         | Required | Description                                          |
-| ----------------- | -------- | ---------------------------------------------------- |
-| `workspace_id`    | Yes      | Workspace ID                                         |
-| `service_id`      | Yes      | Which agent to talk to                               |
-| `token`           | Yes\*    | API key or JWT (\*or use subprotocol auth)           |
-| `conversation_id` | No       | Resume a frozen conversation                         |
-| `entity_id`       | No       | Patient entity ID for world model context            |
-| `tool_events`     | No       | `true` to receive tool call frames (default `false`) |
-
-## Step 3: Handle streaming events
-
-### Wire protocol
-
-**Client sends:**
-
-| Frame                                | Description         |
-| ------------------------------------ | ------------------- |
-| `{"type": "message", "text": "..."}` | Send a user message |
-| `{"type": "stop"}`                   | End the session     |
-
-**Server sends:**
-
-| Frame                                                                                                       | When                                               |
-| ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `{"type": "session_started", "session_id": "...", "conversation_id": "..."}`                                | First frame after connection                       |
-| `{"type": "typing"}`                                                                                        | Agent is thinking                                  |
-| `{"type": "tool_call_started", "tool_name": "...", "call_id": "...", "input": {...}}`                       | Agent started a tool (requires `tool_events=true`) |
-| `{"type": "tool_call_completed", "tool_name": "...", "call_id": "...", "result": "...", "succeeded": true}` | Tool finished (requires `tool_events=true`)        |
-| `{"type": "message", "text": "..."}`                                                                        | Agent's response                                   |
-| `{"type": "error", "message": "..."}`                                                                       | Error (connection stays open)                      |
-| `{"type": "session_ended", "reason": "..."}`                                                                | Session ended, socket closing                      |
-
-### Event sequence for a turn with tool calls
-
-```
-Client: {"type": "message", "text": "What appointments are available?"}
-Server: {"type": "typing"}
-Server: {"type": "tool_call_started", "tool_name": "search_appointments", "call_id": "c1", "input": {"date": "2026-04-29"}}
-Server: {"type": "tool_call_completed", "tool_name": "search_appointments", "call_id": "c1", "result": "[{\"time\": \"2pm\", ...}]", "succeeded": true}
-Server: {"type": "message", "text": "I found 3 available appointments for tomorrow..."}
-```
-
-### Message handler
-
-```typescript
-ws.onmessage = (event) => {
-  const frame = JSON.parse(event.data)
-
-  switch (frame.type) {
-    case 'session_started':
-      // Save conversation_id for reconnection
-      localStorage.setItem('conversationId', frame.conversation_id)
-      break
-
-    case 'typing':
-      showTypingIndicator()
+for await (const event of client.conversations.streamTurn(
+  conversation.id,
+  { message: 'What appointments are available tomorrow?' },
+  { includeToolCalls: true },
+)) {
+  switch (event.event) {
+    case 'token':
+      process.stdout.write(event.text)
       break
 
     case 'tool_call_started':
-      // Show tool activity: "Searching appointments..."
-      showToolCard(frame.call_id, frame.tool_name, frame.input)
+      console.log(`tool started: ${event.tool_name}`)
       break
 
     case 'tool_call_completed':
-      // Update tool card with result or error
-      updateToolCard(frame.call_id, frame.result, frame.succeeded)
+      console.log(`tool completed: ${event.tool_name}`)
       break
 
     case 'message':
-      hideTypingIndicator()
-      appendMessage('agent', frame.text)
+      console.log(event.text)
+      break
+
+    case 'done':
+      console.log(`conversation ${event.conversation_id} is ${event.status}`)
       break
 
     case 'error':
-      showError(frame.message)
-      break
-
-    case 'session_ended':
-      disableInput()
-      showStatus(`Session ended: ${frame.reason}`)
-      break
+      throw new Error(event.message)
   }
 }
 ```
 
-## Step 4: Display tool calls
+## Resume a Conversation
 
-When a tool call starts, create a card showing the tool name and input. When it completes, update the card with the result.
+Persist `conversation.id` in your app session. Send later turns to the same ID:
 
 ```typescript
-function showToolCard(callId: string, toolName: string, input: Record<string, unknown>) {
-  const card = document.createElement('div')
-  card.id = `tool-${callId}`
-  card.className = 'tool-card loading'
-  card.innerHTML = `
-    <span class="tool-name">${toolName}</span>
-    <span class="tool-input">${JSON.stringify(input)}</span>
-    <span class="tool-status">Running...</span>
-  `
-  chatLog.appendChild(card)
-}
+await client.conversations.createTurn(
+  conversationId,
+  { message: 'Can you book that slot?' },
+  { includeToolCalls: true },
+)
+```
 
-function updateToolCard(callId: string, result: string, succeeded: boolean) {
-  const card = document.getElementById(`tool-${callId}`)
-  if (!card) return
-  card.classList.remove('loading')
-  card.classList.add(succeeded ? 'success' : 'failure')
-  const status = card.querySelector('.tool-status')!
-  status.textContent = succeeded ? result.slice(0, 200) : `Failed: ${result}`
+or stream it:
+
+```typescript
+for await (const event of client.conversations.streamTurn(conversationId, {
+  message: 'Can you book that slot?',
+})) {
+  // render token/message/tool/done events
 }
 ```
 
-## Step 5: Resume a frozen conversation
+## Browser Architecture
 
-When the WebSocket disconnects, the conversation freezes. To resume, reconnect with the same `conversation_id`:
+Do not expose workspace API keys directly in browser code. Put the SDK calls
+behind your backend or BFF:
 
-```typescript
-const url = client.conversations.textStreamUrl({
-  serviceId: SERVICE_ID,
-  conversationId: localStorage.getItem('conversationId')!,
-})
-const ws = new WebSocket(url, textStreamAuthProtocols(API_KEY))
-// No greeting — agent waits for your message
-```
+1. Browser posts the user's message to your backend.
+2. Backend calls `client.conversations.create()` if there is no conversation ID.
+3. Backend calls `streamTurn()` and forwards typed events to the browser using
+   your app's preferred transport.
+4. Browser stores the returned `conversation_id` for the next turn.
 
-## Step 6: REST turns (alternative)
+For a Node REPL example of the same durable streaming flow, see
+[`examples/conversations/text-chat.ts`](../../examples/conversations/text-chat.ts).
 
-For server-to-server integrations, use `POST /turns` instead of WebSocket. Tool calls are returned in the response when `include_tool_calls=true`:
+## Troubleshooting
 
-```typescript
-const response = await client.conversations.createTurn(conversationId, {
-  message: 'What appointments are available?',
-})
+If a chat does not show in `/{workspace}/conversations`, check the SDK surface
+being used:
 
-// response.output — agent's response messages
-// response.tool_calls — tool call details (when include_tool_calls=true)
-```
-
-```bash
-curl -X POST "https://api.platform.amigo.ai/v1/$WS/conversations/$CONV/turns?include_tool_calls=true" \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"message": "What appointments are available?"}'
-```
-
-## Complete reference implementation
-
-Copy this HTML file, fill in your credentials, and open it in a browser. It demonstrates the complete WebSocket text chat flow with tool call display.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Amigo Text Chat</title>
-    <style>
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-      body {
-        font-family: system-ui, sans-serif;
-        background: #f5f5f5;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-      }
-      .config {
-        padding: 12px 16px;
-        background: #fff;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        gap: 8px;
-        flex-wrap: wrap;
-        align-items: end;
-      }
-      .config label {
-        font-size: 12px;
-        color: #666;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-      }
-      .config input {
-        padding: 6px 8px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 13px;
-        width: 180px;
-      }
-      .config button {
-        padding: 6px 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 13px;
-      }
-      .config .connect {
-        background: #2563eb;
-        color: #fff;
-      }
-      .config .disconnect {
-        background: #dc2626;
-        color: #fff;
-      }
-      .status {
-        font-size: 12px;
-        padding: 4px 8px;
-        border-radius: 12px;
-        align-self: center;
-      }
-      .status.connected {
-        background: #dcfce7;
-        color: #166534;
-      }
-      .status.disconnected {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .chat {
-        flex: 1;
-        overflow-y: auto;
-        padding: 16px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-      .msg {
-        max-width: 70%;
-        padding: 10px 14px;
-        border-radius: 12px;
-        font-size: 14px;
-        line-height: 1.4;
-        white-space: pre-wrap;
-      }
-      .msg.user {
-        align-self: flex-end;
-        background: #2563eb;
-        color: #fff;
-        border-bottom-right-radius: 4px;
-      }
-      .msg.agent {
-        align-self: flex-start;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-bottom-left-radius: 4px;
-      }
-      .msg.system {
-        align-self: center;
-        background: #f3f4f6;
-        color: #6b7280;
-        font-size: 12px;
-        border-radius: 8px;
-      }
-      .tool-card {
-        align-self: stretch;
-        background: #fefce8;
-        border: 1px solid #fde68a;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 13px;
-      }
-      .tool-card.success {
-        background: #f0fdf4;
-        border-color: #bbf7d0;
-      }
-      .tool-card.failure {
-        background: #fef2f2;
-        border-color: #fecaca;
-      }
-      .tool-card .name {
-        font-weight: 600;
-      }
-      .tool-card .result {
-        color: #374151;
-        margin-top: 4px;
-        font-size: 12px;
-        max-height: 80px;
-        overflow: hidden;
-      }
-      .typing {
-        align-self: flex-start;
-        color: #9ca3af;
-        font-size: 13px;
-        padding: 4px 0;
-      }
-      .input-bar {
-        padding: 12px 16px;
-        background: #fff;
-        border-top: 1px solid #ddd;
-        display: flex;
-        gap: 8px;
-      }
-      .input-bar input {
-        flex: 1;
-        padding: 10px 14px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 14px;
-      }
-      .input-bar button {
-        padding: 10px 20px;
-        background: #2563eb;
-        color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      .input-bar button:disabled {
-        background: #93c5fd;
-        cursor: not-allowed;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="config">
-      <label>API URL <input id="apiUrl" value="wss://api.platform.amigo.ai" /></label>
-      <label>Token <input id="token" type="password" /></label>
-      <label>Workspace <input id="workspace" /></label>
-      <label>Service <input id="service" /></label>
-      <label>Conversation ID <input id="convId" placeholder="(optional — resume)" /></label>
-      <label>Entity ID <input id="entityId" placeholder="(optional)" /></label>
-      <button class="connect" onclick="connect()">Connect</button>
-      <button class="disconnect" onclick="disconnect()">Disconnect</button>
-      <span id="status" class="status disconnected">Disconnected</span>
-    </div>
-    <div class="chat" id="chat"></div>
-    <div class="input-bar">
-      <input
-        id="msgInput"
-        placeholder="Type a message..."
-        onkeydown="if(event.key==='Enter')send()"
-        disabled
-      />
-      <button id="sendBtn" onclick="send()" disabled>Send</button>
-    </div>
-    <script>
-      let ws = null
-      let conversationId = null
-
-      function connect() {
-        const base = document.getElementById('apiUrl').value
-        const token = document.getElementById('token').value
-        const workspace = document.getElementById('workspace').value
-        const service = document.getElementById('service').value
-        const convId = document.getElementById('convId').value
-        const entityId = document.getElementById('entityId').value
-        if (!token || !workspace || !service)
-          return alert('Token, workspace, and service are required')
-
-        const url = new URL(base.replace(/^http/, 'ws') + '/agent/text-stream')
-        url.searchParams.set('token', token)
-        url.searchParams.set('workspace_id', workspace)
-        url.searchParams.set('service_id', service)
-        url.searchParams.set('tool_events', 'true')
-        if (convId) url.searchParams.set('conversation_id', convId)
-        if (entityId) url.searchParams.set('entity_id', entityId)
-
-        ws = new WebSocket(url.toString())
-        setStatus('connecting')
-
-        ws.onopen = () => setStatus('connected')
-        ws.onclose = (e) => {
-          setStatus('disconnected')
-          addSystem(`Disconnected (${e.code}: ${e.reason || 'clean'})`)
-          document.getElementById('msgInput').disabled = true
-          document.getElementById('sendBtn').disabled = true
-        }
-        ws.onerror = () => addSystem('WebSocket error')
-        ws.onmessage = (e) => {
-          const f = JSON.parse(e.data)
-          switch (f.type) {
-            case 'session_started':
-              conversationId = f.conversation_id
-              document.getElementById('convId').value = conversationId
-              addSystem(`Session ${f.session_id} | Conversation ${f.conversation_id}`)
-              document.getElementById('msgInput').disabled = false
-              document.getElementById('sendBtn').disabled = false
-              document.getElementById('msgInput').focus()
-              break
-            case 'typing':
-              showTyping()
-              break
-            case 'tool_call_started':
-              hideTyping()
-              addToolStart(f.call_id, f.tool_name, f.input)
-              break
-            case 'tool_call_completed':
-              updateTool(f.call_id, f.result, f.succeeded)
-              break
-            case 'message':
-              hideTyping()
-              addAgent(f.text)
-              break
-            case 'error':
-              addSystem('Error: ' + f.message)
-              break
-            case 'session_ended':
-              addSystem('Session ended: ' + f.reason)
-              document.getElementById('msgInput').disabled = true
-              document.getElementById('sendBtn').disabled = true
-              break
-          }
-        }
-      }
-
-      function disconnect() {
-        if (ws) {
-          ws.send(JSON.stringify({ type: 'stop' }))
-          ws.close()
-        }
-      }
-
-      function send() {
-        const input = document.getElementById('msgInput')
-        const text = input.value.trim()
-        if (!text || !ws || ws.readyState !== 1) return
-        ws.send(JSON.stringify({ type: 'message', text }))
-        addUser(text)
-        input.value = ''
-      }
-
-      function setStatus(s) {
-        const el = document.getElementById('status')
-        el.textContent = s.charAt(0).toUpperCase() + s.slice(1)
-        el.className = 'status ' + (s === 'connected' ? 'connected' : 'disconnected')
-      }
-
-      function addUser(text) {
-        const d = document.createElement('div')
-        d.className = 'msg user'
-        d.textContent = text
-        document.getElementById('chat').appendChild(d)
-        scrollBottom()
-      }
-
-      function addAgent(text) {
-        const d = document.createElement('div')
-        d.className = 'msg agent'
-        d.textContent = text
-        document.getElementById('chat').appendChild(d)
-        scrollBottom()
-      }
-
-      function addSystem(text) {
-        const d = document.createElement('div')
-        d.className = 'msg system'
-        d.textContent = text
-        document.getElementById('chat').appendChild(d)
-        scrollBottom()
-      }
-
-      function addToolStart(callId, name, input) {
-        const d = document.createElement('div')
-        d.className = 'tool-card'
-        d.id = 'tool-' + callId
-        d.innerHTML =
-          '<span class="name">' +
-          name +
-          '</span> <span style="color:#6b7280">running...</span>' +
-          '<div class="result" style="color:#92400e">' +
-          JSON.stringify(input) +
-          '</div>'
-        document.getElementById('chat').appendChild(d)
-        scrollBottom()
-      }
-
-      function updateTool(callId, result, succeeded) {
-        const d = document.getElementById('tool-' + callId)
-        if (!d) return
-        d.className = 'tool-card ' + (succeeded ? 'success' : 'failure')
-        const label = succeeded ? 'done' : 'failed'
-        d.querySelector('span:last-of-type').textContent = label
-        d.querySelector('.result').textContent = result.slice(0, 300)
-      }
-
-      let typingEl = null
-      function showTyping() {
-        if (typingEl) return
-        typingEl = document.createElement('div')
-        typingEl.className = 'typing'
-        typingEl.textContent = 'Agent is typing...'
-        document.getElementById('chat').appendChild(typingEl)
-        scrollBottom()
-      }
-      function hideTyping() {
-        if (typingEl) {
-          typingEl.remove()
-          typingEl = null
-        }
-      }
-
-      function scrollBottom() {
-        const c = document.getElementById('chat')
-        c.scrollTop = c.scrollHeight
-      }
-    </script>
-  </body>
-</html>
-```
-
-## Error handling
-
-| Close code | Meaning                     | Action                                                  |
-| ---------- | --------------------------- | ------------------------------------------------------- |
-| `1000`     | Normal close                | Session ended cleanly                                   |
-| `4001`     | Missing params or bad token | Check credentials                                       |
-| `4003`     | Token workspace mismatch    | Token doesn't match workspace_id                        |
-| `4200`     | Engine init failed          | Retry once, then investigate                            |
-| `4400`     | Invalid conversation_id     | Must be a valid UUID                                    |
-| `4404`     | Conversation not found      | Wrong ID or different workspace                         |
-| `4409`     | Conversation already active | Another client owns it — wait or use a new conversation |
-
-## Reconnection
-
-```typescript
-ws.onclose = (event) => {
-  if (event.code === 1000) return // clean close, don't reconnect
-
-  setTimeout(() => {
-    connect({
-      conversationId: localStorage.getItem('conversationId'),
-      // ... other params
-    })
-  }, 3000)
-}
-```
-
-The `retry: 3000` SSE directive equivalent for WebSocket — reconnect after 3 seconds. The conversation is frozen, not lost.
+- `client.conversations.*` writes durable conversation rows.
+- `client.simulations.*` writes simulation/call-intelligence artifacts instead.
+- Legacy text WebSocket helpers may not be available in all deployments and
+  should not be used for new headless web-chat integrations.

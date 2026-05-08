@@ -97,11 +97,7 @@ describe('ConversationsResource', () => {
     expect(result.items[0]?.status).toBe('active')
     expect(result.total).toBe(3)
     // SDK passes lifecycle through unmodified for every enum value.
-    expect(result.items.map((item) => item.lifecycle)).toEqual([
-      'active',
-      'dormant',
-      'closed',
-    ])
+    expect(result.items.map((item) => item.lifecycle)).toEqual(['active', 'dormant', 'closed'])
     // Verify the ``status`` query parameter is actually forwarded to the
     // request URL. Without this, a future regression that drops the
     // filter param would still pass — the mock returns whatever it
@@ -201,8 +197,7 @@ describe('ConversationsResource', () => {
         apiKey: TEST_API_KEY,
         workspaceId: TEST_WORKSPACE_ID,
         fetch: mockFetch({
-          [`GET ${BASE}/conversations/${conversationId}`]: () =>
-            Response.json(apiResponse),
+          [`GET ${BASE}/conversations/${conversationId}`]: () => Response.json(apiResponse),
         }),
       })
 
@@ -424,6 +419,144 @@ describe('ConversationsResource', () => {
     await expect(
       client.conversations.createTurn(conversationId, { message: '' }),
     ).rejects.toBeInstanceOf(BadRequestError)
+  })
+
+  it('sendMessage starts a durable conversation before sending the first user turn', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const serviceId = 'svc-00000000-0000-0000-0000-000000000001'
+    const entityId = 'ent-00000000-0000-0000-0000-000000000001'
+    let createBody: unknown
+    let turnBody: unknown
+    let turnUrl: string | undefined
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-001',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: {
+        role: 'user',
+        text: 'Hello',
+        timestamp: '2026-01-01T00:00:00Z',
+        content: [{ type: 'text', text: 'Hello' }],
+      },
+      output: [
+        {
+          role: 'agent',
+          text: 'How can I help?',
+          timestamp: '2026-01-01T00:00:01Z',
+          content: [{ type: 'text', text: 'How can I help?' }],
+        },
+      ],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations`]: async (req) => {
+          createBody = await req.json()
+          return Response.json(
+            {
+              id: conversationId,
+              channel_kind: 'web',
+              status: 'active',
+              lifecycle: 'active',
+              turn_count: 0,
+              turns: [],
+              created_at: '2026-01-01T00:00:00Z',
+              updated_at: '2026-01-01T00:00:00Z',
+            } satisfies ConversationDetail,
+            { status: 201 },
+          )
+        },
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
+          turnUrl = req.url
+          turnBody = await req.json()
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    const result = await client.conversations.sendMessage(
+      {
+        service_id: serviceId,
+        entity_id: entityId,
+        message: 'Hello',
+      },
+      { includeToolCalls: true },
+    )
+
+    expect(createBody).toEqual({
+      service_id: serviceId,
+      entity_id: entityId,
+      auto_greet: false,
+    })
+    expect(turnBody).toEqual({ message: 'Hello' })
+    expect(new URL(turnUrl as string).searchParams.get('include_tool_calls')).toBe('true')
+    expect(result.conversation_id).toBe(conversationId)
+    expect(result.messages).toEqual(apiResponse.output)
+  })
+
+  it('sendMessage resumes an existing durable conversation without creating a new one', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let turnBody: unknown
+    let createCalled = false
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-002',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 2,
+        updated_at: '2026-01-01T00:00:02Z',
+      },
+      input: {
+        role: 'user',
+        text: 'Tuesday morning works',
+        timestamp: '2026-01-01T00:00:01Z',
+        content: [{ type: 'text', text: 'Tuesday morning works' }],
+      },
+      output: [],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations`]: () => {
+          createCalled = true
+          return Response.json({ detail: 'should not create' }, { status: 500 })
+        },
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
+          turnBody = await req.json()
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    const result = await client.conversations.sendMessage({
+      conversation_id: conversationId,
+      message: 'Tuesday morning works',
+    })
+
+    expect(createCalled).toBe(false)
+    expect(turnBody).toEqual({ message: 'Tuesday morning works' })
+    expect(result.conversation_id).toBe(conversationId)
+    expect(result.conversation.turn_count).toBe(2)
+  })
+
+  it('sendMessage requires service_id when starting a new durable conversation', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({}),
+    })
+
+    await expect(client.conversations.sendMessage({ message: 'Hello' })).rejects.toBeInstanceOf(
+      ConfigurationError,
+    )
   })
 
   it('builds a text-stream URL from the client baseUrl', () => {
@@ -908,9 +1041,14 @@ describe('ConversationsResource', () => {
       fetch: mockFetch({
         [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: (req) => {
           requestUrl = req.url
-          return new Response(sseStream(['event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n']), {
-            headers: { 'content-type': 'text/event-stream' },
-          })
+          return new Response(
+            sseStream([
+              'event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n',
+            ]),
+            {
+              headers: { 'content-type': 'text/event-stream' },
+            },
+          )
         },
       }),
     })
@@ -1014,9 +1152,7 @@ describe('ConversationsResource', () => {
     // default of false. Those defaults are static-type defaults; on the
     // wire the fields are simply absent and pass through the parser.
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const stream = sseStream([
-      'event: error\ndata: {"message":"legacy"}\n\n',
-    ])
+    const stream = sseStream(['event: error\ndata: {"message":"legacy"}\n\n'])
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,

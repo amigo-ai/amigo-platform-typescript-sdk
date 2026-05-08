@@ -20,6 +20,31 @@ export type TurnMessageEvent = components['schemas']['TurnMessageEvent']
 export type TurnDoneEvent = components['schemas']['TurnDoneEvent']
 export type TurnErrorEvent = components['schemas']['TurnErrorEvent']
 
+export type SendMessageRequest = TurnRequest & {
+  /**
+   * Existing durable conversation to resume. When omitted, the SDK creates a
+   * new `/conversations` row before sending the turn.
+   */
+  conversation_id?: string
+  /** Required when starting a new conversation. Ignored when `conversation_id` is present. */
+  service_id?: string
+  /** Optional entity binding for the new conversation. */
+  entity_id?: string | null
+  /**
+   * Whether the server should create an agent greeting before the first user
+   * turn when starting a new conversation. Defaults to `false` so the helper
+   * follows a user-first web-chat flow.
+   */
+  auto_greet?: boolean
+}
+
+export type SendMessageResponse = TurnResponse & {
+  /** Convenience alias for `conversation.id`, useful for passing into the next turn. */
+  conversation_id: string
+  /** Convenience alias for `output`, matching user-facing chat terminology. */
+  messages: ConversationTurn[]
+}
+
 /**
  * Hand-authored because the text-stream WebSocket endpoint is intentionally
  * outside the generated OpenAPI REST snapshot.
@@ -167,6 +192,37 @@ export class ConversationsResource extends WorkspaceScopedResource {
         headers: { Accept: 'application/json' },
       }),
     ) as TurnResponse
+  }
+
+  /**
+   * User-first durable text chat helper.
+   *
+   * If `request.conversation_id` is omitted, this creates a new durable
+   * `/conversations` row with `auto_greet: false` by default, then sends the
+   * user message as the first turn. Pass the returned `conversation_id` back
+   * into subsequent calls to resume the same conversation.
+   */
+  async sendMessage(
+    request: SendMessageRequest,
+    options?: { includeToolCalls?: boolean },
+  ): Promise<SendMessageResponse> {
+    const existingConversationId = optionalNonEmpty(request.conversation_id)
+    const conversationId =
+      existingConversationId ??
+      (
+        await this.create({
+          service_id: requireServiceId(request.service_id),
+          ...(request.entity_id !== undefined && { entity_id: request.entity_id }),
+          auto_greet: request.auto_greet ?? false,
+        })
+      ).id
+
+    const response = await this.createTurn(conversationId, toTurnRequest(request), options)
+    return {
+      ...response,
+      conversation_id: response.conversation.id,
+      messages: response.output,
+    }
   }
 
   /**
@@ -495,6 +551,25 @@ function describeInvalidSubprotocolChars(token: string): string {
   return [...chars].map((char) => JSON.stringify(char)).join(', ')
 }
 
+function requireServiceId(serviceId: string | undefined): string {
+  if (!serviceId?.trim()) {
+    throw new ConfigurationError('service_id is required when conversation_id is not provided')
+  }
+  return serviceId
+}
+
+function optionalNonEmpty(value: string | undefined): string | undefined {
+  return value?.trim() ? value : undefined
+}
+
+function toTurnRequest(request: TurnRequest): TurnRequest {
+  const turnRequest: TurnRequest = { message: request.message }
+  if (request.content !== undefined) turnRequest.content = request.content
+  if (request.media_type !== undefined) turnRequest.media_type = request.media_type
+  if (request.media_url !== undefined) turnRequest.media_url = request.media_url
+  return turnRequest
+}
+
 // ---------------------------------------------------------------------------
 // Inline SSE parser
 //
@@ -510,9 +585,7 @@ interface SSEFrame {
   data: string
 }
 
-async function* parseSSEFrames(
-  stream: ReadableStream<Uint8Array>,
-): AsyncGenerator<SSEFrame> {
+async function* parseSSEFrames(stream: ReadableStream<Uint8Array>): AsyncGenerator<SSEFrame> {
   const reader = stream.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
@@ -549,9 +622,7 @@ async function* parseSSEFrames(
   }
 }
 
-function findFrameTerminator(
-  s: string,
-): { terminatorStart: number; terminatorEnd: number } | null {
+function findFrameTerminator(s: string): { terminatorStart: number; terminatorEnd: number } | null {
   // Prefer LF-LF; fall back to CRLF-CRLF if the server is using CRLF
   // line endings end-to-end.
   const lf = s.indexOf('\n\n')
@@ -616,4 +687,3 @@ function parseTurnStreamFrame(eventName: string, dataJson: string): TurnStreamEv
   // `event:` line). Reattach it so the union member is well-formed.
   return { ...(payload as Record<string, unknown>), event: eventName } as TurnStreamEvent
 }
-
