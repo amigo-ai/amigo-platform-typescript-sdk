@@ -23,32 +23,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/s/vcard/{workspace_slug}.vcf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Serve Vcard
-         * @description Serve a vCard contact card for a workspace.
-         *
-         *     Public, unauthenticated endpoint. iOS blocks clickable links in SMS
-         *     from unknown senders — sending a vCard first lets patients save the
-         *     number so subsequent SMS links render as tappable.
-         *
-         *     Path: ``/s/vcard/{workspace_slug}.vcf``
-         */
-        get: operations["serve-vcard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/s/{token}": {
         parameters: {
             query?: never;
@@ -7475,9 +7449,10 @@ export interface paths {
          * Deliver Surface
          * @description Record a real delivery handoff for a surface.
          *
-         *     Phone-number targets are delivered via SMS (SendBlue or Twilio).
-         *     Email targets are delivered via Gmail API. Other targets record an
-         *     external handoff that was completed outside platform-api.
+         *     Email targets are delivered via Gmail API. Phone-shaped addresses
+         *     return 422 — SMS surface delivery was removed in PR #2783 (zero
+         *     production callers across all 4 prod regions). Other targets
+         *     record an external handoff that was completed outside platform-api.
          *
          *     Permissions: member, admin, owner (surfaces:write)
          */
@@ -21402,7 +21377,7 @@ export interface components {
          *     Infobip both support SMS).
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
+        ProviderType: "twilio" | "infobip" | "gmail" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -29154,51 +29129,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "serve-vcard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Workspace or phone number not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
