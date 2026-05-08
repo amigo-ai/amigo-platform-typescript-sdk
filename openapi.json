@@ -4577,6 +4577,12 @@
           "source": {
             "anyOf": [
               {
+                "enum": [
+                  "real",
+                  "simulation",
+                  "playground",
+                  "scribe"
+                ],
                 "type": "string"
               },
               {
@@ -5344,7 +5350,7 @@
                 "type": "null"
               }
             ],
-            "description": "Simulation run ID (simulated calls only)",
+            "description": "Simulation run ID (simulation calls only)",
             "title": "Run Id"
           },
           "service_id": {
@@ -5365,7 +5371,7 @@
               {
                 "enum": [
                   "real",
-                  "simulated",
+                  "simulation",
                   "playground",
                   "scribe"
                 ],
@@ -5375,7 +5381,7 @@
                 "type": "null"
               }
             ],
-            "description": "Whether this is a real or simulated call",
+            "description": "Call source \u2014 real, simulation, playground, or scribe",
             "title": "Source"
           },
           "started_at": {
@@ -14388,236 +14394,6 @@
           "verified"
         ],
         "title": "DnsRecordResponse",
-        "type": "object"
-      },
-      "DriverRow": {
-        "description": "One SPR row \u2014 generic (outcome, feature-tuple) grain.",
-        "properties": {
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "expected": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected"
-          },
-          "feature_arity": {
-            "title": "Feature Arity",
-            "type": "integer"
-          },
-          "feature_family_1": {
-            "title": "Feature Family 1",
-            "type": "string"
-          },
-          "feature_family_2": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feature Family 2"
-          },
-          "feature_name_1": {
-            "title": "Feature Name 1",
-            "type": "string"
-          },
-          "feature_name_2": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feature Name 2"
-          },
-          "feature_population": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feature Population"
-          },
-          "feature_value_1": {
-            "title": "Feature Value 1",
-            "type": "string"
-          },
-          "feature_value_2": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Feature Value 2"
-          },
-          "min_support_met": {
-            "title": "Min Support Met",
-            "type": "boolean"
-          },
-          "observed": {
-            "title": "Observed",
-            "type": "integer"
-          },
-          "outcome_code_system": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Outcome Code System"
-          },
-          "outcome_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Outcome Display"
-          },
-          "outcome_family": {
-            "title": "Outcome Family",
-            "type": "string"
-          },
-          "outcome_key": {
-            "title": "Outcome Key",
-            "type": "string"
-          },
-          "spr": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr"
-          },
-          "spr_ci_lower": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr Ci Lower"
-          },
-          "spr_ci_upper": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr Ci Upper"
-          },
-          "window_days": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Window Days"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "outcome_family",
-          "outcome_key",
-          "feature_arity",
-          "feature_family_1",
-          "feature_name_1",
-          "feature_value_1",
-          "observed",
-          "min_support_met"
-        ],
-        "title": "DriverRow",
-        "type": "object"
-      },
-      "DriversResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/DriverRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "outcome_family": {
-            "title": "Outcome Family",
-            "type": "string"
-          },
-          "outcome_key": {
-            "title": "Outcome Key",
-            "type": "string"
-          },
-          "sort_by": {
-            "title": "Sort By",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "outcome_family",
-          "outcome_key",
-          "sort_by",
-          "count",
-          "items"
-        ],
-        "title": "DriversResponse",
         "type": "object"
       },
       "EditSoapRequest": {
@@ -58206,148 +57982,6 @@
         "summary": "Deep call understanding",
         "tags": [
           "Calls"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/causal/drivers": {
-      "get": {
-        "description": "Ranked SPR drivers for one (outcome_family, outcome_key). Byar 1978 95% CI. SPR > 1 = feature value over-indexes for this outcome vs. the workspace baseline. Filter by feature_family (demographic|comorbidity) or feature_arity (1=univariate, 2=pairwise). min_support_only=true (default) hides observed < 5 rows. This is DESCRIPTIVE attribution \u2014 v2 causal (ITS + synthetic control) lands via the analytics.public.causal_attribution pipeline in Phase 5.",
-        "operationId": "list_drivers_v1__workspace_id__causal_drivers_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "outcome_family",
-            "required": true,
-            "schema": {
-              "const": "disease_incidence",
-              "title": "Outcome Family",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "outcome_key",
-            "required": true,
-            "schema": {
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "Outcome Key",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "feature_family",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "demographic",
-                    "comorbidity"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Feature Family"
-            }
-          },
-          {
-            "in": "query",
-            "name": "feature_arity",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    1,
-                    2
-                  ],
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Feature Arity"
-            }
-          },
-          {
-            "in": "query",
-            "name": "min_support_only",
-            "required": false,
-            "schema": {
-              "default": true,
-              "title": "Min Support Only",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort_by",
-            "required": false,
-            "schema": {
-              "default": "spr",
-              "enum": [
-                "spr",
-                "observed",
-                "feature_population"
-              ],
-              "title": "Sort By",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DriversResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Drivers",
-        "tags": [
-          "Causal Ledger"
         ]
       }
     },
