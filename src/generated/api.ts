@@ -7475,7 +7475,7 @@ export interface paths {
          * Deliver Surface
          * @description Record a real delivery handoff for a surface.
          *
-         *     Phone-number targets are delivered via SMS (SendBlue or Twilio).
+         *     Phone-number targets are delivered via SMS (Twilio).
          *     Email targets are delivered via Gmail API. Other targets record an
          *     external handoff that was completed outside platform-api.
          *
@@ -21402,7 +21402,7 @@ export interface components {
          *     Infobip both support SMS).
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
+        ProviderType: "twilio" | "infobip" | "gmail" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];

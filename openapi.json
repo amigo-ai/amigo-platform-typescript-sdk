@@ -31900,7 +31900,6 @@
         "enum": [
           "twilio",
           "infobip",
-          "sendblue",
           "gmail",
           "websocket"
         ],
@@ -80336,7 +80335,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (SendBlue or Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {
