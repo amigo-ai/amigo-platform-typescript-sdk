@@ -11001,6 +11001,18 @@
           },
           "title": {
             "$ref": "#/components/schemas/NameString"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -11082,6 +11094,18 @@
               }
             ],
             "title": "Url"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -31900,7 +31924,6 @@
         "enum": [
           "twilio",
           "infobip",
-          "sendblue",
           "gmail",
           "websocket"
         ],
@@ -39965,6 +39988,18 @@
               }
             ],
             "title": "Title"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -50938,53 +50973,6 @@
           }
         },
         "summary": "Redirect To Surface",
-        "tags": [
-          "Surface Patient"
-        ]
-      }
-    },
-    "/s/vcard/{workspace_slug}.vcf": {
-      "get": {
-        "description": "Serve a vCard contact card for a workspace.\n\nPublic, unauthenticated endpoint. iOS blocks clickable links in SMS\nfrom unknown senders \u2014 sending a vCard first lets patients save the\nnumber so subsequent SMS links render as tappable.\n\nPath: ``/s/vcard/{workspace_slug}.vcf``",
-        "operationId": "serve-vcard",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_slug",
-            "required": true,
-            "schema": {
-              "title": "Workspace Slug",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace or phone number not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Serve Vcard",
         "tags": [
           "Surface Patient"
         ]
@@ -80336,7 +80324,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (SendBlue or Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered via Gmail API. Phone-shaped addresses\nreturn 422 \u2014 SMS surface delivery was removed in PR #2783 (zero\nproduction callers across all 4 prod regions). Other targets\nrecord an external handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {

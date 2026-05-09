@@ -355,7 +355,6 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "search-world-entities",
   "send-billing-invoice",
   "send-voicemail",
-  "serve-vcard",
   "set-phone-number-forwarding",
   "simulation-bridge",
   "simulation-bridge-plan",
