@@ -6162,11 +6162,7 @@
       "ChannelType": {
         "description": "Delivery channels for surfaces.",
         "enum": [
-          "sms",
-          "whatsapp",
-          "imessage",
           "email",
-          "voice",
           "web"
         ],
         "title": "ChannelType",
@@ -11001,6 +10997,18 @@
           },
           "title": {
             "$ref": "#/components/schemas/NameString"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -11082,6 +11090,18 @@
               }
             ],
             "title": "Url"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -21401,7 +21421,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -21474,7 +21494,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -26984,7 +27004,7 @@
           },
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "consent_required": {
             "default": true,
@@ -31900,7 +31920,6 @@
         "enum": [
           "twilio",
           "infobip",
-          "sendblue",
           "gmail",
           "websocket"
         ],
@@ -32208,7 +32227,7 @@
         "type": "object"
       },
       "QuietHours": {
-        "description": "TCPA-compliant quiet hours \u2014 no outbound SMS during this window.",
+        "description": "Quiet hours \u2014 no outbound outreach during this window.",
         "properties": {
           "enabled": {
             "default": false,
@@ -39965,6 +39984,18 @@
               }
             ],
             "title": "Title"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -50938,53 +50969,6 @@
           }
         },
         "summary": "Redirect To Surface",
-        "tags": [
-          "Surface Patient"
-        ]
-      }
-    },
-    "/s/vcard/{workspace_slug}.vcf": {
-      "get": {
-        "description": "Serve a vCard contact card for a workspace.\n\nPublic, unauthenticated endpoint. iOS blocks clickable links in SMS\nfrom unknown senders \u2014 sending a vCard first lets patients save the\nnumber so subsequent SMS links render as tappable.\n\nPath: ``/s/vcard/{workspace_slug}.vcf``",
-        "operationId": "serve-vcard",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_slug",
-            "required": true,
-            "schema": {
-              "title": "Workspace Slug",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace or phone number not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Serve Vcard",
         "tags": [
           "Surface Patient"
         ]
@@ -80336,7 +80320,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (SendBlue or Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {

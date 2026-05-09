@@ -23,32 +23,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/s/vcard/{workspace_slug}.vcf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Serve Vcard
-         * @description Serve a vCard contact card for a workspace.
-         *
-         *     Public, unauthenticated endpoint. iOS blocks clickable links in SMS
-         *     from unknown senders — sending a vCard first lets patients save the
-         *     number so subsequent SMS links render as tappable.
-         *
-         *     Path: ``/s/vcard/{workspace_slug}.vcf``
-         */
-        get: operations["serve-vcard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/s/{token}": {
         parameters: {
             query?: never;
@@ -7475,9 +7449,12 @@ export interface paths {
          * Deliver Surface
          * @description Record a real delivery handoff for a surface.
          *
-         *     Phone-number targets are delivered via SMS (SendBlue or Twilio).
-         *     Email targets are delivered via Gmail API. Other targets record an
-         *     external handoff that was completed outside platform-api.
+         *     Email targets are delivered through channel-manager's
+         *     ``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,
+         *     suppression — keyed on the surface row's ``use_case_id``). Phone-shaped
+         *     addresses return 422 — SMS surface delivery was removed in PR #2783.
+         *     Other targets record an external handoff that was completed outside
+         *     platform-api.
          *
          *     Permissions: member, admin, owner (surfaces:write)
          */
@@ -11019,7 +10996,7 @@ export interface components {
          * @description Delivery channels for surfaces.
          * @enum {string}
          */
-        ChannelType: "sms" | "whatsapp" | "imessage" | "email" | "voice" | "web";
+        ChannelType: "email" | "web";
         /**
          * ChannelVoicemailStatusEvent
          * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
@@ -12963,6 +12940,8 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title: components["schemas"]["NameString"];
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** CreateSurfaceResponse */
         CreateSurfaceResponse: {
@@ -12997,6 +12976,8 @@ export interface components {
             token?: string | null;
             /** Url */
             url?: string | null;
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** CreateToolRequest */
         CreateToolRequest: {
@@ -17079,7 +17060,7 @@ export interface components {
          * @description A named gap detection rule.
          */
         "GapRequirement-Input": {
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Entity Type
@@ -17111,7 +17092,7 @@ export interface components {
          * @description A named gap detection rule.
          */
         "GapRequirement-Output": {
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Entity Type
@@ -19713,7 +19694,7 @@ export interface components {
              * @default true
              */
             active?: boolean;
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Consent Required
@@ -21402,7 +21383,7 @@ export interface components {
          *     Infobip both support SMS).
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
+        ProviderType: "twilio" | "infobip" | "gmail" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -21533,7 +21514,7 @@ export interface components {
         };
         /**
          * QuietHours
-         * @description TCPA-compliant quiet hours — no outbound SMS during this window.
+         * @description Quiet hours — no outbound outreach during this window.
          */
         QuietHours: {
             /**
@@ -25066,6 +25047,8 @@ export interface components {
             } | null;
             /** Title */
             title?: string | null;
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** SurfaceReviewApprovedEvent */
         SurfaceReviewApprovedEvent: {
@@ -29154,51 +29137,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "serve-vcard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Workspace or phone number not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
