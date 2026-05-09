@@ -23,7 +23,7 @@ const surface = await client.POST('/v1/{workspace_id}/surfaces', {
     entity_id: patientId,
     title: 'New Patient Intake',
     description: 'Please complete this form before your appointment.',
-    channel: 'sms',
+    channel: 'web',
     expires_in_hours: 72,
     fields: [
       {
