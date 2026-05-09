@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.48.3] - 2026-05-09
+
+### Maintenance
+
+- No public SDK changes were recorded in this release.
+
 ## [0.48.2] - 2026-05-09
 
 ### Bug Fixes
