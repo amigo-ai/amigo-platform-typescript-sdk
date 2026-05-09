@@ -6115,7 +6115,6 @@
           "voice",
           "sms",
           "whatsapp",
-          "imessage",
           "email",
           "web",
           "scribe"
@@ -6162,11 +6161,7 @@
       "ChannelType": {
         "description": "Delivery channels for surfaces.",
         "enum": [
-          "sms",
-          "whatsapp",
-          "imessage",
           "email",
-          "voice",
           "web"
         ],
         "title": "ChannelType",
@@ -10613,7 +10608,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Input"
               },
               {
                 "type": "null"
@@ -11001,6 +10996,18 @@
           },
           "title": {
             "$ref": "#/components/schemas/NameString"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -11082,6 +11089,18 @@
               }
             ],
             "title": "Url"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -20839,7 +20858,7 @@
         "type": "object"
       },
       "ForwardAction": {
-        "description": "Cold-transfer the caller to the inbound phone number's configured\nforwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven `forward_call`\ntool, with no location override, which falls through to the static\n`ForwardingMap` populated from the phone-number config.\n\nIf forwarding is not configured for the inbound phone number, the\ndispatcher falls back to the operator path (audit event + SSE only).",
+        "description": "Cold-transfer the caller to the service's configured forwarding\ndestination (set via ``Service.voice_config.forwarding``).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven\n``forward_call`` tool, with no location override, which falls through to\nthe per-service ``ServiceForwardingConfig``.\n\nIf ``voice_config.forwarding`` is unset, the dispatcher falls back to the\noperator path (audit event + SSE only).",
         "properties": {
           "type": {
             "const": "forward",
@@ -20913,7 +20932,7 @@
         "type": "object"
       },
       "ForwardingConfigRequest": {
-        "description": "Call forwarding configuration for create/update requests.",
+        "description": "Call forwarding configuration for create/update requests.\n\nDeprecated: per-phone forwarding has moved to per-service config\n(``Service.voice_config.forwarding``). The field is accepted for one\nrelease for SDK backward-compat but is no longer read by the voice\nagent at session time. Will be removed in a follow-up PR alongside\nthe ``platform.phone_numbers`` table drop.",
         "properties": {
           "enabled": {
             "default": true,
@@ -21401,7 +21420,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -21474,7 +21493,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -22737,30 +22756,6 @@
           }
         },
         "title": "InteractionDynamics",
-        "type": "object"
-      },
-      "InternalForwardingResponse": {
-        "description": "Resolved forwarding config for a phone number.",
-        "properties": {
-          "forward_to": {
-            "title": "Forward To",
-            "type": "string"
-          },
-          "should_disconnect": {
-            "title": "Should Disconnect",
-            "type": "boolean"
-          },
-          "warm_transfer": {
-            "default": true,
-            "title": "Warm Transfer",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "forward_to",
-          "should_disconnect"
-        ],
-        "title": "InternalForwardingResponse",
         "type": "object"
       },
       "InternalIntegrationResponse": {
@@ -26984,7 +26979,7 @@
           },
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "consent_required": {
             "default": true,
@@ -31900,8 +31895,6 @@
         "enum": [
           "twilio",
           "infobip",
-          "sendblue",
-          "gmail",
           "websocket"
         ],
         "title": "ProviderType",
@@ -32208,7 +32201,7 @@
         "type": "object"
       },
       "QuietHours": {
-        "description": "TCPA-compliant quiet hours \u2014 no outbound SMS during this window.",
+        "description": "Quiet hours \u2014 no outbound outreach during this window.",
         "properties": {
           "enabled": {
             "default": false,
@@ -35234,7 +35227,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Output"
               },
               {
                 "type": "null"
@@ -35317,6 +35310,29 @@
           "updated_at"
         ],
         "title": "ServiceBindingResponse",
+        "type": "object"
+      },
+      "ServiceForwardingConfig": {
+        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by:\n  - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't\n    pass an explicit ``phone_number`` and no EHR location is configured).\n  - ``EscalationPolicy.ForwardAction`` \u2014 engine-fired escalation with no\n    overrides falls through to the same path.\n\nDistinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone\nlegacy shape with ``enabled``); per-service forwarding is a binary\npresence \u2014 set means tier 3 resolves to it, None means tier 3 has no\nstatic target.",
+        "properties": {
+          "forward_to": {
+            "$ref": "#/components/schemas/PhoneE164"
+          },
+          "should_disconnect": {
+            "default": true,
+            "title": "Should Disconnect",
+            "type": "boolean"
+          },
+          "warm_transfer": {
+            "default": true,
+            "title": "Warm Transfer",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "forward_to"
+        ],
+        "title": "ServiceForwardingConfig",
         "type": "object"
       },
       "ServiceResponse": {
@@ -35470,7 +35486,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Output"
               },
               {
                 "type": "null"
@@ -35525,7 +35541,7 @@
         "title": "ServiceTag",
         "type": "object"
       },
-      "ServiceVoiceConfig": {
+      "ServiceVoiceConfig-Input": {
         "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
         "properties": {
           "backchannel_delay_ms": {
@@ -35627,6 +35643,282 @@
             "default": false,
             "title": "Forward Call Enabled",
             "type": "boolean"
+          },
+          "forwarding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceForwardingConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language_providers": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/LanguageProviderEntry"
+                },
+                "maxProperties": 10,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language Providers"
+          },
+          "max_buffer_delay_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Buffer Delay Ms"
+          },
+          "max_response_sentences": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Response Sentences"
+          },
+          "max_response_words": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Response Words"
+          },
+          "min_tts_speed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Tts Speed"
+          },
+          "post_eot_pause_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Eot Pause Ms"
+          },
+          "progress_interval_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Interval Ms"
+          },
+          "progress_vocabulary": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Vocabulary"
+          },
+          "transition_deadline_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transition Deadline Ms"
+          },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_model": {
+            "anyOf": [
+              {
+                "enum": [
+                  "sonic-turbo",
+                  "sonic-3"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Model"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
+          }
+        },
+        "title": "ServiceVoiceConfig",
+        "type": "object"
+      },
+      "ServiceVoiceConfig-Output": {
+        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
+        "properties": {
+          "backchannel_delay_ms": {
+            "default": 400,
+            "title": "Backchannel Delay Ms",
+            "type": "integer"
+          },
+          "barge_in_cooldown_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barge In Cooldown S"
+          },
+          "barge_in_min_speech_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barge In Min Speech S"
+          },
+          "eager_eot_threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eager Eot Threshold"
+          },
+          "empathy_hold_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empathy Hold Ms"
+          },
+          "eot_timeout_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eot Timeout Ms"
+          },
+          "filler_cooldown_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Cooldown Ms"
+          },
+          "filler_style": {
+            "default": "backchannel",
+            "enum": [
+              "backchannel",
+              "phrase",
+              "silent"
+            ],
+            "title": "Filler Style",
+            "type": "string"
+          },
+          "filler_vocabulary": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Vocabulary"
+          },
+          "forward_call_enabled": {
+            "default": false,
+            "title": "Forward Call Enabled",
+            "type": "boolean"
+          },
+          "forwarding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceForwardingConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "language_providers": {
             "anyOf": [
@@ -39965,6 +40257,18 @@
               }
             ],
             "title": "Title"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -46144,7 +46448,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Input"
               },
               {
                 "type": "null"
@@ -50938,53 +51242,6 @@
           }
         },
         "summary": "Redirect To Surface",
-        "tags": [
-          "Surface Patient"
-        ]
-      }
-    },
-    "/s/vcard/{workspace_slug}.vcf": {
-      "get": {
-        "description": "Serve a vCard contact card for a workspace.\n\nPublic, unauthenticated endpoint. iOS blocks clickable links in SMS\nfrom unknown senders \u2014 sending a vCard first lets patients save the\nnumber so subsequent SMS links render as tappable.\n\nPath: ``/s/vcard/{workspace_slug}.vcf``",
-        "operationId": "serve-vcard",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_slug",
-            "required": true,
-            "schema": {
-              "title": "Workspace Slug",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace or phone number not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Serve Vcard",
         "tags": [
           "Surface Patient"
         ]
@@ -80336,7 +80593,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (SendBlue or Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {
