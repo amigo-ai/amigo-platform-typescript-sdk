@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.48.2] - 2026-05-09
+
+### Bug Fixes
+
+- update surface example channel from 'sms' to 'web' (#232)
+
+### Maintenance
+
+- sync API types from platform (596cb6c0) (#231)
+
 ## [0.48.1] - 2026-05-08
 
 ### Maintenance
