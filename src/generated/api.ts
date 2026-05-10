@@ -1883,6 +1883,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/config/client": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get client configuration
+         * @description Return client-safe configuration for the authenticated workspace.
+         */
+        get: operations["get-client-config"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/context-graphs": {
         parameters: {
             query?: never;
@@ -10127,6 +10147,11 @@ export interface components {
              * @default 3
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for every scenario session created by this bridge run. The value is forwarded to each scenario's session-create call and inherited by any forks; identical precedence rules apply per-session (entity match wins over phone, stale UUID falls back to phone lookup, malformed UUID returns 422). Use this to pin an entire regression suite to a specific test patient.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Turns
@@ -11134,6 +11159,18 @@ export interface components {
             id: string;
             /** Status */
             status: string;
+        };
+        /**
+         * ClientConfigResponse
+         * @description Client-safe configuration values.
+         *
+         *     Values returned here are safe to embed in browser-side code.
+         *     API keys are restricted by HTTP referrer or similar origin
+         *     controls at the provider level.
+         */
+        ClientConfigResponse: {
+            /** Google Maps Api Key */
+            google_maps_api_key?: string | null;
         };
         /**
          * ClinicOpenHoursParams
@@ -21394,11 +21431,10 @@ export interface components {
          * ProviderType
          * @description Messaging provider that implements a channel.
          *
-         *     Multiple providers can serve the same ChannelKind (e.g., Twilio and
-         *     Infobip both support SMS).
+         *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "websocket";
+        ProviderType: "twilio" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -29188,12 +29224,12 @@ export interface components {
             branch_name?: string | null;
             /**
              * Caller Id
-             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             * @description Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.
              */
             caller_id?: string | null;
             /**
              * Entity Id
-             * @description Entity UUID to bind to the session for patient context resolution.
+             * @description Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).
              */
             entity_id?: string | null;
             /**
@@ -33744,6 +33780,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "get-client-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientConfigResponse"];
+                };
             };
         };
     };
