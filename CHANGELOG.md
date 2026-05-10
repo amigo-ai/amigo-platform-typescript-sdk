@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.48.4] - 2026-05-10
+
+### Features
+
+- add order param to listEntities, remove deprecated semantic/tags (#233)
+
+### Maintenance
+
+- sync API types from platform (d4bf31ab) (#234)
+- sync API types from platform (3e7c46cb) (#235)
+
 ## [0.48.3] - 2026-05-09
 
 ### Maintenance
