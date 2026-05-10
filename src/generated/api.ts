@@ -8791,6 +8791,8 @@ export interface components {
             name: string;
             /** Objective */
             objective: string;
+            /** Preload */
+            preload?: components["schemas"]["PreloadSpec"][];
             /** Surface Spec Template */
             surface_spec_template?: {
                 [key: string]: unknown;
@@ -8843,6 +8845,8 @@ export interface components {
             name: string;
             /** Objective */
             objective: string;
+            /** Preload */
+            preload?: components["schemas"]["PreloadSpec"][];
             /** Surface Spec Template */
             surface_spec_template?: {
                 [key: string]: unknown;
@@ -21076,6 +21080,24 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * PreloadSpec
+         * @description A tool call executed deterministically by the engine on state entry.
+         *
+         *     Unlike LLM-driven tool calls, preloads run before any LLM turn —
+         *     the results appear in the interaction log so the engage LLM sees
+         *     them as pre-loaded context.  All preloads in a state execute in
+         *     parallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``
+         *     template variables resolved from the session's caller context.
+         */
+        PreloadSpec: {
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Tool Id */
+            tool_id: string;
         };
         /** PrevalenceResponse */
         PrevalenceResponse: {
