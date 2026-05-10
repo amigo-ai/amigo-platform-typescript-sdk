@@ -3870,6 +3870,19 @@
             "title": "Concurrency",
             "type": "integer"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for every scenario session created by this bridge run. The value is forwarded to each scenario's session-create call and inherited by any forks; identical precedence rules apply per-session (entity match wins over phone, stale UUID falls back to phone lookup, malformed UUID returns 422). Use this to pin an entire regression suite to a specific test patient.",
+            "title": "Entity Id"
+          },
           "exploration": {
             "anyOf": [
               {
@@ -31948,10 +31961,9 @@
         "type": "object"
       },
       "ProviderType": {
-        "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
+        "description": "Messaging provider that implements a channel.\n\nMultiple providers may serve the same ChannelKind.",
         "enum": [
           "twilio",
-          "infobip",
           "websocket"
         ],
         "title": "ProviderType",
@@ -51188,7 +51200,7 @@
                 "type": "null"
               }
             ],
-            "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
+            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context \u2014 same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
             "title": "Caller Id"
           },
           "entity_id": {
@@ -51201,7 +51213,7 @@
                 "type": "null"
               }
             ],
-            "description": "Entity UUID to bind to the session for patient context resolution.",
+            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS \u2014 `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) \u2014 no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
             "title": "Entity Id"
           },
           "service_id": {
