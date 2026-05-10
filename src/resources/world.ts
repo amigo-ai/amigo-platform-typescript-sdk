@@ -17,11 +17,11 @@ export class WorldResource extends WorkspaceScopedResource {
     q?: string | null
     limit?: number
     offset?: number
+    order?: string | null
     has_projection?: boolean | null
     source?: string | null
     source_system?: string | null
-    semantic?: string | null
-    tags?: string[] | null
+    fhir_resource_type?: string | null
   }) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/world/entities', {
@@ -35,11 +35,11 @@ export class WorldResource extends WorkspaceScopedResource {
     q?: string | null
     limit?: number
     offset?: number
+    order?: string | null
     has_projection?: boolean | null
     source?: string | null
     source_system?: string | null
-    semantic?: string | null
-    tags?: string[] | null
+    fhir_resource_type?: string | null
   }) {
     return this.iterateOffsetPaginatedList(
       (pageParams) => this.listEntities(pageParams),

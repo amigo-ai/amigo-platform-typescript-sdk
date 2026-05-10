@@ -49296,6 +49296,8 @@ export interface operations {
                 q?: string | null;
                 limit?: number;
                 offset?: number;
+                /** @description Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc) */
+                order?: string | null;
                 /** @description Filter by has_projection flag */
                 has_projection?: boolean | null;
                 /** @description Filter by event source (e.g. voice_agent, connector_runner) */
