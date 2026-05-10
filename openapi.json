@@ -84036,6 +84036,25 @@
             }
           },
           {
+            "description": "Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc)",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc)",
+              "title": "Order"
+            }
+          },
+          {
             "description": "Filter by has_projection flag",
             "in": "query",
             "name": "has_projection",
