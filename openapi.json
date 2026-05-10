@@ -31948,10 +31948,9 @@
         "type": "object"
       },
       "ProviderType": {
-        "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
+        "description": "Messaging provider that implements a channel.\n\nMultiple providers may serve the same ChannelKind.",
         "enum": [
           "twilio",
-          "infobip",
           "websocket"
         ],
         "title": "ProviderType",

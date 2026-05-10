@@ -21394,11 +21394,10 @@ export interface components {
          * ProviderType
          * @description Messaging provider that implements a channel.
          *
-         *     Multiple providers can serve the same ChannelKind (e.g., Twilio and
-         *     Infobip both support SMS).
+         *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "websocket";
+        ProviderType: "twilio" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
