@@ -53,6 +53,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "create-service",
   "create-ses-setup",
   "create-simulation-branch",
+  "create-simulation-cases",
   "create-simulation-run",
   "create-simulation-session",
   "create-skill",

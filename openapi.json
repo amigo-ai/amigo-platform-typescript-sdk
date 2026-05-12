@@ -9559,19 +9559,6 @@
       },
       "CreateConversationRequest": {
         "properties": {
-          "context": {
-            "anyOf": [
-              {
-                "maxLength": 5000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Injected into the agent's prompt as caller/patient context for this conversation.",
-            "title": "Context"
-          },
           "entity_id": {
             "anyOf": [
               {
@@ -9588,41 +9575,6 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
-          },
-          "start_mode": {
-            "default": "user_first",
-            "enum": [
-              "user_first",
-              "agent_first"
-            ],
-            "title": "Start Mode",
-            "type": "string"
-          },
-          "viewport_height": {
-            "anyOf": [
-              {
-                "maximum": 500.0,
-                "minimum": 5.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Viewport Height"
-          },
-          "viewport_width": {
-            "anyOf": [
-              {
-                "maximum": 500.0,
-                "minimum": 20.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Viewport Width"
           }
         },
         "required": [
@@ -10764,6 +10716,138 @@
           "display_size"
         ],
         "title": "CreateSessionResponse",
+        "type": "object"
+      },
+      "CreateSimulationCaseItem": {
+        "description": "One durable simulation case to create.",
+        "properties": {
+          "assertions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 100,
+            "title": "Assertions",
+            "type": "array"
+          },
+          "constraints": {
+            "additionalProperties": true,
+            "title": "Constraints",
+            "type": "object"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "fixtures": {
+            "additionalProperties": true,
+            "title": "Fixtures",
+            "type": "object"
+          },
+          "initial_message": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Initial Message",
+            "type": "string"
+          },
+          "persona": {
+            "additionalProperties": true,
+            "title": "Persona",
+            "type": "object"
+          },
+          "provenance": {
+            "default": "manual",
+            "maxLength": 64,
+            "title": "Provenance",
+            "type": "string"
+          },
+          "scenario_instructions": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Scenario Instructions",
+            "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          },
+          "target_spec": {
+            "additionalProperties": true,
+            "title": "Target Spec",
+            "type": "object"
+          },
+          "temperament": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperament"
+          }
+        },
+        "required": [
+          "description",
+          "scenario_instructions",
+          "initial_message"
+        ],
+        "title": "CreateSimulationCaseItem",
+        "type": "object"
+      },
+      "CreateSimulationCasesRequest": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/CreateSimulationCaseItem"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases"
+        ],
+        "title": "CreateSimulationCasesRequest",
+        "type": "object"
+      },
+      "CreateSimulationCasesResponse": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationCaseResponse"
+            },
+            "title": "Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases"
+        ],
+        "title": "CreateSimulationCasesResponse",
         "type": "object"
       },
       "CreateSkillRequest": {
@@ -33852,6 +33936,19 @@
             "title": "Concurrency",
             "type": "integer"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for every selected saved-case run.",
+            "title": "Entity Id"
+          },
           "exploration": {
             "anyOf": [
               {
@@ -33930,6 +34027,19 @@
             "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for this saved-case run.",
+            "title": "Entity Id"
           },
           "exploration": {
             "anyOf": [
@@ -44819,8 +44929,8 @@
             "title": "Media Url"
           },
           "message": {
+            "default": "",
             "maxLength": 10000,
-            "minLength": 1,
             "title": "Message",
             "type": "string"
           },
@@ -44851,9 +44961,6 @@
             "title": "Viewport Width"
           }
         },
-        "required": [
-          "message"
-        ],
         "title": "TurnRequest",
         "type": "object"
       },
@@ -78288,6 +78395,58 @@
           }
         },
         "summary": "List Simulation Cases",
+        "tags": [
+          "Simulations"
+        ]
+      },
+      "post": {
+        "description": "Create durable simulation cases for an internal benchmark suite.",
+        "operationId": "create-simulation-cases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimulationCasesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSimulationCasesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Simulation Cases",
         "tags": [
           "Simulations"
         ]
