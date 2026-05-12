@@ -409,7 +409,7 @@ turns with `client.conversations.createTurn()`.
 const conversation = await client.conversations.create({
   service_id: 'service-id',
   entity_id: 'entity-id',
-  auto_greet: false,
+  start_mode: 'user_first',
 })
 
 const turn = await client.conversations.createTurn(conversation.id, {
@@ -431,7 +431,7 @@ the dedicated streaming surface:
 const conversation = await client.conversations.create({
   service_id: 'service-id',
   entity_id: 'entity-id',
-  auto_greet: false,
+  start_mode: 'user_first',
 })
 
 for await (const event of client.conversationStreams.streamTurn(

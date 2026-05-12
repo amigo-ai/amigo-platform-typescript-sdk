@@ -204,7 +204,7 @@ async function main() {
     console.log()
 
     try {
-      for await (const event of client.conversations.streamTurn(
+      for await (const event of client.conversationStreams.streamTurn(
         conv.id,
         { message: text },
         { includeToolCalls: true },

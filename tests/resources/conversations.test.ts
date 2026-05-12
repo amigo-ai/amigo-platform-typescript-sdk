@@ -386,9 +386,9 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    await expect(
-      client.conversations.create({ service_id: '' }),
-    ).rejects.toBeInstanceOf(ValidationError)
+    await expect(client.conversations.create({ service_id: '' })).rejects.toBeInstanceOf(
+      ValidationError,
+    )
   })
 
   it('routes DELETE failures through the central error pipeline', async () => {
@@ -482,7 +482,7 @@ describe('ConversationsResource', () => {
     const conversation = await client.conversations.create({
       service_id: serviceId,
       entity_id: entityId,
-      auto_greet: false,
+      start_mode: 'user_first',
     })
     const result = await client.conversations.createTurn(
       conversation.id,
@@ -493,7 +493,7 @@ describe('ConversationsResource', () => {
     expect(createBody).toEqual({
       service_id: serviceId,
       entity_id: entityId,
-      auto_greet: false,
+      start_mode: 'user_first',
     })
     expect(turnBody).toEqual({ message: 'Hello' })
     expect(new URL(turnUrl as string).searchParams.get('include_tool_calls')).toBe('true')

@@ -34,7 +34,7 @@ async function main() {
   const conversation = await client.conversations.create({
     service_id: serviceId,
     ...(entityId && { entity_id: entityId }),
-    auto_greet: false,
+    start_mode: 'user_first',
   })
 
   console.log(`Conversation: ${conversation.id}`)

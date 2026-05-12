@@ -35,7 +35,7 @@ const client = new AmigoClient({
 const conversation = await client.conversations.create({
   service_id: process.env.AMIGO_SERVICE_ID!,
   entity_id: 'optional-patient-entity-id',
-  auto_greet: false,
+  start_mode: 'user_first',
 })
 
 const firstTurn = await client.conversations.createTurn(conversation.id, {
@@ -50,9 +50,9 @@ const nextTurn = await client.conversations.createTurn(conversation.id, {
 })
 ```
 
-`auto_greet: false` makes the conversation start with the user's first message.
-Use `auto_greet: true` when your UI should show an agent greeting before the
-first user turn.
+`start_mode: 'user_first'` makes the conversation start with the user's first
+message. Use `start_mode: 'agent_first'` when your UI should show an agent
+greeting before the first user turn.
 
 ## Streaming Chat
 
@@ -63,7 +63,7 @@ Use `create()` once, store the returned conversation ID, then call
 const conversation = await client.conversations.create({
   service_id: process.env.AMIGO_SERVICE_ID!,
   entity_id: 'optional-patient-entity-id',
-  auto_greet: false,
+  start_mode: 'user_first',
 })
 
 for await (const event of client.conversationStreams.streamTurn(
