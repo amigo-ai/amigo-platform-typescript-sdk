@@ -1,6 +1,7 @@
 # Build a Text Chat Integration
 
-This guide shows the production text-conversation flow for embedded web chat.
+This guide shows the production text-conversation flow for embedded web chat
+using the Platform Conversations REST API.
 
 Do not use `client.simulations.*` for production/headless web chat. Simulation
 sessions are for playground and coverage workflows.
@@ -12,6 +13,10 @@ these SDK methods for web chat:
 
 - `client.conversations.create()` starts a production conversation.
 - `client.conversations.createTurn()` sends a synchronous user turn.
+
+These methods call the conversation endpoints for the workspace: create the
+conversation first, then send each user turn to that conversation. Do not create
+production web-chat sessions through `client.simulations.*`.
 
 After each turn, the conversation may freeze/dormant on the server until the
 next user turn resumes it. Keep the returned `conversation_id` and pass it into

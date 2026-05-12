@@ -403,7 +403,8 @@ const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 ### Text conversations
 
 Use `client.conversations.create()` to start a production text conversation, then send
-turns with `client.conversations.createTurn()`.
+turns with `client.conversations.createTurn()`. These SDK calls use the Platform
+Conversations REST API, not `client.simulations.*`.
 
 ```typescript
 const conversation = await client.conversations.create({
