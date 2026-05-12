@@ -9559,10 +9559,18 @@
       },
       "CreateConversationRequest": {
         "properties": {
-          "auto_greet": {
-            "default": true,
-            "title": "Auto Greet",
-            "type": "boolean"
+          "context": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Injected into the agent's prompt as caller/patient context for this conversation.",
+            "title": "Context"
           },
           "entity_id": {
             "anyOf": [
@@ -9580,6 +9588,41 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "start_mode": {
+            "default": "user_first",
+            "enum": [
+              "user_first",
+              "agent_first"
+            ],
+            "title": "Start Mode",
+            "type": "string"
+          },
+          "viewport_height": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Height"
+          },
+          "viewport_width": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 20.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Width"
           }
         },
         "required": [
@@ -11412,6 +11455,7 @@
         "type": "object"
       },
       "CreateWorkspaceRequest": {
+        "description": "Request body for ``POST /v1/me/workspaces``.\n\n``region`` is intentionally not exposed here \u2014 the workspace is created\nin the region of the platform-api pod that handles the request (each\nregion's CD pipeline serves its own ingress host), and a workspace\ncannot migrate between regions. The handler derives it from\n``app.env.aws_region``.\n\n``environment`` has no default: it is a load-bearing routing field\n(staging vs production downstream), and ``PATCH .../convert_environment``\nis the supported migration path. Callers must commit to a value.",
         "properties": {
           "backend_org_id": {
             "anyOf": [
@@ -11424,7 +11468,6 @@
             ]
           },
           "environment": {
-            "default": "staging",
             "enum": [
               "production",
               "staging",
@@ -11436,24 +11479,14 @@
           "name": {
             "$ref": "#/components/schemas/StrippedNonemptyString"
           },
-          "region": {
-            "default": "us-east-1",
-            "enum": [
-              "us-east-1",
-              "ap-southeast-2",
-              "eu-central-1",
-              "ca-central-1"
-            ],
-            "title": "Region",
-            "type": "string"
-          },
           "slug": {
             "$ref": "#/components/schemas/SlugString"
           }
         },
         "required": [
           "slug",
-          "name"
+          "name",
+          "environment"
         ],
         "title": "CreateWorkspaceRequest",
         "type": "object"
@@ -44748,6 +44781,19 @@
             ],
             "title": "Content"
           },
+          "context": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Injected into the agent's prompt as caller/patient context for this turn.",
+            "title": "Context"
+          },
           "media_type": {
             "anyOf": [
               {
@@ -44777,6 +44823,32 @@
             "minLength": 1,
             "title": "Message",
             "type": "string"
+          },
+          "viewport_height": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Height"
+          },
+          "viewport_width": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 20.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Width"
           }
         },
         "required": [

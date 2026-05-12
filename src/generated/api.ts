@@ -12382,10 +12382,10 @@ export interface components {
         /** CreateConversationRequest */
         CreateConversationRequest: {
             /**
-             * Auto Greet
-             * @default true
+             * Context
+             * @description Injected into the agent's prompt as caller/patient context for this conversation.
              */
-            auto_greet?: boolean;
+            context?: string | null;
             /** Entity Id */
             entity_id?: string | null;
             /**
@@ -12393,6 +12393,16 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
+            /**
+             * Start Mode
+             * @default user_first
+             * @enum {string}
+             */
+            start_mode?: "user_first" | "agent_first";
+            /** Viewport Height */
+            viewport_height?: number | null;
+            /** Viewport Width */
+            viewport_width?: number | null;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -13107,22 +13117,28 @@ export interface components {
              */
             trigger_id: string;
         };
-        /** CreateWorkspaceRequest */
+        /**
+         * CreateWorkspaceRequest
+         * @description Request body for ``POST /v1/me/workspaces``.
+         *
+         *     ``region`` is intentionally not exposed here — the workspace is created
+         *     in the region of the platform-api pod that handles the request (each
+         *     region's CD pipeline serves its own ingress host), and a workspace
+         *     cannot migrate between regions. The handler derives it from
+         *     ``app.env.aws_region``.
+         *
+         *     ``environment`` has no default: it is a load-bearing routing field
+         *     (staging vs production downstream), and ``PATCH .../convert_environment``
+         *     is the supported migration path. Callers must commit to a value.
+         */
         CreateWorkspaceRequest: {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
             /**
              * Environment
-             * @default staging
              * @enum {string}
              */
-            environment?: "production" | "staging" | "development";
+            environment: "production" | "staging" | "development";
             name: components["schemas"]["StrippedNonemptyString"];
-            /**
-             * Region
-             * @default us-east-1
-             * @enum {string}
-             */
-            region?: "us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1";
             slug: components["schemas"]["SlugString"];
         };
         /** CrmActivityItem */
@@ -27165,12 +27181,21 @@ export interface components {
         TurnRequest: {
             /** Content */
             content?: components["schemas"]["ContentPartPayload"][] | null;
+            /**
+             * Context
+             * @description Injected into the agent's prompt as caller/patient context for this turn.
+             */
+            context?: string | null;
             /** Media Type */
             media_type?: string | null;
             /** Media Url */
             media_url?: string | null;
             /** Message */
             message: string;
+            /** Viewport Height */
+            viewport_height?: number | null;
+            /** Viewport Width */
+            viewport_width?: number | null;
         };
         /** TurnResponse */
         TurnResponse: {
