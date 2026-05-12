@@ -6842,7 +6842,11 @@ export interface paths {
          */
         get: operations["list-simulation-cases"];
         put?: never;
-        post?: never;
+        /**
+         * Create Simulation Cases
+         * @description Create durable simulation cases for an internal benchmark suite.
+         */
+        post: operations["create-simulation-cases"];
         delete?: never;
         options?: never;
         head?: never;
@@ -12854,6 +12858,59 @@ export interface components {
             display_size: number[];
             /** Session Id */
             session_id: string;
+        };
+        /**
+         * CreateSimulationCaseItem
+         * @description One durable simulation case to create.
+         */
+        CreateSimulationCaseItem: {
+            /** Assertions */
+            assertions?: {
+                [key: string]: unknown;
+            }[];
+            /** Constraints */
+            constraints?: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description: string;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            };
+            /** Initial Message */
+            initial_message: string;
+            /** Persona */
+            persona?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Provenance
+             * @default manual
+             */
+            provenance?: string;
+            /** Scenario Instructions */
+            scenario_instructions: string;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+            /** Target Spec */
+            target_spec?: {
+                [key: string]: unknown;
+            };
+            /** Temperament */
+            temperament?: string | null;
+        };
+        /** CreateSimulationCasesRequest */
+        CreateSimulationCasesRequest: {
+            /** Cases */
+            cases: components["schemas"]["CreateSimulationCaseItem"][];
+        };
+        /** CreateSimulationCasesResponse */
+        CreateSimulationCasesResponse: {
+            /** Cases */
+            cases: components["schemas"]["SimulationCaseResponse"][];
         };
         /** CreateSkillRequest */
         CreateSkillRequest: {
@@ -22327,6 +22384,11 @@ export interface components {
              * @default 1
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for every selected saved-case run.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Cases
@@ -22354,6 +22416,11 @@ export interface components {
              * @default 1
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for this saved-case run.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Turns
@@ -45366,6 +45433,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_SimulationCaseResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-simulation-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSimulationCasesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSimulationCasesResponse"];
                 };
             };
             /** @description Validation Error */
