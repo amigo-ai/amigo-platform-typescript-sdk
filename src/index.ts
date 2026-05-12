@@ -49,6 +49,8 @@ import { DataSourcesResource } from './resources/data-sources.js'
 import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
+import { ConversationStreamsResource } from './resources/conversation-streams.js'
+import { ConversationWebSocketsResource } from './resources/conversation-web-sockets.js'
 import { ChannelsResource } from './resources/channels/index.js'
 import { PhoneNumbersResource } from './resources/phone-numbers.js'
 import { IntegrationsResource } from './resources/integrations.js'
@@ -170,7 +172,7 @@ export interface AmigoClientConfig {
    *
    * Required when `baseUrl` points to a BFF proxy or a different host
    * than the agent engine — WebSockets cannot traverse HTTP proxies.
-   * Used by `conversations.textStreamUrl()` to build the `ws://` URL.
+   * Used by `conversationWebSockets.textStreamUrl()` to build the `ws://` URL.
    *
    * Accepts `http://` or `https://` (auto-mapped to `ws://` / `wss://`)
    * or direct `ws://` / `wss://` URLs.
@@ -209,6 +211,8 @@ export class AmigoClient {
   readonly world!: WorldResource
   readonly calls!: CallsResource
   readonly conversations!: ConversationsResource
+  readonly conversationStreams!: ConversationStreamsResource
+  readonly conversationWebSockets!: ConversationWebSocketsResource
   readonly channels!: ChannelsResource
   readonly phoneNumbers!: PhoneNumbersResource
   readonly integrations!: IntegrationsResource
@@ -485,7 +489,13 @@ export class AmigoClient {
     mutable.dataSources = new DataSourcesResource(client, workspaceId)
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
-    mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
+    mutable.conversations = new ConversationsResource(client, workspaceId)
+    mutable.conversationStreams = new ConversationStreamsResource(client, workspaceId)
+    mutable.conversationWebSockets = new ConversationWebSocketsResource(
+      client,
+      workspaceId,
+      agentBaseUrl,
+    )
     mutable.channels = new ChannelsResource(client, workspaceId)
     mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
@@ -714,7 +724,10 @@ export type {
 } from './resources/events.js'
 export { WorkspaceEventStreamError, isWorkspaceEventStreamError } from './resources/events.js'
 
-export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
+export {
+  sessionConnectAuthProtocols,
+  textStreamAuthProtocols,
+} from './resources/conversation-web-sockets.js'
 export type {
   ConversationDetail,
   ConversationListResponse,
@@ -722,22 +735,24 @@ export type {
   ConversationTurn,
   CreateConversationRequest,
   ListConversationsParams,
-  SendMessageRequest,
-  SendMessageResponse,
-  SessionConnectUrlParams,
-  TextStreamAuthProtocols,
-  TextStreamUrlParams,
+  TurnRequest,
+  TurnResponse,
+} from './resources/conversations.js'
+export type {
   TurnDoneEvent,
   TurnErrorEvent,
   TurnMessageEvent,
-  TurnRequest,
-  TurnResponse,
   TurnStreamEvent,
   TurnThinkingEvent,
   TurnTokenEvent,
   TurnToolCallCompletedEvent,
   TurnToolCallStartedEvent,
-} from './resources/conversations.js'
+} from './resources/conversation-streams.js'
+export type {
+  SessionConnectUrlParams,
+  TextStreamAuthProtocols,
+  TextStreamUrlParams,
+} from './resources/conversation-web-sockets.js'
 
 // Channels — workspace-scoped channel-manager proxy (SES setup, future Twilio, etc.)
 export { ChannelsResource, SesSetupResource } from './resources/channels/index.js'

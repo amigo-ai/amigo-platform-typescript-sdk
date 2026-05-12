@@ -1,24 +1,19 @@
 # Build a Text Chat Integration
 
-This guide shows the durable text-conversation flow used by the developer-console
-text playground. It creates rows through `/v1/{workspace_id}/conversations`, so
-the resulting sessions appear in `/{workspace}/conversations`.
+This guide shows the production text-conversation flow for embedded web chat.
 
 Do not use `client.simulations.*` for production/headless web chat. Simulation
-sessions are for test coverage and are stored as simulated call intelligence,
-not as conversation rows.
+sessions are for playground and coverage workflows.
 
 ## Concepts
 
 **Conversations** are persistent, multi-turn text sessions with an agent. Use
 these SDK methods for web chat:
 
-- `client.conversations.create()` starts a durable conversation row.
+- `client.conversations.create()` starts a production conversation.
 - `client.conversations.createTurn()` sends a synchronous user turn.
-- `client.conversations.streamTurn()` sends a user turn and yields typed SSE
+- `client.conversationStreams.streamTurn()` sends a user turn and yields typed SSE
   events for tokens, tool calls, messages, and completion.
-- `client.conversations.sendMessage()` is a user-first convenience helper that
-  creates a conversation when `conversation_id` is omitted, then sends the turn.
 
 After each turn, the conversation may freeze/dormant on the server until the
 next user turn resumes it. Keep the returned `conversation_id` and pass it into
@@ -26,7 +21,8 @@ the next request.
 
 ## User-First Synchronous Chat
 
-Use `sendMessage()` when your backend wants a simple request/response flow.
+Create the conversation once, store the returned ID, then send user turns to
+that explicit conversation.
 
 ```typescript
 import { AmigoClient } from '@amigo-ai/platform-sdk'
@@ -36,24 +32,27 @@ const client = new AmigoClient({
   workspaceId: process.env.AMIGO_WORKSPACE_ID!,
 })
 
-const firstTurn = await client.conversations.sendMessage({
+const conversation = await client.conversations.create({
   service_id: process.env.AMIGO_SERVICE_ID!,
   entity_id: 'optional-patient-entity-id',
+  auto_greet: false,
+})
+
+const firstTurn = await client.conversations.createTurn(conversation.id, {
   message: 'Hi, I need help scheduling an appointment',
 })
 
-console.log(firstTurn.conversation_id)
-console.log(firstTurn.messages.map((message) => message.text))
+console.log(conversation.id)
+console.log(firstTurn.output.map((message) => message.text))
 
-const nextTurn = await client.conversations.sendMessage({
-  conversation_id: firstTurn.conversation_id,
+const nextTurn = await client.conversations.createTurn(conversation.id, {
   message: 'Tuesday morning works',
 })
 ```
 
-`sendMessage()` defaults the initial create call to `auto_greet: false`, so the
-conversation starts with the user's first message. That matches most embedded
-web-chat experiences.
+`auto_greet: false` makes the conversation start with the user's first message.
+Use `auto_greet: true` when your UI should show an agent greeting before the
+first user turn.
 
 ## Streaming Chat
 
@@ -67,7 +66,7 @@ const conversation = await client.conversations.create({
   auto_greet: false,
 })
 
-for await (const event of client.conversations.streamTurn(
+for await (const event of client.conversationStreams.streamTurn(
   conversation.id,
   { message: 'What appointments are available tomorrow?' },
   { includeToolCalls: true },
@@ -114,7 +113,7 @@ await client.conversations.createTurn(
 or stream it:
 
 ```typescript
-for await (const event of client.conversations.streamTurn(conversationId, {
+for await (const event of client.conversationStreams.streamTurn(conversationId, {
   message: 'Can you book that slot?',
 })) {
   // render token/message/tool/done events
@@ -128,8 +127,9 @@ behind your backend or BFF:
 
 1. Browser posts the user's message to your backend.
 2. Backend calls `client.conversations.create()` if there is no conversation ID.
-3. Backend calls `streamTurn()` and forwards typed events to the browser using
-   your app's preferred transport.
+3. Backend calls `client.conversations.createTurn()` or
+   `client.conversationStreams.streamTurn()` and forwards the response to the
+   browser using your app's preferred transport.
 4. Browser stores the returned `conversation_id` for the next turn.
 
 For a Node REPL example of the same durable streaming flow, see
@@ -137,10 +137,12 @@ For a Node REPL example of the same durable streaming flow, see
 
 ## Troubleshooting
 
-If a chat does not show in `/{workspace}/conversations`, check the SDK surface
+If a production web chat is not behaving as expected, check the SDK surface
 being used:
 
-- `client.conversations.*` writes durable conversation rows.
-- `client.simulations.*` writes simulation/call-intelligence artifacts instead.
+- `client.conversations.*` is the production conversation flow.
+- `client.conversationStreams.*` is the streaming variant for production
+  conversations.
+- `client.simulations.*` is for playground and coverage workflows.
 - Legacy text WebSocket helpers may not be available in all deployments and
   should not be used for new headless web-chat integrations.

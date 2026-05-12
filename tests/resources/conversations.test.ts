@@ -421,7 +421,7 @@ describe('ConversationsResource', () => {
     ).rejects.toBeInstanceOf(BadRequestError)
   })
 
-  it('sendMessage starts a durable conversation before sending the first user turn', async () => {
+  it('supports explicit create then createTurn for user-first chat', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const serviceId = 'svc-00000000-0000-0000-0000-000000000001'
     const entityId = 'ent-00000000-0000-0000-0000-000000000001'
@@ -480,12 +480,14 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    const result = await client.conversations.sendMessage(
-      {
-        service_id: serviceId,
-        entity_id: entityId,
-        message: 'Hello',
-      },
+    const conversation = await client.conversations.create({
+      service_id: serviceId,
+      entity_id: entityId,
+      auto_greet: false,
+    })
+    const result = await client.conversations.createTurn(
+      conversation.id,
+      { message: 'Hello' },
       { includeToolCalls: true },
     )
 
@@ -496,67 +498,8 @@ describe('ConversationsResource', () => {
     })
     expect(turnBody).toEqual({ message: 'Hello' })
     expect(new URL(turnUrl as string).searchParams.get('include_tool_calls')).toBe('true')
-    expect(result.conversation_id).toBe(conversationId)
-    expect(result.messages).toEqual(apiResponse.output)
-  })
-
-  it('sendMessage resumes an existing durable conversation without creating a new one', async () => {
-    const conversationId = '00000000-0000-4000-8000-000000000001'
-    let turnBody: unknown
-    let createCalled = false
-    const apiResponse: TurnResponse = {
-      turn_id: 'turn-002',
-      conversation: {
-        id: conversationId,
-        status: 'active',
-        turn_count: 2,
-        updated_at: '2026-01-01T00:00:02Z',
-      },
-      input: {
-        role: 'user',
-        text: 'Tuesday morning works',
-        timestamp: '2026-01-01T00:00:01Z',
-        content: [{ type: 'text', text: 'Tuesday morning works' }],
-      },
-      output: [],
-      tool_calls: [],
-    }
-    const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
-      workspaceId: TEST_WORKSPACE_ID,
-      fetch: mockFetch({
-        [`POST ${BASE}/conversations`]: () => {
-          createCalled = true
-          return Response.json({ detail: 'should not create' }, { status: 500 })
-        },
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
-          turnBody = await req.json()
-          return Response.json(apiResponse)
-        },
-      }),
-    })
-
-    const result = await client.conversations.sendMessage({
-      conversation_id: conversationId,
-      message: 'Tuesday morning works',
-    })
-
-    expect(createCalled).toBe(false)
-    expect(turnBody).toEqual({ message: 'Tuesday morning works' })
-    expect(result.conversation_id).toBe(conversationId)
-    expect(result.conversation.turn_count).toBe(2)
-  })
-
-  it('sendMessage requires service_id when starting a new durable conversation', async () => {
-    const client = new AmigoClient({
-      apiKey: TEST_API_KEY,
-      workspaceId: TEST_WORKSPACE_ID,
-      fetch: mockFetch({}),
-    })
-
-    await expect(client.conversations.sendMessage({ message: 'Hello' })).rejects.toBeInstanceOf(
-      ConfigurationError,
-    )
+    expect(result.conversation.id).toBe(conversationId)
+    expect(result.output).toEqual(apiResponse.output)
   })
 
   it('builds a text-stream URL from the client baseUrl', () => {
@@ -567,7 +510,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         conversationId: '00000000-0000-4000-8000-000000000001',
         entityId: 'ent-1',
@@ -598,7 +541,7 @@ describe('ConversationsResource', () => {
       baseUrl: 'http://localhost:8000',
     })
 
-    const url = new URL(client.conversations.textStreamUrl({ serviceId: 'svc-1' }))
+    const url = new URL(client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' }))
 
     expect(url.protocol).toBe('ws:')
     expect(url.host).toBe('localhost:8000')
@@ -613,7 +556,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         textStreamUrl: 'wss://preview-123.platform.example.com/agent/text-stream',
       }),
@@ -629,7 +572,7 @@ describe('ConversationsResource', () => {
     expect([...url.searchParams.keys()]).toEqual(['workspace_id', 'service_id'])
   })
 
-  it('applies scoped request options while preserving text-stream URL derivation', async () => {
+  it('keeps REST request options separate from WebSocket URL helpers', async () => {
     let scopedHeader: string | null = null
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const client = new AmigoClient({
@@ -655,7 +598,7 @@ describe('ConversationsResource', () => {
     const scoped = client.conversations.withOptions({
       headers: { 'x-request-scope': 'conversation' },
     })
-    const url = new URL(scoped.textStreamUrl({ serviceId: 'svc-1' }))
+    const url = new URL(client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' }))
     await scoped.get(conversationId)
 
     expect(scopedHeader).toBe('conversation')
@@ -672,7 +615,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         token: 'workspace:secret/with=base64+chars',
       }),
@@ -692,7 +635,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         toolEvents: true,
       }),
@@ -710,9 +653,11 @@ describe('ConversationsResource', () => {
     })
 
     const urlFalse = new URL(
-      client.conversations.textStreamUrl({ serviceId: 'svc-1', toolEvents: false }),
+      client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1', toolEvents: false }),
     )
-    const urlUndefined = new URL(client.conversations.textStreamUrl({ serviceId: 'svc-1' }))
+    const urlUndefined = new URL(
+      client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' }),
+    )
 
     expect(urlFalse.searchParams.has('tool_events')).toBe(false)
     expect(urlUndefined.searchParams.has('tool_events')).toBe(false)
@@ -726,7 +671,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         conversationId: '00000000-0000-4000-8000-000000000001',
         toolEvents: true,
@@ -751,7 +696,7 @@ describe('ConversationsResource', () => {
     })
 
     expect(() =>
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         textStreamUrl:
           'wss://preview-123.platform.example.com/agent/text-stream?workspace_id=wrong&service_id=wrong&conversation_id=wrong#frag',
@@ -767,7 +712,7 @@ describe('ConversationsResource', () => {
     })
 
     expect(() =>
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         textStreamUrl: 'https://preview-123.platform.example.com/agent/text-stream',
       }),
@@ -781,7 +726,7 @@ describe('ConversationsResource', () => {
       baseUrl: '/api/platform',
     })
 
-    expect(() => client.conversations.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
+    expect(() => client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
       ConfigurationError,
     )
   })
@@ -794,7 +739,7 @@ describe('ConversationsResource', () => {
     })
 
     expect(() =>
-      client.conversations.textStreamUrl({
+      client.conversationWebSockets.textStreamUrl({
         serviceId: 'svc-1',
         textStreamUrl: '/agent/text-stream',
       }),
@@ -808,7 +753,7 @@ describe('ConversationsResource', () => {
       baseUrl: 'http+unix://socket/api',
     })
 
-    expect(() => client.conversations.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
+    expect(() => client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
       ConfigurationError,
     )
   })
@@ -820,7 +765,7 @@ describe('ConversationsResource', () => {
       baseUrl: 'https://api.example.com/v1/platform',
     })
 
-    expect(() => client.conversations.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
+    expect(() => client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1' })).toThrow(
       ConfigurationError,
     )
   })
@@ -841,14 +786,17 @@ describe('ConversationsResource', () => {
       baseUrl: 'https://api.example.com',
     })
 
-    expect(() => client.conversations.textStreamUrl({ serviceId: 'svc-1', token: '' })).toThrow(
-      ConfigurationError,
-    )
-    expect(() => client.conversations.textStreamUrl({ serviceId: 'svc-1', token: '   ' })).toThrow(
-      ConfigurationError,
-    )
     expect(() =>
-      client.conversations.textStreamUrl({ serviceId: 'svc-1', token: 'abc\r\nx-evil: y' }),
+      client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1', token: '' }),
+    ).toThrow(ConfigurationError)
+    expect(() =>
+      client.conversationWebSockets.textStreamUrl({ serviceId: 'svc-1', token: '   ' }),
+    ).toThrow(ConfigurationError)
+    expect(() =>
+      client.conversationWebSockets.textStreamUrl({
+        serviceId: 'svc-1',
+        token: 'abc\r\nx-evil: y',
+      }),
     ).toThrow(ConfigurationError)
   })
 
@@ -860,7 +808,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.sessionConnectUrl({
+      client.conversationWebSockets.sessionConnectUrl({
         serviceId: 'svc-1',
         entityId: '00000000-0000-4000-8000-000000000010',
         conversationId: '00000000-0000-4000-8000-000000000001',
@@ -887,7 +835,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
+      client.conversationWebSockets.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
     )
 
     expect(url.protocol).toBe('ws:')
@@ -903,12 +851,20 @@ describe('ConversationsResource', () => {
     })
 
     const enabled = new URL(
-      client.conversations.sessionConnectUrl({ serviceId: 's', entityId: 'e', toolEvents: true }),
+      client.conversationWebSockets.sessionConnectUrl({
+        serviceId: 's',
+        entityId: 'e',
+        toolEvents: true,
+      }),
     )
     expect(enabled.searchParams.has('tool_events')).toBe(false)
 
     const disabled = new URL(
-      client.conversations.sessionConnectUrl({ serviceId: 's', entityId: 'e', toolEvents: false }),
+      client.conversationWebSockets.sessionConnectUrl({
+        serviceId: 's',
+        entityId: 'e',
+        toolEvents: false,
+      }),
     )
     expect(disabled.searchParams.get('tool_events')).toBe('false')
   })
@@ -921,7 +877,7 @@ describe('ConversationsResource', () => {
     })
 
     const url = new URL(
-      client.conversations.sessionConnectUrl({
+      client.conversationWebSockets.sessionConnectUrl({
         serviceId: 'svc-1',
         entityId: 'ent-1',
         sessionConnectUrl: `wss://preview-123.platform.example.com/v1/${TEST_WORKSPACE_ID}/sessions/connect`,
@@ -942,7 +898,7 @@ describe('ConversationsResource', () => {
     })
 
     expect(() =>
-      client.conversations.sessionConnectUrl({
+      client.conversationWebSockets.sessionConnectUrl({
         serviceId: 'svc-1',
         entityId: 'ent-1',
         sessionConnectUrl: 'wss://example.com/v1/x/sessions/connect?leak=1',
@@ -958,7 +914,7 @@ describe('ConversationsResource', () => {
     })
 
     expect(() =>
-      client.conversations.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
+      client.conversationWebSockets.sessionConnectUrl({ serviceId: 'svc-1', entityId: 'ent-1' }),
     ).toThrow(ConfigurationError)
   })
 
@@ -1006,7 +962,7 @@ describe('ConversationsResource', () => {
     })
 
     const events = []
-    for await (const event of client.conversations.streamTurn(conversationId, {
+    for await (const event of client.conversationStreams.streamTurn(conversationId, {
       message: 'hi',
     })) {
       events.push(event)
@@ -1056,7 +1012,7 @@ describe('ConversationsResource', () => {
     // Drain the generator so the underlying request is issued and the URL
     // captured by the mock fetch above. We don't read the events themselves —
     // the assertion is on the request URL's `include_tool_calls` query param.
-    for await (const _ of client.conversations.streamTurn(
+    for await (const _ of client.conversationStreams.streamTurn(
       conversationId,
       { message: 'hi' },
       { includeToolCalls: true },
@@ -1092,7 +1048,7 @@ describe('ConversationsResource', () => {
     })
 
     const events = []
-    for await (const event of client.conversations.streamTurn(conversationId, {
+    for await (const event of client.conversationStreams.streamTurn(conversationId, {
       message: 'hi',
     })) {
       events.push(event)
@@ -1121,7 +1077,7 @@ describe('ConversationsResource', () => {
     })
 
     const events = []
-    for await (const event of client.conversations.streamTurn(conversationId, {
+    for await (const event of client.conversationStreams.streamTurn(conversationId, {
       message: 'hi',
     })) {
       events.push(event)
@@ -1165,7 +1121,7 @@ describe('ConversationsResource', () => {
     })
 
     const events = []
-    for await (const event of client.conversations.streamTurn(conversationId, {
+    for await (const event of client.conversationStreams.streamTurn(conversationId, {
       message: 'hi',
     })) {
       events.push(event)
@@ -1213,7 +1169,7 @@ describe('ConversationsResource', () => {
     })
 
     const events = []
-    for await (const event of client.conversations.streamTurn(conversationId, {
+    for await (const event of client.conversationStreams.streamTurn(conversationId, {
       message: 'hi',
     })) {
       events.push(event)

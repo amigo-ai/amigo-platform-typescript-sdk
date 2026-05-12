@@ -402,29 +402,8 @@ const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 
 ### Text conversations
 
-Use `client.conversations.sendMessage()` for user-first synchronous text turns. Omit
-`conversation_id` to start a new durable conversation; pass the returned ID to resume it.
-These conversations are written through `/v1/{workspace_id}/conversations` and show up
-in the developer console Conversations page.
-
-```typescript
-const firstTurn = await client.conversations.sendMessage({
-  service_id: 'service-id',
-  message: 'Hello, I need help scheduling',
-  entity_id: 'entity-id',
-})
-
-const nextTurn = await client.conversations.sendMessage({
-  service_id: 'service-id',
-  conversation_id: firstTurn.conversation_id,
-  message: 'Tuesday morning works',
-})
-
-console.log(nextTurn.messages.map((message) => message.text))
-```
-
-For streaming responses, create the durable conversation first, then stream turns
-through the same conversations API used by the playground:
+Use `client.conversations.create()` to start a production text conversation, then send
+turns with `client.conversations.createTurn()`.
 
 ```typescript
 const conversation = await client.conversations.create({
@@ -433,7 +412,29 @@ const conversation = await client.conversations.create({
   auto_greet: false,
 })
 
-for await (const event of client.conversations.streamTurn(
+const turn = await client.conversations.createTurn(conversation.id, {
+  message: 'Hello, I need help scheduling',
+})
+
+const nextTurn = await client.conversations.createTurn(conversation.id, {
+  message: 'Tuesday morning works',
+})
+
+console.log(turn.output.map((message) => message.text))
+console.log(nextTurn.output.map((message) => message.text))
+```
+
+For streaming responses, create the conversation first, then stream turns through
+the dedicated streaming surface:
+
+```typescript
+const conversation = await client.conversations.create({
+  service_id: 'service-id',
+  entity_id: 'entity-id',
+  auto_greet: false,
+})
+
+for await (const event of client.conversationStreams.streamTurn(
   conversation.id,
   { message: 'Hello, I need help scheduling' },
   { includeToolCalls: true },
@@ -443,9 +444,8 @@ for await (const event of client.conversations.streamTurn(
 }
 ```
 
-Use `client.simulations.*` only for simulation and coverage workflows. Simulation
-sessions are stored as simulated call intelligence and do not appear in
-`/[workspace]/conversations`.
+Use `client.simulations.*` only for simulation and coverage workflows, not for
+production web chat.
 
 ### Real-time event streams
 
@@ -455,8 +455,12 @@ For workspace-wide events (calls, surfaces, pipeline, operators, channels), use 
 const handle = client.events.subscribeToWorkspace({
   onEvent: (event) => {
     switch (event.event_type) {
-      case 'call.started': console.log('call started:', event.call_sid); break
-      case 'pipeline.error': console.error('pipeline error:', event); break
+      case 'call.started':
+        console.log('call started:', event.call_sid)
+        break
+      case 'pipeline.error':
+        console.error('pipeline error:', event)
+        break
     }
   },
   onError: (err) => console.error('terminal:', err),
@@ -494,8 +498,12 @@ const observerHandle = client.observers.subscribe({
   token: bearerToken,
   onEvent: (event) => {
     switch (event.type) {
-      case 'agent_transcript_delta': renderAgentDelta(event.delta); break
-      case 'session_end': showSummary(event); break
+      case 'agent_transcript_delta':
+        renderAgentDelta(event.delta)
+        break
+      case 'session_end':
+        showSummary(event)
+        break
     }
   },
   onError: (err) => console.error('observer terminal:', err.reason, err.closeCode),

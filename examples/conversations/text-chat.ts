@@ -1,9 +1,8 @@
 /**
  * Interactive durable text chat — streaming responses with tool call events.
  *
- * Creates a `/conversations` row first, then streams each user turn through
- * the same conversations API used by the developer-console text playground.
- * The session appears in the developer console Conversations page.
+ * Creates a production text conversation first, then streams each user turn
+ * through the dedicated streaming surface.
  *
  * Usage:
  *   AMIGO_API_KEY=... AMIGO_WORKSPACE_ID=... AMIGO_SERVICE_ID=... \
@@ -53,7 +52,7 @@ async function main() {
 async function streamTurn(conversationId: string, message: string): Promise<void> {
   let wroteTokens = false
 
-  for await (const event of client.conversations.streamTurn(
+  for await (const event of client.conversationStreams.streamTurn(
     conversationId,
     { message },
     { includeToolCalls: true },
