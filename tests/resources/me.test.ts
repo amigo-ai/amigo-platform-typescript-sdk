@@ -80,7 +80,6 @@ describe('MeResource', () => {
       slug: 'acme-health',
       name: 'Acme Health',
       environment: 'staging',
-      region: 'us-east-1',
       backend_org_id: null,
     }
 
