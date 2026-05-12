@@ -30,7 +30,7 @@
  * advertises ``retry: 3000`` and we honor that as the initial backoff,
  * doubling with full jitter on each successive failure up to ``maxDelayMs``.
  *
- * @see ConversationStreamsResource.streamTurn for the analogous turn-stream helper.
+ * @see ConversationsResource.streamTurn for the analogous turn-stream helper.
  */
 
 import type { components } from '../generated/api.js'
@@ -100,7 +100,9 @@ export class WorkspaceEventStreamError extends Error {
   }
 }
 
-export function isWorkspaceEventStreamError(value: unknown): value is WorkspaceEventStreamError {
+export function isWorkspaceEventStreamError(
+  value: unknown,
+): value is WorkspaceEventStreamError {
   return value instanceof WorkspaceEventStreamError
 }
 
@@ -516,7 +518,7 @@ interface SSEFrame {
 /**
  * Parses an SSE byte stream into structured frames.
  *
- * Forks the parser in {@link ConversationStreamsResource.streamTurn} to also
+ * Forks the parser in {@link ConversationsResource.streamTurn} to also
  * surface ``id:`` and ``retry:`` lines that the workspace event stream
  * relies on for gapless reconnect.
  */
@@ -704,7 +706,8 @@ function interpretServerErrorFrame(dataJson: string): {
   }
   const obj = payload as Record<string, unknown>
   const rawCode = typeof obj['code'] === 'string' ? (obj['code'] as string) : ''
-  const message = typeof obj['message'] === 'string' ? (obj['message'] as string) : 'Stream error'
+  const message =
+    typeof obj['message'] === 'string' ? (obj['message'] as string) : 'Stream error'
 
   if (rawCode in TERMINAL_SERVER_ERROR_CODES) {
     return {

@@ -424,26 +424,6 @@ console.log(turn.output.map((message) => message.text))
 console.log(nextTurn.output.map((message) => message.text))
 ```
 
-For streaming responses, create the conversation first, then stream turns through
-the dedicated streaming surface:
-
-```typescript
-const conversation = await client.conversations.create({
-  service_id: 'service-id',
-  entity_id: 'entity-id',
-  start_mode: 'user_first',
-})
-
-for await (const event of client.conversationStreams.streamTurn(
-  conversation.id,
-  { message: 'Hello, I need help scheduling' },
-  { includeToolCalls: true },
-)) {
-  if (event.event === 'token') process.stdout.write(event.text)
-  if (event.event === 'done') console.log(`\nConversation: ${event.conversation_id}`)
-}
-```
-
 Use `client.simulations.*` only for simulation and coverage workflows, not for
 production web chat.
 

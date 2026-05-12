@@ -1,8 +1,8 @@
 /**
- * Interactive durable text chat — streaming responses with tool call events.
+ * Interactive durable text chat — synchronous REST turns.
  *
- * Creates a production text conversation first, then streams each user turn
- * through the dedicated streaming surface.
+ * Creates a production text conversation first, then sends each user turn with
+ * the JSON REST conversation API.
  *
  * Usage:
  *   AMIGO_API_KEY=... AMIGO_WORKSPACE_ID=... AMIGO_SERVICE_ID=... \
@@ -45,56 +45,27 @@ async function main() {
     if (!text) continue
     if (text === '/quit') break
 
-    await streamTurn(conversation.id, text)
+    await sendTurn(conversation.id, text)
   }
 }
 
-async function streamTurn(conversationId: string, message: string): Promise<void> {
-  let wroteTokens = false
-
-  for await (const event of client.conversationStreams.streamTurn(
+async function sendTurn(conversationId: string, message: string): Promise<void> {
+  const turn = await client.conversations.createTurn(
     conversationId,
     { message },
     { includeToolCalls: true },
-  )) {
-    switch (event.event) {
-      case 'token':
-        if (!wroteTokens) {
-          process.stdout.write('Agent: ')
-          wroteTokens = true
-        }
-        process.stdout.write(event.text)
-        break
+  )
 
-      case 'message':
-        if (!wroteTokens) console.log(`Agent: ${event.text}`)
-        break
-
-      case 'tool_call_started':
-        console.log(`\n  [tool] ${event.tool_name}(${JSON.stringify(event.input).slice(0, 120)})`)
-        break
-
-      case 'tool_call_completed':
-        console.log(
-          `  [tool] ${event.tool_name} -> ${
-            event.succeeded ? event.result.slice(0, 200) : `FAILED: ${event.result}`
-          }`,
-        )
-        break
-
-      case 'error':
-        console.error(`\nError: ${event.message}`)
-        break
-
-      case 'done':
-        if (wroteTokens) process.stdout.write('\n')
-        console.log('')
-        break
-
-      case 'thinking':
-        break
-    }
+  for (const toolCall of turn.tool_calls ?? []) {
+    const result = toolCall.result ?? ''
+    console.log(`  [tool] ${toolCall.tool_name} -> ${result.slice(0, 200)}`)
   }
+
+  for (const output of turn.output) {
+    console.log(`Agent: ${output.text}`)
+  }
+
+  console.log('')
 }
 
 main()

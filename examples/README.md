@@ -30,7 +30,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - [examples/surfaces/create-and-deliver.ts](./surfaces/create-and-deliver.ts): create a patient intake form and deliver it via SMS
 - [examples/surfaces/render-form.ts](./surfaces/render-form.ts): fetch a surface spec by token and display the field structure (uses public token routes)
 - [examples/scribe/encounter-review.ts](./scribe/encounter-review.ts): fetch an encounter entity, approve ICD-10 codes, edit SOAP notes, and finalize
-- [examples/conversations/text-chat.ts](./conversations/text-chat.ts): create a durable text conversation, stream turns, and display tool calls + responses
+- [examples/conversations/text-chat.ts](./conversations/text-chat.ts): create a durable text conversation and send synchronous user turns
 
 For full walkthroughs, see the guides:
 

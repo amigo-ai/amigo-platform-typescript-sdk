@@ -57,12 +57,10 @@ function formatDisplayTool(toolName: string, result: string): string {
 
     if (toolName === 'show_observation_cards') {
       const ids = data?.input?.observationDefinitionIds ?? data?.observationDefinitionIds ?? []
-      return (
-        `\n  ┌─ OBSERVATION CARDS ─────────────────────────\n` +
+      return `\n  ┌─ OBSERVATION CARDS ─────────────────────────\n` +
         `  │ IDs: ${JSON.stringify(ids)}\n` +
         `  │ Frontend renders interactive lab result cards\n` +
         `  └──────────────────────────────────────────────\n`
-      )
     }
 
     if (toolName === 'show_options') {
@@ -80,23 +78,19 @@ function formatDisplayTool(toolName: string, result: string): string {
       const level = data?.input?.level ?? data?.level ?? 'info'
       const text = data?.input?.text ?? data?.text ?? ''
       const icon = level === 'urgent' ? '🚨' : level === 'warning' ? '⚠️' : 'ℹ️'
-      return (
-        `\n  ┌─ ALERT [${level.toUpperCase()}] ${icon} ─────────────────────\n` +
+      return `\n  ┌─ ALERT [${level.toUpperCase()}] ${icon} ─────────────────────\n` +
         `  │ ${text.slice(0, 200)}\n` +
         `  └──────────────────────────────────────────────\n`
-      )
     }
 
     if (toolName === 'escalate_to_clinician') {
       const queue = data?.input?.queue ?? data?.queue ?? '?'
       const priority = data?.input?.priority ?? data?.priority ?? '?'
       const trigger = data?.input?.triggerSource ?? data?.triggerSource ?? '?'
-      return (
-        `\n  ┌─ ESCALATION ──────────────────────────────────\n` +
+      return `\n  ┌─ ESCALATION ──────────────────────────────────\n` +
         `  │ Queue: ${queue} | Priority: ${priority}\n` +
         `  │ Trigger: ${trigger}\n` +
         `  └──────────────────────────────────────────────\n`
-      )
     }
 
     return `  [display] ${JSON.stringify(data).slice(0, 200)}`
@@ -133,7 +127,7 @@ async function main() {
     let fullMessage = ''
 
     try {
-      for await (const event of client.conversationStreams.streamTurn(
+      for await (const event of client.conversations.streamTurn(
         conversationId,
         { message: text },
         { includeToolCalls: true },

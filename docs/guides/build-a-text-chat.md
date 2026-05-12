@@ -12,8 +12,6 @@ these SDK methods for web chat:
 
 - `client.conversations.create()` starts a production conversation.
 - `client.conversations.createTurn()` sends a synchronous user turn.
-- `client.conversationStreams.streamTurn()` sends a user turn and yields typed SSE
-  events for tokens, tool calls, messages, and completion.
 
 After each turn, the conversation may freeze/dormant on the server until the
 next user turn resumes it. Keep the returned `conversation_id` and pass it into
@@ -54,50 +52,6 @@ const nextTurn = await client.conversations.createTurn(conversation.id, {
 message. Use `start_mode: 'agent_first'` when your UI should show an agent
 greeting before the first user turn.
 
-## Streaming Chat
-
-Use `create()` once, store the returned conversation ID, then call
-`streamTurn()` for every user message.
-
-```typescript
-const conversation = await client.conversations.create({
-  service_id: process.env.AMIGO_SERVICE_ID!,
-  entity_id: 'optional-patient-entity-id',
-  start_mode: 'user_first',
-})
-
-for await (const event of client.conversationStreams.streamTurn(
-  conversation.id,
-  { message: 'What appointments are available tomorrow?' },
-  { includeToolCalls: true },
-)) {
-  switch (event.event) {
-    case 'token':
-      process.stdout.write(event.text)
-      break
-
-    case 'tool_call_started':
-      console.log(`tool started: ${event.tool_name}`)
-      break
-
-    case 'tool_call_completed':
-      console.log(`tool completed: ${event.tool_name}`)
-      break
-
-    case 'message':
-      console.log(event.text)
-      break
-
-    case 'done':
-      console.log(`conversation ${event.conversation_id} is ${event.status}`)
-      break
-
-    case 'error':
-      throw new Error(event.message)
-  }
-}
-```
-
 ## Resume a Conversation
 
 Persist `conversation.id` in your app session. Send later turns to the same ID:
@@ -110,16 +64,6 @@ await client.conversations.createTurn(
 )
 ```
 
-or stream it:
-
-```typescript
-for await (const event of client.conversationStreams.streamTurn(conversationId, {
-  message: 'Can you book that slot?',
-})) {
-  // render token/message/tool/done events
-}
-```
-
 ## Browser Architecture
 
 Do not expose workspace API keys directly in browser code. Put the SDK calls
@@ -127,12 +71,11 @@ behind your backend or BFF:
 
 1. Browser posts the user's message to your backend.
 2. Backend calls `client.conversations.create()` if there is no conversation ID.
-3. Backend calls `client.conversations.createTurn()` or
-   `client.conversationStreams.streamTurn()` and forwards the response to the
-   browser using your app's preferred transport.
+3. Backend calls `client.conversations.createTurn()` and forwards the response
+   to the browser using your app's preferred transport.
 4. Browser stores the returned `conversation_id` for the next turn.
 
-For a Node REPL example of the same durable streaming flow, see
+For a Node REPL example of the same REST conversation flow, see
 [`examples/conversations/text-chat.ts`](../../examples/conversations/text-chat.ts).
 
 ## Troubleshooting
@@ -141,8 +84,4 @@ If a production web chat is not behaving as expected, check the SDK surface
 being used:
 
 - `client.conversations.*` is the production conversation flow.
-- `client.conversationStreams.*` is the streaming variant for production
-  conversations.
 - `client.simulations.*` is for playground and coverage workflows.
-- Legacy text WebSocket helpers may not be available in all deployments and
-  should not be used for new headless web-chat integrations.

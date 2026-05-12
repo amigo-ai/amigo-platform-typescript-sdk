@@ -39,24 +39,25 @@ const resourceFiles = collectResourceTsFiles(RESOURCES_DIR)
 
 const indexSource = loadSource(INDEX_FILE)
 const resourceClassMap = new Map(
-  resourceFiles.flatMap((file) => {
-    const fullPath = path.join(RESOURCES_DIR, file)
-    const source = loadSource(fullPath)
-    // A nested resource module may export multiple classes (e.g.
-    // ``channels/index.ts`` declares ``ChannelsResource`` and
-    // re-exports ``SesSetupResource``); collect every class
-    // declaration so the class-name map covers all of them.
-    const classDeclarations = source.statements.filter(ts.isClassDeclaration)
-    return classDeclarations
-      .filter((decl) => Boolean(decl.name))
-      .map((decl) => [
-        decl.name.text,
-        {
-          file,
-          methods: collectResourceMethods(decl),
-        },
-      ])
-  }),
+  resourceFiles
+    .flatMap((file) => {
+      const fullPath = path.join(RESOURCES_DIR, file)
+      const source = loadSource(fullPath)
+      // A nested resource module may export multiple classes (e.g.
+      // ``channels/index.ts`` declares ``ChannelsResource`` and
+      // re-exports ``SesSetupResource``); collect every class
+      // declaration so the class-name map covers all of them.
+      const classDeclarations = source.statements.filter(ts.isClassDeclaration)
+      return classDeclarations
+        .filter((decl) => Boolean(decl.name))
+        .map((decl) => [
+          decl.name.text,
+          {
+            file,
+            methods: collectResourceMethods(decl),
+          },
+        ])
+    }),
 )
 
 const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')
@@ -68,13 +69,9 @@ const clientMethods = collectPublicMethodNames(clientClass).filter(
 const exportMap = collectExportMap(indexSource)
 const conversationHelperExports = requireExportNames(
   exportMap.values,
-  './resources/conversation-web-sockets.js',
+  './resources/conversations.js',
 )
-const conversationTypeExports = [
-  ...requireExportNames(exportMap.types, './resources/conversations.js'),
-  ...requireExportNames(exportMap.types, './resources/conversation-streams.js'),
-  ...requireExportNames(exportMap.types, './resources/conversation-web-sockets.js'),
-]
+const conversationTypeExports = requireExportNames(exportMap.types, './resources/conversations.js')
 function collectSubresources(className) {
   // Namespace resources (e.g. ``ChannelsResource``) carry typed
   // subresource fields (``readonly sesSetup: SesSetupResource``) that
@@ -104,7 +101,7 @@ function collectSubresources(className) {
 }
 
 const resourceEntries = clientFields
-  .filter((field) => !['workspaceId', 'baseUrl', 'agentBaseUrl', 'api'].includes(field.name))
+  .filter((field) => !['workspaceId', 'baseUrl'].includes(field.name))
   .map((field) => {
     const entry = resourceClassMap.get(field.typeText)
     const methods = entry?.methods ?? []
@@ -264,13 +261,8 @@ function collectResourceMethods(classDeclaration) {
   const sourceFile = classDeclaration.getSourceFile()
 
   for (const member of classDeclaration.members) {
-    const methodName = member.name?.getText(sourceFile)
-    if (
-      ts.isMethodDeclaration(member) &&
-      methodName !== 'constructor' &&
-      methodName !== 'withOptions'
-    ) {
-      methods.push(methodName)
+    if (ts.isMethodDeclaration(member) && member.name.getText(sourceFile) !== 'constructor') {
+      methods.push(member.name.getText(sourceFile))
       continue
     }
 
