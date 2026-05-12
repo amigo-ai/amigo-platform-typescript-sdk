@@ -366,6 +366,14 @@
             "title": "Objective",
             "type": "string"
           },
+          "preload": {
+            "items": {
+              "$ref": "#/components/schemas/PreloadSpec"
+            },
+            "maxItems": 20,
+            "title": "Preload",
+            "type": "array"
+          },
           "surface_spec_template": {
             "anyOf": [
               {
@@ -508,6 +516,14 @@
           "objective": {
             "title": "Objective",
             "type": "string"
+          },
+          "preload": {
+            "items": {
+              "$ref": "#/components/schemas/PreloadSpec"
+            },
+            "maxItems": 20,
+            "title": "Preload",
+            "type": "array"
           },
           "surface_spec_template": {
             "anyOf": [
@@ -3854,6 +3870,19 @@
             "title": "Concurrency",
             "type": "integer"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for every scenario session created by this bridge run. The value is forwarded to each scenario's session-create call and inherited by any forks; identical precedence rules apply per-session (entity match wins over phone, stale UUID falls back to phone lookup, malformed UUID returns 422). Use this to pin an entire regression suite to a specific test patient.",
+            "title": "Entity Id"
+          },
           "exploration": {
             "anyOf": [
               {
@@ -6115,7 +6144,6 @@
           "voice",
           "sms",
           "whatsapp",
-          "imessage",
           "email",
           "web",
           "scribe"
@@ -6162,11 +6190,7 @@
       "ChannelType": {
         "description": "Delivery channels for surfaces.",
         "enum": [
-          "sms",
-          "whatsapp",
-          "imessage",
           "email",
-          "voice",
           "web"
         ],
         "title": "ChannelType",
@@ -6339,6 +6363,25 @@
           "status"
         ],
         "title": "ClaimResponse",
+        "type": "object"
+      },
+      "ClientConfigResponse": {
+        "description": "Client-safe configuration values.\n\nValues returned here are safe to embed in browser-side code.\nAPI keys are restricted by HTTP referrer or similar origin\ncontrols at the provider level.",
+        "properties": {
+          "google_maps_api_key": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Google Maps Api Key"
+          }
+        },
+        "title": "ClientConfigResponse",
         "type": "object"
       },
       "ClinicOpenHoursParams": {
@@ -9516,10 +9559,18 @@
       },
       "CreateConversationRequest": {
         "properties": {
-          "auto_greet": {
-            "default": true,
-            "title": "Auto Greet",
-            "type": "boolean"
+          "context": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Injected into the agent's prompt as caller/patient context for this conversation.",
+            "title": "Context"
           },
           "entity_id": {
             "anyOf": [
@@ -9537,6 +9588,41 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "start_mode": {
+            "default": "user_first",
+            "enum": [
+              "user_first",
+              "agent_first"
+            ],
+            "title": "Start Mode",
+            "type": "string"
+          },
+          "viewport_height": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Height"
+          },
+          "viewport_width": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 20.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Width"
           }
         },
         "required": [
@@ -10613,7 +10699,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Input"
               },
               {
                 "type": "null"
@@ -11001,6 +11087,18 @@
           },
           "title": {
             "$ref": "#/components/schemas/NameString"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -11082,6 +11180,18 @@
               }
             ],
             "title": "Url"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -11345,6 +11455,7 @@
         "type": "object"
       },
       "CreateWorkspaceRequest": {
+        "description": "Request body for ``POST /v1/me/workspaces``.\n\n``region`` is intentionally not exposed here \u2014 the workspace is created\nin the region of the platform-api pod that handles the request (each\nregion's CD pipeline serves its own ingress host), and a workspace\ncannot migrate between regions. The handler derives it from\n``app.env.aws_region``.\n\n``environment`` has no default: it is a load-bearing routing field\n(staging vs production downstream), and ``PATCH .../convert_environment``\nis the supported migration path. Callers must commit to a value.",
         "properties": {
           "backend_org_id": {
             "anyOf": [
@@ -11357,7 +11468,6 @@
             ]
           },
           "environment": {
-            "default": "staging",
             "enum": [
               "production",
               "staging",
@@ -11369,24 +11479,14 @@
           "name": {
             "$ref": "#/components/schemas/StrippedNonemptyString"
           },
-          "region": {
-            "default": "us-east-1",
-            "enum": [
-              "us-east-1",
-              "ap-southeast-2",
-              "eu-central-1",
-              "ca-central-1"
-            ],
-            "title": "Region",
-            "type": "string"
-          },
           "slug": {
             "$ref": "#/components/schemas/SlugString"
           }
         },
         "required": [
           "slug",
-          "name"
+          "name",
+          "environment"
         ],
         "title": "CreateWorkspaceRequest",
         "type": "object"
@@ -15229,6 +15329,16 @@
             "title": "Path",
             "type": "string"
           },
+          "request_transform": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestTransform"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "response_filter": {
             "anyOf": [
               {
@@ -15384,6 +15494,16 @@
           "path": {
             "title": "Path",
             "type": "string"
+          },
+          "request_transform": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RequestTransform"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "response_filter": {
             "anyOf": [
@@ -20839,7 +20959,7 @@
         "type": "object"
       },
       "ForwardAction": {
-        "description": "Cold-transfer the caller to the inbound phone number's configured\nforwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven `forward_call`\ntool, with no location override, which falls through to the static\n`ForwardingMap` populated from the phone-number config.\n\nIf forwarding is not configured for the inbound phone number, the\ndispatcher falls back to the operator path (audit event + SSE only).",
+        "description": "Cold-transfer the caller to the service's configured forwarding\ndestination (set via ``Service.voice_config.forwarding``).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven\n``forward_call`` tool, with no location override, which falls through to\nthe per-service ``ServiceForwardingConfig``.\n\nIf ``voice_config.forwarding`` is unset, the dispatcher falls back to the\noperator path (audit event + SSE only).",
         "properties": {
           "type": {
             "const": "forward",
@@ -20913,7 +21033,7 @@
         "type": "object"
       },
       "ForwardingConfigRequest": {
-        "description": "Call forwarding configuration for create/update requests.",
+        "description": "Call forwarding configuration for create/update requests.\n\nDeprecated: per-phone forwarding has moved to per-service config\n(``Service.voice_config.forwarding``). The field is accepted for one\nrelease for SDK backward-compat but is no longer read by the voice\nagent at session time. Will be removed in a follow-up PR alongside\nthe ``platform.phone_numbers`` table drop.",
         "properties": {
           "enabled": {
             "default": true,
@@ -21401,7 +21521,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -21474,7 +21594,7 @@
         "properties": {
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "entity_type": {
             "const": "person",
@@ -22737,30 +22857,6 @@
           }
         },
         "title": "InteractionDynamics",
-        "type": "object"
-      },
-      "InternalForwardingResponse": {
-        "description": "Resolved forwarding config for a phone number.",
-        "properties": {
-          "forward_to": {
-            "title": "Forward To",
-            "type": "string"
-          },
-          "should_disconnect": {
-            "title": "Should Disconnect",
-            "type": "boolean"
-          },
-          "warm_transfer": {
-            "default": true,
-            "title": "Warm Transfer",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "forward_to",
-          "should_disconnect"
-        ],
-        "title": "InternalForwardingResponse",
         "type": "object"
       },
       "InternalIntegrationResponse": {
@@ -26984,7 +27080,7 @@
           },
           "channel": {
             "$ref": "#/components/schemas/ChannelType",
-            "default": "sms"
+            "default": "email"
           },
           "consent_required": {
             "default": true,
@@ -31063,6 +31159,27 @@
         "title": "PositiveSignalRow",
         "type": "object"
       },
+      "PreloadSpec": {
+        "description": "A tool call executed deterministically by the engine on state entry.\n\nUnlike LLM-driven tool calls, preloads run before any LLM turn \u2014\nthe results appear in the interaction log so the engage LLM sees\nthem as pre-loaded context.  All preloads in a state execute in\nparallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``\ntemplate variables resolved from the session's caller context.",
+        "properties": {
+          "params": {
+            "additionalProperties": true,
+            "maxProperties": 20,
+            "title": "Params",
+            "type": "object"
+          },
+          "tool_id": {
+            "maxLength": 256,
+            "title": "Tool Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_id"
+        ],
+        "title": "PreloadSpec",
+        "type": "object"
+      },
       "PrevalenceResponse": {
         "properties": {
           "count": {
@@ -31896,12 +32013,9 @@
         "type": "object"
       },
       "ProviderType": {
-        "description": "Messaging provider that implements a channel.\n\nMultiple providers can serve the same ChannelKind (e.g., Twilio and\nInfobip both support SMS).",
+        "description": "Messaging provider that implements a channel.\n\nMultiple providers may serve the same ChannelKind.",
         "enum": [
           "twilio",
-          "infobip",
-          "sendblue",
-          "gmail",
           "websocket"
         ],
         "title": "ProviderType",
@@ -32208,7 +32322,7 @@
         "type": "object"
       },
       "QuietHours": {
-        "description": "TCPA-compliant quiet hours \u2014 no outbound SMS during this window.",
+        "description": "Quiet hours \u2014 no outbound outreach during this window.",
         "properties": {
           "enabled": {
             "default": false,
@@ -32834,6 +32948,33 @@
           "thought_visibility"
         ],
         "title": "RelationshipToDeveloper",
+        "type": "object"
+      },
+      "RequestTransform": {
+        "description": "Transforms outbound request body before sending to the integration endpoint.\n\nApplied after path-param substitution and auth-header resolution, right\nbefore the HTTP call.  Mirror of the response-side pipeline\n(``response_filter`` / ``result_key`` / ``result_template``).\n\nInject targets the **outermost** dict: when combined with\n``wrap_params_key``, injected fields sit alongside the wrapper key,\nnever inside the wrapped sub-dict.",
+        "properties": {
+          "inject": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "maxProperties": 20,
+            "title": "Inject",
+            "type": "object"
+          },
+          "wrap_params_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wrap Params Key"
+          }
+        },
+        "title": "RequestTransform",
         "type": "object"
       },
       "ResolveTemplateRequest": {
@@ -35234,7 +35375,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Output"
               },
               {
                 "type": "null"
@@ -35317,6 +35458,29 @@
           "updated_at"
         ],
         "title": "ServiceBindingResponse",
+        "type": "object"
+      },
+      "ServiceForwardingConfig": {
+        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by:\n  - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't\n    pass an explicit ``phone_number`` and no EHR location is configured).\n  - ``EscalationPolicy.ForwardAction`` \u2014 engine-fired escalation with no\n    overrides falls through to the same path.\n\nDistinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone\nlegacy shape with ``enabled``); per-service forwarding is a binary\npresence \u2014 set means tier 3 resolves to it, None means tier 3 has no\nstatic target.",
+        "properties": {
+          "forward_to": {
+            "$ref": "#/components/schemas/PhoneE164"
+          },
+          "should_disconnect": {
+            "default": true,
+            "title": "Should Disconnect",
+            "type": "boolean"
+          },
+          "warm_transfer": {
+            "default": true,
+            "title": "Warm Transfer",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "forward_to"
+        ],
+        "title": "ServiceForwardingConfig",
         "type": "object"
       },
       "ServiceResponse": {
@@ -35470,7 +35634,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Output"
               },
               {
                 "type": "null"
@@ -35525,7 +35689,7 @@
         "title": "ServiceTag",
         "type": "object"
       },
-      "ServiceVoiceConfig": {
+      "ServiceVoiceConfig-Input": {
         "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
         "properties": {
           "backchannel_delay_ms": {
@@ -35627,6 +35791,282 @@
             "default": false,
             "title": "Forward Call Enabled",
             "type": "boolean"
+          },
+          "forwarding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceForwardingConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "language_providers": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "$ref": "#/components/schemas/LanguageProviderEntry"
+                },
+                "maxProperties": 10,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Language Providers"
+          },
+          "max_buffer_delay_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Buffer Delay Ms"
+          },
+          "max_response_sentences": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Response Sentences"
+          },
+          "max_response_words": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Response Words"
+          },
+          "min_tts_speed": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Min Tts Speed"
+          },
+          "post_eot_pause_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Post Eot Pause Ms"
+          },
+          "progress_interval_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Interval Ms"
+          },
+          "progress_vocabulary": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Vocabulary"
+          },
+          "transition_deadline_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Transition Deadline Ms"
+          },
+          "tts_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Config"
+          },
+          "tts_model": {
+            "anyOf": [
+              {
+                "enum": [
+                  "sonic-turbo",
+                  "sonic-3"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Model"
+          },
+          "tts_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "cartesia",
+                  "elevenlabs",
+                  "groq"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tts Provider"
+          }
+        },
+        "title": "ServiceVoiceConfig",
+        "type": "object"
+      },
+      "ServiceVoiceConfig-Output": {
+        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
+        "properties": {
+          "backchannel_delay_ms": {
+            "default": 400,
+            "title": "Backchannel Delay Ms",
+            "type": "integer"
+          },
+          "barge_in_cooldown_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barge In Cooldown S"
+          },
+          "barge_in_min_speech_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Barge In Min Speech S"
+          },
+          "eager_eot_threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eager Eot Threshold"
+          },
+          "empathy_hold_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Empathy Hold Ms"
+          },
+          "eot_timeout_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eot Timeout Ms"
+          },
+          "filler_cooldown_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Cooldown Ms"
+          },
+          "filler_style": {
+            "default": "backchannel",
+            "enum": [
+              "backchannel",
+              "phrase",
+              "silent"
+            ],
+            "title": "Filler Style",
+            "type": "string"
+          },
+          "filler_vocabulary": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Filler Vocabulary"
+          },
+          "forward_call_enabled": {
+            "default": false,
+            "title": "Forward Call Enabled",
+            "type": "boolean"
+          },
+          "forwarding": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ServiceForwardingConfig"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "language_providers": {
             "anyOf": [
@@ -38571,11 +39011,7 @@
             "description": "World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both."
           },
           "channel_kind": {
-            "enum": [
-              "sms",
-              "whatsapp",
-              "web"
-            ],
+            "const": "web",
             "title": "Channel Kind",
             "type": "string"
           },
@@ -38605,47 +39041,10 @@
             "description": "Custom greeting. Agent auto-greets if omitted.",
             "title": "Greeting"
           },
-          "idempotency_key": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Client-provided idempotency key for SMS/WhatsApp.",
-            "title": "Idempotency Key"
-          },
-          "phone_to": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/PhoneE164"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "E.164 phone override for SMS/WhatsApp. Resolved from entity if omitted."
-          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
-          },
-          "surface_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Surface to deliver inline in the conversation.",
-            "title": "Surface Id"
           }
         },
         "required": [
@@ -38658,11 +39057,7 @@
       "StartSessionResponse": {
         "properties": {
           "channel_kind": {
-            "enum": [
-              "sms",
-              "whatsapp",
-              "web"
-            ],
+            "const": "web",
             "title": "Channel Kind",
             "type": "string"
           },
@@ -38679,28 +39074,6 @@
             "format": "uuid",
             "title": "Entity Id",
             "type": "string"
-          },
-          "phone_from": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone From"
-          },
-          "phone_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone To"
           },
           "service_id": {
             "format": "uuid",
@@ -39965,6 +40338,18 @@
               }
             ],
             "title": "Title"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -42219,6 +42604,33 @@
             ],
             "title": "Output"
           },
+          "output_original_length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Original Length"
+          },
+          "output_truncated": {
+            "default": false,
+            "title": "Output Truncated",
+            "type": "boolean"
+          },
+          "output_truncated_to": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Truncated To"
+          },
           "protocol": {
             "anyOf": [
               {
@@ -44369,6 +44781,19 @@
             ],
             "title": "Content"
           },
+          "context": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Injected into the agent's prompt as caller/patient context for this turn.",
+            "title": "Context"
+          },
           "media_type": {
             "anyOf": [
               {
@@ -44398,6 +44823,32 @@
             "minLength": 1,
             "title": "Message",
             "type": "string"
+          },
+          "viewport_height": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 5.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Height"
+          },
+          "viewport_width": {
+            "anyOf": [
+              {
+                "maximum": 500.0,
+                "minimum": 20.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Viewport Width"
           }
         },
         "required": [
@@ -46144,7 +46595,7 @@
           "voice_config": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ServiceVoiceConfig"
+                "$ref": "#/components/schemas/ServiceVoiceConfig-Input"
               },
               {
                 "type": "null"
@@ -50840,7 +51291,7 @@
                 "type": "null"
               }
             ],
-            "description": "Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.",
+            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context \u2014 same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
             "title": "Caller Id"
           },
           "entity_id": {
@@ -50853,7 +51304,7 @@
                 "type": "null"
               }
             ],
-            "description": "Entity UUID to bind to the session for patient context resolution.",
+            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS \u2014 `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) \u2014 no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
             "title": "Entity Id"
           },
           "service_id": {
@@ -50938,53 +51389,6 @@
           }
         },
         "summary": "Redirect To Surface",
-        "tags": [
-          "Surface Patient"
-        ]
-      }
-    },
-    "/s/vcard/{workspace_slug}.vcf": {
-      "get": {
-        "description": "Serve a vCard contact card for a workspace.\n\nPublic, unauthenticated endpoint. iOS blocks clickable links in SMS\nfrom unknown senders \u2014 sending a vCard first lets patients save the\nnumber so subsequent SMS links render as tappable.\n\nPath: ``/s/vcard/{workspace_slug}.vcf``",
-        "operationId": "serve-vcard",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_slug",
-            "required": true,
-            "schema": {
-              "title": "Workspace Slug",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace or phone number not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Serve Vcard",
         "tags": [
           "Surface Patient"
         ]
@@ -58460,6 +58864,40 @@
         "summary": "HIPAA compliance evidence report",
         "tags": [
           "Compliance"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/config/client": {
+      "get": {
+        "description": "Return client-safe configuration for the authenticated workspace.",
+        "operationId": "get-client-config",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClientConfigResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get client configuration",
+        "tags": [
+          "Config"
         ]
       }
     },
@@ -75806,7 +76244,7 @@
     },
     "/v1/{workspace_id}/sessions/start": {
       "post": {
-        "description": "Start an SMS, WhatsApp, or web text session with a world model entity. Resolves contact info from the entity, picks the workspace outbound number, and creates or resumes a conversation. Returns conversation_id for subsequent turns via POST /v1/{ws}/conversations/{id}/turns.",
+        "description": "Start a web text session with a world model entity. Materializes the conversation and returns conversation_id for subsequent turns via POST /v1/{ws}/conversations/{id}/turns.",
         "operationId": "start_text_session_v1__workspace_id__sessions_start_post",
         "parameters": [
           {
@@ -75844,17 +76282,21 @@
           "404": {
             "description": "Service or entity not found."
           },
-          "409": {
-            "description": "No outbound-capable phone number in workspace."
-          },
           "422": {
-            "description": "Entity has no phone for SMS/WhatsApp channel."
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           },
           "503": {
             "description": "Agent service unavailable."
           }
         },
-        "summary": "Start a text conversation session with an entity",
+        "summary": "Start a web text conversation session with an entity",
         "tags": [
           "Sessions"
         ]
@@ -80336,7 +80778,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nPhone-number targets are delivered via SMS (SendBlue or Twilio).\nEmail targets are delivered via Gmail API. Other targets record an\nexternal handoff that was completed outside platform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {
@@ -83765,6 +84207,25 @@
               "minimum": 0,
               "title": "Offset",
               "type": "integer"
+            }
+          },
+          {
+            "description": "Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc)",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc)",
+              "title": "Order"
             }
           },
           {

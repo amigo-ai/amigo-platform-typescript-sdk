@@ -1,5 +1,38 @@
 # Changelog
 
+## [0.49.0] - 2026-05-10
+
+### Maintenance
+
+- sync API types from platform (f49b8311) (#239)
+
+## [0.48.4] - 2026-05-10
+
+### Features
+
+- add order param to listEntities, remove deprecated semantic/tags (#233)
+
+### Maintenance
+
+- sync API types from platform (d4bf31ab) (#234)
+- sync API types from platform (3e7c46cb) (#235)
+
+## [0.48.3] - 2026-05-09
+
+### Maintenance
+
+- No public SDK changes were recorded in this release.
+
+## [0.48.2] - 2026-05-09
+
+### Bug Fixes
+
+- update surface example channel from 'sms' to 'web' (#232)
+
+### Maintenance
+
+- sync API types from platform (596cb6c0) (#231)
+
 ## [0.48.1] - 2026-05-08
 
 ### Maintenance

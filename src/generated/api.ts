@@ -23,32 +23,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/s/vcard/{workspace_slug}.vcf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Serve Vcard
-         * @description Serve a vCard contact card for a workspace.
-         *
-         *     Public, unauthenticated endpoint. iOS blocks clickable links in SMS
-         *     from unknown senders — sending a vCard first lets patients save the
-         *     number so subsequent SMS links render as tappable.
-         *
-         *     Path: ``/s/vcard/{workspace_slug}.vcf``
-         */
-        get: operations["serve-vcard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/s/{token}": {
         parameters: {
             query?: never;
@@ -1901,6 +1875,26 @@ export interface paths {
          *     Permissions: admin, owner.
          */
         get: operations["get-hipaa-report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/config/client": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get client configuration
+         * @description Return client-safe configuration for the authenticated workspace.
+         */
+        get: operations["get-client-config"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6131,8 +6125,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Start a text conversation session with an entity
-         * @description Start an SMS, WhatsApp, or web text session with a world model entity. Resolves contact info from the entity, picks the workspace outbound number, and creates or resumes a conversation. Returns conversation_id for subsequent turns via POST /v1/{ws}/conversations/{id}/turns.
+         * Start a web text conversation session with an entity
+         * @description Start a web text session with a world model entity. Materializes the conversation and returns conversation_id for subsequent turns via POST /v1/{ws}/conversations/{id}/turns.
          */
         post: operations["start_text_session_v1__workspace_id__sessions_start_post"];
         delete?: never;
@@ -7475,9 +7469,12 @@ export interface paths {
          * Deliver Surface
          * @description Record a real delivery handoff for a surface.
          *
-         *     Phone-number targets are delivered via SMS (SendBlue or Twilio).
-         *     Email targets are delivered via Gmail API. Other targets record an
-         *     external handoff that was completed outside platform-api.
+         *     Email targets are delivered through channel-manager's
+         *     ``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,
+         *     suppression — keyed on the surface row's ``use_case_id``). Phone-shaped
+         *     addresses return 422 — SMS surface delivery was removed in PR #2783.
+         *     Other targets record an external handoff that was completed outside
+         *     platform-api.
          *
          *     Permissions: member, admin, owner (surfaces:write)
          */
@@ -8814,6 +8811,8 @@ export interface components {
             name: string;
             /** Objective */
             objective: string;
+            /** Preload */
+            preload?: components["schemas"]["PreloadSpec"][];
             /** Surface Spec Template */
             surface_spec_template?: {
                 [key: string]: unknown;
@@ -8866,6 +8865,8 @@ export interface components {
             name: string;
             /** Objective */
             objective: string;
+            /** Preload */
+            preload?: components["schemas"]["PreloadSpec"][];
             /** Surface Spec Template */
             surface_spec_template?: {
                 [key: string]: unknown;
@@ -10146,6 +10147,11 @@ export interface components {
              * @default 3
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for every scenario session created by this bridge run. The value is forwarded to each scenario's session-create call and inherited by any forks; identical precedence rules apply per-session (entity match wins over phone, stale UUID falls back to phone lookup, malformed UUID returns 422). Use this to pin an entire regression suite to a specific test patient.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Turns
@@ -10999,7 +11005,7 @@ export interface components {
          *     Each kind maps to one or more providers.
          * @enum {string}
          */
-        ChannelKind: "voice" | "sms" | "whatsapp" | "imessage" | "email" | "web" | "scribe";
+        ChannelKind: "voice" | "sms" | "whatsapp" | "email" | "web" | "scribe";
         /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
@@ -11019,7 +11025,7 @@ export interface components {
          * @description Delivery channels for surfaces.
          * @enum {string}
          */
-        ChannelType: "sms" | "whatsapp" | "imessage" | "email" | "voice" | "web";
+        ChannelType: "email" | "web";
         /**
          * ChannelVoicemailStatusEvent
          * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
@@ -11153,6 +11159,18 @@ export interface components {
             id: string;
             /** Status */
             status: string;
+        };
+        /**
+         * ClientConfigResponse
+         * @description Client-safe configuration values.
+         *
+         *     Values returned here are safe to embed in browser-side code.
+         *     API keys are restricted by HTTP referrer or similar origin
+         *     controls at the provider level.
+         */
+        ClientConfigResponse: {
+            /** Google Maps Api Key */
+            google_maps_api_key?: string | null;
         };
         /**
          * ClinicOpenHoursParams
@@ -12364,10 +12382,10 @@ export interface components {
         /** CreateConversationRequest */
         CreateConversationRequest: {
             /**
-             * Auto Greet
-             * @default true
+             * Context
+             * @description Injected into the agent's prompt as caller/patient context for this conversation.
              */
-            auto_greet?: boolean;
+            context?: string | null;
             /** Entity Id */
             entity_id?: string | null;
             /**
@@ -12375,6 +12393,16 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
+            /**
+             * Start Mode
+             * @default user_first
+             * @enum {string}
+             */
+            start_mode?: "user_first" | "agent_first";
+            /** Viewport Height */
+            viewport_height?: number | null;
+            /** Viewport Width */
+            viewport_width?: number | null;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -12801,7 +12829,7 @@ export interface components {
             version_sets?: {
                 [key: string]: components["schemas"]["VersionSet"];
             };
-            voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
+            voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
         /** CreateSesSetupRequest */
         CreateSesSetupRequest: {
@@ -12963,6 +12991,8 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title: components["schemas"]["NameString"];
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** CreateSurfaceResponse */
         CreateSurfaceResponse: {
@@ -12997,6 +13027,8 @@ export interface components {
             token?: string | null;
             /** Url */
             url?: string | null;
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** CreateToolRequest */
         CreateToolRequest: {
@@ -13085,22 +13117,28 @@ export interface components {
              */
             trigger_id: string;
         };
-        /** CreateWorkspaceRequest */
+        /**
+         * CreateWorkspaceRequest
+         * @description Request body for ``POST /v1/me/workspaces``.
+         *
+         *     ``region`` is intentionally not exposed here — the workspace is created
+         *     in the region of the platform-api pod that handles the request (each
+         *     region's CD pipeline serves its own ingress host), and a workspace
+         *     cannot migrate between regions. The handler derives it from
+         *     ``app.env.aws_region``.
+         *
+         *     ``environment`` has no default: it is a load-bearing routing field
+         *     (staging vs production downstream), and ``PATCH .../convert_environment``
+         *     is the supported migration path. Callers must commit to a value.
+         */
         CreateWorkspaceRequest: {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
             /**
              * Environment
-             * @default staging
              * @enum {string}
              */
-            environment?: "production" | "staging" | "development";
+            environment: "production" | "staging" | "development";
             name: components["schemas"]["StrippedNonemptyString"];
-            /**
-             * Region
-             * @default us-east-1
-             * @enum {string}
-             */
-            region?: "us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1";
             slug: components["schemas"]["SlugString"];
         };
         /** CrmActivityItem */
@@ -14704,6 +14742,7 @@ export interface components {
             name: string;
             /** Path */
             path: string;
+            request_transform?: components["schemas"]["RequestTransform"] | null;
             /** Response Filter */
             response_filter?: string[] | null;
             /** Response Mapping */
@@ -14778,6 +14817,7 @@ export interface components {
             name: string;
             /** Path */
             path: string;
+            request_transform?: components["schemas"]["RequestTransform"] | null;
             /** Response Filter */
             response_filter?: string[] | null;
             /** Response Mapping */
@@ -16776,16 +16816,16 @@ export interface components {
         };
         /**
          * ForwardAction
-         * @description Cold-transfer the caller to the inbound phone number's configured
-         *     forwarding destination (set via `PUT /v1/{ws}/phone-numbers/{id}/forwarding`).
+         * @description Cold-transfer the caller to the service's configured forwarding
+         *     destination (set via ``Service.voice_config.forwarding``).
          *
          *     No agent-side decision and no operator dashboard required — the engine
-         *     invokes the same forwarding callback used by the LLM-driven `forward_call`
-         *     tool, with no location override, which falls through to the static
-         *     `ForwardingMap` populated from the phone-number config.
+         *     invokes the same forwarding callback used by the LLM-driven
+         *     ``forward_call`` tool, with no location override, which falls through to
+         *     the per-service ``ServiceForwardingConfig``.
          *
-         *     If forwarding is not configured for the inbound phone number, the
-         *     dispatcher falls back to the operator path (audit event + SSE only).
+         *     If ``voice_config.forwarding`` is unset, the dispatcher falls back to the
+         *     operator path (audit event + SSE only).
          */
         ForwardAction: {
             /**
@@ -16825,6 +16865,12 @@ export interface components {
         /**
          * ForwardingConfigRequest
          * @description Call forwarding configuration for create/update requests.
+         *
+         *     Deprecated: per-phone forwarding has moved to per-service config
+         *     (``Service.voice_config.forwarding``). The field is accepted for one
+         *     release for SDK backward-compat but is no longer read by the voice
+         *     agent at session time. Will be removed in a follow-up PR alongside
+         *     the ``platform.phone_numbers`` table drop.
          */
         ForwardingConfigRequest: {
             /**
@@ -17079,7 +17125,7 @@ export interface components {
          * @description A named gap detection rule.
          */
         "GapRequirement-Input": {
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Entity Type
@@ -17111,7 +17157,7 @@ export interface components {
          * @description A named gap detection rule.
          */
         "GapRequirement-Output": {
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Entity Type
@@ -17636,21 +17682,6 @@ export interface components {
              * @description How well speakers managed turn-taking - interruptions, overlaps, pacing
              */
             turn_taking_quality?: string | null;
-        };
-        /**
-         * InternalForwardingResponse
-         * @description Resolved forwarding config for a phone number.
-         */
-        InternalForwardingResponse: {
-            /** Forward To */
-            forward_to: string;
-            /** Should Disconnect */
-            should_disconnect: boolean;
-            /**
-             * Warm Transfer
-             * @default true
-             */
-            warm_transfer?: boolean;
         };
         /**
          * InternalIntegrationResponse
@@ -19713,7 +19744,7 @@ export interface components {
              * @default true
              */
             active?: boolean;
-            /** @default sms */
+            /** @default email */
             channel?: components["schemas"]["ChannelType"];
             /**
              * Consent Required
@@ -21103,6 +21134,24 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * PreloadSpec
+         * @description A tool call executed deterministically by the engine on state entry.
+         *
+         *     Unlike LLM-driven tool calls, preloads run before any LLM turn —
+         *     the results appear in the interaction log so the engage LLM sees
+         *     them as pre-loaded context.  All preloads in a state execute in
+         *     parallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``
+         *     template variables resolved from the session's caller context.
+         */
+        PreloadSpec: {
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Tool Id */
+            tool_id: string;
+        };
         /** PrevalenceResponse */
         PrevalenceResponse: {
             /** Count */
@@ -21398,11 +21447,10 @@ export interface components {
          * ProviderType
          * @description Messaging provider that implements a channel.
          *
-         *     Multiple providers can serve the same ChannelKind (e.g., Twilio and
-         *     Infobip both support SMS).
+         *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "infobip" | "sendblue" | "gmail" | "websocket";
+        ProviderType: "twilio" | "websocket";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -21533,7 +21581,7 @@ export interface components {
         };
         /**
          * QuietHours
-         * @description TCPA-compliant quiet hours — no outbound SMS during this window.
+         * @description Quiet hours — no outbound outreach during this window.
          */
         QuietHours: {
             /**
@@ -21872,6 +21920,26 @@ export interface components {
             thought_visibility: string;
             /** Type */
             type: string;
+        };
+        /**
+         * RequestTransform
+         * @description Transforms outbound request body before sending to the integration endpoint.
+         *
+         *     Applied after path-param substitution and auth-header resolution, right
+         *     before the HTTP call.  Mirror of the response-side pipeline
+         *     (``response_filter`` / ``result_key`` / ``result_template``).
+         *
+         *     Inject targets the **outermost** dict: when combined with
+         *     ``wrap_params_key``, injected fields sit alongside the wrapper key,
+         *     never inside the wrapped sub-dict.
+         */
+        RequestTransform: {
+            /** Inject */
+            inject?: {
+                [key: string]: string;
+            };
+            /** Wrap Params Key */
+            wrap_params_key?: string | null;
         };
         /**
          * ResolveTemplateRequest
@@ -22971,7 +23039,7 @@ export interface components {
             version_sets: {
                 [key: string]: components["schemas"]["VersionSet"];
             };
-            voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
+            voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
         };
         /** ServiceBindingRequest */
         ServiceBindingRequest: {
@@ -23013,6 +23081,34 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * ServiceForwardingConfig
+         * @description Per-service call-forwarding destination + transfer mechanism.
+         *
+         *     Read by:
+         *       - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't
+         *         pass an explicit ``phone_number`` and no EHR location is configured).
+         *       - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no
+         *         overrides falls through to the same path.
+         *
+         *     Distinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone
+         *     legacy shape with ``enabled``); per-service forwarding is a binary
+         *     presence — set means tier 3 resolves to it, None means tier 3 has no
+         *     static target.
+         */
+        ServiceForwardingConfig: {
+            forward_to: components["schemas"]["PhoneE164"];
+            /**
+             * Should Disconnect
+             * @default true
+             */
+            should_disconnect?: boolean;
+            /**
+             * Warm Transfer
+             * @default true
+             */
+            warm_transfer?: boolean;
         };
         /** ServiceResponse */
         ServiceResponse: {
@@ -23088,7 +23184,7 @@ export interface components {
             version_sets: {
                 [key: string]: components["schemas"]["VersionSet"];
             };
-            voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
+            voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
             /**
              * Workspace Id
              * Format: uuid
@@ -23109,7 +23205,7 @@ export interface components {
          *     Each field is optional — None means inherit from the layer above
          *     (workspace VoiceSettings → env vars → hardcoded defaults).
          */
-        ServiceVoiceConfig: {
+        "ServiceVoiceConfig-Input": {
             /**
              * Backchannel Delay Ms
              * @default 400
@@ -23140,6 +23236,75 @@ export interface components {
              * @default false
              */
             forward_call_enabled?: boolean;
+            forwarding?: components["schemas"]["ServiceForwardingConfig"] | null;
+            /** Language Providers */
+            language_providers?: {
+                [key: string]: components["schemas"]["LanguageProviderEntry"];
+            } | null;
+            /** Max Buffer Delay Ms */
+            max_buffer_delay_ms?: number | null;
+            /** Max Response Sentences */
+            max_response_sentences?: number | null;
+            /** Max Response Words */
+            max_response_words?: number | null;
+            /** Min Tts Speed */
+            min_tts_speed?: number | null;
+            /** Post Eot Pause Ms */
+            post_eot_pause_ms?: number | null;
+            /** Progress Interval Ms */
+            progress_interval_ms?: number | null;
+            /** Progress Vocabulary */
+            progress_vocabulary?: string[] | null;
+            /** Transition Deadline Ms */
+            transition_deadline_ms?: number | null;
+            /** Tts Config */
+            tts_config?: {
+                [key: string]: unknown;
+            } | null;
+            /** Tts Model */
+            tts_model?: ("sonic-turbo" | "sonic-3") | null;
+            /** Tts Provider */
+            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
+        };
+        /**
+         * ServiceVoiceConfig
+         * @description Per-service voice pipeline tuning. Overrides workspace/env defaults.
+         *
+         *     Each field is optional — None means inherit from the layer above
+         *     (workspace VoiceSettings → env vars → hardcoded defaults).
+         */
+        "ServiceVoiceConfig-Output": {
+            /**
+             * Backchannel Delay Ms
+             * @default 400
+             */
+            backchannel_delay_ms?: number;
+            /** Barge In Cooldown S */
+            barge_in_cooldown_s?: number | null;
+            /** Barge In Min Speech S */
+            barge_in_min_speech_s?: number | null;
+            /** Eager Eot Threshold */
+            eager_eot_threshold?: number | null;
+            /** Empathy Hold Ms */
+            empathy_hold_ms?: number | null;
+            /** Eot Timeout Ms */
+            eot_timeout_ms?: number | null;
+            /** Filler Cooldown Ms */
+            filler_cooldown_ms?: number | null;
+            /**
+             * Filler Style
+             * @default backchannel
+             * @enum {string}
+             */
+            filler_style?: "backchannel" | "phrase" | "silent";
+            /** Filler Vocabulary */
+            filler_vocabulary?: string[] | null;
+            /**
+             * Forward Call Enabled
+             * @default false
+             */
+            forward_call_enabled?: boolean;
+            forwarding?: components["schemas"]["ServiceForwardingConfig"] | null;
             /** Language Providers */
             language_providers?: {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
@@ -24439,9 +24604,9 @@ export interface components {
             canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
-             * @enum {string}
+             * @constant
              */
-            channel_kind: "sms" | "whatsapp" | "web";
+            channel_kind: "web";
             /**
              * Entity Id
              * @description World model entity UUID. Provide either entity_id or canonical_id.
@@ -24453,30 +24618,18 @@ export interface components {
              */
             greeting?: string | null;
             /**
-             * Idempotency Key
-             * @description Client-provided idempotency key for SMS/WhatsApp.
-             */
-            idempotency_key?: string | null;
-            /** @description E.164 phone override for SMS/WhatsApp. Resolved from entity if omitted. */
-            phone_to?: components["schemas"]["PhoneE164"] | null;
-            /**
              * Service Id
              * Format: uuid
              */
             service_id: string;
-            /**
-             * Surface Id
-             * @description Surface to deliver inline in the conversation.
-             */
-            surface_id?: string | null;
         };
         /** StartSessionResponse */
         StartSessionResponse: {
             /**
              * Channel Kind
-             * @enum {string}
+             * @constant
              */
-            channel_kind: "sms" | "whatsapp" | "web";
+            channel_kind: "web";
             /**
              * Conversation Id
              * Format: uuid
@@ -24489,10 +24642,6 @@ export interface components {
              * Format: uuid
              */
             entity_id: string;
-            /** Phone From */
-            phone_from?: string | null;
-            /** Phone To */
-            phone_to?: string | null;
             /**
              * Service Id
              * Format: uuid
@@ -25066,6 +25215,8 @@ export interface components {
             } | null;
             /** Title */
             title?: string | null;
+            /** Use Case Id */
+            use_case_id?: string | null;
         };
         /** SurfaceReviewApprovedEvent */
         SurfaceReviewApprovedEvent: {
@@ -25978,6 +26129,15 @@ export interface components {
             integration_name?: string | null;
             /** Output */
             output?: string | null;
+            /** Output Original Length */
+            output_original_length?: number | null;
+            /**
+             * Output Truncated
+             * @default false
+             */
+            output_truncated?: boolean;
+            /** Output Truncated To */
+            output_truncated_to?: number | null;
             /** Protocol */
             protocol?: string | null;
             /**
@@ -27021,12 +27181,21 @@ export interface components {
         TurnRequest: {
             /** Content */
             content?: components["schemas"]["ContentPartPayload"][] | null;
+            /**
+             * Context
+             * @description Injected into the agent's prompt as caller/patient context for this turn.
+             */
+            context?: string | null;
             /** Media Type */
             media_type?: string | null;
             /** Media Url */
             media_url?: string | null;
             /** Message */
             message: string;
+            /** Viewport Height */
+            viewport_height?: number | null;
+            /** Viewport Width */
+            viewport_width?: number | null;
         };
         /** TurnResponse */
         TurnResponse: {
@@ -27400,7 +27569,7 @@ export interface components {
             version_sets?: {
                 [key: string]: components["schemas"]["VersionSet"];
             } | null;
-            voice_config?: components["schemas"]["ServiceVoiceConfig"] | null;
+            voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
         /** UpdateSkillRequest */
         UpdateSkillRequest: {
@@ -29080,12 +29249,12 @@ export interface components {
             branch_name?: string | null;
             /**
              * Caller Id
-             * @description Simulated caller phone number for patient resolution. When omitted or blank the agent-engine falls back to the sim-orchestrator sentinel.
+             * @description Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.
              */
             caller_id?: string | null;
             /**
              * Entity Id
-             * @description Entity UUID to bind to the session for patient context resolution.
+             * @description Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).
              */
             entity_id?: string | null;
             /**
@@ -29154,51 +29323,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "serve-vcard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_slug: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Workspace or phone number not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -33681,6 +33805,28 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "get-client-config": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClientConfigResponse"];
+                };
             };
         };
     };
@@ -43714,19 +43860,14 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description No outbound-capable phone number in workspace. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Entity has no phone for SMS/WhatsApp channel. */
+            /** @description Validation Error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
             /** @description Agent service unavailable. */
             503: {
@@ -49260,6 +49401,8 @@ export interface operations {
                 q?: string | null;
                 limit?: number;
                 offset?: number;
+                /** @description Sort order (PostgREST-style, e.g. last_event_at.desc, display_name.asc) */
+                order?: string | null;
                 /** @description Filter by has_projection flag */
                 has_projection?: boolean | null;
                 /** @description Filter by event source (e.g. voice_agent, connector_runner) */

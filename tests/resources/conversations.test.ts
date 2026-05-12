@@ -122,7 +122,6 @@ describe('ConversationsResource', () => {
     const request: CreateConversationRequest = {
       service_id: 'svc-00000000-0000-0000-0000-000000000001',
       entity_id: 'ent-00000000-0000-0000-0000-000000000001',
-      auto_greet: false,
     }
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -388,7 +387,7 @@ describe('ConversationsResource', () => {
     })
 
     await expect(
-      client.conversations.create({ service_id: '', auto_greet: false }),
+      client.conversations.create({ service_id: '' }),
     ).rejects.toBeInstanceOf(ValidationError)
   })
 
