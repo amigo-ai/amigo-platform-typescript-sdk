@@ -47,10 +47,9 @@ The SDK is the typed client boundary between your runtime and the workspace-scop
 
 ### Guides
 
-| Guide                                                              | Description                                                                     |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| [Build a Custom Patient Form](./docs/guides/build-a-form.md)       | Create, deliver, and render patient intake forms using surfaces                 |
-| [Build a Custom Clinical Copilot](./docs/guides/build-a-scribe.md) | Real-time ambient documentation with encounter review and voiceprint enrollment |
+| Guide                                                        | Description                                                     |
+| ------------------------------------------------------------ | --------------------------------------------------------------- |
+| [Build a Custom Patient Form](./docs/guides/build-a-form.md) | Create, deliver, and render patient intake forms using surfaces |
 
 The docs site remains the primary reference. The repo-local examples stay close to the shipped package surface and are typechecked in CI to reduce drift.
 
@@ -454,8 +453,12 @@ For workspace-wide events (calls, surfaces, pipeline, operators, channels), use 
 const handle = client.events.subscribeToWorkspace({
   onEvent: (event) => {
     switch (event.event_type) {
-      case 'call.started': console.log('call started:', event.call_sid); break
-      case 'pipeline.error': console.error('pipeline error:', event); break
+      case 'call.started':
+        console.log('call started:', event.call_sid)
+        break
+      case 'pipeline.error':
+        console.error('pipeline error:', event)
+        break
     }
   },
   onError: (err) => console.error('terminal:', err),
@@ -493,8 +496,12 @@ const observerHandle = client.observers.subscribe({
   token: bearerToken,
   onEvent: (event) => {
     switch (event.type) {
-      case 'agent_transcript_delta': renderAgentDelta(event.delta); break
-      case 'session_end': showSummary(event); break
+      case 'agent_transcript_delta':
+        renderAgentDelta(event.delta)
+        break
+      case 'session_end':
+        showSummary(event)
+        break
     }
   },
   onError: (err) => console.error('observer terminal:', err.reason, err.closeCode),
@@ -623,39 +630,6 @@ const { data: rates } = await client.GET(
 ```
 
 Public token routes (`/s/{token}/spec`, `/s/{token}/submit`, etc.) require no API key -- use `openapi-fetch` with the SDK's `paths` type for full type safety on unauthenticated endpoints.
-
-### Scribe (Clinical Copilot)
-
-Build ambient clinical documentation tools. The SDK covers encounter review actions and scribe settings. The real-time copilot WebSocket (`/copilot-stream`) is documented in the full guide: [Build a Custom Clinical Copilot](./docs/guides/build-a-scribe.md).
-
-```typescript
-// Configure scribe settings
-const settings = await client.settings.scribe.get()
-await client.settings.scribe.update({
-  enabled: true,
-  soap_style: 'detailed',
-  language: 'es',
-  keyterms: ['metformin', 'Ozempic', 'Dr. Ramirez'],
-  specialty: 'Primary care',
-})
-
-// Approve ICD-10 codes after physician review
-await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve', {
-  params: { path: { encounter_id: encounterId } },
-  body: { code: 'J06.9' },
-})
-
-// Edit SOAP notes
-await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit', {
-  params: { path: { encounter_id: encounterId } },
-  body: { section: 'assessment', content: 'Acute upper respiratory infection...' },
-})
-
-// Finalize for EHR sync
-await client.POST('/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize', {
-  params: { path: { encounter_id: encounterId } },
-})
-```
 
 ### Billing
 

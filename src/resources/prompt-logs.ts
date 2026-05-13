@@ -25,7 +25,7 @@ export type PromptLogListResponse = components['schemas']['PromptLogListResponse
  * responses can include PHI from prompt history.
  *
  * The canonical filter is ``conversation_id`` (UUID from
- * ``world.entities``) which works across voice / text / sim / scribe
+ * ``world.entities``) which works across voice / text / sim
  * modalities. ``call_sid`` remains for legacy callers and external
  * systems holding the SID directly. The two are mutually exclusive.
  *
@@ -57,7 +57,7 @@ export class PromptLogsResource extends WorkspaceScopedResource {
    *
    * When ``params.conversation_id`` is supplied, the response surfaces
    * ``resolved_call_sid`` (the call_sid the lookup mapped to) and
-   * ``resolved_conversation_kind`` (``"call"`` for voice/sim/scribe,
+   * ``resolved_conversation_kind`` (``"call"`` for voice/sim,
    * ``"conversation"`` for text/sms/whatsapp/email) so you can drill
    * into per-call surfaces afterward without re-querying
    * ``world.entities``.

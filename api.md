@@ -359,8 +359,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `gapScanner.update`
 - `gapScanner.preview`
 - `gapScanner.scan`
-- `scribe.get`
-- `scribe.update`
 - `metrics.get`
 - `metrics.update`
 - `environments.get`

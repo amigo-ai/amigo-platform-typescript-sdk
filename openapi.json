@@ -1670,20 +1670,6 @@
         "title": "ApplyTemplateResponse",
         "type": "object"
       },
-      "ApproveICD10Request": {
-        "properties": {
-          "code": {
-            "maxLength": 16,
-            "title": "Code",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "title": "ApproveICD10Request",
-        "type": "object"
-      },
       "ApproveRequest": {
         "description": "Approve events \u2014 promotes confidence to 0.95.",
         "properties": {
@@ -3348,38 +3334,6 @@
         "title": "BindChannelPhoneRequest",
         "type": "object"
       },
-      "Body_enroll-voiceprint": {
-        "properties": {
-          "audio": {
-            "contentMediaType": "application/octet-stream",
-            "title": "Audio",
-            "type": "string"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "format": "uuid",
-                "type": "string"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "sample_rate": {
-            "default": 16000,
-            "title": "Sample Rate",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "audio",
-          "entity_id"
-        ],
-        "title": "Body_enroll-voiceprint",
-        "type": "object"
-      },
       "Body_send-voicemail": {
         "properties": {
           "audio": {
@@ -3405,94 +3359,6 @@
           "audio"
         ],
         "title": "Body_send-voicemail",
-        "type": "object"
-      },
-      "Body_transcribe-scribe-recording": {
-        "properties": {
-          "audio": {
-            "contentMediaType": "application/octet-stream",
-            "title": "Audio",
-            "type": "string"
-          },
-          "keyterms": {
-            "anyOf": [
-              {
-                "maxLength": 4000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Keyterms"
-          },
-          "language": {
-            "anyOf": [
-              {
-                "maxLength": 16,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language"
-          },
-          "patient_entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Patient Entity Id"
-          },
-          "service_id": {
-            "format": "uuid",
-            "title": "Service Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "audio",
-          "service_id"
-        ],
-        "title": "Body_transcribe-scribe-recording",
-        "type": "object"
-      },
-      "Body_verify-voiceprint": {
-        "properties": {
-          "audio": {
-            "contentMediaType": "application/octet-stream",
-            "title": "Audio",
-            "type": "string"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "format": "uuid",
-                "type": "string"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "sample_rate": {
-            "default": 16000,
-            "title": "Sample Rate",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "audio",
-          "entity_id"
-        ],
-        "title": "Body_verify-voiceprint",
         "type": "object"
       },
       "Body_voice-turn": {
@@ -4609,8 +4475,7 @@
                 "enum": [
                   "real",
                   "simulation",
-                  "playground",
-                  "scribe"
+                  "playground"
                 ],
                 "type": "string"
               },
@@ -5401,8 +5266,7 @@
                 "enum": [
                   "real",
                   "simulation",
-                  "playground",
-                  "scribe"
+                  "playground"
                 ],
                 "type": "string"
               },
@@ -5410,7 +5274,7 @@
                 "type": "null"
               }
             ],
-            "description": "Call source \u2014 real, simulation, playground, or scribe",
+            "description": "Call source \u2014 real, simulation, or playground",
             "title": "Source"
           },
           "started_at": {
@@ -6145,8 +6009,7 @@
           "sms",
           "whatsapp",
           "email",
-          "web",
-          "scribe"
+          "web"
         ],
         "title": "ChannelKind",
         "type": "string"
@@ -9559,19 +9422,6 @@
       },
       "CreateConversationRequest": {
         "properties": {
-          "context": {
-            "anyOf": [
-              {
-                "maxLength": 5000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Injected into the agent's prompt as caller/patient context for this conversation.",
-            "title": "Context"
-          },
           "entity_id": {
             "anyOf": [
               {
@@ -9588,41 +9438,6 @@
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
-          },
-          "start_mode": {
-            "default": "user_first",
-            "enum": [
-              "user_first",
-              "agent_first"
-            ],
-            "title": "Start Mode",
-            "type": "string"
-          },
-          "viewport_height": {
-            "anyOf": [
-              {
-                "maximum": 500.0,
-                "minimum": 5.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Viewport Height"
-          },
-          "viewport_width": {
-            "anyOf": [
-              {
-                "maximum": 500.0,
-                "minimum": 20.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Viewport Width"
           }
         },
         "required": [
@@ -9848,19 +9663,6 @@
           "source_type"
         ],
         "title": "CreateDataSourceRequest",
-        "type": "object"
-      },
-      "CreateForkRequest": {
-        "properties": {
-          "ttl_days": {
-            "default": 7,
-            "maximum": 30.0,
-            "minimum": 1.0,
-            "title": "Ttl Days",
-            "type": "integer"
-          }
-        },
-        "title": "CreateForkRequest",
         "type": "object"
       },
       "CreateIntegrationRequest": {
@@ -10604,8 +10406,7 @@
             "default": "voice",
             "enum": [
               "voice",
-              "text",
-              "scribe"
+              "text"
             ],
             "title": "Channel Type",
             "type": "string"
@@ -10764,6 +10565,138 @@
           "display_size"
         ],
         "title": "CreateSessionResponse",
+        "type": "object"
+      },
+      "CreateSimulationCaseItem": {
+        "description": "One durable simulation case to create.",
+        "properties": {
+          "assertions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 100,
+            "title": "Assertions",
+            "type": "array"
+          },
+          "constraints": {
+            "additionalProperties": true,
+            "title": "Constraints",
+            "type": "object"
+          },
+          "description": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Description",
+            "type": "string"
+          },
+          "fixtures": {
+            "additionalProperties": true,
+            "title": "Fixtures",
+            "type": "object"
+          },
+          "initial_message": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Initial Message",
+            "type": "string"
+          },
+          "persona": {
+            "additionalProperties": true,
+            "title": "Persona",
+            "type": "object"
+          },
+          "provenance": {
+            "default": "manual",
+            "maxLength": 64,
+            "title": "Provenance",
+            "type": "string"
+          },
+          "scenario_instructions": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Scenario Instructions",
+            "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
+          },
+          "target_spec": {
+            "additionalProperties": true,
+            "title": "Target Spec",
+            "type": "object"
+          },
+          "temperament": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperament"
+          }
+        },
+        "required": [
+          "description",
+          "scenario_instructions",
+          "initial_message"
+        ],
+        "title": "CreateSimulationCaseItem",
+        "type": "object"
+      },
+      "CreateSimulationCasesRequest": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/CreateSimulationCaseItem"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases"
+        ],
+        "title": "CreateSimulationCasesRequest",
+        "type": "object"
+      },
+      "CreateSimulationCasesResponse": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationCaseResponse"
+            },
+            "title": "Cases",
+            "type": "array"
+          }
+        },
+        "required": [
+          "cases"
+        ],
+        "title": "CreateSimulationCasesResponse",
         "type": "object"
       },
       "CreateSkillRequest": {
@@ -11206,40 +11139,6 @@
           "created_at"
         ],
         "title": "CreateSurfaceResponse",
-        "type": "object"
-      },
-      "CreateToolRequest": {
-        "properties": {
-          "description": {
-            "$ref": "#/components/schemas/DescriptionString",
-            "default": ""
-          },
-          "name": {
-            "$ref": "#/components/schemas/NameString"
-          },
-          "parameters": {
-            "additionalProperties": true,
-            "title": "Parameters",
-            "type": "object"
-          },
-          "query": {
-            "maxLength": 50000,
-            "minLength": 1,
-            "title": "Query",
-            "type": "string"
-          },
-          "target": {
-            "const": "lakebase",
-            "default": "lakebase",
-            "title": "Target",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "query"
-        ],
-        "title": "CreateToolRequest",
         "type": "object"
       },
       "CreateTriggerRequest": {
@@ -14496,26 +14395,6 @@
         "title": "DnsRecordResponse",
         "type": "object"
       },
-      "EditSoapRequest": {
-        "properties": {
-          "content": {
-            "maxLength": 10000,
-            "title": "Content",
-            "type": "string"
-          },
-          "section": {
-            "pattern": "^(subjective|objective|assessment|plan)$",
-            "title": "Section",
-            "type": "string"
-          }
-        },
-        "required": [
-          "section",
-          "content"
-        ],
-        "title": "EditSoapRequest",
-        "type": "object"
-      },
       "EgressIpsResponse": {
         "properties": {
           "egress_ips": {
@@ -16096,7 +15975,7 @@
           },
           "source": {
             "default": "manual",
-            "description": "Write source \u2014 e.g. manual, hubspot, forms, scribe, auto_enrich.",
+            "description": "Write source \u2014 e.g. manual, hubspot, forms, auto_enrich.",
             "maxLength": 64,
             "minLength": 1,
             "title": "Source",
@@ -18210,21 +18089,6 @@
           }
         },
         "title": "ExecutePanelRequest",
-        "type": "object"
-      },
-      "ExecuteQueryRequest": {
-        "properties": {
-          "sql": {
-            "maxLength": 50000,
-            "minLength": 1,
-            "title": "Sql",
-            "type": "string"
-          }
-        },
-        "required": [
-          "sql"
-        ],
-        "title": "ExecuteQueryRequest",
         "type": "object"
       },
       "ExitCondition": {
@@ -20423,40 +20287,6 @@
           "alternatives"
         ],
         "title": "ForkRequest",
-        "type": "object"
-      },
-      "ForkResponse": {
-        "properties": {
-          "endpoint": {
-            "title": "Endpoint",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "pending",
-              "ready",
-              "deleting"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "ttl_days": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ttl Days"
-          }
-        },
-        "required": [
-          "endpoint",
-          "status"
-        ],
-        "title": "ForkResponse",
         "type": "object"
       },
       "FormTemplate-Input": {
@@ -28421,49 +28251,6 @@
         "title": "PaginatedResponse[SurfaceResponse]",
         "type": "object"
       },
-      "PaginatedResponse_ToolResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/ToolResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[ToolResponse]",
-        "type": "object"
-      },
       "PaginatedResponse_TriggerResponse_": {
         "properties": {
           "continuation_token": {
@@ -32000,7 +31787,7 @@
                 "type": "null"
               }
             ],
-            "description": "``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim/scribe, ``conversation`` for text/sms/whatsapp/email). Null otherwise.",
+            "description": "``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim, ``conversation`` for text/sms/whatsapp/email). Null otherwise.",
             "title": "Resolved Conversation Kind"
           }
         },
@@ -32277,48 +32064,6 @@
           }
         },
         "title": "QueryResponse",
-        "type": "object"
-      },
-      "QueryResultResponse": {
-        "properties": {
-          "columns": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Columns"
-          },
-          "row_count": {
-            "title": "Row Count",
-            "type": "integer"
-          },
-          "rows": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rows"
-          }
-        },
-        "required": [
-          "row_count"
-        ],
-        "title": "QueryResultResponse",
         "type": "object"
       },
       "QuietHours": {
@@ -32860,32 +32605,6 @@
           "rules"
         ],
         "title": "RegulationTemplateResponse",
-        "type": "object"
-      },
-      "RejectICD10Request": {
-        "properties": {
-          "code": {
-            "maxLength": 16,
-            "title": "Code",
-            "type": "string"
-          },
-          "reason": {
-            "anyOf": [
-              {
-                "maxLength": 500,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reason"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "title": "RejectICD10Request",
         "type": "object"
       },
       "RejectRequest": {
@@ -33852,6 +33571,19 @@
             "title": "Concurrency",
             "type": "integer"
           },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for every selected saved-case run. When omitted, each case falls back to fixtures.case_specific.entity_id if present.",
+            "title": "Entity Id"
+          },
           "exploration": {
             "anyOf": [
               {
@@ -33864,7 +33596,7 @@
           },
           "max_cases": {
             "default": 20,
-            "maximum": 20.0,
+            "maximum": 200.0,
             "minimum": 1.0,
             "title": "Max Cases",
             "type": "integer"
@@ -33930,6 +33662,19 @@
             "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context for this saved-case run. When omitted, the runner falls back to fixtures.case_specific.entity_id if present.",
+            "title": "Entity Id"
           },
           "exploration": {
             "anyOf": [
@@ -34582,540 +34327,6 @@
         "title": "ScoreSessionRequest",
         "type": "object"
       },
-      "ScribeCdsConfig": {
-        "description": "Clinical decision support configuration (V2/V3 workers).",
-        "properties": {
-          "care_gap_surfacing": {
-            "default": true,
-            "title": "Care Gap Surfacing",
-            "type": "boolean"
-          },
-          "documentation_completeness": {
-            "default": true,
-            "title": "Documentation Completeness",
-            "type": "boolean"
-          },
-          "guideline_matching": {
-            "default": false,
-            "title": "Guideline Matching",
-            "type": "boolean"
-          },
-          "icd10_auto_suggest": {
-            "default": true,
-            "title": "Icd10 Auto Suggest",
-            "type": "boolean"
-          }
-        },
-        "title": "ScribeCdsConfig",
-        "type": "object"
-      },
-      "ScribeClinician": {
-        "description": "A clinician authorized to use Superscribe.",
-        "properties": {
-          "email": {
-            "format": "email",
-            "title": "Email",
-            "type": "string"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "role": {
-            "default": "clinician",
-            "maxLength": 64,
-            "title": "Role",
-            "type": "string"
-          }
-        },
-        "required": [
-          "email"
-        ],
-        "title": "ScribeClinician",
-        "type": "object"
-      },
-      "ScribePostEncounterConfig": {
-        "description": "Post-encounter automation configuration.",
-        "properties": {
-          "auto_polish_note": {
-            "default": true,
-            "title": "Auto Polish Note",
-            "type": "boolean"
-          },
-          "education_materials": {
-            "default": false,
-            "title": "Education Materials",
-            "type": "boolean"
-          },
-          "follow_up_surface": {
-            "default": false,
-            "title": "Follow Up Surface",
-            "type": "boolean"
-          },
-          "order_preparation": {
-            "default": false,
-            "title": "Order Preparation",
-            "type": "boolean"
-          }
-        },
-        "title": "ScribePostEncounterConfig",
-        "type": "object"
-      },
-      "ScribeSafetyConfig": {
-        "description": "V0 sentinel and safety configuration.",
-        "properties": {
-          "allergy_cross_reference": {
-            "default": true,
-            "title": "Allergy Cross Reference",
-            "type": "boolean"
-          },
-          "crisis_detection": {
-            "default": true,
-            "title": "Crisis Detection",
-            "type": "boolean"
-          },
-          "drug_interaction_checking": {
-            "default": true,
-            "title": "Drug Interaction Checking",
-            "type": "boolean"
-          },
-          "vital_range_alerting": {
-            "default": true,
-            "title": "Vital Range Alerting",
-            "type": "boolean"
-          }
-        },
-        "title": "ScribeSafetyConfig",
-        "type": "object"
-      },
-      "ScribeSettingsRequest": {
-        "description": "Partial update \u2014 only provided fields are changed.",
-        "properties": {
-          "authorized_clinicians": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/ScribeClinician"
-                },
-                "maxItems": 500,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Authorized Clinicians"
-          },
-          "cds": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ScribeCdsConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "custom_instructions": {
-            "anyOf": [
-              {
-                "maxLength": 4000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Custom Instructions"
-          },
-          "enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enabled"
-          },
-          "keyterms": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Keyterms"
-          },
-          "language": {
-            "anyOf": [
-              {
-                "maxLength": 16,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language"
-          },
-          "post_encounter": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ScribePostEncounterConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "safety": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ScribeSafetyConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "soap_style": {
-            "anyOf": [
-              {
-                "enum": [
-                  "concise",
-                  "detailed",
-                  "structured"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Soap Style"
-          },
-          "specialty": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Specialty"
-          },
-          "tools_enabled": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tools Enabled"
-          },
-          "voice_auth_enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Voice Auth Enabled"
-          }
-        },
-        "title": "ScribeSettingsRequest",
-        "type": "object"
-      },
-      "ScribeSettingsResponse": {
-        "properties": {
-          "authorized_clinicians": {
-            "items": {
-              "$ref": "#/components/schemas/ScribeClinician"
-            },
-            "title": "Authorized Clinicians",
-            "type": "array"
-          },
-          "cds": {
-            "$ref": "#/components/schemas/ScribeCdsConfig"
-          },
-          "custom_instructions": {
-            "anyOf": [
-              {
-                "maxLength": 4000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Custom Instructions"
-          },
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "keyterms": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Keyterms",
-            "type": "array"
-          },
-          "language": {
-            "default": "en",
-            "maxLength": 16,
-            "title": "Language",
-            "type": "string"
-          },
-          "post_encounter": {
-            "$ref": "#/components/schemas/ScribePostEncounterConfig"
-          },
-          "safety": {
-            "$ref": "#/components/schemas/ScribeSafetyConfig"
-          },
-          "soap_style": {
-            "default": "concise",
-            "enum": [
-              "concise",
-              "detailed",
-              "structured"
-            ],
-            "title": "Soap Style",
-            "type": "string"
-          },
-          "specialty": {
-            "anyOf": [
-              {
-                "maxLength": 120,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Specialty"
-          },
-          "tools_enabled": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tools Enabled"
-          },
-          "voice_auth_enabled": {
-            "default": false,
-            "title": "Voice Auth Enabled",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled",
-          "authorized_clinicians"
-        ],
-        "title": "ScribeSettingsResponse",
-        "type": "object"
-      },
-      "ScribeTranscriptionChunk": {
-        "properties": {
-          "confidence": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence"
-          },
-          "duration_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Seconds"
-          },
-          "end_seconds": {
-            "title": "End Seconds",
-            "type": "number"
-          },
-          "index": {
-            "title": "Index",
-            "type": "integer"
-          },
-          "start_seconds": {
-            "title": "Start Seconds",
-            "type": "number"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "index",
-          "start_seconds",
-          "end_seconds",
-          "text"
-        ],
-        "title": "ScribeTranscriptionChunk",
-        "type": "object"
-      },
-      "ScribeTranscriptionResponse": {
-        "properties": {
-          "chunk_count": {
-            "title": "Chunk Count",
-            "type": "integer"
-          },
-          "chunks": {
-            "items": {
-              "$ref": "#/components/schemas/ScribeTranscriptionChunk"
-            },
-            "title": "Chunks",
-            "type": "array"
-          },
-          "confidence": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence"
-          },
-          "duration_seconds": {
-            "title": "Duration Seconds",
-            "type": "number"
-          },
-          "keyterm_count": {
-            "title": "Keyterm Count",
-            "type": "integer"
-          },
-          "language": {
-            "title": "Language",
-            "type": "string"
-          },
-          "model": {
-            "title": "Model",
-            "type": "string"
-          },
-          "segments": {
-            "items": {
-              "$ref": "#/components/schemas/ScribeTranscriptionSegment"
-            },
-            "title": "Segments",
-            "type": "array"
-          },
-          "transcript": {
-            "title": "Transcript",
-            "type": "string"
-          }
-        },
-        "required": [
-          "transcript",
-          "duration_seconds",
-          "model",
-          "language",
-          "chunk_count",
-          "keyterm_count"
-        ],
-        "title": "ScribeTranscriptionResponse",
-        "type": "object"
-      },
-      "ScribeTranscriptionSegment": {
-        "properties": {
-          "confidence": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confidence"
-          },
-          "end_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Seconds"
-          },
-          "speaker": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Speaker"
-          },
-          "start_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Seconds"
-          },
-          "text": {
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "text"
-        ],
-        "title": "ScribeTranscriptionSegment",
-        "type": "object"
-      },
       "SearchAvailableNumbersResponse": {
         "properties": {
           "numbers": {
@@ -35240,8 +34451,7 @@
             "default": "voice",
             "enum": [
               "voice",
-              "text",
-              "scribe"
+              "text"
             ],
             "title": "Channel Type",
             "type": "string"
@@ -35505,8 +34715,7 @@
             "default": "voice",
             "enum": [
               "voice",
-              "text",
-              "scribe"
+              "text"
             ],
             "title": "Channel Type",
             "type": "string"
@@ -41857,17 +41066,6 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
-      "TestToolRequest": {
-        "properties": {
-          "parameters": {
-            "additionalProperties": true,
-            "title": "Parameters",
-            "type": "object"
-          }
-        },
-        "title": "TestToolRequest",
-        "type": "object"
-      },
       "TextCompletedEvent": {
         "properties": {
           "channel_kind": {
@@ -43118,78 +42316,6 @@
           "workspace_id"
         ],
         "title": "ToolResolveResponse",
-        "type": "object"
-      },
-      "ToolResponse": {
-        "properties": {
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "description": {
-            "title": "Description",
-            "type": "string"
-          },
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "parameters": {
-            "additionalProperties": true,
-            "title": "Parameters",
-            "type": "object"
-          },
-          "query": {
-            "title": "Query",
-            "type": "string"
-          },
-          "target": {
-            "const": "lakebase",
-            "title": "Target",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "workspace_id": {
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "description",
-          "parameters",
-          "query",
-          "target",
-          "enabled"
-        ],
-        "title": "ToolResponse",
         "type": "object"
       },
       "ToolSummary": {
@@ -44819,8 +43945,8 @@
             "title": "Media Url"
           },
           "message": {
+            "default": "",
             "maxLength": 10000,
-            "minLength": 1,
             "title": "Message",
             "type": "string"
           },
@@ -44851,9 +43977,6 @@
             "title": "Viewport Width"
           }
         },
-        "required": [
-          "message"
-        ],
         "title": "TurnRequest",
         "type": "object"
       },
@@ -46431,8 +45554,7 @@
               {
                 "enum": [
                   "voice",
-                  "text",
-                  "scribe"
+                  "text"
                 ],
                 "type": "string"
               },
@@ -47081,68 +46203,6 @@
           "last_sync_status"
         ],
         "title": "UpdateSyncStatusRequest",
-        "type": "object"
-      },
-      "UpdateToolRequest": {
-        "properties": {
-          "description": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DescriptionString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enabled"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NameString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "parameters": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parameters"
-          },
-          "query": {
-            "anyOf": [
-              {
-                "maxLength": 50000,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Query"
-          }
-        },
-        "title": "UpdateToolRequest",
         "type": "object"
       },
       "UpdateTriggerRequest": {
@@ -49153,94 +48213,6 @@
           "sender_phone_number"
         ],
         "title": "VoicemailSentResponse",
-        "type": "object"
-      },
-      "VoiceprintEnrollResponse": {
-        "properties": {
-          "dimensions": {
-            "default": 192,
-            "title": "Dimensions",
-            "type": "integer"
-          },
-          "enrolled": {
-            "default": true,
-            "title": "Enrolled",
-            "type": "boolean"
-          },
-          "entity_id": {
-            "format": "uuid",
-            "title": "Entity Id",
-            "type": "string"
-          },
-          "model_id": {
-            "title": "Model Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "entity_id",
-          "model_id"
-        ],
-        "title": "VoiceprintEnrollResponse",
-        "type": "object"
-      },
-      "VoiceprintStatusResponse": {
-        "properties": {
-          "enrolled": {
-            "title": "Enrolled",
-            "type": "boolean"
-          },
-          "enrolled_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Enrolled At"
-          },
-          "model_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Model Id"
-          }
-        },
-        "required": [
-          "enrolled"
-        ],
-        "title": "VoiceprintStatusResponse",
-        "type": "object"
-      },
-      "VoiceprintVerifyResponse": {
-        "properties": {
-          "entity_id": {
-            "format": "uuid",
-            "title": "Entity Id",
-            "type": "string"
-          },
-          "similarity": {
-            "title": "Similarity",
-            "type": "number"
-          },
-          "verified": {
-            "title": "Verified",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "verified",
-          "similarity",
-          "entity_id"
-        ],
-        "title": "VoiceprintVerifyResponse",
         "type": "object"
       },
       "WebhookDestinationCreatedResponse": {
@@ -64519,127 +63491,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/fork": {
-      "delete": {
-        "operationId": "delete-fork",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Destroy fork",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      },
-      "get": {
-        "operationId": "get-fork",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "anyOf": [
-                    {
-                      "$ref": "#/components/schemas/ForkResponse"
-                    },
-                    {
-                      "type": "null"
-                    }
-                  ],
-                  "title": "Response Get-Fork"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Get fork status",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      },
-      "post": {
-        "operationId": "create-fork",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateForkRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ForkResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Create a Lakebase fork (sandbox)",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      }
-    },
     "/v1/{workspace_id}/functions": {
       "get": {
         "description": "List all registered platform functions.\n\nPermissions: authenticated (any role).",
@@ -66853,55 +65704,6 @@
         "summary": "Probe an integration's connection + auth",
         "tags": [
           "Integrations"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/lakebase/query": {
-      "post": {
-        "operationId": "execute-workspace-query",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ExecuteQueryRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/QueryResultResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Execute SQL against workspace Lakebase",
-        "tags": [
-          "Workspace Lakebase"
         ]
       }
     },
@@ -72506,7 +71308,7 @@
     },
     "/v1/{workspace_id}/prompt-logs": {
       "get": {
-        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model \u2014 works uniformly across voice, text, sim, and scribe modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
+        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model \u2014 works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
         "operationId": "list-prompt-logs",
         "parameters": [
           {
@@ -72520,7 +71322,7 @@
             }
           },
           {
-            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
             "in": "query",
             "name": "conversation_id",
             "required": false,
@@ -72534,12 +71336,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
               "title": "Conversation Id"
             }
           },
           {
-            "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
+            "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
             "in": "query",
             "name": "call_sid",
             "required": false,
@@ -72553,7 +71355,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
+              "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
               "title": "Call Sid"
             }
           },
@@ -72699,289 +71501,6 @@
         "summary": "List prompt logs for a workspace",
         "tags": [
           "Prompt Logs"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/query-tools": {
-      "get": {
-        "operationId": "list-query-tools",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 20,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_ToolResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "List query tools",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      },
-      "post": {
-        "operationId": "create-query-tool",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateToolRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ToolResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Create a query tool",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/query-tools/{tool_id}": {
-      "delete": {
-        "operationId": "delete-query-tool",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "tool_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Tool Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Delete a query tool",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      },
-      "patch": {
-        "operationId": "update-query-tool",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "tool_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Tool Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateToolRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ToolResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Tool not found"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Update a query tool",
-        "tags": [
-          "Workspace Lakebase"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/query-tools/{tool_id}/test": {
-      "post": {
-        "operationId": "test-query-tool",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "tool_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Tool Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TestToolRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/QueryResultResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Test a query tool with sample parameters",
-        "tags": [
-          "Workspace Lakebase"
         ]
       }
     },
@@ -75078,314 +73597,6 @@
         "summary": "Partially update a scheduling rule set",
         "tags": [
           "Scheduling Rules"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize": {
-      "post": {
-        "description": "Physician finalizes the encounter. Locks the encounter for EHR sync.",
-        "operationId": "finalize-encounter",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "encounter_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Encounter Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Finalize-Encounter",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Finalize Encounter",
-        "tags": [
-          "Scribe"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve": {
-      "post": {
-        "description": "Physician approves an ICD-10 code. Writes at HIGH confidence (0.9).",
-        "operationId": "approve-icd10-code",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "encounter_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Encounter Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApproveICD10Request"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Approve-Icd10-Code",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Approve Icd10",
-        "tags": [
-          "Scribe"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/reject": {
-      "post": {
-        "description": "Physician rejects an ICD-10 code. Writes at HIGH confidence (0.9).",
-        "operationId": "reject-icd10-code",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "encounter_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Encounter Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RejectICD10Request"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reject-Icd10-Code",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Reject Icd10",
-        "tags": [
-          "Scribe"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit": {
-      "post": {
-        "description": "Physician edits a SOAP section. Writes at HIGH confidence (0.9) \u2014 supersedes agent observations.",
-        "operationId": "edit-encounter-soap",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "encounter_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Encounter Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditSoapRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Edit-Encounter-Soap",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Edit Soap",
-        "tags": [
-          "Scribe"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/scribe/recordings/transcribe": {
-      "post": {
-        "description": "Transcribe a completed Superscribe clinical recording.",
-        "operationId": "transcribe-scribe-recording",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_transcribe-scribe-recording"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScribeTranscriptionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Transcribe Scribe Recording",
-        "tags": [
-          "Scribe"
         ]
       }
     },
@@ -77533,94 +75744,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/settings/scribe": {
-      "get": {
-        "description": "Get workspace Superscribe access settings.\n\nReturns the list of authorized clinicians and whether scribe is enabled.\n\nPermissions: authenticated (any role).",
-        "operationId": "get-scribe-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScribeSettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Get Superscribe access settings",
-        "tags": [
-          "Settings"
-        ]
-      },
-      "put": {
-        "description": "Update workspace Superscribe access settings.\n\nManages which clinicians can authenticate to Superscribe via Google OAuth.\n\nPermissions: admin, owner.",
-        "operationId": "update-scribe-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ScribeSettingsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ScribeSettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace not found"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Update Superscribe access settings",
-        "tags": [
-          "Settings"
-        ]
-      }
-    },
     "/v1/{workspace_id}/settings/security": {
       "get": {
         "description": "Get workspace security settings.\n\nPermissions: authenticated (any role).",
@@ -78288,6 +76411,58 @@
           }
         },
         "summary": "List Simulation Cases",
+        "tags": [
+          "Simulations"
+        ]
+      },
+      "post": {
+        "description": "Create durable simulation cases for an internal benchmark suite.",
+        "operationId": "create-simulation-cases",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSimulationCasesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSimulationCasesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Simulation Cases",
         "tags": [
           "Simulations"
         ]
@@ -82996,181 +81171,6 @@
         "summary": "Send a voicemail",
         "tags": [
           "Voicemail"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/voiceprints/enroll": {
-      "post": {
-        "description": "Enroll a speaker voiceprint for an entity.\n\nAccepts PCM16 audio (wav or raw bytes). Proxies to emotion-engine\nfor ECAPA-TDNN embedding extraction, then stores the result as a\nworld event on the person entity.\n\nPermissions: admin, owner.",
-        "operationId": "enroll-voiceprint",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_enroll-voiceprint"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VoiceprintEnrollResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Enroll Voiceprint",
-        "tags": [
-          "Voiceprints"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/voiceprints/verify": {
-      "post": {
-        "operationId": "verify-voiceprint",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "multipart/form-data": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_verify-voiceprint"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VoiceprintVerifyResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Service Unavailable"
-          }
-        },
-        "summary": "Verify Voiceprint",
-        "tags": [
-          "Voiceprints"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/voiceprints/{entity_id}": {
-      "get": {
-        "operationId": "get-voiceprint-status",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "entity_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Entity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/VoiceprintStatusResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Voiceprint Status",
-        "tags": [
-          "Voiceprints"
         ]
       }
     },

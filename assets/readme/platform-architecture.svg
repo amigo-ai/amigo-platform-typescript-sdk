@@ -29,8 +29,8 @@
   <text x="152" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">Phone, text, simulation</text>
 
   <rect x="268" y="78" width="200" height="60" rx="8" fill="white" fill-opacity="0.1" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
-  <text x="368" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Clinical Copilot</text>
-  <text x="368" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">SOAP, ICD-10, CDS</text>
+  <text x="368" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Clinical Data</text>
+  <text x="368" y="121" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" fill="white" fill-opacity="0.7">FHIR, encounters, CDS</text>
 
   <rect x="484" y="78" width="200" height="60" rx="8" fill="white" fill-opacity="0.08" stroke="url(#strokeGradSubtle)" stroke-width="0.75"/>
   <text x="584" y="103" text-anchor="middle" font-family="'Flecha S', Georgia, serif" font-size="16" fill="white" fill-opacity="0.95">Emotion Engine</text>
