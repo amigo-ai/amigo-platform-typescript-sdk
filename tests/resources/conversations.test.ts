@@ -110,12 +110,13 @@ describe('ConversationsResource', () => {
     expect(new URL(requestUrl!).searchParams.get('status')).toBe('active')
   })
 
-  it('creates a new conversation and forwards auth header', async () => {
+  it('creates a new conversation with an existing entity id and forwards auth header', async () => {
     let requestBody: unknown
     let authorization: string | null = null
     const apiResponse: ConversationDetail = {
       id: '00000000-0000-4000-8000-000000000001',
       channel_kind: 'web',
+      entity_id: 'ent-00000000-0000-0000-0000-000000000001',
       status: 'active',
       lifecycle: 'active',
       turn_count: 0,
@@ -144,6 +145,7 @@ describe('ConversationsResource', () => {
     expect(authorization).toBe(`Bearer ${TEST_API_KEY}`)
     expect(requestBody).toEqual(request)
     expect(result.id).toBe('00000000-0000-4000-8000-000000000001')
+    expect(result.entity_id).toBe('ent-00000000-0000-0000-0000-000000000001')
     expect(result.status).toBe('active')
   })
 

@@ -402,49 +402,31 @@ const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 
 ### Text conversations
 
-Use `client.conversations.sendMessage()` for user-first synchronous text turns. Omit
-`conversation_id` to start a new durable conversation; pass the returned ID to resume it.
+Create a durable conversation first, then send each user message as a turn on
+that conversation. Pass `entity_id` when you already have a world-model entity
+to bind to the conversation.
 
 ```typescript
-const firstTurn = await client.conversations.sendMessage({
+const conversation = await client.conversations.create({
   service_id: 'service-id',
-  message: 'Hello, I need help scheduling',
-  entity_id: 'entity-id',
+  entity_id: 'existing-patient-entity-id',
 })
 
-const nextTurn = await client.conversations.sendMessage({
-  service_id: 'service-id',
-  conversation_id: firstTurn.conversation_id,
+const firstTurn = await client.conversations.createTurn(conversation.id, {
+  message: 'Hello, I need help scheduling',
+})
+
+const nextTurn = await client.conversations.createTurn(conversation.id, {
   message: 'Tuesday morning works',
 })
 
-console.log(nextTurn.messages.map((message) => message.text))
+console.log(nextTurn.output.map((message) => message.text))
 ```
 
-For real-time browser clients, build the text-stream URL and use WebSocket
-subprotocol auth so the token is not placed in the URL:
-
-```typescript
-import { textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
-
-const apiKey = process.env.AMIGO_API_KEY!
-const url = client.conversations.textStreamUrl({ serviceId: 'service-id' })
-const socket = new WebSocket(url, textStreamAuthProtocols(apiKey))
-
-socket.addEventListener('open', () => {
-  socket.send(JSON.stringify({ type: 'message', text: 'Hello' }))
-})
-```
-
-If a browser rejects your API key as a WebSocket subprotocol value, use the
-query-token fallback only in trusted contexts. URL tokens can appear in browser
-history, server access logs, HTTP proxy logs, and referrer headers:
-
-```typescript
-// WARNING: query tokens can be captured by URL logs and browser history.
-const url = client.conversations.textStreamUrl({ serviceId: 'service-id', token: apiKey })
-const socket = new WebSocket(url)
-```
+For production web chat, create one conversation when the chat session starts,
+persist `conversation.id` in your backend/session state, and send every user
+turn to `client.conversations.createTurn(conversation.id, ...)`. Do not use
+simulation sessions for live text conversations.
 
 ### Real-time event streams
 

@@ -1,98 +1,50 @@
 /**
- * Interactive text chat over WebSocket — streaming responses with tool call events.
+ * Interactive text chat over synchronous REST turns.
  *
- * Connects to the text-stream WebSocket and starts an interactive REPL.
- * Type messages, see tool calls and agent responses stream in real-time.
+ * Creates one durable conversation, then sends each REPL message through
+ * client.conversations.createTurn(conversation.id, ...).
  *
  * Usage:
  *   AMIGO_API_KEY=... AMIGO_WORKSPACE_ID=... AMIGO_SERVICE_ID=... \
  *     npx tsx examples/conversations/text-chat.ts
+ *
+ * Optional:
+ *   AMIGO_ENTITY_ID=... binds the conversation to an existing world entity.
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
-import * as readline from 'readline'
-import WebSocket from 'ws'
-import { requireEnv } from '../shared.js'
+import { stdin as input, stdout as output } from 'node:process'
+import * as readline from 'node:readline/promises'
+import { createClient, requireEnv } from '../shared.js'
 
-const apiKey = requireEnv('AMIGO_API_KEY')
-const workspaceId = requireEnv('AMIGO_WORKSPACE_ID')
 const serviceId = requireEnv('AMIGO_SERVICE_ID')
+const entityId = process.env.AMIGO_ENTITY_ID
+const client = createClient()
 
-const client = new AmigoClient({
-  apiKey,
-  workspaceId,
-  baseUrl: process.env.AMIGO_BASE_URL,
+const conversation = await client.conversations.create({
+  service_id: serviceId,
+  ...(entityId ? { entity_id: entityId } : {}),
 })
 
-const wsUrl =
-  client.conversations.textStreamUrl({ serviceId, token: apiKey }) + '&tool_events=true'
+console.log(`Conversation: ${conversation.id}`)
+if (conversation.entity_id) console.log(`Entity: ${conversation.entity_id}`)
+console.log('Type /quit to exit.\n')
 
-console.log(`Connecting to ${wsUrl.replace(apiKey, '***')}`)
+const rl = readline.createInterface({ input, output })
 
-const ws = new WebSocket(wsUrl)
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
+try {
+  while (true) {
+    const text = (await rl.question('You: ')).trim()
+    if (!text) continue
+    if (text === '/quit') break
 
-function prompt() {
-  rl.question('You: ', (text) => {
-    if (!text.trim()) return prompt()
-    if (text.trim() === '/quit') {
-      ws.send(JSON.stringify({ type: 'stop' }))
-      return
+    const turn = await client.conversations.createTurn(conversation.id, {
+      message: text,
+    })
+
+    for (const message of turn.output) {
+      if (message.text.trim()) console.log(`Agent: ${message.text}\n`)
     }
-    ws.send(JSON.stringify({ type: 'message', text: text.trim() }))
-  })
-}
-
-ws.on('open', () => {
-  console.log('Connected. Waiting for session...\n')
-})
-
-ws.on('message', (raw: Buffer) => {
-  const frame = JSON.parse(raw.toString())
-
-  switch (frame.type) {
-    case 'session_started':
-      console.log(`Session: ${frame.session_id}`)
-      console.log(`Conversation: ${frame.conversation_id}\n`)
-      break
-
-    case 'typing':
-      break
-
-    case 'tool_call_started':
-      console.log(`  [tool] ${frame.tool_name}(${JSON.stringify(frame.input).slice(0, 120)})`)
-      break
-
-    case 'tool_call_completed':
-      console.log(
-        `  [tool] ${frame.tool_name} → ${frame.succeeded ? frame.result.slice(0, 200) : 'FAILED: ' + frame.result}`,
-      )
-      break
-
-    case 'message':
-      console.log(`Agent: ${frame.text}\n`)
-      prompt()
-      break
-
-    case 'error':
-      console.error(`Error: ${frame.message}\n`)
-      prompt()
-      break
-
-    case 'session_ended':
-      console.log(`\nSession ended: ${frame.reason}`)
-      rl.close()
-      ws.close()
-      break
   }
-})
-
-ws.on('close', (code: number, reason: Buffer) => {
-  console.log(`Disconnected (${code}: ${reason.toString() || 'clean'})`)
-  process.exit(0)
-})
-
-ws.on('error', (err: Error) => {
-  console.error(`WebSocket error: ${err.message}`)
-  process.exit(1)
-})
+} finally {
+  rl.close()
+}

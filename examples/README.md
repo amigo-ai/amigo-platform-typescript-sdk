@@ -14,6 +14,8 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - `AMIGO_API_KEY`
 - `AMIGO_WORKSPACE_ID`
 - `AMIGO_BASE_URL` (optional)
+- `AMIGO_SERVICE_ID` (conversation example)
+- `AMIGO_ENTITY_ID` (optional, conversation example)
 - `AMIGO_WEBHOOK_SECRET` (webhook example)
 - `AMIGO_WEBHOOK_SIGNATURE` (webhook example)
 - `AMIGO_WEBHOOK_TIMESTAMP` (optional, webhook example)
@@ -30,10 +32,10 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - [examples/surfaces/create-and-deliver.ts](./surfaces/create-and-deliver.ts): create a patient intake form and deliver it via SMS
 - [examples/surfaces/render-form.ts](./surfaces/render-form.ts): fetch a surface spec by token and display the field structure (uses public token routes)
 - [examples/scribe/encounter-review.ts](./scribe/encounter-review.ts): fetch an encounter entity, approve ICD-10 codes, edit SOAP notes, and finalize
-- [examples/conversations/text-chat.ts](./conversations/text-chat.ts): connect to a text agent via WebSocket, send a message, and display streaming tool calls + responses
-- [examples/text-chat-app/](./text-chat-app/): self-contained reference app with browser frontend showing streaming responses, tool call events, and the full WebSocket frame protocol
+- [examples/conversations/text-chat.ts](./conversations/text-chat.ts): create a conversation and send synchronous REST turns in an interactive REPL
 
 For full walkthroughs, see the guides:
 
 - [Build a Custom Patient Form](../docs/guides/build-a-form.md)
 - [Build a Custom Clinical Copilot](../docs/guides/build-a-scribe.md)
+- [Build a Text Chat Integration](../docs/guides/build-a-text-chat.md)

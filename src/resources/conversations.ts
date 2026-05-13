@@ -115,6 +115,13 @@ export class ConversationsResource extends WorkspaceScopedResource {
     )
   }
 
+  /**
+   * Create a durable text conversation.
+   *
+   * Pass `request.entity_id` to bind the conversation to an existing
+   * world-model entity. Subsequent user messages should be sent with
+   * {@link createTurn} using the returned conversation ID.
+   */
   async create(request: CreateConversationRequest): Promise<ConversationDetail> {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/conversations', {
@@ -616,4 +623,3 @@ function parseTurnStreamFrame(eventName: string, dataJson: string): TurnStreamEv
   // `event:` line). Reattach it so the union member is well-formed.
   return { ...(payload as Record<string, unknown>), event: eventName } as TurnStreamEvent
 }
-
