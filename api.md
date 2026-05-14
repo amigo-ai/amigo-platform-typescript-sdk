@@ -483,18 +483,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `sessions.get`
 - `sessions.chat`
 
-### `crm`
-
-- `getStatus`
-- `contacts.list`
-- `contacts.get`
-- `contacts.getTimeline`
-- `companies.list`
-- `companies.get`
-- `deals.list`
-- `deals.get`
-- `deals.getPipeline`
-
 ### `commandCenter`
 
 - `get`
