@@ -1005,26 +1005,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/analytics/safety-trends": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Safety Trends
-         * @description Safety and escalation trends — risk distribution, safety matches.
-         */
-        get: operations["get-safety-trends"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/analytics/surfaces/channel-effectiveness": {
         parameters: {
             query?: never;
@@ -3035,161 +3015,14 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List registered functions
-         * @description List all registered platform functions.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["list-functions"];
-        put?: never;
-        /**
-         * Register a new function
-         * @description Register a new platform function.
-         *
-         *     The function must already exist in Databricks Unity Catalog.
-         *     This endpoint registers it so agents can discover and call it.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["create-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Discover functions from Databricks UC catalog
-         * @description Discover available functions from the Databricks UC catalog.
-         *
-         *     Queries ``INFORMATION_SCHEMA.ROUTINES`` to find all functions with
-         *     a COMMENT clause. Shows which functions are already registered in
-         *     this workspace.
-         *
-         *     Permissions: admin, owner.
-         */
-        get: operations["discover-catalog"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/deploy": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Deploy (validate + register) a platform function
-         * @description Validate + register a new platform function version.
-         *
-         *     Atomic: validation + INSERT + alias rebind happen in one
-         *     transaction. The next ``version`` is allocated server-side as
-         *     ``max(existing) + 1`` per ``(workspace, name)``; concurrent
-         *     deploys race-fail on the UNIQUE constraint and surface as 409.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["deploy-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/query": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Execute an open-scope SQL query
-         * @description Execute an open-scope read-only SQL query via agent-engine.
-         *
-         *     The SQL is validated to be read-only (SELECT/WITH only) and executed
-         *     on a Databricks serverless warehouse. Can query world model data
-         *     (``lakebase_production.world.*``) and analytics (``billing.public.*``).
-         *
-         *     Permissions: admin, owner (requires ``tools:test`` scope).
-         */
-        post: operations["query-functions"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/registered": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List latest version of every V109 platform function in the workspace
-         * @description List the ``latest`` version of every V109-registered function
-         *     in the workspace.
-         *
-         *     Returns one row per function (the alias-pinned latest version).
-         *     The Studio + SDK use this to render a workspace-wide directory of
-         *     deployed platform functions; the per-function ``/{name}/versions``
-         *     endpoint returns history for a specific function.
-         *
-         *     Note this is **distinct** from ``GET /v1/{ws}/functions``, which
-         *     reads ``workspace.settings["functions"]`` JSONB (pre-V109 shape).
-         *     Both paths co-exist; clients should prefer this one for
-         *     V109-registered functions.
+         * List every platform function registered in the workspace
+         * @description List every platform function registered in the workspace.
          *
          *     Permissions: ``Workspace.view`` (read role and above).
          */
-        get: operations["list-registered-functions"];
+        get: operations["list-functions"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/sync": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Auto-register all discovered catalog functions
-         * @description Auto-register all discovered catalog functions.
-         *
-         *     Discovers functions from ``INFORMATION_SCHEMA.ROUTINES`` and registers
-         *     any that aren't already registered in this workspace. Functions with
-         *     a COMMENT become tools — the COMMENT is the tool description.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["sync-catalog"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3203,15 +3036,33 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put?: never;
+        /**
+         * Get a registered platform function by name
+         * @description Resolve a function by name.
+         *
+         *     Permissions: ``Workspace.view`` (read role and above).
+         */
+        get: operations["get-function"];
+        /**
+         * Deploy (validate + upsert) a platform function
+         * @description Validate + upsert a platform function row.
+         *
+         *     Atomic: validation + (python/udtf only) UC UDF materialization +
+         *     upsert into ``platform.functions`` happen as one logical operation.
+         *     Repeat deploys against the same ``(workspace, name)`` replace the
+         *     row in place and clear stale ``last_test_*`` telemetry.
+         *
+         *     The function name comes from the URL path; the request body's
+         *     ``name`` field must match or a 400 is raised. The URL is the
+         *     authoritative source.
+         *
+         *     Permissions: admin, owner.
+         */
+        put: operations["deploy-function"];
         post?: never;
         /**
-         * Remove a registered function
-         * @description Remove a registered function.
-         *
-         *     This only removes the platform registration — the underlying
-         *     Databricks function is not affected.
+         * Remove a registered platform function
+         * @description Remove a registered function row.
          *
          *     Permissions: admin, owner.
          */
@@ -3231,70 +3082,21 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Execute a registered function
+         * Execute a registered platform function
          * @description Execute a registered function and return its rows.
          *
-         *     Bound parameters are validated against the version's stored
-         *     schema; ``ws_id`` is auto-injected from the request context.
-         *     Returns the executor's shaped response (``rows`` for
-         *     ``returns=table``, scalar value for ``returns=scalar``).
+         *     Bound parameters are validated against the stored schema; ``ws_id``
+         *     is auto-injected from the request context. Returns the executor's
+         *     shaped response (``rows`` for ``returns=table``, scalar value for
+         *     ``returns=scalar``).
          *
          *     Permissions: ``Workspace.view`` (read role and above). Read-only
-         *     keys are intentionally allowed here — invocation runs a stored,
-         *     pre-validated SELECT against catalogs the workspace SP already
-         *     has SELECT on; the gate on what can run is the deploy-time
-         *     validator (read-only invariant), not the per-call permission.
+         *     keys are intentionally allowed — invocation runs a stored,
+         *     pre-validated SELECT against catalogs the workspace SP already has
+         *     SELECT on; the gate on what can run is the deploy-time validator
+         *     (read-only invariant), not the per-call permission.
          */
         post: operations["invoke-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/{function_name}/promote": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Rebind an alias to a specific version
-         * @description Rebind an alias to an existing version.
-         *
-         *     Verifies the version exists before rebinding.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["promote-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/{function_name}/rollback": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Rebind latest + production to a prior version
-         * @description Rebind ``latest`` and ``production`` to a prior version.
-         *
-         *     Used when a new deploy was bad. ``staging`` stays untouched so
-         *     operator can re-promote independently.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["rollback-function"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3311,86 +3113,16 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Test a function with sample input
-         * @description Test a registered function with sample input.
+         * Test invoke + persist last_test_* telemetry on the row
+         * @description Test invoke — same as invoke + persists last_test_* on the row.
          *
-         *     Proxies to agent-engine's internal tool test endpoint.
-         *
-         *     Permissions: admin, owner (requires ``tools:test`` scope).
-         */
-        post: operations["test-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/{function_name}/v2/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Test invoke + persist telemetry
-         * @description Test invoke — same as invoke + persists last_test_* on the version row.
-         *
-         *     Returns :class:`TestInvokeResponse` so callers can render
-         *     ``status`` + ``error`` directly (the previous shape was
-         *     :class:`InvokeResponse`, which silently dropped those fields and
-         *     left the DC showing a generic "Invocation failed." even on the
-         *     catastrophic path).
+         *     Returns 200 with ``status="fail"`` + populated ``error`` on
+         *     execution failure (instead of a 5xx) so the DC has a single
+         *     happy-path rendering.
          *
          *     Permissions: admin, owner.
          */
-        post: operations["test-function-v2"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/{function_name}/version": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Resolve (name, alias) → version row
-         * @description Resolve (function_name, alias) → version row.
-         *
-         *     Permissions: ``Workspace.view`` (read role and above).
-         */
-        get: operations["get-function-version"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/functions/{function_name}/versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List all versions of a function
-         * @description List all versions of a registered function, newest first.
-         *
-         *     Permissions: ``Workspace.view`` (read role and above).
-         */
-        get: operations["list-function-versions"];
-        put?: never;
-        post?: never;
+        post: operations["test-function"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4344,58 +4076,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/monitor-concepts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List monitor concepts
-         * @description List monitor concepts for the workspace.
-         */
-        get: operations["list-monitor-concepts"];
-        put?: never;
-        /**
-         * Create a monitor concept
-         * @description Create a semantic monitoring concept. The description is embedded for real-time conversation monitoring via ConversationMonitor.
-         */
-        post: operations["create-monitor-concept"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/monitor-concepts/{concept_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a monitor concept
-         * @description Retrieve a monitor concept by ID.
-         */
-        get: operations["get-monitor-concept"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete a monitor concept
-         * @description Delete a monitor concept.
-         */
-        delete: operations["delete-monitor-concept"];
-        options?: never;
-        head?: never;
-        /**
-         * Update a monitor concept
-         * @description Update a monitor concept's configuration or description.
-         */
-        patch: operations["update-monitor-concept"];
-        trace?: never;
-    };
     "/v1/{workspace_id}/network/egress-ips": {
         parameters: {
             query?: never;
@@ -4832,102 +4512,6 @@ export interface paths {
          *     Permissions: admin, owner.
          */
         patch: operations["update-persona"];
-        trace?: never;
-    };
-    "/v1/{workspace_id}/phone-numbers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List phone numbers
-         * @description List phone numbers for a workspace with pagination. Optionally filter by status. Requires `PhoneNumber.view` permission.
-         */
-        get: operations["list-phone-numbers"];
-        put?: never;
-        /**
-         * Create a phone number
-         * @description Register a new phone number in a workspace. Requires `PhoneNumber.create` permission.
-         */
-        post: operations["create-phone-number"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/phone-numbers/bind": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Bind a channel-manager phone number
-         * @description Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and persists the local binding row in platform.phone_numbers. Credential resolution at call time flows through ChannelManagerClient (Valkey-cached, see V108). Requires PhoneNumber.create permission.
-         */
-        post: operations["bind-channel-phone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/phone-numbers/{phone_number_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a phone number
-         * @description Retrieve a phone number by ID. Requires `PhoneNumber.view` permission.
-         */
-        get: operations["get-phone-number"];
-        /**
-         * Update a phone number
-         * @description Update a phone number's configuration. Requires `PhoneNumber.update` permission.
-         */
-        put: operations["update-phone-number"];
-        post?: never;
-        /**
-         * Delete a phone number
-         * @description Delete a phone number. Requires `PhoneNumber.delete` permission.
-         */
-        delete: operations["delete-phone-number"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/phone-numbers/{phone_number_id}/forwarding": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /**
-         * Set call forwarding
-         * @description Configure call forwarding for a phone number. When enabled, the voice agent can transfer callers to the specified destination. Requires `PhoneNumber.update` permission.
-         */
-        put: operations["set-phone-number-forwarding"];
-        post?: never;
-        /**
-         * Clear call forwarding
-         * @description Remove call forwarding configuration from a phone number. Requires `PhoneNumber.update` permission.
-         */
-        delete: operations["clear-phone-number-forwarding"];
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/v1/{workspace_id}/pipeline/entity-resolution": {
@@ -5583,90 +5167,6 @@ export interface paths {
          * @description Clears assignment — only the current claimant can unclaim.
          */
         post: operations["unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/safety/config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get safety policy config
-         * @description Get the workspace safety policy configuration.
-         */
-        get: operations["get-safety-config"];
-        /**
-         * Update safety policy config
-         * @description Upsert the workspace safety policy configuration.
-         */
-        put: operations["update-safety-config"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/safety/templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List regulation templates
-         * @description List all available regulation templates and composite templates.
-         */
-        get: operations["list-safety-templates"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/safety/templates/{template_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a regulation template
-         * @description Get a regulation template by ID, including all rules.
-         */
-        get: operations["get-safety-template"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/safety/templates/{template_id}/apply": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Apply regulation template
-         * @description Apply a regulation template to create monitor concepts for the workspace. Concepts matching existing names are skipped unless override_existing is set.
-         */
-        post: operations["apply-safety-template"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7536,142 +7036,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/twilio/phone-numbers/available": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search available phone numbers
-         * @description Search available phone numbers for purchase on this workspace's Twilio sub-account. Requires `PhoneNumber.create` permission.
-         */
-        get: operations["search-available-phone-numbers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/twilio/phone-numbers/purchase": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Purchase a phone number
-         * @description Purchase a phone number on this workspace's Twilio sub-account and register it. Requires `PhoneNumber.create` permission.
-         */
-        post: operations["purchase-phone-number"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/twilio/phone-numbers/{phone_number_id}/release": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Release a phone number
-         * @description Release a phone number back to Twilio and remove from workspace. Requires `PhoneNumber.delete` permission.
-         */
-        delete: operations["release-phone-number"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/twilio/sub-account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Twilio sub-account
-         * @description Retrieve the Twilio sub-account for this workspace. Requires `Workspace.view` permission.
-         */
-        get: operations["get-twilio-sub-account"];
-        put?: never;
-        /**
-         * Provision Twilio sub-account
-         * @description Create a Twilio sub-account for this workspace with TwiML App. Idempotent — returns existing if already provisioned. Requires `Workspace.update` permission.
-         */
-        post: operations["provision-twilio-sub-account"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/unification-rules": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List unification rules
-         * @description List unification rules with optional filtering by data source or active status.
-         */
-        get: operations["list-unification-rules"];
-        put?: never;
-        /**
-         * Create a unification rule
-         * @description Create a new data mapping rule. Can be scoped to a specific data source.
-         */
-        post: operations["create-unification-rule"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/unification-rules/{rule_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a unification rule
-         * @description Retrieve a unification rule by ID.
-         */
-        get: operations["get-unification-rule"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete a unification rule
-         * @description Delete a unification rule.
-         */
-        delete: operations["delete-unification-rule"];
-        options?: never;
-        head?: never;
-        /**
-         * Update a unification rule
-         * @description Update a unification rule's configuration.
-         */
-        patch: operations["update-unification-rule"];
-        trace?: never;
-    };
     "/v1/{workspace_id}/use-cases": {
         parameters: {
             query?: never;
@@ -8812,23 +8176,6 @@ export interface components {
             /** Period */
             period?: string | null;
         };
-        /** AgentConfigPayload */
-        AgentConfigPayload: {
-            /** Action Space */
-            action_space?: string[];
-            /**
-             * Model
-             * @default gemini-2.5-flash
-             */
-            model?: string;
-            /** System Prompt */
-            system_prompt?: string | null;
-            /**
-             * Timeout S
-             * @default 3
-             */
-            timeout_s?: number;
-        };
         /** AgentResponse */
         AgentResponse: {
             /**
@@ -9087,21 +8434,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** ApplyTemplateRequest */
-        ApplyTemplateRequest: {
-            /**
-             * Override Existing
-             * @default false
-             */
-            override_existing?: boolean;
-        };
-        /** ApplyTemplateResponse */
-        ApplyTemplateResponse: {
-            /** Created Concepts */
-            created_concepts: string[];
-            /** Skipped */
-            skipped: string[];
         };
         /**
          * ApproveRequest
@@ -9463,24 +8795,6 @@ export interface components {
             /** Start */
             start: string;
         };
-        /** AvailableNumber */
-        AvailableNumber: {
-            /**
-             * Capabilities
-             * @default {}
-             */
-            capabilities?: {
-                [key: string]: boolean;
-            };
-            /** Friendly Name */
-            friendly_name: string;
-            /** Locality */
-            locality?: string | null;
-            /** Phone Number */
-            phone_number: string;
-            /** Region */
-            region?: string | null;
-        };
         BackgroundString: string;
         /** BargeInEvent */
         BargeInEvent: {
@@ -9686,48 +9000,6 @@ export interface components {
              * @description Workspace ID
              */
             workspace_id: string;
-        };
-        /**
-         * BindChannelPhoneRequest
-         * @description Bind a channel-manager-provisioned phone number to this workspace.
-         */
-        BindChannelPhoneRequest: {
-            /**
-             * Capabilities
-             * @default [
-             *       "inbound",
-             *       "outbound"
-             *     ]
-             */
-            capabilities?: string[];
-            /**
-             * Channel Phone Id
-             * Format: uuid
-             * @description Phone number ID from channel-manager
-             */
-            channel_phone_id: string;
-            /**
-             * Display Name
-             * @default
-             */
-            display_name?: string;
-            forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
-            /**
-             * Inbound Service Id
-             * @description Voice agent service ID for inbound call routing
-             */
-            inbound_service_id?: string | null;
-            /**
-             * Notes
-             * @default
-             */
-            notes?: string;
-            /**
-             * Setup Id
-             * Format: uuid
-             * @description Channel-manager Twilio setup ID that owns the phone number
-             */
-            setup_id: string;
         };
         /** Body_send-voicemail */
         "Body_send-voicemail": {
@@ -10471,52 +9743,6 @@ export interface components {
             name: string;
             /** Row Count */
             row_count: number;
-        };
-        /**
-         * CatalogFunctionDef
-         * @description A function discovered from the Databricks UC catalog.
-         */
-        CatalogFunctionDef: {
-            /**
-             * Comment
-             * @default
-             */
-            comment?: string;
-            /**
-             * Data Type
-             * @default
-             */
-            data_type?: string;
-            /** Name */
-            name: string;
-            /**
-             * Registered
-             * @default false
-             */
-            registered?: boolean;
-        };
-        /**
-         * CatalogResponse
-         * @description Response from catalog discovery.
-         */
-        CatalogResponse: {
-            /**
-             * Catalog
-             * @default world
-             */
-            catalog?: string;
-            /**
-             * Count
-             * @default 0
-             */
-            count?: number;
-            /** Functions */
-            functions: components["schemas"]["CatalogFunctionDef"][];
-            /**
-             * Schema
-             * @default functions
-             */
-            schema?: string;
         };
         /** CategoricalMetricValueResponse */
         CategoricalMetricValueResponse: {
@@ -12292,25 +11518,6 @@ export interface components {
              */
             max_uploads?: number;
         };
-        /** CreateMonitorConceptRequest */
-        CreateMonitorConceptRequest: {
-            agent_config?: components["schemas"]["AgentConfigPayload"];
-            description: components["schemas"]["DescriptionString"];
-            escalation?: components["schemas"]["EscalationConfigPayload"];
-            name: components["schemas"]["NameString"];
-            /**
-             * Standalone Threshold
-             * @default 0.85
-             */
-            standalone_threshold?: number;
-            /** Tags */
-            tags?: string[];
-            /**
-             * Threshold
-             * @default 0.4
-             */
-            threshold?: number;
-        };
         /** CreateOperatorRequest */
         CreateOperatorRequest: {
             /**
@@ -12455,45 +11662,6 @@ export interface components {
             developed_by: components["schemas"]["NameString"];
             name: components["schemas"]["NameString"];
             role: components["schemas"]["NameString"];
-        };
-        /** CreatePhoneNumberRequest */
-        CreatePhoneNumberRequest: {
-            /**
-             * Capabilities
-             * @default [
-             *       "inbound",
-             *       "outbound"
-             *     ]
-             */
-            capabilities?: ("inbound" | "outbound")[];
-            /**
-             * Display Name
-             * @default
-             */
-            display_name?: string;
-            forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
-            /** Inbound Service Id */
-            inbound_service_id?: string | null;
-            /**
-             * Notes
-             * @default
-             */
-            notes?: string;
-            phone_number: components["schemas"]["PhoneE164"];
-            /**
-             * Provider
-             * @default twilio
-             * @enum {string}
-             */
-            provider?: "twilio" | "livekit";
-            /** Provider Phone Sid */
-            provider_phone_sid?: string | null;
-            /**
-             * Status
-             * @default active
-             * @enum {string}
-             */
-            status?: "active" | "inactive";
         };
         /** CreateRunRequest */
         CreateRunRequest: {
@@ -12860,28 +12028,6 @@ export interface components {
              * @default UTC
              */
             timezone?: string;
-        };
-        /** CreateUnificationRuleRequest */
-        CreateUnificationRuleRequest: {
-            /** Created By */
-            created_by?: string | null;
-            /** Data Source Id */
-            data_source_id?: string | null;
-            description?: components["schemas"]["DescriptionString"] | null;
-            name: components["schemas"]["NameString"];
-            /** Rule Config */
-            rule_config?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Rule Type
-             * @enum {string}
-             */
-            rule_type: "field_mapping" | "entity_resolution" | "dedup" | "transform";
-            /** Source Event Type */
-            source_event_type?: string | null;
-            /** Target Entity Type */
-            target_entity_type?: string | null;
         };
         /** CreateWebhookDestinationRequest */
         CreateWebhookDestinationRequest: {
@@ -15405,29 +14551,6 @@ export interface components {
                 [key: string]: components["schemas"]["EnvironmentOverrides"];
             };
         };
-        /** EscalationConfigPayload */
-        EscalationConfigPayload: {
-            /**
-             * Immediate
-             * @default true
-             */
-            immediate?: boolean;
-            /**
-             * Operator Type
-             * @default crisis_counselor
-             */
-            operator_type?: string;
-            /**
-             * Reason
-             * @default
-             */
-            reason?: string;
-            /**
-             * Regulatory Basis
-             * @default
-             */
-            regulatory_basis?: string;
-        };
         /** EscalationDailyStats */
         EscalationDailyStats: {
             /** Avg Handle Time Seconds */
@@ -16715,38 +15838,6 @@ export interface components {
              */
             type: "forward_call_resolved";
         };
-        /**
-         * ForwardingConfigRequest
-         * @description Call forwarding configuration for create/update requests.
-         *
-         *     Deprecated: per-phone forwarding has moved to per-service config
-         *     (``Service.voice_config.forwarding``). The field is accepted for one
-         *     release for SDK backward-compat but is no longer read by the voice
-         *     agent at session time. Will be removed in a follow-up PR alongside
-         *     the ``platform.phone_numbers`` table drop.
-         */
-        ForwardingConfigRequest: {
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            forward_to: components["schemas"]["PhoneE164"];
-            /**
-             * Should Disconnect
-             * @default true
-             */
-            should_disconnect?: boolean;
-        };
-        /** ForwardingConfigResponse */
-        ForwardingConfigResponse: {
-            /** Enabled */
-            enabled: boolean;
-            /** Forward To */
-            forward_to: string;
-            /** Should Disconnect */
-            should_disconnect: boolean;
-        };
         /** ForwardingDetails */
         ForwardingDetails: {
             /** Forward To */
@@ -16760,78 +15851,6 @@ export interface components {
              * @default true
              */
             warm_transfer?: boolean;
-        };
-        /**
-         * FunctionCreateRequest
-         * @description Register a new function. Name must be unique within the workspace.
-         */
-        FunctionCreateRequest: {
-            /**
-             * Catalog
-             * @default world
-             */
-            catalog?: string;
-            /** @default  */
-            description?: components["schemas"]["DescriptionString"];
-            /**
-             * Function Type
-             * @default sql
-             */
-            function_type?: string;
-            /** Input Schema */
-            input_schema?: {
-                [key: string]: unknown;
-            };
-            name: components["schemas"]["NameString"];
-            /**
-             * Returns Table
-             * @default true
-             */
-            returns_table?: boolean;
-            /**
-             * Schema
-             * @default functions
-             */
-            schema?: string;
-        };
-        /**
-         * FunctionDef
-         * @description A registered platform function.
-         */
-        FunctionDef: {
-            /**
-             * Catalog
-             * @default world
-             */
-            catalog?: string;
-            /** @default  */
-            description?: components["schemas"]["DescriptionString"];
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /**
-             * Function Type
-             * @description sql | python | udtf | ai
-             * @default sql
-             */
-            function_type?: string;
-            /** Input Schema */
-            input_schema?: {
-                [key: string]: unknown;
-            };
-            name: components["schemas"]["NameString"];
-            /**
-             * Returns Table
-             * @default true
-             */
-            returns_table?: boolean;
-            /**
-             * Schema
-             * @default functions
-             */
-            schema?: string;
         };
         /**
          * FunctionExample
@@ -16853,106 +15872,6 @@ export interface components {
             };
             /** Output */
             output: unknown;
-        };
-        /** FunctionListResponse */
-        FunctionListResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["FunctionDef"][];
-        };
-        /**
-         * FunctionTestRequest
-         * @description Test a function with sample input.
-         */
-        FunctionTestRequest: {
-            /** Input Params */
-            input_params?: {
-                [key: string]: unknown;
-            };
-        };
-        /** FunctionTestResponse */
-        FunctionTestResponse: {
-            /**
-             * Duration Ms
-             * @default 0
-             */
-            duration_ms?: number;
-            /** Error */
-            error?: string | null;
-            /**
-             * Function Name
-             * @default
-             */
-            function_name?: string;
-            /** Result */
-            result?: unknown;
-        };
-        /** FunctionVersionListResponse */
-        FunctionVersionListResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["FunctionVersionResponse"][];
-        };
-        /**
-         * FunctionVersionResponse
-         * @description Single version row from ``platform.functions``.
-         */
-        FunctionVersionResponse: {
-            /** Deployed At */
-            deployed_at?: string | null;
-            /** Deployed By */
-            deployed_by?: string | null;
-            /**
-             * Description
-             * @default
-             */
-            description?: string;
-            /** Examples */
-            examples?: {
-                [key: string]: unknown;
-            }[];
-            /** Function Type */
-            function_type: string;
-            /** Input Schema */
-            input_schema?: {
-                [key: string]: unknown;
-            };
-            /** Last Test At */
-            last_test_at?: string | null;
-            /** Last Test Duration Ms */
-            last_test_duration_ms?: number | null;
-            /** Last Test Error */
-            last_test_error?: string | null;
-            /** Last Test Status */
-            last_test_status?: string | null;
-            /** Name */
-            name: string;
-            /** Parameters */
-            parameters?: {
-                [key: string]: unknown;
-            }[];
-            /** Returns Kind */
-            returns_kind: string;
-            /** Source Hash */
-            source_hash?: string | null;
-            /** Source Path */
-            source_path?: string | null;
-            /** Sql Template */
-            sql_template: string;
-            /**
-             * Timeout Ms
-             * @default 30000
-             */
-            timeout_ms?: number;
-            /** Version */
-            version: number;
-            /**
-             * When To Use
-             * @default
-             */
-            when_to_use?: string;
         };
         /**
          * GapRequiredField
@@ -17884,13 +16803,6 @@ export interface components {
          */
         InvokeRequest: {
             /**
-             * Alias
-             * @description Alias to resolve.
-             * @default latest
-             * @enum {string}
-             */
-            alias?: "latest" | "staging" | "production";
-            /**
              * Input
              * @description Caller arguments matching input_schema.
              */
@@ -17912,11 +16824,6 @@ export interface components {
              * @default 0
              */
             row_count?: number;
-            /**
-             * Version
-             * @default 0
-             */
-            version?: number;
         };
         /** Item */
         Item: {
@@ -18908,49 +17815,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /** MonitorConceptResponse */
-        MonitorConceptResponse: {
-            /** Agent Config */
-            agent_config: {
-                [key: string]: unknown;
-            };
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Description */
-            description: string;
-            /** Escalation */
-            escalation: {
-                [key: string]: unknown;
-            };
-            /** Has Embedding */
-            has_embedding: boolean;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Standalone Threshold */
-            standalone_threshold: number;
-            /** Tags */
-            tags: string[];
-            /** Threshold */
-            threshold: number;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         NameString: string;
         /** NarrativeUpdatedEvent */
         NarrativeUpdatedEvent: {
@@ -19861,17 +18725,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[MonitorConceptResponse] */
-        PaginatedResponse_MonitorConceptResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["MonitorConceptResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[OperatorResponse] */
         PaginatedResponse_OperatorResponse_: {
             /** Continuation Token */
@@ -19902,17 +18755,6 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["PersonaResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[PhoneNumberResponse] */
-        PaginatedResponse_PhoneNumberResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["PhoneNumberResponse"][];
             /** Total */
             total?: number | null;
         };
@@ -20026,17 +18868,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[UnificationRuleResponse] */
-        PaginatedResponse_UnificationRuleResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["UnificationRuleResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[WebhookDestinationResponse] */
         PaginatedResponse_WebhookDestinationResponse_: {
             /** Continuation Token */
@@ -20104,11 +18935,6 @@ export interface components {
             description: string;
             /** Name */
             name: string;
-            /**
-             * Required
-             * @default true
-             */
-            required?: boolean;
             /**
              * Type
              * @enum {string}
@@ -20733,76 +19559,6 @@ export interface components {
              */
             total_calls: number;
         };
-        /** PhoneNumberPurchaseResponse */
-        PhoneNumberPurchaseResponse: {
-            /** Capabilities */
-            capabilities: ("inbound" | "outbound")[];
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Display Name */
-            display_name: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Phone Number */
-            phone_number: string;
-            /** Provider Phone Sid */
-            provider_phone_sid: string;
-            /** Status */
-            status: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PhoneNumberResponse */
-        PhoneNumberResponse: {
-            /** Capabilities */
-            capabilities: string[];
-            /** Channel Phone Id */
-            channel_phone_id?: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Display Name */
-            display_name: string;
-            forwarding: components["schemas"]["ForwardingConfigResponse"] | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Inbound Service Id */
-            inbound_service_id: string | null;
-            /** Notes */
-            notes: string;
-            /** Phone Number */
-            phone_number: string;
-            /** Provider */
-            provider: string;
-            /** Provider Phone Sid */
-            provider_phone_sid: string | null;
-            /** Status */
-            status: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** PipelineErrorEvent */
         PipelineErrorEvent: {
             /**
@@ -21211,25 +19967,6 @@ export interface components {
             /** Trigger Delay Ms */
             trigger_delay_ms?: number | null;
         };
-        /** PromoteRequest */
-        PromoteRequest: {
-            /**
-             * Alias
-             * @enum {string}
-             */
-            alias: "latest" | "staging" | "production";
-            /** Version */
-            version: number;
-        };
-        /** PromoteResponse */
-        PromoteResponse: {
-            /** Alias */
-            alias: string;
-            /** Name */
-            name: string;
-            /** Version */
-            version: number;
-        };
         /**
          * PromptLogEntry
          * @description One ``prompt_log`` event projection — full LLM input + output for a turn.
@@ -21335,23 +20072,6 @@ export interface components {
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
         };
-        /** PurchasePhoneNumberRequest */
-        PurchasePhoneNumberRequest: {
-            /**
-             * Capabilities
-             * @default [
-             *       "inbound",
-             *       "outbound"
-             *     ]
-             */
-            capabilities?: ("inbound" | "outbound")[];
-            /**
-             * Display Name
-             * @default
-             */
-            display_name?: string;
-            phone_number: components["schemas"]["PhoneE164"];
-        };
         /** PurgeEntityResponse */
         PurgeEntityResponse: {
             /** Delta Events Note */
@@ -21417,36 +20137,6 @@ export interface components {
              * @description Raw measured value
              */
             value?: number | null;
-        };
-        /**
-         * QueryRequest
-         * @description Execute an open-scope SQL query.
-         */
-        QueryRequest: {
-            /**
-             * Sql
-             * @description Read-only SQL SELECT statement
-             */
-            sql: string;
-        };
-        /** QueryResponse */
-        QueryResponse: {
-            /**
-             * Count
-             * @default 0
-             */
-            count?: number;
-            /**
-             * Duration Ms
-             * @default 0
-             */
-            duration_ms?: number;
-            /** Error */
-            error?: string | null;
-            /** Results */
-            results?: {
-                [key: string]: unknown;
-            }[];
         };
         /**
          * QuietHours
@@ -21735,29 +20425,65 @@ export interface components {
              */
             when_to_use?: string;
         };
-        /** RegulationTemplateResponse */
-        RegulationTemplateResponse: {
-            /** Category */
-            category: string;
-            /** Description */
-            description: string;
-            /** Id */
-            id: string;
+        /** RegisteredFunctionListResponse */
+        RegisteredFunctionListResponse: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["RegisteredFunctionResponse"][];
+        };
+        /**
+         * RegisteredFunctionResponse
+         * @description Single row from ``platform.functions``.
+         */
+        RegisteredFunctionResponse: {
+            /** Deployed At */
+            deployed_at?: string | null;
+            /** Deployed By */
+            deployed_by?: string | null;
             /**
-             * Is Composite
-             * @default false
+             * Description
+             * @default
              */
-            is_composite?: boolean;
+            description?: string;
+            /** Examples */
+            examples?: {
+                [key: string]: unknown;
+            }[];
+            /** Function Type */
+            function_type: string;
+            /** Input Schema */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /** Last Test At */
+            last_test_at?: string | null;
+            /** Last Test Duration Ms */
+            last_test_duration_ms?: number | null;
+            /** Last Test Error */
+            last_test_error?: string | null;
+            /** Last Test Status */
+            last_test_status?: string | null;
             /** Name */
             name: string;
-            /** Regulation */
-            regulation: string;
-            /** Rules */
-            rules: components["schemas"]["SafetyRuleResponse"][];
-            /** Template Ids */
-            template_ids?: string[];
-            /** Version */
-            version: string;
+            /** Parameters */
+            parameters?: {
+                [key: string]: unknown;
+            }[];
+            /** Returns Kind */
+            returns_kind: string;
+            /** Sql Template */
+            sql_template: string;
+            /**
+             * Timeout Ms
+             * @default 30000
+             */
+            timeout_ms?: number;
+            /**
+             * When To Use
+             * @default
+             */
+            when_to_use?: string;
         };
         /**
          * RejectRequest
@@ -22160,21 +20886,6 @@ export interface components {
              */
             level?: "low" | "medium" | "high" | "critical";
         };
-        /** RollbackRequest */
-        RollbackRequest: {
-            /**
-             * Version
-             * @description Prior version to rebind latest+production to.
-             */
-            version: number;
-        };
-        /** RollbackResponse */
-        RollbackResponse: {
-            /** Name */
-            name: string;
-            /** Rolled Back To Version */
-            rolled_back_to_version: number;
-        };
         /** RotateApiKeyRequest */
         RotateApiKeyRequest: {
             /** Duration Days */
@@ -22247,78 +20958,6 @@ export interface components {
             /** Tags */
             tags?: string[];
         };
-        /** SafetyConfigResponse */
-        SafetyConfigResponse: {
-            /** Accumulation Cumulative Count */
-            accumulation_cumulative_count: number;
-            /** Accumulation Enabled */
-            accumulation_enabled: boolean;
-            /** Accumulation Fast Track Level */
-            accumulation_fast_track_level: number;
-            /** Accumulation Mild Threshold */
-            accumulation_mild_threshold: number;
-            /** Accumulation Single Turn Threshold */
-            accumulation_single_turn_threshold: number;
-            /** Accumulation Window Size */
-            accumulation_window_size: number;
-            /** Applied Template Ids */
-            applied_template_ids: string[];
-            /** Triage Enabled */
-            triage_enabled: boolean;
-            /** Triage Max History Turns */
-            triage_max_history_turns: number;
-            /** Triage Model */
-            triage_model: string;
-            /** Triage Timeout S */
-            triage_timeout_s: number;
-        };
-        /** SafetyRuleResponse */
-        SafetyRuleResponse: {
-            /**
-             * Agent Config
-             * @description Agent triage configuration (model, timeout, action space)
-             */
-            agent_config: {
-                [key: string]: unknown;
-            };
-            /**
-             * Description
-             * @description Human-readable description of what the rule detects
-             */
-            description: string;
-            /**
-             * Escalation
-             * @description Escalation configuration (operator type, reason, regulatory basis)
-             */
-            escalation: {
-                [key: string]: unknown;
-            };
-            /**
-             * Name
-             * @description Unique rule name within the template
-             */
-            name: string;
-            /**
-             * Standalone Threshold
-             * @description Confidence threshold for triggering on a single turn
-             */
-            standalone_threshold: number;
-            /**
-             * Tags
-             * @description Classification tags for grouping and filtering
-             */
-            tags: string[];
-            /**
-             * Threshold
-             * @description Confidence threshold for triggering in accumulated context
-             */
-            threshold: number;
-            /**
-             * Triage Hints
-             * @description Hints for the triage model to identify this safety concern
-             */
-            triage_hints: string[];
-        };
         /** SafetyState */
         SafetyState: {
             /**
@@ -22361,84 +21000,6 @@ export interface components {
              * @default 0
              */
             match_count?: number;
-        };
-        /**
-         * SafetyTrendPoint
-         * @description Single time-bucket data point in the safety trend series.
-         */
-        SafetyTrendPoint: {
-            /**
-             * Date
-             * Format: date
-             * @description Date for the time bucket
-             */
-            date: string;
-            /**
-             * Escalated Count
-             * @description Escalated calls in this time bucket
-             */
-            escalated_count: number;
-            /**
-             * Safety Flagged
-             * @description Safety-flagged calls in this time bucket
-             */
-            safety_flagged: number;
-            /**
-             * Total Calls
-             * @description Total calls in this time bucket
-             */
-            total_calls: number;
-        };
-        /**
-         * SafetyTrendsResponse
-         * @description Safety and escalation trends — risk distribution, escalation rates, and time series.
-         */
-        SafetyTrendsResponse: {
-            /**
-             * Risk Distribution
-             * @description Count of calls by risk level (e.g. high, medium, low)
-             */
-            risk_distribution: {
-                [key: string]: number;
-            };
-            /** @description Aggregate safety metrics for the full period */
-            summary: components["schemas"]["SafetyTrendsSummary"];
-            /**
-             * Trend
-             * @description Time series of safety metrics per interval bucket
-             */
-            trend: components["schemas"]["SafetyTrendPoint"][];
-        };
-        /**
-         * SafetyTrendsSummary
-         * @description Aggregate safety and escalation counts for the period.
-         */
-        SafetyTrendsSummary: {
-            /**
-             * Escalation Rate
-             * @description Fraction of calls that were escalated (0.0-1.0)
-             */
-            escalation_rate: number;
-            /**
-             * Total Calls
-             * @description Total number of calls in the period
-             */
-            total_calls: number;
-            /**
-             * Total Escalations
-             * @description Number of calls escalated to an operator
-             */
-            total_escalations: number;
-            /**
-             * Total Safety Flagged
-             * @description Number of calls with a safety summary present
-             */
-            total_safety_flagged: number;
-            /**
-             * Total Safety Matches
-             * @description Sum of safety match counts across all calls
-             */
-            total_safety_matches: number;
         };
         /**
          * SampleFact
@@ -22590,11 +21151,6 @@ export interface components {
             score: number;
             /** Score Rationale */
             score_rationale?: string | null;
-        };
-        /** SearchAvailableNumbersResponse */
-        SearchAvailableNumbersResponse: {
-            /** Numbers */
-            numbers: components["schemas"]["AvailableNumber"][];
         };
         SearchString: string;
         /**
@@ -24462,39 +23018,6 @@ export interface components {
             workspace_id: string;
         };
         StrippedNonemptyString: string;
-        /** SubAccountResponse */
-        SubAccountResponse: {
-            /** Account Sid */
-            account_sid: string;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Environment */
-            environment: string;
-            /** Friendly Name */
-            friendly_name: string;
-            /** Id */
-            id: string;
-            /**
-             * Status
-             * @default active
-             */
-            status?: string;
-            /** Twiml App Sid */
-            twiml_app_sid: string | null;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** SubToolLog */
         SubToolLog: {
             /**
@@ -25449,24 +23972,19 @@ export interface components {
         };
         /**
          * TestInvokeResponse
-         * @description Response shape for ``POST /v1/{ws}/functions/{name}/v2/test``.
+         * @description Response shape for ``POST /v1/{ws}/functions/{name}/test``.
          *
-         *     Structural superset of :class:`InvokeResponse` (inheritance makes
-         *     the relationship explicit and refactor-safe — if a field is
-         *     renamed on the base, both responses move together). Adds the
-         *     test-only telemetry the DC + SDK need to render a pass/fail
-         *     badge and an actionable error string when a deployed function
-         *     blows up at execute time. The underlying invoke uses the same
-         *     path; ``status`` / ``error`` are filled in by ``service.test``
-         *     after catching any ``ServiceUnavailableError`` from the
-         *     executor, so the route never bubbles a 5xx for a logical SQL
-         *     failure — it's still a 200 with ``status=fail`` so the caller
-         *     can show the message.
+         *     Structural superset of :class:`InvokeResponse`. Adds ``status`` and
+         *     ``error`` so the DC can render the executor's failure detail inline
+         *     rather than a generic "Invocation failed." The underlying invoke
+         *     uses the same path; ``status`` / ``error`` are filled in by
+         *     ``service.test`` after catching any ``ServiceUnavailableError`` from
+         *     the executor, so the route never bubbles a 5xx for a logical SQL
+         *     failure — it's still a 200 with ``status=fail`` so the caller can
+         *     show the message.
          *
          *     Invariant (enforced by :func:`_check_error_when_fail`):
-         *     ``status == "fail" → error is not None and len(error) > 0``. Caps
-         *     the error string length so an upstream stack trace never blows up
-         *     a ``console.log`` line in the browser.
+         *     ``status == "fail" → error is not None and len(error) > 0``.
          */
         TestInvokeResponse: {
             /**
@@ -25486,16 +24004,10 @@ export interface components {
             /**
              * Status
              * @default pass
-             * @enum {string}
              */
-            status?: "pass" | "fail";
+            status?: string;
             /** Test Duration Ms */
             test_duration_ms?: number | null;
-            /**
-             * Version
-             * @default 0
-             */
-            version?: number;
         };
         /** TestSkillRequest */
         TestSkillRequest: {
@@ -26930,57 +25442,6 @@ export interface components {
             /** Tool Name */
             tool_name: string;
         };
-        /** UnificationRuleResponse */
-        UnificationRuleResponse: {
-            /** Accuracy */
-            accuracy: number | null;
-            /** Agent Task Id */
-            agent_task_id: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Created By */
-            created_by: string | null;
-            /** Data Source Id */
-            data_source_id: string | null;
-            /** Description */
-            description: string | null;
-            /** Events Processed */
-            events_processed: number;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Is Active */
-            is_active: boolean;
-            /** Last Applied At */
-            last_applied_at: string | null;
-            /** Name */
-            name: string;
-            /** Rule Config */
-            rule_config: {
-                [key: string]: unknown;
-            };
-            /** Rule Type */
-            rule_type: string;
-            /** Source Event Type */
-            source_event_type: string | null;
-            /** Target Entity Type */
-            target_entity_type: string | null;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** UpdateAgentRequest */
         UpdateAgentRequest: {
             description?: components["schemas"]["DescriptionString"] | null;
@@ -27093,19 +25554,6 @@ export interface components {
             /** Protocol */
             protocol?: ("rest" | "fhir" | "mcp") | null;
         };
-        /** UpdateMonitorConceptRequest */
-        UpdateMonitorConceptRequest: {
-            agent_config?: components["schemas"]["AgentConfigPayload"] | null;
-            description?: components["schemas"]["DescriptionString"] | null;
-            escalation?: components["schemas"]["EscalationConfigPayload"] | null;
-            name?: components["schemas"]["NameString"] | null;
-            /** Standalone Threshold */
-            standalone_threshold?: number | null;
-            /** Tags */
-            tags?: string[] | null;
-            /** Threshold */
-            threshold?: number | null;
-        };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
             /** Connection Method */
@@ -27135,47 +25583,6 @@ export interface components {
             developed_by?: components["schemas"]["NameString"] | null;
             name?: components["schemas"]["NameString"] | null;
             role?: components["schemas"]["NameString"] | null;
-        };
-        /** UpdatePhoneNumberRequest */
-        UpdatePhoneNumberRequest: {
-            /** Capabilities */
-            capabilities?: ("inbound" | "outbound")[] | null;
-            /** Display Name */
-            display_name?: string | null;
-            forwarding?: components["schemas"]["ForwardingConfigRequest"] | null;
-            /** Inbound Service Id */
-            inbound_service_id?: string | null;
-            /** Notes */
-            notes?: string | null;
-            /** Provider */
-            provider?: ("twilio" | "livekit") | null;
-            /** Provider Phone Sid */
-            provider_phone_sid?: string | null;
-            /** Status */
-            status?: ("active" | "inactive") | null;
-        };
-        /** UpdateSafetyConfigRequest */
-        UpdateSafetyConfigRequest: {
-            /** Accumulation Cumulative Count */
-            accumulation_cumulative_count?: number | null;
-            /** Accumulation Enabled */
-            accumulation_enabled?: boolean | null;
-            /** Accumulation Fast Track Level */
-            accumulation_fast_track_level?: number | null;
-            /** Accumulation Mild Threshold */
-            accumulation_mild_threshold?: number | null;
-            /** Accumulation Single Turn Threshold */
-            accumulation_single_turn_threshold?: number | null;
-            /** Accumulation Window Size */
-            accumulation_window_size?: number | null;
-            /** Triage Enabled */
-            triage_enabled?: boolean | null;
-            /** Triage Max History Turns */
-            triage_max_history_turns?: number | null;
-            /** Triage Model */
-            triage_model?: string | null;
-            /** Triage Timeout S */
-            triage_timeout_s?: number | null;
         };
         /**
          * UpdateSchedulingRuleSetRequest
@@ -27347,25 +25754,6 @@ export interface components {
             schedule?: string | null;
             /** Timezone */
             timezone?: string | null;
-        };
-        /** UpdateUnificationRuleRequest */
-        UpdateUnificationRuleRequest: {
-            /** Data Source Id */
-            data_source_id?: string | null;
-            description?: components["schemas"]["DescriptionString"] | null;
-            /** Is Active */
-            is_active?: boolean | null;
-            name?: components["schemas"]["NameString"] | null;
-            /** Rule Config */
-            rule_config?: {
-                [key: string]: unknown;
-            } | null;
-            /** Rule Type */
-            rule_type?: ("field_mapping" | "entity_resolution" | "dedup" | "transform") | null;
-            /** Source Event Type */
-            source_event_type?: string | null;
-            /** Target Entity Type */
-            target_entity_type?: string | null;
         };
         /** UpdateWebhookDestinationRequest */
         UpdateWebhookDestinationRequest: {
@@ -31620,50 +30008,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OperatorPerformanceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limit exceeded */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-safety-trends": {
-        parameters: {
-            query?: {
-                days?: number;
-                date_from?: string | null;
-                date_to?: string | null;
-                interval?: "1h" | "1d" | "1w";
-                service_id?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SafetyTrendsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -36478,7 +34822,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FunctionListResponse"];
+                    "application/json": components["schemas"]["RegisteredFunctionListResponse"];
                 };
             };
             /** @description Rate limited */
@@ -36490,59 +34834,13 @@ export interface operations {
             };
         };
     };
-    "create-function": {
+    "get-function": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FunctionCreateRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionDef"];
-                };
-            };
-            /** @description Function name already registered */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "discover-catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
+                function_name: string;
             };
             cookie?: never;
         };
@@ -36554,18 +34852,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["CatalogResponse"];
+                    "application/json": components["schemas"]["RegisteredFunctionResponse"];
                 };
             };
-            /** @description Rate limited */
-            429: {
+            /** @description Function not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Agent engine unavailable */
-            503: {
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -36579,6 +34886,7 @@ export interface operations {
             header?: never;
             path: {
                 workspace_id: string;
+                function_name: string;
             };
             cookie?: never;
         };
@@ -36594,11 +34902,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["FunctionVersionResponse"];
+                    "application/json": components["schemas"]["RegisteredFunctionResponse"];
                 };
             };
-            /** @description Concurrent deploy raced at the same version */
-            409: {
+            /** @description URL function_name does not match body name */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -36620,120 +34928,6 @@ export interface operations {
             };
         };
     };
-    "query-functions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QueryRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QueryResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent engine unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-registered-functions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionVersionListResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "sync-catalog": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionListResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent engine unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "delete-function": {
         parameters: {
             query?: never;
@@ -36747,15 +34941,11 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description Successful Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        [key: string]: string;
-                    };
-                };
+                content?: never;
             };
             /** @description Function not found */
             404: {
@@ -36837,164 +35027,7 @@ export interface operations {
             };
         };
     };
-    "promote-function": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                function_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PromoteRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PromoteResponse"];
-                };
-            };
-            /** @description Function or version not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "rollback-function": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                function_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RollbackRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RollbackResponse"];
-                };
-            };
-            /** @description Function or version not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "test-function": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                function_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FunctionTestRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionTestResponse"];
-                };
-            };
-            /** @description Function not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Agent engine unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "test-function-v2": {
         parameters: {
             query?: never;
             header?: never;
@@ -37044,100 +35077,6 @@ export interface operations {
             };
             /** @description Databricks SQL client unavailable */
             503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-function-version": {
-        parameters: {
-            query?: {
-                alias?: "latest" | "staging" | "production";
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                function_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionVersionResponse"];
-                };
-            };
-            /** @description Function not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-function-versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                function_name: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FunctionVersionListResponse"];
-                };
-            };
-            /** @description Function not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -39014,236 +36953,6 @@ export interface operations {
             };
         };
     };
-    "list-monitor-concepts": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_MonitorConceptResponse_"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-monitor-concept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateMonitorConceptRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MonitorConceptResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-monitor-concept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                concept_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MonitorConceptResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Monitor concept not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "delete-monitor-concept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                concept_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Monitor concept not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "update-monitor-concept": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                concept_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateMonitorConceptRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MonitorConceptResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Monitor concept not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "get-egress-ips": {
         parameters: {
             query?: never;
@@ -40262,446 +37971,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "list-phone-numbers": {
-        parameters: {
-            query?: {
-                status?: ("active" | "inactive") | null;
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_PhoneNumberResponse_"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePhoneNumberRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Workspace not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number already registered. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "bind-channel-phone": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BindChannelPhoneRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel phone ID not found in channel-manager. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number already registered. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Channel manager not configured. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "update-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePhoneNumberRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "delete-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "set-phone-number-forwarding": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ForwardingConfigRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid forwarding config. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "clear-phone-number-forwarding": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
@@ -41949,202 +39218,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ClaimResponse"];
                 };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-safety-config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SafetyConfigResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-safety-config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateSafetyConfigRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SafetyConfigResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "list-safety-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegulationTemplateResponse"][];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-safety-template": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                template_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegulationTemplateResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Template not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "apply-safety-template": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                template_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApplyTemplateRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApplyTemplateResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Template not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -46981,496 +44054,6 @@ export interface operations {
             };
             /** @description Rate limited */
             429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "search-available-phone-numbers": {
-        parameters: {
-            query?: {
-                country?: string;
-                area_code?: string | null;
-                contains?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SearchAvailableNumbersResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No sub-account provisioned. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "purchase-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PurchasePhoneNumberRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PhoneNumberPurchaseResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No sub-account provisioned. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number already registered. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "release-phone-number": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                phone_number_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Phone number not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No provider SID on number. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-twilio-sub-account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubAccountResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description No sub-account provisioned. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "provision-twilio-sub-account": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubAccountResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Workspace not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Twilio provisioning not configured. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-unification-rules": {
-        parameters: {
-            query?: {
-                data_source_id?: string | null;
-                is_active?: boolean | null;
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_UnificationRuleResponse_"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-unification-rule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateUnificationRuleRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnificationRuleResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid data_source_id reference. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-unification-rule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                rule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnificationRuleResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unification rule not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "delete-unification-rule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                rule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unification rule not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "update-unification-rule": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                rule_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateUnificationRuleRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UnificationRuleResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Unification rule not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid data_source_id reference. */
-            422: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -58,10 +58,8 @@ src/
     memory.ts           -- Memory fact queries
     operators.ts        -- Operator CRUD, dashboard, queue, escalations, call actions
     personas.ts         -- Persona management
-    phone-numbers.ts    -- Phone number provisioning
     recordings.ts       -- Call recording access
     review-queue.ts     -- Review queue management
-    safety.ts           -- Safety rule management
     services.ts         -- Service CRUD
     settings.ts         -- Workspace settings (voice, branding, outreach, memory, security, retention, workflows)
     simulations.ts      -- Call simulation management

@@ -267,17 +267,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `verify`
 - `delete`
 
-### `phoneNumbers`
-
-- `provision`
-- `list`
-- `listAutoPaging`
-- `get`
-- `update`
-- `release`
-- `setForwarding`
-- `clearForwarding`
-
 ### `integrations`
 
 - `create`
@@ -302,7 +291,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getDataQuality`
 - `getUsage`
 - `getEventBreakdown`
-- `getSafetyTrends`
 - `getOperatorPerformance`
 - `getAdvancedCallStats`
 - `compareCallPeriods`
@@ -442,14 +430,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `listDeliveriesAutoPaging`
 - `rotateSecret`
 
-### `safety`
-
-- `getConfig`
-- `updateConfig`
-- `listTemplates`
-- `getTemplate`
-- `applyTemplate`
-
 ### `compliance`
 
 - `getDashboard`
@@ -463,20 +443,11 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `functions`
 
 - `list`
-- `create`
-- `delete`
-- `test`
-- `getCatalog`
-- `query`
-- `sync`
+- `get`
 - `deploy`
-- `listRegistered`
-- `listVersions`
-- `getVersion`
+- `delete`
 - `invoke`
-- `testV2`
-- `promote`
-- `rollback`
+- `test`
 
 ### `observers`
 
@@ -511,24 +482,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `sessions.create`
 - `sessions.get`
 - `sessions.chat`
-
-### `monitorConcepts`
-
-- `create`
-- `list`
-- `listAutoPaging`
-- `get`
-- `update`
-- `delete`
-
-### `unificationRules`
-
-- `create`
-- `list`
-- `listAutoPaging`
-- `get`
-- `update`
-- `delete`
 
 ### `crm`
 

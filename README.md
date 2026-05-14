@@ -696,12 +696,10 @@ const persona = await client.personas.create({
 const { items: personas } = await client.personas.list()
 ```
 
-### Compliance & Safety
+### Compliance
 
 ```typescript
 const hipaa = await client.compliance.getHipaa()
-const safetyConfig = await client.safety.getConfig()
-const templates = await client.safety.listTemplates()
 ```
 
 ### Audit
@@ -722,8 +720,8 @@ const metadata = await client.recordings.getMetadata('call-sid')
 ### Functions (UC Functions)
 
 ```typescript
-const catalog = await client.functions.getCatalog()
 const { items: functions } = await client.functions.list()
+const fn = await client.functions.get('my-function')
 const result = await client.functions.test('my-function', { input: { query: 'test' } })
 ```
 
