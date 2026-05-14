@@ -2710,7 +2710,7 @@ export interface paths {
         put?: never;
         /**
          * Import FHIR Bundle
-         * @description Import a FHIR Bundle. Decomposes into events and creates patient entities.
+         * @description Import a FHIR Bundle. Decomposes supported resources into upserted world events and creates patient entities. Unsupported resource types are skipped and reported; omitted resources are not deleted.
          */
         post: operations["fhir-import"];
         delete?: never;
@@ -2730,7 +2730,7 @@ export interface paths {
         put?: never;
         /**
          * Import FHIR resources via NDJSON streaming
-         * @description Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST send Patient resources before resources that reference them, and MUST pre-resolve any bundle-internal urn:uuid: references.
+         * @description Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST pre-resolve any bundle-internal urn:uuid: references. Unsupported resource types are skipped and reported; omitted resources are not deleted.
          */
         post: operations["fhir-import-stream"];
         delete?: never;
@@ -15881,15 +15881,37 @@ export interface components {
             source?: string;
             /** Source System */
             source_system?: string | null;
+            /**
+             * @description Controls resources whose resourceType is missing or not projected by platform FHIR APIs. 'error' skips the resource and adds a per-resource error; 'skip' skips it without adding an error. Unsupported resources are never emitted as silent raw world events.
+             * @default error
+             */
+            unsupported_resource_policy?: components["schemas"]["FhirUnsupportedResourcePolicy"];
         };
         /** FhirImportResponse */
         FhirImportResponse: {
+            /**
+             * Absence Semantics
+             * @description Resources omitted from a later bundle are not deleted or archived by import.
+             * @default absent_resources_persist
+             * @constant
+             */
+            absence_semantics?: "absent_resources_persist";
             /** Entities Created */
             entities_created: number;
             /** Entities Updated */
             entities_updated: number;
+            /**
+             * Error Count
+             * @default 0
+             */
+            error_count?: number;
             /** Errors */
             errors?: string[];
+            /**
+             * Errors Truncated
+             * @default false
+             */
+            errors_truncated?: boolean;
             /** Events Created */
             events_created: number;
             /**
@@ -15902,6 +15924,25 @@ export interface components {
              * @default 0
              */
             events_updated?: number;
+            /**
+             * Unsupported Resource Count
+             * @default 0
+             */
+            unsupported_resource_count?: number;
+            /** Unsupported Resources */
+            unsupported_resources?: components["schemas"]["FhirUnsupportedResourceItem"][];
+            /**
+             * Unsupported Resources Truncated
+             * @default false
+             */
+            unsupported_resources_truncated?: boolean;
+            /**
+             * Upsert Semantics
+             * @description FHIR import uses workspace + resourceType + id as the natural key. Identical re-uploads can be deduped; changed resources supersede prior current events.
+             * @default same_resource_id_upsert
+             * @constant
+             */
+            upsert_semantics?: "same_resource_id_upsert";
         };
         /** FhirLocationListResponse */
         FhirLocationListResponse: {
@@ -16309,6 +16350,19 @@ export interface components {
             /** Sync Healthy */
             sync_healthy?: boolean | null;
         };
+        /** FhirUnsupportedResourceItem */
+        FhirUnsupportedResourceItem: {
+            /** Location */
+            location: string;
+            /** Reason */
+            reason: string;
+            /** Resource Id */
+            resource_id?: string | null;
+            /** Resource Type */
+            resource_type?: string | null;
+        };
+        /** @enum {string} */
+        FhirUnsupportedResourcePolicy: "error" | "skip";
         /** FhirWriteRequest */
         FhirWriteRequest: {
             /** Data */
@@ -35698,6 +35752,8 @@ export interface operations {
                 data_source_id?: string | null;
                 /** @description Skip identical re-uploads via content-hash dedup */
                 dedup?: boolean;
+                /** @description Use 'error' to report unsupported resources, or 'skip' to skip them without errors. */
+                unsupported_resource_policy?: components["schemas"]["FhirUnsupportedResourcePolicy"];
             };
             header?: never;
             path: {

@@ -18746,6 +18746,11 @@
               }
             ],
             "title": "Source System"
+          },
+          "unsupported_resource_policy": {
+            "$ref": "#/components/schemas/FhirUnsupportedResourcePolicy",
+            "default": "error",
+            "description": "Controls resources whose resourceType is missing or not projected by platform FHIR APIs. 'error' skips the resource and adds a per-resource error; 'skip' skips it without adding an error. Unsupported resources are never emitted as silent raw world events."
           }
         },
         "required": [
@@ -18756,6 +18761,13 @@
       },
       "FhirImportResponse": {
         "properties": {
+          "absence_semantics": {
+            "const": "absent_resources_persist",
+            "default": "absent_resources_persist",
+            "description": "Resources omitted from a later bundle are not deleted or archived by import.",
+            "title": "Absence Semantics",
+            "type": "string"
+          },
           "entities_created": {
             "title": "Entities Created",
             "type": "integer"
@@ -18764,12 +18776,23 @@
             "title": "Entities Updated",
             "type": "integer"
           },
+          "error_count": {
+            "default": 0,
+            "title": "Error Count",
+            "type": "integer"
+          },
           "errors": {
             "items": {
               "type": "string"
             },
+            "maxItems": 1000,
             "title": "Errors",
             "type": "array"
+          },
+          "errors_truncated": {
+            "default": false,
+            "title": "Errors Truncated",
+            "type": "boolean"
           },
           "events_created": {
             "title": "Events Created",
@@ -18784,6 +18807,31 @@
             "default": 0,
             "title": "Events Updated",
             "type": "integer"
+          },
+          "unsupported_resource_count": {
+            "default": 0,
+            "title": "Unsupported Resource Count",
+            "type": "integer"
+          },
+          "unsupported_resources": {
+            "items": {
+              "$ref": "#/components/schemas/FhirUnsupportedResourceItem"
+            },
+            "maxItems": 1000,
+            "title": "Unsupported Resources",
+            "type": "array"
+          },
+          "unsupported_resources_truncated": {
+            "default": false,
+            "title": "Unsupported Resources Truncated",
+            "type": "boolean"
+          },
+          "upsert_semantics": {
+            "const": "same_resource_id_upsert",
+            "default": "same_resource_id_upsert",
+            "description": "FHIR import uses workspace + resourceType + id as the natural key. Identical re-uploads can be deduped; changed resources supersede prior current events.",
+            "title": "Upsert Semantics",
+            "type": "string"
           }
         },
         "required": [
@@ -20221,6 +20269,57 @@
         ],
         "title": "FhirStatusResponse",
         "type": "object"
+      },
+      "FhirUnsupportedResourceItem": {
+        "properties": {
+          "location": {
+            "maxLength": 128,
+            "title": "Location",
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 512,
+            "title": "Reason",
+            "type": "string"
+          },
+          "resource_id": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Id"
+          },
+          "resource_type": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resource Type"
+          }
+        },
+        "required": [
+          "location",
+          "reason"
+        ],
+        "title": "FhirUnsupportedResourceItem",
+        "type": "object"
+      },
+      "FhirUnsupportedResourcePolicy": {
+        "enum": [
+          "error",
+          "skip"
+        ],
+        "type": "string"
       },
       "FhirWriteRequest": {
         "properties": {
@@ -62473,7 +62572,7 @@
     },
     "/v1/{workspace_id}/fhir/import": {
       "post": {
-        "description": "Import a FHIR Bundle. Decomposes into events and creates patient entities.",
+        "description": "Import a FHIR Bundle. Decomposes supported resources into upserted world events and creates patient entities. Unsupported resource types are skipped and reported; omitted resources are not deleted.",
         "operationId": "fhir-import",
         "parameters": [
           {
@@ -62530,7 +62629,7 @@
     },
     "/v1/{workspace_id}/fhir/import-stream": {
       "post": {
-        "description": "Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST send Patient resources before resources that reference them, and MUST pre-resolve any bundle-internal urn:uuid: references.",
+        "description": "Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST pre-resolve any bundle-internal urn:uuid: references. Unsupported resource types are skipped and reported; omitted resources are not deleted.",
         "operationId": "fhir-import-stream",
         "parameters": [
           {
@@ -62598,6 +62697,17 @@
               "description": "Skip identical re-uploads via content-hash dedup",
               "title": "Dedup",
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Use 'error' to report unsupported resources, or 'skip' to skip them without errors.",
+            "in": "query",
+            "name": "unsupported_resource_policy",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/FhirUnsupportedResourcePolicy",
+              "default": "error",
+              "description": "Use 'error' to report unsupported resources, or 'skip' to skip them without errors."
             }
           }
         ],
