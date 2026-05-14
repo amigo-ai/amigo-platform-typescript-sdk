@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.56.0] - 2026-05-14
+
+### Improvements
+
+- Remove personas API surface
+
 ## [Unreleased]
 
 ### Breaking Changes
