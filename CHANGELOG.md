@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.51.0] - 2026-05-14
+
+### Improvements
+
+- Remove Superscribe SDK surface (#245)
+
 ## [0.49.0] - 2026-05-10
 
 ### Maintenance
