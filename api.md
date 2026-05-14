@@ -368,15 +368,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getEntityFacts`
 - `getAnalytics`
 
-### `personas`
-
-- `list`
-- `listAutoPaging`
-- `create`
-- `get`
-- `update`
-- `delete`
-
 ### `reviewQueue`
 
 - `list`

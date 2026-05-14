@@ -686,16 +686,6 @@ await client.reviewQueue.reject('item-id', { reason: 'Data mismatch' })
 await client.reviewQueue.batchApprove({ item_ids: ['id1', 'id2'] })
 ```
 
-### Personas
-
-```typescript
-const persona = await client.personas.create({
-  name: 'Friendly Scheduler',
-  voice_style: 'warm and professional',
-})
-const { items: personas } = await client.personas.list()
-```
-
 ### Compliance
 
 ```typescript
