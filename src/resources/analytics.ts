@@ -125,21 +125,6 @@ export class AnalyticsResource extends WorkspaceScopedResource {
     )
   }
 
-  /** Safety and escalation trends — risk distribution and time-series data */
-  async getSafetyTrends(params?: {
-    days?: number
-    date_from?: string | null
-    date_to?: string | null
-    interval?: '1h' | '1d' | '1w'
-    service_id?: string | null
-  }) {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/analytics/safety-trends', {
-        params: { path: { workspace_id: this.workspaceId }, query: params },
-      }),
-    )
-  }
-
   /** Operator escalation performance and quality comparison */
   async getOperatorPerformance(params?: {
     days?: number

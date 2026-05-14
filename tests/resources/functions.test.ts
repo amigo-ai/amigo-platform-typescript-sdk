@@ -8,9 +8,9 @@ const FUNCTION_NAME = 'calculate_bmi'
 
 const FUNCTION_FIXTURE = {
   name: FUNCTION_NAME,
-  workspace_id: TEST_WORKSPACE_ID,
   description: 'Calculate BMI from height and weight',
-  parameters: {
+  function_type: 'sql',
+  input_schema: {
     type: 'object',
     properties: {
       height_cm: { type: 'number' },
@@ -18,37 +18,26 @@ const FUNCTION_FIXTURE = {
     },
     required: ['height_cm', 'weight_kg'],
   },
-  created_at: '2026-01-01T00:00:00Z',
+  parameters: [
+    { name: 'height_cm', type: 'number' },
+    { name: 'weight_kg', type: 'number' },
+  ],
+  returns_kind: 'table',
+  sql_template: 'SELECT :weight_kg / POWER(:height_cm / 100, 2) AS bmi',
+  timeout_ms: 30000,
+}
+
+const INVOKE_RESULT_FIXTURE = {
+  result: { bmi: 24.2, category: 'normal' },
+  duration_ms: 45,
+  row_count: 1,
 }
 
 const TEST_RESULT_FIXTURE = {
-  function_name: FUNCTION_NAME,
-  result: { bmi: 24.2, category: 'normal' },
-  duration_ms: 45,
+  ...INVOKE_RESULT_FIXTURE,
+  status: 'pass',
   error: null,
-}
-
-const CATALOG_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  functions: [
-    { name: 'calculate_bmi', description: 'Calculate BMI', category: 'health' },
-    { name: 'format_phone', description: 'Format phone number to E.164', category: 'utility' },
-  ],
-}
-
-const QUERY_RESULT_FIXTURE = {
-  results: [
-    { name: 'Jane Doe', age: 42 },
-    { name: 'John Smith', age: 35 },
-  ],
-  count: 2,
-  duration_ms: 120,
-  error: null,
-}
-
-const SYNC_RESULT_FIXTURE = {
-  count: 5,
-  items: [{ name: 'fn1' }, { name: 'fn2' }, { name: 'fn3' }, { name: 'fn4' }, { name: 'fn5' }],
+  test_duration_ms: 45,
 }
 
 function mockFetch(
@@ -81,69 +70,62 @@ const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/functions`]: () =>
-      Response.json({ items: [FUNCTION_FIXTURE], has_more: false, continuation_token: null }),
+    [`GET ${BASE}/functions`]: () => Response.json({ items: [FUNCTION_FIXTURE], count: 1 }),
 
-    [`POST ${BASE}/functions`]: () => Response.json(FUNCTION_FIXTURE, { status: 201 }),
+    [`GET ${BASE}/functions/${FUNCTION_NAME}`]: () => Response.json(FUNCTION_FIXTURE),
+
+    [`PUT ${BASE}/functions/${FUNCTION_NAME}`]: () => Response.json(FUNCTION_FIXTURE),
 
     [`DELETE ${BASE}/functions/${FUNCTION_NAME}`]: () => new Response(null, { status: 204 }),
 
+    [`POST ${BASE}/functions/${FUNCTION_NAME}/invoke`]: () => Response.json(INVOKE_RESULT_FIXTURE),
+
     [`POST ${BASE}/functions/${FUNCTION_NAME}/test`]: () => Response.json(TEST_RESULT_FIXTURE),
-
-    [`GET ${BASE}/functions/catalog`]: () => Response.json(CATALOG_FIXTURE),
-
-    [`POST ${BASE}/functions/query`]: () => Response.json(QUERY_RESULT_FIXTURE),
-
-    [`POST ${BASE}/functions/sync`]: () => Response.json(SYNC_RESULT_FIXTURE),
   }),
 })
 
 describe('FunctionsResource', () => {
   it('lists functions', async () => {
     const result = await client.functions.list()
-    expect(result).toBeDefined()
+    expect(result.count).toBe(1)
+    expect(result.items[0]?.name).toBe(FUNCTION_NAME)
   })
 
-  it('creates a function', async () => {
-    const result = await client.functions.create({
-      name: FUNCTION_NAME,
-      sql: 'SELECT height_cm, weight_kg FROM ...',
-    } as never)
+  it('gets a function', async () => {
+    const result = await client.functions.get(FUNCTION_NAME)
     expect(result.name).toBe(FUNCTION_NAME)
     expect(result.description).toBe('Calculate BMI from height and weight')
+  })
+
+  it('deploys a function', async () => {
+    const result = await client.functions.deploy(FUNCTION_NAME, {
+      name: FUNCTION_NAME,
+      description: 'Calculate BMI from height and weight',
+      body: 'SELECT :weight_kg / POWER(:height_cm / 100, 2) AS bmi',
+    } as never)
+    expect(result.name).toBe(FUNCTION_NAME)
+    expect(result.sql_template).toContain('POWER')
   })
 
   it('deletes a function', async () => {
     await expect(client.functions.delete(FUNCTION_NAME)).resolves.toBeUndefined()
   })
 
+  it('invokes a function', async () => {
+    const result = await client.functions.invoke(FUNCTION_NAME, {
+      input: { height_cm: 175, weight_kg: 74 },
+    })
+    expect(result.result).toEqual({ bmi: 24.2, category: 'normal' })
+    expect(result.row_count).toBe(1)
+  })
+
   it('tests a function', async () => {
     const result = await client.functions.test(FUNCTION_NAME, {
-      args: { height_cm: 175, weight_kg: 74 },
-    } as never)
+      input: { height_cm: 175, weight_kg: 74 },
+    })
+    expect(result.status).toBe('pass')
     expect(result.error).toBeNull()
     expect(result.result).toEqual({ bmi: 24.2, category: 'normal' })
     expect(result.duration_ms).toBe(45)
-  })
-
-  it('gets the function catalog', async () => {
-    const result = await client.functions.getCatalog()
-    expect(result.functions).toHaveLength(2)
-    expect(result.functions[0]?.name).toBe('calculate_bmi')
-  })
-
-  it('runs a query', async () => {
-    const result = await client.functions.query({
-      sql: 'SELECT name, age FROM patients',
-    } as never)
-    expect(result.count).toBe(2)
-    expect(result.duration_ms).toBe(120)
-    expect(result.results).toHaveLength(2)
-  })
-
-  it('syncs functions', async () => {
-    const result = await client.functions.sync()
-    expect(result.count).toBe(5)
-    expect(result.items).toHaveLength(5)
   })
 })

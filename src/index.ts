@@ -50,7 +50,6 @@ import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
 import { ChannelsResource } from './resources/channels/index.js'
-import { PhoneNumbersResource } from './resources/phone-numbers.js'
 import { IntegrationsResource } from './resources/integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
 import { SimulationsResource } from './resources/simulations.js'
@@ -63,15 +62,12 @@ import { ReviewQueueResource } from './resources/review-queue.js'
 import { RecordingsResource } from './resources/recordings.js'
 import { AuditResource } from './resources/audit.js'
 import { WebhookDestinationsResource } from './resources/webhook-destinations.js'
-import { SafetyResource } from './resources/safety.js'
 import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
 import { ObserversResource } from './resources/observers.js'
 import { FhirResource } from './resources/fhir.js'
 import { InsightsResource } from './resources/insights.js'
-import { MonitorConceptsResource } from './resources/monitor-concepts.js'
-import { UnificationRulesResource } from './resources/unification-rules.js'
 import { CrmResource } from './resources/crm.js'
 import { CommandCenterResource } from './resources/command-center.js'
 import { SensoriumResource } from './resources/sensorium.js'
@@ -210,7 +206,6 @@ export class AmigoClient {
   readonly calls!: CallsResource
   readonly conversations!: ConversationsResource
   readonly channels!: ChannelsResource
-  readonly phoneNumbers!: PhoneNumbersResource
   readonly integrations!: IntegrationsResource
   readonly analytics!: AnalyticsResource
   readonly simulations!: SimulationsResource
@@ -223,7 +218,6 @@ export class AmigoClient {
   readonly recordings!: RecordingsResource
   readonly audit!: AuditResource
   readonly webhookDestinations!: WebhookDestinationsResource
-  readonly safety!: SafetyResource
   readonly compliance!: ComplianceResource
   readonly events!: EventsResource
   readonly functions!: FunctionsResource
@@ -237,10 +231,6 @@ export class AmigoClient {
   readonly fhir!: FhirResource
   /** Natural-language insights — schema, suggestions, SQL, chat sessions */
   readonly insights!: InsightsResource
-  /** Workspace monitor concepts (semantic patterns watched across calls) */
-  readonly monitorConcepts!: MonitorConceptsResource
-  /** Entity unification rules (declarative deduplication of world-model entities) */
-  readonly unificationRules!: UnificationRulesResource
   /** CRM — contacts, companies, deals, pipeline (sync from connected CRM integration) */
   readonly crm!: CrmResource
   /** Command Center — rolled-up workspace homepage snapshot */
@@ -487,7 +477,6 @@ export class AmigoClient {
     mutable.calls = new CallsResource(client, workspaceId)
     mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
     mutable.channels = new ChannelsResource(client, workspaceId)
-    mutable.phoneNumbers = new PhoneNumbersResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
     mutable.simulations = new SimulationsResource(client, workspaceId)
@@ -500,15 +489,12 @@ export class AmigoClient {
     mutable.recordings = new RecordingsResource(client, workspaceId)
     mutable.audit = new AuditResource(client, workspaceId)
     mutable.webhookDestinations = new WebhookDestinationsResource(client, workspaceId)
-    mutable.safety = new SafetyResource(client, workspaceId)
     mutable.compliance = new ComplianceResource(client, workspaceId)
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
     mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
     mutable.fhir = new FhirResource(client, workspaceId)
     mutable.insights = new InsightsResource(client, workspaceId)
-    mutable.monitorConcepts = new MonitorConceptsResource(client, workspaceId)
-    mutable.unificationRules = new UnificationRulesResource(client, workspaceId)
     mutable.crm = new CrmResource(client, workspaceId)
     mutable.commandCenter = new CommandCenterResource(client, workspaceId)
     mutable.sensorium = new SensoriumResource(client, workspaceId)

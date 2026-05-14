@@ -90,12 +90,6 @@ const EVENT_BREAKDOWN_FIXTURE = {
   total_events: 298,
 }
 
-const SAFETY_TRENDS_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  risk_distribution: { low: 120, medium: 25, high: 5 },
-  timeseries: [],
-}
-
 const OPERATOR_PERFORMANCE_FIXTURE = {
   summary: {
     escalated_count: 12,
@@ -163,7 +157,6 @@ const client = new AmigoClient({
     [`GET ${BASE}/analytics/data-quality`]: () => Response.json(DATA_QUALITY_FIXTURE),
     [`GET ${BASE}/analytics/usage`]: () => Response.json(USAGE_FIXTURE),
     [`GET ${BASE}/analytics/events`]: () => Response.json(EVENT_BREAKDOWN_FIXTURE),
-    [`GET ${BASE}/analytics/safety-trends`]: () => Response.json(SAFETY_TRENDS_FIXTURE),
     [`GET ${BASE}/analytics/operator-performance`]: () =>
       Response.json(OPERATOR_PERFORMANCE_FIXTURE),
     [`GET ${BASE}/analytics/calls/advanced`]: () => Response.json(ADVANCED_CALL_STATS_FIXTURE),
@@ -247,11 +240,6 @@ describe('AnalyticsResource', () => {
     const result = await client.analytics.getEventBreakdown()
     expect(result.by_type).toHaveLength(2)
     expect(result.by_type[0]?.key).toBe('call.started')
-  })
-
-  it('gets safety trends', async () => {
-    const result = await client.analytics.getSafetyTrends()
-    expect(result.risk_distribution.high).toBe(5)
   })
 
   it('gets operator performance', async () => {

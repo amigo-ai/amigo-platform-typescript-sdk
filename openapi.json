@@ -1028,47 +1028,6 @@
         "title": "AgentAnalyticsResponse",
         "type": "object"
       },
-      "AgentConfigPayload": {
-        "properties": {
-          "action_space": {
-            "items": {
-              "maxLength": 64,
-              "minLength": 1,
-              "type": "string"
-            },
-            "maxItems": 20,
-            "title": "Action Space",
-            "type": "array"
-          },
-          "model": {
-            "default": "gemini-2.5-flash",
-            "maxLength": 128,
-            "title": "Model",
-            "type": "string"
-          },
-          "system_prompt": {
-            "anyOf": [
-              {
-                "maxLength": 10000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "System Prompt"
-          },
-          "timeout_s": {
-            "default": 3.0,
-            "maximum": 60.0,
-            "minimum": 0.1,
-            "title": "Timeout S",
-            "type": "number"
-          }
-        },
-        "title": "AgentConfigPayload",
-        "type": "object"
-      },
       "AgentResponse": {
         "properties": {
           "created_at": {
@@ -1713,41 +1672,6 @@
           "updated_at"
         ],
         "title": "ApiKeyResponse",
-        "type": "object"
-      },
-      "ApplyTemplateRequest": {
-        "properties": {
-          "override_existing": {
-            "default": false,
-            "title": "Override Existing",
-            "type": "boolean"
-          }
-        },
-        "title": "ApplyTemplateRequest",
-        "type": "object"
-      },
-      "ApplyTemplateResponse": {
-        "properties": {
-          "created_concepts": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Created Concepts",
-            "type": "array"
-          },
-          "skipped": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Skipped",
-            "type": "array"
-          }
-        },
-        "required": [
-          "created_concepts",
-          "skipped"
-        ],
-        "title": "ApplyTemplateResponse",
         "type": "object"
       },
       "ApproveRequest": {
@@ -2844,54 +2768,6 @@
         "title": "AvailabilitySlot",
         "type": "object"
       },
-      "AvailableNumber": {
-        "properties": {
-          "capabilities": {
-            "additionalProperties": {
-              "type": "boolean"
-            },
-            "default": {},
-            "title": "Capabilities",
-            "type": "object"
-          },
-          "friendly_name": {
-            "title": "Friendly Name",
-            "type": "string"
-          },
-          "locality": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Locality"
-          },
-          "phone_number": {
-            "title": "Phone Number",
-            "type": "string"
-          },
-          "region": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Region"
-          }
-        },
-        "required": [
-          "phone_number",
-          "friendly_name"
-        ],
-        "title": "AvailableNumber",
-        "type": "object"
-      },
       "BackgroundString": {
         "maxLength": 10000,
         "type": "string"
@@ -3341,77 +3217,6 @@
           "period_end"
         ],
         "title": "BillingDashboardResponse",
-        "type": "object"
-      },
-      "BindChannelPhoneRequest": {
-        "description": "Bind a channel-manager-provisioned phone number to this workspace.",
-        "properties": {
-          "capabilities": {
-            "default": [
-              "inbound",
-              "outbound"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 10,
-            "minItems": 1,
-            "title": "Capabilities",
-            "type": "array"
-          },
-          "channel_phone_id": {
-            "description": "Phone number ID from channel-manager",
-            "format": "uuid",
-            "title": "Channel Phone Id",
-            "type": "string"
-          },
-          "display_name": {
-            "default": "",
-            "maxLength": 256,
-            "title": "Display Name",
-            "type": "string"
-          },
-          "forwarding": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ForwardingConfigRequest"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "inbound_service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Voice agent service ID for inbound call routing",
-            "title": "Inbound Service Id"
-          },
-          "notes": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Notes",
-            "type": "string"
-          },
-          "setup_id": {
-            "description": "Channel-manager Twilio setup ID that owns the phone number",
-            "format": "uuid",
-            "title": "Setup Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "setup_id",
-          "channel_phone_id"
-        ],
-        "title": "BindChannelPhoneRequest",
         "type": "object"
       },
       "Body_send-voicemail": {
@@ -5493,67 +5298,6 @@
           "exists"
         ],
         "title": "CatalogEntry",
-        "type": "object"
-      },
-      "CatalogFunctionDef": {
-        "description": "A function discovered from the Databricks UC catalog.",
-        "properties": {
-          "comment": {
-            "default": "",
-            "title": "Comment",
-            "type": "string"
-          },
-          "data_type": {
-            "default": "",
-            "title": "Data Type",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "registered": {
-            "default": false,
-            "title": "Registered",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "title": "CatalogFunctionDef",
-        "type": "object"
-      },
-      "CatalogResponse": {
-        "description": "Response from catalog discovery.",
-        "properties": {
-          "catalog": {
-            "default": "world",
-            "title": "Catalog",
-            "type": "string"
-          },
-          "count": {
-            "default": 0,
-            "title": "Count",
-            "type": "integer"
-          },
-          "functions": {
-            "items": {
-              "$ref": "#/components/schemas/CatalogFunctionDef"
-            },
-            "title": "Functions",
-            "type": "array"
-          },
-          "schema": {
-            "default": "functions",
-            "title": "Schema",
-            "type": "string"
-          }
-        },
-        "required": [
-          "functions"
-        ],
-        "title": "CatalogResponse",
         "type": "object"
       },
       "CategoricalMetricValueResponse": {
@@ -10003,52 +9747,6 @@
         "title": "CreateLinkRequest",
         "type": "object"
       },
-      "CreateMonitorConceptRequest": {
-        "properties": {
-          "agent_config": {
-            "$ref": "#/components/schemas/AgentConfigPayload"
-          },
-          "description": {
-            "$ref": "#/components/schemas/DescriptionString"
-          },
-          "escalation": {
-            "$ref": "#/components/schemas/EscalationConfigPayload"
-          },
-          "name": {
-            "$ref": "#/components/schemas/NameString"
-          },
-          "standalone_threshold": {
-            "default": 0.85,
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Standalone Threshold",
-            "type": "number"
-          },
-          "tags": {
-            "items": {
-              "maxLength": 64,
-              "minLength": 1,
-              "type": "string"
-            },
-            "maxItems": 50,
-            "title": "Tags",
-            "type": "array"
-          },
-          "threshold": {
-            "default": 0.4,
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Threshold",
-            "type": "number"
-          }
-        },
-        "required": [
-          "name",
-          "description"
-        ],
-        "title": "CreateMonitorConceptRequest",
-        "type": "object"
-      },
       "CreateOperatorRequest": {
         "properties": {
           "connection_method": {
@@ -10382,98 +10080,6 @@
           "developed_by"
         ],
         "title": "CreatePersonaRequest",
-        "type": "object"
-      },
-      "CreatePhoneNumberRequest": {
-        "properties": {
-          "capabilities": {
-            "default": [
-              "inbound",
-              "outbound"
-            ],
-            "items": {
-              "enum": [
-                "inbound",
-                "outbound"
-              ],
-              "type": "string"
-            },
-            "maxItems": 2,
-            "title": "Capabilities",
-            "type": "array"
-          },
-          "display_name": {
-            "default": "",
-            "maxLength": 256,
-            "title": "Display Name",
-            "type": "string"
-          },
-          "forwarding": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ForwardingConfigRequest"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "inbound_service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Inbound Service Id"
-          },
-          "notes": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Notes",
-            "type": "string"
-          },
-          "phone_number": {
-            "$ref": "#/components/schemas/PhoneE164"
-          },
-          "provider": {
-            "default": "twilio",
-            "enum": [
-              "twilio",
-              "livekit"
-            ],
-            "title": "Provider",
-            "type": "string"
-          },
-          "provider_phone_sid": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider Phone Sid"
-          },
-          "status": {
-            "default": "active",
-            "enum": [
-              "active",
-              "inactive"
-            ],
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "phone_number"
-        ],
-        "title": "CreatePhoneNumberRequest",
         "type": "object"
       },
       "CreateRunRequest": {
@@ -11382,92 +10988,6 @@
           "action_id"
         ],
         "title": "CreateTriggerRequest",
-        "type": "object"
-      },
-      "CreateUnificationRuleRequest": {
-        "properties": {
-          "created_by": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "data_source_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Source Id"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DescriptionString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "name": {
-            "$ref": "#/components/schemas/NameString"
-          },
-          "rule_config": {
-            "additionalProperties": true,
-            "title": "Rule Config",
-            "type": "object"
-          },
-          "rule_type": {
-            "enum": [
-              "field_mapping",
-              "entity_resolution",
-              "dedup",
-              "transform"
-            ],
-            "title": "Rule Type",
-            "type": "string"
-          },
-          "source_event_type": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Event Type"
-          },
-          "target_entity_type": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Entity Type"
-          }
-        },
-        "required": [
-          "name",
-          "rule_type"
-        ],
-        "title": "CreateUnificationRuleRequest",
         "type": "object"
       },
       "CreateWebhookDestinationRequest": {
@@ -17587,35 +17107,6 @@
         "title": "EnvironmentSettingsResponse",
         "type": "object"
       },
-      "EscalationConfigPayload": {
-        "properties": {
-          "immediate": {
-            "default": true,
-            "title": "Immediate",
-            "type": "boolean"
-          },
-          "operator_type": {
-            "default": "crisis_counselor",
-            "maxLength": 64,
-            "title": "Operator Type",
-            "type": "string"
-          },
-          "reason": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Reason",
-            "type": "string"
-          },
-          "regulatory_basis": {
-            "default": "",
-            "maxLength": 2000,
-            "title": "Regulatory Basis",
-            "type": "string"
-          }
-        },
-        "title": "EscalationConfigPayload",
-        "type": "object"
-      },
       "EscalationDailyStats": {
         "properties": {
           "avg_handle_time_seconds": {
@@ -21207,52 +20698,6 @@
         "title": "ForwardCallResolvedEvent",
         "type": "object"
       },
-      "ForwardingConfigRequest": {
-        "description": "Call forwarding configuration for create/update requests.\n\nDeprecated: per-phone forwarding has moved to per-service config\n(``Service.voice_config.forwarding``). The field is accepted for one\nrelease for SDK backward-compat but is no longer read by the voice\nagent at session time. Will be removed in a follow-up PR alongside\nthe ``platform.phone_numbers`` table drop.",
-        "properties": {
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "forward_to": {
-            "$ref": "#/components/schemas/PhoneE164"
-          },
-          "should_disconnect": {
-            "default": true,
-            "title": "Should Disconnect",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "forward_to"
-        ],
-        "title": "ForwardingConfigRequest",
-        "type": "object"
-      },
-      "ForwardingConfigResponse": {
-        "properties": {
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "forward_to": {
-            "title": "Forward To",
-            "type": "string"
-          },
-          "should_disconnect": {
-            "title": "Should Disconnect",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled",
-          "forward_to",
-          "should_disconnect"
-        ],
-        "title": "ForwardingConfigResponse",
-        "type": "object"
-      },
       "ForwardingDetails": {
         "properties": {
           "forward_to": {
@@ -21289,102 +20734,6 @@
         "title": "ForwardingDetails",
         "type": "object"
       },
-      "FunctionCreateRequest": {
-        "description": "Register a new function. Name must be unique within the workspace.",
-        "properties": {
-          "catalog": {
-            "default": "world",
-            "maxLength": 128,
-            "title": "Catalog",
-            "type": "string"
-          },
-          "description": {
-            "$ref": "#/components/schemas/DescriptionString",
-            "default": ""
-          },
-          "function_type": {
-            "default": "sql",
-            "maxLength": 32,
-            "title": "Function Type",
-            "type": "string"
-          },
-          "input_schema": {
-            "additionalProperties": true,
-            "title": "Input Schema",
-            "type": "object"
-          },
-          "name": {
-            "$ref": "#/components/schemas/NameString"
-          },
-          "returns_table": {
-            "default": true,
-            "title": "Returns Table",
-            "type": "boolean"
-          },
-          "schema": {
-            "default": "functions",
-            "maxLength": 128,
-            "title": "Schema",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "title": "FunctionCreateRequest",
-        "type": "object"
-      },
-      "FunctionDef": {
-        "description": "A registered platform function.",
-        "properties": {
-          "catalog": {
-            "default": "world",
-            "maxLength": 128,
-            "title": "Catalog",
-            "type": "string"
-          },
-          "description": {
-            "$ref": "#/components/schemas/DescriptionString",
-            "default": ""
-          },
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "function_type": {
-            "default": "sql",
-            "description": "sql | python | udtf | ai",
-            "maxLength": 32,
-            "title": "Function Type",
-            "type": "string"
-          },
-          "input_schema": {
-            "additionalProperties": true,
-            "title": "Input Schema",
-            "type": "object"
-          },
-          "name": {
-            "$ref": "#/components/schemas/NameString"
-          },
-          "returns_table": {
-            "default": true,
-            "title": "Returns Table",
-            "type": "boolean"
-          },
-          "schema": {
-            "default": "functions",
-            "maxLength": 128,
-            "title": "Schema",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name"
-        ],
-        "title": "FunctionDef",
-        "type": "object"
-      },
       "FunctionExample": {
         "additionalProperties": false,
         "description": "One example call, surfaced to the LLM and the DC test panel.\n\nExamples are first-class metadata, not buried in a UC ``COMMENT``\nclause the way Databricks' native authoring requires. The DC\ntool-picker shows them; the LLM tool spec includes them inline.",
@@ -21408,248 +20757,6 @@
           "output"
         ],
         "title": "FunctionExample",
-        "type": "object"
-      },
-      "FunctionListResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/FunctionDef"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "count"
-        ],
-        "title": "FunctionListResponse",
-        "type": "object"
-      },
-      "FunctionTestRequest": {
-        "description": "Test a function with sample input.",
-        "properties": {
-          "input_params": {
-            "additionalProperties": true,
-            "title": "Input Params",
-            "type": "object"
-          }
-        },
-        "title": "FunctionTestRequest",
-        "type": "object"
-      },
-      "FunctionTestResponse": {
-        "properties": {
-          "duration_ms": {
-            "default": 0.0,
-            "title": "Duration Ms",
-            "type": "number"
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error"
-          },
-          "function_name": {
-            "default": "",
-            "title": "Function Name",
-            "type": "string"
-          },
-          "result": {
-            "title": "Result"
-          }
-        },
-        "title": "FunctionTestResponse",
-        "type": "object"
-      },
-      "FunctionVersionListResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/FunctionVersionResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "count"
-        ],
-        "title": "FunctionVersionListResponse",
-        "type": "object"
-      },
-      "FunctionVersionResponse": {
-        "description": "Single version row from ``platform.functions``.",
-        "properties": {
-          "deployed_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deployed At"
-          },
-          "deployed_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Deployed By"
-          },
-          "description": {
-            "default": "",
-            "title": "Description",
-            "type": "string"
-          },
-          "examples": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Examples",
-            "type": "array"
-          },
-          "function_type": {
-            "title": "Function Type",
-            "type": "string"
-          },
-          "input_schema": {
-            "additionalProperties": true,
-            "title": "Input Schema",
-            "type": "object"
-          },
-          "last_test_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Test At"
-          },
-          "last_test_duration_ms": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Test Duration Ms"
-          },
-          "last_test_error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Test Error"
-          },
-          "last_test_status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Test Status"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "parameters": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Parameters",
-            "type": "array"
-          },
-          "returns_kind": {
-            "title": "Returns Kind",
-            "type": "string"
-          },
-          "source_hash": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Hash"
-          },
-          "source_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Path"
-          },
-          "sql_template": {
-            "title": "Sql Template",
-            "type": "string"
-          },
-          "timeout_ms": {
-            "default": 30000,
-            "title": "Timeout Ms",
-            "type": "integer"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          },
-          "when_to_use": {
-            "default": "",
-            "title": "When To Use",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "version",
-          "function_type",
-          "returns_kind",
-          "sql_template"
-        ],
-        "title": "FunctionVersionResponse",
         "type": "object"
       },
       "GapRequiredField": {
@@ -23642,17 +22749,6 @@
       "InvokeRequest": {
         "description": "Invoke a registered function with caller-supplied args.",
         "properties": {
-          "alias": {
-            "default": "latest",
-            "description": "Alias to resolve.",
-            "enum": [
-              "latest",
-              "staging",
-              "production"
-            ],
-            "title": "Alias",
-            "type": "string"
-          },
           "input": {
             "additionalProperties": true,
             "description": "Caller arguments matching input_schema.",
@@ -23676,11 +22772,6 @@
           "row_count": {
             "default": 0,
             "title": "Row Count",
-            "type": "integer"
-          },
-          "version": {
-            "default": 0,
-            "title": "Version",
             "type": "integer"
           }
         },
@@ -25769,83 +24860,6 @@
           "model_id"
         ],
         "title": "ModelRegistryRow",
-        "type": "object"
-      },
-      "MonitorConceptResponse": {
-        "properties": {
-          "agent_config": {
-            "additionalProperties": true,
-            "title": "Agent Config",
-            "type": "object"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "description": {
-            "title": "Description",
-            "type": "string"
-          },
-          "escalation": {
-            "additionalProperties": true,
-            "title": "Escalation",
-            "type": "object"
-          },
-          "has_embedding": {
-            "title": "Has Embedding",
-            "type": "boolean"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "standalone_threshold": {
-            "title": "Standalone Threshold",
-            "type": "number"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Tags",
-            "type": "array"
-          },
-          "threshold": {
-            "title": "Threshold",
-            "type": "number"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "description",
-          "threshold",
-          "standalone_threshold",
-          "agent_config",
-          "escalation",
-          "tags",
-          "has_embedding",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "MonitorConceptResponse",
         "type": "object"
       },
       "NameString": {
@@ -28116,49 +27130,6 @@
         "title": "PaginatedResponse[MeterValueItem]",
         "type": "object"
       },
-      "PaginatedResponse_MonitorConceptResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/MonitorConceptResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[MonitorConceptResponse]",
-        "type": "object"
-      },
       "PaginatedResponse_OperatorResponse_": {
         "properties": {
           "continuation_token": {
@@ -28286,49 +27257,6 @@
           "has_more"
         ],
         "title": "PaginatedResponse[PersonaResponse]",
-        "type": "object"
-      },
-      "PaginatedResponse_PhoneNumberResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/PhoneNumberResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[PhoneNumberResponse]",
         "type": "object"
       },
       "PaginatedResponse_ReviewItemResponse_": {
@@ -28761,49 +27689,6 @@
         "title": "PaginatedResponse[TriggerRunResponse]",
         "type": "object"
       },
-      "PaginatedResponse_UnificationRuleResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/UnificationRuleResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[UnificationRuleResponse]",
-        "type": "object"
-      },
       "PaginatedResponse_WebhookDestinationResponse_": {
         "properties": {
           "continuation_token": {
@@ -28971,11 +27856,6 @@
             "pattern": "^[a-z][a-z0-9_]*$",
             "title": "Name",
             "type": "string"
-          },
-          "required": {
-            "default": true,
-            "title": "Required",
-            "type": "boolean"
           },
           "type": {
             "enum": [
@@ -30719,177 +29599,6 @@
         "title": "PhoneNumberCallVolume",
         "type": "object"
       },
-      "PhoneNumberPurchaseResponse": {
-        "properties": {
-          "capabilities": {
-            "items": {
-              "enum": [
-                "inbound",
-                "outbound"
-              ],
-              "type": "string"
-            },
-            "title": "Capabilities",
-            "type": "array"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "display_name": {
-            "title": "Display Name",
-            "type": "string"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "phone_number": {
-            "title": "Phone Number",
-            "type": "string"
-          },
-          "provider_phone_sid": {
-            "title": "Provider Phone Sid",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "phone_number",
-          "display_name",
-          "provider_phone_sid",
-          "status",
-          "capabilities",
-          "created_at"
-        ],
-        "title": "PhoneNumberPurchaseResponse",
-        "type": "object"
-      },
-      "PhoneNumberResponse": {
-        "properties": {
-          "capabilities": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Capabilities",
-            "type": "array"
-          },
-          "channel_phone_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Channel Phone Id"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "display_name": {
-            "title": "Display Name",
-            "type": "string"
-          },
-          "forwarding": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ForwardingConfigResponse"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "inbound_service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Inbound Service Id"
-          },
-          "notes": {
-            "title": "Notes",
-            "type": "string"
-          },
-          "phone_number": {
-            "title": "Phone Number",
-            "type": "string"
-          },
-          "provider": {
-            "title": "Provider",
-            "type": "string"
-          },
-          "provider_phone_sid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider Phone Sid"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "phone_number",
-          "display_name",
-          "provider",
-          "capabilities",
-          "status",
-          "inbound_service_id",
-          "provider_phone_sid",
-          "notes",
-          "forwarding",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "PhoneNumberResponse",
-        "type": "object"
-      },
       "PipelineErrorEvent": {
         "properties": {
           "data_source_id": {
@@ -31869,53 +30578,6 @@
         "title": "ProgressHint",
         "type": "object"
       },
-      "PromoteRequest": {
-        "properties": {
-          "alias": {
-            "enum": [
-              "latest",
-              "staging",
-              "production"
-            ],
-            "title": "Alias",
-            "type": "string"
-          },
-          "version": {
-            "minimum": 1.0,
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "alias",
-          "version"
-        ],
-        "title": "PromoteRequest",
-        "type": "object"
-      },
-      "PromoteResponse": {
-        "properties": {
-          "alias": {
-            "title": "Alias",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "name",
-          "alias",
-          "version"
-        ],
-        "title": "PromoteResponse",
-        "type": "object"
-      },
       "PromptLogEntry": {
         "description": "One ``prompt_log`` event projection \u2014 full LLM input + output for a turn.\n\nUnbounded string fields (``system_prompt``, ``full_prompt``,\n``llm_response``) reflect the producer's payload as-is \u2014 typically\n1-50 KB each, occasionally larger for long histories. SDK consumers\nshould not assume a max length.",
         "properties": {
@@ -32244,40 +30906,6 @@
         "title": "ProvisionResponse",
         "type": "object"
       },
-      "PurchasePhoneNumberRequest": {
-        "properties": {
-          "capabilities": {
-            "default": [
-              "inbound",
-              "outbound"
-            ],
-            "items": {
-              "enum": [
-                "inbound",
-                "outbound"
-              ],
-              "type": "string"
-            },
-            "maxItems": 2,
-            "title": "Capabilities",
-            "type": "array"
-          },
-          "display_name": {
-            "default": "",
-            "maxLength": 256,
-            "title": "Display Name",
-            "type": "string"
-          },
-          "phone_number": {
-            "$ref": "#/components/schemas/PhoneE164"
-          }
-        },
-        "required": [
-          "phone_number"
-        ],
-        "title": "PurchasePhoneNumberRequest",
-        "type": "object"
-      },
       "PurgeEntityResponse": {
         "properties": {
           "delta_events_note": {
@@ -32437,57 +31065,6 @@
           "penalty"
         ],
         "title": "QualityComponent",
-        "type": "object"
-      },
-      "QueryRequest": {
-        "description": "Execute an open-scope SQL query.",
-        "properties": {
-          "sql": {
-            "description": "Read-only SQL SELECT statement",
-            "maxLength": 4000,
-            "title": "Sql",
-            "type": "string"
-          }
-        },
-        "required": [
-          "sql"
-        ],
-        "title": "QueryRequest",
-        "type": "object"
-      },
-      "QueryResponse": {
-        "properties": {
-          "count": {
-            "default": 0,
-            "title": "Count",
-            "type": "integer"
-          },
-          "duration_ms": {
-            "default": 0.0,
-            "title": "Duration Ms",
-            "type": "number"
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error"
-          },
-          "results": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Results",
-            "type": "array"
-          }
-        },
-        "title": "QueryResponse",
         "type": "object"
       },
       "QuietHours": {
@@ -32973,62 +31550,156 @@
         "title": "RegisteredFunction",
         "type": "object"
       },
-      "RegulationTemplateResponse": {
+      "RegisteredFunctionListResponse": {
         "properties": {
-          "category": {
-            "title": "Category",
-            "type": "string"
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RegisteredFunctionResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "count"
+        ],
+        "title": "RegisteredFunctionListResponse",
+        "type": "object"
+      },
+      "RegisteredFunctionResponse": {
+        "description": "Single row from ``platform.functions``.",
+        "properties": {
+          "deployed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployed At"
+          },
+          "deployed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deployed By"
           },
           "description": {
+            "default": "",
             "title": "Description",
             "type": "string"
           },
-          "id": {
-            "title": "Id",
+          "examples": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Examples",
+            "type": "array"
+          },
+          "function_type": {
+            "title": "Function Type",
             "type": "string"
           },
-          "is_composite": {
-            "default": false,
-            "title": "Is Composite",
-            "type": "boolean"
+          "input_schema": {
+            "additionalProperties": true,
+            "title": "Input Schema",
+            "type": "object"
+          },
+          "last_test_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test At"
+          },
+          "last_test_duration_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Duration Ms"
+          },
+          "last_test_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Error"
+          },
+          "last_test_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Test Status"
           },
           "name": {
             "title": "Name",
             "type": "string"
           },
-          "regulation": {
-            "title": "Regulation",
+          "parameters": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Parameters",
+            "type": "array"
+          },
+          "returns_kind": {
+            "title": "Returns Kind",
             "type": "string"
           },
-          "rules": {
-            "items": {
-              "$ref": "#/components/schemas/SafetyRuleResponse"
-            },
-            "title": "Rules",
-            "type": "array"
+          "sql_template": {
+            "title": "Sql Template",
+            "type": "string"
           },
-          "template_ids": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Template Ids",
-            "type": "array"
+          "timeout_ms": {
+            "default": 30000,
+            "title": "Timeout Ms",
+            "type": "integer"
           },
-          "version": {
-            "title": "Version",
+          "when_to_use": {
+            "default": "",
+            "title": "When To Use",
             "type": "string"
           }
         },
         "required": [
-          "id",
           "name",
-          "regulation",
-          "description",
-          "category",
-          "version",
-          "rules"
+          "function_type",
+          "returns_kind",
+          "sql_template"
         ],
-        "title": "RegulationTemplateResponse",
+        "title": "RegisteredFunctionResponse",
         "type": "object"
       },
       "RejectRequest": {
@@ -33929,39 +32600,6 @@
         "title": "RiskSummary",
         "type": "object"
       },
-      "RollbackRequest": {
-        "properties": {
-          "version": {
-            "description": "Prior version to rebind latest+production to.",
-            "minimum": 1.0,
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "version"
-        ],
-        "title": "RollbackRequest",
-        "type": "object"
-      },
-      "RollbackResponse": {
-        "properties": {
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "rolled_back_to_version": {
-            "title": "Rolled Back To Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "name",
-          "rolled_back_to_version"
-        ],
-        "title": "RollbackResponse",
-        "type": "object"
-      },
       "RotateApiKeyRequest": {
         "properties": {
           "duration_days": {
@@ -34164,136 +32802,6 @@
         "title": "RunSimulationCaseRequest",
         "type": "object"
       },
-      "SafetyConfigResponse": {
-        "properties": {
-          "accumulation_cumulative_count": {
-            "title": "Accumulation Cumulative Count",
-            "type": "integer"
-          },
-          "accumulation_enabled": {
-            "title": "Accumulation Enabled",
-            "type": "boolean"
-          },
-          "accumulation_fast_track_level": {
-            "title": "Accumulation Fast Track Level",
-            "type": "integer"
-          },
-          "accumulation_mild_threshold": {
-            "title": "Accumulation Mild Threshold",
-            "type": "integer"
-          },
-          "accumulation_single_turn_threshold": {
-            "title": "Accumulation Single Turn Threshold",
-            "type": "integer"
-          },
-          "accumulation_window_size": {
-            "title": "Accumulation Window Size",
-            "type": "integer"
-          },
-          "applied_template_ids": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Applied Template Ids",
-            "type": "array"
-          },
-          "triage_enabled": {
-            "title": "Triage Enabled",
-            "type": "boolean"
-          },
-          "triage_max_history_turns": {
-            "title": "Triage Max History Turns",
-            "type": "integer"
-          },
-          "triage_model": {
-            "title": "Triage Model",
-            "type": "string"
-          },
-          "triage_timeout_s": {
-            "title": "Triage Timeout S",
-            "type": "number"
-          }
-        },
-        "required": [
-          "triage_enabled",
-          "triage_model",
-          "triage_timeout_s",
-          "triage_max_history_turns",
-          "accumulation_enabled",
-          "accumulation_window_size",
-          "accumulation_single_turn_threshold",
-          "accumulation_cumulative_count",
-          "accumulation_mild_threshold",
-          "accumulation_fast_track_level",
-          "applied_template_ids"
-        ],
-        "title": "SafetyConfigResponse",
-        "type": "object"
-      },
-      "SafetyRuleResponse": {
-        "properties": {
-          "agent_config": {
-            "additionalProperties": true,
-            "description": "Agent triage configuration (model, timeout, action space)",
-            "title": "Agent Config",
-            "type": "object"
-          },
-          "description": {
-            "description": "Human-readable description of what the rule detects",
-            "title": "Description",
-            "type": "string"
-          },
-          "escalation": {
-            "additionalProperties": true,
-            "description": "Escalation configuration (operator type, reason, regulatory basis)",
-            "title": "Escalation",
-            "type": "object"
-          },
-          "name": {
-            "description": "Unique rule name within the template",
-            "title": "Name",
-            "type": "string"
-          },
-          "standalone_threshold": {
-            "description": "Confidence threshold for triggering on a single turn",
-            "title": "Standalone Threshold",
-            "type": "number"
-          },
-          "tags": {
-            "description": "Classification tags for grouping and filtering",
-            "items": {
-              "type": "string"
-            },
-            "title": "Tags",
-            "type": "array"
-          },
-          "threshold": {
-            "description": "Confidence threshold for triggering in accumulated context",
-            "title": "Threshold",
-            "type": "number"
-          },
-          "triage_hints": {
-            "description": "Hints for the triage model to identify this safety concern",
-            "items": {
-              "type": "string"
-            },
-            "title": "Triage Hints",
-            "type": "array"
-          }
-        },
-        "required": [
-          "name",
-          "description",
-          "triage_hints",
-          "threshold",
-          "standalone_threshold",
-          "agent_config",
-          "escalation",
-          "tags"
-        ],
-        "title": "SafetyRuleResponse",
-        "type": "object"
-      },
       "SafetyState": {
         "properties": {
           "concept_matches": {
@@ -34349,112 +32857,6 @@
           }
         },
         "title": "SafetySummary",
-        "type": "object"
-      },
-      "SafetyTrendPoint": {
-        "description": "Single time-bucket data point in the safety trend series.",
-        "properties": {
-          "date": {
-            "description": "Date for the time bucket",
-            "format": "date",
-            "title": "Date",
-            "type": "string"
-          },
-          "escalated_count": {
-            "description": "Escalated calls in this time bucket",
-            "title": "Escalated Count",
-            "type": "integer"
-          },
-          "safety_flagged": {
-            "description": "Safety-flagged calls in this time bucket",
-            "title": "Safety Flagged",
-            "type": "integer"
-          },
-          "total_calls": {
-            "description": "Total calls in this time bucket",
-            "title": "Total Calls",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "date",
-          "total_calls",
-          "escalated_count",
-          "safety_flagged"
-        ],
-        "title": "SafetyTrendPoint",
-        "type": "object"
-      },
-      "SafetyTrendsResponse": {
-        "description": "Safety and escalation trends \u2014 risk distribution, escalation rates, and time series.",
-        "properties": {
-          "risk_distribution": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "description": "Count of calls by risk level (e.g. high, medium, low)",
-            "title": "Risk Distribution",
-            "type": "object"
-          },
-          "summary": {
-            "$ref": "#/components/schemas/SafetyTrendsSummary",
-            "description": "Aggregate safety metrics for the full period"
-          },
-          "trend": {
-            "description": "Time series of safety metrics per interval bucket",
-            "items": {
-              "$ref": "#/components/schemas/SafetyTrendPoint"
-            },
-            "maxItems": 2200,
-            "title": "Trend",
-            "type": "array"
-          }
-        },
-        "required": [
-          "summary",
-          "risk_distribution",
-          "trend"
-        ],
-        "title": "SafetyTrendsResponse",
-        "type": "object"
-      },
-      "SafetyTrendsSummary": {
-        "description": "Aggregate safety and escalation counts for the period.",
-        "properties": {
-          "escalation_rate": {
-            "description": "Fraction of calls that were escalated (0.0-1.0)",
-            "title": "Escalation Rate",
-            "type": "number"
-          },
-          "total_calls": {
-            "description": "Total number of calls in the period",
-            "title": "Total Calls",
-            "type": "integer"
-          },
-          "total_escalations": {
-            "description": "Number of calls escalated to an operator",
-            "title": "Total Escalations",
-            "type": "integer"
-          },
-          "total_safety_flagged": {
-            "description": "Number of calls with a safety summary present",
-            "title": "Total Safety Flagged",
-            "type": "integer"
-          },
-          "total_safety_matches": {
-            "description": "Sum of safety match counts across all calls",
-            "title": "Total Safety Matches",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "total_calls",
-          "total_escalations",
-          "escalation_rate",
-          "total_safety_flagged",
-          "total_safety_matches"
-        ],
-        "title": "SafetyTrendsSummary",
         "type": "object"
       },
       "SampleFact": {
@@ -34771,22 +33173,6 @@
           "score"
         ],
         "title": "ScoreSessionRequest",
-        "type": "object"
-      },
-      "SearchAvailableNumbersResponse": {
-        "properties": {
-          "numbers": {
-            "items": {
-              "$ref": "#/components/schemas/AvailableNumber"
-            },
-            "title": "Numbers",
-            "type": "array"
-          }
-        },
-        "required": [
-          "numbers"
-        ],
-        "title": "SearchAvailableNumbersResponse",
         "type": "object"
       },
       "SearchString": {
@@ -39131,69 +37517,6 @@
         "minLength": 1,
         "type": "string"
       },
-      "SubAccountResponse": {
-        "properties": {
-          "account_sid": {
-            "title": "Account Sid",
-            "type": "string"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "environment": {
-            "title": "Environment",
-            "type": "string"
-          },
-          "friendly_name": {
-            "title": "Friendly Name",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "status": {
-            "default": "active",
-            "title": "Status",
-            "type": "string"
-          },
-          "twiml_app_sid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Twiml App Sid"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "account_sid",
-          "friendly_name",
-          "environment",
-          "twiml_app_sid",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "SubAccountResponse",
-        "type": "object"
-      },
       "SubToolLog": {
         "properties": {
           "duration_ms": {
@@ -41380,7 +39703,7 @@
         "type": "object"
       },
       "TestInvokeResponse": {
-        "description": "Response shape for ``POST /v1/{ws}/functions/{name}/v2/test``.\n\nStructural superset of :class:`InvokeResponse` (inheritance makes\nthe relationship explicit and refactor-safe \u2014 if a field is\nrenamed on the base, both responses move together). Adds the\ntest-only telemetry the DC + SDK need to render a pass/fail\nbadge and an actionable error string when a deployed function\nblows up at execute time. The underlying invoke uses the same\npath; ``status`` / ``error`` are filled in by ``service.test``\nafter catching any ``ServiceUnavailableError`` from the\nexecutor, so the route never bubbles a 5xx for a logical SQL\nfailure \u2014 it's still a 200 with ``status=fail`` so the caller\ncan show the message.\n\nInvariant (enforced by :func:`_check_error_when_fail`):\n``status == \"fail\" \u2192 error is not None and len(error) > 0``. Caps\nthe error string length so an upstream stack trace never blows up\na ``console.log`` line in the browser.",
+        "description": "Response shape for ``POST /v1/{ws}/functions/{name}/test``.\n\nStructural superset of :class:`InvokeResponse`. Adds ``status`` and\n``error`` so the DC can render the executor's failure detail inline\nrather than a generic \"Invocation failed.\" The underlying invoke\nuses the same path; ``status`` / ``error`` are filled in by\n``service.test`` after catching any ``ServiceUnavailableError`` from\nthe executor, so the route never bubbles a 5xx for a logical SQL\nfailure \u2014 it's still a 200 with ``status=fail`` so the caller can\nshow the message.\n\nInvariant (enforced by :func:`_check_error_when_fail`):\n``status == \"fail\" \u2192 error is not None and len(error) > 0``.",
         "properties": {
           "duration_ms": {
             "default": 0.0,
@@ -41409,10 +39732,6 @@
           },
           "status": {
             "default": "pass",
-            "enum": [
-              "pass",
-              "fail"
-            ],
             "title": "Status",
             "type": "string"
           },
@@ -41426,11 +39745,6 @@
               }
             ],
             "title": "Test Duration Ms"
-          },
-          "version": {
-            "default": 0,
-            "title": "Version",
-            "type": "integer"
           }
         },
         "title": "TestInvokeResponse",
@@ -44669,162 +42983,6 @@
         "title": "TurnToolCallStartedEvent",
         "type": "object"
       },
-      "UnificationRuleResponse": {
-        "properties": {
-          "accuracy": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accuracy"
-          },
-          "agent_task_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Agent Task Id"
-          },
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "created_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created By"
-          },
-          "data_source_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Source Id"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "events_processed": {
-            "title": "Events Processed",
-            "type": "integer"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "is_active": {
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "last_applied_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Applied At"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "rule_config": {
-            "additionalProperties": true,
-            "title": "Rule Config",
-            "type": "object"
-          },
-          "rule_type": {
-            "title": "Rule Type",
-            "type": "string"
-          },
-          "source_event_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Event Type"
-          },
-          "target_entity_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Entity Type"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "description",
-          "rule_type",
-          "data_source_id",
-          "source_event_type",
-          "target_entity_type",
-          "rule_config",
-          "accuracy",
-          "events_processed",
-          "last_applied_at",
-          "created_by",
-          "agent_task_id",
-          "is_active",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "UnificationRuleResponse",
-        "type": "object"
-      },
       "UpdateAgentRequest": {
         "properties": {
           "description": {
@@ -45431,95 +43589,6 @@
         "title": "UpdateIntegrationRequest",
         "type": "object"
       },
-      "UpdateMonitorConceptRequest": {
-        "properties": {
-          "agent_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AgentConfigPayload"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "description": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DescriptionString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "escalation": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EscalationConfigPayload"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "name": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NameString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "standalone_threshold": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Standalone Threshold"
-          },
-          "tags": {
-            "anyOf": [
-              {
-                "items": {
-                  "maxLength": 64,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "maxItems": 50,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tags"
-          },
-          "threshold": {
-            "anyOf": [
-              {
-                "maximum": 1.0,
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Threshold"
-          }
-        },
-        "title": "UpdateMonitorConceptRequest",
-        "type": "object"
-      },
       "UpdateOperatorRequest": {
         "properties": {
           "connection_method": {
@@ -45706,236 +43775,6 @@
           }
         },
         "title": "UpdatePersonaRequest",
-        "type": "object"
-      },
-      "UpdatePhoneNumberRequest": {
-        "properties": {
-          "capabilities": {
-            "anyOf": [
-              {
-                "items": {
-                  "enum": [
-                    "inbound",
-                    "outbound"
-                  ],
-                  "type": "string"
-                },
-                "maxItems": 4,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Capabilities"
-          },
-          "display_name": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Display Name"
-          },
-          "forwarding": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ForwardingConfigRequest"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "inbound_service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Inbound Service Id"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "provider": {
-            "anyOf": [
-              {
-                "enum": [
-                  "twilio",
-                  "livekit"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider"
-          },
-          "provider_phone_sid": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider Phone Sid"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "enum": [
-                  "active",
-                  "inactive"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          }
-        },
-        "title": "UpdatePhoneNumberRequest",
-        "type": "object"
-      },
-      "UpdateSafetyConfigRequest": {
-        "properties": {
-          "accumulation_cumulative_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Cumulative Count"
-          },
-          "accumulation_enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Enabled"
-          },
-          "accumulation_fast_track_level": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Fast Track Level"
-          },
-          "accumulation_mild_threshold": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Mild Threshold"
-          },
-          "accumulation_single_turn_threshold": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Single Turn Threshold"
-          },
-          "accumulation_window_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Accumulation Window Size"
-          },
-          "triage_enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Triage Enabled"
-          },
-          "triage_max_history_turns": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Triage Max History Turns"
-          },
-          "triage_model": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Triage Model"
-          },
-          "triage_timeout_s": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Triage Timeout S"
-          }
-        },
-        "title": "UpdateSafetyConfigRequest",
         "type": "object"
       },
       "UpdateSchedulingRuleSetRequest": {
@@ -46763,108 +44602,6 @@
           }
         },
         "title": "UpdateTriggerRequest",
-        "type": "object"
-      },
-      "UpdateUnificationRuleRequest": {
-        "properties": {
-          "data_source_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Data Source Id"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DescriptionString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "is_active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Active"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NameString"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "rule_config": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rule Config"
-          },
-          "rule_type": {
-            "anyOf": [
-              {
-                "enum": [
-                  "field_mapping",
-                  "entity_resolution",
-                  "dedup",
-                  "transform"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Rule Type"
-          },
-          "source_event_type": {
-            "anyOf": [
-              {
-                "maxLength": 128,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Event Type"
-          },
-          "target_entity_type": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Target Entity Type"
-          }
-        },
-        "title": "UpdateUnificationRuleRequest",
         "type": "object"
       },
       "UpdateWebhookDestinationRequest": {
@@ -55243,131 +52980,6 @@
           }
         },
         "summary": "Operator Performance Analytics",
-        "tags": [
-          "Analytics"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/analytics/safety-trends": {
-      "get": {
-        "description": "Safety and escalation trends \u2014 risk distribution, safety matches.",
-        "operationId": "get-safety-trends",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "days",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "maximum": 90,
-              "minimum": 1,
-              "title": "Days",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "date_from",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Date From"
-            }
-          },
-          {
-            "in": "query",
-            "name": "date_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Date To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "interval",
-            "required": false,
-            "schema": {
-              "default": "1d",
-              "enum": [
-                "1h",
-                "1d",
-                "1w"
-              ],
-              "title": "Interval",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "service_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 64,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyTrendsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limit exceeded"
-          }
-        },
-        "summary": "Safety Trends",
         "tags": [
           "Analytics"
         ]
@@ -64412,7 +62024,7 @@
     },
     "/v1/{workspace_id}/functions": {
       "get": {
-        "description": "List all registered platform functions.\n\nPermissions: authenticated (any role).",
+        "description": "List every platform function registered in the workspace.\n\nPermissions: ``Workspace.view`` (read role and above).",
         "operationId": "list-functions",
         "parameters": [
           {
@@ -64431,7 +62043,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FunctionListResponse"
+                  "$ref": "#/components/schemas/RegisteredFunctionListResponse"
                 }
               }
             },
@@ -64441,67 +62053,16 @@
             "description": "Rate limited"
           }
         },
-        "summary": "List registered functions",
-        "tags": [
-          "Functions"
-        ]
-      },
-      "post": {
-        "description": "Register a new platform function.\n\nThe function must already exist in Databricks Unity Catalog.\nThis endpoint registers it so agents can discover and call it.\n\nPermissions: admin, owner.",
-        "operationId": "create-function",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FunctionCreateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionDef"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "409": {
-            "description": "Function name already registered"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Register a new function",
+        "summary": "List every platform function registered in the workspace",
         "tags": [
           "Functions"
         ]
       }
     },
-    "/v1/{workspace_id}/functions/catalog": {
-      "get": {
-        "description": "Discover available functions from the Databricks UC catalog.\n\nQueries ``INFORMATION_SCHEMA.ROUTINES`` to find all functions with\na COMMENT clause. Shows which functions are already registered in\nthis workspace.\n\nPermissions: admin, owner.",
-        "operationId": "discover-catalog",
+    "/v1/{workspace_id}/functions/{function_name}": {
+      "delete": {
+        "description": "Remove a registered function row.\n\nPermissions: admin, owner.",
+        "operationId": "delete-function",
         "parameters": [
           {
             "in": "path",
@@ -64512,121 +62073,23 @@
               "title": "Workspace Id",
               "type": "string"
             }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CatalogResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
           },
-          "429": {
-            "description": "Rate limited"
-          },
-          "503": {
-            "description": "Agent engine unavailable"
-          }
-        },
-        "summary": "Discover functions from Databricks UC catalog",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/deploy": {
-      "post": {
-        "description": "Validate + register a new platform function version.\n\nAtomic: validation + INSERT + alias rebind happen in one\ntransaction. The next ``version`` is allocated server-side as\n``max(existing) + 1`` per ``(workspace, name)``; concurrent\ndeploys race-fail on the UNIQUE constraint and surface as 409.\n\nPermissions: admin, owner.",
-        "operationId": "deploy-function",
-        "parameters": [
           {
             "in": "path",
-            "name": "workspace_id",
+            "name": "function_name",
             "required": true,
             "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
+              "title": "Function Name",
               "type": "string"
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisteredFunction"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionVersionResponse"
-                }
-              }
-            },
+          "204": {
             "description": "Successful Response"
           },
-          "409": {
-            "description": "Concurrent deploy raced at the same version"
-          },
-          "422": {
-            "description": "Validation failure (read-only / bind / parity)"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Deploy (validate + register) a platform function",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/query": {
-      "post": {
-        "description": "Execute an open-scope read-only SQL query via agent-engine.\n\nThe SQL is validated to be read-only (SELECT/WITH only) and executed\non a Databricks serverless warehouse. Can query world model data\n(``lakebase_production.world.*``) and analytics (``billing.public.*``).\n\nPermissions: admin, owner (requires ``tools:test`` scope).",
-        "operationId": "query-functions",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/QueryRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/QueryResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
+          "404": {
+            "description": "Function not found"
           },
           "422": {
             "content": {
@@ -64640,98 +62103,16 @@
           },
           "429": {
             "description": "Rate limited"
-          },
-          "503": {
-            "description": "Agent engine unavailable"
           }
         },
-        "summary": "Execute an open-scope SQL query",
+        "summary": "Remove a registered platform function",
         "tags": [
           "Functions"
         ]
-      }
-    },
-    "/v1/{workspace_id}/functions/registered": {
+      },
       "get": {
-        "description": "List the ``latest`` version of every V109-registered function\nin the workspace.\n\nReturns one row per function (the alias-pinned latest version).\nThe Studio + SDK use this to render a workspace-wide directory of\ndeployed platform functions; the per-function ``/{name}/versions``\nendpoint returns history for a specific function.\n\nNote this is **distinct** from ``GET /v1/{ws}/functions``, which\nreads ``workspace.settings[\"functions\"]`` JSONB (pre-V109 shape).\nBoth paths co-exist; clients should prefer this one for\nV109-registered functions.\n\nPermissions: ``Workspace.view`` (read role and above).",
-        "operationId": "list-registered-functions",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionVersionListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "List latest version of every V109 platform function in the workspace",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/sync": {
-      "post": {
-        "description": "Auto-register all discovered catalog functions.\n\nDiscovers functions from ``INFORMATION_SCHEMA.ROUTINES`` and registers\nany that aren't already registered in this workspace. Functions with\na COMMENT become tools \u2014 the COMMENT is the tool description.\n\nPermissions: admin, owner.",
-        "operationId": "sync-catalog",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          },
-          "503": {
-            "description": "Agent engine unavailable"
-          }
-        },
-        "summary": "Auto-register all discovered catalog functions",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}": {
-      "delete": {
-        "description": "Remove a registered function.\n\nThis only removes the platform registration \u2014 the underlying\nDatabricks function is not affected.\n\nPermissions: admin, owner.",
-        "operationId": "delete-function",
+        "description": "Resolve a function by name.\n\nPermissions: ``Workspace.view`` (read role and above).",
+        "operationId": "get-function",
         "parameters": [
           {
             "in": "path",
@@ -64758,11 +62139,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Delete-Function",
-                  "type": "object"
+                  "$ref": "#/components/schemas/RegisteredFunctionResponse"
                 }
               }
             },
@@ -64785,7 +62162,67 @@
             "description": "Rate limited"
           }
         },
-        "summary": "Remove a registered function",
+        "summary": "Get a registered platform function by name",
+        "tags": [
+          "Functions"
+        ]
+      },
+      "put": {
+        "description": "Validate + upsert a platform function row.\n\nAtomic: validation + (python/udtf only) UC UDF materialization +\nupsert into ``platform.functions`` happen as one logical operation.\nRepeat deploys against the same ``(workspace, name)`` replace the\nrow in place and clear stale ``last_test_*`` telemetry.\n\nThe function name comes from the URL path; the request body's\n``name`` field must match or a 400 is raised. The URL is the\nauthoritative source.\n\nPermissions: admin, owner.",
+        "operationId": "deploy-function",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "function_name",
+            "required": true,
+            "schema": {
+              "title": "Function Name",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisteredFunction"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisteredFunctionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "URL function_name does not match body name"
+          },
+          "422": {
+            "description": "Validation failure (read-only / bind / parity)"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Deploy (validate + upsert) a platform function",
         "tags": [
           "Functions"
         ]
@@ -64793,7 +62230,7 @@
     },
     "/v1/{workspace_id}/functions/{function_name}/invoke": {
       "post": {
-        "description": "Execute a registered function and return its rows.\n\nBound parameters are validated against the version's stored\nschema; ``ws_id`` is auto-injected from the request context.\nReturns the executor's shaped response (``rows`` for\n``returns=table``, scalar value for ``returns=scalar``).\n\nPermissions: ``Workspace.view`` (read role and above). Read-only\nkeys are intentionally allowed here \u2014 invocation runs a stored,\npre-validated SELECT against catalogs the workspace SP already\nhas SELECT on; the gate on what can run is the deploy-time\nvalidator (read-only invariant), not the per-call permission.",
+        "description": "Execute a registered function and return its rows.\n\nBound parameters are validated against the stored schema; ``ws_id``\nis auto-injected from the request context. Returns the executor's\nshaped response (``rows`` for ``returns=table``, scalar value for\n``returns=scalar``).\n\nPermissions: ``Workspace.view`` (read role and above). Read-only\nkeys are intentionally allowed \u2014 invocation runs a stored,\npre-validated SELECT against catalogs the workspace SP already has\nSELECT on; the gate on what can run is the deploy-time validator\n(read-only invariant), not the per-call permission.",
         "operationId": "invoke-function",
         "parameters": [
           {
@@ -64850,145 +62287,7 @@
             "description": "Databricks SQL client unavailable"
           }
         },
-        "summary": "Execute a registered function",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}/promote": {
-      "post": {
-        "description": "Rebind an alias to an existing version.\n\nVerifies the version exists before rebinding.\n\nPermissions: admin, owner.",
-        "operationId": "promote-function",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "function_name",
-            "required": true,
-            "schema": {
-              "title": "Function Name",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PromoteRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PromoteResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Function or version not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Rebind an alias to a specific version",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}/rollback": {
-      "post": {
-        "description": "Rebind ``latest`` and ``production`` to a prior version.\n\nUsed when a new deploy was bad. ``staging`` stays untouched so\noperator can re-promote independently.\n\nPermissions: admin, owner.",
-        "operationId": "rollback-function",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "function_name",
-            "required": true,
-            "schema": {
-              "title": "Function Name",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RollbackRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RollbackResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Function or version not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Rebind latest + production to a prior version",
+        "summary": "Execute a registered platform function",
         "tags": [
           "Functions"
         ]
@@ -64996,80 +62295,8 @@
     },
     "/v1/{workspace_id}/functions/{function_name}/test": {
       "post": {
-        "description": "Test a registered function with sample input.\n\nProxies to agent-engine's internal tool test endpoint.\n\nPermissions: admin, owner (requires ``tools:test`` scope).",
+        "description": "Test invoke \u2014 same as invoke + persists last_test_* on the row.\n\nReturns 200 with ``status=\"fail\"`` + populated ``error`` on\nexecution failure (instead of a 5xx) so the DC has a single\nhappy-path rendering.\n\nPermissions: admin, owner.",
         "operationId": "test-function",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "function_name",
-            "required": true,
-            "schema": {
-              "title": "Function Name",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/FunctionTestRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionTestResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Function not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          },
-          "503": {
-            "description": "Agent engine unavailable"
-          }
-        },
-        "summary": "Test a function with sample input",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}/v2/test": {
-      "post": {
-        "description": "Test invoke \u2014 same as invoke + persists last_test_* on the version row.\n\nReturns :class:`TestInvokeResponse` so callers can render\n``status`` + ``error`` directly (the previous shape was\n:class:`InvokeResponse`, which silently dropped those fields and\nleft the DC showing a generic \"Invocation failed.\" even on the\ncatastrophic path).\n\nPermissions: admin, owner.",
-        "operationId": "test-function-v2",
         "parameters": [
           {
             "in": "path",
@@ -65132,140 +62359,7 @@
             "description": "Databricks SQL client unavailable"
           }
         },
-        "summary": "Test invoke + persist telemetry",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}/version": {
-      "get": {
-        "description": "Resolve (function_name, alias) \u2192 version row.\n\nPermissions: ``Workspace.view`` (read role and above).",
-        "operationId": "get-function-version",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "function_name",
-            "required": true,
-            "schema": {
-              "title": "Function Name",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "alias",
-            "required": false,
-            "schema": {
-              "default": "latest",
-              "enum": [
-                "latest",
-                "staging",
-                "production"
-              ],
-              "title": "Alias",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionVersionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Function not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Resolve (name, alias) \u2192 version row",
-        "tags": [
-          "Functions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/functions/{function_name}/versions": {
-      "get": {
-        "description": "List all versions of a registered function, newest first.\n\nPermissions: ``Workspace.view`` (read role and above).",
-        "operationId": "list-function-versions",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "function_name",
-            "required": true,
-            "schema": {
-              "title": "Function Name",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FunctionVersionListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Function not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "List all versions of a function",
+        "summary": "Test invoke + persist last_test_* telemetry on the row",
         "tags": [
           "Functions"
         ]
@@ -68928,312 +66022,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/monitor-concepts": {
-      "get": {
-        "description": "List monitor concepts for the workspace.",
-        "operationId": "list-monitor-concepts",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 20,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_MonitorConceptResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List monitor concepts",
-        "tags": [
-          "Monitor Concepts"
-        ]
-      },
-      "post": {
-        "description": "Create a semantic monitoring concept. The description is embedded for real-time conversation monitoring via ConversationMonitor.",
-        "operationId": "create-monitor-concept",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMonitorConceptRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MonitorConceptResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Create a monitor concept",
-        "tags": [
-          "Monitor Concepts"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/monitor-concepts/{concept_id}": {
-      "delete": {
-        "description": "Delete a monitor concept.",
-        "operationId": "delete-monitor-concept",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "concept_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Concept Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Monitor concept not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Delete a monitor concept",
-        "tags": [
-          "Monitor Concepts"
-        ]
-      },
-      "get": {
-        "description": "Retrieve a monitor concept by ID.",
-        "operationId": "get-monitor-concept",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "concept_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Concept Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MonitorConceptResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Monitor concept not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get a monitor concept",
-        "tags": [
-          "Monitor Concepts"
-        ]
-      },
-      "patch": {
-        "description": "Update a monitor concept's configuration or description.",
-        "operationId": "update-monitor-concept",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "concept_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Concept Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateMonitorConceptRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MonitorConceptResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Monitor concept not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Update a monitor concept",
-        "tags": [
-          "Monitor Concepts"
-        ]
-      }
-    },
     "/v1/{workspace_id}/network/egress-ips": {
       "get": {
         "description": "Get platform egress IP addresses for firewall allowlisting.\n\nReturns the static IP addresses used by all outbound traffic from the\nplatform. Customers should add these to their firewall allowlists to\nenable data source connectivity (EHR, CRM, FHIR stores, etc.).\n\nPermissions: authenticated (any role).",
@@ -70817,529 +67605,6 @@
         "summary": "Update a persona",
         "tags": [
           "Personas"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/phone-numbers": {
-      "get": {
-        "description": "List phone numbers for a workspace with pagination. Optionally filter by status. Requires `PhoneNumber.view` permission.",
-        "operationId": "list-phone-numbers",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "active",
-                    "inactive"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 20,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_PhoneNumberResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List phone numbers",
-        "tags": [
-          "Phone Numbers"
-        ]
-      },
-      "post": {
-        "description": "Register a new phone number in a workspace. Requires `PhoneNumber.create` permission.",
-        "operationId": "create-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePhoneNumberRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Workspace not found."
-          },
-          "409": {
-            "description": "Phone number already registered."
-          },
-          "422": {
-            "description": "Invalid request body."
-          }
-        },
-        "summary": "Create a phone number",
-        "tags": [
-          "Phone Numbers"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/phone-numbers/bind": {
-      "post": {
-        "description": "Register a channel-manager-provisioned phone number in this workspace. Looks up the phone from channel-manager by ID and persists the local binding row in platform.phone_numbers. Credential resolution at call time flows through ChannelManagerClient (Valkey-cached, see V108). Requires PhoneNumber.create permission.",
-        "operationId": "bind-channel-phone",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BindChannelPhoneRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Channel phone ID not found in channel-manager."
-          },
-          "409": {
-            "description": "Phone number already registered."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Channel manager not configured."
-          }
-        },
-        "summary": "Bind a channel-manager phone number",
-        "tags": [
-          "Phone Numbers"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/phone-numbers/{phone_number_id}": {
-      "delete": {
-        "description": "Delete a phone number. Requires `PhoneNumber.delete` permission.",
-        "operationId": "delete-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Delete a phone number",
-        "tags": [
-          "Phone Numbers"
-        ]
-      },
-      "get": {
-        "description": "Retrieve a phone number by ID. Requires `PhoneNumber.view` permission.",
-        "operationId": "get-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get a phone number",
-        "tags": [
-          "Phone Numbers"
-        ]
-      },
-      "put": {
-        "description": "Update a phone number's configuration. Requires `PhoneNumber.update` permission.",
-        "operationId": "update-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePhoneNumberRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "description": "Invalid request body."
-          }
-        },
-        "summary": "Update a phone number",
-        "tags": [
-          "Phone Numbers"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/phone-numbers/{phone_number_id}/forwarding": {
-      "delete": {
-        "description": "Remove call forwarding configuration from a phone number. Requires `PhoneNumber.update` permission.",
-        "operationId": "clear-phone-number-forwarding",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Clear call forwarding",
-        "tags": [
-          "Phone Numbers"
-        ]
-      },
-      "put": {
-        "description": "Configure call forwarding for a phone number. When enabled, the voice agent can transfer callers to the specified destination. Requires `PhoneNumber.update` permission.",
-        "operationId": "set-phone-number-forwarding",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ForwardingConfigRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "description": "Invalid forwarding config."
-          }
-        },
-        "summary": "Set call forwarding",
-        "tags": [
-          "Phone Numbers"
         ]
       }
     },
@@ -73947,269 +70212,6 @@
         "summary": "Release a claimed review item",
         "tags": [
           "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/safety/config": {
-      "get": {
-        "description": "Get the workspace safety policy configuration.",
-        "operationId": "get-safety-config",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyConfigResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          }
-        },
-        "summary": "Get safety policy config",
-        "tags": [
-          "Safety"
-        ]
-      },
-      "put": {
-        "description": "Upsert the workspace safety policy configuration.",
-        "operationId": "update-safety-config",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateSafetyConfigRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SafetyConfigResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Update safety policy config",
-        "tags": [
-          "Safety"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/safety/templates": {
-      "get": {
-        "description": "List all available regulation templates and composite templates.",
-        "operationId": "list-safety-templates",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/RegulationTemplateResponse"
-                  },
-                  "title": "Response List-Safety-Templates",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          }
-        },
-        "summary": "List regulation templates",
-        "tags": [
-          "Safety"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/safety/templates/{template_id}": {
-      "get": {
-        "description": "Get a regulation template by ID, including all rules.",
-        "operationId": "get-safety-template",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "title": "Template Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RegulationTemplateResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Template not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get a regulation template",
-        "tags": [
-          "Safety"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/safety/templates/{template_id}/apply": {
-      "post": {
-        "description": "Apply a regulation template to create monitor concepts for the workspace. Concepts matching existing names are skipped unless override_existing is set.",
-        "operationId": "apply-safety-template",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "maxLength": 128,
-              "title": "Template Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApplyTemplateRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApplyTemplateResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Template not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Apply regulation template",
-        "tags": [
-          "Safety"
         ]
       }
     },
@@ -81058,635 +77060,6 @@
         "summary": "List trigger execution history",
         "tags": [
           "Triggers"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/twilio/phone-numbers/available": {
-      "get": {
-        "description": "Search available phone numbers for purchase on this workspace's Twilio sub-account. Requires `PhoneNumber.create` permission.",
-        "operationId": "search-available-phone-numbers",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "country",
-            "required": false,
-            "schema": {
-              "default": "US",
-              "title": "Country",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "area_code",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Area Code"
-            }
-          },
-          {
-            "in": "query",
-            "name": "contains",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Contains"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SearchAvailableNumbersResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "No sub-account provisioned."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Search available phone numbers",
-        "tags": [
-          "Twilio"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/twilio/phone-numbers/purchase": {
-      "post": {
-        "description": "Purchase a phone number on this workspace's Twilio sub-account and register it. Requires `PhoneNumber.create` permission.",
-        "operationId": "purchase-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchasePhoneNumberRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PhoneNumberPurchaseResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "No sub-account provisioned."
-          },
-          "409": {
-            "description": "Phone number already registered."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Purchase a phone number",
-        "tags": [
-          "Twilio"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/twilio/phone-numbers/{phone_number_id}/release": {
-      "delete": {
-        "description": "Release a phone number back to Twilio and remove from workspace. Requires `PhoneNumber.delete` permission.",
-        "operationId": "release-phone-number",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "phone_number_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Phone Number Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Phone number not found."
-          },
-          "422": {
-            "description": "No provider SID on number."
-          }
-        },
-        "summary": "Release a phone number",
-        "tags": [
-          "Twilio"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/twilio/sub-account": {
-      "get": {
-        "description": "Retrieve the Twilio sub-account for this workspace. Requires `Workspace.view` permission.",
-        "operationId": "get-twilio-sub-account",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SubAccountResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "No sub-account provisioned."
-          }
-        },
-        "summary": "Get Twilio sub-account",
-        "tags": [
-          "Twilio"
-        ]
-      },
-      "post": {
-        "description": "Create a Twilio sub-account for this workspace with TwiML App. Idempotent \u2014 returns existing if already provisioned. Requires `Workspace.update` permission.",
-        "operationId": "provision-twilio-sub-account",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SubAccountResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Workspace not found."
-          },
-          "503": {
-            "description": "Twilio provisioning not configured."
-          }
-        },
-        "summary": "Provision Twilio sub-account",
-        "tags": [
-          "Twilio"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/unification-rules": {
-      "get": {
-        "description": "List unification rules with optional filtering by data source or active status.",
-        "operationId": "list-unification-rules",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "data_source_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Data Source Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "is_active",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Is Active"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 20,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_UnificationRuleResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List unification rules",
-        "tags": [
-          "Unification Rules"
-        ]
-      },
-      "post": {
-        "description": "Create a new data mapping rule. Can be scoped to a specific data source.",
-        "operationId": "create-unification-rule",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUnificationRuleRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnificationRuleResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "422": {
-            "description": "Invalid data_source_id reference."
-          }
-        },
-        "summary": "Create a unification rule",
-        "tags": [
-          "Unification Rules"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/unification-rules/{rule_id}": {
-      "delete": {
-        "description": "Delete a unification rule.",
-        "operationId": "delete-unification-rule",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "rule_id",
-            "required": true,
-            "schema": {
-              "title": "Rule Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Unification rule not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Delete a unification rule",
-        "tags": [
-          "Unification Rules"
-        ]
-      },
-      "get": {
-        "description": "Retrieve a unification rule by ID.",
-        "operationId": "get-unification-rule",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "rule_id",
-            "required": true,
-            "schema": {
-              "title": "Rule Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnificationRuleResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Unification rule not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get a unification rule",
-        "tags": [
-          "Unification Rules"
-        ]
-      },
-      "patch": {
-        "description": "Update a unification rule's configuration.",
-        "operationId": "update-unification-rule",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "rule_id",
-            "required": true,
-            "schema": {
-              "title": "Rule Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUnificationRuleRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UnificationRuleResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "404": {
-            "description": "Unification rule not found."
-          },
-          "422": {
-            "description": "Invalid data_source_id reference."
-          }
-        },
-        "summary": "Update a unification rule",
-        "tags": [
-          "Unification Rules"
         ]
       }
     },

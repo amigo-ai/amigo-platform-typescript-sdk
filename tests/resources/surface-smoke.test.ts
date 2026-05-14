@@ -94,14 +94,6 @@ describe('resource surface smoke tests', () => {
     await client.personas.update('persona-001', EMPTY_BODY)
     await client.personas.delete('persona-001')
 
-    await client.phoneNumbers.provision(EMPTY_BODY)
-    await client.phoneNumbers.list({ limit: 5 })
-    await client.phoneNumbers.get('phone-001')
-    await client.phoneNumbers.update('phone-001', EMPTY_BODY)
-    await client.phoneNumbers.release('phone-001')
-    await client.phoneNumbers.setForwarding('phone-001', EMPTY_BODY)
-    await client.phoneNumbers.clearForwarding('phone-001')
-
     await client.recordings.getUrls('call-001')
     await client.recordings.getMetadata('call-001')
     await client.recordings.download('call-001', 'audio.wav')
@@ -112,12 +104,6 @@ describe('resource surface smoke tests', () => {
     await client.audit.createExport(EMPTY_BODY)
     await client.audit.listExports()
     await client.audit.getEntityAccessLog('entity-001', { limit: 5 })
-
-    await client.safety.getConfig()
-    await client.safety.updateConfig(EMPTY_BODY)
-    await client.safety.listTemplates()
-    await client.safety.getTemplate('template-001')
-    await client.safety.applyTemplate('template-001', EMPTY_BODY)
 
     await client.compliance.getDashboard()
     await client.compliance.getHipaa({ report_period_days: 30 })
@@ -164,12 +150,11 @@ describe('resource surface smoke tests', () => {
     await client.webhookDestinations.rotateSecret('dest-001')
 
     await client.functions.list()
-    await client.functions.create(EMPTY_BODY)
+    await client.functions.get('lookup_patient')
+    await client.functions.deploy('lookup_patient', EMPTY_BODY)
     await client.functions.delete('lookup_patient')
+    await client.functions.invoke('lookup_patient', EMPTY_BODY)
     await client.functions.test('lookup_patient', EMPTY_BODY)
-    await client.functions.getCatalog()
-    await client.functions.query(EMPTY_BODY)
-    await client.functions.sync()
 
     await client.world.listEntities({ limit: 5, q: 'Jane' })
     await client.world.getEntity('entity-001')
