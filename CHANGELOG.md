@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.54.0] - 2026-05-14
+
+### Improvements
+
+- Remove retired safety and unification resources (#249)
+
 ## [0.53.0] - 2026-05-14
 
 ### Maintenance
