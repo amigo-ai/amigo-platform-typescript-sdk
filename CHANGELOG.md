@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.55.0] - 2026-05-14
+
+### Maintenance
+
+- remove CRM SDK resource (#250)
+
 ## [0.54.0] - 2026-05-14
 
 ### Improvements
