@@ -882,6 +882,86 @@
         "title": "ActiveSession",
         "type": "object"
       },
+      "AddColumnAction": {
+        "properties": {
+          "column": {
+            "$ref": "#/components/schemas/src__routes__workspace_tables__update_workspace_table__Request__Column"
+          },
+          "op": {
+            "const": "add_column",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "column"
+        ],
+        "title": "AddColumnAction",
+        "type": "object"
+      },
+      "AddIndexAction": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierString"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "index_name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "add_index",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "index_name",
+          "columns"
+        ],
+        "title": "AddIndexAction",
+        "type": "object"
+      },
+      "AddUniqueAction": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierString"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "constraint_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/IdentifierString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "op": {
+            "const": "add_unique",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "columns"
+        ],
+        "title": "AddUniqueAction",
+        "type": "object"
+      },
       "AgentAnalyticsEntry": {
         "properties": {
           "agent_id": {
@@ -5618,6 +5698,28 @@
         "title": "CategoricalMetricValueResponse",
         "type": "object"
       },
+      "ChangeColumnTypeAction": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "new_type": {
+            "$ref": "#/components/schemas/ColumnType"
+          },
+          "op": {
+            "const": "change_column_type",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name",
+          "new_type"
+        ],
+        "title": "ChangeColumnTypeAction",
+        "type": "object"
+      },
       "ChannelEmailBouncedEvent": {
         "properties": {
           "bounce_subtype": {
@@ -6911,6 +7013,43 @@
         "title": "CollectionField",
         "type": "object"
       },
+      "Column-Output": {
+        "properties": {
+          "data_type": {
+            "description": "Postgres-side type as reported by ``information_schema.columns``\n(e.g. ``uuid``, ``text``, ``timestamp with time zone``).",
+            "title": "Data Type",
+            "type": "string"
+          },
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Postgres-side default expression text, or NULL if no DEFAULT.",
+            "title": "Default"
+          },
+          "is_nullable": {
+            "title": "Is Nullable",
+            "type": "boolean"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "data_type",
+          "is_nullable",
+          "default"
+        ],
+        "title": "Column",
+        "type": "object"
+      },
       "ColumnInfo": {
         "properties": {
           "column_name": {
@@ -6939,6 +7078,22 @@
         ],
         "title": "ColumnInfo",
         "type": "object"
+      },
+      "ColumnType": {
+        "enum": [
+          "text",
+          "int",
+          "bigint",
+          "numeric",
+          "boolean",
+          "uuid",
+          "timestamptz",
+          "date",
+          "time",
+          "jsonb",
+          "bytea"
+        ],
+        "type": "string"
       },
       "ColumnsResponse": {
         "properties": {
@@ -7741,6 +7896,25 @@
           "connectors"
         ],
         "title": "ConnectorSettingsResponse",
+        "type": "object"
+      },
+      "Constraint": {
+        "properties": {
+          "definition": {
+            "description": "``pg_get_constraintdef(oid)`` \u2014 the postgres-rendered definition.",
+            "title": "Definition",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "definition"
+        ],
+        "title": "Constraint",
         "type": "object"
       },
       "ContentPartPayload": {
@@ -14393,6 +14567,78 @@
           "verified"
         ],
         "title": "DnsRecordResponse",
+        "type": "object"
+      },
+      "DropColumnAction": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "drop_column",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name"
+        ],
+        "title": "DropColumnAction",
+        "type": "object"
+      },
+      "DropColumnDefaultAction": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "drop_column_default",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name"
+        ],
+        "title": "DropColumnDefaultAction",
+        "type": "object"
+      },
+      "DropConstraintAction": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "drop_constraint",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name"
+        ],
+        "title": "DropConstraintAction",
+        "type": "object"
+      },
+      "DropIndexAction": {
+        "properties": {
+          "index_name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "drop_index",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "index_name"
+        ],
+        "title": "DropIndexAction",
         "type": "object"
       },
       "EgressIpsResponse": {
@@ -22069,6 +22315,12 @@
         "title": "HumanSegment",
         "type": "object"
       },
+      "IdentifierString": {
+        "maxLength": 63,
+        "minLength": 1,
+        "pattern": "^[a-z][a-z0-9_]{0,62}$",
+        "type": "string"
+      },
       "Identity": {
         "properties": {
           "default_spoken_language": {
@@ -22153,6 +22405,43 @@
           }
         },
         "title": "IdentityMetrics",
+        "type": "object"
+      },
+      "Index-Input": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/IdentifierString"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          }
+        },
+        "required": [
+          "columns"
+        ],
+        "title": "Index",
+        "type": "object"
+      },
+      "Index-Output": {
+        "properties": {
+          "definition": {
+            "description": "``pg_indexes.indexdef`` \u2014 the full CREATE INDEX statement.",
+            "title": "Definition",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "definition"
+        ],
+        "title": "Index",
         "type": "object"
       },
       "InjectRequest": {
@@ -23297,6 +23586,42 @@
           }
         },
         "title": "InvokeResponse",
+        "type": "object"
+      },
+      "Item": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "physical_name": {
+            "title": "Physical Name",
+            "type": "string"
+          },
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "table_name",
+          "physical_name",
+          "created_at"
+        ],
+        "title": "Item",
         "type": "object"
       },
       "JoinCallRequest": {
@@ -32669,6 +32994,28 @@
         "title": "RelationshipToDeveloper",
         "type": "object"
       },
+      "RenameColumnAction": {
+        "properties": {
+          "from": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "rename_column",
+            "title": "Op",
+            "type": "string"
+          },
+          "to": {
+            "$ref": "#/components/schemas/IdentifierString"
+          }
+        },
+        "required": [
+          "op",
+          "from",
+          "to"
+        ],
+        "title": "RenameColumnAction",
+        "type": "object"
+      },
       "RequestTransform": {
         "description": "Transforms outbound request body before sending to the integration endpoint.\n\nApplied after path-param substitution and auth-header resolution, right\nbefore the HTTP call.  Mirror of the response-side pipeline\n(``response_filter`` / ``result_key`` / ``result_template``).\n\nInject targets the **outermost** dict: when combined with\n``wrap_params_key``, injected fields sit alongside the wrapper key,\nnever inside the wrapped sub-dict.",
         "properties": {
@@ -34364,35 +34711,6 @@
         "title": "SecretInput",
         "type": "object"
       },
-      "SecuritySettingsRequest": {
-        "description": "Partial update \u2014 only provided fields are changed.",
-        "properties": {
-          "voice_auth_enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Voice Auth Enabled"
-          }
-        },
-        "title": "SecuritySettingsRequest",
-        "type": "object"
-      },
-      "SecuritySettingsResponse": {
-        "properties": {
-          "voice_auth_enabled": {
-            "default": false,
-            "title": "Voice Auth Enabled",
-            "type": "boolean"
-          }
-        },
-        "title": "SecuritySettingsResponse",
-        "type": "object"
-      },
       "SendGuidanceRequest": {
         "properties": {
           "call_sid": {
@@ -35848,6 +36166,51 @@
           "idle_seconds"
         ],
         "title": "SessionStatusResponse",
+        "type": "object"
+      },
+      "SetColumnDefaultAction": {
+        "properties": {
+          "default": {
+            "$ref": "#/components/schemas/src__routes__workspace_tables__update_workspace_table__Request__Default"
+          },
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "op": {
+            "const": "set_column_default",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name",
+          "default"
+        ],
+        "title": "SetColumnDefaultAction",
+        "type": "object"
+      },
+      "SetColumnNullableAction": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "nullable": {
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "op": {
+            "const": "set_column_nullable",
+            "title": "Op",
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "name",
+          "nullable"
+        ],
+        "title": "SetColumnNullableAction",
         "type": "object"
       },
       "SignalResponseAlignment": {
@@ -43910,7 +44273,7 @@
           "context": {
             "anyOf": [
               {
-                "maxLength": 5000,
+                "maxLength": 100000,
                 "type": "string"
               },
               {
@@ -50297,6 +50660,452 @@
           "service_id"
         ],
         "title": "CreateSessionRequest",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__create_workspace_table__Request": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/src__routes__workspace_tables__create_workspace_table__Request__Column"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Columns",
+            "type": "array"
+          },
+          "indexes": {
+            "items": {
+              "$ref": "#/components/schemas/Index-Input"
+            },
+            "title": "Indexes",
+            "type": "array"
+          },
+          "primary_key": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/IdentifierString"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Primary Key"
+          },
+          "table_name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "unique": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/IdentifierString"
+              },
+              "maxItems": 32,
+              "minItems": 1,
+              "type": "array"
+            },
+            "title": "Unique",
+            "type": "array"
+          }
+        },
+        "required": [
+          "table_name",
+          "columns"
+        ],
+        "title": "Request",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__create_workspace_table__Request__Column": {
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/src__routes__workspace_tables__create_workspace_table__Request__Default"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ColumnType"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "Column",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__create_workspace_table__Request__Default": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "literal",
+              "uuid_v4",
+              "now",
+              "current_date"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Only meaningful for ``kind=\"literal\"``. Other kinds ignore it.",
+            "title": "Value"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Default",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__create_workspace_table__Response": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "physical_name": {
+            "title": "Physical Name",
+            "type": "string"
+          },
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "table_name",
+          "physical_name"
+        ],
+        "title": "Response",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__execute_workspace_query__Request": {
+        "properties": {
+          "sql": {
+            "description": "One SQL statement: SELECT / WITH ... SELECT / INSERT / UPDATE /\nDELETE. Multi-statement, DDL, and session-state commands (SET ROLE,\nRESET, SET SESSION AUTHORIZATION) reject with 400. ``pg_*``\nfunction calls reject with 400.",
+            "maxLength": 16384,
+            "minLength": 1,
+            "title": "Sql",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sql"
+        ],
+        "title": "Request",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__execute_workspace_query__Response": {
+        "properties": {
+          "columns": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "row_count": {
+            "title": "Row Count",
+            "type": "integer"
+          },
+          "rows": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "columns",
+          "rows",
+          "row_count"
+        ],
+        "title": "Response",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__get_workspace_table__Response": {
+        "properties": {
+          "columns": {
+            "items": {
+              "$ref": "#/components/schemas/Column-Output"
+            },
+            "title": "Columns",
+            "type": "array"
+          },
+          "constraints": {
+            "items": {
+              "$ref": "#/components/schemas/Constraint"
+            },
+            "title": "Constraints",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "indexes": {
+            "items": {
+              "$ref": "#/components/schemas/Index-Output"
+            },
+            "title": "Indexes",
+            "type": "array"
+          },
+          "physical_name": {
+            "title": "Physical Name",
+            "type": "string"
+          },
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "table_name",
+          "physical_name",
+          "created_at",
+          "columns",
+          "indexes",
+          "constraints"
+        ],
+        "title": "Response",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__list_workspace_tables__Response": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "Response",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__update_workspace_table__Request": {
+        "properties": {
+          "actions": {
+            "items": {
+              "discriminator": {
+                "mapping": {
+                  "add_column": "#/components/schemas/AddColumnAction",
+                  "add_index": "#/components/schemas/AddIndexAction",
+                  "add_unique": "#/components/schemas/AddUniqueAction",
+                  "change_column_type": "#/components/schemas/ChangeColumnTypeAction",
+                  "drop_column": "#/components/schemas/DropColumnAction",
+                  "drop_column_default": "#/components/schemas/DropColumnDefaultAction",
+                  "drop_constraint": "#/components/schemas/DropConstraintAction",
+                  "drop_index": "#/components/schemas/DropIndexAction",
+                  "rename_column": "#/components/schemas/RenameColumnAction",
+                  "set_column_default": "#/components/schemas/SetColumnDefaultAction",
+                  "set_column_nullable": "#/components/schemas/SetColumnNullableAction"
+                },
+                "propertyName": "op"
+              },
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/AddColumnAction"
+                },
+                {
+                  "$ref": "#/components/schemas/DropColumnAction"
+                },
+                {
+                  "$ref": "#/components/schemas/RenameColumnAction"
+                },
+                {
+                  "$ref": "#/components/schemas/ChangeColumnTypeAction"
+                },
+                {
+                  "$ref": "#/components/schemas/SetColumnNullableAction"
+                },
+                {
+                  "$ref": "#/components/schemas/SetColumnDefaultAction"
+                },
+                {
+                  "$ref": "#/components/schemas/DropColumnDefaultAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AddUniqueAction"
+                },
+                {
+                  "$ref": "#/components/schemas/DropConstraintAction"
+                },
+                {
+                  "$ref": "#/components/schemas/AddIndexAction"
+                },
+                {
+                  "$ref": "#/components/schemas/DropIndexAction"
+                }
+              ]
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Actions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "actions"
+        ],
+        "title": "Request",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__update_workspace_table__Request__Column": {
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/src__routes__workspace_tables__update_workspace_table__Request__Default"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "$ref": "#/components/schemas/IdentifierString"
+          },
+          "nullable": {
+            "default": true,
+            "title": "Nullable",
+            "type": "boolean"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ColumnType"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "Column",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__update_workspace_table__Request__Default": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "literal",
+              "uuid_v4",
+              "now",
+              "current_date"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "Default",
+        "type": "object"
+      },
+      "src__routes__workspace_tables__update_workspace_table__Response": {
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "physical_name": {
+            "title": "Physical Name",
+            "type": "string"
+          },
+          "table_name": {
+            "title": "Table Name",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "table_name",
+          "physical_name"
+        ],
+        "title": "Response",
         "type": "object"
       }
     },
@@ -71504,6 +72313,59 @@
         ]
       }
     },
+    "/v1/{workspace_id}/query": {
+      "post": {
+        "operationId": "execute-workspace-query",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/src__routes__workspace_tables__execute_workspace_query__Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__routes__workspace_tables__execute_workspace_query__Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Execute Workspace Query",
+        "tags": [
+          "Workspace Tables"
+        ]
+      }
+    },
     "/v1/{workspace_id}/query/{schema}/{table}": {
       "get": {
         "description": "Query a table with PostgREST-style filtering, sorting, and pagination.",
@@ -75744,94 +76606,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/settings/security": {
-      "get": {
-        "description": "Get workspace security settings.\n\nPermissions: authenticated (any role).",
-        "operationId": "get-security-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SecuritySettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Get workspace security settings",
-        "tags": [
-          "Settings"
-        ]
-      },
-      "put": {
-        "description": "Update workspace security settings.\n\nPermissions: admin, owner.",
-        "operationId": "update-security-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SecuritySettingsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SecuritySettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace not found"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Update workspace security settings",
-        "tags": [
-          "Settings"
-        ]
-      }
-    },
     "/v1/{workspace_id}/settings/voice": {
       "get": {
         "description": "Get the voice experience settings for a workspace.\n\nReturns voice identity, domain vocabulary, and post-call intelligence\nconfiguration. These settings shape how the AI agent sounds and what\ndomain-specific terms it recognizes accurately.\n\n#### Permissions\n* Requires authenticated API key (any role).",
@@ -79210,6 +79984,253 @@
         "summary": "Create new surface with only unfilled fields",
         "tags": [
           "Surfaces"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/tables": {
+      "get": {
+        "operationId": "list-workspace-tables",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__routes__workspace_tables__list_workspace_tables__Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Workspace Tables",
+        "tags": [
+          "Workspace Tables"
+        ]
+      },
+      "post": {
+        "operationId": "create-workspace-table",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/src__routes__workspace_tables__create_workspace_table__Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__routes__workspace_tables__create_workspace_table__Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Workspace Table",
+        "tags": [
+          "Workspace Tables"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/tables/{table_id}": {
+      "delete": {
+        "operationId": "delete-workspace-table",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "table_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Table Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Workspace Table",
+        "tags": [
+          "Workspace Tables"
+        ]
+      },
+      "get": {
+        "operationId": "get-workspace-table",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "table_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Table Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__routes__workspace_tables__get_workspace_table__Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Workspace Table",
+        "tags": [
+          "Workspace Tables"
+        ]
+      },
+      "patch": {
+        "operationId": "update-workspace-table",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "table_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Table Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/src__routes__workspace_tables__update_workspace_table__Request"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/src__routes__workspace_tables__update_workspace_table__Response"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Workspace Table",
+        "tags": [
+          "Workspace Tables"
         ]
       }
     },

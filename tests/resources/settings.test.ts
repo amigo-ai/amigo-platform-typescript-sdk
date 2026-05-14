@@ -37,10 +37,6 @@ const MEMORY_SETTINGS_FIXTURE = {
   dimensions: [{ name: 'preferences', enabled: true }],
 }
 
-const SECURITY_FIXTURE = {
-  voice_auth_enabled: true,
-}
-
 const RETENTION_FIXTURE = {
   call_recordings_days: 365,
   call_transcripts_days: 730,
@@ -107,10 +103,6 @@ const client = new AmigoClient({
 
     [`PUT ${BASE}/settings/memory`]: () =>
       Response.json({ ...MEMORY_SETTINGS_FIXTURE, backfill_requested: true }),
-
-    [`GET ${BASE}/settings/security`]: () => Response.json(SECURITY_FIXTURE),
-
-    [`PUT ${BASE}/settings/security`]: () => Response.json({ voice_auth_enabled: false }),
 
     [`GET ${BASE}/settings/retention`]: () => Response.json(RETENTION_FIXTURE),
 
@@ -187,18 +179,6 @@ describe('SettingsResource', () => {
     it('updates memory settings', async () => {
       const result = await client.settings.memory.update({ backfill_requested: true } as never)
       expect(result.backfill_requested).toBe(true)
-    })
-  })
-
-  describe('security', () => {
-    it('gets security settings', async () => {
-      const result = await client.settings.security.get()
-      expect(result.voice_auth_enabled).toBe(true)
-    })
-
-    it('updates security settings', async () => {
-      const result = await client.settings.security.update({ voice_auth_enabled: false } as never)
-      expect(result.voice_auth_enabled).toBe(false)
     })
   })
 

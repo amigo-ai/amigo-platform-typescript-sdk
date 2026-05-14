@@ -5158,6 +5158,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Execute Workspace Query */
+        post: operations["execute-workspace-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/query/{schema}/{table}": {
         parameters: {
             query?: never;
@@ -6378,34 +6395,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/security": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get workspace security settings
-         * @description Get workspace security settings.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-security-settings"];
-        /**
-         * Update workspace security settings
-         * @description Update workspace security settings.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-security-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/voice": {
         parameters: {
             query?: never;
@@ -7340,6 +7329,43 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Workspace Tables */
+        get: operations["list-workspace-tables"];
+        put?: never;
+        /** Create Workspace Table */
+        post: operations["create-workspace-table"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/tables/{table_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workspace Table */
+        get: operations["get-workspace-table"];
+        put?: never;
+        post?: never;
+        /** Delete Workspace Table */
+        delete: operations["delete-workspace-table"];
+        options?: never;
+        head?: never;
+        /** Update Workspace Table */
+        patch: operations["update-workspace-table"];
         trace?: never;
     };
     "/v1/{workspace_id}/tasks/by-call/{call_sid}": {
@@ -8729,6 +8755,37 @@ export interface components {
             service_id?: string | null;
             /** Workspace Id */
             workspace_id?: string | null;
+        };
+        /** AddColumnAction */
+        AddColumnAction: {
+            column: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Column"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "add_column";
+        };
+        /** AddIndexAction */
+        AddIndexAction: {
+            /** Columns */
+            columns: components["schemas"]["IdentifierString"][];
+            index_name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "add_index";
+        };
+        /** AddUniqueAction */
+        AddUniqueAction: {
+            /** Columns */
+            columns: components["schemas"]["IdentifierString"][];
+            constraint_name?: components["schemas"]["IdentifierString"] | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "add_unique";
         };
         /** AgentAnalyticsEntry */
         AgentAnalyticsEntry: {
@@ -10506,6 +10563,16 @@ export interface components {
             /** Value */
             value: string | null;
         };
+        /** ChangeColumnTypeAction */
+        ChangeColumnTypeAction: {
+            name: components["schemas"]["IdentifierString"];
+            new_type: components["schemas"]["ColumnType"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "change_column_type";
+        };
         /** ChannelEmailBouncedEvent */
         ChannelEmailBouncedEvent: {
             /**
@@ -11050,6 +11117,24 @@ export interface components {
             /** Validation */
             validation?: string | null;
         };
+        /** Column */
+        "Column-Output": {
+            /**
+             * Data Type
+             * @description Postgres-side type as reported by ``information_schema.columns``
+             *     (e.g. ``uuid``, ``text``, ``timestamp with time zone``).
+             */
+            data_type: string;
+            /**
+             * Default
+             * @description Postgres-side default expression text, or NULL if no DEFAULT.
+             */
+            default: string | null;
+            /** Is Nullable */
+            is_nullable: boolean;
+            /** Name */
+            name: string;
+        };
         /** ColumnInfo */
         ColumnInfo: {
             /** Column Name */
@@ -11059,6 +11144,8 @@ export interface components {
             /** Data Type */
             data_type: string;
         };
+        /** @enum {string} */
+        ColumnType: "text" | "int" | "bigint" | "numeric" | "boolean" | "uuid" | "timestamptz" | "date" | "time" | "jsonb" | "bytea";
         /** ColumnsResponse */
         ColumnsResponse: {
             /** Count */
@@ -11438,6 +11525,16 @@ export interface components {
         ConnectorSettingsResponse: {
             /** Connectors */
             connectors: components["schemas"]["ConnectorDef"][];
+        };
+        /** Constraint */
+        Constraint: {
+            /**
+             * Definition
+             * @description ``pg_get_constraintdef(oid)`` — the postgres-rendered definition.
+             */
+            definition: string;
+            /** Name */
+            name: string;
         };
         /**
          * ContentPartPayload
@@ -14079,6 +14176,42 @@ export interface components {
              * @description Whether the live DNS lookup at the time of the GET found the entry.
              */
             verified: boolean;
+        };
+        /** DropColumnAction */
+        DropColumnAction: {
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "drop_column";
+        };
+        /** DropColumnDefaultAction */
+        DropColumnDefaultAction: {
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "drop_column_default";
+        };
+        /** DropConstraintAction */
+        DropConstraintAction: {
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "drop_constraint";
+        };
+        /** DropIndexAction */
+        DropIndexAction: {
+            index_name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "drop_index";
         };
         /** EgressIpsResponse */
         EgressIpsResponse: {
@@ -17070,6 +17203,7 @@ export interface components {
             /** Transcript */
             transcript: string;
         };
+        IdentifierString: string;
         /** Identity */
         Identity: {
             /** Default Spoken Language */
@@ -17097,6 +17231,21 @@ export interface components {
             locked_accounts?: number | null;
             /** Mfa Coverage Pct */
             mfa_coverage_pct?: number | null;
+        };
+        /** Index */
+        "Index-Input": {
+            /** Columns */
+            columns: components["schemas"]["IdentifierString"][];
+        };
+        /** Index */
+        "Index-Output": {
+            /**
+             * Definition
+             * @description ``pg_indexes.indexdef`` — the full CREATE INDEX statement.
+             */
+            definition: string;
+            /** Name */
+            name: string;
         };
         /** InjectRequest */
         InjectRequest: {
@@ -17714,6 +17863,28 @@ export interface components {
              * @default 0
              */
             version?: number;
+        };
+        /** Item */
+        Item: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Physical Name */
+            physical_name: string;
+            /** Table Name */
+            table_name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /**
          * JoinCallRequest
@@ -21558,6 +21729,16 @@ export interface components {
             /** Type */
             type: string;
         };
+        /** RenameColumnAction */
+        RenameColumnAction: {
+            from: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "rename_column";
+            to: components["schemas"]["IdentifierString"];
+        };
         /**
          * RequestTransform
          * @description Transforms outbound request body before sending to the integration endpoint.
@@ -22374,22 +22555,6 @@ export interface components {
             /** Value */
             value: string;
         };
-        /**
-         * SecuritySettingsRequest
-         * @description Partial update — only provided fields are changed.
-         */
-        SecuritySettingsRequest: {
-            /** Voice Auth Enabled */
-            voice_auth_enabled?: boolean | null;
-        };
-        /** SecuritySettingsResponse */
-        SecuritySettingsResponse: {
-            /**
-             * Voice Auth Enabled
-             * @default false
-             */
-            voice_auth_enabled?: boolean;
-        };
         /** SendGuidanceRequest */
         SendGuidanceRequest: {
             /** Call Sid */
@@ -22987,6 +23152,27 @@ export interface components {
             idle_seconds: number;
             /** Session Id */
             session_id: string;
+        };
+        /** SetColumnDefaultAction */
+        SetColumnDefaultAction: {
+            default: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"];
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "set_column_default";
+        };
+        /** SetColumnNullableAction */
+        SetColumnNullableAction: {
+            name: components["schemas"]["IdentifierString"];
+            /** Nullable */
+            nullable: boolean;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            op: "set_column_nullable";
         };
         /**
          * SignalResponseAlignment
@@ -28619,6 +28805,157 @@ export interface components {
             service_id: string;
             /** Tags */
             tags?: string[];
+        };
+        /** Request */
+        src__routes__workspace_tables__create_workspace_table__Request: {
+            /** Columns */
+            columns: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Column"][];
+            /** Indexes */
+            indexes?: components["schemas"]["Index-Input"][];
+            /** Primary Key */
+            primary_key?: components["schemas"]["IdentifierString"][] | null;
+            table_name: components["schemas"]["IdentifierString"];
+            /** Unique */
+            unique?: components["schemas"]["IdentifierString"][][];
+        };
+        /** Column */
+        src__routes__workspace_tables__create_workspace_table__Request__Column: {
+            default?: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Default"] | null;
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * Nullable
+             * @default true
+             */
+            nullable?: boolean;
+            type: components["schemas"]["ColumnType"];
+        };
+        /** Default */
+        src__routes__workspace_tables__create_workspace_table__Request__Default: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "literal" | "uuid_v4" | "now" | "current_date";
+            /**
+             * Value
+             * @description Only meaningful for ``kind="literal"``. Other kinds ignore it.
+             */
+            value?: string | number | boolean | null;
+        };
+        /** Response */
+        src__routes__workspace_tables__create_workspace_table__Response: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Physical Name */
+            physical_name: string;
+            /** Table Name */
+            table_name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** Request */
+        src__routes__workspace_tables__execute_workspace_query__Request: {
+            /**
+             * Sql
+             * @description One SQL statement: SELECT / WITH ... SELECT / INSERT / UPDATE /
+             *     DELETE. Multi-statement, DDL, and session-state commands (SET ROLE,
+             *     RESET, SET SESSION AUTHORIZATION) reject with 400. ``pg_*``
+             *     function calls reject with 400.
+             */
+            sql: string;
+        };
+        /** Response */
+        src__routes__workspace_tables__execute_workspace_query__Response: {
+            /** Columns */
+            columns: string[];
+            /** Row Count */
+            row_count: number;
+            /** Rows */
+            rows: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** Response */
+        src__routes__workspace_tables__get_workspace_table__Response: {
+            /** Columns */
+            columns: components["schemas"]["Column-Output"][];
+            /** Constraints */
+            constraints: components["schemas"]["Constraint"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Indexes */
+            indexes: components["schemas"]["Index-Output"][];
+            /** Physical Name */
+            physical_name: string;
+            /** Table Name */
+            table_name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** Response */
+        src__routes__workspace_tables__list_workspace_tables__Response: {
+            /** Items */
+            items: components["schemas"]["Item"][];
+        };
+        /** Request */
+        src__routes__workspace_tables__update_workspace_table__Request: {
+            /** Actions */
+            actions: (components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"])[];
+        };
+        /** Column */
+        src__routes__workspace_tables__update_workspace_table__Request__Column: {
+            default?: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"] | null;
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * Nullable
+             * @default true
+             */
+            nullable?: boolean;
+            type: components["schemas"]["ColumnType"];
+        };
+        /** Default */
+        src__routes__workspace_tables__update_workspace_table__Request__Default: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "literal" | "uuid_v4" | "now" | "current_date";
+            /** Value */
+            value?: string | number | boolean | null;
+        };
+        /** Response */
+        src__routes__workspace_tables__update_workspace_table__Response: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Physical Name */
+            physical_name: string;
+            /** Table Name */
+            table_name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
     };
     responses: never;
@@ -40780,6 +41117,41 @@ export interface operations {
             };
         };
     };
+    "execute-workspace-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_tables__execute_workspace_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_tables__execute_workspace_query__Response"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     query_table_v1__workspace_id__query__schema___table__get: {
         parameters: {
             query?: {
@@ -43660,82 +44032,6 @@ export interface operations {
             };
         };
     };
-    "get-security-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SecuritySettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-security-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["SecuritySettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SecuritySettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-voice-settings": {
         parameters: {
             query?: never;
@@ -45953,6 +46249,163 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "list-workspace-tables": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_tables__list_workspace_tables__Response"];
+                };
+            };
+        };
+    };
+    "create-workspace-table": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_tables__create_workspace_table__Response"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-workspace-table": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                table_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_tables__get_workspace_table__Response"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-workspace-table": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                table_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-workspace-table": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                table_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_tables__update_workspace_table__Response"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
