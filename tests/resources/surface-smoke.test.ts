@@ -88,12 +88,6 @@ describe('resource surface smoke tests', () => {
     await client.memory.getEntityFacts('entity-001', { dimension: 'preferences' })
     await client.memory.getAnalytics()
 
-    await client.personas.list({ limit: 5, search: 'friendly' })
-    await client.personas.create(EMPTY_BODY)
-    await client.personas.get('persona-001')
-    await client.personas.update('persona-001', EMPTY_BODY)
-    await client.personas.delete('persona-001')
-
     await client.recordings.getUrls('call-001')
     await client.recordings.getMetadata('call-001')
     await client.recordings.download('call-001', 'audio.wav')

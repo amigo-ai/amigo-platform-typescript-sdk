@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking Changes
+
+- Remove the standalone personas API surface. This drops `client.personas`,
+  `PersonasResource`, `PersonaId`, and service `persona_id` / `persona_name`
+  fields in coordination with platform PR #2980. Simulation scenario persona
+  payloads are unchanged. Cut this as at least a minor pre-1.0 release
+  (`0.56.0` or later); publishing it as `0.55.x` would be a breaking patch.
+
 ## [0.55.0] - 2026-05-14
 
 ### Maintenance
@@ -232,7 +242,7 @@
 
 ### ⚠️ Breaking changes (type-level): call-intelligence response shapes
 
-**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at *runtime* (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at *compile* time: code that references the removed names will fail type-checking against `@amigo-ai/platform-sdk@^0.28.0`.
+**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at _runtime_ (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at _compile_ time: code that references the removed names will fail type-checking against `@amigo-ai/platform-sdk@^0.28.0`.
 
 Picked up from platform-api PR 3b of the call-intelligence typed-cols program (commit `831f0e8ff`, "V091 Pydantic response alignment to producer keys"). The historical Pydantic shapes declared fields the producer never actually emitted — they were silently dropped by `extra="ignore"` and SDK consumers always saw `None` / `0` / `[]` for these fields. The renames + drops align the response shape to producer truth.
 

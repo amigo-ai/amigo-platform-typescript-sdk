@@ -57,7 +57,6 @@ src/
     integrations.ts     -- Integration CRUD, endpoint testing, health check
     memory.ts           -- Memory fact queries
     operators.ts        -- Operator CRUD, dashboard, queue, escalations, call actions
-    personas.ts         -- Persona management
     recordings.ts       -- Call recording access
     review-queue.ts     -- Review queue management
     services.ts         -- Service CRUD

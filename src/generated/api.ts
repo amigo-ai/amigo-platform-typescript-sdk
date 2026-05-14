@@ -4270,70 +4270,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/personas": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List personas
-         * @description List personas in the workspace.
-         *
-         *     Permissions: viewer+.
-         *     Search: case-insensitive on name and background.
-         *     Sort: +name, -name, +created_at, -created_at, +updated_at, -updated_at.
-         */
-        get: operations["list-personas"];
-        put?: never;
-        /**
-         * Create a persona
-         * @description Create a new persona.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["create-persona"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/personas/{persona_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a persona
-         * @description Get a persona by ID.
-         *
-         *     Permissions: viewer+.
-         */
-        get: operations["get-persona"];
-        put?: never;
-        post?: never;
-        /**
-         * Delete a persona
-         * @description Delete a persona.
-         *
-         *     Permissions: admin, owner.
-         */
-        delete: operations["delete-persona"];
-        options?: never;
-        head?: never;
-        /**
-         * Update a persona
-         * @description Update a persona.
-         *
-         *     Permissions: admin, owner.
-         */
-        patch: operations["update-persona"];
-        trace?: never;
-    };
     "/v1/{workspace_id}/pipeline/entity-resolution": {
         parameters: {
             query?: never;
@@ -11466,23 +11402,6 @@ export interface components {
              */
             status: string;
         };
-        /** CreatePersonaRequest */
-        CreatePersonaRequest: {
-            /** @default  */
-            background?: components["schemas"]["DescriptionString"];
-            /** Communication Style */
-            communication_style?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Default Language
-             * @default eng
-             */
-            default_language?: string;
-            developed_by: components["schemas"]["NameString"];
-            name: components["schemas"]["NameString"];
-            role: components["schemas"]["NameString"];
-        };
         /** CreateRunRequest */
         CreateRunRequest: {
             /** Branch Name */
@@ -11548,8 +11467,6 @@ export interface components {
             /** Keyterms */
             keyterms?: string[];
             name: components["schemas"]["NameString"];
-            /** Persona Id */
-            persona_id?: string | null;
             /**
              * Safety Filters Enabled
              * @default true
@@ -18236,17 +18153,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[PersonaResponse] */
-        PaginatedResponse_PersonaResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["PersonaResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[ReviewItemResponse] */
         PaginatedResponse_ReviewItemResponse_: {
             /** Continuation Token */
@@ -18952,65 +18858,6 @@ export interface components {
             /**
              * Workspace Id
              * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PersonaResponse */
-        PersonaResponse: {
-            /**
-             * Background
-             * @description Background context and instructions for the persona
-             */
-            background: string;
-            /**
-             * Communication Style
-             * @description Communication style configuration
-             */
-            communication_style: {
-                [key: string]: unknown;
-            };
-            /**
-             * Created At
-             * Format: date-time
-             * @description When the persona was created
-             */
-            created_at: string;
-            /**
-             * Default Language
-             * @description ISO 639-3 language code (e.g. 'eng')
-             */
-            default_language: string;
-            /**
-             * Developed By
-             * @description Organization or team that created this persona
-             */
-            developed_by: string;
-            /**
-             * Id
-             * Format: uuid
-             * @description Unique persona identifier
-             */
-            id: string;
-            /**
-             * Name
-             * @description Display name of the persona
-             */
-            name: string;
-            /**
-             * Role
-             * @description Role the persona embodies (e.g. 'Receptionist')
-             */
-            role: string;
-            /**
-             * Updated At
-             * Format: date-time
-             * @description When the persona was last updated
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             * @description Workspace that owns this persona
              */
             workspace_id: string;
         };
@@ -20723,8 +20570,6 @@ export interface components {
             keyterms: string[];
             /** Name */
             name: string;
-            /** Persona Id */
-            persona_id?: string | null;
             risk_signal_config?: components["schemas"]["RiskSignalConfig"] | null;
             /**
              * Safety Filters Enabled
@@ -20867,10 +20712,6 @@ export interface components {
             keyterms: string[];
             /** Name */
             name: string;
-            /** Persona Id */
-            persona_id?: string | null;
-            /** Persona Name */
-            persona_name?: string | null;
             /**
              * Safety Filters Enabled
              * @default true
@@ -25060,19 +24901,6 @@ export interface components {
             /** Type */
             type?: ("clinical" | "administrative" | "crisis_counselor") | null;
         };
-        /** UpdatePersonaRequest */
-        UpdatePersonaRequest: {
-            background?: components["schemas"]["DescriptionString"] | null;
-            /** Communication Style */
-            communication_style?: {
-                [key: string]: unknown;
-            } | null;
-            /** Default Language */
-            default_language?: string | null;
-            developed_by?: components["schemas"]["NameString"] | null;
-            name?: components["schemas"]["NameString"] | null;
-            role?: components["schemas"]["NameString"] | null;
-        };
         /**
          * UpdateSchedulingRuleSetRequest
          * @description Partial update — fields not provided are unchanged. ``params``
@@ -25102,8 +24930,6 @@ export interface components {
             /** Keyterms */
             keyterms?: string[] | null;
             name?: components["schemas"]["NameString"] | null;
-            /** Persona Id */
-            persona_id?: string | null;
             /** Safety Filters Enabled */
             safety_filters_enabled?: boolean | null;
             /** Tags */
@@ -36928,229 +36754,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "list-personas": {
-        parameters: {
-            query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_PersonaResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "create-persona": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreatePersonaRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PersonaResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-persona": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                persona_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PersonaResponse"];
-                };
-            };
-            /** @description Persona not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "delete-persona": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                persona_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Persona not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-persona": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                persona_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdatePersonaRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PersonaResponse"];
-                };
-            };
-            /** @description Persona not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

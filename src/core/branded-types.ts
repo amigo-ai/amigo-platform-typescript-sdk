@@ -10,7 +10,6 @@ type Brand<T, B> = T & { readonly [brand]: B }
 export type WorkspaceId = Brand<string, 'WorkspaceId'>
 export type ApiKeyId = Brand<string, 'ApiKeyId'>
 export type AgentId = Brand<string, 'AgentId'>
-export type PersonaId = Brand<string, 'PersonaId'>
 export type SkillId = Brand<string, 'SkillId'>
 /** @deprecated Use ActionId instead */
 export type ActionId = Brand<string, 'ActionId'>
@@ -34,7 +33,6 @@ export type DataSourceId = Brand<string, 'DataSourceId'>
 export const workspaceId = (id: string): WorkspaceId => id as WorkspaceId
 export const apiKeyId = (id: string): ApiKeyId => id as ApiKeyId
 export const agentId = (id: string): AgentId => id as AgentId
-export const personaId = (id: string): PersonaId => id as PersonaId
 export const skillId = (id: string): SkillId => id as SkillId
 export const actionId = (id: string): ActionId => id as ActionId
 export const serviceId = (id: string): ServiceId => id as ServiceId
