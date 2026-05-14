@@ -349,8 +349,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `outreach.update`
 - `memory.get`
 - `memory.update`
-- `security.get`
-- `security.update`
 - `retention.get`
 - `retention.update`
 - `behaviors.get`

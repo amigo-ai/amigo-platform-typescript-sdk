@@ -2,8 +2,8 @@ import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
 /**
- * Workspace-level settings — configure voice behavior, branding, security
- * policies, data retention, outreach rules, and more.
+ * Workspace-level settings — configure voice behavior, branding, data
+ * retention, outreach rules, and more.
  *
  * Each sub-resource has `get()` and `update()`.
  */
@@ -66,22 +66,6 @@ export class SettingsResource extends WorkspaceScopedResource {
     update: async (body: components['schemas']['MemorySettingsRequest']) =>
       extractData(
         await this.client.PUT('/v1/{workspace_id}/settings/memory', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
-
-  readonly security = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/security', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['SecuritySettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/security', {
           params: { path: { workspace_id: this.workspaceId } },
           body,
         }),
