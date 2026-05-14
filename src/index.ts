@@ -68,7 +68,6 @@ import { FunctionsResource } from './resources/functions.js'
 import { ObserversResource } from './resources/observers.js'
 import { FhirResource } from './resources/fhir.js'
 import { InsightsResource } from './resources/insights.js'
-import { CrmResource } from './resources/crm.js'
 import { CommandCenterResource } from './resources/command-center.js'
 import { SensoriumResource } from './resources/sensorium.js'
 import { DataQueryResource } from './resources/data-query.js'
@@ -231,8 +230,6 @@ export class AmigoClient {
   readonly fhir!: FhirResource
   /** Natural-language insights — schema, suggestions, SQL, chat sessions */
   readonly insights!: InsightsResource
-  /** CRM — contacts, companies, deals, pipeline (sync from connected CRM integration) */
-  readonly crm!: CrmResource
   /** Command Center — rolled-up workspace homepage snapshot */
   readonly commandCenter!: CommandCenterResource
   /** Sensorium — operator-facing live agent loop observability */
@@ -495,7 +492,6 @@ export class AmigoClient {
     mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
     mutable.fhir = new FhirResource(client, workspaceId)
     mutable.insights = new InsightsResource(client, workspaceId)
-    mutable.crm = new CrmResource(client, workspaceId)
     mutable.commandCenter = new CommandCenterResource(client, workspaceId)
     mutable.sensorium = new SensoriumResource(client, workspaceId)
     mutable.dataQuery = new DataQueryResource(client, workspaceId)

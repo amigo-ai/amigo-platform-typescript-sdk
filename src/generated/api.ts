@@ -2055,186 +2055,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/crm/companies": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search CRM companies
-         * @description Search companies from CRM sources. Filter by name. Paginated.
-         */
-        get: operations["crm-company-search"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/companies/{company_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get CRM company
-         * @description Get a single CRM company with full state.
-         */
-        get: operations["crm-company-detail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/contacts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search CRM contacts
-         * @description Search contacts from CRM sources. Filter by name, email, or phone. CRM source is auto-detected from workspace data source config. Paginated — use offset for subsequent pages.
-         */
-        get: operations["crm-contact-search"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/contacts/{contact_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get CRM contact
-         * @description Get a single CRM contact with full projected state including clinical data, operational fields, external IDs, and any cross-source merged entities (same_as links).
-         */
-        get: operations["crm-contact-detail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/contacts/{contact_id}/timeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Contact activity timeline
-         * @description Activity timeline for a CRM contact — calls, meetings, notes, emails, syncs. Includes direction (inbound/outbound) and source system attribution. Paginated.
-         */
-        get: operations["crm-contact-timeline"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/deals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Search CRM deals
-         * @description Search deals from CRM sources. Paginated.
-         */
-        get: operations["crm-deal-search"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/deals/pipeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Deal pipeline aggregation
-         * @description Deals grouped by pipeline stage with aggregate value per stage. Powers the deal pipeline funnel chart.
-         */
-        get: operations["crm-deal-pipeline"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/deals/{deal_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get CRM deal
-         * @description Get a single CRM deal with full state.
-         */
-        get: operations["crm-deal-detail"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/crm/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * CRM sync status
-         * @description Get CRM connector status — contact, company, and deal counts, sync health, last sync time. Parallel to /fhir/status.
-         */
-        get: operations["crm-status"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/dashboards": {
         parameters: {
             query?: never;
@@ -4089,7 +3909,7 @@ export interface paths {
          *
          *     Returns the static IP addresses used by all outbound traffic from the
          *     platform. Customers should add these to their firewall allowlists to
-         *     enable data source connectivity (EHR, CRM, FHIR stores, etc.).
+         *     enable data source connectivity (EHR, FHIR stores, etc.).
          *
          *     Permissions: authenticated (any role).
          */
@@ -5935,7 +5755,7 @@ export interface paths {
          *     **Speech Recognition Boost**
          *     - **keyterms**: Exact words the speech recognition engine should
          *       prioritize. Use for specific names, drug names, and org jargon.
-         *       Example: ``["Dr. Ramirez", "metformin", "InFocus", "HIPAA"]``
+         *       Example: ``["Dr. Ramirez", "metformin", "HIPAA"]``
          *
          *     **Audio Correction Hints**
          *     - **correction_categories**: Broad categories of things callers
@@ -7215,7 +7035,7 @@ export interface paths {
         };
         /**
          * Connected data sources overview
-         * @description All active data sources with entity counts by type, sync status, and health. Powers the CRM/EHR/FHIR connector cards in the frontend. Each item includes connector_type (revolution, hubspot, fhir_store) and a breakdown of entities by type (patient, practitioner, etc.).
+         * @description All active data sources with entity counts by type, sync status, and health. Powers the EHR/FHIR connector cards in the frontend. Each item includes connector_type (charmhealth, fhir_store) and a breakdown of entities by type (patient, practitioner, etc.).
          */
         get: operations["connector-overview"];
         put?: never;
@@ -7523,7 +7343,7 @@ export interface paths {
         };
         /**
          * Get merged entities (same_as links)
-         * @description Returns entities linked via same_as edges — cross-source merges where different data sources refer to the same real-world entity (e.g. a patient in Revolution EHR and HubSpot CRM matched by phone number).
+         * @description Returns entities linked via same_as edges — cross-source merges where different data sources refer to the same real-world entity.
          */
         get: operations["merged-entities"];
         put?: never;
@@ -7683,7 +7503,7 @@ export interface paths {
         };
         /**
          * Entity counts by source system
-         * @description Breakdown of entity counts by source system (e.g. revolution, hubspot, gcp_fhir, voice_agent). Powers the CRM/EHR/FHIR view in the frontend. Filter by entity_type (e.g. person, place) for focused views.
+         * @description Breakdown of entity counts by source system (e.g. charmhealth, gcp_fhir, voice_agent). Powers the EHR/FHIR view in the frontend. Filter by entity_type (e.g. person, place) for focused views.
          */
         get: operations["source-breakdown"];
         put?: never;
@@ -7703,7 +7523,7 @@ export interface paths {
         };
         /**
          * Outbound sync status per data source
-         * @description Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source. For workspaces with multiple outbound sinks (e.g. Revolution + HubSpot).
+         * @description Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source for workspaces with multiple outbound sinks.
          */
         get: operations["outbound-sync-by-sink"];
         put?: never;
@@ -10582,7 +10402,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "ehr" | "crm" | "fhir_store" | "smart_fhir" | "rest_api" | "webhook" | "file_drop" | "lakebase_schema";
+            source_type: "ehr" | "fhir_store" | "smart_fhir" | "rest_api" | "webhook" | "file_drop" | "lakebase_schema";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -11450,7 +11270,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -11581,7 +11401,7 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
-            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
             patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
@@ -12074,327 +11894,6 @@ export interface components {
             name: components["schemas"]["StrippedNonemptyString"];
             slug: components["schemas"]["SlugString"];
         };
-        /** CrmActivityItem */
-        CrmActivityItem: {
-            /** Activity Type */
-            activity_type: string;
-            /**
-             * Confidence
-             * @default 1
-             */
-            confidence?: number;
-            /** Data */
-            data?: {
-                [key: string]: unknown;
-            };
-            /** Description */
-            description?: string | null;
-            /** Direction */
-            direction?: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Occurred At */
-            occurred_at?: string | null;
-            /**
-             * Source
-             * @default unknown
-             */
-            source?: string;
-            /** Source System */
-            source_system?: string | null;
-        };
-        /** CrmActivityTimelineResponse */
-        CrmActivityTimelineResponse: {
-            /** Activities */
-            activities: components["schemas"]["CrmActivityItem"][];
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /**
-             * Has More
-             * @default false
-             */
-            has_more?: boolean;
-            /** Total */
-            total: number;
-        };
-        /** CrmCompanyResponse */
-        CrmCompanyResponse: {
-            /** Address */
-            address?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Created At
-             * @description When the company was created
-             */
-            created_at?: string | null;
-            /** Domain */
-            domain?: string | null;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /**
-             * Event Count
-             * @default 0
-             */
-            event_count?: number;
-            /** Hubspot Id */
-            hubspot_id?: string | null;
-            /** Industry */
-            industry?: string | null;
-            /** Last Activity At */
-            last_activity_at?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Phone */
-            phone?: string | null;
-            /** Source System */
-            source_system?: string | null;
-        };
-        /** CrmCompanySearchResponse */
-        CrmCompanySearchResponse: {
-            /** Companies */
-            companies: components["schemas"]["CrmCompanyResponse"][];
-            /**
-             * Has More
-             * @default false
-             */
-            has_more?: boolean;
-            /** Next Offset */
-            next_offset?: number | null;
-            /** Total */
-            total: number;
-        };
-        /**
-         * CrmContactDetailResponse
-         * @description Single contact with full clinical state + merged entities.
-         */
-        CrmContactDetailResponse: {
-            /** Address */
-            address?: {
-                [key: string]: unknown;
-            } | null;
-            /** Birth Date */
-            birth_date?: string | null;
-            /** Canonical Id */
-            canonical_id?: string | null;
-            /** Clinical */
-            clinical?: {
-                [key: string]: unknown;
-            };
-            /** Company */
-            company?: string | null;
-            /**
-             * Confidence
-             * @default 1
-             */
-            confidence?: number;
-            /**
-             * Created At
-             * @description When the contact was created
-             */
-            created_at?: string | null;
-            /** Email */
-            email?: string | null;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /**
-             * Event Count
-             * @default 0
-             */
-            event_count?: number;
-            /** External Ids */
-            external_ids?: {
-                [key: string]: unknown;
-            };
-            /** First Name */
-            first_name?: string | null;
-            /** Gender */
-            gender?: string | null;
-            /** Hubspot Id */
-            hubspot_id?: string | null;
-            /** Last Activity At */
-            last_activity_at?: string | null;
-            /** Last Name */
-            last_name?: string | null;
-            /** Lifecycle Stage */
-            lifecycle_stage?: string | null;
-            /** Merged With */
-            merged_with?: components["schemas"]["CrmContactResponse"][];
-            /** Mrn */
-            mrn?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Operational */
-            operational?: {
-                [key: string]: unknown;
-            };
-            /** Phone */
-            phone?: string | null;
-            /** Source System */
-            source_system?: string | null;
-        };
-        /** CrmContactResponse */
-        CrmContactResponse: {
-            /** Address */
-            address?: {
-                [key: string]: unknown;
-            } | null;
-            /** Birth Date */
-            birth_date?: string | null;
-            /** Company */
-            company?: string | null;
-            /**
-             * Confidence
-             * @default 1
-             */
-            confidence?: number;
-            /**
-             * Created At
-             * @description When the contact was created
-             */
-            created_at?: string | null;
-            /** Email */
-            email?: string | null;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /**
-             * Event Count
-             * @default 0
-             */
-            event_count?: number;
-            /** First Name */
-            first_name?: string | null;
-            /** Gender */
-            gender?: string | null;
-            /** Hubspot Id */
-            hubspot_id?: string | null;
-            /** Last Activity At */
-            last_activity_at?: string | null;
-            /** Last Name */
-            last_name?: string | null;
-            /** Lifecycle Stage */
-            lifecycle_stage?: string | null;
-            /** Mrn */
-            mrn?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Phone */
-            phone?: string | null;
-            /** Source System */
-            source_system?: string | null;
-        };
-        /** CrmContactSearchResponse */
-        CrmContactSearchResponse: {
-            /** Contacts */
-            contacts: components["schemas"]["CrmContactResponse"][];
-            /**
-             * Has More
-             * @default false
-             */
-            has_more?: boolean;
-            /** Next Offset */
-            next_offset?: number | null;
-            /** Total */
-            total: number;
-        };
-        /** CrmDealResponse */
-        CrmDealResponse: {
-            /** Amount */
-            amount?: number | null;
-            /** Close Date */
-            close_date?: string | null;
-            /**
-             * Created At
-             * @description When the deal was created
-             */
-            created_at?: string | null;
-            /** Deal Type */
-            deal_type?: string | null;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /**
-             * Event Count
-             * @default 0
-             */
-            event_count?: number;
-            /** Hubspot Id */
-            hubspot_id?: string | null;
-            /** Last Activity At */
-            last_activity_at?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Pipeline */
-            pipeline?: string | null;
-            /** Stage */
-            stage?: string | null;
-        };
-        /** CrmDealSearchResponse */
-        CrmDealSearchResponse: {
-            /** Deals */
-            deals: components["schemas"]["CrmDealResponse"][];
-            /**
-             * Has More
-             * @default false
-             */
-            has_more?: boolean;
-            /** Next Offset */
-            next_offset?: number | null;
-            /** Total */
-            total: number;
-        };
-        /** CrmStatusResponse */
-        CrmStatusResponse: {
-            /**
-             * Company Count
-             * @default 0
-             */
-            company_count?: number;
-            /** Configured */
-            configured: boolean;
-            /** Connector Type */
-            connector_type?: string | null;
-            /**
-             * Contact Count
-             * @default 0
-             */
-            contact_count?: number;
-            /** Data Source Id */
-            data_source_id?: string | null;
-            /**
-             * Deal Count
-             * @default 0
-             */
-            deal_count?: number;
-            /** Last Sync At */
-            last_sync_at?: string | null;
-            /** Last Sync Status */
-            last_sync_status?: ("success" | "error") | null;
-            /**
-             * Sync Failure Count
-             * @default 0
-             */
-            sync_failure_count?: number;
-            /** Sync Healthy */
-            sync_healthy?: boolean | null;
-        };
         /**
          * CustomerAddress
          * @description Customer billing address.
@@ -12880,7 +12379,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
             /** Sync Schedule */
             sync_schedule: string | null;
             /**
@@ -13992,7 +13491,7 @@ export interface components {
             effective_at?: string | null;
             /**
              * Source
-             * @description Write source — e.g. manual, hubspot, forms, auto_enrich.
+             * @description Write source — e.g. manual, forms, auto_enrich.
              * @default manual
              */
             source?: string;
@@ -14160,14 +13659,14 @@ export interface components {
          * EntityResolveExternalId
          * @description Reference to an external-system identifier.
          *
-         *     ``system`` labels which system minted the value (``epic``, ``hubspot``,
-         *     ``charm``, ``revolution``, …). The value is matched against any
+         *     ``system`` labels which system minted the value (``epic``, ``charm``,
+         *     ``charmhealth``, …). The value is matched against any
          *     nested key in ``world.entities.external_ids`` whose value equals
          *     ``value``. ``system`` is informational for scoring; it doesn't
          *     constrain the lookup, since adapters disagree on naming.
          */
         EntityResolveExternalId: {
-            /** @description External system label (lowercase, e.g. 'epic', 'hubspot'). */
+            /** @description External system label (lowercase, e.g. 'epic'). */
             system: components["schemas"]["ExternalSystemString"];
             /** @description System-issued identifier. */
             value: components["schemas"]["ExternalValueString"];
@@ -14328,16 +13827,6 @@ export interface components {
              * @description When the entity was created
              */
             created_at?: string | null;
-            /**
-             * Deal Amount
-             * @description CRM deal monetary value
-             */
-            deal_amount?: number | null;
-            /**
-             * Deal Stage
-             * @description CRM deal stage
-             */
-            deal_stage?: string | null;
             /**
              * Direction
              * @description Call direction (inbound, outbound)
@@ -22670,7 +22159,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -22730,7 +22219,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -22769,7 +22258,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "crm" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
             /** Status */
             status: string;
             /**
@@ -22837,7 +22326,7 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
-            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'revolution:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
             canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
@@ -25773,7 +25262,7 @@ export interface components {
         /** UpdateWorkspaceRequest */
         UpdateWorkspaceRequest: {
             /** Connector Type */
-            connector_type?: ("revolution" | "epic" | "cerner" | "allscripts" | "fhir_store" | "hubspot" | "athenahealth" | "charmhealth" | "eclinicalworks" | "meditab") | null;
+            connector_type?: ("epic" | "cerner" | "allscripts" | "fhir_store" | "athenahealth" | "charmhealth" | "eclinicalworks" | "meditab") | null;
             /** Environment */
             environment?: ("production" | "staging" | "development") | null;
             name?: components["schemas"]["StrippedNonemptyString"] | null;
@@ -32608,315 +32097,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "crm-company-search": {
-        parameters: {
-            query?: {
-                /** @description Search by name */
-                q?: string | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmCompanySearchResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "crm-company-detail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                company_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmCompanyResponse"];
-                };
-            };
-            /** @description Company not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid company ID format. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "crm-contact-search": {
-        parameters: {
-            query?: {
-                /** @description Search by name */
-                q?: string | null;
-                /** @description Search by email */
-                email?: string | null;
-                /** @description Search by phone */
-                phone?: string | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmContactSearchResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "crm-contact-detail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                contact_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmContactDetailResponse"];
-                };
-            };
-            /** @description Contact not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid contact ID format. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "crm-contact-timeline": {
-        parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                contact_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmActivityTimelineResponse"];
-                };
-            };
-            /** @description Contact not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid contact ID format. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "crm-deal-search": {
-        parameters: {
-            query?: {
-                /** @description Search by name */
-                q?: string | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmDealSearchResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "crm-deal-pipeline": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
-    "crm-deal-detail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                deal_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmDealResponse"];
-                };
-            };
-            /** @description Deal not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid deal ID format. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "crm-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrmStatusResponse"];
-                };
             };
         };
     };
@@ -45143,7 +44323,7 @@ export interface operations {
                 has_projection?: boolean | null;
                 /** @description Filter by event source (e.g. voice_agent, connector_runner) */
                 source?: string | null;
-                /** @description Filter by source system name (e.g. hubspot, revolution) */
+                /** @description Filter by source system name (e.g. charmhealth, gcp_fhir) */
                 source_system?: string | null;
                 /** @description Filter by FHIR resource type (e.g. Patient, Practitioner) */
                 fhir_resource_type?: string | null;
