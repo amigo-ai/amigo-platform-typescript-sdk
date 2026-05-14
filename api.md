@@ -629,6 +629,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `workspaceDatabase`
 
+- `get`
+- `post`
+- `patch`
+- `delete`
 - `getFork`
 - `createFork`
 - `deleteFork`
