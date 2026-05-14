@@ -3027,25 +3027,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/fork": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get fork status */
-        get: operations["get-fork"];
-        put?: never;
-        /** Create a Lakebase fork (sandbox) */
-        post: operations["create-fork"];
-        /** Destroy fork */
-        delete: operations["delete-fork"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/functions": {
         parameters: {
             query?: never;
@@ -3771,23 +3752,6 @@ export interface paths {
          * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
          */
         post: operations["test-integration-connection"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/lakebase/query": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Execute SQL against workspace Lakebase */
-        post: operations["execute-workspace-query"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5177,7 +5141,7 @@ export interface paths {
          * List prompt logs for a workspace
          * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
          *
-         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, sim, and scribe modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
+         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
          *
          *     **Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
          *
@@ -5188,59 +5152,6 @@ export interface paths {
         get: operations["list-prompt-logs"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/query-tools": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List query tools */
-        get: operations["list-query-tools"];
-        put?: never;
-        /** Create a query tool */
-        post: operations["create-query-tool"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/query-tools/{tool_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Delete a query tool */
-        delete: operations["delete-query-tool"];
-        options?: never;
-        head?: never;
-        /** Update a query tool */
-        patch: operations["update-query-tool"];
-        trace?: never;
-    };
-    "/v1/{workspace_id}/query-tools/{tool_id}/test": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Test a query tool with sample parameters */
-        post: operations["test-query-tool"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5799,106 +5710,6 @@ export interface paths {
          * @description Update `params` and/or `is_active` on an existing rule set. `agent_kind` and `rule_kind` are immutable — to change either, create a new rule set and delete the old one.
          */
         patch: operations["update-scheduling-rule-set"];
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/finalize": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Finalize Encounter
-         * @description Physician finalizes the encounter. Locks the encounter for EHR sync.
-         */
-        post: operations["finalize-encounter"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Approve Icd10
-         * @description Physician approves an ICD-10 code. Writes at HIGH confidence (0.9).
-         */
-        post: operations["approve-icd10-code"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/icd10/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reject Icd10
-         * @description Physician rejects an ICD-10 code. Writes at HIGH confidence (0.9).
-         */
-        post: operations["reject-icd10-code"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/encounters/{encounter_id}/soap/edit": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Edit Soap
-         * @description Physician edits a SOAP section. Writes at HIGH confidence (0.9) — supersedes agent observations.
-         */
-        post: operations["edit-encounter-soap"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/scribe/recordings/transcribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Transcribe Scribe Recording
-         * @description Transcribe a completed Superscribe clinical recording.
-         */
-        post: operations["transcribe-scribe-recording"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/v1/{workspace_id}/sensorium/connector-health": {
@@ -6567,38 +6378,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/scribe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Superscribe access settings
-         * @description Get workspace Superscribe access settings.
-         *
-         *     Returns the list of authorized clinicians and whether scribe is enabled.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-scribe-settings"];
-        /**
-         * Update Superscribe access settings
-         * @description Update workspace Superscribe access settings.
-         *
-         *     Manages which clinicians can authenticate to Superscribe via Google OAuth.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-scribe-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/security": {
         parameters: {
             query?: never;
@@ -6842,7 +6621,11 @@ export interface paths {
          */
         get: operations["list-simulation-cases"];
         put?: never;
-        post?: never;
+        /**
+         * Create Simulation Cases
+         * @description Create durable simulation cases for an internal benchmark suite.
+         */
+        post: operations["create-simulation-cases"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7953,66 +7736,6 @@ export interface paths {
          * @description Send a ringless voicemail. Accepts multipart form with use_case_id, recipient_phone_number (US E.164), and audio MP3 file (10-60s, max 8 MB). Requires Channel.send permission.
          */
         post: operations["send-voicemail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/voiceprints/enroll": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Enroll Voiceprint
-         * @description Enroll a speaker voiceprint for an entity.
-         *
-         *     Accepts PCM16 audio (wav or raw bytes). Proxies to emotion-engine
-         *     for ECAPA-TDNN embedding extraction, then stores the result as a
-         *     world event on the person entity.
-         *
-         *     Permissions: admin, owner.
-         */
-        post: operations["enroll-voiceprint"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/voiceprints/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Verify Voiceprint */
-        post: operations["verify-voiceprint"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/voiceprints/{entity_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Voiceprint Status */
-        get: operations["get-voiceprint-status"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -9323,11 +9046,6 @@ export interface components {
             /** Skipped */
             skipped: string[];
         };
-        /** ApproveICD10Request */
-        ApproveICD10Request: {
-            /** Code */
-            code: string;
-        };
         /**
          * ApproveRequest
          * @description Approve events — promotes confidence to 0.95.
@@ -9954,18 +9672,6 @@ export interface components {
              */
             setup_id: string;
         };
-        /** Body_enroll-voiceprint */
-        "Body_enroll-voiceprint": {
-            /** Audio */
-            audio: string;
-            /** Entity Id */
-            entity_id: string;
-            /**
-             * Sample Rate
-             * @default 16000
-             */
-            sample_rate?: number;
-        };
         /** Body_send-voicemail */
         "Body_send-voicemail": {
             /** Audio */
@@ -9977,34 +9683,6 @@ export interface components {
              * Format: uuid
              */
             use_case_id: string;
-        };
-        /** Body_transcribe-scribe-recording */
-        "Body_transcribe-scribe-recording": {
-            /** Audio */
-            audio: string;
-            /** Keyterms */
-            keyterms?: string | null;
-            /** Language */
-            language?: string | null;
-            /** Patient Entity Id */
-            patient_entity_id?: string | null;
-            /**
-             * Service Id
-             * Format: uuid
-             */
-            service_id: string;
-        };
-        /** Body_verify-voiceprint */
-        "Body_verify-voiceprint": {
-            /** Audio */
-            audio: string;
-            /** Entity Id */
-            entity_id: string;
-            /**
-             * Sample Rate
-             * @default 16000
-             */
-            sample_rate?: number;
         };
         /** Body_voice-turn */
         "Body_voice-turn": {
@@ -10375,7 +10053,7 @@ export interface components {
             /** Service Id */
             service_id?: string | null;
             /** Source */
-            source?: ("real" | "simulation" | "playground" | "scribe") | null;
+            source?: ("real" | "simulation" | "playground") | null;
             /**
              * States Visited
              * @default []
@@ -10689,9 +10367,9 @@ export interface components {
             service_id?: string | null;
             /**
              * Source
-             * @description Call source — real, simulation, playground, or scribe
+             * @description Call source — real, simulation, or playground
              */
-            source?: ("real" | "simulation" | "playground" | "scribe") | null;
+            source?: ("real" | "simulation" | "playground") | null;
             /**
              * Started At
              * @description When the call started
@@ -11005,7 +10683,7 @@ export interface components {
          *     Each kind maps to one or more providers.
          * @enum {string}
          */
-        ChannelKind: "voice" | "sms" | "whatsapp" | "email" | "web" | "scribe";
+        ChannelKind: "voice" | "sms" | "whatsapp" | "email" | "web";
         /**
          * ChannelOverride
          * @description Per-channel behavior override for a state.
@@ -12381,11 +12059,6 @@ export interface components {
         };
         /** CreateConversationRequest */
         CreateConversationRequest: {
-            /**
-             * Context
-             * @description Injected into the agent's prompt as caller/patient context for this conversation.
-             */
-            context?: string | null;
             /** Entity Id */
             entity_id?: string | null;
             /**
@@ -12393,16 +12066,6 @@ export interface components {
              * Format: uuid
              */
             service_id: string;
-            /**
-             * Start Mode
-             * @default user_first
-             * @enum {string}
-             */
-            start_mode?: "user_first" | "agent_first";
-            /** Viewport Height */
-            viewport_height?: number | null;
-            /** Viewport Width */
-            viewport_width?: number | null;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -12473,14 +12136,6 @@ export interface components {
              * @enum {string}
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
-        };
-        /** CreateForkRequest */
-        CreateForkRequest: {
-            /**
-             * Ttl Days
-             * @default 7
-             */
-            ttl_days?: number;
         };
         /** CreateIntegrationRequest */
         CreateIntegrationRequest: {
@@ -12785,7 +12440,7 @@ export interface components {
              * @default voice
              * @enum {string}
              */
-            channel_type?: "voice" | "text" | "scribe";
+            channel_type?: "voice" | "text";
             /**
              * Context Graph Id
              * Format: uuid
@@ -12854,6 +12509,59 @@ export interface components {
             display_size: number[];
             /** Session Id */
             session_id: string;
+        };
+        /**
+         * CreateSimulationCaseItem
+         * @description One durable simulation case to create.
+         */
+        CreateSimulationCaseItem: {
+            /** Assertions */
+            assertions?: {
+                [key: string]: unknown;
+            }[];
+            /** Constraints */
+            constraints?: {
+                [key: string]: unknown;
+            };
+            /** Description */
+            description: string;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            };
+            /** Initial Message */
+            initial_message: string;
+            /** Persona */
+            persona?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Provenance
+             * @default manual
+             */
+            provenance?: string;
+            /** Scenario Instructions */
+            scenario_instructions: string;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[];
+            /** Target Spec */
+            target_spec?: {
+                [key: string]: unknown;
+            };
+            /** Temperament */
+            temperament?: string | null;
+        };
+        /** CreateSimulationCasesRequest */
+        CreateSimulationCasesRequest: {
+            /** Cases */
+            cases: components["schemas"]["CreateSimulationCaseItem"][];
+        };
+        /** CreateSimulationCasesResponse */
+        CreateSimulationCasesResponse: {
+            /** Cases */
+            cases: components["schemas"]["SimulationCaseResponse"][];
         };
         /** CreateSkillRequest */
         CreateSkillRequest: {
@@ -13029,24 +12737,6 @@ export interface components {
             url?: string | null;
             /** Use Case Id */
             use_case_id?: string | null;
-        };
-        /** CreateToolRequest */
-        CreateToolRequest: {
-            /** @default  */
-            description?: components["schemas"]["DescriptionString"];
-            name: components["schemas"]["NameString"];
-            /** Parameters */
-            parameters?: {
-                [key: string]: unknown;
-            };
-            /** Query */
-            query: string;
-            /**
-             * Target
-             * @default lakebase
-             * @constant
-             */
-            target?: "lakebase";
         };
         /** CreateTriggerRequest */
         CreateTriggerRequest: {
@@ -14390,13 +14080,6 @@ export interface components {
              */
             verified: boolean;
         };
-        /** EditSoapRequest */
-        EditSoapRequest: {
-            /** Content */
-            content: string;
-            /** Section */
-            section: string;
-        };
         /** EgressIpsResponse */
         EgressIpsResponse: {
             /** Egress Ips */
@@ -15030,7 +14713,7 @@ export interface components {
             effective_at?: string | null;
             /**
              * Source
-             * @description Write source — e.g. manual, hubspot, forms, scribe, auto_enrich.
+             * @description Write source — e.g. manual, hubspot, forms, auto_enrich.
              * @default manual
              */
             source?: string;
@@ -15918,11 +15601,6 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** ExecuteQueryRequest */
-        ExecuteQueryRequest: {
-            /** Sql */
-            sql: string;
-        };
         /** ExitCondition */
         ExitCondition: {
             /** Description */
@@ -16606,18 +16284,6 @@ export interface components {
         ForkRequest: {
             /** Alternatives */
             alternatives: components["schemas"]["ForkAlternative"][];
-        };
-        /** ForkResponse */
-        ForkResponse: {
-            /** Endpoint */
-            endpoint: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "pending" | "ready" | "deleting";
-            /** Ttl Days */
-            ttl_days?: number | null;
         };
         /**
          * FormTemplate
@@ -20113,17 +19779,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[ToolResponse] */
-        PaginatedResponse_ToolResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ToolResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[TriggerResponse] */
         PaginatedResponse_TriggerResponse_: {
             /** Continuation Token */
@@ -21439,7 +21094,7 @@ export interface components {
             resolved_call_sid?: string | null;
             /**
              * Resolved Conversation Kind
-             * @description ``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim/scribe, ``conversation`` for text/sms/whatsapp/email). Null otherwise.
+             * @description ``entity_type`` of the conversation entity when ``conversation_id`` was supplied (``call`` for voice/sim, ``conversation`` for text/sms/whatsapp/email). Null otherwise.
              */
             resolved_conversation_kind?: ("call" | "conversation") | null;
         };
@@ -21567,17 +21222,6 @@ export interface components {
             results?: {
                 [key: string]: unknown;
             }[];
-        };
-        /** QueryResultResponse */
-        QueryResultResponse: {
-            /** Columns */
-            columns?: string[] | null;
-            /** Row Count */
-            row_count: number;
-            /** Rows */
-            rows?: {
-                [key: string]: unknown;
-            }[] | null;
         };
         /**
          * QuietHours
@@ -21889,13 +21533,6 @@ export interface components {
             template_ids?: string[];
             /** Version */
             version: string;
-        };
-        /** RejectICD10Request */
-        RejectICD10Request: {
-            /** Code */
-            code: string;
-            /** Reason */
-            reason?: string | null;
         };
         /**
          * RejectRequest
@@ -22327,6 +21964,11 @@ export interface components {
              * @default 1
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for every selected saved-case run. When omitted, each case falls back to fixtures.case_specific.entity_id if present.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Cases
@@ -22354,6 +21996,11 @@ export interface components {
              * @default 1
              */
             concurrency?: number;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context for this saved-case run. When omitted, the runner falls back to fixtures.case_specific.entity_id if present.
+             */
+            entity_id?: string | null;
             exploration?: components["schemas"]["ExplorationConfig"] | null;
             /**
              * Max Turns
@@ -22709,212 +22356,6 @@ export interface components {
             /** Score Rationale */
             score_rationale?: string | null;
         };
-        /**
-         * ScribeCdsConfig
-         * @description Clinical decision support configuration (V2/V3 workers).
-         */
-        ScribeCdsConfig: {
-            /**
-             * Care Gap Surfacing
-             * @default true
-             */
-            care_gap_surfacing?: boolean;
-            /**
-             * Documentation Completeness
-             * @default true
-             */
-            documentation_completeness?: boolean;
-            /**
-             * Guideline Matching
-             * @default false
-             */
-            guideline_matching?: boolean;
-            /**
-             * Icd10 Auto Suggest
-             * @default true
-             */
-            icd10_auto_suggest?: boolean;
-        };
-        /**
-         * ScribeClinician
-         * @description A clinician authorized to use Superscribe.
-         */
-        ScribeClinician: {
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Name */
-            name?: string | null;
-            /**
-             * Role
-             * @default clinician
-             */
-            role?: string;
-        };
-        /**
-         * ScribePostEncounterConfig
-         * @description Post-encounter automation configuration.
-         */
-        ScribePostEncounterConfig: {
-            /**
-             * Auto Polish Note
-             * @default true
-             */
-            auto_polish_note?: boolean;
-            /**
-             * Education Materials
-             * @default false
-             */
-            education_materials?: boolean;
-            /**
-             * Follow Up Surface
-             * @default false
-             */
-            follow_up_surface?: boolean;
-            /**
-             * Order Preparation
-             * @default false
-             */
-            order_preparation?: boolean;
-        };
-        /**
-         * ScribeSafetyConfig
-         * @description V0 sentinel and safety configuration.
-         */
-        ScribeSafetyConfig: {
-            /**
-             * Allergy Cross Reference
-             * @default true
-             */
-            allergy_cross_reference?: boolean;
-            /**
-             * Crisis Detection
-             * @default true
-             */
-            crisis_detection?: boolean;
-            /**
-             * Drug Interaction Checking
-             * @default true
-             */
-            drug_interaction_checking?: boolean;
-            /**
-             * Vital Range Alerting
-             * @default true
-             */
-            vital_range_alerting?: boolean;
-        };
-        /**
-         * ScribeSettingsRequest
-         * @description Partial update — only provided fields are changed.
-         */
-        ScribeSettingsRequest: {
-            /** Authorized Clinicians */
-            authorized_clinicians?: components["schemas"]["ScribeClinician"][] | null;
-            cds?: components["schemas"]["ScribeCdsConfig"] | null;
-            /** Custom Instructions */
-            custom_instructions?: string | null;
-            /** Enabled */
-            enabled?: boolean | null;
-            /** Keyterms */
-            keyterms?: string[] | null;
-            /** Language */
-            language?: string | null;
-            post_encounter?: components["schemas"]["ScribePostEncounterConfig"] | null;
-            safety?: components["schemas"]["ScribeSafetyConfig"] | null;
-            /** Soap Style */
-            soap_style?: ("concise" | "detailed" | "structured") | null;
-            /** Specialty */
-            specialty?: string | null;
-            /** Tools Enabled */
-            tools_enabled?: string[] | null;
-            /** Voice Auth Enabled */
-            voice_auth_enabled?: boolean | null;
-        };
-        /** ScribeSettingsResponse */
-        ScribeSettingsResponse: {
-            /** Authorized Clinicians */
-            authorized_clinicians: components["schemas"]["ScribeClinician"][];
-            cds?: components["schemas"]["ScribeCdsConfig"];
-            /** Custom Instructions */
-            custom_instructions?: string | null;
-            /** Enabled */
-            enabled: boolean;
-            /** Keyterms */
-            keyterms?: string[];
-            /**
-             * Language
-             * @default en
-             */
-            language?: string;
-            post_encounter?: components["schemas"]["ScribePostEncounterConfig"];
-            safety?: components["schemas"]["ScribeSafetyConfig"];
-            /**
-             * Soap Style
-             * @default concise
-             * @enum {string}
-             */
-            soap_style?: "concise" | "detailed" | "structured";
-            /** Specialty */
-            specialty?: string | null;
-            /** Tools Enabled */
-            tools_enabled?: string[] | null;
-            /**
-             * Voice Auth Enabled
-             * @default false
-             */
-            voice_auth_enabled?: boolean;
-        };
-        /** ScribeTranscriptionChunk */
-        ScribeTranscriptionChunk: {
-            /** Confidence */
-            confidence?: number | null;
-            /** Duration Seconds */
-            duration_seconds?: number | null;
-            /** End Seconds */
-            end_seconds: number;
-            /** Index */
-            index: number;
-            /** Start Seconds */
-            start_seconds: number;
-            /** Text */
-            text: string;
-        };
-        /** ScribeTranscriptionResponse */
-        ScribeTranscriptionResponse: {
-            /** Chunk Count */
-            chunk_count: number;
-            /** Chunks */
-            chunks?: components["schemas"]["ScribeTranscriptionChunk"][];
-            /** Confidence */
-            confidence?: number | null;
-            /** Duration Seconds */
-            duration_seconds: number;
-            /** Keyterm Count */
-            keyterm_count: number;
-            /** Language */
-            language: string;
-            /** Model */
-            model: string;
-            /** Segments */
-            segments?: components["schemas"]["ScribeTranscriptionSegment"][];
-            /** Transcript */
-            transcript: string;
-        };
-        /** ScribeTranscriptionSegment */
-        ScribeTranscriptionSegment: {
-            /** Confidence */
-            confidence?: number | null;
-            /** End Seconds */
-            end_seconds?: number | null;
-            /** Speaker */
-            speaker?: number | null;
-            /** Start Seconds */
-            start_seconds?: number | null;
-            /** Text */
-            text: string;
-        };
         /** SearchAvailableNumbersResponse */
         SearchAvailableNumbersResponse: {
             /** Numbers */
@@ -22985,7 +22426,7 @@ export interface components {
              * @default voice
              * @enum {string}
              */
-            channel_type?: "voice" | "text" | "scribe";
+            channel_type?: "voice" | "text";
             /**
              * Context Graph Id
              * Format: uuid
@@ -23124,7 +22565,7 @@ export interface components {
              * @default voice
              * @enum {string}
              */
-            channel_type?: "voice" | "text" | "scribe";
+            channel_type?: "voice" | "text";
             /**
              * Context Graph Id
              * Format: uuid
@@ -25876,13 +25317,6 @@ export interface components {
              */
             sub_tool_logs: components["schemas"]["SubToolLog"][];
         };
-        /** TestToolRequest */
-        TestToolRequest: {
-            /** Parameters */
-            parameters?: {
-                [key: string]: unknown;
-            };
-        };
         /** TextCompletedEvent */
         TextCompletedEvent: {
             /** Channel Kind */
@@ -26384,34 +25818,6 @@ export interface components {
              * Workspace Id
              * Format: uuid
              */
-            workspace_id: string;
-        };
-        /** ToolResponse */
-        ToolResponse: {
-            /** Created At */
-            created_at?: string | null;
-            /** Description */
-            description: string;
-            /** Enabled */
-            enabled: boolean;
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Parameters */
-            parameters: {
-                [key: string]: unknown;
-            };
-            /** Query */
-            query: string;
-            /**
-             * Target
-             * @constant
-             */
-            target: "lakebase";
-            /** Updated At */
-            updated_at?: string | null;
-            /** Workspace Id */
             workspace_id: string;
         };
         /**
@@ -27190,8 +26596,11 @@ export interface components {
             media_type?: string | null;
             /** Media Url */
             media_url?: string | null;
-            /** Message */
-            message: string;
+            /**
+             * Message
+             * @default
+             */
+            message?: string;
             /** Viewport Height */
             viewport_height?: number | null;
             /** Viewport Width */
@@ -27545,7 +26954,7 @@ export interface components {
             /** Agent Id */
             agent_id?: string | null;
             /** Channel Type */
-            channel_type?: ("voice" | "text" | "scribe") | null;
+            channel_type?: ("voice" | "text") | null;
             /** Context Graph Id */
             context_graph_id?: string | null;
             description?: components["schemas"]["DescriptionString"] | null;
@@ -27678,19 +27087,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** UpdateToolRequest */
-        UpdateToolRequest: {
-            description?: components["schemas"]["DescriptionString"] | null;
-            /** Enabled */
-            enabled?: boolean | null;
-            name?: components["schemas"]["NameString"] | null;
-            /** Parameters */
-            parameters?: {
-                [key: string]: unknown;
-            } | null;
-            /** Query */
-            query?: string | null;
         };
         /** UpdateTriggerRequest */
         UpdateTriggerRequest: {
@@ -28383,47 +27779,6 @@ export interface components {
              * Format: uuid
              */
             voicemail_id: string;
-        };
-        /** VoiceprintEnrollResponse */
-        VoiceprintEnrollResponse: {
-            /**
-             * Dimensions
-             * @default 192
-             */
-            dimensions?: number;
-            /**
-             * Enrolled
-             * @default true
-             */
-            enrolled?: boolean;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Model Id */
-            model_id: string;
-        };
-        /** VoiceprintStatusResponse */
-        VoiceprintStatusResponse: {
-            /** Enrolled */
-            enrolled: boolean;
-            /** Enrolled At */
-            enrolled_at?: string | null;
-            /** Model Id */
-            model_id?: string | null;
-        };
-        /** VoiceprintVerifyResponse */
-        VoiceprintVerifyResponse: {
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Similarity */
-            similarity: number;
-            /** Verified */
-            verified: boolean;
         };
         /** WebhookDestinationCreatedResponse */
         WebhookDestinationCreatedResponse: {
@@ -36713,109 +36068,6 @@ export interface operations {
             };
         };
     };
-    "get-fork": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ForkResponse"] | null;
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "create-fork": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateForkRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ForkResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "delete-fork": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "list-functions": {
         parameters: {
             query?: never;
@@ -38353,46 +37605,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "execute-workspace-query": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ExecuteQueryRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QueryResultResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -41495,9 +40707,9 @@ export interface operations {
     "list-prompt-logs": {
         parameters: {
             query?: {
-                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim, scribe). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
+                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
                 conversation_id?: string | null;
-                /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim/scribe sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
+                /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
                 call_sid?: string | null;
                 /** @description Filter by prompt_type (e.g. engage_user, navigation, tool) */
                 prompt_type?: string | null;
@@ -41561,213 +40773,6 @@ export interface operations {
             };
             /** @description Raw world event reads disabled or warehouse unavailable */
             503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-query-tools": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ToolResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "create-query-tool": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateToolRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ToolResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "delete-query-tool": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                tool_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-query-tool": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                tool_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateToolRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ToolResponse"];
-                };
-            };
-            /** @description Tool not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "test-query-tool": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                tool_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TestToolRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QueryResultResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -43019,189 +42024,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "finalize-encounter": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                encounter_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "approve-icd10-code": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                encounter_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApproveICD10Request"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "reject-icd10-code": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                encounter_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RejectICD10Request"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "edit-encounter-soap": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                encounter_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EditSoapRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "transcribe-scribe-recording": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_transcribe-scribe-recording"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScribeTranscriptionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
@@ -44838,82 +43660,6 @@ export interface operations {
             };
         };
     };
-    "get-scribe-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScribeSettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-scribe-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ScribeSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ScribeSettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-security-settings": {
         parameters: {
             query?: never;
@@ -45366,6 +44112,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedResponse_SimulationCaseResponse_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-simulation-cases": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSimulationCasesRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateSimulationCasesResponse"];
                 };
             };
             /** @description Validation Error */
@@ -48632,143 +47413,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "enroll-voiceprint": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_enroll-voiceprint"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoiceprintEnrollResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "verify-voiceprint": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_verify-voiceprint"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoiceprintVerifyResponse"];
-                };
-            };
-            /** @description Bad Request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not Found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Service Unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-voiceprint-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                entity_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoiceprintStatusResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };

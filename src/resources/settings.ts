@@ -159,22 +159,6 @@ export class SettingsResource extends WorkspaceScopedResource {
       ),
   }
 
-  readonly scribe = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/scribe', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['ScribeSettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/scribe', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
-
   readonly metrics = {
     get: async () =>
       extractData(
