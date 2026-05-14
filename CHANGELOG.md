@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.52.0] - 2026-05-14
+
+### Improvements
+
+- Update generated operation snapshots (#247)
+- Regenerate SDK without voiceprint settings (#246)
+
 ## [0.51.0] - 2026-05-14
 
 ### Improvements
