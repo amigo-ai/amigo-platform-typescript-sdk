@@ -16342,10 +16342,7 @@ export interface components {
         LLMConfig: {
             /** Llm Name */
             llm_name: string;
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
@@ -25343,10 +25340,7 @@ export interface components {
             agent_version_number?: number | null;
             /** Context Graph Version Number */
             context_graph_version_number?: number | null;
-            /**
-             * Llm Model Preferences
-             * @default {}
-             */
+            /** Llm Model Preferences */
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };

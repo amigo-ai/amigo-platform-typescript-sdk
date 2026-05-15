@@ -21910,7 +21910,6 @@
           },
           "params": {
             "additionalProperties": true,
-            "default": {},
             "title": "Params",
             "type": "object"
           }
@@ -43969,7 +43968,6 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/LLMConfig"
             },
-            "default": {},
             "title": "Llm Model Preferences",
             "type": "object"
           }
