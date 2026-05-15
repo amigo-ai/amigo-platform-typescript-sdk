@@ -4481,7 +4481,7 @@ export interface paths {
          * List prompt logs for a workspace
          * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
          *
-         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
+         *     **Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
          *
          *     **Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
          *
@@ -7179,7 +7179,7 @@ export interface paths {
         };
         /**
          * List current enrichment values for an entity
-         * @description Current winners per (entity, key) from world.entity_enrichment (Synced-Table-populated view of SDP's entity_enrichment_current). Each row carries value, value_type, confidence, source, effective_at.
+         * @description Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.
          */
         get: operations["list-entity-enrichment"];
         put?: never;
@@ -11484,7 +11484,7 @@ export interface components {
              * @default {}
              */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -13242,7 +13242,7 @@ export interface components {
              */
             ingested_at: string;
             /** Is Current */
-            is_current: boolean;
+            is_current: boolean | null;
             /** Source */
             source: string;
             /** Source System */
@@ -13259,6 +13259,11 @@ export interface components {
         };
         /** EnrichmentHistoryResponse */
         EnrichmentHistoryResponse: {
+            /**
+             * Dropped Count
+             * @default 0
+             */
+            dropped_count?: number;
             /**
              * Entity Id
              * Format: uuid
@@ -13430,11 +13435,15 @@ export interface components {
         };
         /** EntityEventResponse */
         EntityEventResponse: {
+            /** Amount */
+            amount?: number | null;
+            call_sid?: components["schemas"]["EventCallSidString"] | null;
+            channel?: components["schemas"]["EventChannelString"] | null;
             /**
              * Confidence
              * @default 1
              */
-            confidence?: number;
+            confidence?: number | null;
             /**
              * Created At
              * @description When the event was created
@@ -13444,8 +13453,13 @@ export interface components {
             data?: {
                 [key: string]: unknown;
             };
+            description?: components["schemas"]["EventDescriptionString"] | null;
+            direction?: components["schemas"]["EventDirectionString"] | null;
+            display_name?: components["schemas"]["EventDisplayNameString"] | null;
             /** Domain */
             domain: string;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Effective At */
             effective_at?: string | null;
             /** Entity Type */
@@ -13469,16 +13483,18 @@ export interface components {
              * Is Current
              * @default true
              */
-            is_current?: boolean;
+            is_current?: boolean | null;
+            outcome?: components["schemas"]["EventOutcomeString"] | null;
             /** Produced By Agent */
             produced_by_agent?: string | null;
             /**
              * Source
              * @default manual
              */
-            source?: string;
+            source?: string | null;
             /** Source System */
             source_system?: string | null;
+            status?: components["schemas"]["EventStatusString"] | null;
             /** Supersedes */
             supersedes?: string | null;
             /** Sync Error */
@@ -13853,6 +13869,11 @@ export interface components {
             by_event_type?: {
                 [key: string]: number;
             };
+            /**
+             * Event Type Window Days
+             * @description Window applied to by_event_type counts when an entity_type filter is supplied.
+             */
+            event_type_window_days?: number | null;
             /** Sync Failed */
             sync_failed: number;
             /** Sync Pending */
@@ -14172,6 +14193,13 @@ export interface components {
              */
             workspace_id: string;
         };
+        EventCallSidString: string;
+        EventChannelString: string;
+        EventDescriptionString: string;
+        EventDirectionString: string;
+        EventDisplayNameString: string;
+        EventOutcomeString: string;
+        EventStatusString: string;
         /**
          * EventSummary
          * @description Inline event data for review context — avoids extra API calls.
@@ -16340,15 +16368,69 @@ export interface components {
         };
         /** LLMConfig */
         LLMConfig: {
+            experience_controls?: components["schemas"]["LLMExperienceControls"] | null;
             /** Llm Name */
             llm_name: string;
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * LLMExperienceControls
+         * @description First-class chat experience controls for consumer-facing agents.
+         *
+         *     ``params`` remains available as a provider-specific escape hatch. These
+         *     fields cover the OpenAI Chat Completions controls that most directly shape
+         *     response tone, feel, determinism, latency, and structured output behavior.
+         *     Token budgets are intentionally excluded so version sets do not reintroduce
+         *     accidental response truncation.
+         */
+        LLMExperienceControls: {
+            /** Frequency Penalty */
+            frequency_penalty?: number | null;
+            /** Logit Bias */
+            logit_bias?: {
+                [key: string]: number;
+            } | null;
+            /** Logprobs */
+            logprobs?: boolean | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: string;
+            } | null;
+            /** Parallel Tool Calls */
+            parallel_tool_calls?: boolean | null;
+            /** Presence Penalty */
+            presence_penalty?: number | null;
+            /** Prompt Cache Key */
+            prompt_cache_key?: string | null;
+            /** Prompt Cache Retention */
+            prompt_cache_retention?: ("in-memory" | "24h") | null;
+            /** Reasoning Effort */
+            reasoning_effort?: ("none" | "minimal" | "low" | "medium" | "high" | "xhigh") | null;
+            /** Response Format */
+            response_format?: {
+                [key: string]: unknown;
+            } | null;
+            /** Safety Identifier */
+            safety_identifier?: string | null;
+            /** Seed */
+            seed?: number | null;
+            /** Service Tier */
+            service_tier?: string | null;
+            /** Stop */
+            stop?: string | string[] | null;
+            /** Store */
+            store?: boolean | null;
+            /** Temperature */
+            temperature?: number | null;
+            /** Top Logprobs */
+            top_logprobs?: number | null;
+            /** Top P */
+            top_p?: number | null;
+            /** Verbosity */
+            verbosity?: ("low" | "medium" | "high") | null;
         };
         /**
          * LanguageProviderEntry
@@ -20587,7 +20669,7 @@ export interface components {
             updated_at?: string | null;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
         };
@@ -20728,7 +20810,7 @@ export interface components {
             updated_at: string;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
             /**
@@ -24938,7 +25020,7 @@ export interface components {
             tool_capacity?: number | null;
             /** Version Sets */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             } | null;
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -25146,7 +25228,7 @@ export interface components {
         };
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
-            version_set: components["schemas"]["VersionSet"];
+            version_set: components["schemas"]["VersionSet-Input"];
         };
         /** UsageBucket */
         UsageBucket: {
@@ -25338,15 +25420,26 @@ export interface components {
          * VersionSet
          * @description Pins agent, state machine, and LLM model versions for a service.
          */
-        VersionSet: {
+        "VersionSet-Input": {
             /** Agent Version Number */
             agent_version_number?: number | null;
             /** Context Graph Version Number */
             context_graph_version_number?: number | null;
-            /**
-             * Llm Model Preferences
-             * @default {}
-             */
+            /** Llm Model Preferences */
+            llm_model_preferences?: {
+                [key: string]: components["schemas"]["LLMConfig"];
+            };
+        };
+        /**
+         * VersionSet
+         * @description Pins agent, state machine, and LLM model versions for a service.
+         */
+        "VersionSet-Output": {
+            /** Agent Version Number */
+            agent_version_number?: number | null;
+            /** Context Graph Version Number */
+            context_graph_version_number?: number | null;
+            /** Llm Model Preferences */
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
@@ -37152,7 +37245,7 @@ export interface operations {
     "list-prompt-logs": {
         parameters: {
             query?: {
-                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
+                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter. */
                 conversation_id?: string | null;
                 /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
                 call_sid?: string | null;
