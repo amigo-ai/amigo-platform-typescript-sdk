@@ -13242,7 +13242,7 @@ export interface components {
              */
             ingested_at: string;
             /** Is Current */
-            is_current: boolean;
+            is_current: boolean | null;
             /** Source */
             source: string;
             /** Source System */
@@ -13259,6 +13259,11 @@ export interface components {
         };
         /** EnrichmentHistoryResponse */
         EnrichmentHistoryResponse: {
+            /**
+             * Dropped Count
+             * @default 0
+             */
+            dropped_count?: number;
             /**
              * Entity Id
              * Format: uuid
@@ -13430,11 +13435,15 @@ export interface components {
         };
         /** EntityEventResponse */
         EntityEventResponse: {
+            /** Amount */
+            amount?: number | null;
+            call_sid?: components["schemas"]["EventCallSidString"] | null;
+            channel?: components["schemas"]["EventChannelString"] | null;
             /**
              * Confidence
              * @default 1
              */
-            confidence?: number;
+            confidence?: number | null;
             /**
              * Created At
              * @description When the event was created
@@ -13444,8 +13453,13 @@ export interface components {
             data?: {
                 [key: string]: unknown;
             };
+            description?: components["schemas"]["EventDescriptionString"] | null;
+            direction?: components["schemas"]["EventDirectionString"] | null;
+            display_name?: components["schemas"]["EventDisplayNameString"] | null;
             /** Domain */
             domain: string;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Effective At */
             effective_at?: string | null;
             /** Entity Type */
@@ -13469,16 +13483,18 @@ export interface components {
              * Is Current
              * @default true
              */
-            is_current?: boolean;
+            is_current?: boolean | null;
+            outcome?: components["schemas"]["EventOutcomeString"] | null;
             /** Produced By Agent */
             produced_by_agent?: string | null;
             /**
              * Source
              * @default manual
              */
-            source?: string;
+            source?: string | null;
             /** Source System */
             source_system?: string | null;
+            status?: components["schemas"]["EventStatusString"] | null;
             /** Supersedes */
             supersedes?: string | null;
             /** Sync Error */
@@ -13853,6 +13869,11 @@ export interface components {
             by_event_type?: {
                 [key: string]: number;
             };
+            /**
+             * Event Type Window Days
+             * @description Window applied to by_event_type counts when an entity_type filter is supplied.
+             */
+            event_type_window_days?: number | null;
             /** Sync Failed */
             sync_failed: number;
             /** Sync Pending */
@@ -14172,6 +14193,13 @@ export interface components {
              */
             workspace_id: string;
         };
+        EventCallSidString: string;
+        EventChannelString: string;
+        EventDescriptionString: string;
+        EventDirectionString: string;
+        EventDisplayNameString: string;
+        EventOutcomeString: string;
+        EventStatusString: string;
         /**
          * EventSummary
          * @description Inline event data for review context — avoids extra API calls.
@@ -16342,10 +16370,7 @@ export interface components {
         LLMConfig: {
             /** Llm Name */
             llm_name: string;
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
@@ -25343,10 +25368,7 @@ export interface components {
             agent_version_number?: number | null;
             /** Context Graph Version Number */
             context_graph_version_number?: number | null;
-            /**
-             * Llm Model Preferences
-             * @default {}
-             */
+            /** Llm Model Preferences */
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };

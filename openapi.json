@@ -14231,8 +14231,15 @@
             "type": "string"
           },
           "is_current": {
-            "title": "Is Current",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Current"
           },
           "source": {
             "title": "Source",
@@ -14291,6 +14298,11 @@
       },
       "EnrichmentHistoryResponse": {
         "properties": {
+          "dropped_count": {
+            "default": 0,
+            "title": "Dropped Count",
+            "type": "integer"
+          },
           "entity_id": {
             "format": "uuid",
             "title": "Entity Id",
@@ -14766,10 +14778,48 @@
       },
       "EntityEventResponse": {
         "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "call_sid": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventCallSidString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventChannelString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": 1.0,
-            "title": "Confidence",
-            "type": "number"
+            "title": "Confidence"
           },
           "created_at": {
             "anyOf": [
@@ -14789,9 +14839,50 @@
             "title": "Data",
             "type": "object"
           },
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDirectionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDisplayNameString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "domain": {
             "title": "Domain",
             "type": "string"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
           },
           "effective_at": {
             "anyOf": [
@@ -14871,9 +14962,26 @@
             "title": "Ingested At"
           },
           "is_current": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": true,
-            "title": "Is Current",
-            "type": "boolean"
+            "title": "Is Current"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventOutcomeString"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "produced_by_agent": {
             "anyOf": [
@@ -14887,9 +14995,16 @@
             "title": "Produced By Agent"
           },
           "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": "manual",
-            "title": "Source",
-            "type": "string"
+            "title": "Source"
           },
           "source_system": {
             "anyOf": [
@@ -14901,6 +15016,16 @@
               }
             ],
             "title": "Source System"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventStatusString"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "supersedes": {
             "anyOf": [
@@ -15782,6 +15907,18 @@
             "title": "By Event Type",
             "type": "object"
           },
+          "event_type_window_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Window applied to by_event_type counts when an entity_type filter is supplied.",
+            "title": "Event Type Window Days"
+          },
           "sync_failed": {
             "title": "Sync Failed",
             "type": "integer"
@@ -16575,6 +16712,34 @@
         ],
         "title": "EventBreakdownResponse",
         "type": "object"
+      },
+      "EventCallSidString": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "EventChannelString": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "EventDescriptionString": {
+        "maxLength": 4096,
+        "type": "string"
+      },
+      "EventDirectionString": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "EventDisplayNameString": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "EventOutcomeString": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "EventStatusString": {
+        "maxLength": 128,
+        "type": "string"
       },
       "EventSummary": {
         "description": "Inline event data for review context \u2014 avoids extra API calls.",
@@ -21910,7 +22075,6 @@
           },
           "params": {
             "additionalProperties": true,
-            "default": {},
             "title": "Params",
             "type": "object"
           }
@@ -43969,7 +44133,6 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/LLMConfig"
             },
-            "default": {},
             "title": "Llm Model Preferences",
             "type": "object"
           }
