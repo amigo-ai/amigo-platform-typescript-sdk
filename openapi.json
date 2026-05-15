@@ -10222,7 +10222,7 @@
           },
           "version_sets": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/VersionSet"
+              "$ref": "#/components/schemas/VersionSet-Input"
             },
             "default": {},
             "title": "Version Sets",
@@ -14231,8 +14231,15 @@
             "type": "string"
           },
           "is_current": {
-            "title": "Is Current",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Current"
           },
           "source": {
             "title": "Source",
@@ -14291,6 +14298,11 @@
       },
       "EnrichmentHistoryResponse": {
         "properties": {
+          "dropped_count": {
+            "default": 0,
+            "title": "Dropped Count",
+            "type": "integer"
+          },
           "entity_id": {
             "format": "uuid",
             "title": "Entity Id",
@@ -14766,10 +14778,48 @@
       },
       "EntityEventResponse": {
         "properties": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "call_sid": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventCallSidString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventChannelString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": 1.0,
-            "title": "Confidence",
-            "type": "number"
+            "title": "Confidence"
           },
           "created_at": {
             "anyOf": [
@@ -14789,9 +14839,50 @@
             "title": "Data",
             "type": "object"
           },
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDirectionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventDisplayNameString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "domain": {
             "title": "Domain",
             "type": "string"
+          },
+          "duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Seconds"
           },
           "effective_at": {
             "anyOf": [
@@ -14871,9 +14962,26 @@
             "title": "Ingested At"
           },
           "is_current": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": true,
-            "title": "Is Current",
-            "type": "boolean"
+            "title": "Is Current"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventOutcomeString"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "produced_by_agent": {
             "anyOf": [
@@ -14887,9 +14995,16 @@
             "title": "Produced By Agent"
           },
           "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "default": "manual",
-            "title": "Source",
-            "type": "string"
+            "title": "Source"
           },
           "source_system": {
             "anyOf": [
@@ -14901,6 +15016,16 @@
               }
             ],
             "title": "Source System"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventStatusString"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "supersedes": {
             "anyOf": [
@@ -15782,6 +15907,18 @@
             "title": "By Event Type",
             "type": "object"
           },
+          "event_type_window_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Window applied to by_event_type counts when an entity_type filter is supplied.",
+            "title": "Event Type Window Days"
+          },
           "sync_failed": {
             "title": "Sync Failed",
             "type": "integer"
@@ -16575,6 +16712,34 @@
         ],
         "title": "EventBreakdownResponse",
         "type": "object"
+      },
+      "EventCallSidString": {
+        "maxLength": 128,
+        "type": "string"
+      },
+      "EventChannelString": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "EventDescriptionString": {
+        "maxLength": 4096,
+        "type": "string"
+      },
+      "EventDirectionString": {
+        "maxLength": 64,
+        "type": "string"
+      },
+      "EventDisplayNameString": {
+        "maxLength": 512,
+        "type": "string"
+      },
+      "EventOutcomeString": {
+        "maxLength": 256,
+        "type": "string"
+      },
+      "EventStatusString": {
+        "maxLength": 128,
+        "type": "string"
       },
       "EventSummary": {
         "description": "Inline event data for review context \u2014 avoids extra API calls.",
@@ -21904,13 +22069,22 @@
       },
       "LLMConfig": {
         "properties": {
+          "experience_controls": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LLMExperienceControls"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "llm_name": {
             "title": "Llm Name",
             "type": "string"
           },
           "params": {
             "additionalProperties": true,
-            "default": {},
             "title": "Params",
             "type": "object"
           }
@@ -21919,6 +22093,265 @@
           "llm_name"
         ],
         "title": "LLMConfig",
+        "type": "object"
+      },
+      "LLMExperienceControls": {
+        "additionalProperties": false,
+        "description": "First-class chat experience controls for consumer-facing agents.\n\n``params`` remains available as a provider-specific escape hatch. These\nfields cover the OpenAI Chat Completions controls that most directly shape\nresponse tone, feel, determinism, latency, and structured output behavior.\nToken budgets are intentionally excluded so version sets do not reintroduce\naccidental response truncation.",
+        "properties": {
+          "frequency_penalty": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Frequency Penalty"
+          },
+          "logit_bias": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maximum": 100.0,
+                  "minimum": -100.0,
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logit Bias"
+          },
+          "logprobs": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Logprobs"
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metadata"
+          },
+          "parallel_tool_calls": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parallel Tool Calls"
+          },
+          "presence_penalty": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": -2.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Presence Penalty"
+          },
+          "prompt_cache_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Cache Key"
+          },
+          "prompt_cache_retention": {
+            "anyOf": [
+              {
+                "enum": [
+                  "in-memory",
+                  "24h"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Cache Retention"
+          },
+          "reasoning_effort": {
+            "anyOf": [
+              {
+                "enum": [
+                  "none",
+                  "minimal",
+                  "low",
+                  "medium",
+                  "high",
+                  "xhigh"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reasoning Effort"
+          },
+          "response_format": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Response Format"
+          },
+          "safety_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Identifier"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "service_tier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Tier"
+          },
+          "stop": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stop"
+          },
+          "store": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Store"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
+          "top_logprobs": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top Logprobs"
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top P"
+          },
+          "verbosity": {
+            "anyOf": [
+              {
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verbosity"
+          }
+        },
+        "title": "LLMExperienceControls",
         "type": "object"
       },
       "LanguageProviderEntry": {
@@ -32200,7 +32633,7 @@
           },
           "version_sets": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/VersionSet"
+              "$ref": "#/components/schemas/VersionSet-Output"
             },
             "title": "Version Sets",
             "type": "object"
@@ -32435,7 +32868,7 @@
           },
           "version_sets": {
             "additionalProperties": {
-              "$ref": "#/components/schemas/VersionSet"
+              "$ref": "#/components/schemas/VersionSet-Output"
             },
             "title": "Version Sets",
             "type": "object"
@@ -42717,7 +43150,7 @@
             "anyOf": [
               {
                 "additionalProperties": {
-                  "$ref": "#/components/schemas/VersionSet"
+                  "$ref": "#/components/schemas/VersionSet-Input"
                 },
                 "type": "object"
               },
@@ -43546,7 +43979,7 @@
       "UpsertVersionSetRequest": {
         "properties": {
           "version_set": {
-            "$ref": "#/components/schemas/VersionSet"
+            "$ref": "#/components/schemas/VersionSet-Input"
           }
         },
         "required": [
@@ -43940,7 +44373,7 @@
         "title": "ValidationError",
         "type": "object"
       },
-      "VersionSet": {
+      "VersionSet-Input": {
         "description": "Pins agent, state machine, and LLM model versions for a service.",
         "properties": {
           "agent_version_number": {
@@ -43969,7 +44402,42 @@
             "additionalProperties": {
               "$ref": "#/components/schemas/LLMConfig"
             },
-            "default": {},
+            "title": "Llm Model Preferences",
+            "type": "object"
+          }
+        },
+        "title": "VersionSet",
+        "type": "object"
+      },
+      "VersionSet-Output": {
+        "description": "Pins agent, state machine, and LLM model versions for a service.",
+        "properties": {
+          "agent_version_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agent Version Number"
+          },
+          "context_graph_version_number": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Graph Version Number"
+          },
+          "llm_model_preferences": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LLMConfig"
+            },
             "title": "Llm Model Preferences",
             "type": "object"
           }
@@ -66287,7 +66755,7 @@
     },
     "/v1/{workspace_id}/prompt-logs": {
       "get": {
-        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model \u2014 works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
+        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
         "operationId": "list-prompt-logs",
         "parameters": [
           {
@@ -66301,7 +66769,7 @@
             }
           },
           {
-            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
             "in": "query",
             "name": "conversation_id",
             "required": false,
@@ -66315,7 +66783,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter.",
+              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
               "title": "Conversation Id"
             }
           },
@@ -76868,7 +77336,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/enrichment": {
       "get": {
-        "description": "Current winners per (entity, key) from world.entity_enrichment (Synced-Table-populated view of SDP's entity_enrichment_current). Each row carries value, value_type, confidence, source, effective_at.",
+        "description": "Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.",
         "operationId": "list-entity-enrichment",
         "parameters": [
           {
