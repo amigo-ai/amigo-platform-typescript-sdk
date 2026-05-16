@@ -2250,6 +2250,76 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/data_queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Workspace Data Queries */
+        get: operations["list-workspace-data-queries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/data_queries/{name}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workspace Data Query */
+        get: operations["get-workspace-data-query"];
+        /** Deploy Workspace Data Query */
+        put: operations["deploy-workspace-data-query"];
+        post?: never;
+        /** Delete Workspace Data Query */
+        delete: operations["delete-workspace-data-query"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/data_queries/{name}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invoke Workspace Data Query */
+        post: operations["invoke-workspace-data-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/data_queries/{name}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Test Workspace Data Query */
+        post: operations["test-workspace-data-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/desktop-sessions": {
         parameters: {
             query?: never;
@@ -4481,7 +4551,7 @@ export interface paths {
          * List prompt logs for a workspace
          * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
          *
-         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
+         *     **Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
          *
          *     **Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
          *
@@ -7179,7 +7249,7 @@ export interface paths {
         };
         /**
          * List current enrichment values for an entity
-         * @description Current winners per (entity, key) from world.entity_enrichment (Synced-Table-populated view of SDP's entity_enrichment_current). Each row carries value, value_type, confidence, source, effective_at.
+         * @description Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.
          */
         get: operations["list-entity-enrichment"];
         put?: never;
@@ -7878,7 +7948,7 @@ export interface components {
         };
         /** AddColumnAction */
         AddColumnAction: {
-            column: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Column"];
+            column: components["schemas"]["Column-Input"];
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -8215,6 +8285,66 @@ export interface components {
         /** ArchiveWorkspaceRequest */
         ArchiveWorkspaceRequest: {
             slug: components["schemas"]["SlugString"];
+        };
+        /**
+         * ArtifactMetricProjectionRequest
+         * @description Generic source-artifact metric projection request.
+         *
+         *     The payload is used only inside this request transaction for static
+         *     extraction. Async metric jobs store source pointers, not this payload.
+         */
+        ArtifactMetricProjectionRequest: {
+            /** Artifact Id */
+            artifact_id: string;
+            /**
+             * Artifact Revision
+             * @default
+             */
+            artifact_revision?: string;
+            /** Artifact Type */
+            artifact_type: string;
+            /**
+             * Entity Id
+             * @default
+             */
+            entity_id?: string;
+            /**
+             * Entity Type
+             * @default workspace
+             */
+            entity_type?: string;
+            /**
+             * Event Type
+             * @default *
+             */
+            event_type?: string;
+            /**
+             * Metric Source
+             * @description Metric source key, such as world_model or connector_events.
+             */
+            metric_source: string;
+            /**
+             * Observed At
+             * Format: date-time
+             * @description Producer-observed source artifact timestamp. Required so historical projections keep timeline integrity.
+             */
+            observed_at: string;
+            /** Payload */
+            payload?: {
+                [key: string]: unknown;
+            };
+            /** Run Id */
+            run_id?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default production
+             * @enum {string}
+             */
+            source?: "production" | "simulation";
         };
         /** AttachWorkspaceRequest */
         AttachWorkspaceRequest: {
@@ -9295,6 +9425,11 @@ export interface components {
             /** @description Tool usage statistics */
             tool_summary?: components["schemas"]["ToolSummary"] | null;
         };
+        /** CallIntelligenceMetricProjectionRequest */
+        CallIntelligenceMetricProjectionRequest: {
+            /** Call Sid */
+            call_sid: string;
+        };
         /** CallListResponse */
         CallListResponse: {
             /** Continuation Token */
@@ -10098,6 +10233,17 @@ export interface components {
             type: string;
             /** Validation */
             validation?: string | null;
+        };
+        /** Column */
+        "Column-Input": {
+            default?: components["schemas"]["Default"] | null;
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * Nullable
+             * @default true
+             */
+            nullable?: boolean;
+            type: components["schemas"]["ColumnType"];
         };
         /** Column */
         "Column-Output": {
@@ -11484,7 +11630,7 @@ export interface components {
              * @default {}
              */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -12527,6 +12673,23 @@ export interface components {
             /** Feature Name */
             feature_name: string;
         };
+        /** Default */
+        Default: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "literal" | "uuid_v4" | "now" | "current_date";
+            /**
+             * Value
+             * @description Only meaningful for ``kind="literal"``. Other kinds ignore it.
+             *     A ``dict`` value is rendered as a JSONB literal — pair it with a
+             *     ``jsonb`` column.
+             */
+            value?: string | number | boolean | {
+                [key: string]: unknown;
+            } | null;
+        };
         /**
          * DeliverSurfaceRequest
          * @description Request to mark a surface as delivered.
@@ -13242,7 +13405,7 @@ export interface components {
              */
             ingested_at: string;
             /** Is Current */
-            is_current: boolean;
+            is_current: boolean | null;
             /** Source */
             source: string;
             /** Source System */
@@ -13259,6 +13422,11 @@ export interface components {
         };
         /** EnrichmentHistoryResponse */
         EnrichmentHistoryResponse: {
+            /**
+             * Dropped Count
+             * @default 0
+             */
+            dropped_count?: number;
             /**
              * Entity Id
              * Format: uuid
@@ -13430,11 +13598,15 @@ export interface components {
         };
         /** EntityEventResponse */
         EntityEventResponse: {
+            /** Amount */
+            amount?: number | null;
+            call_sid?: components["schemas"]["EventCallSidString"] | null;
+            channel?: components["schemas"]["EventChannelString"] | null;
             /**
              * Confidence
              * @default 1
              */
-            confidence?: number;
+            confidence?: number | null;
             /**
              * Created At
              * @description When the event was created
@@ -13444,8 +13616,13 @@ export interface components {
             data?: {
                 [key: string]: unknown;
             };
+            description?: components["schemas"]["EventDescriptionString"] | null;
+            direction?: components["schemas"]["EventDirectionString"] | null;
+            display_name?: components["schemas"]["EventDisplayNameString"] | null;
             /** Domain */
             domain: string;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Effective At */
             effective_at?: string | null;
             /** Entity Type */
@@ -13469,16 +13646,18 @@ export interface components {
              * Is Current
              * @default true
              */
-            is_current?: boolean;
+            is_current?: boolean | null;
+            outcome?: components["schemas"]["EventOutcomeString"] | null;
             /** Produced By Agent */
             produced_by_agent?: string | null;
             /**
              * Source
              * @default manual
              */
-            source?: string;
+            source?: string | null;
             /** Source System */
             source_system?: string | null;
+            status?: components["schemas"]["EventStatusString"] | null;
             /** Supersedes */
             supersedes?: string | null;
             /** Sync Error */
@@ -13853,6 +14032,11 @@ export interface components {
             by_event_type?: {
                 [key: string]: number;
             };
+            /**
+             * Event Type Window Days
+             * @description Window applied to by_event_type counts when an entity_type filter is supplied.
+             */
+            event_type_window_days?: number | null;
             /** Sync Failed */
             sync_failed: number;
             /** Sync Pending */
@@ -14172,6 +14356,13 @@ export interface components {
              */
             workspace_id: string;
         };
+        EventCallSidString: string;
+        EventChannelString: string;
+        EventDescriptionString: string;
+        EventDirectionString: string;
+        EventDisplayNameString: string;
+        EventOutcomeString: string;
+        EventStatusString: string;
         /**
          * EventSummary
          * @description Inline event data for review context — avoids extra API calls.
@@ -16340,15 +16531,69 @@ export interface components {
         };
         /** LLMConfig */
         LLMConfig: {
+            experience_controls?: components["schemas"]["LLMExperienceControls"] | null;
             /** Llm Name */
             llm_name: string;
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * LLMExperienceControls
+         * @description First-class chat experience controls for consumer-facing agents.
+         *
+         *     ``params`` remains available as a provider-specific escape hatch. These
+         *     fields cover the OpenAI Chat Completions controls that most directly shape
+         *     response tone, feel, determinism, latency, and structured output behavior.
+         *     Token budgets are intentionally excluded so version sets do not reintroduce
+         *     accidental response truncation.
+         */
+        LLMExperienceControls: {
+            /** Frequency Penalty */
+            frequency_penalty?: number | null;
+            /** Logit Bias */
+            logit_bias?: {
+                [key: string]: number;
+            } | null;
+            /** Logprobs */
+            logprobs?: boolean | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: string;
+            } | null;
+            /** Parallel Tool Calls */
+            parallel_tool_calls?: boolean | null;
+            /** Presence Penalty */
+            presence_penalty?: number | null;
+            /** Prompt Cache Key */
+            prompt_cache_key?: string | null;
+            /** Prompt Cache Retention */
+            prompt_cache_retention?: ("in-memory" | "24h") | null;
+            /** Reasoning Effort */
+            reasoning_effort?: ("none" | "minimal" | "low" | "medium" | "high" | "xhigh") | null;
+            /** Response Format */
+            response_format?: {
+                [key: string]: unknown;
+            } | null;
+            /** Safety Identifier */
+            safety_identifier?: string | null;
+            /** Seed */
+            seed?: number | null;
+            /** Service Tier */
+            service_tier?: string | null;
+            /** Stop */
+            stop?: string | string[] | null;
+            /** Store */
+            store?: boolean | null;
+            /** Temperature */
+            temperature?: number | null;
+            /** Top Logprobs */
+            top_logprobs?: number | null;
+            /** Top P */
+            top_p?: number | null;
+            /** Verbosity */
+            verbosity?: ("low" | "medium" | "high") | null;
         };
         /**
          * LanguageProviderEntry
@@ -17007,6 +17252,11 @@ export interface components {
              * @enum {string}
              */
             channel_scope?: "all" | "voice" | "text" | "surface" | "inbound" | "outbound";
+            /**
+             * Custom Source Key
+             * @description Extension source key used only when source='custom'.
+             */
+            custom_source_key?: string | null;
             description?: components["schemas"]["DescriptionString"] | null;
             /**
              * Event Types
@@ -17092,10 +17342,10 @@ export interface components {
             ratio_numerator_event?: string | null;
             /**
              * Source
-             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from Delta world_events. 'surface_events' reads from Delta world_events WHERE domain='surface'.
+             * @description Source key for the producer that supplies this metric. Built-ins include 'call_intelligence', 'world_events', and 'surface_events'. Use 'custom' with custom_source_key for extension producers.
              * @enum {string}
              */
-            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results";
+            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results" | "custom";
             /**
              * Source Filter
              * @description Optional SQL WHERE fragment for additional filtering (e.g. "source = 'voice_agent'"). Applied after event_type filter.
@@ -17162,6 +17412,20 @@ export interface components {
         MetricListResponse: {
             /** Metrics */
             metrics: (components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"])[];
+        };
+        /** MetricProjectionResponse */
+        MetricProjectionResponse: {
+            /** Accepted */
+            accepted: number;
+            /** Queued Jobs */
+            queued_jobs: number;
+            /** Skipped Duplicates */
+            skipped_duplicates: number;
+            /**
+             * Status
+             * @constant
+             */
+            status: "projected";
         };
         /**
          * MetricSettingsRequest
@@ -18310,20 +18574,14 @@ export interface components {
         };
         /**
          * Parameter
-         * @description Typed declaration of one input parameter.
+         * @description One typed input parameter to a workspace data query.
          *
-         *     For SQL function types, ``name`` becomes the ``:name`` placeholder
-         *     in the SQL template. For Python function types, ``name`` becomes
-         *     the positional argument name in ``def main(...)`` and the input
-         *     column name on the UC UDF signature.
-         *
-         *     The ``description`` propagates into the LLM tool spec (this is
-         *     what Databricks' Agent Framework reads, and what Anthropic's
-         *     tool-use spec exposes to the model). Missing descriptions
-         *     silently break tool selection — the registration layer rejects
-         *     empty strings.
+         *     ``name`` becomes the ``:name`` placeholder in ``sql_template``.
+         *     ``default is None`` is the canonical "required" signal — the
+         *     executor raises if a caller omits a required argument, and
+         *     substitutes the stored default for optionals.
          */
-        Parameter: {
+        "Parameter-Output": {
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -19735,7 +19993,7 @@ export interface components {
             /** Name */
             name: string;
             /** Parameters */
-            parameters?: components["schemas"]["Parameter"][];
+            parameters?: components["schemas"]["platform_lib__platform_functions__models__Parameter"][];
             /**
              * Returns
              * @default table
@@ -20587,7 +20845,7 @@ export interface components {
             updated_at?: string | null;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
         };
@@ -20728,7 +20986,7 @@ export interface components {
             updated_at: string;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
             /**
@@ -21095,7 +21353,7 @@ export interface components {
         };
         /** SetColumnDefaultAction */
         SetColumnDefaultAction: {
-            default: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"];
+            default: components["schemas"]["Default"];
             name: components["schemas"]["IdentifierString"];
             /**
              * @description discriminator enum property added by openapi-typescript
@@ -24938,7 +25196,7 @@ export interface components {
             tool_capacity?: number | null;
             /** Version Sets */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             } | null;
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -25146,7 +25404,7 @@ export interface components {
         };
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
-            version_set: components["schemas"]["VersionSet"];
+            version_set: components["schemas"]["VersionSet-Input"];
         };
         /** UsageBucket */
         UsageBucket: {
@@ -25338,15 +25596,26 @@ export interface components {
          * VersionSet
          * @description Pins agent, state machine, and LLM model versions for a service.
          */
-        VersionSet: {
+        "VersionSet-Input": {
             /** Agent Version Number */
             agent_version_number?: number | null;
             /** Context Graph Version Number */
             context_graph_version_number?: number | null;
-            /**
-             * Llm Model Preferences
-             * @default {}
-             */
+            /** Llm Model Preferences */
+            llm_model_preferences?: {
+                [key: string]: components["schemas"]["LLMConfig"];
+            };
+        };
+        /**
+         * VersionSet
+         * @description Pins agent, state machine, and LLM model versions for a service.
+         */
+        "VersionSet-Output": {
+            /** Agent Version Number */
+            agent_version_number?: number | null;
+            /** Context Graph Version Number */
+            context_graph_version_number?: number | null;
+            /** Llm Model Preferences */
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
@@ -26109,6 +26378,67 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * WorkspaceDataQuery
+         * @description The authored shape of a workspace data query.
+         *
+         *     Identical wire format whether posted via the REST surface or
+         *     constructed in tests. Validation, executor, and tool-registration
+         *     consumers all share this Pydantic model.
+         */
+        WorkspaceDataQuery: {
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters?: components["schemas"]["platform_lib__workspace_data_queries__models__Parameter"][];
+            /** Sql Template */
+            sql_template: string;
+            /**
+             * Timeout Ms
+             * @default 5000
+             */
+            timeout_ms?: number;
+        };
+        /**
+         * WorkspaceDataQueryItem
+         * @description Wire shape for the response of every read + deploy handler.
+         */
+        WorkspaceDataQueryItem: {
+            /** Deployed At */
+            deployed_at?: string | null;
+            /** Deployed By */
+            deployed_by?: string | null;
+            /** Description */
+            description: string;
+            /**
+             * Input Schema
+             * @description JSON Schema derived from ``parameters[]`` for the LLM tool spec.
+             *
+             *     Genuinely freeform (``additionalProperties``, nested ``properties``
+             *     objects, etc.) so ``dict[str, Any]`` is the honest shape.
+             */
+            input_schema: {
+                [key: string]: unknown;
+            };
+            /** Last Test At */
+            last_test_at?: string | null;
+            /** Last Test Duration Ms */
+            last_test_duration_ms?: number | null;
+            /** Last Test Error */
+            last_test_error?: string | null;
+            /** Last Test Status */
+            last_test_status?: string | null;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters: components["schemas"]["Parameter-Output"][];
+            /** Sql Template */
+            sql_template: string;
+            /** Timeout Ms */
+            timeout_ms: number;
+        };
         /** WorkspaceInvitationAcceptedEvent */
         WorkspaceInvitationAcceptedEvent: {
             /**
@@ -26272,6 +26602,56 @@ export interface components {
         };
         _ToolMockKey: string;
         _ToolMockValue: string;
+        /**
+         * Parameter
+         * @description Typed declaration of one input parameter.
+         *
+         *     For SQL function types, ``name`` becomes the ``:name`` placeholder
+         *     in the SQL template. For Python function types, ``name`` becomes
+         *     the positional argument name in ``def main(...)`` and the input
+         *     column name on the UC UDF signature.
+         *
+         *     The ``description`` propagates into the LLM tool spec (this is
+         *     what Databricks' Agent Framework reads, and what Anthropic's
+         *     tool-use spec exposes to the model). Missing descriptions
+         *     silently break tool selection — the registration layer rejects
+         *     empty strings.
+         */
+        platform_lib__platform_functions__models__Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
+        /**
+         * Parameter
+         * @description One typed input parameter to a workspace data query.
+         *
+         *     ``name`` becomes the ``:name`` placeholder in ``sql_template``.
+         *     ``default is None`` is the canonical "required" signal — the
+         *     executor raises if a caller omits a required argument, and
+         *     substitutes the stored default for optionals.
+         */
+        platform_lib__workspace_data_queries__models__Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
         /**
          * IntegrationToolRef
          * @description Reference to an integration endpoint by integration + endpoint name.
@@ -26564,9 +26944,75 @@ export interface components {
             tags?: string[];
         };
         /** Request */
+        src__routes__workspace_data_queries__invoke_workspace_data_query__Request: {
+            /**
+             * Input
+             * @description Caller arguments matching input_schema.
+             */
+            input?: {
+                [key: string]: unknown;
+            };
+        };
+        /** Response */
+        src__routes__workspace_data_queries__invoke_workspace_data_query__Response: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /** Result */
+            result?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count?: number;
+        };
+        /** Response */
+        src__routes__workspace_data_queries__list_workspace_data_queries__Response: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["WorkspaceDataQueryItem"][];
+        };
+        /**
+         * Response
+         * @description Superset of the invoke response with per-test telemetry fields.
+         *
+         *     Invariant (enforced by :func:`_check_error_when_fail`):
+         *     ``status == "fail" → error is not None and len(error) > 0``.
+         */
+        src__routes__workspace_data_queries__test_workspace_data_query__Response: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /** Error */
+            error?: string | null;
+            /** Result */
+            result?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count?: number;
+            /**
+             * Status
+             * @default pass
+             */
+            status?: string;
+            /** Test Duration Ms */
+            test_duration_ms?: number | null;
+        };
+        /** Request */
         src__routes__workspace_tables__create_workspace_table__Request: {
             /** Columns */
-            columns: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Column"][];
+            columns: components["schemas"]["Column-Input"][];
             /** Indexes */
             indexes?: components["schemas"]["Index-Input"][];
             /** Primary Key */
@@ -26574,30 +27020,6 @@ export interface components {
             table_name: components["schemas"]["IdentifierString"];
             /** Unique */
             unique?: components["schemas"]["IdentifierString"][][];
-        };
-        /** Column */
-        src__routes__workspace_tables__create_workspace_table__Request__Column: {
-            default?: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Default"] | null;
-            name: components["schemas"]["IdentifierString"];
-            /**
-             * Nullable
-             * @default true
-             */
-            nullable?: boolean;
-            type: components["schemas"]["ColumnType"];
-        };
-        /** Default */
-        src__routes__workspace_tables__create_workspace_table__Request__Default: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "literal" | "uuid_v4" | "now" | "current_date";
-            /**
-             * Value
-             * @description Only meaningful for ``kind="literal"``. Other kinds ignore it.
-             */
-            value?: string | number | boolean | null;
         };
         /** Response */
         src__routes__workspace_tables__create_workspace_table__Response: {
@@ -26675,27 +27097,6 @@ export interface components {
         src__routes__workspace_tables__update_workspace_table__Request: {
             /** Actions */
             actions: (components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"])[];
-        };
-        /** Column */
-        src__routes__workspace_tables__update_workspace_table__Request__Column: {
-            default?: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"] | null;
-            name: components["schemas"]["IdentifierString"];
-            /**
-             * Nullable
-             * @default true
-             */
-            nullable?: boolean;
-            type: components["schemas"]["ColumnType"];
-        };
-        /** Default */
-        src__routes__workspace_tables__update_workspace_table__Request__Default: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "literal" | "uuid_v4" | "now" | "current_date";
-            /** Value */
-            value?: string | number | boolean | null;
         };
         /** Response */
         src__routes__workspace_tables__update_workspace_table__Response: {
@@ -32567,6 +32968,238 @@ export interface operations {
             };
         };
     };
+    "list-workspace-data-queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Response"];
+                };
+            };
+        };
+    };
+    "get-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDataQueryItem"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "deploy-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceDataQuery"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDataQueryItem"];
+                };
+            };
+            /** @description URL name does not match body name */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation or precondition failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "invoke-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_data_queries__invoke_workspace_data_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_data_queries__invoke_workspace_data_query__Response"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Execution failed */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "test-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                name: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_data_queries__invoke_workspace_data_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_data_queries__test_workspace_data_query__Response"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_desktop_session_v1__workspace_id__desktop_sessions_post: {
         parameters: {
             query?: never;
@@ -37152,7 +37785,7 @@ export interface operations {
     "list-prompt-logs": {
         parameters: {
             query?: {
-                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
+                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter. */
                 conversation_id?: string | null;
                 /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
                 call_sid?: string | null;
