@@ -38,10 +38,8 @@ jobs:
             TAG="$RELEASE_TAG"
           elif [ "$REF_TYPE" = "tag" ]; then
             TAG="$REF_NAME"
-          elif [ -n "$EXPECTED_VERSION" ]; then
-            TAG="v$EXPECTED_VERSION"
           else
-            echo "::error::Publish must run from a release event, a v* tag ref, or workflow_dispatch with expected_version."
+            echo "::error::Publish must run from a release event or a v* tag ref."
             exit 1
           fi
 
@@ -79,7 +77,6 @@ jobs:
         run: npm ci
 
       - name: Validate publish credentials
-        id: publish_credentials
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
@@ -91,12 +88,9 @@ jobs:
             trap 'rm -f "$NPM_USERCONFIG"' EXIT
             echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN_TRIMMED}" > "$NPM_USERCONFIG"
             chmod 600 "$NPM_USERCONFIG"
-            if npm whoami --userconfig "$NPM_USERCONFIG" --registry https://registry.npmjs.org >/dev/null; then
-              echo "mode=token" >> "$GITHUB_OUTPUT"
-              echo "Using validated NPM_TOKEN fallback credentials."
-              exit 0
-            fi
-            echo "::warning::NPM_TOKEN is configured but npm rejected it; falling back to trusted publishing if available."
+            npm whoami --userconfig "$NPM_USERCONFIG" --registry https://registry.npmjs.org >/dev/null
+            echo "Using validated NPM_TOKEN fallback credentials."
+            exit 0
           fi
 
           if [ -z "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || [ -z "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}" ]; then
@@ -104,8 +98,7 @@ jobs:
             exit 1
           fi
 
-          echo "mode=oidc" >> "$GITHUB_OUTPUT"
-          echo "No valid NPM_TOKEN configured; publish will use npm trusted publishing via GitHub OIDC."
+          echo "No NPM_TOKEN configured; publish will use npm trusted publishing via GitHub OIDC."
 
       - name: Validate release package
         env:
@@ -161,7 +154,7 @@ jobs:
         run: |
           echo "::add-mask::$NODE_AUTH_TOKEN"
           NODE_AUTH_TOKEN_TRIMMED="${NODE_AUTH_TOKEN//[[:space:]]/}"
-          if [ "${{ steps.publish_credentials.outputs.mode }}" = "token" ]; then
+          if [ -n "$NODE_AUTH_TOKEN_TRIMMED" ]; then
             echo "::add-mask::$NODE_AUTH_TOKEN_TRIMMED"
             echo "Using NPM_TOKEN fallback. Prefer npm trusted publishing once package settings are configured."
             NPM_USERCONFIG="$RUNNER_TEMP/npmrc"
@@ -171,12 +164,7 @@ jobs:
             npm publish --userconfig "$NPM_USERCONFIG" --access public --provenance
           else
             echo "Using npm trusted publishing via OIDC."
-            unset NODE_AUTH_TOKEN
-            NPM_USERCONFIG="$RUNNER_TEMP/npmrc-oidc"
-            trap 'rm -f "$NPM_USERCONFIG"' EXIT
-            echo "registry=https://registry.npmjs.org/" > "$NPM_USERCONFIG"
-            chmod 600 "$NPM_USERCONFIG"
-            npm publish --userconfig "$NPM_USERCONFIG" --access public --provenance
+            npm publish --access public --provenance
           fi
 
       - name: Publish Summary
