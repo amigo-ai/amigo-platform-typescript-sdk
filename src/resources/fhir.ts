@@ -8,7 +8,6 @@ type Q<P extends keyof paths> = NonNullable<
 export type PatientSearchParams = Q<'/v1/{workspace_id}/fhir/patients'>
 /** Spec-defined query params for `/fhir/resources/{resource_type}` (FHIR-style search). */
 export type FhirSearchParams = Q<'/v1/{workspace_id}/fhir/resources/{resource_type}'>
-export type SyncFailuresParams = Q<'/v1/{workspace_id}/fhir/sync-failures'>
 
 // Each typed view has its own query shape in the spec — most share `q`,
 // `data_source_id`, `limit`, `offset` but `slots` adds scheduling filters.
@@ -27,7 +26,7 @@ export type FhirSlotsViewParams = Q<'/v1/{workspace_id}/fhir/views/slots'>
  * @beta New in this release; surface may evolve as the EHR adapters stabilize.
  *
  * Provides:
- *   - Sync status + failure visibility (`status`, `syncFailures`)
+ *   - Sync status (`status`)
  *   - Bulk imports (`import`)
  *   - FHIR-shaped CRUD on resources (`resources.*`)
  *   - Patient-centric views (`patients`, `patientSummary`, `patientTimeline`)
@@ -42,15 +41,6 @@ export class FhirResource extends WorkspaceScopedResource {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/fhir/status', {
         params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
-  }
-
-  /** List recent FHIR sync failures (for triage) */
-  async getSyncFailures(params?: SyncFailuresParams) {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/fhir/sync-failures', {
-        params: { path: { workspace_id: this.workspaceId }, query: params },
       }),
     )
   }
@@ -116,18 +106,15 @@ export class FhirResource extends WorkspaceScopedResource {
     /** Get a single FHIR resource by type + id */
     get: async (resourceType: string, resourceId: string) =>
       extractData(
-        await this.client.GET(
-          '/v1/{workspace_id}/fhir/resources/{resource_type}/{resource_id}',
-          {
-            params: {
-              path: {
-                workspace_id: this.workspaceId,
-                resource_type: resourceType,
-                resource_id: resourceId,
-              },
+        await this.client.GET('/v1/{workspace_id}/fhir/resources/{resource_type}/{resource_id}', {
+          params: {
+            path: {
+              workspace_id: this.workspaceId,
+              resource_type: resourceType,
+              resource_id: resourceId,
             },
           },
-        ),
+        }),
       ),
 
     /** Update a FHIR resource by type + id */
@@ -137,19 +124,16 @@ export class FhirResource extends WorkspaceScopedResource {
       body: components['schemas']['FhirWriteRequest'],
     ) =>
       extractData(
-        await this.client.PUT(
-          '/v1/{workspace_id}/fhir/resources/{resource_type}/{resource_id}',
-          {
-            params: {
-              path: {
-                workspace_id: this.workspaceId,
-                resource_type: resourceType,
-                resource_id: resourceId,
-              },
+        await this.client.PUT('/v1/{workspace_id}/fhir/resources/{resource_type}/{resource_id}', {
+          params: {
+            path: {
+              workspace_id: this.workspaceId,
+              resource_type: resourceType,
+              resource_id: resourceId,
             },
-            body,
           },
-        ),
+          body,
+        }),
       ),
 
     /** Get the version history for a FHIR resource */

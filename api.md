@@ -221,11 +221,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getTimeline`
 - `getTimelineAutoPaging`
 - `getSyncStatusBySink`
-- `listSyncEvents`
-- `listSyncEventsAutoPaging`
-- `getSyncQueueDepth`
-- `retrySyncEvent`
-- `retryAllSyncEvents`
 - `getStats`
 - `getSourceBreakdown`
 
@@ -339,8 +334,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `memory.update`
 - `retention.get`
 - `retention.update`
-- `behaviors.get`
-- `behaviors.update`
 - `gapScanner.get`
 - `gapScanner.update`
 - `gapScanner.preview`
@@ -349,8 +342,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `metrics.update`
 - `environments.get`
 - `environments.update`
-- `workflows.get`
-- `workflows.update`
 
 ### `billing`
 
@@ -409,18 +400,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getEntityAccessLog`
 - `getEntityAccessLogAutoPaging`
 
-### `webhookDestinations`
-
-- `list`
-- `listAutoPaging`
-- `create`
-- `get`
-- `update`
-- `delete`
-- `listDeliveries`
-- `listDeliveriesAutoPaging`
-- `rotateSecret`
-
 ### `compliance`
 
 - `getDashboard`
@@ -447,7 +426,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `fhir`
 
 - `getStatus`
-- `getSyncFailures`
 - `import`
 - `searchPatients`
 - `getPatientSummary`
@@ -573,5 +551,14 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `updateQueryTool`
 - `deleteQueryTool`
 - `testQueryTool`
+
+### `workspaceDataQueries`
+
+- `list`
+- `create`
+- `get`
+- `update`
+- `delete`
+- `invoke`
 
 ### `api`

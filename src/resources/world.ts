@@ -239,66 +239,6 @@ export class WorldResource extends WorkspaceScopedResource {
     )
   }
 
-  /** List sync events with status filtering */
-  async listSyncEvents(params: {
-    status: 'pending' | 'failed'
-    data_source_id?: string | null
-    source_system?: string | null
-    fhir_resource_type?: string | null
-    fhir_resource_id?: string | null
-    limit?: number
-    offset?: number
-  }) {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/world/sync/events', {
-        params: { path: { workspace_id: this.workspaceId }, query: params },
-      }),
-    )
-  }
-
-  listSyncEventsAutoPaging(params: {
-    status: 'pending' | 'failed'
-    data_source_id?: string | null
-    source_system?: string | null
-    fhir_resource_type?: string | null
-    fhir_resource_id?: string | null
-    limit?: number
-    offset?: number
-  }) {
-    return this.iterateOffsetPaginatedList(
-      (pageParams) => this.listSyncEvents(pageParams),
-      (page) => page.events,
-      params,
-    )
-  }
-
-  /** Get current sync queue depth */
-  async getSyncQueueDepth() {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/world/sync/queue', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
-  }
-
-  /** Retry a single failed sync event */
-  async retrySyncEvent(eventId: string) {
-    return extractData(
-      await this.client.POST('/v1/{workspace_id}/world/sync/retry/{event_id}', {
-        params: { path: { workspace_id: this.workspaceId, event_id: eventId } },
-      }),
-    )
-  }
-
-  /** Retry all failed sync events */
-  async retryAllSyncEvents() {
-    return extractData(
-      await this.client.POST('/v1/{workspace_id}/world/sync/retry-all', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
-  }
-
   // ---- Statistics ----
 
   /** Get aggregate entity and event statistics */

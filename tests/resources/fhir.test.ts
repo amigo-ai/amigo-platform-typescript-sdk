@@ -9,13 +9,11 @@ const PATIENT_ID = 'pat-001'
 const RESOURCE_TYPE = 'Patient'
 const RESOURCE_ID = 'res-001'
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
     [`GET ${BASE}/fhir/status`]: () => Response.json({ status: 'healthy' }),
-    [`GET ${BASE}/fhir/sync-failures`]: () => Response.json({ items: [], total: 0 }),
     [`POST ${BASE}/fhir/import`]: () => Response.json({ run_id: 'imp-1' }, { status: 202 }),
     [`GET ${BASE}/fhir/patients`]: () => Response.json({ items: [], total: 0 }),
     [`GET ${BASE}/fhir/patients/${PATIENT_ID}/summary`]: () =>
@@ -43,10 +41,6 @@ const client = new AmigoClient({
 describe('FhirResource', () => {
   it('gets status', async () => {
     expect(await client.fhir.getStatus()).toMatchObject({ status: 'healthy' })
-  })
-
-  it('lists sync failures', async () => {
-    expect(await client.fhir.getSyncFailures()).toMatchObject({ total: 0 })
   })
 
   it('triggers an import', async () => {

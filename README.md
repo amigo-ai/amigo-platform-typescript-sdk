@@ -715,15 +715,18 @@ const fn = await client.functions.get('my-function')
 const result = await client.functions.test('my-function', { input: { query: 'test' } })
 ```
 
-### Webhook Destinations
+### Workspace Data Queries
 
 ```typescript
-const dest = await client.webhookDestinations.create({
-  name: 'My Webhook',
-  url: 'https://example.com/webhook',
-  events: ['call.completed'],
+const query = await client.workspaceDataQueries.create({
+  name: 'recent_orders',
+  description: 'Recent orders by status',
+  sql_template: 'select * from custom.orders where status = :status',
+  parameters: [{ name: 'status', type: 'string', description: 'Order status' }],
 })
-const deliveries = await client.webhookDestinations.listDeliveries(dest.id)
+const result = await client.workspaceDataQueries.invoke(query.id, {
+  input: { status: 'open' },
+})
 ```
 
 ## Webhook Verification

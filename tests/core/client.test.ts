@@ -56,7 +56,7 @@ describe('AmigoClient configuration', () => {
     expect(client.services).toBeDefined()
     expect(client.world).toBeDefined()
     expect(client.metrics).toBeDefined()
-    expect(client.webhookDestinations).toBeDefined()
+    expect(client.workspaceDataQueries).toBeDefined()
   })
 
   it('attaches response metadata to object results', async () => {

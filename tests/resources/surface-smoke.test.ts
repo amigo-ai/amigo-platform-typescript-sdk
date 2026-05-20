@@ -135,14 +135,6 @@ describe('resource surface smoke tests', () => {
     await client.reviewQueue.getCorrectionSchema('item-001')
     await client.reviewQueue.getDiff('item-001')
 
-    await client.webhookDestinations.list({ limit: 5 })
-    await client.webhookDestinations.create(EMPTY_BODY)
-    await client.webhookDestinations.get('dest-001')
-    await client.webhookDestinations.update('dest-001', EMPTY_BODY)
-    await client.webhookDestinations.delete('dest-001')
-    await client.webhookDestinations.listDeliveries('dest-001', { limit: 5 })
-    await client.webhookDestinations.rotateSecret('dest-001')
-
     await client.functions.list()
     await client.functions.get('lookup_patient')
     await client.functions.deploy('lookup_patient', EMPTY_BODY)
@@ -162,19 +154,22 @@ describe('resource surface smoke tests', () => {
     await client.world.search({ q: 'Jane Doe', entity_type: 'patient', limit: 5 })
     await client.world.getTimeline('entity-001', { limit: 5 })
     await client.world.getSyncStatusBySink()
-    await client.world.listSyncEvents({ status: 'pending', limit: 5 })
-    await client.world.getSyncQueueDepth()
-    await client.world.retrySyncEvent('sync-001')
-    await client.world.retryAllSyncEvents()
     await client.world.getStats()
     await client.world.getSourceBreakdown()
+
+    await client.workspaceDataQueries.list()
+    await client.workspaceDataQueries.create(EMPTY_BODY)
+    await client.workspaceDataQueries.get('query-001')
+    await client.workspaceDataQueries.update('query-001', EMPTY_BODY)
+    await client.workspaceDataQueries.invoke('query-001')
+    await client.workspaceDataQueries.delete('query-001')
 
     expect(fetchImpl).toHaveBeenCalled()
     expect(requests).toEqual(
       expect.arrayContaining([
         'GET /v1/auth/me',
         `GET /v1/${TEST_WORKSPACE_ID}/analytics/calls/comparison`,
-        `POST /v1/${TEST_WORKSPACE_ID}/webhook-destinations/dest-001/rotate-secret`,
+        `POST /v1/${TEST_WORKSPACE_ID}/data_queries/query-001/invoke`,
         `GET /v1/${TEST_WORKSPACE_ID}/world/entities/entity-001/graph`,
         `POST /v1/workspaces/${TEST_WORKSPACE_ID}/archive`,
       ]),

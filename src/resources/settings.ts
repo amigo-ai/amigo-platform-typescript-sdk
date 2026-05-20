@@ -2,7 +2,7 @@ import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
 /**
- * Workspace-level settings — configure voice behavior, branding, data
+ * Workspace-level settings — configure voice, branding, data
  * retention, outreach rules, and more.
  *
  * Each sub-resource has `get()` and `update()`.
@@ -88,22 +88,6 @@ export class SettingsResource extends WorkspaceScopedResource {
       ),
   }
 
-  readonly behaviors = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/behaviors', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['BehaviorSettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/behaviors', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
-
   readonly gapScanner = {
     get: async () =>
       extractData(
@@ -169,22 +153,6 @@ export class SettingsResource extends WorkspaceScopedResource {
     update: async (body: components['schemas']['EnvironmentSettingsRequest']) =>
       extractData(
         await this.client.PUT('/v1/{workspace_id}/settings/environments', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
-
-  readonly workflows = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/workflows', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['WorkflowSettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/workflows', {
           params: { path: { workspace_id: this.workspaceId } },
           body,
         }),
