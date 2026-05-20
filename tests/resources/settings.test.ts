@@ -47,10 +47,6 @@ const RETENTION_FIXTURE = {
   legal_hold_reason: null,
 }
 
-const WORKFLOWS_FIXTURE = {
-  workflows: [{ name: 'escalation', enabled: true }],
-}
-
 function mockFetch(
   routes: Record<string, () => Response | Promise<Response>>,
 ): typeof globalThis.fetch {
@@ -108,16 +104,6 @@ const client = new AmigoClient({
 
     [`PUT ${BASE}/settings/retention`]: () =>
       Response.json({ ...RETENTION_FIXTURE, call_recordings_days: 180 }),
-
-    [`GET ${BASE}/settings/workflows`]: () => Response.json(WORKFLOWS_FIXTURE),
-
-    [`PUT ${BASE}/settings/workflows`]: () =>
-      Response.json({
-        workflows: [
-          { name: 'escalation', enabled: true },
-          { name: 'wrap-up', enabled: true },
-        ],
-      }),
 
     [`GET ${BASE}/settings/gap-scanner`]: () => Response.json({ enabled: true, rules: [] }),
     [`PUT ${BASE}/settings/gap-scanner`]: () => Response.json({ enabled: false, rules: [] }),
@@ -192,18 +178,6 @@ describe('SettingsResource', () => {
     it('updates retention policy', async () => {
       const result = await client.settings.retention.update({ call_recordings_days: 180 } as never)
       expect(result.call_recordings_days).toBe(180)
-    })
-  })
-
-  describe('workflows', () => {
-    it('gets workflow settings', async () => {
-      const result = await client.settings.workflows.get()
-      expect(result.workflows).toHaveLength(1)
-    })
-
-    it('updates workflow settings', async () => {
-      const result = await client.settings.workflows.update({ workflows: [] } as never)
-      expect(result.workflows).toHaveLength(2)
     })
   })
 

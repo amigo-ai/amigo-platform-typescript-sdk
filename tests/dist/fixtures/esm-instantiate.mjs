@@ -5,7 +5,7 @@ const client = new sdk.AmigoClient({
   workspaceId: 'ws_123',
 })
 
-if (!client.agents || !client.world || !client.webhookDestinations) {
+if (!client.agents || !client.world || !client.workspaceDataQueries) {
   throw new Error('Expected public resources to be initialized')
 }
 

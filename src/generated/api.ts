@@ -1645,7 +1645,7 @@ export interface paths {
         };
         /**
          * Call metric values
-         * @description Latest per-call Universal Metric Store values for the call detail sidebar.
+         * @description Latest per-call realtime metric values for the call detail sidebar.
          */
         get: operations["list-call-metric-values"];
         put?: never;
@@ -2250,6 +2250,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/data_queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Workspace Data Queries */
+        get: operations["list-workspace-data-queries"];
+        put?: never;
+        /** Create Workspace Data Query */
+        post: operations["create-workspace-data-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/data_queries/{query_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Workspace Data Query */
+        get: operations["get-workspace-data-query"];
+        put?: never;
+        post?: never;
+        /** Delete Workspace Data Query */
+        delete: operations["delete-workspace-data-query"];
+        options?: never;
+        head?: never;
+        /** Update Workspace Data Query */
+        patch: operations["update-workspace-data-query"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/data_queries/{query_id}/invoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invoke Workspace Data Query */
+        post: operations["invoke-workspace-data-query"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/desktop-sessions": {
         parameters: {
             query?: never;
@@ -2687,26 +2741,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/fhir/sync-failures": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List sync failures
-         * @description Get events that permanently failed to sync to the external EHR. These need manual attention.
-         */
-        get: operations["fhir-sync-failures"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/fhir/views/appointments": {
         parameters: {
             query?: never;
@@ -2943,23 +2977,6 @@ export interface paths {
          *     Permissions: admin, owner.
          */
         post: operations["test-function"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/hooks/{destination_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Receive Webhook */
-        post: operations["receive_webhook_v1__workspace_id__hooks__destination_id__post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3854,26 +3871,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/metrics/{metric_key}/evaluate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Evaluate a metric once without storing it
-         * @description Execute one metric definition without persisting to UMS.
-         */
-        post: operations["evaluate-metric"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/metrics/{metric_key}/trend": {
         parameters: {
             query?: never;
@@ -4481,7 +4478,7 @@ export interface paths {
          * List prompt logs for a workspace
          * @description Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.
          *
-         *     **Conversation filter**: pass ``conversation_id`` (UUID from ``world.entities``) for the canonical mental model — works uniformly across voice, text, and sim modalities. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
+         *     **Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.
          *
          *     **Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.
          *
@@ -5239,39 +5236,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/behaviors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get dynamic behavior settings
-         * @description Get the workspace dynamic behavior settings.
-         *
-         *     Returns defaults (disabled, empty) when not configured.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-behavior-settings"];
-        /**
-         * Update dynamic behavior settings
-         * @description Update the workspace dynamic behavior settings.
-         *
-         *     Partial updates supported — only provided fields are changed.
-         *     Behaviors list is replaced entirely when provided.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-behavior-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/branding": {
         parameters: {
             query?: never;
@@ -5709,34 +5673,6 @@ export interface paths {
          *     * Requires admin or owner role.
          */
         put: operations["update-voice-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/settings/workflows": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get workflow specs
-         * @description Get workflow specs for this workspace.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-workflow-settings"];
-        /**
-         * Update workflow specs
-         * @description Update workflow specs.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-workflow-settings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -6300,7 +6236,7 @@ export interface paths {
         get: operations["get-skill"];
         /**
          * Update a skill
-         * @description Update a skill's configuration. Increments version and creates an audit trail snapshot.
+         * @description Update a skill's configuration in place.
          *
          *     **Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.
          *
@@ -6310,7 +6246,7 @@ export interface paths {
         post?: never;
         /**
          * Delete a skill
-         * @description Delete a skill. SkillVersion audit trail is retained.
+         * @description Delete a skill.
          *
          *     **Not idempotent.** A second concurrent caller racing the same delete will receive ``404 Not Found`` once the row is gone — clients should treat 404 as success-equivalent for cleanup workflows. Requires `Skill.delete` permission.
          */
@@ -6864,104 +6800,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/voicemail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List voicemails
-         * @description List voicemail records with optional filters. Requires Channel.view permission.
-         */
-        get: operations["list-voicemails"];
-        put?: never;
-        /**
-         * Send a voicemail
-         * @description Send a ringless voicemail. Accepts multipart form with use_case_id, recipient_phone_number (US E.164), and audio MP3 file (10-60s, max 8 MB). Requires Channel.send permission.
-         */
-        post: operations["send-voicemail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/webhook-destinations": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List webhook destinations */
-        get: operations["list-webhook-destinations"];
-        put?: never;
-        /** Create a webhook destination */
-        post: operations["create-webhook-destination"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/webhook-destinations/{destination_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get a webhook destination */
-        get: operations["get-webhook-destination"];
-        /** Update a webhook destination */
-        put: operations["update-webhook-destination"];
-        post?: never;
-        /** Delete a webhook destination */
-        delete: operations["delete-webhook-destination"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/webhook-destinations/{destination_id}/deliveries": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List webhook delivery history
-         * @description Delivery history from the Lakebase entity-event timeline read model.
-         */
-        get: operations["list-webhook-destination-deliveries"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/webhook-destinations/{destination_id}/rotate-secret": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Rotate the destination's HMAC signing secret */
-        post: operations["rotate-webhook-destination-secret"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/world/connectors": {
         parameters: {
             query?: never;
@@ -7179,7 +7017,7 @@ export interface paths {
         };
         /**
          * List current enrichment values for an entity
-         * @description Current winners per (entity, key) from world.entity_enrichment (Synced-Table-populated view of SDP's entity_enrichment_current). Each row carries value, value_type, confidence, source, effective_at.
+         * @description Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.
          */
         get: operations["list-entity-enrichment"];
         put?: never;
@@ -7464,86 +7302,6 @@ export interface paths {
         get: operations["outbound-sync-by-sink"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/world/sync/events": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List sync events by status
-         * @description Lists outbound events filtered by sync status (pending or failed). Optionally scope the queue to a specific outbound data source or source system, or narrow to a specific FHIR resource type/ID. Includes entity display_name for the UI. Use for the pending events table (status=pending) or the retry table (status=failed).
-         */
-        get: operations["world-sync-events"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/world/sync/queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Outbound sync queue depth
-         * @description Pending and failed outbound sync event counts, grouped by FHIR resource type. Includes oldest pending timestamp and last successful sync time. Queries Lakebase — not Valkey.
-         */
-        get: operations["world-sync-queue"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/world/sync/retry-all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Retry all failed sync events
-         * @description Clears sync_error on all failed events in the workspace and re-publishes each to the outbound sync channel.
-         */
-        post: operations["world-sync-retry-all"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/world/sync/retry/{event_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Retry a failed sync event
-         * @description Clears sync_error on a failed event and re-publishes to the outbound sync channel. The event re-enters the sync pipeline.
-         */
-        post: operations["world-sync-retry"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7878,10 +7636,10 @@ export interface components {
         };
         /** AddColumnAction */
         AddColumnAction: {
-            column: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Column"];
+            column: components["schemas"]["Column-Input"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "add_column";
         };
@@ -7891,8 +7649,8 @@ export interface components {
             columns: components["schemas"]["IdentifierString"][];
             index_name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "add_index";
         };
@@ -7902,8 +7660,8 @@ export interface components {
             columns: components["schemas"]["IdentifierString"][];
             constraint_name?: components["schemas"]["IdentifierString"] | null;
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "add_unique";
         };
@@ -8090,6 +7848,7 @@ export interface components {
              */
             workspace_id: string;
         };
+        AlterAction: components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"];
         /**
          * AnnotationState
          * @description Injects a hardcoded inner thought (no LLM call).
@@ -8617,100 +8376,6 @@ export interface components {
             /** Reason */
             reason: string;
         };
-        /**
-         * BehaviorAction
-         * @description What happens when the behavior activates.
-         */
-        BehaviorAction: {
-            /**
-             * Add Tools
-             * @description Tool names to make available when active
-             */
-            add_tools?: string[];
-            /**
-             * Filler Override
-             * @description Override filler type when active
-             */
-            filler_override?: ("empathy" | "receipt" | "working" | "silent") | null;
-            /**
-             * Instruction
-             * @description Instruction injected into the engage prompt when active
-             * @default
-             */
-            instruction?: string;
-            /**
-             * Remove Tools
-             * @description Tool names to hide when active
-             */
-            remove_tools?: string[];
-            /** Turn Policy Overrides */
-            turn_policy_overrides?: {
-                [key: string]: unknown;
-            };
-        };
-        /**
-         * BehaviorDef
-         * @description A named dynamic behavior definition.
-         */
-        BehaviorDef: {
-            action?: components["schemas"]["BehaviorAction"];
-            /**
-             * Cooldown Turns
-             * @default 3
-             */
-            cooldown_turns?: number;
-            /** @default  */
-            description?: components["schemas"]["DescriptionString"];
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            name: components["schemas"]["NameString"];
-            /**
-             * Priority
-             * @default 0
-             */
-            priority?: number;
-            trigger?: components["schemas"]["BehaviorTrigger"];
-        };
-        /**
-         * BehaviorSettingsRequest
-         * @description Partial update — only provided fields are changed.
-         */
-        BehaviorSettingsRequest: {
-            /** Behaviors */
-            behaviors?: components["schemas"]["BehaviorDef"][] | null;
-            /** Enabled */
-            enabled?: boolean | null;
-        };
-        /** BehaviorSettingsResponse */
-        BehaviorSettingsResponse: {
-            /** Behaviors */
-            behaviors: components["schemas"]["BehaviorDef"][];
-            /** Enabled */
-            enabled: boolean;
-        };
-        /**
-         * BehaviorTrigger
-         * @description Conditions that activate this behavior.
-         */
-        BehaviorTrigger: {
-            /**
-             * Emotion Tiers
-             * @description Empathy tiers (0-3) that activate this behavior
-             */
-            emotion_tiers?: number[];
-            /** Intent Categories */
-            intent_categories?: string[];
-            /** Keywords */
-            keywords?: string[];
-            /**
-             * States
-             * @description Context graph state names that activate this behavior
-             */
-            states?: string[];
-        };
         /** BillingDashboardResponse */
         BillingDashboardResponse: {
             /**
@@ -8756,18 +8421,6 @@ export interface components {
              * @description Workspace ID
              */
             workspace_id: string;
-        };
-        /** Body_send-voicemail */
-        "Body_send-voicemail": {
-            /** Audio */
-            audio: string;
-            /** Recipient Phone Number */
-            recipient_phone_number: string;
-            /**
-             * Use Case Id
-             * Format: uuid
-             */
-            use_case_id: string;
         };
         /** Body_voice-turn */
         "Body_voice-turn": {
@@ -9295,6 +8948,11 @@ export interface components {
             /** @description Tool usage statistics */
             tool_summary?: components["schemas"]["ToolSummary"] | null;
         };
+        /** CallIntelligenceMetricProjectionRequest */
+        CallIntelligenceMetricProjectionRequest: {
+            /** Call Sid */
+            call_sid: string;
+        };
         /** CallListResponse */
         CallListResponse: {
             /** Continuation Token */
@@ -9550,8 +9208,8 @@ export interface components {
             name: components["schemas"]["IdentifierString"];
             new_type: components["schemas"]["ColumnType"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "change_column_type";
         };
@@ -10098,6 +9756,17 @@ export interface components {
             type: string;
             /** Validation */
             validation?: string | null;
+        };
+        /** Column */
+        "Column-Input": {
+            default?: components["schemas"]["Default"] | null;
+            name: components["schemas"]["IdentifierString"];
+            /**
+             * Nullable
+             * @default true
+             */
+            nullable?: boolean;
+            type: components["schemas"]["ColumnType"];
         };
         /** Column */
         "Column-Output": {
@@ -10771,49 +10440,6 @@ export interface components {
             /** Total */
             total: number;
         };
-        /** ConversationStateSaveRequest */
-        ConversationStateSaveRequest: {
-            /** Entity Id */
-            entity_id?: string | null;
-            /** Resume At */
-            resume_at?: string | null;
-            /** State */
-            state: {
-                [key: string]: unknown;
-            };
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "frozen" | "closed";
-            /** Version */
-            version: number;
-        };
-        /** ConversationStateSaveResponse */
-        ConversationStateSaveResponse: {
-            /**
-             * Conversation Id
-             * Format: uuid
-             */
-            conversation_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "frozen" | "closed";
-            /**
-             * Turn Count
-             * @default 0
-             */
-            turn_count?: number;
-            /** Version */
-            version: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** ConversationThreadRequest */
         ConversationThreadRequest: {
             channel_kind: components["schemas"]["ChannelKind"];
@@ -10846,22 +10472,11 @@ export interface components {
             reactivated: boolean;
             /** Service Id */
             service_id?: string | null;
-            /** State */
-            state: {
-                [key: string]: unknown;
-            };
             /**
              * Status
              * @constant
              */
             status: "active";
-            /**
-             * Turn Count
-             * @default 0
-             */
-            turn_count?: number;
-            /** Version */
-            version: number;
             /**
              * Workspace Id
              * Format: uuid
@@ -11484,7 +11099,7 @@ export interface components {
              * @default {}
              */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -11765,27 +11380,6 @@ export interface components {
              * @default UTC
              */
             timezone?: string;
-        };
-        /** CreateWebhookDestinationRequest */
-        CreateWebhookDestinationRequest: {
-            /** Accepted Event Types */
-            accepted_event_types?: components["schemas"]["EventTypeString"][];
-            description?: components["schemas"]["DescriptionString"] | null;
-            /** Field Mapping */
-            field_mapping?: {
-                [key: string]: string;
-            } | null;
-            name: components["schemas"]["NameString"];
-            /**
-             * Retry Attempts
-             * @default 3
-             */
-            retry_attempts?: number;
-            /**
-             * Trigger Id
-             * Format: uuid
-             */
-            trigger_id: string;
         };
         /**
          * CreateWorkspaceRequest
@@ -12527,6 +12121,23 @@ export interface components {
             /** Feature Name */
             feature_name: string;
         };
+        /** Default */
+        Default: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "literal" | "uuid_v4" | "now" | "current_date";
+            /**
+             * Value
+             * @description Only meaningful for ``kind="literal"``. Other kinds ignore it.
+             *     A ``dict`` value is rendered as a JSONB literal — pair it with a
+             *     ``jsonb`` column.
+             */
+            value?: string | number | boolean | {
+                [key: string]: unknown;
+            } | null;
+        };
         /**
          * DeliverSurfaceRequest
          * @description Request to mark a surface as delivered.
@@ -12565,27 +12176,6 @@ export interface components {
             surface_id: string;
             /** Url */
             url?: string | null;
-        };
-        /** DeliveryResponse */
-        DeliveryResponse: {
-            /**
-             * Created At
-             * @description When the delivery event was created
-             */
-            created_at?: string | null;
-            /** Data */
-            data: {
-                [key: string]: unknown;
-            };
-            /** Effective At */
-            effective_at: string | null;
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-            /** Event Type */
-            event_type: string;
         };
         DescriptionString: string;
         /** DestroySessionResponse */
@@ -12743,8 +12333,8 @@ export interface components {
         DropColumnAction: {
             name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "drop_column";
         };
@@ -12752,8 +12342,8 @@ export interface components {
         DropColumnDefaultAction: {
             name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "drop_column_default";
         };
@@ -12761,8 +12351,8 @@ export interface components {
         DropConstraintAction: {
             name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "drop_constraint";
         };
@@ -12770,8 +12360,8 @@ export interface components {
         DropIndexAction: {
             index_name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "drop_index";
         };
@@ -13242,7 +12832,7 @@ export interface components {
              */
             ingested_at: string;
             /** Is Current */
-            is_current: boolean;
+            is_current: boolean | null;
             /** Source */
             source: string;
             /** Source System */
@@ -13259,6 +12849,11 @@ export interface components {
         };
         /** EnrichmentHistoryResponse */
         EnrichmentHistoryResponse: {
+            /**
+             * Dropped Count
+             * @default 0
+             */
+            dropped_count?: number;
             /**
              * Entity Id
              * Format: uuid
@@ -13430,11 +13025,15 @@ export interface components {
         };
         /** EntityEventResponse */
         EntityEventResponse: {
+            /** Amount */
+            amount?: number | null;
+            call_sid?: components["schemas"]["EventCallSidString"] | null;
+            channel?: components["schemas"]["EventChannelString"] | null;
             /**
              * Confidence
              * @default 1
              */
-            confidence?: number;
+            confidence?: number | null;
             /**
              * Created At
              * @description When the event was created
@@ -13444,8 +13043,13 @@ export interface components {
             data?: {
                 [key: string]: unknown;
             };
+            description?: components["schemas"]["EventDescriptionString"] | null;
+            direction?: components["schemas"]["EventDirectionString"] | null;
+            display_name?: components["schemas"]["EventDisplayNameString"] | null;
             /** Domain */
             domain: string;
+            /** Duration Seconds */
+            duration_seconds?: number | null;
             /** Effective At */
             effective_at?: string | null;
             /** Entity Type */
@@ -13469,16 +13073,18 @@ export interface components {
              * Is Current
              * @default true
              */
-            is_current?: boolean;
+            is_current?: boolean | null;
+            outcome?: components["schemas"]["EventOutcomeString"] | null;
             /** Produced By Agent */
             produced_by_agent?: string | null;
             /**
              * Source
              * @default manual
              */
-            source?: string;
+            source?: string | null;
             /** Source System */
             source_system?: string | null;
+            status?: components["schemas"]["EventStatusString"] | null;
             /** Supersedes */
             supersedes?: string | null;
             /** Sync Error */
@@ -13853,6 +13459,11 @@ export interface components {
             by_event_type?: {
                 [key: string]: number;
             };
+            /**
+             * Event Type Window Days
+             * @description Window applied to by_event_type counts when an entity_type filter is supplied.
+             */
+            event_type_window_days?: number | null;
             /** Sync Failed */
             sync_failed: number;
             /** Sync Pending */
@@ -14172,6 +13783,13 @@ export interface components {
              */
             workspace_id: string;
         };
+        EventCallSidString: string;
+        EventChannelString: string;
+        EventDescriptionString: string;
+        EventDirectionString: string;
+        EventDisplayNameString: string;
+        EventOutcomeString: string;
+        EventStatusString: string;
         /**
          * EventSummary
          * @description Inline event data for review context — avoids extra API calls.
@@ -14747,10 +14365,6 @@ export interface components {
             source?: string | null;
             /** Source System */
             source_system?: string | null;
-            /** Sync Error */
-            sync_error?: string | null;
-            /** Synced At */
-            synced_at?: string | null;
         };
         /** FhirResourceHistoryResponse */
         FhirResourceHistoryResponse: {
@@ -14871,11 +14485,6 @@ export interface components {
             resource_type_counts?: {
                 [key: string]: number;
             };
-            /**
-             * Sync Failure Count
-             * @default 0
-             */
-            sync_failure_count?: number;
             /** Sync Healthy */
             sync_healthy?: boolean | null;
         };
@@ -15517,16 +15126,6 @@ export interface components {
         HealthSyncResponse: {
             /** Connector Heartbeats */
             connector_heartbeats?: components["schemas"]["ConnectorHeartbeat"][];
-            /** Failed Count */
-            failed_count: number;
-            /** Healthy */
-            healthy: boolean;
-            /** Last Sync Success At */
-            last_sync_success_at?: string | null;
-            /** Oldest Pending Minutes */
-            oldest_pending_minutes?: number | null;
-            /** Pending Count */
-            pending_count: number;
         };
         /** HipaaReportResponse */
         HipaaReportResponse: {
@@ -16065,11 +15664,6 @@ export interface components {
              */
             use_structured_output?: boolean;
             /**
-             * Version
-             * @default 1
-             */
-            version?: number;
-            /**
              * Workspace Id
              * Format: uuid
              */
@@ -16231,28 +15825,6 @@ export interface components {
              */
             row_count?: number;
         };
-        /** Item */
-        Item: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Physical Name */
-            physical_name: string;
-            /** Table Name */
-            table_name: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /**
          * JoinCallRequest
          * @description Request to join an active call as operator.
@@ -16340,15 +15912,69 @@ export interface components {
         };
         /** LLMConfig */
         LLMConfig: {
+            experience_controls?: components["schemas"]["LLMExperienceControls"] | null;
             /** Llm Name */
             llm_name: string;
-            /**
-             * Params
-             * @default {}
-             */
+            /** Params */
             params?: {
                 [key: string]: unknown;
             };
+        };
+        /**
+         * LLMExperienceControls
+         * @description First-class chat experience controls for consumer-facing agents.
+         *
+         *     ``params`` remains available as a provider-specific escape hatch. These
+         *     fields cover the OpenAI Chat Completions controls that most directly shape
+         *     response tone, feel, determinism, latency, and structured output behavior.
+         *     Token budgets are intentionally excluded so version sets do not reintroduce
+         *     accidental response truncation.
+         */
+        LLMExperienceControls: {
+            /** Frequency Penalty */
+            frequency_penalty?: number | null;
+            /** Logit Bias */
+            logit_bias?: {
+                [key: string]: number;
+            } | null;
+            /** Logprobs */
+            logprobs?: boolean | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: string;
+            } | null;
+            /** Parallel Tool Calls */
+            parallel_tool_calls?: boolean | null;
+            /** Presence Penalty */
+            presence_penalty?: number | null;
+            /** Prompt Cache Key */
+            prompt_cache_key?: string | null;
+            /** Prompt Cache Retention */
+            prompt_cache_retention?: ("in-memory" | "24h") | null;
+            /** Reasoning Effort */
+            reasoning_effort?: ("none" | "minimal" | "low" | "medium" | "high" | "xhigh") | null;
+            /** Response Format */
+            response_format?: {
+                [key: string]: unknown;
+            } | null;
+            /** Safety Identifier */
+            safety_identifier?: string | null;
+            /** Seed */
+            seed?: number | null;
+            /** Service Tier */
+            service_tier?: string | null;
+            /** Stop */
+            stop?: string | string[] | null;
+            /** Store */
+            store?: boolean | null;
+            /** Temperature */
+            temperature?: number | null;
+            /** Top Logprobs */
+            top_logprobs?: number | null;
+            /** Top P */
+            top_p?: number | null;
+            /** Verbosity */
+            verbosity?: ("low" | "medium" | "high") | null;
         };
         /**
          * LanguageProviderEntry
@@ -16588,22 +16214,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** MarkSyncedRequest */
-        MarkSyncedRequest: {
-            /** Data Source Id */
-            data_source_id?: string | null;
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-            /** Sync Error */
-            sync_error?: string | null;
-            /** Synced At */
-            synced_at?: string | null;
-            /** Workspace Id */
-            workspace_id?: string | null;
         };
         /** MemoryAnalyticsResponse */
         MemoryAnalyticsResponse: {
@@ -16894,8 +16504,9 @@ export interface components {
         MetricCatalogEntry: {
             /** Builtin */
             builtin: boolean;
-            /** Description */
-            description?: string | null;
+            /** Custom Source Key */
+            custom_source_key?: string | null;
+            description?: components["schemas"]["DescriptionString"] | null;
             /**
              * Extraction Mode
              * @default static
@@ -16913,7 +16524,17 @@ export interface components {
              * @default false
              */
             has_prompt?: boolean;
-            key: components["schemas"]["SlugString"];
+            /**
+             * Key
+             * @description Metric key (lowercase alphanumeric + underscores)
+             */
+            key: string;
+            /**
+             * Latency Tier
+             * @default batch
+             * @enum {string}
+             */
+            latency_tier?: "streaming" | "near_realtime" | "batch";
             /**
              * Metric Type
              * @enum {string}
@@ -16926,6 +16547,17 @@ export interface components {
              */
             model_tier?: "free" | "fast" | "balanced" | "max" | "custom";
             name: components["schemas"]["NameString"];
+            /**
+             * Period Granularity
+             * @default daily
+             * @enum {string}
+             */
+            period_granularity?: "hourly" | "daily";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results" | "custom";
             /** Unit */
             unit?: string | null;
         };
@@ -17007,6 +16639,11 @@ export interface components {
              * @enum {string}
              */
             channel_scope?: "all" | "voice" | "text" | "surface" | "inbound" | "outbound";
+            /**
+             * Custom Source Key
+             * @description Extension source key used only when source='custom'.
+             */
+            custom_source_key?: string | null;
             description?: components["schemas"]["DescriptionString"] | null;
             /**
              * Event Types
@@ -17092,10 +16729,10 @@ export interface components {
             ratio_numerator_event?: string | null;
             /**
              * Source
-             * @description 'call_intelligence' reads from world.call_intelligence table. 'world_events' reads from Delta world_events. 'surface_events' reads from Delta world_events WHERE domain='surface'.
+             * @description Source key for the producer that supplies this metric. Built-ins include 'call_intelligence', 'world_events', and 'surface_events'. Use 'custom' with custom_source_key for extension producers.
              * @enum {string}
              */
-            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results";
+            source: "call_intelligence" | "world_events" | "surface_events" | "emotion_events" | "connector_events" | "zerobus_events" | "voice_judge_results" | "custom";
             /**
              * Source Filter
              * @description Optional SQL WHERE fragment for additional filtering (e.g. "source = 'voice_agent'"). Applied after event_type filter.
@@ -17122,46 +16759,28 @@ export interface components {
              */
             valid_range_min?: number | null;
         };
-        /** MetricEvaluateRequest */
-        MetricEvaluateRequest: {
-            /**
-             * As Of
-             * @description Optional point-in-time cutoff for selecting the call intelligence snapshot.
-             */
-            as_of?: string | null;
-            /**
-             * Persist
-             * @description On-demand metric evaluation never writes to metrics.metric_values.
-             * @default false
-             * @constant
-             */
-            persist?: false;
-            /**
-             * Subject Id
-             * @description CallSid, call UUID, or simulation session id
-             */
-            subject_id: string;
-        };
-        /** MetricEvaluateResponse */
-        MetricEvaluateResponse: {
-            /**
-             * Evaluated At
-             * Format: date-time
-             */
-            evaluated_at: string;
-            /** Metric */
-            metric: components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"];
-            /**
-             * Persisted
-             * @default false
-             * @constant
-             */
-            persisted?: false;
-        };
         /** MetricListResponse */
         MetricListResponse: {
             /** Metrics */
             metrics: (components["schemas"]["NumericalMetricValueResponse"] | components["schemas"]["CategoricalMetricValueResponse"] | components["schemas"]["BooleanMetricValueResponse"])[];
+        };
+        /** MetricProjectionResponse */
+        MetricProjectionResponse: {
+            /** Accepted */
+            accepted: number;
+            /**
+             * Queued Jobs
+             * @deprecated
+             * @default 0
+             */
+            queued_jobs?: number;
+            /** Skipped Duplicates */
+            skipped_duplicates: number;
+            /**
+             * Status
+             * @constant
+             */
+            status: "projected";
         };
         /**
          * MetricSettingsRequest
@@ -18076,17 +17695,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[DeliveryResponse] */
-        PaginatedResponse_DeliveryResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["DeliveryResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[EscalationEventResponse] */
         PaginatedResponse_EscalationEventResponse_: {
             /** Continuation Token */
@@ -18263,17 +17871,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[WebhookDestinationResponse] */
-        PaginatedResponse_WebhookDestinationResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["WebhookDestinationResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[WorkspaceResponse] */
         PaginatedResponse_WorkspaceResponse_: {
             /** Continuation Token */
@@ -18307,34 +17904,6 @@ export interface components {
              * @description Result rows
              */
             rows: unknown[][];
-        };
-        /**
-         * Parameter
-         * @description Typed declaration of one input parameter.
-         *
-         *     For SQL function types, ``name`` becomes the ``:name`` placeholder
-         *     in the SQL template. For Python function types, ``name`` becomes
-         *     the positional argument name in ``def main(...)`` and the input
-         *     column name on the UC UDF signature.
-         *
-         *     The ``description`` propagates into the LLM tool spec (this is
-         *     what Databricks' Agent Framework reads, and what Anthropic's
-         *     tool-use spec exposes to the model). Missing descriptions
-         *     silently break tool selection — the registration layer rejects
-         *     empty strings.
-         */
-        Parameter: {
-            /** Default */
-            default?: string | number | boolean | null;
-            /** Description */
-            description: string;
-            /** Name */
-            name: string;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "string" | "integer" | "number" | "boolean";
         };
         /** Participant */
         Participant: {
@@ -19735,7 +19304,7 @@ export interface components {
             /** Name */
             name: string;
             /** Parameters */
-            parameters?: components["schemas"]["Parameter"][];
+            parameters?: components["schemas"]["platform_lib__platform_functions__models__Parameter"][];
             /**
              * Returns
              * @default table
@@ -19849,8 +19418,8 @@ export interface components {
         RenameColumnAction: {
             from: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "rename_column";
             to: components["schemas"]["IdentifierString"];
@@ -20227,16 +19796,6 @@ export interface components {
             /** Duration Days */
             duration_days: number;
         };
-        /** RotateSecretResponse */
-        RotateSecretResponse: {
-            /**
-             * Rotation Expires At
-             * Format: date-time
-             */
-            rotation_expires_at: string;
-            /** Secret */
-            secret: string;
-        };
         /** RunSimulationBenchmarkRequest */
         RunSimulationBenchmarkRequest: {
             /** Branch Name */
@@ -20587,7 +20146,7 @@ export interface components {
             updated_at?: string | null;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
         };
@@ -20728,7 +20287,7 @@ export interface components {
             updated_at: string;
             /** Version Sets */
             version_sets: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Output"];
             };
             voice_config?: components["schemas"]["ServiceVoiceConfig-Output"] | null;
             /**
@@ -21095,11 +20654,11 @@ export interface components {
         };
         /** SetColumnDefaultAction */
         SetColumnDefaultAction: {
-            default: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"];
+            default: components["schemas"]["Default"];
             name: components["schemas"]["IdentifierString"];
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "set_column_default";
         };
@@ -21109,8 +20668,8 @@ export interface components {
             /** Nullable */
             nullable: boolean;
             /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
+             * Op
+             * @constant
              */
             op: "set_column_nullable";
         };
@@ -21888,8 +21447,6 @@ export interface components {
             urgency_keywords: string[];
             /** Use Structured Output */
             use_structured_output: boolean;
-            /** Version */
-            version: number;
             /**
              * Workspace Id
              * Format: uuid
@@ -22246,6 +21803,8 @@ export interface components {
             annotation?: string | null;
             /** From State */
             readonly from_state: string;
+            /** Nav Ms */
+            nav_ms?: number | null;
             /**
              * Next State
              * @default
@@ -22309,6 +21868,34 @@ export interface components {
             session_id: string;
             /** Valence */
             valence?: number | null;
+        };
+        /**
+         * StoredParameter
+         * @description One typed input parameter to a workspace data query — trusted shape.
+         *
+         *     Read-path model: the DB's CHECK constraints already enforced ``name``
+         *     regex and ``type`` enum on write, and the deploy endpoint's strict
+         *     :class:`Parameter` validators enforced ``description`` length and
+         *     typo-rejection at the inbound network edge. After that, every
+         *     construction of this model (DB read projection, executor binding,
+         *     agent-engine spec, outbound response) is trusted — no 422 surface.
+         *
+         *     ``default is None`` is the canonical "required" signal: the executor
+         *     raises if a caller omits a required argument, otherwise substitutes
+         *     the stored default.
+         */
+        StoredParameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
         };
         /** StratifiedFitRow */
         StratifiedFitRow: {
@@ -22931,64 +22518,6 @@ export interface components {
              */
             mode: "listen" | "takeover";
         };
-        /** SyncBulkRetryResponse */
-        SyncBulkRetryResponse: {
-            /** Failed To Publish */
-            failed_to_publish: number;
-            /** Retried */
-            retried: number;
-        };
-        /** SyncEventItem */
-        SyncEventItem: {
-            /**
-             * Created At
-             * @description When the event was created
-             */
-            created_at?: string | null;
-            /** Data Source Id */
-            data_source_id?: string | null;
-            /** Display Name */
-            display_name?: string | null;
-            /** Entity Id */
-            entity_id?: string | null;
-            /** Entity Type */
-            entity_type?: string | null;
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-            /** Event Type */
-            event_type: string;
-            /** Fhir Resource Id */
-            fhir_resource_id?: string | null;
-            /** Fhir Resource Type */
-            fhir_resource_type?: string | null;
-            /** Source */
-            source: string;
-            /** Source System */
-            source_system?: string | null;
-            /** Sync Error */
-            sync_error?: string | null;
-            /**
-             * Sync Status
-             * @enum {string}
-             */
-            sync_status: "pending" | "synced" | "failed" | "processing" | "not_applicable";
-            /** Synced At */
-            synced_at?: string | null;
-        };
-        /** SyncEventsResponse */
-        SyncEventsResponse: {
-            /** Events */
-            events: components["schemas"]["SyncEventItem"][];
-            /** Has More */
-            has_more: boolean;
-            /** Next Offset */
-            next_offset?: number | null;
-            /** Total */
-            total: number;
-        };
         /** SyncFailureEntry */
         SyncFailureEntry: {
             /** Created At */
@@ -23007,39 +22536,6 @@ export interface components {
             /** Sync Error */
             sync_error: string | null;
         };
-        /** SyncFailureItem */
-        SyncFailureItem: {
-            /** Created At */
-            created_at?: string | null;
-            /** Data */
-            data?: {
-                [key: string]: unknown;
-            };
-            /** Entity Id */
-            entity_id?: string | null;
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-            /** Event Type */
-            event_type: string;
-            /** Fhir Resource Id */
-            fhir_resource_id?: string | null;
-            /** Fhir Resource Type */
-            fhir_resource_type?: string | null;
-            /** Sync Error */
-            sync_error: string;
-            /** Synced At */
-            synced_at?: string | null;
-        };
-        /** SyncFailuresResponse */
-        SyncFailuresResponse: {
-            /** Failures */
-            failures: components["schemas"]["SyncFailureItem"][];
-            /** Total */
-            total: number;
-        };
         /** SyncHistoryEntry */
         SyncHistoryEntry: {
             /** Date */
@@ -23050,33 +22546,6 @@ export interface components {
             failed_count: number;
             /** Synced Count */
             synced_count: number;
-        };
-        /** SyncQueueResponse */
-        SyncQueueResponse: {
-            /** By Resource Type */
-            by_resource_type?: {
-                [key: string]: {
-                    [key: string]: number;
-                };
-            };
-            /** Failed Count */
-            failed_count: number;
-            /** Last Sync Success At */
-            last_sync_success_at?: string | null;
-            /** Oldest Pending At */
-            oldest_pending_at?: string | null;
-            /** Pending Count */
-            pending_count: number;
-        };
-        /** SyncRetryResponse */
-        SyncRetryResponse: {
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-            /** Status */
-            status: string;
         };
         /**
          * TMSMappingReleaseParams
@@ -24466,10 +23935,14 @@ export interface components {
             compound_emotions?: {
                 [key: string]: unknown;
             }[] | null;
+            /** Decision Bearing */
+            decision_bearing?: boolean | null;
             /** Emotion Label */
             emotion_label?: string | null;
             /** Emotion Valence */
             emotion_valence?: number | null;
+            /** Empathy Tier */
+            empathy_tier?: number | null;
             /** Engine Ms */
             engine_ms?: number | null;
             /** Eot Confidence */
@@ -24488,10 +23961,18 @@ export interface components {
              * @default false
              */
             interrupted?: boolean;
+            /** Modality */
+            modality?: string | null;
             /** Nav Ms */
             nav_ms?: number | null;
+            /** Primary Effect Kind */
+            primary_effect_kind?: string | null;
             /** Render Ms */
             render_ms?: number | null;
+            /** Signal Kind */
+            signal_kind?: string | null;
+            /** Signal Source */
+            signal_source?: string | null;
             /** Speaker Id */
             speaker_id?: string | null;
             /** Speaker Role */
@@ -24501,6 +23982,10 @@ export interface components {
              * @default
              */
             state?: string;
+            /** State After */
+            state_after?: string | null;
+            /** State Before */
+            state_before?: string | null;
             /**
              * State Transitions
              * @default []
@@ -24515,6 +24000,12 @@ export interface components {
              * @default []
              */
             tool_calls?: components["schemas"]["ToolCall"][];
+            /** Tool Ms */
+            tool_ms?: number | null;
+            /** Tool Name */
+            tool_name?: string | null;
+            /** Tool Succeeded */
+            tool_succeeded?: boolean | null;
             /**
              * Trigger
              * @default
@@ -24938,7 +24429,7 @@ export interface components {
             tool_capacity?: number | null;
             /** Version Sets */
             version_sets?: {
-                [key: string]: components["schemas"]["VersionSet"];
+                [key: string]: components["schemas"]["VersionSet-Input"];
             } | null;
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
@@ -25070,21 +24561,6 @@ export interface components {
             /** Timezone */
             timezone?: string | null;
         };
-        /** UpdateWebhookDestinationRequest */
-        UpdateWebhookDestinationRequest: {
-            /** Accepted Event Types */
-            accepted_event_types?: components["schemas"]["EventTypeString"][] | null;
-            description?: components["schemas"]["DescriptionString"] | null;
-            /** Field Mapping */
-            field_mapping?: {
-                [key: string]: string;
-            } | null;
-            /** Is Active */
-            is_active?: boolean | null;
-            name?: components["schemas"]["NameString"] | null;
-            /** Retry Attempts */
-            retry_attempts?: number | null;
-        };
         /** UpdateWorkspaceRequest */
         UpdateWorkspaceRequest: {
             /** Connector Type */
@@ -25146,7 +24622,7 @@ export interface components {
         };
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
-            version_set: components["schemas"]["VersionSet"];
+            version_set: components["schemas"]["VersionSet-Input"];
         };
         /** UsageBucket */
         UsageBucket: {
@@ -25338,15 +24814,26 @@ export interface components {
          * VersionSet
          * @description Pins agent, state machine, and LLM model versions for a service.
          */
-        VersionSet: {
+        "VersionSet-Input": {
             /** Agent Version Number */
             agent_version_number?: number | null;
             /** Context Graph Version Number */
             context_graph_version_number?: number | null;
-            /**
-             * Llm Model Preferences
-             * @default {}
-             */
+            /** Llm Model Preferences */
+            llm_model_preferences?: {
+                [key: string]: components["schemas"]["LLMConfig"];
+            };
+        };
+        /**
+         * VersionSet
+         * @description Pins agent, state machine, and LLM model versions for a service.
+         */
+        "VersionSet-Output": {
+            /** Agent Version Number */
+            agent_version_number?: number | null;
+            /** Context Graph Version Number */
+            context_graph_version_number?: number | null;
+            /** Llm Model Preferences */
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
@@ -25682,373 +25169,6 @@ export interface components {
              */
             setup_id: string;
         };
-        /** VoicemailListResponse */
-        VoicemailListResponse: {
-            /** Items */
-            items: components["schemas"]["VoicemailResponse"][];
-        };
-        /** VoicemailResponse */
-        VoicemailResponse: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Recipient Phone Number */
-            recipient_phone_number: string;
-            /** Setup Id */
-            setup_id: string;
-            /** Status */
-            status: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-            /** Use Case Id */
-            use_case_id: string;
-            /**
-             * Voicemail Id
-             * Format: uuid
-             */
-            voicemail_id: string;
-        };
-        /** VoicemailSentResponse */
-        VoicemailSentResponse: {
-            /** Sender Phone Number */
-            sender_phone_number: string;
-            /**
-             * Voicemail Id
-             * Format: uuid
-             */
-            voicemail_id: string;
-        };
-        /** WebhookDestinationCreatedResponse */
-        WebhookDestinationCreatedResponse: {
-            /** Accepted Event Types */
-            accepted_event_types: string[];
-            /**
-             * Created At
-             * @description When the webhook destination was created
-             */
-            created_at?: string | null;
-            /** Created By */
-            created_by: string | null;
-            /** Description */
-            description: string | null;
-            /** Field Mapping */
-            field_mapping: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Is Active */
-            is_active: boolean;
-            /** Name */
-            name: string;
-            /** Retry Attempts */
-            retry_attempts: number;
-            /** Secret */
-            secret: string;
-            /**
-             * Trigger Id
-             * Format: uuid
-             */
-            trigger_id: string;
-            /**
-             * Updated At
-             * @description When the webhook destination was last updated
-             */
-            updated_at?: string | null;
-            /** Url */
-            url: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** WebhookDestinationResponse */
-        WebhookDestinationResponse: {
-            /** Accepted Event Types */
-            accepted_event_types: string[];
-            /**
-             * Created At
-             * @description When the webhook destination was created
-             */
-            created_at?: string | null;
-            /** Created By */
-            created_by: string | null;
-            /** Description */
-            description: string | null;
-            /** Field Mapping */
-            field_mapping: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Is Active */
-            is_active: boolean;
-            /** Name */
-            name: string;
-            /** Retry Attempts */
-            retry_attempts: number;
-            /**
-             * Trigger Id
-             * Format: uuid
-             */
-            trigger_id: string;
-            /**
-             * Updated At
-             * @description When the webhook destination was last updated
-             */
-            updated_at?: string | null;
-            /** Url */
-            url: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** WebhookReceivedResponse */
-        WebhookReceivedResponse: {
-            /**
-             * Destination Id
-             * Format: uuid
-             */
-            destination_id: string;
-            /**
-             * Event Id
-             * Format: uuid
-             */
-            event_id: string;
-        };
-        /** WorkflowSettingsRequest */
-        WorkflowSettingsRequest: {
-            /** Workflows */
-            workflows: components["schemas"]["WorkflowSpec-Input"][];
-        };
-        /** WorkflowSettingsResponse */
-        WorkflowSettingsResponse: {
-            /** Workflows */
-            workflows?: components["schemas"]["WorkflowSpec-Output"][];
-        };
-        /**
-         * WorkflowSpec
-         * @description A workflow definition stored in workspace settings.
-         *
-         *     Workflows are identified by name (unique within a workspace).
-         */
-        "WorkflowSpec-Input": {
-            /**
-             * Description
-             * @default
-             */
-            description?: string;
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /** Id */
-            id?: string;
-            /** Input Query */
-            input_query?: string | null;
-            /**
-             * Max Concurrent
-             * @default 10
-             */
-            max_concurrent?: number;
-            /** Name */
-            name: string;
-            /** Steps */
-            steps: components["schemas"]["WorkflowStep-Input"][];
-            /**
-             * Timeout
-             * Format: duration
-             * @default P7D
-             */
-            timeout?: string;
-            trigger: components["schemas"]["WorkflowTrigger"];
-        };
-        /**
-         * WorkflowSpec
-         * @description A workflow definition stored in workspace settings.
-         *
-         *     Workflows are identified by name (unique within a workspace).
-         */
-        "WorkflowSpec-Output": {
-            /**
-             * Description
-             * @default
-             */
-            description?: string;
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /** Id */
-            id?: string;
-            /** Input Query */
-            input_query?: string | null;
-            /**
-             * Max Concurrent
-             * @default 10
-             */
-            max_concurrent?: number;
-            /** Name */
-            name: string;
-            /** Steps */
-            steps: components["schemas"]["WorkflowStep-Output"][];
-            /**
-             * Timeout
-             * Format: duration
-             * @default P7D
-             */
-            timeout?: string;
-            trigger: components["schemas"]["WorkflowTrigger"];
-        };
-        /**
-         * WorkflowStep
-         * @description A single step in a workflow spec.
-         *
-         *     Steps are declarative — no LLM decides which step to run next.
-         *     The engine executes them sequentially unless branch/for_each alters flow.
-         */
-        "WorkflowStep-Input": {
-            /** Body Steps */
-            body_steps?: components["schemas"]["WorkflowStep-Input"][] | null;
-            /** Condition */
-            condition?: string | null;
-            /** Endpoint */
-            endpoint?: string | null;
-            /** Integration */
-            integration?: string | null;
-            /** Items From */
-            items_from?: string | null;
-            /** Name */
-            name: string;
-            /** On False */
-            on_false?: string | null;
-            /** On True */
-            on_true?: string | null;
-            /** Request Body */
-            request_body?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Retry Backoff Seconds
-             * @default 2
-             */
-            retry_backoff_seconds?: number;
-            /**
-             * Retry Count
-             * @default 3
-             */
-            retry_count?: number;
-            /** Surface Spec */
-            surface_spec?: {
-                [key: string]: unknown;
-            } | null;
-            /** Tool Name */
-            tool_name?: string | null;
-            /** Tool Params */
-            tool_params?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "tool_call" | "integration_call" | "wait" | "branch" | "for_each" | "surface";
-            /** Wait Duration */
-            wait_duration?: string | null;
-            /** Wait For Event */
-            wait_for_event?: string | null;
-        };
-        /**
-         * WorkflowStep
-         * @description A single step in a workflow spec.
-         *
-         *     Steps are declarative — no LLM decides which step to run next.
-         *     The engine executes them sequentially unless branch/for_each alters flow.
-         */
-        "WorkflowStep-Output": {
-            /** Body Steps */
-            body_steps?: components["schemas"]["WorkflowStep-Output"][] | null;
-            /** Condition */
-            condition?: string | null;
-            /** Endpoint */
-            endpoint?: string | null;
-            /** Integration */
-            integration?: string | null;
-            /** Items From */
-            items_from?: string | null;
-            /** Name */
-            name: string;
-            /** On False */
-            on_false?: string | null;
-            /** On True */
-            on_true?: string | null;
-            /** Request Body */
-            request_body?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Retry Backoff Seconds
-             * @default 2
-             */
-            retry_backoff_seconds?: number;
-            /**
-             * Retry Count
-             * @default 3
-             */
-            retry_count?: number;
-            /** Surface Spec */
-            surface_spec?: {
-                [key: string]: unknown;
-            } | null;
-            /** Tool Name */
-            tool_name?: string | null;
-            /** Tool Params */
-            tool_params?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "tool_call" | "integration_call" | "wait" | "branch" | "for_each" | "surface";
-            /** Wait Duration */
-            wait_duration?: string | null;
-            /** Wait For Event */
-            wait_for_event?: string | null;
-        };
-        /**
-         * WorkflowTrigger
-         * @description When and how a workflow starts.
-         */
-        WorkflowTrigger: {
-            /** Cron Expression */
-            cron_expression?: string | null;
-            /** Event Filter */
-            event_filter?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "cron" | "event" | "manual";
-        };
         /**
          * WorkspaceBenchmarks
          * @description Workspace-level call quality benchmarks for contextual comparison.
@@ -26108,6 +25228,48 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * WorkspaceDataQueryItem
+         * @description Wire shape for the response of every read + create/update handler.
+         *
+         *     ``id`` (UUID) is the stable handle — every URL except list takes it.
+         *     ``name`` is the workspace-visible label (UNIQUE per workspace) and is
+         *     still what the LLM tool registry keys on (``wsq_<name>``), but it is
+         *     not the route identifier.
+         *
+         *     ``input_schema`` is deliberately NOT exposed — it is fully derivable
+         *     from ``parameters[]``. UI consumers can build the JSON Schema view
+         *     locally if they need it.
+         */
+        WorkspaceDataQueryItem: {
+            /**
+             * Deployed At
+             * Format: date-time
+             */
+            deployed_at: string;
+            /**
+             * Deployed By
+             * Format: uuid
+             */
+            deployed_by: string;
+            /** Description */
+            description: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Invoked At */
+            last_invoked_at?: string | null;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters: components["schemas"]["StoredParameter"][];
+            /** Sql Template */
+            sql_template: string;
+            /** Timeout Ms */
+            timeout_ms: number;
         };
         /** WorkspaceInvitationAcceptedEvent */
         WorkspaceInvitationAcceptedEvent: {
@@ -26272,6 +25434,34 @@ export interface components {
         };
         _ToolMockKey: string;
         _ToolMockValue: string;
+        /**
+         * Parameter
+         * @description Typed declaration of one input parameter.
+         *
+         *     For SQL function types, ``name`` becomes the ``:name`` placeholder
+         *     in the SQL template. For Python function types, ``name`` becomes
+         *     the positional argument name in ``def main(...)`` and the input
+         *     column name on the UC UDF signature.
+         *
+         *     The ``description`` propagates into the LLM tool spec (this is
+         *     what Databricks' Agent Framework reads, and what Anthropic's
+         *     tool-use spec exposes to the model). Missing descriptions
+         *     silently break tool selection — the registration layer rejects
+         *     empty strings.
+         */
+        platform_lib__platform_functions__models__Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
         /**
          * IntegrationToolRef
          * @description Reference to an integration endpoint by integration + endpoint name.
@@ -26563,10 +25753,148 @@ export interface components {
             /** Tags */
             tags?: string[];
         };
+        /**
+         * Request
+         * @description Create body — the authored shape of a new workspace data query.
+         *
+         *     The SQL template + parameters parity check + multi-statement /
+         *     session-state-command refusal runs inside :meth:`_validate_template`
+         *     so a bad payload surfaces as a Pydantic 422 with the standard wire
+         *     shape — no try/except in the handler.
+         */
+        src__routes__workspace_data_queries__create_workspace_data_query__Request: {
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /** Parameters */
+            parameters?: components["schemas"]["src__routes__workspace_data_queries__create_workspace_data_query__Request__Parameter"][];
+            /** Sql Template */
+            sql_template: string;
+            /**
+             * Timeout Ms
+             * @default 5000
+             */
+            timeout_ms?: number;
+        };
+        /**
+         * Parameter
+         * @description Strict write-side validator for one declared parameter.
+         */
+        src__routes__workspace_data_queries__create_workspace_data_query__Request__Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
+        /** Request */
+        src__routes__workspace_data_queries__invoke_workspace_data_query__Request: {
+            /**
+             * Input
+             * @description Caller arguments matching the declared parameters.
+             */
+            input?: {
+                [key: string]: unknown;
+            };
+        };
+        /** Response */
+        src__routes__workspace_data_queries__invoke_workspace_data_query__Response: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /** Result */
+            result?: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Row Count
+             * @default 0
+             */
+            row_count?: number;
+        };
+        /** Item */
+        src__routes__workspace_data_queries__list_workspace_data_queries__Item: {
+            /**
+             * Deployed At
+             * Format: date-time
+             */
+            deployed_at: string;
+            /**
+             * Deployed By
+             * Format: uuid
+             */
+            deployed_by: string;
+            /** Description */
+            description: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Invoked At */
+            last_invoked_at?: string | null;
+            /** Name */
+            name: string;
+            /** Parameter Count */
+            parameter_count: number;
+            /** Sql Template */
+            sql_template: string;
+            /** Timeout Ms */
+            timeout_ms: number;
+        };
+        /** Response */
+        src__routes__workspace_data_queries__list_workspace_data_queries__Response: {
+            /** Count */
+            count: number;
+            /** Items */
+            items: components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Item"][];
+        };
+        /**
+         * Request
+         * @description PATCH body — every field optional. Present ⇒ overwrite; absent ⇒ keep.
+         */
+        src__routes__workspace_data_queries__update_workspace_data_query__Request: {
+            /** Description */
+            description?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Parameters */
+            parameters?: components["schemas"]["src__routes__workspace_data_queries__update_workspace_data_query__Request__Parameter"][] | null;
+            /** Sql Template */
+            sql_template?: string | null;
+            /** Timeout Ms */
+            timeout_ms?: number | null;
+        };
+        /**
+         * Parameter
+         * @description Strict write-side validator for one declared parameter.
+         */
+        src__routes__workspace_data_queries__update_workspace_data_query__Request__Parameter: {
+            /** Default */
+            default?: string | number | boolean | null;
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "integer" | "number" | "boolean";
+        };
         /** Request */
         src__routes__workspace_tables__create_workspace_table__Request: {
             /** Columns */
-            columns: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Column"][];
+            columns: components["schemas"]["Column-Input"][];
             /** Indexes */
             indexes?: components["schemas"]["Index-Input"][];
             /** Primary Key */
@@ -26574,30 +25902,6 @@ export interface components {
             table_name: components["schemas"]["IdentifierString"];
             /** Unique */
             unique?: components["schemas"]["IdentifierString"][][];
-        };
-        /** Column */
-        src__routes__workspace_tables__create_workspace_table__Request__Column: {
-            default?: components["schemas"]["src__routes__workspace_tables__create_workspace_table__Request__Default"] | null;
-            name: components["schemas"]["IdentifierString"];
-            /**
-             * Nullable
-             * @default true
-             */
-            nullable?: boolean;
-            type: components["schemas"]["ColumnType"];
-        };
-        /** Default */
-        src__routes__workspace_tables__create_workspace_table__Request__Default: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "literal" | "uuid_v4" | "now" | "current_date";
-            /**
-             * Value
-             * @description Only meaningful for ``kind="literal"``. Other kinds ignore it.
-             */
-            value?: string | number | boolean | null;
         };
         /** Response */
         src__routes__workspace_tables__create_workspace_table__Response: {
@@ -26622,8 +25926,9 @@ export interface components {
              * Sql
              * @description One SQL statement: SELECT / WITH ... SELECT / INSERT / UPDATE /
              *     DELETE. Multi-statement, DDL, and session-state commands (SET ROLE,
-             *     RESET, SET SESSION AUTHORIZATION) reject with 400. ``pg_*``
-             *     function calls reject with 400.
+             *     RESET, SET SESSION AUTHORIZATION) reject with 422 at the Pydantic
+             *     boundary. ``pg_*`` function calls reject with 400 at execute time
+             *     (no grant).
              */
             sql: string;
         };
@@ -26669,33 +25974,34 @@ export interface components {
         /** Response */
         src__routes__workspace_tables__list_workspace_tables__Response: {
             /** Items */
-            items: components["schemas"]["Item"][];
+            items: components["schemas"]["src__routes__workspace_tables__list_workspace_tables__Response__Item"][];
+        };
+        /** Item */
+        src__routes__workspace_tables__list_workspace_tables__Response__Item: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Physical Name */
+            physical_name: string;
+            /** Table Name */
+            table_name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** Request */
         src__routes__workspace_tables__update_workspace_table__Request: {
             /** Actions */
-            actions: (components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"])[];
-        };
-        /** Column */
-        src__routes__workspace_tables__update_workspace_table__Request__Column: {
-            default?: components["schemas"]["src__routes__workspace_tables__update_workspace_table__Request__Default"] | null;
-            name: components["schemas"]["IdentifierString"];
-            /**
-             * Nullable
-             * @default true
-             */
-            nullable?: boolean;
-            type: components["schemas"]["ColumnType"];
-        };
-        /** Default */
-        src__routes__workspace_tables__update_workspace_table__Request__Default: {
-            /**
-             * Kind
-             * @enum {string}
-             */
-            kind: "literal" | "uuid_v4" | "now" | "current_date";
-            /** Value */
-            value?: string | number | boolean | null;
+            actions: components["schemas"]["AlterAction"][];
         };
         /** Response */
         src__routes__workspace_tables__update_workspace_table__Response: {
@@ -27374,13 +26680,6 @@ export interface operations {
             };
             /** @description Rate limited or upload limit reached */
             429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Upload service unavailable */
-            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -29958,13 +29257,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Audit export not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     "list-audit-exports": {
@@ -30001,13 +29293,6 @@ export interface operations {
             };
             /** @description Rate limited */
             429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Audit export not configured */
-            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -32567,6 +31852,242 @@ export interface operations {
             };
         };
     };
+    "list-workspace-data-queries": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Response"];
+                };
+            };
+        };
+    };
+    "create-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_data_queries__create_workspace_data_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDataQueryItem"];
+                };
+            };
+            /** @description A workspace data query with the given name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation or precondition failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDataQueryItem"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_data_queries__update_workspace_data_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDataQueryItem"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A workspace data query with the given name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation failure */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "invoke-workspace-data-query": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                query_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__workspace_data_queries__invoke_workspace_data_query__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__workspace_data_queries__invoke_workspace_data_query__Response"];
+                };
+            };
+            /** @description Workspace data query not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Execution failed */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     create_desktop_session_v1__workspace_id__desktop_sessions_post: {
         parameters: {
             query?: never;
@@ -33527,48 +33048,6 @@ export interface operations {
             };
         };
     };
-    "fhir-sync-failures": {
-        parameters: {
-            query?: {
-                limit?: number;
-                fhir_resource_type?: string | null;
-                fhir_resource_id?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncFailuresResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "fhir-appointments-view": {
         parameters: {
             query?: {
@@ -34024,13 +33503,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Databricks SQL client unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
     "test-function": {
@@ -34080,45 +33552,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Databricks SQL client unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    receive_webhook_v1__workspace_id__hooks__destination_id__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WebhookReceivedResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
@@ -35847,69 +35280,6 @@ export interface operations {
             };
         };
     };
-    "evaluate-metric": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                /** @description Metric key (lowercase alphanumeric + underscores) */
-                metric_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MetricEvaluateRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MetricEvaluateResponse"];
-                };
-            };
-            /** @description Metric or call intelligence not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Metric cannot be evaluated on demand */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Metric preview query failed */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Analytics warehouse not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-metric-trend": {
         parameters: {
             query?: {
@@ -37152,7 +36522,7 @@ export interface operations {
     "list-prompt-logs": {
         parameters: {
             query?: {
-                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves to the underlying ``call_sid`` via ``world.entities``. Mutually exclusive with the ``call_sid`` query parameter. */
+                /** @description Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter. */
                 conversation_id?: string | null;
                 /** @description Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``. */
                 call_sid?: string | null;
@@ -39034,82 +38404,6 @@ export interface operations {
             };
         };
     };
-    "get-behavior-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BehaviorSettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-behavior-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BehaviorSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BehaviorSettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-branding-settings": {
         parameters: {
             query?: never;
@@ -39995,82 +39289,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VoiceSettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-workflow-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowSettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-workflow-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkflowSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkflowSettingsResponse"];
                 };
             };
             /** @description Workspace not found */
@@ -43180,415 +42398,6 @@ export interface operations {
             };
         };
     };
-    "list-voicemails": {
-        parameters: {
-            query?: {
-                use_case_id?: string | null;
-                setup_id?: string | null;
-                status?: ("pending" | "skipped" | "failed" | "delivered" | "not_delivered")[] | null;
-                recipient_phone_number?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoicemailListResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "send-voicemail": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": components["schemas"]["Body_send-voicemail"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["VoicemailSentResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found or no phone assigned. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Audio exceeds 8 MB. */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid audio or configuration. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager unavailable. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager timed out. */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-webhook-destinations": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WebhookDestinationResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "create-webhook-destination": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateWebhookDestinationRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WebhookDestinationCreatedResponse"];
-                };
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-webhook-destination": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WebhookDestinationResponse"];
-                };
-            };
-            /** @description Webhook destination not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-webhook-destination": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateWebhookDestinationRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WebhookDestinationResponse"];
-                };
-            };
-            /** @description Webhook destination not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "delete-webhook-destination": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "list-webhook-destination-deliveries": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DeliveryResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "rotate-webhook-destination-secret": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                destination_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RotateSecretResponse"];
-                };
-            };
-            /** @description Webhook destination not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "connector-overview": {
         parameters: {
             query?: never;
@@ -44768,172 +43577,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OutboundSyncBySinkResponse"];
                 };
-            };
-        };
-    };
-    "world-sync-events": {
-        parameters: {
-            query: {
-                status: "pending" | "synced" | "failed" | "processing" | "not_applicable";
-                /** @description Filter events to a specific outbound data source. */
-                data_source_id?: string | null;
-                /** @description Filter events to a specific source system. */
-                source_system?: string | null;
-                /** @description Filter events to a specific FHIR resource type. */
-                fhir_resource_type?: string | null;
-                /** @description Filter events to a specific FHIR resource ID. */
-                fhir_resource_id?: string | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncEventsResponse"];
-                };
-            };
-            /** @description Invalid status parameter. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "world-sync-queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncQueueResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "world-sync-retry-all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncBulkRetryResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "world-sync-retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                event_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SyncRetryResponse"];
-                };
-            };
-            /** @description Invalid event ID format. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Event not found or has no sync_error. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Event missing FHIR resource type/ID. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };

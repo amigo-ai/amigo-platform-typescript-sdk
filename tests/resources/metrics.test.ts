@@ -70,6 +70,7 @@ const METRIC_CATALOG_FIXTURE: MetricCatalogResponse = {
       unit: 'score',
       has_prompt: false,
       builtin: true,
+      source: 'call_intelligence',
     },
   ],
 }

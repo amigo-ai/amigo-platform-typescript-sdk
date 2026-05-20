@@ -60,7 +60,6 @@ import { MemoryResource } from './resources/memory.js'
 import { ReviewQueueResource } from './resources/review-queue.js'
 import { RecordingsResource } from './resources/recordings.js'
 import { AuditResource } from './resources/audit.js'
-import { WebhookDestinationsResource } from './resources/webhook-destinations.js'
 import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
@@ -80,6 +79,7 @@ import { ToolsResource } from './resources/tools.js'
 import { SurfacesResource } from './resources/surfaces.js'
 import { SessionsResource } from './resources/sessions.js'
 import { WorkspaceDatabaseResource } from './resources/workspace-database.js'
+import { WorkspaceDataQueriesResource } from './resources/workspace-data-queries.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -214,7 +214,6 @@ export class AmigoClient {
   readonly reviewQueue!: ReviewQueueResource
   readonly recordings!: RecordingsResource
   readonly audit!: AuditResource
-  readonly webhookDestinations!: WebhookDestinationsResource
   readonly compliance!: ComplianceResource
   readonly events!: EventsResource
   readonly functions!: FunctionsResource
@@ -254,6 +253,8 @@ export class AmigoClient {
   readonly sessions!: SessionsResource
   /** Workspace database — Lakebase fork lifecycle, SQL query execution, query tool CRUD */
   readonly workspaceDatabase!: WorkspaceDatabaseResource
+  /** Workspace data queries — Lakebase-backed query tool registry */
+  readonly workspaceDataQueries!: WorkspaceDataQueriesResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -482,7 +483,6 @@ export class AmigoClient {
     mutable.reviewQueue = new ReviewQueueResource(client, workspaceId)
     mutable.recordings = new RecordingsResource(client, workspaceId)
     mutable.audit = new AuditResource(client, workspaceId)
-    mutable.webhookDestinations = new WebhookDestinationsResource(client, workspaceId)
     mutable.compliance = new ComplianceResource(client, workspaceId)
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
@@ -502,6 +502,7 @@ export class AmigoClient {
     mutable.surfaces = new SurfacesResource(client, workspaceId)
     mutable.sessions = new SessionsResource(client, workspaceId)
     mutable.workspaceDatabase = new WorkspaceDatabaseResource(client, workspaceId)
+    mutable.workspaceDataQueries = new WorkspaceDataQueriesResource(client, workspaceId)
   }
 
   private async resolveApiRequest<
@@ -665,6 +666,16 @@ export type {
 } from './resources/metrics.js'
 /** @deprecated Use `MetricValue` instead. */
 export type MetricValueResponse = MetricValueAlias
+
+export type {
+  CreateWorkspaceDataQueryRequest,
+  InvokeWorkspaceDataQueryRequest,
+  InvokeWorkspaceDataQueryResponse,
+  UpdateWorkspaceDataQueryRequest,
+  WorkspaceDataQuery,
+  WorkspaceDataQueryListItem,
+  WorkspaceDataQueryListResponse,
+} from './resources/workspace-data-queries.js'
 
 export type CallSummary = components['schemas']['CallSummary']
 export type CallDetail = components['schemas']['CallDetailResponse']

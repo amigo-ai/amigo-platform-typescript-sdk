@@ -22,8 +22,6 @@ const continuationPaths = new Set([
   `${BASE}/services`,
   `${BASE}/triggers`,
   `${BASE}/triggers/trigger-001/runs`,
-  `${BASE}/webhook-destinations`,
-  `${BASE}/webhook-destinations/dest-001/deliveries`,
   '/v1/workspaces',
 ])
 
@@ -38,7 +36,6 @@ const offsetEventPaths = new Set([
   `${BASE}/audit/phi-access`,
   `${BASE}/audit/entity/entity-001/access-log`,
   `${BASE}/world/entities/entity-001/timeline`,
-  `${BASE}/world/sync/events`,
 ])
 
 function mockFetch(): typeof globalThis.fetch {
@@ -126,8 +123,6 @@ describe('resource auto-pagination helpers', () => {
       countItems(client.skills.listAutoPaging({ limit: 1 })),
       countItems(client.triggers.listAutoPaging({ limit: 1 })),
       countItems(client.triggers.listRunsAutoPaging('trigger-001', { limit: 1 })),
-      countItems(client.webhookDestinations.listAutoPaging({ limit: 1 })),
-      countItems(client.webhookDestinations.listDeliveriesAutoPaging('dest-001', { limit: 1 })),
       countItems(client.workspaces.listAutoPaging({ limit: 1 })),
     ])
 
@@ -144,7 +139,6 @@ describe('resource auto-pagination helpers', () => {
       countItems(client.operators.getAuditLogAutoPaging({ limit: 1 })),
       countItems(client.world.listEntitiesAutoPaging({ limit: 1 })),
       countItems(client.world.getTimelineAutoPaging('entity-001', { limit: 1 })),
-      countItems(client.world.listSyncEventsAutoPaging({ status: 'pending', limit: 1 })),
     ])
 
     expect(counts).toEqual(new Array(counts.length).fill(2))
