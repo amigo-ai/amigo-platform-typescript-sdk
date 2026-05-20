@@ -8950,8 +8950,69 @@ export interface components {
         };
         /** CallIntelligenceMetricProjectionRequest */
         CallIntelligenceMetricProjectionRequest: {
+            /** Call Id */
+            call_id?: string | null;
             /** Call Sid */
             call_sid: string;
+            /**
+             * Channel Kind
+             * @default voice
+             */
+            channel_kind?: string;
+            /** Completion Reason */
+            completion_reason?: string | null;
+            /** Conversation Summary */
+            conversation_summary?: {
+                [key: string]: unknown;
+            };
+            /** Created At */
+            created_at?: string | null;
+            /** Direction */
+            direction: string;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Emotion Summary */
+            emotion_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Final State
+             * @default
+             */
+            final_state?: string;
+            /** Latency Summary */
+            latency_summary?: {
+                [key: string]: unknown;
+            };
+            /** Operator Summary */
+            operator_summary?: {
+                [key: string]: unknown;
+            };
+            /** Quality Score */
+            quality_score: number;
+            /** Risk Summary */
+            risk_summary?: {
+                [key: string]: unknown;
+            };
+            /** Run Id */
+            run_id?: string | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default real
+             */
+            source?: string;
+            /** Tool Summary */
+            tool_summary?: {
+                [key: string]: unknown;
+            };
         };
         /** CallListResponse */
         CallListResponse: {
