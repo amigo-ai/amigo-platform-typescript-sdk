@@ -3318,7 +3318,7 @@ export interface paths {
         put?: never;
         /**
          * Probe an integration's connection + auth
-         * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
+         * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
          */
         post: operations["test-integration-connection"];
         delete?: never;
@@ -8950,8 +8950,69 @@ export interface components {
         };
         /** CallIntelligenceMetricProjectionRequest */
         CallIntelligenceMetricProjectionRequest: {
+            /** Call Id */
+            call_id?: string | null;
             /** Call Sid */
             call_sid: string;
+            /**
+             * Channel Kind
+             * @default voice
+             */
+            channel_kind?: string;
+            /** Completion Reason */
+            completion_reason?: string | null;
+            /** Conversation Summary */
+            conversation_summary?: {
+                [key: string]: unknown;
+            };
+            /** Created At */
+            created_at?: string | null;
+            /** Direction */
+            direction: string;
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Emotion Summary */
+            emotion_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Final State
+             * @default
+             */
+            final_state?: string;
+            /** Latency Summary */
+            latency_summary?: {
+                [key: string]: unknown;
+            };
+            /** Operator Summary */
+            operator_summary?: {
+                [key: string]: unknown;
+            };
+            /** Quality Score */
+            quality_score: number;
+            /** Risk Summary */
+            risk_summary?: {
+                [key: string]: unknown;
+            };
+            /** Run Id */
+            run_id?: string | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source
+             * @default real
+             */
+            source?: string;
+            /** Tool Summary */
+            tool_summary?: {
+                [key: string]: unknown;
+            };
         };
         /** CallListResponse */
         CallListResponse: {
@@ -10850,18 +10911,6 @@ export interface components {
              * @default []
              */
             endpoints?: components["schemas"]["EndpointConfig-Input"][];
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
             /**
              * Name
              * @description Slug-like identifier, lowercase alphanumeric + hyphens/underscores.
@@ -10872,7 +10921,7 @@ export interface components {
              * @default rest
              * @enum {string}
              */
-            protocol?: "rest" | "fhir" | "mcp";
+            protocol?: "rest" | "fhir";
         };
         /** CreateLinkRequest */
         CreateLinkRequest: {
@@ -15390,33 +15439,6 @@ export interface components {
              */
             last_tested_at?: string | null;
             /**
-             * Mcp Args
-             * @description MCP stdio command arguments
-             */
-            mcp_args?: string[] | null;
-            /**
-             * Mcp Command
-             * @description MCP stdio command
-             */
-            mcp_command?: string | null;
-            /**
-             * Mcp Headers
-             * @description MCP request headers
-             */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * Mcp Transport
-             * @description MCP transport type
-             */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /**
-             * Mcp Url
-             * @description MCP server URL (SSE/HTTP)
-             */
-            mcp_url?: string | null;
-            /**
              * Name
              * @description Slug-like identifier
              */
@@ -15426,7 +15448,7 @@ export interface components {
              * @description Communication protocol
              * @enum {string}
              */
-            protocol: "rest" | "fhir" | "mcp" | "desktop";
+            protocol: "rest" | "fhir" | "desktop";
             /**
              * Updated At
              * Format: date-time
@@ -15509,18 +15531,6 @@ export interface components {
              * Format: uuid
              */
             id: string;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: string | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
             /** Name */
             name: string;
             /**
@@ -22692,7 +22702,7 @@ export interface components {
             duration_ms?: number;
             /**
              * Http Status
-             * @description HTTP status code from the upstream HEAD probe (REST/FHIR/MCP-http only).
+             * @description HTTP status code from the upstream HEAD probe (REST/FHIR only).
              */
             http_status?: number | null;
             /**
@@ -23311,7 +23321,7 @@ export interface components {
             tool_name: components["schemas"]["NameString"];
             /**
              * Tool Type
-             * @description world_tool, skill, or integration
+             * @description world_tool — other tool families use their dedicated endpoints
              */
             tool_type: string;
         };
@@ -24360,20 +24370,8 @@ export interface components {
             enabled?: boolean | null;
             /** Endpoints */
             endpoints?: components["schemas"]["EndpointConfig-Input"][] | null;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
             /** Protocol */
-            protocol?: ("rest" | "fhir" | "mcp") | null;
+            protocol?: ("rest" | "fhir") | null;
         };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
