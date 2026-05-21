@@ -22,10 +22,15 @@ async function main() {
     throw new Error('AMIGO_API_KEY and AMIGO_WORKSPACE_ID must be set')
   }
 
-  const client = new AmigoClient({ apiKey, workspaceId })
+  const client = new AmigoClient({
+    apiKey,
+    workspaceId,
+    baseUrl: process.env.AMIGO_BASE_URL,
+  })
 
-  // Exchange the API key for a JWT. Optional `scope` restricts the issued
-  // token to a subset of the API key's permissions.
+  // Exchange the API key for a JWT. Optional `scope` requests a narrower
+  // scope on the issued token — enforcement happens server-side.
+  // Adjust the scope string to match your integration's least-privilege needs.
   const tokenResponse = await client.tokens.exchangeApiKey({
     apiKey,
     scope: 'entities:read agents:read',

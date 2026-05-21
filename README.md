@@ -135,41 +135,46 @@ forward to a browser via a BFF proxy, or to call the platform from a runtime
 that can't safely hold the raw API key).
 
 The call posts to `POST /token` on the configured `baseUrl` and is **not**
-workspace-scoped — the existing `Authorization` header is intentionally
-stripped from this one request, and the API key is sent as a form field
-instead.
+workspace-scoped — `workspaceId` is still required on the client because it
+governs every other resource call on the same instance, but `POST /token`
+itself ignores it. The SDK also unconditionally strips the configured
+`Authorization` header for this one request and sends the exchange key only
+as the `api_key` form field, so the configured client key is never sent over
+the wire on the exchange call.
 
 ```typescript
 import { AmigoClient } from '@amigo-ai/platform-sdk'
 
-const client = new AmigoClient({
-  apiKey: process.env.AMIGO_API_KEY!,
-  workspaceId: process.env.AMIGO_WORKSPACE_ID!,
-})
+const apiKey = process.env.AMIGO_API_KEY
+const workspaceId = process.env.AMIGO_WORKSPACE_ID
+if (!apiKey || !workspaceId) {
+  throw new Error('AMIGO_API_KEY and AMIGO_WORKSPACE_ID must be set')
+}
+
+const client = new AmigoClient({ apiKey, workspaceId })
 
 const { access_token, expires_in, scope } = await client.tokens.exchangeApiKey({
-  apiKey: process.env.AMIGO_API_KEY!,
-  // Optional: restrict the issued JWT to a subset of scopes.
+  apiKey,
+  // Optional: request a narrower scope on the issued JWT. Enforcement is
+  // server-side — the SDK just forwards the value as a form field.
   scope: 'entities:read agents:read',
 })
 
 console.log(`Got JWT, expires in ${expires_in}s with scope "${scope}"`)
 
 // Use the JWT in a second client. JWTs are passed as `apiKey` — Bearer auth.
-const scopedClient = new AmigoClient({
-  apiKey: access_token,
-  workspaceId: process.env.AMIGO_WORKSPACE_ID!,
-})
+const scopedClient = new AmigoClient({ apiKey: access_token, workspaceId })
 
 const { items: agents } = await scopedClient.agents.list({ limit: 5 })
 console.log(agents.map((agent) => agent.name))
 ```
 
 The response is the standard OAuth-style token payload (`access_token`,
-`token_type`, `expires_in`, `scope`, plus `session_id` / `refresh_token` when
-applicable). The `apiKey` you pass to `exchangeApiKey()` can be a different
-key than the one configured on the client — the configured key is only used
-to authenticate the calling identity if your deployment requires it.
+`token_type`, `expires_in`, `scope`, plus optional `session_id` /
+`refresh_token` when applicable). The `apiKey` you pass to
+`exchangeApiKey()` can be a different key than the one configured on the
+client — the configured key is not used to authenticate the exchange
+request itself.
 
 ## Configuration
 
