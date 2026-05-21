@@ -49,6 +49,7 @@ src/
     agents.ts           -- Agent CRUD and versioning
     analytics.ts        -- Call stats, event breakdown, data quality
     api-keys.ts         -- API key management
+    tokens.ts           -- Exchange API key for identity-issued JWT (POST /token)
     audit.ts            -- Audit log queries
     billing.ts          -- Dashboard, usage, invoices
     calls.ts            -- Call list, detail, intelligence, trace analysis

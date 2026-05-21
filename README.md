@@ -126,6 +126,51 @@ const client = new AmigoClient({ apiKey: result.accessToken, workspaceId: result
 
 See [`examples/auth/device-code-login.ts`](./examples/auth/device-code-login.ts) for a complete working example.
 
+### Exchange an API key for a JWT
+
+Use `client.tokens.exchangeApiKey()` to swap a long-lived API key for a
+short-lived identity-issued JWT. This is useful when you want to mint a
+narrowly scoped, time-bound token from a privileged server (for example to
+forward to a browser via a BFF proxy, or to call the platform from a runtime
+that can't safely hold the raw API key).
+
+The call posts to `POST /token` on the configured `baseUrl` and is **not**
+workspace-scoped — the existing `Authorization` header is intentionally
+stripped from this one request, and the API key is sent as a form field
+instead.
+
+```typescript
+import { AmigoClient } from '@amigo-ai/platform-sdk'
+
+const client = new AmigoClient({
+  apiKey: process.env.AMIGO_API_KEY!,
+  workspaceId: process.env.AMIGO_WORKSPACE_ID!,
+})
+
+const { access_token, expires_in, scope } = await client.tokens.exchangeApiKey({
+  apiKey: process.env.AMIGO_API_KEY!,
+  // Optional: restrict the issued JWT to a subset of scopes.
+  scope: 'entities:read agents:read',
+})
+
+console.log(`Got JWT, expires in ${expires_in}s with scope "${scope}"`)
+
+// Use the JWT in a second client. JWTs are passed as `apiKey` — Bearer auth.
+const scopedClient = new AmigoClient({
+  apiKey: access_token,
+  workspaceId: process.env.AMIGO_WORKSPACE_ID!,
+})
+
+const { items: agents } = await scopedClient.agents.list({ limit: 5 })
+console.log(agents.map((agent) => agent.name))
+```
+
+The response is the standard OAuth-style token payload (`access_token`,
+`token_type`, `expires_in`, `scope`, plus `session_id` / `refresh_token` when
+applicable). The `apiKey` you pass to `exchangeApiKey()` can be a different
+key than the one configured on the client — the configured key is only used
+to authenticate the calling identity if your deployment requires it.
+
 ## Configuration
 
 | Option        | Type           | Required | Description                                                          |
@@ -279,6 +324,19 @@ const client = new AmigoClient({
 ```
 
 ## Resources
+
+### Tokens
+
+Exchange a long-lived API key for a short-lived identity-issued JWT. See
+[Exchange an API key for a JWT](#exchange-an-api-key-for-a-jwt) under
+Authentication for the full walkthrough.
+
+```typescript
+const { access_token, expires_in } = await client.tokens.exchangeApiKey({
+  apiKey: process.env.AMIGO_API_KEY!,
+  scope: 'entities:read agents:read',
+})
+```
 
 ### Agents
 
