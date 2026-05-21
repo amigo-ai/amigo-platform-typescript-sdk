@@ -45,6 +45,10 @@ async function main() {
   const scopedClient = new AmigoClient({
     apiKey: tokenResponse.access_token,
     workspaceId,
+    // Reuse the same base URL so the JWT (minted against `baseUrl`) is
+    // sent back to the same host. Otherwise a staging-issued token would
+    // be sent to production.
+    baseUrl: process.env.AMIGO_BASE_URL,
   })
 
   const { items: agents } = await scopedClient.agents.list({ limit: 3 })
