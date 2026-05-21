@@ -90,6 +90,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `revoke`
 - `rotate`
 
+### `tokens`
+
+- `exchangeApiKey`
+
 ### `agents`
 
 - `create`
