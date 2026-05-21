@@ -37,6 +37,7 @@ import type { RetryOptions } from './core/retry.js'
 import { MeResource } from './resources/me.js'
 import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
+import { TokensResource } from './resources/tokens.js'
 import { AgentsResource } from './resources/agents.js'
 import { SkillsResource } from './resources/skills.js'
 import { ActionsResource } from './resources/actions.js'
@@ -190,6 +191,7 @@ export class AmigoClient {
   readonly workspaces!: WorkspacesResource
   readonly me!: MeResource
   readonly apiKeys!: ApiKeysResource
+  readonly tokens!: TokensResource
   readonly agents!: AgentsResource
   /** @deprecated Use `actions` instead */
   readonly skills!: SkillsResource
@@ -460,6 +462,7 @@ export class AmigoClient {
     // ``tests/resources/me.test.ts``.
     mutable.me = new MeResource(client, '_account')
     mutable.apiKeys = new ApiKeysResource(client, workspaceId)
+    mutable.tokens = new TokensResource(client, '_identity')
     mutable.agents = new AgentsResource(client, workspaceId)
     mutable.skills = new SkillsResource(client, workspaceId)
     mutable.actions = new ActionsResource(client, workspaceId)
@@ -652,6 +655,9 @@ export type {
   ResponseHookContext,
   ErrorHookContext,
 } from './core/openapi-client.js'
+
+export { TokensResource } from './resources/tokens.js'
+export type { ApiKeyTokenExchangeRequest, ApiKeyTokenExchangeResponse } from './resources/tokens.js'
 
 export type {
   MetricCatalogEntry,
