@@ -21,6 +21,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 
 ## Examples
 
+- [examples/auth/exchange-api-key.ts](./auth/exchange-api-key.ts): exchange a long-lived API key for a short-lived identity-issued JWT, then use it with `AmigoClient`
 - [examples/basic/list-agents.ts](./basic/list-agents.ts): list agents with the public client
 - [examples/analytics/dashboard.ts](./analytics/dashboard.ts): read dashboard and call analytics
 - [examples/advanced/scoped-request-control.ts](./advanced/scoped-request-control.ts): apply timeout, retry, and header overrides on the normal resource surface
