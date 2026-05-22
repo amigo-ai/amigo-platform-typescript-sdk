@@ -2413,126 +2413,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/epidemiology/cohort-drivers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Cohort Drivers
-         * @description Standardized Prevalence Ratio (SPR = observed / expected) per (age_bucket, gender) cohort for a given code, with Byar 95% CI. SPR > 1 = cohort over-indexes for this code.
-         */
-        get: operations["list_cohort_drivers_v1__workspace_id__epidemiology_cohort_drivers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/cooccurrence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Cooccurrence
-         * @description Active-condition code pairs co-occurring within the same patient. Emits Jaccard, lift, PMI, and Pearson χ². Filter by `code` to constrain one side of the pair; sort by lift|pmi|chi_square|jaccard.
-         */
-        get: operations["list_cooccurrence_v1__workspace_id__epidemiology_cooccurrence_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/patient-burden": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Patient Burden
-         * @description Per-patient condition features including Charlson Comorbidity Index (Quan 2005 ICD-10) and age-adjusted CCI (Charlson 1994). Filter by min_charlson, age range, or gender. Sort by any of the numeric feature columns.
-         */
-        get: operations["list_patient_burden_v1__workspace_id__epidemiology_patient_burden_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/patient-burden/{patient_entity_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Patient Burden
-         * @description Full condition-burden features for a single patient, including per-category Charlson flags (17 Quan 2005 ICD-10 categories).
-         */
-        get: operations["get_patient_burden_v1__workspace_id__epidemiology_patient_burden__patient_entity_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/prevalence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Prevalence
-         * @description Active-condition prevalence by code x (age_bucket, gender) with Wilson 95% CI. Filter by code, code_system, age_bucket, gender; set min_support_only=true to hide small-cell (observed < 5) cohorts.
-         */
-        get: operations["list_prevalence_v1__workspace_id__epidemiology_prevalence_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/trends": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Trends
-         * @description Monthly incidence for a code (YYYY-MM). Requires `code`. Optional filters: code_system, start_month, end_month, age_bucket, gender.
-         */
-        get: operations["list_trends_v1__workspace_id__epidemiology_trends_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/events/stream": {
         parameters: {
             query?: never;
@@ -3318,7 +3198,7 @@ export interface paths {
         put?: never;
         /**
          * Probe an integration's connection + auth
-         * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
+         * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
          */
         post: operations["test-integration-connection"];
         delete?: never;
@@ -5720,24 +5600,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/simulations/branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Simulation Branches */
-        get: operations["list-simulation-branches"];
-        put?: never;
-        /** Create Simulation Branch */
-        post: operations["create-simulation-branch"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/simulations/bridge": {
         parameters: {
             query?: never;
@@ -5827,10 +5689,18 @@ export interface paths {
         get: operations["get-simulation-case"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Simulation Case
+         * @description Delete one durable simulation case.
+         */
+        delete: operations["delete-simulation-case"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Simulation Case
+         * @description Update editable fields on one durable simulation case.
+         */
+        patch: operations["update-simulation-case"];
         trace?: never;
     };
     "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
@@ -6190,6 +6060,26 @@ export interface paths {
         };
         /** Get Simulation Session Turns */
         get: operations["get-simulation-session-turns"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Simulation Suites
+         * @description List runnable simulation suites derived from `suite:*` case tags.
+         */
+        get: operations["list-simulation-suites"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7590,9 +7480,8 @@ export interface components {
             /**
              * Status
              * @description Current escalation state
-             * @enum {string}
              */
-            status: "none" | "requested" | "connected" | "handback" | "completed";
+            status: string;
             /**
              * Trigger
              * @description What triggered the escalation
@@ -8092,18 +7981,13 @@ export interface components {
          * @description Authentication configuration for an integration.
          *
          *     Supports api_key_header, bearer_token, oauth2_client_credentials,
-         *     json_token_exchange, oauth2_jwt_bearer, gcp_wif,
-         *     smart_backend_services, and bearer_token_exchange.
+         *     json_token_exchange, oauth2_jwt_bearer, and bearer_token_exchange.
          */
         AuthConfig: {
-            /** Assertion Algorithm */
-            assertion_algorithm?: ("RS384" | "ES384") | null;
             /** Assertion Audience */
             assertion_audience?: string | null;
             /** Assertion Issuer */
             assertion_issuer?: string | null;
-            /** Assertion Kid */
-            assertion_kid?: string | null;
             /**
              * Assertion Scopes In Jwt
              * @default false
@@ -8143,8 +8027,6 @@ export interface components {
             exchange_token_field?: string;
             /** Exchange Url */
             exchange_url?: string | null;
-            /** Gcp Scopes */
-            gcp_scopes?: string[] | null;
             /** Header Name */
             header_name?: string | null;
             /** Private Key Ssm Param Path */
@@ -8172,7 +8054,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "bearer_token_exchange";
         };
         /**
          * AuthConfigWithSecrets
@@ -8183,14 +8065,10 @@ export interface components {
          */
         AuthConfigWithSecrets: {
             api_key_value?: components["schemas"]["SecretInput"] | null;
-            /** Assertion Algorithm */
-            assertion_algorithm?: ("RS384" | "ES384") | null;
             /** Assertion Audience */
             assertion_audience?: string | null;
             /** Assertion Issuer */
             assertion_issuer?: string | null;
-            /** Assertion Kid */
-            assertion_kid?: string | null;
             /**
              * Assertion Scopes In Jwt
              * @default false
@@ -8233,8 +8111,6 @@ export interface components {
             exchange_token_field?: string;
             /** Exchange Url */
             exchange_url?: string | null;
-            /** Gcp Scopes */
-            gcp_scopes?: string[] | null;
             /** Header Name */
             header_name?: string | null;
             /** Private Key Ssm Param Path */
@@ -8263,7 +8139,7 @@ export interface components {
              * Type
              * @enum {string}
              */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
+            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "bearer_token_exchange";
         };
         /** AuthInfoResponse */
         AuthInfoResponse: {
@@ -8948,10 +8824,89 @@ export interface components {
             /** @description Tool usage statistics */
             tool_summary?: components["schemas"]["ToolSummary"] | null;
         };
-        /** CallIntelligenceMetricProjectionRequest */
+        /**
+         * CallIntelligenceMetricProjectionRequest
+         * @description Internal projection request for the shared terminal artifact.
+         */
         CallIntelligenceMetricProjectionRequest: {
+            /** Call Id */
+            call_id?: string | null;
             /** Call Sid */
             call_sid: string;
+            /**
+             * Channel Kind
+             * @default voice
+             */
+            channel_kind?: string;
+            /** Completion Reason */
+            completion_reason?: string | null;
+            /** Conversation Summary */
+            conversation_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound" | "playground" | "simulated" | "test";
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Emotion Summary */
+            emotion_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Final State
+             * @default
+             */
+            final_state?: string;
+            /** Latency Summary */
+            latency_summary?: {
+                [key: string]: unknown;
+            };
+            /** Operator Summary */
+            operator_summary?: {
+                [key: string]: unknown;
+            };
+            /** Quality Score */
+            quality_score: number;
+            /** Risk Summary */
+            risk_summary?: {
+                [key: string]: unknown;
+            };
+            /** Run Id */
+            run_id?: string | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /** Simulation */
+            simulation?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "real" | "simulation" | "playground";
+            /** Tool Summary */
+            tool_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** CallListResponse */
         CallListResponse: {
@@ -9067,7 +9022,7 @@ export interface components {
              * Escalation Status
              * @description Escalation state if any
              */
-            escalation_status?: ("none" | "requested" | "connected" | "handback" | "completed") | null;
+            escalation_status?: string | null;
             /**
              * Final State
              * @description Final conversation state
@@ -9410,7 +9365,7 @@ export interface components {
          * @description Delivery channels for surfaces.
          * @enum {string}
          */
-        ChannelType: "email" | "web";
+        ChannelType: "email" | "web" | "sms";
         /**
          * ChannelVoicemailStatusEvent
          * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
@@ -9436,97 +9391,6 @@ export interface components {
              * Format: uuid
              */
             voicemail_id: string;
-        };
-        /**
-         * CharlsonCategoryFlags
-         * @description Quan 2005 ICD-10 Charlson category flags (0/1).
-         */
-        CharlsonCategoryFlags: {
-            /**
-             * Any Malignancy
-             * @default 0
-             */
-            any_malignancy?: number;
-            /**
-             * Cerebrovascular Disease
-             * @default 0
-             */
-            cerebrovascular_disease?: number;
-            /**
-             * Chronic Pulmonary Disease
-             * @default 0
-             */
-            chronic_pulmonary_disease?: number;
-            /**
-             * Congestive Heart Failure
-             * @default 0
-             */
-            congestive_heart_failure?: number;
-            /**
-             * Dementia
-             * @default 0
-             */
-            dementia?: number;
-            /**
-             * Diabetes With Complication
-             * @default 0
-             */
-            diabetes_with_complication?: number;
-            /**
-             * Diabetes Without Complication
-             * @default 0
-             */
-            diabetes_without_complication?: number;
-            /**
-             * Hemiplegia Or Paraplegia
-             * @default 0
-             */
-            hemiplegia_or_paraplegia?: number;
-            /**
-             * Hiv Aids
-             * @default 0
-             */
-            hiv_aids?: number;
-            /**
-             * Metastatic Solid Tumor
-             * @default 0
-             */
-            metastatic_solid_tumor?: number;
-            /**
-             * Mild Liver Disease
-             * @default 0
-             */
-            mild_liver_disease?: number;
-            /**
-             * Moderate Severe Liver Disease
-             * @default 0
-             */
-            moderate_severe_liver_disease?: number;
-            /**
-             * Myocardial Infarction
-             * @default 0
-             */
-            myocardial_infarction?: number;
-            /**
-             * Peptic Ulcer Disease
-             * @default 0
-             */
-            peptic_ulcer_disease?: number;
-            /**
-             * Peripheral Vascular Disease
-             * @default 0
-             */
-            peripheral_vascular_disease?: number;
-            /**
-             * Renal Disease
-             * @default 0
-             */
-            renal_disease?: number;
-            /**
-             * Rheumatic Disease
-             * @default 0
-             */
-            rheumatic_disease?: number;
         };
         /** ChatRequest */
         ChatRequest: {
@@ -9677,60 +9541,6 @@ export interface components {
              * @description Specific improvement the agent should make
              */
             recommendation: string;
-        };
-        /** CohortDriverResponse */
-        CohortDriverResponse: {
-            /** Code */
-            code: string;
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["CohortDriverRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** CohortDriverRow */
-        CohortDriverRow: {
-            /** Age Bucket */
-            age_bucket: string;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Cohort Size */
-            cohort_size?: number | null;
-            /** Expected */
-            expected?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** Observed */
-            observed: number;
-            /** Spr */
-            spr?: number | null;
-            /** Spr Ci Lower */
-            spr_ci_lower?: number | null;
-            /** Spr Ci Upper */
-            spr_ci_upper?: number | null;
-            /** Workspace Baseline Rate */
-            workspace_baseline_rate?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-            /** Workspace Patients With Condition */
-            workspace_patients_with_condition?: number | null;
-            /** Workspace Population */
-            workspace_population?: number | null;
         };
         /**
          * CollectionField
@@ -9934,9 +9744,9 @@ export interface components {
             /** At */
             at?: string | null;
             /** Concept */
-            concept: string;
+            concept?: string | null;
             /** Similarity */
-            similarity: number;
+            similarity?: number | null;
         };
         /**
          * ConcurrentStartBlockParams
@@ -10416,7 +10226,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -10468,8 +10278,6 @@ export interface components {
             provider: components["schemas"]["ProviderType"];
             /** Provider Thread Id */
             provider_thread_id: string;
-            /** Reactivated */
-            reactivated: boolean;
             /** Service Id */
             service_id?: string | null;
             /**
@@ -10534,58 +10342,6 @@ export interface components {
              * @enum {string}
              */
             target: "production" | "staging";
-        };
-        /** CooccurrenceResponse */
-        CooccurrenceResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["CooccurrenceRow"][];
-            /** Sort By */
-            sort_by: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** CooccurrenceRow */
-        CooccurrenceRow: {
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Chi Square */
-            chi_square?: number | null;
-            /** Code A */
-            code_a: string;
-            /** Code A Display */
-            code_a_display?: string | null;
-            /** Code B */
-            code_b: string;
-            /** Code B Display */
-            code_b_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Expected Both */
-            expected_both?: number | null;
-            /** Jaccard */
-            jaccard?: number | null;
-            /** Lift */
-            lift?: number | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** N Patients A */
-            n_patients_a?: number | null;
-            /** N Patients B */
-            n_patients_b?: number | null;
-            /** N Patients Both */
-            n_patients_both: number;
-            /** Pmi */
-            pmi?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /**
          * CorrectRequest
@@ -10701,19 +10457,6 @@ export interface components {
             permissions: string[];
             /** Role */
             role: string;
-        };
-        /** CreateBranchRequest */
-        CreateBranchRequest: {
-            /**
-             * Source
-             * @default staging
-             */
-            source?: string;
-            /**
-             * Ttl Seconds
-             * @default 3600
-             */
-            ttl_seconds?: number;
         };
         /** CreateContextGraphRequest */
         CreateContextGraphRequest: {
@@ -10849,19 +10592,7 @@ export interface components {
              * Endpoints
              * @default []
              */
-            endpoints?: components["schemas"]["EndpointConfig-Input"][];
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
+            endpoints?: components["schemas"]["EndpointConfig"][];
             /**
              * Name
              * @description Slug-like identifier, lowercase alphanumeric + hyphens/underscores.
@@ -10870,9 +10601,9 @@ export interface components {
             /**
              * Protocol
              * @default rest
-             * @enum {string}
+             * @constant
              */
-            protocol?: "rest" | "fhir" | "mcp";
+            protocol?: "rest";
         };
         /** CreateLinkRequest */
         CreateLinkRequest: {
@@ -12403,13 +12134,6 @@ export interface components {
              */
             setup_id: string;
         };
-        /** EmotionBurst */
-        EmotionBurst: {
-            /** Score */
-            score: number;
-            /** Type */
-            type: string;
-        };
         /** EmotionEvent */
         EmotionEvent: {
             /** Arousal */
@@ -12458,11 +12182,6 @@ export interface components {
              * @default null
              */
             provider?: string | null;
-            /**
-             * Recent Bursts
-             * @default null
-             */
-            recent_bursts?: components["schemas"]["EmotionBurst"][] | null;
             /**
              * Scores
              * @default null
@@ -12669,85 +12388,7 @@ export interface components {
          * EndpointConfig
          * @description Configuration for a single integration endpoint.
          */
-        "EndpointConfig-Input": {
-            auth?: components["schemas"]["AuthConfig"] | null;
-            /** Base Url */
-            base_url?: string | null;
-            /**
-             * Body Format
-             * @default json
-             * @enum {string}
-             */
-            body_format?: "json" | "form";
-            /** Description */
-            description: string;
-            /**
-             * Headers
-             * @default {}
-             */
-            headers?: {
-                [key: string]: string;
-            };
-            /**
-             * Input Schema
-             * @default {}
-             */
-            input_schema?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Max Result Length
-             * @default 0
-             */
-            max_result_length?: number;
-            /**
-             * Method
-             * @default POST
-             * @enum {string}
-             */
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-            /** Name */
-            name: string;
-            /** Path */
-            path: string;
-            request_transform?: components["schemas"]["RequestTransform"] | null;
-            /** Response Filter */
-            response_filter?: string[] | null;
-            /** Response Mapping */
-            response_mapping?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * Result Delivery
-             * @default interrupt
-             * @enum {string}
-             */
-            result_delivery?: "interrupt" | "queue";
-            /** Result Key */
-            result_key?: string | null;
-            /** Result Template */
-            result_template?: string | null;
-            /**
-             * @default {
-             *       "max_retries": 2,
-             *       "retry_on_status": [
-             *         429,
-             *         502,
-             *         503,
-             *         504
-             *       ]
-             *     }
-             */
-            retry_config?: components["schemas"]["RetryConfig"];
-        };
-        /**
-         * EndpointConfig
-         * @description Configuration for a single integration endpoint.
-         */
-        "EndpointConfig-Output": {
-            auth?: components["schemas"]["AuthConfig"] | null;
-            /** Base Url */
-            base_url?: string | null;
+        EndpointConfig: {
             /**
              * Body Format
              * @default json
@@ -13698,9 +13339,9 @@ export interface components {
             similarity?: number | null;
             /**
              * Status
-             * @enum {string}
+             * @default none
              */
-            status: "none" | "requested" | "connected" | "handback" | "completed";
+            status?: string;
             /** Trigger */
             trigger?: string | null;
             /** Trigger Source */
@@ -15342,7 +14983,7 @@ export interface components {
             auth?: components["schemas"]["AuthConfig"] | null;
             /**
              * Base Url
-             * @description Base URL for REST/FHIR integrations
+             * @description Base URL for REST integrations
              * @default
              */
             base_url?: string;
@@ -15372,7 +15013,7 @@ export interface components {
              * Endpoints
              * @description Configured endpoints
              */
-            endpoints?: components["schemas"]["EndpointConfig-Output"][];
+            endpoints?: components["schemas"]["EndpointConfig"][];
             /**
              * Id
              * Format: uuid
@@ -15390,33 +15031,6 @@ export interface components {
              */
             last_tested_at?: string | null;
             /**
-             * Mcp Args
-             * @description MCP stdio command arguments
-             */
-            mcp_args?: string[] | null;
-            /**
-             * Mcp Command
-             * @description MCP stdio command
-             */
-            mcp_command?: string | null;
-            /**
-             * Mcp Headers
-             * @description MCP request headers
-             */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * Mcp Transport
-             * @description MCP transport type
-             */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /**
-             * Mcp Url
-             * @description MCP server URL (SSE/HTTP)
-             */
-            mcp_url?: string | null;
-            /**
              * Name
              * @description Slug-like identifier
              */
@@ -15426,7 +15040,7 @@ export interface components {
              * @description Communication protocol
              * @enum {string}
              */
-            protocol: "rest" | "fhir" | "mcp" | "desktop";
+            protocol: "rest" | "desktop";
             /**
              * Updated At
              * Format: date-time
@@ -15503,24 +15117,12 @@ export interface components {
              * Endpoints
              * @default []
              */
-            endpoints?: components["schemas"]["EndpointConfig-Output"][];
+            endpoints?: components["schemas"]["EndpointConfig"][];
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: string | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
             /** Name */
             name: string;
             /**
@@ -16145,6 +15747,11 @@ export interface components {
              */
             max_upload_bytes: number;
         };
+        /** ListSimulationSuitesResponse */
+        ListSimulationSuitesResponse: {
+            /** Suites */
+            suites: components["schemas"]["SimulationSuiteResponse"][];
+        };
         /**
          * LookupResponse
          * @description Autocompletion results for a surface lookup field.
@@ -16512,7 +16119,7 @@ export interface components {
              * @default static
              * @enum {string}
              */
-            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_sentiment" | "ai_query" | "sql_expr";
+            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_query" | "sql_expr";
             /**
              * Granularity
              * @default aggregate
@@ -16657,11 +16264,11 @@ export interface components {
             extract_path?: string | null;
             /**
              * Extraction Mode
-             * @description 'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_sentiment' — AI sentiment analysis (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.
+             * @description 'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.
              * @default static
              * @enum {string}
              */
-            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_sentiment" | "ai_query" | "sql_expr";
+            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_query" | "sql_expr";
             /**
              * Freshness Sla Minutes
              * @description Max acceptable staleness in minutes before alerting. Default: 60 (1 hour).
@@ -16699,7 +16306,7 @@ export interface components {
             metric_type: "numerical" | "categorical" | "boolean";
             /**
              * Model Tier
-             * @description AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract, ai_sentiment). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.
+             * @description AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.
              * @default free
              * @enum {string}
              */
@@ -17995,111 +17602,6 @@ export interface components {
              */
             type: "participant_left";
         };
-        /** PatientBurdenDetailResponse */
-        PatientBurdenDetailResponse: {
-            /** Age Adjusted Charlson Index */
-            age_adjusted_charlson_index: number;
-            /** Age Bucket Now */
-            age_bucket_now?: string | null;
-            /** Age Cci Points */
-            age_cci_points: number;
-            /** Age Now */
-            age_now?: number | null;
-            /** As Of Date */
-            as_of_date?: string | null;
-            charlson_flags: components["schemas"]["CharlsonCategoryFlags"];
-            /** Charlson Index */
-            charlson_index: number;
-            /** Days Since Most Recent Onset */
-            days_since_most_recent_onset?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Most Recent Active Onset Date */
-            most_recent_active_onset_date?: string | null;
-            /** N Active Conditions */
-            n_active_conditions: number;
-            /** N Distinct Code Systems */
-            n_distinct_code_systems?: number | null;
-            /** N Distinct Codes */
-            n_distinct_codes?: number | null;
-            /** N Lifetime Condition Records */
-            n_lifetime_condition_records?: number | null;
-            /** N Lifetime Distinct Codes */
-            n_lifetime_distinct_codes?: number | null;
-            /** Oldest Active Onset Date */
-            oldest_active_onset_date?: string | null;
-            /**
-             * Patient Entity Id
-             * Format: uuid
-             */
-            patient_entity_id: string;
-            /** Recent Onset Count 365D */
-            recent_onset_count_365d?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PatientBurdenResponse */
-        PatientBurdenResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["PatientBurdenRow"][];
-            /** Sort By */
-            sort_by: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PatientBurdenRow */
-        PatientBurdenRow: {
-            /** Age Adjusted Charlson Index */
-            age_adjusted_charlson_index: number;
-            /** Age Bucket Now */
-            age_bucket_now?: string | null;
-            /** Age Cci Points */
-            age_cci_points: number;
-            /** Age Now */
-            age_now?: number | null;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Charlson Index */
-            charlson_index: number;
-            /** Days Since Most Recent Onset */
-            days_since_most_recent_onset?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Most Recent Active Onset Date */
-            most_recent_active_onset_date?: string | null;
-            /** N Active Conditions */
-            n_active_conditions: number;
-            /** N Distinct Code Systems */
-            n_distinct_code_systems?: number | null;
-            /** N Distinct Codes */
-            n_distinct_codes?: number | null;
-            /** N Lifetime Condition Records */
-            n_lifetime_condition_records?: number | null;
-            /** N Lifetime Distinct Codes */
-            n_lifetime_distinct_codes?: number | null;
-            /** Oldest Active Onset Date */
-            oldest_active_onset_date?: string | null;
-            /**
-             * Patient Entity Id
-             * Format: uuid
-             */
-            patient_entity_id: string;
-            /** Recent Onset Count 365D */
-            recent_onset_count_365d?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** PatientLabRow */
         PatientLabRow: {
             /** Loinc Code */
@@ -18692,50 +18194,6 @@ export interface components {
             };
             /** Tool Id */
             tool_id: string;
-        };
-        /** PrevalenceResponse */
-        PrevalenceResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["PrevalenceRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PrevalenceRow */
-        PrevalenceRow: {
-            /** Age Bucket */
-            age_bucket: string;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Cohort Size */
-            cohort_size: number;
-            /** Gender */
-            gender?: string | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** Patients With Condition */
-            patients_with_condition: number;
-            /** Prevalence Ci Lower Pct */
-            prevalence_ci_lower_pct?: number | null;
-            /** Prevalence Ci Upper Pct */
-            prevalence_ci_upper_pct?: number | null;
-            /** Prevalence Pct */
-            prevalence_pct?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /**
          * PriorityQueueItem
@@ -19626,7 +19084,7 @@ export interface components {
             /** Assigned To */
             assigned_to: string | null;
             /** Completed Action */
-            completed_action: ("approved" | "rejected" | "corrected") | null;
+            completed_action: ("approve" | "reject" | "correct" | "approved" | "rejected" | "corrected") | null;
             /** Completed At */
             completed_at: string | null;
             /**
@@ -21266,6 +20724,22 @@ export interface components {
             observation: components["schemas"]["SimulationObservation"];
             snapshot: components["schemas"]["SimulationSnapshotResponse"];
         };
+        /**
+         * SimulationSuiteResponse
+         * @description A runnable suite derived from persisted `suite:*` case tags.
+         */
+        SimulationSuiteResponse: {
+            /** Case Count */
+            case_count: number;
+            /** Latest Updated At */
+            latest_updated_at?: string | null;
+            /** Name */
+            name: string;
+            /** Service Ids */
+            service_ids?: string[];
+            /** Tag */
+            tag: string;
+        };
         /** SimulationTurnPolicyResponse */
         SimulationTurnPolicyResponse: {
             /**
@@ -21775,7 +21249,7 @@ export interface components {
              * Session Status
              * @enum {string}
              */
-            session_status: "created" | "resumed" | "already_active";
+            session_status: "created" | "already_active";
         };
         /**
          * StateRiskOverride
@@ -22692,7 +22166,7 @@ export interface components {
             duration_ms?: number;
             /**
              * Http Status
-             * @description HTTP status code from the upstream HEAD probe (REST/FHIR/MCP-http only).
+             * @description HTTP status code from the upstream HEAD probe (REST only).
              */
             http_status?: number | null;
             /**
@@ -23311,7 +22785,7 @@ export interface components {
             tool_name: components["schemas"]["NameString"];
             /**
              * Tool Type
-             * @description world_tool, skill, or integration
+             * @description world_tool — other tool families use their dedicated endpoints
              */
             tool_type: string;
         };
@@ -23650,44 +23124,6 @@ export interface components {
             timestamp: string | null;
             /** Transcript */
             transcript: string;
-        };
-        /** TrendResponse */
-        TrendResponse: {
-            /** Code */
-            code: string;
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["TrendRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** TrendRow */
-        TrendRow: {
-            /** Age Bucket */
-            age_bucket?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Condition Records */
-            condition_records: number;
-            /** Gender */
-            gender?: string | null;
-            /** Incident Patients */
-            incident_patients: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-            /** Year Month */
-            year_month: string;
         };
         /** TriggerCompletedEvent */
         TriggerCompletedEvent: {
@@ -24029,7 +23465,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -24359,21 +23795,9 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
             /** Endpoints */
-            endpoints?: components["schemas"]["EndpointConfig-Input"][] | null;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
+            endpoints?: components["schemas"]["EndpointConfig"][] | null;
             /** Protocol */
-            protocol?: ("rest" | "fhir" | "mcp") | null;
+            protocol?: "rest" | null;
         };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
@@ -24432,6 +23856,46 @@ export interface components {
                 [key: string]: components["schemas"]["VersionSet-Input"];
             } | null;
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
+        };
+        /**
+         * UpdateSimulationCaseRequest
+         * @description Partial update for one durable simulation case.
+         */
+        UpdateSimulationCaseRequest: {
+            /** Assertions */
+            assertions?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Constraints */
+            constraints?: {
+                [key: string]: unknown;
+            } | null;
+            /** Description */
+            description?: string | null;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            } | null;
+            /** Initial Message */
+            initial_message?: string | null;
+            /** Persona */
+            persona?: {
+                [key: string]: unknown;
+            } | null;
+            /** Provenance */
+            provenance?: string | null;
+            /** Scenario Instructions */
+            scenario_instructions?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[] | null;
+            /** Target Spec */
+            target_spec?: {
+                [key: string]: unknown;
+            } | null;
+            /** Temperament */
+            temperament?: string | null;
         };
         /** UpdateSkillRequest */
         UpdateSkillRequest: {
@@ -24509,37 +23973,6 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title?: components["schemas"]["NameString"] | null;
-        };
-        /**
-         * UpdateSyncStatusRequest
-         * @description Report sync status for a data source after a poll cycle.
-         */
-        UpdateSyncStatusRequest: {
-            /**
-             * Data Source Id
-             * Format: uuid
-             */
-            data_source_id: string;
-            /**
-             * Last Sync At
-             * Format: date-time
-             */
-            last_sync_at: string;
-            /**
-             * Last Sync Event Count
-             * @default 0
-             */
-            last_sync_event_count?: number;
-            /**
-             * Last Sync Status
-             * @enum {string}
-             */
-            last_sync_status: "success" | "partial" | "error";
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** UpdateTriggerRequest */
         UpdateTriggerRequest: {
@@ -25658,7 +25091,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -30983,7 +30416,7 @@ export interface operations {
                 /** @description Filter by channel */
                 channel_kind?: ("voice" | "sms" | "whatsapp" | "web" | "email") | null;
                 /** @description Filter by status */
-                status?: ("active" | "frozen" | "closed" | "completed" | "in-progress" | "failed") | null;
+                status?: ("active" | "closed" | "completed" | "in-progress" | "failed") | null;
                 limit?: number;
                 offset?: number;
             };
@@ -32308,228 +31741,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BriefResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_cohort_drivers_v1__workspace_id__epidemiology_cohort_drivers_get: {
-        parameters: {
-            query: {
-                code: string;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                min_support_only?: boolean;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CohortDriverResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_cooccurrence_v1__workspace_id__epidemiology_cooccurrence_get: {
-        parameters: {
-            query?: {
-                code?: string | null;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                sort_by?: "lift" | "pmi" | "chi_square" | "jaccard" | "n_patients_both";
-                min_support_only?: boolean;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CooccurrenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_patient_burden_v1__workspace_id__epidemiology_patient_burden_get: {
-        parameters: {
-            query?: {
-                min_charlson?: number | null;
-                age_min?: number | null;
-                age_max?: number | null;
-                gender?: string | null;
-                sort_by?: "age_adjusted_charlson_index" | "charlson_index" | "n_active_conditions" | "recent_onset_count_365d" | "age_now";
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PatientBurdenResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_patient_burden_v1__workspace_id__epidemiology_patient_burden__patient_entity_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                patient_entity_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PatientBurdenDetailResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_prevalence_v1__workspace_id__epidemiology_prevalence_get: {
-        parameters: {
-            query?: {
-                code?: string | null;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                age_bucket?: ("0-17" | "18-34" | "35-49" | "50-64" | "65-79" | "80+") | null;
-                gender?: string | null;
-                min_support_only?: boolean;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrevalenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_trends_v1__workspace_id__epidemiology_trends_get: {
-        parameters: {
-            query: {
-                code: string;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                start_month?: string | null;
-                end_month?: string | null;
-                age_bucket?: ("0-17" | "18-34" | "35-49" | "50-64" | "65-79" | "80+") | null;
-                gender?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrendResponse"];
                 };
             };
             /** @description Validation Error */
@@ -39384,67 +38595,6 @@ export interface operations {
             };
         };
     };
-    "list-simulation-branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
-    "create-simulation-branch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateBranchRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "simulation-bridge": {
         parameters: {
             query?: never;
@@ -39597,6 +38747,86 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationCaseResponse"];
+                };
+            };
+            /** @description Simulation case not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Simulation case not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSimulationCaseRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -40401,6 +39631,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-simulation-suites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSimulationSuitesResponse"];
                 };
             };
         };

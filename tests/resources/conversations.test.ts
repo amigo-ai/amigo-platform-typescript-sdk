@@ -36,7 +36,7 @@ function mockFetch(
 describe('ConversationsResource', () => {
   it('lists conversations with optional status filter', async () => {
     // Mix of all three lifecycle values (active/dormant/closed) so the
-    // SDK's pass-through behavior is exercised across the full enum,
+    // SDK's pass-through behavior is exercised across non-active values,
     // not just the happy "active" path. A future decoder that silently
     // defaults non-active values to "active" would fail here.
     //
@@ -61,7 +61,7 @@ describe('ConversationsResource', () => {
           channel_kind: 'sms',
           created_at: '2026-01-01T00:00:00Z',
           id: '00000000-0000-4000-8000-000000000002',
-          status: 'frozen',
+          status: 'in-progress',
           lifecycle: 'dormant',
           turn_count: 7,
           updated_at: '2025-12-31T22:00:00Z',
@@ -175,7 +175,7 @@ describe('ConversationsResource', () => {
 
   it.each([
     { lifecycle: 'active' as const, status: 'active' as const },
-    { lifecycle: 'dormant' as const, status: 'frozen' as const },
+    { lifecycle: 'dormant' as const, status: 'in-progress' as const },
     { lifecycle: 'closed' as const, status: 'closed' as const },
   ])(
     'preserves lifecycle=$lifecycle on ConversationDetail responses',

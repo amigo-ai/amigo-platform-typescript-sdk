@@ -765,13 +765,7 @@
           },
           "status": {
             "description": "Current escalation state",
-            "enum": [
-              "none",
-              "requested",
-              "connected",
-              "handback",
-              "completed"
-            ],
+            "maxLength": 64,
             "title": "Status",
             "type": "string"
           },
@@ -2019,23 +2013,8 @@
         "type": "object"
       },
       "AuthConfig": {
-        "description": "Authentication configuration for an integration.\n\nSupports api_key_header, bearer_token, oauth2_client_credentials,\njson_token_exchange, oauth2_jwt_bearer, gcp_wif,\nsmart_backend_services, and bearer_token_exchange.",
+        "description": "Authentication configuration for an integration.\n\nSupports api_key_header, bearer_token, oauth2_client_credentials,\njson_token_exchange, oauth2_jwt_bearer, and bearer_token_exchange.",
         "properties": {
-          "assertion_algorithm": {
-            "anyOf": [
-              {
-                "enum": [
-                  "RS384",
-                  "ES384"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assertion Algorithm"
-          },
           "assertion_audience": {
             "anyOf": [
               {
@@ -2057,17 +2036,6 @@
               }
             ],
             "title": "Assertion Issuer"
-          },
-          "assertion_kid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assertion Kid"
           },
           "assertion_scopes_in_jwt": {
             "default": false,
@@ -2179,20 +2147,6 @@
               }
             ],
             "title": "Exchange Url"
-          },
-          "gcp_scopes": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gcp Scopes"
           },
           "header_name": {
             "anyOf": [
@@ -2314,8 +2268,6 @@
               "oauth2_client_credentials",
               "json_token_exchange",
               "oauth2_jwt_bearer",
-              "gcp_wif",
-              "smart_backend_services",
               "bearer_token_exchange"
             ],
             "title": "Type",
@@ -2341,21 +2293,6 @@
               }
             ]
           },
-          "assertion_algorithm": {
-            "anyOf": [
-              {
-                "enum": [
-                  "RS384",
-                  "ES384"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assertion Algorithm"
-          },
           "assertion_audience": {
             "anyOf": [
               {
@@ -2377,17 +2314,6 @@
               }
             ],
             "title": "Assertion Issuer"
-          },
-          "assertion_kid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assertion Kid"
           },
           "assertion_scopes_in_jwt": {
             "default": false,
@@ -2530,20 +2456,6 @@
             ],
             "title": "Exchange Url"
           },
-          "gcp_scopes": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gcp Scopes"
-          },
           "header_name": {
             "anyOf": [
               {
@@ -2674,8 +2586,6 @@
               "oauth2_client_credentials",
               "json_token_exchange",
               "oauth2_jwt_bearer",
-              "gcp_wif",
-              "smart_backend_services",
               "bearer_token_exchange"
             ],
             "title": "Type",
@@ -4615,16 +4525,185 @@
         "type": "object"
       },
       "CallIntelligenceMetricProjectionRequest": {
+        "additionalProperties": false,
+        "description": "Internal projection request for the shared terminal artifact.",
         "properties": {
+          "call_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Call Id"
+          },
           "call_sid": {
             "maxLength": 128,
             "minLength": 1,
             "title": "Call Sid",
             "type": "string"
+          },
+          "channel_kind": {
+            "default": "voice",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "completion_reason": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completion Reason"
+          },
+          "conversation_summary": {
+            "additionalProperties": true,
+            "title": "Conversation Summary",
+            "type": "object"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "direction": {
+            "enum": [
+              "inbound",
+              "outbound",
+              "playground",
+              "simulated",
+              "test"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "duration_seconds": {
+            "minimum": 0,
+            "title": "Duration Seconds",
+            "type": "number"
+          },
+          "emotion_summary": {
+            "additionalProperties": true,
+            "title": "Emotion Summary",
+            "type": "object"
+          },
+          "final_state": {
+            "default": "",
+            "maxLength": 256,
+            "title": "Final State",
+            "type": "string"
+          },
+          "latency_summary": {
+            "additionalProperties": true,
+            "title": "Latency Summary",
+            "type": "object"
+          },
+          "operator_summary": {
+            "additionalProperties": true,
+            "title": "Operator Summary",
+            "type": "object"
+          },
+          "quality_score": {
+            "maximum": 100,
+            "minimum": 0,
+            "title": "Quality Score",
+            "type": "number"
+          },
+          "risk_summary": {
+            "additionalProperties": true,
+            "title": "Risk Summary",
+            "type": "object"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "safety_summary": {
+            "additionalProperties": true,
+            "title": "Safety Summary",
+            "type": "object"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "simulation": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation"
+          },
+          "source": {
+            "enum": [
+              "real",
+              "simulation",
+              "playground"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "tool_summary": {
+            "additionalProperties": true,
+            "title": "Tool Summary",
+            "type": "object"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
           }
         },
         "required": [
-          "call_sid"
+          "workspace_id",
+          "call_sid",
+          "direction",
+          "duration_seconds",
+          "quality_score",
+          "source",
+          "created_at"
         ],
         "title": "CallIntelligenceMetricProjectionRequest",
         "type": "object"
@@ -4866,13 +4945,7 @@
           "escalation_status": {
             "anyOf": [
               {
-                "enum": [
-                  "none",
-                  "requested",
-                  "connected",
-                  "handback",
-                  "completed"
-                ],
+                "maxLength": 64,
                 "type": "string"
               },
               {
@@ -5735,7 +5808,8 @@
         "description": "Delivery channels for surfaces.",
         "enum": [
           "email",
-          "web"
+          "web",
+          "sms"
         ],
         "title": "ChannelType",
         "type": "string"
@@ -5776,98 +5850,6 @@
           "recipient_phone_number"
         ],
         "title": "ChannelVoicemailStatusEvent",
-        "type": "object"
-      },
-      "CharlsonCategoryFlags": {
-        "description": "Quan 2005 ICD-10 Charlson category flags (0/1).",
-        "properties": {
-          "any_malignancy": {
-            "default": 0,
-            "title": "Any Malignancy",
-            "type": "integer"
-          },
-          "cerebrovascular_disease": {
-            "default": 0,
-            "title": "Cerebrovascular Disease",
-            "type": "integer"
-          },
-          "chronic_pulmonary_disease": {
-            "default": 0,
-            "title": "Chronic Pulmonary Disease",
-            "type": "integer"
-          },
-          "congestive_heart_failure": {
-            "default": 0,
-            "title": "Congestive Heart Failure",
-            "type": "integer"
-          },
-          "dementia": {
-            "default": 0,
-            "title": "Dementia",
-            "type": "integer"
-          },
-          "diabetes_with_complication": {
-            "default": 0,
-            "title": "Diabetes With Complication",
-            "type": "integer"
-          },
-          "diabetes_without_complication": {
-            "default": 0,
-            "title": "Diabetes Without Complication",
-            "type": "integer"
-          },
-          "hemiplegia_or_paraplegia": {
-            "default": 0,
-            "title": "Hemiplegia Or Paraplegia",
-            "type": "integer"
-          },
-          "hiv_aids": {
-            "default": 0,
-            "title": "Hiv Aids",
-            "type": "integer"
-          },
-          "metastatic_solid_tumor": {
-            "default": 0,
-            "title": "Metastatic Solid Tumor",
-            "type": "integer"
-          },
-          "mild_liver_disease": {
-            "default": 0,
-            "title": "Mild Liver Disease",
-            "type": "integer"
-          },
-          "moderate_severe_liver_disease": {
-            "default": 0,
-            "title": "Moderate Severe Liver Disease",
-            "type": "integer"
-          },
-          "myocardial_infarction": {
-            "default": 0,
-            "title": "Myocardial Infarction",
-            "type": "integer"
-          },
-          "peptic_ulcer_disease": {
-            "default": 0,
-            "title": "Peptic Ulcer Disease",
-            "type": "integer"
-          },
-          "peripheral_vascular_disease": {
-            "default": 0,
-            "title": "Peripheral Vascular Disease",
-            "type": "integer"
-          },
-          "renal_disease": {
-            "default": 0,
-            "title": "Renal Disease",
-            "type": "integer"
-          },
-          "rheumatic_disease": {
-            "default": 0,
-            "title": "Rheumatic Disease",
-            "type": "integer"
-          }
-        },
-        "title": "CharlsonCategoryFlags",
         "type": "object"
       },
       "ChatRequest": {
@@ -6321,199 +6303,6 @@
           "recommendation"
         ],
         "title": "CoachingItem",
-        "type": "object"
-      },
-      "CohortDriverResponse": {
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/CohortDriverRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code",
-          "count",
-          "items"
-        ],
-        "title": "CohortDriverResponse",
-        "type": "object"
-      },
-      "CohortDriverRow": {
-        "properties": {
-          "age_bucket": {
-            "title": "Age Bucket",
-            "type": "string"
-          },
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "code_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code Display"
-          },
-          "code_system_normalized": {
-            "title": "Code System Normalized",
-            "type": "string"
-          },
-          "cohort_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cohort Size"
-          },
-          "expected": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected"
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "min_support_met": {
-            "title": "Min Support Met",
-            "type": "boolean"
-          },
-          "observed": {
-            "title": "Observed",
-            "type": "integer"
-          },
-          "spr": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr"
-          },
-          "spr_ci_lower": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr Ci Lower"
-          },
-          "spr_ci_upper": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Spr Ci Upper"
-          },
-          "workspace_baseline_rate": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace Baseline Rate"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          },
-          "workspace_patients_with_condition": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace Patients With Condition"
-          },
-          "workspace_population": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Workspace Population"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code_system_normalized",
-          "code",
-          "age_bucket",
-          "observed",
-          "min_support_met"
-        ],
-        "title": "CohortDriverRow",
         "type": "object"
       },
       "CollectionField": {
@@ -6992,24 +6781,37 @@
                 "type": "string"
               },
               {
+                "type": "string"
+              },
+              {
                 "type": "null"
               }
             ],
             "title": "At"
           },
           "concept": {
-            "title": "Concept",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Concept"
           },
           "similarity": {
-            "title": "Similarity",
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Similarity"
           }
         },
-        "required": [
-          "concept",
-          "similarity"
-        ],
         "title": "ConceptMatch",
         "type": "object"
       },
@@ -8203,7 +8005,6 @@
           "status": {
             "enum": [
               "active",
-              "frozen",
               "closed",
               "completed",
               "in-progress",
@@ -8363,10 +8164,6 @@
             "title": "Provider Thread Id",
             "type": "string"
           },
-          "reactivated": {
-            "title": "Reactivated",
-            "type": "boolean"
-          },
           "service_id": {
             "anyOf": [
               {
@@ -8398,8 +8195,7 @@
           "provider_thread_id",
           "status",
           "created_at",
-          "created",
-          "reactivated"
+          "created"
         ],
         "title": "ConversationThreadResponse",
         "type": "object"
@@ -8512,188 +8308,6 @@
           "confirm_slug"
         ],
         "title": "ConvertEnvironmentRequest",
-        "type": "object"
-      },
-      "CooccurrenceResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/CooccurrenceRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "sort_by": {
-            "title": "Sort By",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "sort_by",
-          "count",
-          "items"
-        ],
-        "title": "CooccurrenceResponse",
-        "type": "object"
-      },
-      "CooccurrenceRow": {
-        "properties": {
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "chi_square": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Chi Square"
-          },
-          "code_a": {
-            "title": "Code A",
-            "type": "string"
-          },
-          "code_a_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code A Display"
-          },
-          "code_b": {
-            "title": "Code B",
-            "type": "string"
-          },
-          "code_b_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code B Display"
-          },
-          "code_system_normalized": {
-            "title": "Code System Normalized",
-            "type": "string"
-          },
-          "expected_both": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expected Both"
-          },
-          "jaccard": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Jaccard"
-          },
-          "lift": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Lift"
-          },
-          "min_support_met": {
-            "title": "Min Support Met",
-            "type": "boolean"
-          },
-          "n_patients_a": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Patients A"
-          },
-          "n_patients_b": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Patients B"
-          },
-          "n_patients_both": {
-            "title": "N Patients Both",
-            "type": "integer"
-          },
-          "pmi": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pmi"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code_system_normalized",
-          "code_a",
-          "code_b",
-          "n_patients_both",
-          "min_support_met"
-        ],
-        "title": "CooccurrenceRow",
         "type": "object"
       },
       "CorrectRequest": {
@@ -8986,25 +8600,6 @@
           "created_by_credential_id"
         ],
         "title": "CreateApiKeyResponse",
-        "type": "object"
-      },
-      "CreateBranchRequest": {
-        "properties": {
-          "source": {
-            "default": "staging",
-            "maxLength": 64,
-            "title": "Source",
-            "type": "string"
-          },
-          "ttl_seconds": {
-            "default": 3600,
-            "maximum": 86400,
-            "minimum": 300,
-            "title": "Ttl Seconds",
-            "type": "integer"
-          }
-        },
-        "title": "CreateBranchRequest",
         "type": "object"
       },
       "CreateContextGraphRequest": {
@@ -9366,79 +8961,11 @@
           "endpoints": {
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig-Input"
+              "$ref": "#/components/schemas/EndpointConfig"
             },
             "maxItems": 50,
             "title": "Endpoints",
             "type": "array"
-          },
-          "mcp_args": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Args"
-          },
-          "mcp_command": {
-            "anyOf": [
-              {
-                "maxLength": 512,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Command"
-          },
-          "mcp_headers": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Headers"
-          },
-          "mcp_transport": {
-            "anyOf": [
-              {
-                "enum": [
-                  "stdio",
-                  "sse",
-                  "http"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Transport"
-          },
-          "mcp_url": {
-            "anyOf": [
-              {
-                "maxLength": 2048,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Url"
           },
           "name": {
             "description": "Slug-like identifier, lowercase alphanumeric + hyphens/underscores.",
@@ -9448,12 +8975,8 @@
             "type": "string"
           },
           "protocol": {
+            "const": "rest",
             "default": "rest",
-            "enum": [
-              "rest",
-              "fhir",
-              "mcp"
-            ],
             "title": "Protocol",
             "type": "string"
           }
@@ -12914,24 +12437,6 @@
         "title": "EmailUseCaseRequest",
         "type": "object"
       },
-      "EmotionBurst": {
-        "properties": {
-          "score": {
-            "title": "Score",
-            "type": "number"
-          },
-          "type": {
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "type",
-          "score"
-        ],
-        "title": "EmotionBurst",
-        "type": "object"
-      },
       "EmotionEvent": {
         "properties": {
           "arousal": {
@@ -13033,21 +12538,6 @@
             ],
             "default": null,
             "title": "Provider"
-          },
-          "recent_bursts": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/EmotionBurst"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Recent Bursts"
           },
           "scores": {
             "anyOf": [
@@ -13562,196 +13052,9 @@
         "title": "EncounterUpdatedEvent",
         "type": "object"
       },
-      "EndpointConfig-Input": {
+      "EndpointConfig": {
         "description": "Configuration for a single integration endpoint.",
         "properties": {
-          "auth": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "base_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Base Url"
-          },
-          "body_format": {
-            "default": "json",
-            "enum": [
-              "json",
-              "form"
-            ],
-            "title": "Body Format",
-            "type": "string"
-          },
-          "description": {
-            "title": "Description",
-            "type": "string"
-          },
-          "headers": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "default": {},
-            "title": "Headers",
-            "type": "object"
-          },
-          "input_schema": {
-            "additionalProperties": true,
-            "default": {},
-            "title": "Input Schema",
-            "type": "object"
-          },
-          "max_result_length": {
-            "default": 0,
-            "title": "Max Result Length",
-            "type": "integer"
-          },
-          "method": {
-            "default": "POST",
-            "enum": [
-              "GET",
-              "POST",
-              "PUT",
-              "PATCH",
-              "DELETE"
-            ],
-            "title": "Method",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "path": {
-            "title": "Path",
-            "type": "string"
-          },
-          "request_transform": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RequestTransform"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "response_filter": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Response Filter"
-          },
-          "response_mapping": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Response Mapping"
-          },
-          "result_delivery": {
-            "default": "interrupt",
-            "enum": [
-              "interrupt",
-              "queue"
-            ],
-            "title": "Result Delivery",
-            "type": "string"
-          },
-          "result_key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result Key"
-          },
-          "result_template": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result Template"
-          },
-          "retry_config": {
-            "$ref": "#/components/schemas/RetryConfig",
-            "default": {
-              "max_retries": 2,
-              "retry_on_status": [
-                429,
-                502,
-                503,
-                504
-              ]
-            }
-          }
-        },
-        "required": [
-          "name",
-          "description",
-          "path"
-        ],
-        "title": "EndpointConfig",
-        "type": "object"
-      },
-      "EndpointConfig-Output": {
-        "description": "Configuration for a single integration endpoint.",
-        "properties": {
-          "auth": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/AuthConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "base_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Base Url"
-          },
           "body_format": {
             "default": "json",
             "enum": [
@@ -16091,6 +15394,9 @@
                 "type": "string"
               },
               {
+                "type": "string"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -16111,6 +15417,9 @@
             "anyOf": [
               {
                 "format": "date-time",
+                "type": "string"
+              },
+              {
                 "type": "string"
               },
               {
@@ -16160,7 +15469,6 @@
           "operator_entity_id": {
             "anyOf": [
               {
-                "format": "uuid",
                 "type": "string"
               },
               {
@@ -16198,6 +15506,9 @@
                 "type": "string"
               },
               {
+                "type": "string"
+              },
+              {
                 "type": "null"
               }
             ],
@@ -16226,13 +15537,7 @@
             "title": "Similarity"
           },
           "status": {
-            "enum": [
-              "none",
-              "requested",
-              "connected",
-              "handback",
-              "completed"
-            ],
+            "default": "none",
             "title": "Status",
             "type": "string"
           },
@@ -16270,9 +15575,6 @@
             "title": "Wait Seconds"
           }
         },
-        "required": [
-          "status"
-        ],
         "title": "EscalationState",
         "type": "object"
       },
@@ -20655,7 +19957,7 @@
           },
           "base_url": {
             "default": "",
-            "description": "Base URL for REST/FHIR integrations",
+            "description": "Base URL for REST integrations",
             "title": "Base Url",
             "type": "string"
           },
@@ -20684,7 +19986,7 @@
           "endpoints": {
             "description": "Configured endpoints",
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig-Output"
+              "$ref": "#/components/schemas/EndpointConfig"
             },
             "title": "Endpoints",
             "type": "array"
@@ -20728,77 +20030,6 @@
             "description": "When this integration was last successfully or unsuccessfully tested (server UTC).",
             "title": "Last Tested At"
           },
-          "mcp_args": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "MCP stdio command arguments",
-            "title": "Mcp Args"
-          },
-          "mcp_command": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "MCP stdio command",
-            "title": "Mcp Command"
-          },
-          "mcp_headers": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "MCP request headers",
-            "title": "Mcp Headers"
-          },
-          "mcp_transport": {
-            "anyOf": [
-              {
-                "enum": [
-                  "stdio",
-                  "sse",
-                  "http"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "MCP transport type",
-            "title": "Mcp Transport"
-          },
-          "mcp_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "MCP server URL (SSE/HTTP)",
-            "title": "Mcp Url"
-          },
           "name": {
             "description": "Slug-like identifier",
             "title": "Name",
@@ -20808,8 +20039,6 @@
             "description": "Communication protocol",
             "enum": [
               "rest",
-              "fhir",
-              "mcp",
               "desktop"
             ],
             "title": "Protocol",
@@ -20958,7 +20187,7 @@
           "endpoints": {
             "default": [],
             "items": {
-              "$ref": "#/components/schemas/EndpointConfig-Output"
+              "$ref": "#/components/schemas/EndpointConfig"
             },
             "title": "Endpoints",
             "type": "array"
@@ -20967,67 +20196,6 @@
             "format": "uuid",
             "title": "Id",
             "type": "string"
-          },
-          "mcp_args": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Args"
-          },
-          "mcp_command": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Command"
-          },
-          "mcp_headers": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Headers"
-          },
-          "mcp_transport": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Transport"
-          },
-          "mcp_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Url"
           },
           "name": {
             "title": "Name",
@@ -22274,6 +21442,22 @@
         "title": "LinkInfoResponse",
         "type": "object"
       },
+      "ListSimulationSuitesResponse": {
+        "properties": {
+          "suites": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationSuiteResponse"
+            },
+            "title": "Suites",
+            "type": "array"
+          }
+        },
+        "required": [
+          "suites"
+        ],
+        "title": "ListSimulationSuitesResponse",
+        "type": "object"
+      },
       "LookupResponse": {
         "description": "Autocompletion results for a surface lookup field.",
         "properties": {
@@ -23020,7 +22204,6 @@
               "static",
               "ai_classify",
               "ai_extract",
-              "ai_sentiment",
               "ai_query",
               "sql_expr"
             ],
@@ -23324,12 +22507,11 @@
           },
           "extraction_mode": {
             "default": "static",
-            "description": "'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_sentiment' — AI sentiment analysis (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.",
+            "description": "'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.",
             "enum": [
               "static",
               "ai_classify",
               "ai_extract",
-              "ai_sentiment",
               "ai_query",
               "sql_expr"
             ],
@@ -23389,7 +22571,7 @@
           },
           "model_tier": {
             "default": "free",
-            "description": "AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract, ai_sentiment). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.",
+            "description": "AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.",
             "enum": [
               "free",
               "fast",
@@ -26838,392 +26020,6 @@
         "title": "ParticipantLeftEvent",
         "type": "object"
       },
-      "PatientBurdenDetailResponse": {
-        "properties": {
-          "age_adjusted_charlson_index": {
-            "title": "Age Adjusted Charlson Index",
-            "type": "integer"
-          },
-          "age_bucket_now": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Age Bucket Now"
-          },
-          "age_cci_points": {
-            "title": "Age Cci Points",
-            "type": "integer"
-          },
-          "age_now": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Age Now"
-          },
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "charlson_flags": {
-            "$ref": "#/components/schemas/CharlsonCategoryFlags"
-          },
-          "charlson_index": {
-            "title": "Charlson Index",
-            "type": "integer"
-          },
-          "days_since_most_recent_onset": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Days Since Most Recent Onset"
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "most_recent_active_onset_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Most Recent Active Onset Date"
-          },
-          "n_active_conditions": {
-            "title": "N Active Conditions",
-            "type": "integer"
-          },
-          "n_distinct_code_systems": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Distinct Code Systems"
-          },
-          "n_distinct_codes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Distinct Codes"
-          },
-          "n_lifetime_condition_records": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Lifetime Condition Records"
-          },
-          "n_lifetime_distinct_codes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Lifetime Distinct Codes"
-          },
-          "oldest_active_onset_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Oldest Active Onset Date"
-          },
-          "patient_entity_id": {
-            "format": "uuid",
-            "title": "Patient Entity Id",
-            "type": "string"
-          },
-          "recent_onset_count_365d": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recent Onset Count 365D"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "patient_entity_id",
-          "n_active_conditions",
-          "charlson_index",
-          "age_cci_points",
-          "age_adjusted_charlson_index",
-          "charlson_flags"
-        ],
-        "title": "PatientBurdenDetailResponse",
-        "type": "object"
-      },
-      "PatientBurdenResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/PatientBurdenRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "sort_by": {
-            "title": "Sort By",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "sort_by",
-          "items"
-        ],
-        "title": "PatientBurdenResponse",
-        "type": "object"
-      },
-      "PatientBurdenRow": {
-        "properties": {
-          "age_adjusted_charlson_index": {
-            "title": "Age Adjusted Charlson Index",
-            "type": "integer"
-          },
-          "age_bucket_now": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Age Bucket Now"
-          },
-          "age_cci_points": {
-            "title": "Age Cci Points",
-            "type": "integer"
-          },
-          "age_now": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Age Now"
-          },
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "charlson_index": {
-            "title": "Charlson Index",
-            "type": "integer"
-          },
-          "days_since_most_recent_onset": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Days Since Most Recent Onset"
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "most_recent_active_onset_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Most Recent Active Onset Date"
-          },
-          "n_active_conditions": {
-            "title": "N Active Conditions",
-            "type": "integer"
-          },
-          "n_distinct_code_systems": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Distinct Code Systems"
-          },
-          "n_distinct_codes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Distinct Codes"
-          },
-          "n_lifetime_condition_records": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Lifetime Condition Records"
-          },
-          "n_lifetime_distinct_codes": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "N Lifetime Distinct Codes"
-          },
-          "oldest_active_onset_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Oldest Active Onset Date"
-          },
-          "patient_entity_id": {
-            "format": "uuid",
-            "title": "Patient Entity Id",
-            "type": "string"
-          },
-          "recent_onset_count_365d": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Recent Onset Count 365D"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "patient_entity_id",
-          "n_active_conditions",
-          "charlson_index",
-          "age_cci_points",
-          "age_adjusted_charlson_index"
-        ],
-        "title": "PatientBurdenRow",
-        "type": "object"
-      },
       "PatientLabRow": {
         "properties": {
           "loinc_code": {
@@ -28764,144 +27560,6 @@
           "tool_id"
         ],
         "title": "PreloadSpec",
-        "type": "object"
-      },
-      "PrevalenceResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/PrevalenceRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "PrevalenceResponse",
-        "type": "object"
-      },
-      "PrevalenceRow": {
-        "properties": {
-          "age_bucket": {
-            "title": "Age Bucket",
-            "type": "string"
-          },
-          "as_of_date": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "As Of Date"
-          },
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "code_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code Display"
-          },
-          "code_system_normalized": {
-            "title": "Code System Normalized",
-            "type": "string"
-          },
-          "cohort_size": {
-            "title": "Cohort Size",
-            "type": "integer"
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "min_support_met": {
-            "title": "Min Support Met",
-            "type": "boolean"
-          },
-          "patients_with_condition": {
-            "title": "Patients With Condition",
-            "type": "integer"
-          },
-          "prevalence_ci_lower_pct": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prevalence Ci Lower Pct"
-          },
-          "prevalence_ci_upper_pct": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prevalence Ci Upper Pct"
-          },
-          "prevalence_pct": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prevalence Pct"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code_system_normalized",
-          "code",
-          "age_bucket",
-          "patients_with_condition",
-          "cohort_size",
-          "min_support_met"
-        ],
-        "title": "PrevalenceRow",
         "type": "object"
       },
       "PriorityQueueItem": {
@@ -30894,6 +29552,9 @@
             "anyOf": [
               {
                 "enum": [
+                  "approve",
+                  "reject",
+                  "correct",
                   "approved",
                   "rejected",
                   "corrected"
@@ -34571,6 +33232,53 @@
         "title": "SimulationStepResponse",
         "type": "object"
       },
+      "SimulationSuiteResponse": {
+        "description": "A runnable suite derived from persisted `suite:*` case tags.",
+        "properties": {
+          "case_count": {
+            "minimum": 0,
+            "title": "Case Count",
+            "type": "integer"
+          },
+          "latest_updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Updated At"
+          },
+          "name": {
+            "maxLength": 128,
+            "title": "Name",
+            "type": "string"
+          },
+          "service_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Service Ids",
+            "type": "array"
+          },
+          "tag": {
+            "maxLength": 128,
+            "title": "Tag",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tag",
+          "name",
+          "case_count"
+        ],
+        "title": "SimulationSuiteResponse",
+        "type": "object"
+      },
       "SimulationTurnPolicyResponse": {
         "properties": {
           "barge_in_enabled": {
@@ -35744,7 +34452,6 @@
           "session_status": {
             "enum": [
               "created",
-              "resumed",
               "already_active"
             ],
             "title": "Session Status",
@@ -37871,7 +36578,7 @@
                 "type": "null"
               }
             ],
-            "description": "HTTP status code from the upstream HEAD probe (REST/FHIR/MCP-http only).",
+            "description": "HTTP status code from the upstream HEAD probe (REST only).",
             "title": "Http Status"
           },
           "message": {
@@ -39271,7 +37978,7 @@
             "description": "Fully qualified tool name"
           },
           "tool_type": {
-            "description": "world_tool, skill, or integration",
+            "description": "world_tool — other tool families use their dedicated endpoints",
             "maxLength": 64,
             "title": "Tool Type",
             "type": "string"
@@ -39919,110 +38626,6 @@
           "confidence"
         ],
         "title": "TranscriptSegment",
-        "type": "object"
-      },
-      "TrendResponse": {
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/TrendRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code",
-          "count",
-          "items"
-        ],
-        "title": "TrendResponse",
-        "type": "object"
-      },
-      "TrendRow": {
-        "properties": {
-          "age_bucket": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Age Bucket"
-          },
-          "code": {
-            "title": "Code",
-            "type": "string"
-          },
-          "code_display": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Code Display"
-          },
-          "code_system_normalized": {
-            "title": "Code System Normalized",
-            "type": "string"
-          },
-          "condition_records": {
-            "title": "Condition Records",
-            "type": "integer"
-          },
-          "gender": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gender"
-          },
-          "incident_patients": {
-            "title": "Incident Patients",
-            "type": "integer"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          },
-          "year_month": {
-            "title": "Year Month",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "code_system_normalized",
-          "code",
-          "year_month",
-          "incident_patients",
-          "condition_records"
-        ],
-        "title": "TrendRow",
         "type": "object"
       },
       "TriggerCompletedEvent": {
@@ -40854,7 +39457,6 @@
           "status": {
             "enum": [
               "active",
-              "frozen",
               "closed",
               "completed",
               "in-progress",
@@ -41894,7 +40496,7 @@
             "anyOf": [
               {
                 "items": {
-                  "$ref": "#/components/schemas/EndpointConfig-Input"
+                  "$ref": "#/components/schemas/EndpointConfig"
                 },
                 "maxItems": 50,
                 "type": "array"
@@ -41905,82 +40507,10 @@
             ],
             "title": "Endpoints"
           },
-          "mcp_args": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Args"
-          },
-          "mcp_command": {
-            "anyOf": [
-              {
-                "maxLength": 512,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Command"
-          },
-          "mcp_headers": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Headers"
-          },
-          "mcp_transport": {
-            "anyOf": [
-              {
-                "enum": [
-                  "stdio",
-                  "sse",
-                  "http"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Transport"
-          },
-          "mcp_url": {
-            "anyOf": [
-              {
-                "maxLength": 2048,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mcp Url"
-          },
           "protocol": {
             "anyOf": [
               {
-                "enum": [
-                  "rest",
-                  "fhir",
-                  "mcp"
-                ],
+                "const": "rest",
                 "type": "string"
               },
               {
@@ -42349,6 +40879,168 @@
           }
         },
         "title": "UpdateServiceRequest",
+        "type": "object"
+      },
+      "UpdateSimulationCaseRequest": {
+        "description": "Partial update for one durable simulation case.",
+        "properties": {
+          "assertions": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "maxItems": 100,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assertions"
+          },
+          "constraints": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Constraints"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "fixtures": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fixtures"
+          },
+          "initial_message": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Initial Message"
+          },
+          "persona": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona"
+          },
+          "provenance": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provenance"
+          },
+          "scenario_instructions": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scenario Instructions"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "maxLength": 128,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          },
+          "target_spec": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Spec"
+          },
+          "temperament": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperament"
+          }
+        },
+        "title": "UpdateSimulationCaseRequest",
         "type": "object"
       },
       "UpdateSkillRequest": {
@@ -42784,48 +41476,6 @@
           }
         },
         "title": "UpdateSurfaceRequest",
-        "type": "object"
-      },
-      "UpdateSyncStatusRequest": {
-        "description": "Report sync status for a data source after a poll cycle.",
-        "properties": {
-          "data_source_id": {
-            "format": "uuid",
-            "title": "Data Source Id",
-            "type": "string"
-          },
-          "last_sync_at": {
-            "format": "date-time",
-            "title": "Last Sync At",
-            "type": "string"
-          },
-          "last_sync_event_count": {
-            "default": 0,
-            "title": "Last Sync Event Count",
-            "type": "integer"
-          },
-          "last_sync_status": {
-            "enum": [
-              "success",
-              "partial",
-              "error"
-            ],
-            "title": "Last Sync Status",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "data_source_id",
-          "workspace_id",
-          "last_sync_at",
-          "last_sync_status"
-        ],
-        "title": "UpdateSyncStatusRequest",
         "type": "object"
       },
       "UpdateTriggerRequest": {
@@ -45801,7 +44451,6 @@
           "status": {
             "enum": [
               "active",
-              "frozen",
               "closed",
               "completed",
               "in-progress",
@@ -54765,7 +53414,6 @@
                 {
                   "enum": [
                     "active",
-                    "frozen",
                     "closed",
                     "completed",
                     "in-progress",
@@ -56832,762 +55480,6 @@
         "summary": "Generate Brief",
         "tags": [
           "Self-Image"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/cohort-drivers": {
-      "get": {
-        "description": "Standardized Prevalence Ratio (SPR = observed / expected) per (age_bucket, gender) cohort for a given code, with Byar 95% CI. SPR > 1 = cohort over-indexes for this code.",
-        "operationId": "list_cohort_drivers_v1__workspace_id__epidemiology_cohort_drivers_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code",
-            "required": true,
-            "schema": {
-              "maxLength": 32,
-              "minLength": 1,
-              "title": "Code",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code_system",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "ICD10",
-                    "SNOMED",
-                    "ICD9",
-                    "OTHER"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code System"
-            }
-          },
-          {
-            "in": "query",
-            "name": "min_support_only",
-            "required": false,
-            "schema": {
-              "default": true,
-              "title": "Min Support Only",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CohortDriverResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Cohort Drivers",
-        "tags": [
-          "Epidemiology"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/cooccurrence": {
-      "get": {
-        "description": "Active-condition code pairs co-occurring within the same patient. Emits Jaccard, lift, PMI, and Pearson χ². Filter by `code` to constrain one side of the pair; sort by lift|pmi|chi_square|jaccard.",
-        "operationId": "list_cooccurrence_v1__workspace_id__epidemiology_cooccurrence_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 32,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code_system",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "ICD10",
-                    "SNOMED",
-                    "ICD9",
-                    "OTHER"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code System"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort_by",
-            "required": false,
-            "schema": {
-              "default": "lift",
-              "enum": [
-                "lift",
-                "pmi",
-                "chi_square",
-                "jaccard",
-                "n_patients_both"
-              ],
-              "title": "Sort By",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "min_support_only",
-            "required": false,
-            "schema": {
-              "default": true,
-              "title": "Min Support Only",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CooccurrenceResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Cooccurrence",
-        "tags": [
-          "Epidemiology"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/patient-burden": {
-      "get": {
-        "description": "Per-patient condition features including Charlson Comorbidity Index (Quan 2005 ICD-10) and age-adjusted CCI (Charlson 1994). Filter by min_charlson, age range, or gender. Sort by any of the numeric feature columns.",
-        "operationId": "list_patient_burden_v1__workspace_id__epidemiology_patient_burden_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "min_charlson",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maximum": 40,
-                  "minimum": 0,
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Min Charlson"
-            }
-          },
-          {
-            "in": "query",
-            "name": "age_min",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maximum": 120,
-                  "minimum": 0,
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Age Min"
-            }
-          },
-          {
-            "in": "query",
-            "name": "age_max",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maximum": 120,
-                  "minimum": 0,
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Age Max"
-            }
-          },
-          {
-            "in": "query",
-            "name": "gender",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 32,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Gender"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort_by",
-            "required": false,
-            "schema": {
-              "default": "age_adjusted_charlson_index",
-              "enum": [
-                "age_adjusted_charlson_index",
-                "charlson_index",
-                "n_active_conditions",
-                "recent_onset_count_365d",
-                "age_now"
-              ],
-              "title": "Sort By",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatientBurdenResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Patient Burden",
-        "tags": [
-          "Epidemiology"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/patient-burden/{patient_entity_id}": {
-      "get": {
-        "description": "Full condition-burden features for a single patient, including per-category Charlson flags (17 Quan 2005 ICD-10 categories).",
-        "operationId": "get_patient_burden_v1__workspace_id__epidemiology_patient_burden__patient_entity_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "patient_entity_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Patient Entity Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PatientBurdenDetailResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Patient Burden",
-        "tags": [
-          "Epidemiology"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/prevalence": {
-      "get": {
-        "description": "Active-condition prevalence by code x (age_bucket, gender) with Wilson 95% CI. Filter by code, code_system, age_bucket, gender; set min_support_only=true to hide small-cell (observed < 5) cohorts.",
-        "operationId": "list_prevalence_v1__workspace_id__epidemiology_prevalence_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 32,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code_system",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "ICD10",
-                    "SNOMED",
-                    "ICD9",
-                    "OTHER"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code System"
-            }
-          },
-          {
-            "in": "query",
-            "name": "age_bucket",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "0-17",
-                    "18-34",
-                    "35-49",
-                    "50-64",
-                    "65-79",
-                    "80+"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Age Bucket"
-            }
-          },
-          {
-            "in": "query",
-            "name": "gender",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 32,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Gender"
-            }
-          },
-          {
-            "in": "query",
-            "name": "min_support_only",
-            "required": false,
-            "schema": {
-              "default": false,
-              "title": "Min Support Only",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PrevalenceResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Prevalence",
-        "tags": [
-          "Epidemiology"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/epidemiology/trends": {
-      "get": {
-        "description": "Monthly incidence for a code (YYYY-MM). Requires `code`. Optional filters: code_system, start_month, end_month, age_bucket, gender.",
-        "operationId": "list_trends_v1__workspace_id__epidemiology_trends_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code",
-            "required": true,
-            "schema": {
-              "maxLength": 32,
-              "minLength": 1,
-              "title": "Code",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "code_system",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "ICD10",
-                    "SNOMED",
-                    "ICD9",
-                    "OTHER"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Code System"
-            }
-          },
-          {
-            "in": "query",
-            "name": "start_month",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Start Month"
-            }
-          },
-          {
-            "in": "query",
-            "name": "end_month",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "End Month"
-            }
-          },
-          {
-            "in": "query",
-            "name": "age_bucket",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "0-17",
-                    "18-34",
-                    "35-49",
-                    "50-64",
-                    "65-79",
-                    "80+"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Age Bucket"
-            }
-          },
-          {
-            "in": "query",
-            "name": "gender",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 32,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Gender"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 120,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TrendResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Trends",
-        "tags": [
-          "Epidemiology"
         ]
       }
     },
@@ -60960,7 +58852,7 @@
     },
     "/v1/{workspace_id}/integrations/{integration_id}/test-connection": {
       "post": {
-        "description": "Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.",
+        "description": "Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.",
         "operationId": "test-integration-connection",
         "parameters": [
           {
@@ -69728,94 +67620,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/simulations/branches": {
-      "get": {
-        "operationId": "list-simulation-branches",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response List-Simulation-Branches",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "List Simulation Branches",
-        "tags": [
-          "Simulations"
-        ]
-      },
-      "post": {
-        "operationId": "create-simulation-branch",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateBranchRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create-Simulation-Branch",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Create Simulation Branch",
-        "tags": [
-          "Simulations"
-        ]
-      }
-    },
     "/v1/{workspace_id}/simulations/bridge": {
       "post": {
         "description": "NL objective to N autonomous scenarios against the tracked simulation primitives.\n\nReturns immediately with run_id + generated scenarios. Scenarios run in\nthe background via BridgeExecutor (lifecycle-managed, shutdown-drained).\nCompletion events are emitted to Delta via world_emitter for SDP\nobservability.",
@@ -70081,6 +67885,54 @@
       }
     },
     "/v1/{workspace_id}/simulations/cases/{case_id}": {
+      "delete": {
+        "description": "Delete one durable simulation case.",
+        "operationId": "delete-simulation-case",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Simulation case not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Simulation Case",
+        "tags": [
+          "Simulations"
+        ]
+      },
       "get": {
         "description": "Fetch one durable simulation case for case-library inspection.",
         "operationId": "get-simulation-case",
@@ -70132,6 +67984,71 @@
           }
         },
         "summary": "Get Simulation Case",
+        "tags": [
+          "Simulations"
+        ]
+      },
+      "patch": {
+        "description": "Update editable fields on one durable simulation case.",
+        "operationId": "update-simulation-case",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSimulationCaseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationCaseResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Simulation case not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Simulation Case",
         "tags": [
           "Simulations"
         ]
@@ -71533,6 +69450,40 @@
           }
         },
         "summary": "Get Simulation Session Turns",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/suites": {
+      "get": {
+        "description": "List runnable simulation suites derived from `suite:*` case tags.",
+        "operationId": "list-simulation-suites",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSimulationSuitesResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Simulation Suites",
         "tags": [
           "Simulations"
         ]
