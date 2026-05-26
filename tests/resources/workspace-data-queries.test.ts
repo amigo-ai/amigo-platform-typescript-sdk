@@ -52,7 +52,7 @@ describe('WorkspaceDataQueriesResource', () => {
   it('lists workspace data queries', async () => {
     const result = await client.workspaceDataQueries.list()
 
-    expect(result.count).toBe(1)
+    expect(result.items).toHaveLength(1)
     expect(result.items[0]?.name).toBe('recent_orders')
   })
 

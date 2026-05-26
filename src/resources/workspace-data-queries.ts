@@ -3,7 +3,7 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 
 export type WorkspaceDataQuery = components['schemas']['WorkspaceDataQueryItem']
 export type WorkspaceDataQueryListItem =
-  components['schemas']['src__routes__workspace_data_queries__list_workspace_data_queries__Item']
+  components['schemas']['src__routes__workspace_data_queries__list_workspace_data_queries__Response__Item']
 export type WorkspaceDataQueryListResponse =
   components['schemas']['src__routes__workspace_data_queries__list_workspace_data_queries__Response']
 export type CreateWorkspaceDataQueryRequest =

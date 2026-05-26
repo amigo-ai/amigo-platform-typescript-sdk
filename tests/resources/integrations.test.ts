@@ -6,35 +6,50 @@ const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const INTEGRATION_ID = 'int-00000000-0000-0000-0000-000000000001'
+const ENDPOINT_ID = 'ep-00000000-0000-0000-0000-000000000001'
 
 const INTEGRATION_FIXTURE = {
   id: INTEGRATION_ID,
   workspace_id: TEST_WORKSPACE_ID,
-  name: 'Athena EHR',
-  protocol: 'fhir_r4',
+  kind: 'rest',
+  name: 'athena-ehr',
+  display_name: 'Athena EHR',
   base_url: 'https://fhir.athena.example.com/r4',
+  auth: {
+    type: 'static_header',
+    header_name: 'X-API-Key',
+  },
   enabled: true,
-  last_sync_at: '2026-01-15T08:00:00Z',
+  endpoint_count: 1,
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-const HEALTH_CHECK_FIXTURE = {
-  overall_status: 'healthy',
-  checks: [
-    {
-      id: INTEGRATION_ID,
-      name: 'Athena EHR',
-      status: 'healthy',
-      latency_ms: 120,
-    },
-  ],
+const ENDPOINT_FIXTURE = {
+  id: ENDPOINT_ID,
+  name: 'get-patient',
+  description: 'Fetch a patient record by ID',
+  method: 'GET',
+  path: 'Patient/{patient_id}',
+  body_format: 'json',
+  timeout_seconds: 30,
+  max_retries: 2,
+  max_response_length: 0,
+  input_schema: { type: 'object', properties: { patient_id: { type: 'string' } } },
+  headers: {},
+  static_body_fields: {},
+  retry_on_status: [502, 503, 504],
+  response_template: null,
 }
 
 const TEST_ENDPOINT_FIXTURE = {
   status_code: 200,
   duration_ms: 85,
+  retries: 0,
   raw_response: { resourceType: 'Patient', id: 'test-001' },
+  rendered: null,
+  final_result: null,
+  error: null,
 }
 
 function mockFetch(
@@ -77,48 +92,52 @@ const client = new AmigoClient({
     [`GET ${BASE}/integrations/not-found`]: () =>
       Response.json({ detail: 'Integration not found', error_code: 'not_found' }, { status: 404 }),
 
-    [`PUT ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
-      Response.json({ ...INTEGRATION_FIXTURE, name: 'Updated Integration', enabled: false }),
+    [`PATCH ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
+      Response.json({ ...INTEGRATION_FIXTURE, display_name: 'Updated Integration', enabled: false }),
 
     [`DELETE ${BASE}/integrations/${INTEGRATION_ID}`]: () => new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/integrations/${INTEGRATION_ID}/endpoints/Patient/test`]: () =>
+    [`GET ${BASE}/integrations/${INTEGRATION_ID}/endpoints`]: () =>
+      Response.json({ items: [ENDPOINT_FIXTURE], has_more: false, continuation_token: null }),
+
+    [`POST ${BASE}/integrations/${INTEGRATION_ID}/endpoints`]: () =>
+      Response.json(ENDPOINT_FIXTURE, { status: 201 }),
+
+    [`GET ${BASE}/integrations/${INTEGRATION_ID}/endpoints/${ENDPOINT_ID}`]: () =>
+      Response.json(ENDPOINT_FIXTURE),
+
+    [`PATCH ${BASE}/integrations/${INTEGRATION_ID}/endpoints/${ENDPOINT_ID}`]: () =>
+      Response.json({ ...ENDPOINT_FIXTURE, description: 'Updated description' }),
+
+    [`DELETE ${BASE}/integrations/${INTEGRATION_ID}/endpoints/${ENDPOINT_ID}`]: () =>
+      new Response(null, { status: 204 }),
+
+    [`POST ${BASE}/integrations/${INTEGRATION_ID}/endpoints/${ENDPOINT_ID}/test`]: () =>
       Response.json(TEST_ENDPOINT_FIXTURE),
-
-    [`POST ${BASE}/integrations/${INTEGRATION_ID}/test-connection`]: () =>
-      Response.json({
-        status: 'healthy',
-        duration_ms: 42.5,
-        http_status: 200,
-        auth_resolved: true,
-        message: 'Connection successful (HTTP 200)',
-        tested_at: '2026-05-01T22:00:00.000Z',
-      }),
-
-    [`GET ${BASE}/integrations/health-check`]: () => Response.json(HEALTH_CHECK_FIXTURE),
   }),
 })
 
 describe('IntegrationsResource', () => {
   it('creates an integration', async () => {
     const result = await client.integrations.create({
-      name: 'Athena EHR',
-      protocol: 'fhir_r4',
-    } as never)
+      name: 'athena-ehr',
+      display_name: 'Athena EHR',
+      base_url: 'https://fhir.athena.example.com/r4',
+    })
     expect(result.id).toBe(INTEGRATION_ID)
-    expect(result.name).toBe('Athena EHR')
-    expect(result.protocol).toBe('fhir_r4')
+    expect(result.name).toBe('athena-ehr')
+    expect(result.display_name).toBe('Athena EHR')
   })
 
   it('lists integrations', async () => {
     const result = await client.integrations.list()
     expect(result.items).toHaveLength(1)
-    expect(result.items[0]?.name).toBe('Athena EHR')
+    expect(result.items[0]?.name).toBe('athena-ehr')
     expect(result.has_more).toBe(false)
   })
 
   it('lists integrations with filters', async () => {
-    const result = await client.integrations.list({ protocol: 'fhir_r4', enabled: true })
+    const result = await client.integrations.list({ enabled: true, search: 'athena' })
     expect(result.items).toHaveLength(1)
   })
 
@@ -126,6 +145,9 @@ describe('IntegrationsResource', () => {
     const result = await client.integrations.get(INTEGRATION_ID)
     expect(result.id).toBe(INTEGRATION_ID)
     expect(result.enabled).toBe(true)
+    if (result.kind === 'rest') {
+      expect(result.endpoint_count).toBe(1)
+    }
   })
 
   it('throws NotFoundError for missing integration', async () => {
@@ -134,10 +156,10 @@ describe('IntegrationsResource', () => {
 
   it('updates an integration', async () => {
     const result = await client.integrations.update(INTEGRATION_ID, {
-      name: 'Updated Integration',
+      display_name: 'Updated Integration',
       enabled: false,
-    } as never)
-    expect(result.name).toBe('Updated Integration')
+    })
+    expect(result.display_name).toBe('Updated Integration')
     expect(result.enabled).toBe(false)
   })
 
@@ -145,25 +167,46 @@ describe('IntegrationsResource', () => {
     await expect(client.integrations.delete(INTEGRATION_ID)).resolves.toBeUndefined()
   })
 
+  it('lists endpoints', async () => {
+    const result = await client.integrations.listEndpoints(INTEGRATION_ID)
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.id).toBe(ENDPOINT_ID)
+    expect(result.items[0]?.name).toBe('get-patient')
+  })
+
+  it('gets an endpoint by id', async () => {
+    const result = await client.integrations.getEndpoint(INTEGRATION_ID, ENDPOINT_ID)
+    expect(result.id).toBe(ENDPOINT_ID)
+    expect(result.method).toBe('GET')
+  })
+
+  it('creates an endpoint', async () => {
+    const result = await client.integrations.createEndpoint(INTEGRATION_ID, {
+      name: 'get-patient',
+      description: 'Fetch a patient record by ID',
+      path: 'Patient/{patient_id}',
+    })
+    expect(result.id).toBe(ENDPOINT_ID)
+  })
+
+  it('updates an endpoint', async () => {
+    const result = await client.integrations.updateEndpoint(INTEGRATION_ID, ENDPOINT_ID, {
+      description: 'Updated description',
+    })
+    expect(result.description).toBe('Updated description')
+  })
+
+  it('deletes an endpoint', async () => {
+    await expect(
+      client.integrations.deleteEndpoint(INTEGRATION_ID, ENDPOINT_ID),
+    ).resolves.toBeUndefined()
+  })
+
   it('tests an endpoint', async () => {
-    const result = await client.integrations.testEndpoint(INTEGRATION_ID, 'Patient', {
-      params: { _id: 'test-001' },
-    } as never)
+    const result = await client.integrations.testEndpoint(INTEGRATION_ID, ENDPOINT_ID, {
+      params: { patient_id: 'test-001' },
+    })
     expect(result.status_code).toBe(200)
     expect(result.duration_ms).toBe(85)
-  })
-
-  it('gets health check status', async () => {
-    const result = await client.integrations.getHealthCheck()
-    expect(result).toBeDefined()
-  })
-
-  it('testConnection probes auth + reachability', async () => {
-    const result = await client.integrations.testConnection(INTEGRATION_ID)
-    expect(result.status).toBe('healthy')
-    expect(result.http_status).toBe(200)
-    expect(result.auth_resolved).toBe(true)
-    expect(result.duration_ms).toBeGreaterThan(0)
-    expect(result.message).toContain('Connection successful')
   })
 })

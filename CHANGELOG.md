@@ -1,5 +1,52 @@
 # Changelog
 
+## [0.58.0] - 2026-05-26
+
+### Breaking Changes
+
+- **Integrations: auth-shape collapse.** The six legacy REST auth variants
+  (`api_key_header`, `bearer_token`, `oauth2_client_credentials`,
+  `oauth2_jwt_bearer`, `gcp_wif`, `bearer_token_exchange`) have been collapsed
+  to four (`static_header`, `oauth2_client_credentials`, `oauth2_jwt_bearer`,
+  `custom_token_exchange`). Per-type SSM path fields are gone in favor of a
+  single `secret_value` field on create/update that the platform provisions
+  to a unified SSM path. `oauth2_client_credentials` now requires
+  `client_auth_method` (`"basic" | "body"`). `oauth2_jwt_bearer` drops
+  `client_id`, renames `token_lifetime_seconds` → `assertion_lifetime_seconds`,
+  adds `assertion_algorithm`/`include_iat`/`include_jti`, and folds
+  `gcp_scopes` into `extra_claims`. `bearer_token_exchange` is replaced by
+  `custom_token_exchange` with RFC 6901-pointer-based static/param fields.
+
+- **Integrations: endpoint sub-resource.** Endpoints are no longer embedded
+  in the integration response — `RestIntegrationResponse` exposes
+  `endpoint_count` instead of `endpoints[]`. New CRUD methods on
+  `IntegrationsResource`: `listEndpoints`, `listEndpointsAutoPaging`,
+  `getEndpoint`, `createEndpoint`, `updateEndpoint`, `deleteEndpoint`.
+
+- **`testEndpoint` identifies endpoints by UUID, not name.**
+  `client.integrations.testEndpoint(integrationId, endpointId, body)` now
+  takes the endpoint `id` (UUID). Callers passing the human-readable
+  endpoint `name` will hit 404.
+
+- **`integrations.update` is now PATCH.** Was `PUT` under the hood; this is
+  invisible at the JS API boundary but worth noting if you were relying on
+  the wire-level method.
+
+- **Removed `client.integrations.testConnection` and `getHealthCheck`.** The
+  underlying `POST /test-connection` and `GET /health-check` endpoints were
+  removed from the platform API.
+
+### New types
+
+- `IntegrationEndpointId` branded type + `integrationEndpointId(id)`
+  constructor.
+
+### Maintenance
+
+- Sync API types from platform (operation-IDs snapshot updated: adds the new
+  integration-endpoint operations, drops `integration-health-check`, picks up
+  unrelated simulation-suite + simulation-case rename churn).
+
 ## [0.57.0] - 2026-05-20
 
 ### Maintenance
