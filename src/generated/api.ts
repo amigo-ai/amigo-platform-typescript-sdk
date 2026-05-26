@@ -23673,6 +23673,7 @@ export interface components {
         };
         /** TurnConversationSnapshot */
         TurnConversationSnapshot: {
+            context_graph_state?: components["schemas"]["ContextGraphState-Output"] | null;
             /**
              * Id
              * Format: uuid
