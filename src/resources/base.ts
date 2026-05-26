@@ -47,7 +47,7 @@ export abstract class WorkspaceScopedResource {
     TPage extends {
       items?: readonly unknown[]
       has_more?: boolean
-      continuation_token?: number | null
+      continuation_token?: unknown
     },
     TParams,
   >(

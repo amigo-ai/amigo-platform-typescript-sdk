@@ -656,7 +656,7 @@ export interface paths {
         put?: never;
         /**
          * Provision workspace resources
-         * @description Seed default IntegrationConfig and mark workspace as provisioned. Idempotent. Requires `Workspace.update` permission.
+         * @description Seed default integrations and mark workspace as provisioned. Idempotent. Requires `Workspace.update` permission.
          */
         post: operations["provision-workspace"];
         delete?: never;
@@ -2257,7 +2257,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Workspace Data Queries */
+        /**
+         * List workspace data queries
+         * @description List every registered query for a workspace. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed field: deployed_at). Default: `-deployed_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Workspace.view` permission.
+         */
         get: operations["list-workspace-data-queries"];
         put?: never;
         /** Create Workspace Data Query */
@@ -2407,126 +2410,6 @@ export interface paths {
          * @description Generate a Self-Image brief for the target entity (patient, cohort, territory, emirate, or district).
          */
         post: operations["generate_brief_v1__workspace_id__entities__entity_id__brief_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/cohort-drivers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Cohort Drivers
-         * @description Standardized Prevalence Ratio (SPR = observed / expected) per (age_bucket, gender) cohort for a given code, with Byar 95% CI. SPR > 1 = cohort over-indexes for this code.
-         */
-        get: operations["list_cohort_drivers_v1__workspace_id__epidemiology_cohort_drivers_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/cooccurrence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Cooccurrence
-         * @description Active-condition code pairs co-occurring within the same patient. Emits Jaccard, lift, PMI, and Pearson χ². Filter by `code` to constrain one side of the pair; sort by lift|pmi|chi_square|jaccard.
-         */
-        get: operations["list_cooccurrence_v1__workspace_id__epidemiology_cooccurrence_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/patient-burden": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Patient Burden
-         * @description Per-patient condition features including Charlson Comorbidity Index (Quan 2005 ICD-10) and age-adjusted CCI (Charlson 1994). Filter by min_charlson, age range, or gender. Sort by any of the numeric feature columns.
-         */
-        get: operations["list_patient_burden_v1__workspace_id__epidemiology_patient_burden_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/patient-burden/{patient_entity_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Patient Burden
-         * @description Full condition-burden features for a single patient, including per-category Charlson flags (17 Quan 2005 ICD-10 categories).
-         */
-        get: operations["get_patient_burden_v1__workspace_id__epidemiology_patient_burden__patient_entity_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/prevalence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Prevalence
-         * @description Active-condition prevalence by code x (age_bucket, gender) with Wilson 95% CI. Filter by code, code_system, age_bucket, gender; set min_support_only=true to hide small-cell (observed < 5) cohorts.
-         */
-        get: operations["list_prevalence_v1__workspace_id__epidemiology_prevalence_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/epidemiology/trends": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Trends
-         * @description Monthly incidence for a code (YYYY-MM). Requires `code`. Optional filters: code_system, start_month, end_month, age_bucket, gender.
-         */
-        get: operations["list_trends_v1__workspace_id__epidemiology_trends_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3224,35 +3107,15 @@ export interface paths {
         };
         /**
          * List integrations
-         * @description List integrations for a workspace with pagination. Optionally filter by enabled status. Requires `Integration.view` permission.
+         * @description List every integration (REST + desktop) for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.
          */
         get: operations["list-integrations"];
         put?: never;
         /**
-         * Create an integration
-         * @description Create a new external API integration in a workspace. Requires `Integration.create` permission.
+         * Create a REST integration
+         * @description Create a new REST integration in a workspace. Endpoints are added separately via `POST /integrations/{integration_id}/endpoints`. Requires `Integration.create` permission.
          */
         post: operations["create-integration"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/integrations/health-check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Bulk integration health check
-         * @description Quick health status of all enabled integrations.
-         */
-        get: operations["integration-health-check"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3268,26 +3131,78 @@ export interface paths {
         };
         /**
          * Get an integration
-         * @description Retrieve an integration by ID. Requires `Integration.view` permission.
+         * @description Retrieve an integration (REST or desktop) by ID. Requires `Integration.view` permission.
          */
         get: operations["get-integration"];
-        /**
-         * Update an integration
-         * @description Update an integration's configuration. Requires `Integration.update` permission.
-         */
-        put: operations["update-integration"];
+        put?: never;
         post?: never;
         /**
-         * Delete an integration
-         * @description Delete an integration. Requires `Integration.delete` permission.
+         * Delete a REST integration
+         * @description Delete a REST integration. Requires `Integration.delete` permission.
          */
         delete: operations["delete-integration"];
+        options?: never;
+        head?: never;
+        /**
+         * Update a REST integration
+         * @description Patch a REST integration. NOT NULL fields reject `null` at validation time; pass `auth: null` to clear the auth config. `auth` and `secret_value` are independent — update either alone to swap auth shape (reusing the existing secret) or rotate the secret (keeping the existing auth shape). Requires `Integration.update` permission.
+         */
+        patch: operations["update-integration"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/integrations/{integration_id}/endpoints": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List endpoints
+         * @description List endpoints on a REST integration. Optionally search by name/description. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.
+         */
+        get: operations["list-integration-endpoints"];
+        put?: never;
+        /**
+         * Add an endpoint
+         * @description Add a new endpoint to a REST integration. Requires `Integration.update` permission.
+         */
+        post: operations["create-integration-endpoint"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_name}/test": {
+    "/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an endpoint
+         * @description Get a single endpoint on a REST integration. Requires `Integration.view` permission.
+         */
+        get: operations["get-integration-endpoint"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an endpoint
+         * @description Delete an endpoint from a REST integration. Requires `Integration.update` permission.
+         */
+        delete: operations["delete-integration-endpoint"];
+        options?: never;
+        head?: never;
+        /**
+         * Update an endpoint
+         * @description Patch an endpoint on a REST integration. The endpoint `name` is immutable. Pass `response_template: null` to clear the Jinja template (the only DB-nullable column). Every other field rejects explicit null at validation time. Requires `Integration.update` permission.
+         */
+        patch: operations["update-integration-endpoint"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_id}/test": {
         parameters: {
             query?: never;
             header?: never;
@@ -3301,26 +3216,6 @@ export interface paths {
          * @description Execute an integration endpoint with test parameters and return the full response pipeline breakdown. Requires `Integration.view` permission.
          */
         post: operations["test-integration-endpoint"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/integrations/{integration_id}/test-connection": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Probe an integration's connection + auth
-         * @description Pre-flight probe of an integration without invoking any specific endpoint. Exercises auth resolution end-to-end (SSM lookup, OAuth2 token mint, JWT signing) and sends a HEAD request to ``base_url`` (REST/FHIR) or to ``mcp_url`` (MCP sse/http). The most recent probe outcome is persisted on the integration so the UI can display a health badge without re-probing on every render. Safe to run on production integrations — HEAD requests carry no side effects. Requires `Integration.view` permission.
-         */
-        post: operations["test-integration-connection"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5711,27 +5606,9 @@ export interface paths {
         put?: never;
         /**
          * Run Simulation Benchmark
-         * @description Run a tag-selected benchmark batch as one saved-case run per case.
+         * @description Run a suite or tag-selected benchmark batch as one saved-case run per case.
          */
         post: operations["run-simulation-benchmark"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/simulations/branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Simulation Branches */
-        get: operations["list-simulation-branches"];
-        put?: never;
-        /** Create Simulation Branch */
-        post: operations["create-simulation-branch"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5827,10 +5704,18 @@ export interface paths {
         get: operations["get-simulation-case"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Simulation Case
+         * @description Delete one durable simulation case.
+         */
+        delete: operations["delete-simulation-case"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update Simulation Case
+         * @description Update editable fields on one durable simulation case.
+         */
+        patch: operations["update-simulation-case"];
         trace?: never;
     };
     "/v1/{workspace_id}/simulations/cases/{case_id}/run": {
@@ -6192,6 +6077,69 @@ export interface paths {
         get: operations["get-simulation-session-turns"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Simulation Suites
+         * @description List first-class simulation suites.
+         */
+        get: operations["list-simulation-suites"];
+        put?: never;
+        /**
+         * Create Simulation Suite
+         * @description Create a reusable suite definition for saved simulation cases.
+         */
+        post: operations["create-simulation-suite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites/{suite_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Simulation Suite */
+        get: operations["get-simulation-suite"];
+        put?: never;
+        post?: never;
+        /** Delete Simulation Suite */
+        delete: operations["delete-simulation-suite"];
+        options?: never;
+        head?: never;
+        /** Update Simulation Suite */
+        patch: operations["update-simulation-suite"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites/{suite_id}/run": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Run Simulation Suite
+         * @description Run a first-class suite definition.
+         */
+        post: operations["run-simulation-suite"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7590,9 +7538,8 @@ export interface components {
             /**
              * Status
              * @description Current escalation state
-             * @enum {string}
              */
-            status: "none" | "requested" | "connected" | "handback" | "completed";
+            status: string;
             /**
              * Trigger
              * @description What triggered the escalation
@@ -8086,184 +8033,6 @@ export interface components {
             total_events: number;
             /** Unique Actors */
             unique_actors: number;
-        };
-        /**
-         * AuthConfig
-         * @description Authentication configuration for an integration.
-         *
-         *     Supports api_key_header, bearer_token, oauth2_client_credentials,
-         *     json_token_exchange, oauth2_jwt_bearer, gcp_wif,
-         *     smart_backend_services, and bearer_token_exchange.
-         */
-        AuthConfig: {
-            /** Assertion Algorithm */
-            assertion_algorithm?: ("RS384" | "ES384") | null;
-            /** Assertion Audience */
-            assertion_audience?: string | null;
-            /** Assertion Issuer */
-            assertion_issuer?: string | null;
-            /** Assertion Kid */
-            assertion_kid?: string | null;
-            /**
-             * Assertion Scopes In Jwt
-             * @default false
-             */
-            assertion_scopes_in_jwt?: boolean;
-            /** Assertion Subject */
-            assertion_subject?: string | null;
-            /** Client Id */
-            client_id?: string | null;
-            /** Client Secret Ssm Param Path */
-            client_secret_ssm_param_path?: string | null;
-            /**
-             * Exchange Default Ttl Seconds
-             * @default 3600
-             */
-            exchange_default_ttl_seconds?: number;
-            /** Exchange Expires In Field */
-            exchange_expires_in_field?: string | null;
-            /** Exchange Param Headers */
-            exchange_param_headers?: components["schemas"]["ExchangeHeaderMapping"][];
-            /**
-             * Exchange Secret Format
-             * @default {secret}
-             */
-            exchange_secret_format?: string;
-            /**
-             * Exchange Secret Header
-             * @default X-API-KEY
-             */
-            exchange_secret_header?: string;
-            /** Exchange Secret Ssm Param Path */
-            exchange_secret_ssm_param_path?: string | null;
-            /**
-             * Exchange Token Field
-             * @default token
-             */
-            exchange_token_field?: string;
-            /** Exchange Url */
-            exchange_url?: string | null;
-            /** Gcp Scopes */
-            gcp_scopes?: string[] | null;
-            /** Header Name */
-            header_name?: string | null;
-            /** Private Key Ssm Param Path */
-            private_key_ssm_param_path?: string | null;
-            /** Scopes */
-            scopes?: string[] | null;
-            /** Ssm Param Path */
-            ssm_param_path?: string | null;
-            /**
-             * Token Lifetime Seconds
-             * @default 3600
-             */
-            token_lifetime_seconds?: number;
-            /** Token Request Client Id Field */
-            token_request_client_id_field?: string | null;
-            /** Token Request Client Secret Field */
-            token_request_client_secret_field?: string | null;
-            /** Token Response Path */
-            token_response_path?: string | null;
-            /** Token Ssm Param Path */
-            token_ssm_param_path?: string | null;
-            /** Token Url */
-            token_url?: string | null;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
-        };
-        /**
-         * AuthConfigWithSecrets
-         * @description AuthConfig that accepts inline secret values for auto-provisioning.
-         *
-         *     If provided, platform-api writes the value to SSM and replaces
-         *     the field with the generated ssm_param_path.
-         */
-        AuthConfigWithSecrets: {
-            api_key_value?: components["schemas"]["SecretInput"] | null;
-            /** Assertion Algorithm */
-            assertion_algorithm?: ("RS384" | "ES384") | null;
-            /** Assertion Audience */
-            assertion_audience?: string | null;
-            /** Assertion Issuer */
-            assertion_issuer?: string | null;
-            /** Assertion Kid */
-            assertion_kid?: string | null;
-            /**
-             * Assertion Scopes In Jwt
-             * @default false
-             */
-            assertion_scopes_in_jwt?: boolean;
-            /** Assertion Subject */
-            assertion_subject?: string | null;
-            bearer_token_value?: components["schemas"]["SecretInput"] | null;
-            /** Client Id */
-            client_id?: string | null;
-            /** Client Secret Ssm Param Path */
-            client_secret_ssm_param_path?: string | null;
-            client_secret_value?: components["schemas"]["SecretInput"] | null;
-            /**
-             * Exchange Default Ttl Seconds
-             * @default 3600
-             */
-            exchange_default_ttl_seconds?: number;
-            /** Exchange Expires In Field */
-            exchange_expires_in_field?: string | null;
-            /** Exchange Param Headers */
-            exchange_param_headers?: components["schemas"]["ExchangeHeaderMapping"][];
-            /**
-             * Exchange Secret Format
-             * @default {secret}
-             */
-            exchange_secret_format?: string;
-            /**
-             * Exchange Secret Header
-             * @default X-API-KEY
-             */
-            exchange_secret_header?: string;
-            /** Exchange Secret Ssm Param Path */
-            exchange_secret_ssm_param_path?: string | null;
-            exchange_secret_value?: components["schemas"]["SecretInput"] | null;
-            /**
-             * Exchange Token Field
-             * @default token
-             */
-            exchange_token_field?: string;
-            /** Exchange Url */
-            exchange_url?: string | null;
-            /** Gcp Scopes */
-            gcp_scopes?: string[] | null;
-            /** Header Name */
-            header_name?: string | null;
-            /** Private Key Ssm Param Path */
-            private_key_ssm_param_path?: string | null;
-            private_key_value?: components["schemas"]["SecretInput"] | null;
-            /** Scopes */
-            scopes?: string[] | null;
-            /** Ssm Param Path */
-            ssm_param_path?: string | null;
-            /**
-             * Token Lifetime Seconds
-             * @default 3600
-             */
-            token_lifetime_seconds?: number;
-            /** Token Request Client Id Field */
-            token_request_client_id_field?: string | null;
-            /** Token Request Client Secret Field */
-            token_request_client_secret_field?: string | null;
-            /** Token Response Path */
-            token_response_path?: string | null;
-            /** Token Ssm Param Path */
-            token_ssm_param_path?: string | null;
-            /** Token Url */
-            token_url?: string | null;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "api_key_header" | "bearer_token" | "oauth2_client_credentials" | "json_token_exchange" | "oauth2_jwt_bearer" | "gcp_wif" | "smart_backend_services" | "bearer_token_exchange";
         };
         /** AuthInfoResponse */
         AuthInfoResponse: {
@@ -8948,10 +8717,89 @@ export interface components {
             /** @description Tool usage statistics */
             tool_summary?: components["schemas"]["ToolSummary"] | null;
         };
-        /** CallIntelligenceMetricProjectionRequest */
+        /**
+         * CallIntelligenceMetricProjectionRequest
+         * @description Internal projection request for the shared terminal artifact.
+         */
         CallIntelligenceMetricProjectionRequest: {
+            /** Call Id */
+            call_id?: string | null;
             /** Call Sid */
             call_sid: string;
+            /**
+             * Channel Kind
+             * @default voice
+             */
+            channel_kind?: string;
+            /** Completion Reason */
+            completion_reason?: string | null;
+            /** Conversation Summary */
+            conversation_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Direction
+             * @enum {string}
+             */
+            direction: "inbound" | "outbound" | "playground" | "simulated" | "test";
+            /** Duration Seconds */
+            duration_seconds: number;
+            /** Emotion Summary */
+            emotion_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Final State
+             * @default
+             */
+            final_state?: string;
+            /** Latency Summary */
+            latency_summary?: {
+                [key: string]: unknown;
+            };
+            /** Operator Summary */
+            operator_summary?: {
+                [key: string]: unknown;
+            };
+            /** Quality Score */
+            quality_score: number;
+            /** Risk Summary */
+            risk_summary?: {
+                [key: string]: unknown;
+            };
+            /** Run Id */
+            run_id?: string | null;
+            /** Safety Summary */
+            safety_summary?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /** Simulation */
+            simulation?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "real" | "simulation" | "playground";
+            /** Tool Summary */
+            tool_summary?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** CallListResponse */
         CallListResponse: {
@@ -9067,7 +8915,7 @@ export interface components {
              * Escalation Status
              * @description Escalation state if any
              */
-            escalation_status?: ("none" | "requested" | "connected" | "handback" | "completed") | null;
+            escalation_status?: string | null;
             /**
              * Final State
              * @description Final conversation state
@@ -9410,7 +9258,7 @@ export interface components {
          * @description Delivery channels for surfaces.
          * @enum {string}
          */
-        ChannelType: "email" | "web";
+        ChannelType: "email" | "web" | "sms";
         /**
          * ChannelVoicemailStatusEvent
          * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
@@ -9436,97 +9284,6 @@ export interface components {
              * Format: uuid
              */
             voicemail_id: string;
-        };
-        /**
-         * CharlsonCategoryFlags
-         * @description Quan 2005 ICD-10 Charlson category flags (0/1).
-         */
-        CharlsonCategoryFlags: {
-            /**
-             * Any Malignancy
-             * @default 0
-             */
-            any_malignancy?: number;
-            /**
-             * Cerebrovascular Disease
-             * @default 0
-             */
-            cerebrovascular_disease?: number;
-            /**
-             * Chronic Pulmonary Disease
-             * @default 0
-             */
-            chronic_pulmonary_disease?: number;
-            /**
-             * Congestive Heart Failure
-             * @default 0
-             */
-            congestive_heart_failure?: number;
-            /**
-             * Dementia
-             * @default 0
-             */
-            dementia?: number;
-            /**
-             * Diabetes With Complication
-             * @default 0
-             */
-            diabetes_with_complication?: number;
-            /**
-             * Diabetes Without Complication
-             * @default 0
-             */
-            diabetes_without_complication?: number;
-            /**
-             * Hemiplegia Or Paraplegia
-             * @default 0
-             */
-            hemiplegia_or_paraplegia?: number;
-            /**
-             * Hiv Aids
-             * @default 0
-             */
-            hiv_aids?: number;
-            /**
-             * Metastatic Solid Tumor
-             * @default 0
-             */
-            metastatic_solid_tumor?: number;
-            /**
-             * Mild Liver Disease
-             * @default 0
-             */
-            mild_liver_disease?: number;
-            /**
-             * Moderate Severe Liver Disease
-             * @default 0
-             */
-            moderate_severe_liver_disease?: number;
-            /**
-             * Myocardial Infarction
-             * @default 0
-             */
-            myocardial_infarction?: number;
-            /**
-             * Peptic Ulcer Disease
-             * @default 0
-             */
-            peptic_ulcer_disease?: number;
-            /**
-             * Peripheral Vascular Disease
-             * @default 0
-             */
-            peripheral_vascular_disease?: number;
-            /**
-             * Renal Disease
-             * @default 0
-             */
-            renal_disease?: number;
-            /**
-             * Rheumatic Disease
-             * @default 0
-             */
-            rheumatic_disease?: number;
         };
         /** ChatRequest */
         ChatRequest: {
@@ -9677,60 +9434,6 @@ export interface components {
              * @description Specific improvement the agent should make
              */
             recommendation: string;
-        };
-        /** CohortDriverResponse */
-        CohortDriverResponse: {
-            /** Code */
-            code: string;
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["CohortDriverRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** CohortDriverRow */
-        CohortDriverRow: {
-            /** Age Bucket */
-            age_bucket: string;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Cohort Size */
-            cohort_size?: number | null;
-            /** Expected */
-            expected?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** Observed */
-            observed: number;
-            /** Spr */
-            spr?: number | null;
-            /** Spr Ci Lower */
-            spr_ci_lower?: number | null;
-            /** Spr Ci Upper */
-            spr_ci_upper?: number | null;
-            /** Workspace Baseline Rate */
-            workspace_baseline_rate?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-            /** Workspace Patients With Condition */
-            workspace_patients_with_condition?: number | null;
-            /** Workspace Population */
-            workspace_population?: number | null;
         };
         /**
          * CollectionField
@@ -9934,9 +9637,9 @@ export interface components {
             /** At */
             at?: string | null;
             /** Concept */
-            concept: string;
+            concept?: string | null;
             /** Similarity */
-            similarity: number;
+            similarity?: number | null;
         };
         /**
          * ConcurrentStartBlockParams
@@ -10416,7 +10119,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -10468,8 +10171,6 @@ export interface components {
             provider: components["schemas"]["ProviderType"];
             /** Provider Thread Id */
             provider_thread_id: string;
-            /** Reactivated */
-            reactivated: boolean;
             /** Service Id */
             service_id?: string | null;
             /**
@@ -10534,58 +10235,6 @@ export interface components {
              * @enum {string}
              */
             target: "production" | "staging";
-        };
-        /** CooccurrenceResponse */
-        CooccurrenceResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["CooccurrenceRow"][];
-            /** Sort By */
-            sort_by: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** CooccurrenceRow */
-        CooccurrenceRow: {
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Chi Square */
-            chi_square?: number | null;
-            /** Code A */
-            code_a: string;
-            /** Code A Display */
-            code_a_display?: string | null;
-            /** Code B */
-            code_b: string;
-            /** Code B Display */
-            code_b_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Expected Both */
-            expected_both?: number | null;
-            /** Jaccard */
-            jaccard?: number | null;
-            /** Lift */
-            lift?: number | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** N Patients A */
-            n_patients_a?: number | null;
-            /** N Patients B */
-            n_patients_b?: number | null;
-            /** N Patients Both */
-            n_patients_both: number;
-            /** Pmi */
-            pmi?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /**
          * CorrectRequest
@@ -10702,19 +10351,6 @@ export interface components {
             /** Role */
             role: string;
         };
-        /** CreateBranchRequest */
-        CreateBranchRequest: {
-            /**
-             * Source
-             * @default staging
-             */
-            source?: string;
-            /**
-             * Ttl Seconds
-             * @default 3600
-             */
-            ttl_seconds?: number;
-        };
         /** CreateContextGraphRequest */
         CreateContextGraphRequest: {
             /** @default  */
@@ -10830,49 +10466,6 @@ export interface components {
              * @enum {string}
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
-        };
-        /** CreateIntegrationRequest */
-        CreateIntegrationRequest: {
-            auth?: components["schemas"]["AuthConfigWithSecrets"] | null;
-            /**
-             * Base Url
-             * @default
-             */
-            base_url?: string;
-            display_name: components["schemas"]["NameString"];
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /**
-             * Endpoints
-             * @default []
-             */
-            endpoints?: components["schemas"]["EndpointConfig-Input"][];
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
-            /**
-             * Name
-             * @description Slug-like identifier, lowercase alphanumeric + hyphens/underscores.
-             */
-            name: string;
-            /**
-             * Protocol
-             * @default rest
-             * @enum {string}
-             */
-            protocol?: "rest" | "fhir" | "mcp";
         };
         /** CreateLinkRequest */
         CreateLinkRequest: {
@@ -11132,43 +10725,24 @@ export interface components {
          * @description One durable simulation case to create.
          */
         CreateSimulationCaseItem: {
-            /** Assertions */
-            assertions?: {
-                [key: string]: unknown;
-            }[];
-            /** Constraints */
-            constraints?: {
-                [key: string]: unknown;
-            };
             /** Description */
             description: string;
-            /** Fixtures */
-            fixtures?: {
+            /** Evals */
+            evals?: (components["schemas"]["SimulationCaseMetricEval"] | components["schemas"]["SimulationCaseAssertionEval"])[];
+            grounding?: components["schemas"]["SimulationCaseGrounding"];
+            /** Metadata */
+            metadata?: {
                 [key: string]: unknown;
             };
-            /** Initial Message */
-            initial_message: string;
             /** Persona */
             persona?: {
                 [key: string]: unknown;
             };
-            /**
-             * Provenance
-             * @default manual
-             */
-            provenance?: string;
-            /** Scenario Instructions */
-            scenario_instructions: string;
+            scenario: components["schemas"]["SimulationCaseScenario"];
             /** Service Id */
             service_id?: string | null;
             /** Tags */
             tags?: string[];
-            /** Target Spec */
-            target_spec?: {
-                [key: string]: unknown;
-            };
-            /** Temperament */
-            temperament?: string | null;
         };
         /** CreateSimulationCasesRequest */
         CreateSimulationCasesRequest: {
@@ -11179,6 +10753,26 @@ export interface components {
         CreateSimulationCasesResponse: {
             /** Cases */
             cases: components["schemas"]["SimulationCaseResponse"][];
+        };
+        /** CreateSimulationSuiteRequest */
+        CreateSimulationSuiteRequest: {
+            /** Case Ids */
+            case_ids?: string[];
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+            /** Required Tags */
+            required_tags?: string[];
+            /** Tags */
+            tags?: string[];
         };
         /** CreateSkillRequest */
         CreateSkillRequest: {
@@ -11192,12 +10786,6 @@ export interface components {
              * @default true
              */
             checkpoint_enabled?: boolean;
-            /**
-             * Delivery
-             * @default interrupt
-             * @enum {string}
-             */
-            delivery?: "interrupt" | "queue";
             description: components["schemas"]["DescriptionString"];
             /**
              * Enable Caching
@@ -11219,7 +10807,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "computer_use";
+            execution_tier?: "orchestrated" | "computer_use";
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -11265,8 +10853,6 @@ export interface components {
              * @default 60
              */
             timeout_s?: number;
-            /** Urgency Keywords */
-            urgency_keywords?: string[];
             /**
              * Use Structured Output
              * @default false
@@ -11404,6 +10990,114 @@ export interface components {
             environment: "production" | "staging" | "development";
             name: components["schemas"]["StrippedNonemptyString"];
             slug: components["schemas"]["SlugString"];
+        };
+        /**
+         * CustomTokenExchangeAuthDict
+         * @description Pre-flight exchange that mints a downstream bearer.
+         *
+         *     Replaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.
+         *     Downstream call always receives ``Authorization: Bearer {token}``. No
+         *     in-process caching — every call mints fresh.
+         */
+        CustomTokenExchangeAuthDict: {
+            /**
+             * Body Encoding
+             * @enum {string}
+             */
+            body_encoding: "json" | "form";
+            /** Exchange Url */
+            exchange_url: string;
+            /** Param Body Fields */
+            param_body_fields: {
+                [key: string]: components["schemas"]["ParamValueDict"];
+            };
+            /** Param Headers */
+            param_headers: {
+                [key: string]: components["schemas"]["ParamValueDict"];
+            };
+            /** Response Token Path */
+            response_token_path: string;
+            /** Static Body Fields */
+            static_body_fields: {
+                [key: string]: string;
+            };
+            /** Static Headers */
+            static_headers: {
+                [key: string]: string;
+            };
+            /**
+             * Type
+             * @constant
+             */
+            type: "custom_token_exchange";
+        };
+        /**
+         * CustomTokenExchangeAuthRequest
+         * @description Pre-flight exchange that mints a downstream bearer.
+         *
+         *     Replaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.
+         *     Path-shaped fields (``response_token_path``, ``static_body_fields`` keys,
+         *     ``param_body_fields`` keys) MUST be valid RFC 6901 JSON Pointer — one
+         *     syntax throughout.
+         */
+        CustomTokenExchangeAuthRequest: {
+            /**
+             * Body Encoding
+             * @description ``json`` (default) sends static_body_fields + param_body_fields as JSON; ``form`` sends as application/x-www-form-urlencoded.
+             * @default json
+             * @enum {string}
+             */
+            body_encoding?: "json" | "form";
+            /**
+             * Exchange Url
+             * Format: uri
+             */
+            exchange_url: string;
+            /**
+             * Param Body Fields
+             * @description Per-request params routed to body fields on the exchange request, keyed by RFC 6901 JSON Pointer.
+             * @default {}
+             */
+            param_body_fields?: {
+                [key: string]: components["schemas"]["ParamValueRequest"];
+            };
+            /**
+             * Param Headers
+             * @description Per-request params routed to headers on the exchange request, keyed by wire-name.
+             * @default {}
+             */
+            param_headers?: {
+                [key: string]: components["schemas"]["ParamValueRequest"];
+            };
+            /**
+             * Response Token Path
+             * @description RFC 6901 JSON Pointer into the exchange response body that extracts the bearer token
+             *     (e.g. ``/access_token`` or ``/data/bearer``). NO default — every config commits explicitly.
+             */
+            response_token_path: string;
+            /**
+             * Static Body Fields
+             * @description Workspace-level body fields keyed by RFC 6901 JSON Pointer (e.g. ``/meta/tool_name``
+             *     for nested fields, or ``/foo`` for a root-level field). Values may contain ``{secret}``
+             *     placeholder.
+             * @default {}
+             */
+            static_body_fields?: {
+                [key: string]: string;
+            };
+            /**
+             * Static Headers
+             * @description Workspace-level headers on the exchange request (keys are RFC 7230 tchar). Values may contain ``{secret}`` placeholder.
+             * @default {}
+             */
+            static_headers?: {
+                [key: string]: string;
+            };
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "custom_token_exchange";
         };
         /**
          * CustomerAddress
@@ -12178,6 +11872,93 @@ export interface components {
             url?: string | null;
         };
         DescriptionString: string;
+        /**
+         * DesktopIntegrationResponse
+         * @description Desktop variant — Computer Use connection fields. System-provisioned.
+         */
+        DesktopIntegrationResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the integration was created.
+             */
+            created_at: string;
+            /** Desktop Allowed Domains */
+            desktop_allowed_domains: string[];
+            /** Desktop Display Height */
+            desktop_display_height: number;
+            /** Desktop Display Width */
+            desktop_display_width: number;
+            /** Desktop Gateway Host */
+            desktop_gateway_host: string | null;
+            /** Desktop Gateway Password Ssm Path */
+            desktop_gateway_password_ssm_path: string | null;
+            /** Desktop Gateway User Ssm Path */
+            desktop_gateway_user_ssm_path: string | null;
+            /** Desktop Host */
+            desktop_host: string | null;
+            /** Desktop Load Balance Info */
+            desktop_load_balance_info: string | null;
+            /** Desktop Password Ssm Path */
+            desktop_password_ssm_path: string | null;
+            /** Desktop Port */
+            desktop_port: number | null;
+            /** Desktop Rdp File */
+            desktop_rdp_file: string | null;
+            /** Desktop Remote App */
+            desktop_remote_app: string | null;
+            /** Desktop Remote App Cmd */
+            desktop_remote_app_cmd: string | null;
+            /** Desktop Security */
+            desktop_security: ("nla" | "tls" | "rdp") | null;
+            /** Desktop Start Url */
+            desktop_start_url: string | null;
+            /**
+             * Desktop Type
+             * @enum {string}
+             */
+            desktop_type: "rdp" | "vnc" | "browser";
+            /** Desktop Username Ssm Path */
+            desktop_username_ssm_path: string | null;
+            /**
+             * Display Name
+             * @description Human-readable name.
+             */
+            display_name: string;
+            /**
+             * Enabled
+             * @description Whether the integration is active.
+             */
+            enabled: boolean;
+            /**
+             * Id
+             * Format: uuid
+             * @description Integration ID.
+             */
+            id: string;
+            /**
+             * @description Discriminator. (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            kind: "desktop";
+            /**
+             * Name
+             * @description Slug-like identifier, immutable post-create.
+             */
+            name: string;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the integration was last updated.
+             */
+            updated_at: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace ID.
+             */
+            workspace_id: string;
+        };
         /** DestroySessionResponse */
         DestroySessionResponse: {
             /**
@@ -12403,13 +12184,6 @@ export interface components {
              */
             setup_id: string;
         };
-        /** EmotionBurst */
-        EmotionBurst: {
-            /** Score */
-            score: number;
-            /** Type */
-            type: string;
-        };
         /** EmotionEvent */
         EmotionEvent: {
             /** Arousal */
@@ -12458,11 +12232,6 @@ export interface components {
              * @default null
              */
             provider?: string | null;
-            /**
-             * Recent Bursts
-             * @default null
-             */
-            recent_bursts?: components["schemas"]["EmotionBurst"][] | null;
             /**
              * Scores
              * @default null
@@ -12666,154 +12435,94 @@ export interface components {
             session_id: string;
         };
         /**
-         * EndpointConfig
-         * @description Configuration for a single integration endpoint.
+         * EndpointResponse
+         * @description Per-endpoint response (V186 flat shape).
          */
-        "EndpointConfig-Input": {
-            auth?: components["schemas"]["AuthConfig"] | null;
-            /** Base Url */
-            base_url?: string | null;
+        EndpointResponse: {
             /**
              * Body Format
+             * @description Outbound body encoding.
              * @default json
              * @enum {string}
              */
             body_format?: "json" | "form";
-            /** Description */
+            /**
+             * Description
+             * @description LLM-facing description.
+             */
             description: string;
             /**
              * Headers
-             * @default {}
+             * @description Static request headers.
              */
             headers?: {
                 [key: string]: string;
             };
             /**
+             * Id
+             * Format: uuid
+             * @description Endpoint ID — stable, used in subsequent GET/PATCH/DELETE/test URLs.
+             */
+            id: string;
+            /**
              * Input Schema
-             * @default {}
+             * @description JSON Schema for the tool's input arguments.
              */
             input_schema?: {
                 [key: string]: unknown;
             };
             /**
-             * Max Result Length
+             * Max Response Length
+             * @description Truncate the final rendered string to this many chars.
              * @default 0
              */
-            max_result_length?: number;
+            max_response_length?: number;
+            /**
+             * Max Retries
+             * @description Retry attempts on transient failures.
+             * @default 2
+             */
+            max_retries?: number;
             /**
              * Method
-             * @default POST
+             * @description HTTP method.
              * @enum {string}
              */
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-            /** Name */
+            method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /**
+             * Name
+             * @description Slug-like identifier. Unique per integration; immutable post-create.
+             */
             name: string;
-            /** Path */
+            /**
+             * Path
+             * @description URL path appended to the integration's base_url.
+             */
             path: string;
-            request_transform?: components["schemas"]["RequestTransform"] | null;
-            /** Response Filter */
-            response_filter?: string[] | null;
-            /** Response Mapping */
-            response_mapping?: {
-                [key: string]: string;
-            } | null;
             /**
-             * Result Delivery
-             * @default interrupt
-             * @enum {string}
+             * Response Template
+             * @description Jinja template rendered against the parsed JSON response.
              */
-            result_delivery?: "interrupt" | "queue";
-            /** Result Key */
-            result_key?: string | null;
-            /** Result Template */
-            result_template?: string | null;
+            response_template?: string | null;
             /**
-             * @default {
-             *       "max_retries": 2,
-             *       "retry_on_status": [
-             *         429,
-             *         502,
-             *         503,
-             *         504
-             *       ]
-             *     }
+             * Retry On Status
+             * @description HTTP status codes that trigger a retry.
              */
-            retry_config?: components["schemas"]["RetryConfig"];
-        };
-        /**
-         * EndpointConfig
-         * @description Configuration for a single integration endpoint.
-         */
-        "EndpointConfig-Output": {
-            auth?: components["schemas"]["AuthConfig"] | null;
-            /** Base Url */
-            base_url?: string | null;
+            retry_on_status?: number[];
             /**
-             * Body Format
-             * @default json
-             * @enum {string}
+             * Static Body Fields
+             * @description Static body fields merged into every request. Keys are RFC 6901 JSON Pointers
+             *     (e.g. ``/meta/tool_name`` for nested, ``/foo`` for a root-level field).
              */
-            body_format?: "json" | "form";
-            /** Description */
-            description: string;
-            /**
-             * Headers
-             * @default {}
-             */
-            headers?: {
+            static_body_fields?: {
                 [key: string]: string;
             };
             /**
-             * Input Schema
-             * @default {}
+             * Timeout Seconds
+             * @description Per-request timeout.
+             * @default 30
              */
-            input_schema?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Max Result Length
-             * @default 0
-             */
-            max_result_length?: number;
-            /**
-             * Method
-             * @default POST
-             * @enum {string}
-             */
-            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-            /** Name */
-            name: string;
-            /** Path */
-            path: string;
-            request_transform?: components["schemas"]["RequestTransform"] | null;
-            /** Response Filter */
-            response_filter?: string[] | null;
-            /** Response Mapping */
-            response_mapping?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * Result Delivery
-             * @default interrupt
-             * @enum {string}
-             */
-            result_delivery?: "interrupt" | "queue";
-            /** Result Key */
-            result_key?: string | null;
-            /** Result Template */
-            result_template?: string | null;
-            /**
-             * @default {
-             *       "max_retries": 2,
-             *       "retry_on_status": [
-             *         429,
-             *         502,
-             *         503,
-             *         504
-             *       ]
-             *     }
-             */
-            retry_config?: components["schemas"]["RetryConfig"];
+            timeout_seconds?: number;
         };
         /** EnrichmentHistoryEntry */
         EnrichmentHistoryEntry: {
@@ -13698,9 +13407,9 @@ export interface components {
             similarity?: number | null;
             /**
              * Status
-             * @enum {string}
+             * @default none
              */
-            status: "none" | "requested" | "connected" | "handback" | "completed";
+            status?: string;
             /** Trigger */
             trigger?: string | null;
             /** Trigger Source */
@@ -13841,35 +13550,6 @@ export interface components {
             event_type: string;
             /** Sources */
             sources: string[];
-        };
-        /**
-         * ExchangeHeaderMapping
-         * @description One header on a token-exchange request, sourced from a request param.
-         *
-         *     Used by ``bearer_token_exchange`` auth type. Each mapping declares which
-         *     request param feeds which exchange-call header. The same param values
-         *     also form the per-call cache key, so distinct (e.g.) user_ids yield
-         *     distinct cached tokens.
-         *
-         *     Examples:
-         *         ``ExchangeHeaderMapping(header_name="X-USER-ID", param_name="user_id")``
-         *         ``ExchangeHeaderMapping(header_name="X-Org-ID", param_name="org_id")``
-         */
-        ExchangeHeaderMapping: {
-            /**
-             * Consume
-             * @default true
-             */
-            consume?: boolean;
-            /** Header Name */
-            header_name: string;
-            /** Param Name */
-            param_name: string;
-            /**
-             * Required
-             * @default true
-             */
-            required?: boolean;
         };
         /** ExecutePanelRequest */
         ExecutePanelRequest: {
@@ -15336,110 +15016,6 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
         };
-        /** IntegrationResponse */
-        IntegrationResponse: {
-            /** @description Authentication configuration */
-            auth?: components["schemas"]["AuthConfig"] | null;
-            /**
-             * Base Url
-             * @description Base URL for REST/FHIR integrations
-             * @default
-             */
-            base_url?: string;
-            /**
-             * Builtin
-             * @description Whether this is a system-provided integration
-             * @default false
-             */
-            builtin?: boolean;
-            /**
-             * Created At
-             * Format: date-time
-             * @description When the integration was created
-             */
-            created_at: string;
-            /**
-             * Display Name
-             * @description Human-readable name
-             */
-            display_name: string;
-            /**
-             * Enabled
-             * @description Whether the integration is active
-             */
-            enabled: boolean;
-            /**
-             * Endpoints
-             * @description Configured endpoints
-             */
-            endpoints?: components["schemas"]["EndpointConfig-Output"][];
-            /**
-             * Id
-             * Format: uuid
-             * @description Integration ID
-             */
-            id: string;
-            /**
-             * Last Test Status
-             * @description Status of the most recent connection probe. ``None`` if never tested.
-             */
-            last_test_status?: ("healthy" | "auth_failed" | "unreachable" | "timeout" | "ssl_error" | "misconfigured") | null;
-            /**
-             * Last Tested At
-             * @description When this integration was last successfully or unsuccessfully tested (server UTC).
-             */
-            last_tested_at?: string | null;
-            /**
-             * Mcp Args
-             * @description MCP stdio command arguments
-             */
-            mcp_args?: string[] | null;
-            /**
-             * Mcp Command
-             * @description MCP stdio command
-             */
-            mcp_command?: string | null;
-            /**
-             * Mcp Headers
-             * @description MCP request headers
-             */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /**
-             * Mcp Transport
-             * @description MCP transport type
-             */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /**
-             * Mcp Url
-             * @description MCP server URL (SSE/HTTP)
-             */
-            mcp_url?: string | null;
-            /**
-             * Name
-             * @description Slug-like identifier
-             */
-            name: string;
-            /**
-             * Protocol
-             * @description Communication protocol
-             * @enum {string}
-             */
-            protocol: "rest" | "fhir" | "mcp" | "desktop";
-            /**
-             * Updated At
-             * Format: date-time
-             * @description When the integration was last updated
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             * @description Workspace ID
-             */
-            workspace_id: string;
-        };
         /**
          * IntegrationToolRef
          * @description Reference to an integration endpoint by integration + endpoint name.
@@ -15477,21 +15053,96 @@ export interface components {
             turn_taking_quality?: string | null;
         };
         /**
-         * InternalIntegrationResponse
-         * @description Wire format matching platform_lib.integrations.models.IntegrationConfig.
+         * InternalDesktopIntegrationItem
+         * @description Wire format for desktop integrations consumed by agent-engine.
          */
-        InternalIntegrationResponse: {
-            auth?: components["schemas"]["AuthConfig"] | null;
+        InternalDesktopIntegrationItem: {
             /**
-             * Base Url
-             * @default
+             * Desktop Allowed Domains
+             * @default []
              */
-            base_url?: string;
+            desktop_allowed_domains?: string[];
             /**
-             * Builtin
-             * @default false
+             * Desktop Display Height
+             * @default 768
              */
-            builtin?: boolean;
+            desktop_display_height?: number;
+            /**
+             * Desktop Display Width
+             * @default 1024
+             */
+            desktop_display_width?: number;
+            /** Desktop Gateway Host */
+            desktop_gateway_host?: string | null;
+            /** Desktop Gateway Password Ssm Path */
+            desktop_gateway_password_ssm_path?: string | null;
+            /** Desktop Gateway User Ssm Path */
+            desktop_gateway_user_ssm_path?: string | null;
+            /** Desktop Host */
+            desktop_host?: string | null;
+            /** Desktop Load Balance Info */
+            desktop_load_balance_info?: string | null;
+            /** Desktop Password Ssm Path */
+            desktop_password_ssm_path?: string | null;
+            /** Desktop Port */
+            desktop_port?: number | null;
+            /** Desktop Rdp File */
+            desktop_rdp_file?: string | null;
+            /** Desktop Remote App */
+            desktop_remote_app?: string | null;
+            /** Desktop Remote App Cmd */
+            desktop_remote_app_cmd?: string | null;
+            /** Desktop Security */
+            desktop_security?: ("nla" | "tls" | "rdp") | null;
+            /** Desktop Start Url */
+            desktop_start_url?: string | null;
+            /**
+             * Desktop Type
+             * @enum {string}
+             */
+            desktop_type: "rdp" | "vnc" | "browser";
+            /** Desktop Username Ssm Path */
+            desktop_username_ssm_path?: string | null;
+            /** Display Name */
+            display_name: string;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled?: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Kind
+             * @default desktop
+             * @constant
+             */
+            kind?: "desktop";
+            /** Name */
+            name: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** InternalIntegrationsListResponse */
+        InternalIntegrationsListResponse: {
+            /** Items */
+            items: (components["schemas"]["InternalRestIntegrationItem"] | components["schemas"]["InternalDesktopIntegrationItem"])[];
+        };
+        /**
+         * InternalRestIntegrationItem
+         * @description Wire format for REST integrations consumed by agent-engine.
+         */
+        InternalRestIntegrationItem: {
+            /** Auth */
+            auth?: components["schemas"]["StaticHeaderAuthDict"] | components["schemas"]["OAuth2ClientCredentialsAuthDict"] | components["schemas"]["OAuth2JwtBearerAuthDict"] | components["schemas"]["CustomTokenExchangeAuthDict"] | null;
+            /** Base Url */
+            base_url: string;
             /** Display Name */
             display_name: string;
             /**
@@ -15503,41 +15154,25 @@ export interface components {
              * Endpoints
              * @default []
              */
-            endpoints?: components["schemas"]["EndpointConfig-Output"][];
+            endpoints?: components["schemas"]["EndpointResponse"][];
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: string | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
+            /**
+             * Kind
+             * @default rest
+             * @constant
+             */
+            kind?: "rest";
             /** Name */
             name: string;
-            /**
-             * Protocol
-             * @default rest
-             */
-            protocol?: string;
             /**
              * Workspace Id
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** InternalIntegrationsListResponse */
-        InternalIntegrationsListResponse: {
-            /** Items */
-            items: components["schemas"]["InternalIntegrationResponse"][];
         };
         /**
          * InternalServiceConfigResponse
@@ -15560,12 +15195,6 @@ export interface components {
              * @default true
              */
             checkpoint_enabled?: boolean;
-            /**
-             * Delivery
-             * @default interrupt
-             * @enum {string}
-             */
-            delivery?: "interrupt" | "queue";
             /** Description */
             description: string;
             /**
@@ -15588,7 +15217,7 @@ export interface components {
              * @default orchestrated
              * @enum {string}
              */
-            execution_tier?: "direct" | "orchestrated" | "computer_use";
+            execution_tier?: "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -15653,11 +15282,6 @@ export interface components {
              * @default 60
              */
             timeout_s?: number;
-            /**
-             * Urgency Keywords
-             * @default []
-             */
-            urgency_keywords?: string[];
             /**
              * Use Structured Output
              * @default false
@@ -16145,6 +15769,11 @@ export interface components {
              */
             max_upload_bytes: number;
         };
+        /** ListSimulationSuitesResponse */
+        ListSimulationSuitesResponse: {
+            /** Suites */
+            suites: components["schemas"]["SimulationSuiteResponse"][];
+        };
         /**
          * LookupResponse
          * @description Autocompletion results for a surface lookup field.
@@ -16512,7 +16141,7 @@ export interface components {
              * @default static
              * @enum {string}
              */
-            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_sentiment" | "ai_query" | "sql_expr";
+            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_query" | "sql_expr";
             /**
              * Granularity
              * @default aggregate
@@ -16657,11 +16286,11 @@ export interface components {
             extract_path?: string | null;
             /**
              * Extraction Mode
-             * @description 'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_sentiment' — AI sentiment analysis (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.
+             * @description 'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.
              * @default static
              * @enum {string}
              */
-            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_sentiment" | "ai_query" | "sql_expr";
+            extraction_mode?: "static" | "ai_classify" | "ai_extract" | "ai_query" | "sql_expr";
             /**
              * Freshness Sla Minutes
              * @description Max acceptable staleness in minutes before alerting. Default: 60 (1 hour).
@@ -16699,7 +16328,7 @@ export interface components {
             metric_type: "numerical" | "categorical" | "boolean";
             /**
              * Model Tier
-             * @description AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract, ai_sentiment). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.
+             * @description AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.
              * @default free
              * @enum {string}
              */
@@ -17028,6 +16657,172 @@ export interface components {
             unit?: string | null;
             /** Value */
             value: number | null;
+        };
+        /**
+         * OAuth2ClientCredentialsAuthDict
+         * @description OAuth 2.0 Client Credentials Grant — RFC 6749 § 4.4.
+         */
+        OAuth2ClientCredentialsAuthDict: {
+            /**
+             * Client Auth Method
+             * @enum {string}
+             */
+            client_auth_method: "basic" | "body";
+            /** Client Id */
+            client_id: string;
+            /** Scopes */
+            scopes: string[] | null;
+            /** Token Url */
+            token_url: string;
+            /**
+             * Type
+             * @constant
+             */
+            type: "oauth2_client_credentials";
+        };
+        /**
+         * OAuth2ClientCredentialsAuthRequest
+         * @description OAuth 2.0 Client Credentials Grant — RFC 6749 § 4.4.
+         *
+         *     Strict RFC 6749 § 4.4.2 access token request: ``grant_type`` + optional
+         *     ``scope``. Client authentication (RFC 6749 § 2.3.1) is orthogonal —
+         *     ``client_auth_method`` picks between HTTP Basic auth and form-body
+         *     credentials. RFC 8707 ``resource`` and non-standard ``audience`` extensions
+         *     are NOT supported here — add them back when a vendor needs one.
+         */
+        OAuth2ClientCredentialsAuthRequest: {
+            /**
+             * Client Auth Method
+             * @description RFC 6749 § 2.3.1: ``basic`` sends client_id+secret as HTTP Basic auth; ``body`` sends them in the form body.
+             * @default basic
+             * @enum {string}
+             */
+            client_auth_method?: "basic" | "body";
+            /** Client Id */
+            client_id: string;
+            /** Scopes */
+            scopes?: string[] | null;
+            /**
+             * Token Url
+             * Format: uri
+             */
+            token_url: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "oauth2_client_credentials";
+        };
+        /**
+         * OAuth2JwtBearerAuthDict
+         * @description OAuth 2.0 JWT Bearer Token Grant — RFC 7523 § 2.1.
+         */
+        OAuth2JwtBearerAuthDict: {
+            /**
+             * Assertion Algorithm
+             * @enum {string}
+             */
+            assertion_algorithm: "RS256" | "RS384" | "RS512" | "PS256" | "PS384" | "PS512" | "ES256" | "ES384" | "ES512";
+            /** Assertion Audience */
+            assertion_audience: string;
+            /** Assertion Issuer */
+            assertion_issuer: string;
+            /** Assertion Lifetime Seconds */
+            assertion_lifetime_seconds: number;
+            /** Assertion Subject */
+            assertion_subject: string;
+            /** Extra Claims */
+            extra_claims: {
+                [key: string]: unknown;
+            };
+            /** Include Iat */
+            include_iat: boolean;
+            /** Include Jti */
+            include_jti: boolean;
+            /** Scopes */
+            scopes: string[] | null;
+            /** Token Url */
+            token_url: string;
+            /**
+             * Type
+             * @constant
+             */
+            type: "oauth2_jwt_bearer";
+        };
+        /**
+         * OAuth2JwtBearerAuthRequest
+         * @description OAuth 2.0 JWT Bearer Token Grant — RFC 7523 § 2.1.
+         */
+        OAuth2JwtBearerAuthRequest: {
+            /**
+             * Assertion Algorithm
+             * @default RS256
+             * @enum {string}
+             */
+            assertion_algorithm?: "RS256" | "RS384" | "RS512" | "PS256" | "PS384" | "PS512" | "ES256" | "ES384" | "ES512";
+            /**
+             * Assertion Audience
+             * @description RFC 7523 ``aud`` claim — typically the token_url.
+             */
+            assertion_audience: string;
+            /**
+             * Assertion Issuer
+             * @description RFC 7523 ``iss`` claim — typically the service-account email or client_id.
+             */
+            assertion_issuer: string;
+            /**
+             * Assertion Lifetime Seconds
+             * @default 3600
+             */
+            assertion_lifetime_seconds?: number;
+            /**
+             * Assertion Subject
+             * @description RFC 7523 § 3 ``sub`` claim — MUST be present. For service-account flows
+             *     where the client is its own subject, set to the same value as ``assertion_issuer``.
+             *     Use a different value only for delegation / impersonation grants.
+             */
+            assertion_subject: string;
+            /**
+             * Extra Claims
+             * @description RFC 7523 § 3 item 8 — arbitrary additional JWT claims (e.g. Google's
+             *     ``scope`` claim, Azure's tenant claim). Merged BEFORE the required claims so
+             *     IdP-specific extensions can't override ``iss`` / ``sub`` / ``aud`` / ``exp`` /
+             *     ``iat`` / ``nbf`` / ``jti``.
+             * @default {}
+             */
+            extra_claims?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Include Iat
+             * @description RFC 7523 § 3 item 6 — ``iat`` claim set to mint time. Most IdPs (Google, Azure)
+             *     require it for anti-replay; leave True unless a specific vendor rejects it.
+             * @default true
+             */
+            include_iat?: boolean;
+            /**
+             * Include Jti
+             * @description When True, generate a fresh ``jti`` (anti-replay) on every mint.
+             * @default true
+             */
+            include_jti?: boolean;
+            /**
+             * Scopes
+             * @description RFC 7523 § 2.1 ``scope`` form-body parameter. Vendors that put scopes inside
+             *     the JWT instead (Google service accounts) use ``extra_claims = {"scope": "..."}``
+             *     and leave this empty.
+             */
+            scopes?: string[] | null;
+            /**
+             * Token Url
+             * Format: uri
+             */
+            token_url: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "oauth2_jwt_bearer";
         };
         ObserverSSEEvent: components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
         /** OcrRequest */
@@ -17706,17 +17501,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[IntegrationResponse] */
-        PaginatedResponse_IntegrationResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["IntegrationResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[InvoiceItem] */
         PaginatedResponse_InvoiceItem_: {
             /** Continuation Token */
@@ -17905,6 +17689,32 @@ export interface components {
              */
             rows: unknown[][];
         };
+        /**
+         * ParamValueDict
+         * @description Routing target for one per-request parameter on the exchange call.
+         *
+         *     Paired with a wire-name (header / body-field key) on
+         *     ``CustomTokenExchangeAuthDict.param_headers`` / ``param_body_fields``.
+         */
+        ParamValueDict: {
+            /** Description */
+            description: string;
+            /** Param Name */
+            param_name: string;
+        };
+        /**
+         * ParamValueRequest
+         * @description Routing target for a single per-request parameter on the exchange call.
+         *
+         *     Paired with a wire-name (header / body-field key) on
+         *     ``CustomTokenExchangeAuthRequest.param_headers`` / ``param_body_fields``.
+         */
+        ParamValueRequest: {
+            /** Description */
+            description: string;
+            /** Param Name */
+            param_name: string;
+        };
         /** Participant */
         Participant: {
             /** Display Name */
@@ -17994,111 +17804,6 @@ export interface components {
              * @enum {string}
              */
             type: "participant_left";
-        };
-        /** PatientBurdenDetailResponse */
-        PatientBurdenDetailResponse: {
-            /** Age Adjusted Charlson Index */
-            age_adjusted_charlson_index: number;
-            /** Age Bucket Now */
-            age_bucket_now?: string | null;
-            /** Age Cci Points */
-            age_cci_points: number;
-            /** Age Now */
-            age_now?: number | null;
-            /** As Of Date */
-            as_of_date?: string | null;
-            charlson_flags: components["schemas"]["CharlsonCategoryFlags"];
-            /** Charlson Index */
-            charlson_index: number;
-            /** Days Since Most Recent Onset */
-            days_since_most_recent_onset?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Most Recent Active Onset Date */
-            most_recent_active_onset_date?: string | null;
-            /** N Active Conditions */
-            n_active_conditions: number;
-            /** N Distinct Code Systems */
-            n_distinct_code_systems?: number | null;
-            /** N Distinct Codes */
-            n_distinct_codes?: number | null;
-            /** N Lifetime Condition Records */
-            n_lifetime_condition_records?: number | null;
-            /** N Lifetime Distinct Codes */
-            n_lifetime_distinct_codes?: number | null;
-            /** Oldest Active Onset Date */
-            oldest_active_onset_date?: string | null;
-            /**
-             * Patient Entity Id
-             * Format: uuid
-             */
-            patient_entity_id: string;
-            /** Recent Onset Count 365D */
-            recent_onset_count_365d?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PatientBurdenResponse */
-        PatientBurdenResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["PatientBurdenRow"][];
-            /** Sort By */
-            sort_by: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PatientBurdenRow */
-        PatientBurdenRow: {
-            /** Age Adjusted Charlson Index */
-            age_adjusted_charlson_index: number;
-            /** Age Bucket Now */
-            age_bucket_now?: string | null;
-            /** Age Cci Points */
-            age_cci_points: number;
-            /** Age Now */
-            age_now?: number | null;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Charlson Index */
-            charlson_index: number;
-            /** Days Since Most Recent Onset */
-            days_since_most_recent_onset?: number | null;
-            /** Gender */
-            gender?: string | null;
-            /** Most Recent Active Onset Date */
-            most_recent_active_onset_date?: string | null;
-            /** N Active Conditions */
-            n_active_conditions: number;
-            /** N Distinct Code Systems */
-            n_distinct_code_systems?: number | null;
-            /** N Distinct Codes */
-            n_distinct_codes?: number | null;
-            /** N Lifetime Condition Records */
-            n_lifetime_condition_records?: number | null;
-            /** N Lifetime Distinct Codes */
-            n_lifetime_distinct_codes?: number | null;
-            /** Oldest Active Onset Date */
-            oldest_active_onset_date?: string | null;
-            /**
-             * Patient Entity Id
-             * Format: uuid
-             */
-            patient_entity_id: string;
-            /** Recent Onset Count 365D */
-            recent_onset_count_365d?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** PatientLabRow */
         PatientLabRow: {
@@ -18692,50 +18397,6 @@ export interface components {
             };
             /** Tool Id */
             tool_id: string;
-        };
-        /** PrevalenceResponse */
-        PrevalenceResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["PrevalenceRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PrevalenceRow */
-        PrevalenceRow: {
-            /** Age Bucket */
-            age_bucket: string;
-            /** As Of Date */
-            as_of_date?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Cohort Size */
-            cohort_size: number;
-            /** Gender */
-            gender?: string | null;
-            /** Min Support Met */
-            min_support_met: boolean;
-            /** Patients With Condition */
-            patients_with_condition: number;
-            /** Prevalence Ci Lower Pct */
-            prevalence_ci_lower_pct?: number | null;
-            /** Prevalence Ci Upper Pct */
-            prevalence_ci_upper_pct?: number | null;
-            /** Prevalence Pct */
-            prevalence_pct?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /**
          * PriorityQueueItem
@@ -19425,26 +19086,6 @@ export interface components {
             to: components["schemas"]["IdentifierString"];
         };
         /**
-         * RequestTransform
-         * @description Transforms outbound request body before sending to the integration endpoint.
-         *
-         *     Applied after path-param substitution and auth-header resolution, right
-         *     before the HTTP call.  Mirror of the response-side pipeline
-         *     (``response_filter`` / ``result_key`` / ``result_template``).
-         *
-         *     Inject targets the **outermost** dict: when combined with
-         *     ``wrap_params_key``, injected fields sit alongside the wrapper key,
-         *     never inside the wrapped sub-dict.
-         */
-        RequestTransform: {
-            /** Inject */
-            inject?: {
-                [key: string]: string;
-            };
-            /** Wrap Params Key */
-            wrap_params_key?: string | null;
-        };
-        /**
          * ResolveTemplateRequest
          * @description Resolve a form template for a specific entity.
          */
@@ -19498,6 +19139,71 @@ export interface components {
             /** Tool Type */
             tool_type: string;
         };
+        /**
+         * RestIntegrationResponse
+         * @description REST variant — base URL, auth config, endpoint count.
+         */
+        RestIntegrationResponse: {
+            /**
+             * Auth
+             * @description Authentication configuration (lib TypedDict union).
+             */
+            auth?: components["schemas"]["StaticHeaderAuthDict"] | components["schemas"]["OAuth2ClientCredentialsAuthDict"] | components["schemas"]["OAuth2JwtBearerAuthDict"] | components["schemas"]["CustomTokenExchangeAuthDict"] | null;
+            /**
+             * Base Url
+             * @description Base URL for REST integrations.
+             */
+            base_url: string;
+            /**
+             * Created At
+             * Format: date-time
+             * @description When the integration was created.
+             */
+            created_at: string;
+            /**
+             * Display Name
+             * @description Human-readable name.
+             */
+            display_name: string;
+            /**
+             * Enabled
+             * @description Whether the integration is active.
+             */
+            enabled: boolean;
+            /**
+             * Endpoint Count
+             * @description Number of configured endpoints. Fetch the full list via GET /endpoints.
+             */
+            endpoint_count: number;
+            /**
+             * Id
+             * Format: uuid
+             * @description Integration ID.
+             */
+            id: string;
+            /**
+             * @description Discriminator. (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            kind: "rest";
+            /**
+             * Name
+             * @description Slug-like identifier, immutable post-create.
+             */
+            name: string;
+            /**
+             * Updated At
+             * Format: date-time
+             * @description When the integration was last updated.
+             */
+            updated_at: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace ID.
+             */
+            workspace_id: string;
+        };
         /** RetentionPolicyRequest */
         RetentionPolicyRequest: {
             /** Audit Log Days */
@@ -19530,27 +19236,6 @@ export interface components {
             phi_data_days: number;
             /** World Events Days */
             world_events_days: number;
-        };
-        /**
-         * RetryConfig
-         * @description Retry configuration for an endpoint.
-         */
-        RetryConfig: {
-            /**
-             * Max Retries
-             * @default 2
-             */
-            max_retries?: number;
-            /**
-             * Retry On Status
-             * @default [
-             *       429,
-             *       502,
-             *       503,
-             *       504
-             *     ]
-             */
-            retry_on_status?: number[];
         };
         /**
          * ReturnColumn
@@ -19626,7 +19311,7 @@ export interface components {
             /** Assigned To */
             assigned_to: string | null;
             /** Completed Action */
-            completed_action: ("approved" | "rejected" | "corrected") | null;
+            completed_action: ("approve" | "reject" | "correct" | "approved" | "rejected" | "corrected") | null;
             /** Completed At */
             completed_at: string | null;
             /**
@@ -19825,6 +19510,8 @@ export interface components {
             required_tags?: string[];
             /** Service Id */
             service_id?: string | null;
+            /** Suite Id */
+            suite_id?: string | null;
             /** Tags */
             tags?: string[];
         };
@@ -20048,18 +19735,6 @@ export interface components {
             score_rationale?: string | null;
         };
         SearchString: string;
-        /**
-         * SecretInput
-         * @description Inline secret value — auto-provisioned to SSM on create/update.
-         *
-         *     Bounded to 8192 chars: large enough for a PEM RSA-4096 private key
-         *     plus a short cert chain, small enough that an adversary cannot
-         *     push a 100 MB "secret" through to SSM.
-         */
-        SecretInput: {
-            /** Value */
-            value: string;
-        };
         /** SendGuidanceRequest */
         SendGuidanceRequest: {
             /** Call Sid */
@@ -20960,58 +20635,89 @@ export interface components {
             selected_case_ids: string[];
             /** Skipped Cases */
             skipped_cases: components["schemas"]["SimulationBenchmarkCaseResult"][];
+            /** Suite Id */
+            suite_id?: string | null;
+        };
+        /** SimulationCaseAssertionEval */
+        SimulationCaseAssertionEval: {
+            /** Assertion Kind */
+            assertion_kind: string;
+            /** Description */
+            description?: string | null;
+            /** Expected */
+            expected?: unknown | null;
+            /** Key */
+            key: string;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Type
+             * @constant
+             */
+            type: "assertion";
+            /** Weight */
+            weight?: number | null;
+        };
+        /**
+         * SimulationCaseGrounding
+         * @description Optional bindings that start the sim from existing workspace data.
+         */
+        SimulationCaseGrounding: {
+            /** Patient Entity Id */
+            patient_entity_id?: string | null;
+        };
+        /** SimulationCaseMetricEval */
+        SimulationCaseMetricEval: {
+            /** Expected */
+            expected?: unknown | null;
+            /** Metric Key */
+            metric_key: string;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Type
+             * @constant
+             */
+            type: "metric";
+            /** Weight */
+            weight?: number | null;
         };
         /**
          * SimulationCaseResponse
          * @description HTTP response shape for durable simulation cases.
          */
         SimulationCaseResponse: {
-            /** Assertions */
-            assertions?: {
-                [key: string]: unknown;
-            }[];
-            /** Constraints */
-            constraints?: {
-                [key: string]: unknown;
-            };
             /** Created At */
             created_at?: string | null;
             /** Created By */
             created_by?: string | null;
             /** Description */
             description: string;
-            /** Fixtures */
-            fixtures?: {
-                [key: string]: unknown;
-            };
+            /** Evals */
+            evals?: (components["schemas"]["SimulationCaseMetricEval"] | components["schemas"]["SimulationCaseAssertionEval"])[];
+            grounding?: components["schemas"]["SimulationCaseGrounding"];
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Initial Message */
-            initial_message: string;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
             /** Persona */
             persona?: {
                 [key: string]: unknown;
             };
-            /**
-             * Provenance
-             * @default manual
-             */
-            provenance?: string;
-            /** Scenario Instructions */
-            scenario_instructions: string;
+            scenario: components["schemas"]["SimulationCaseScenario"];
             /** Service Id */
             service_id?: string | null;
             /** Tags */
             tags?: string[];
-            /** Target Spec */
-            target_spec?: {
-                [key: string]: unknown;
-            };
-            /** Temperament */
-            temperament?: string | null;
             /** Updated At */
             updated_at?: string | null;
             /**
@@ -21019,6 +20725,21 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * SimulationCaseScenario
+         * @description Runnable patient-side scenario content for a saved case.
+         */
+        SimulationCaseScenario: {
+            /**
+             * Initial Message
+             * @default
+             */
+            initial_message?: string;
+            /** Instructions */
+            instructions: string;
+            /** Temperament */
+            temperament?: string | null;
         };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
@@ -21266,6 +20987,47 @@ export interface components {
             observation: components["schemas"]["SimulationObservation"];
             snapshot: components["schemas"]["SimulationSnapshotResponse"];
         };
+        /**
+         * SimulationSuiteResponse
+         * @description HTTP response shape for first-class simulation suites.
+         */
+        SimulationSuiteResponse: {
+            /** Case Count */
+            case_count: number;
+            /** Case Ids */
+            case_ids?: string[];
+            /** Created At */
+            created_at?: string | null;
+            /** Created By */
+            created_by?: string | null;
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+            /** Required Tags */
+            required_tags?: string[];
+            /** Tags */
+            tags?: string[];
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** SimulationTurnPolicyResponse */
         SimulationTurnPolicyResponse: {
             /**
@@ -21383,11 +21145,6 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /**
-             * Delivery
-             * @enum {string}
-             */
-            delivery: "interrupt" | "queue";
             /** Description */
             description: string;
             /** Enable Caching */
@@ -21400,7 +21157,7 @@ export interface components {
              * Execution Tier
              * @enum {string}
              */
-            execution_tier: "direct" | "orchestrated" | "computer_use";
+            execution_tier: "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -21443,8 +21200,6 @@ export interface components {
              * Format: date-time
              */
             updated_at: string;
-            /** Urgency Keywords */
-            urgency_keywords: string[];
             /** Use Structured Output */
             use_structured_output: boolean;
             /**
@@ -21775,7 +21530,7 @@ export interface components {
              * Session Status
              * @enum {string}
              */
-            session_status: "created" | "resumed" | "already_active";
+            session_status: "created" | "already_active";
         };
         /**
          * StateRiskOverride
@@ -21843,14 +21598,44 @@ export interface components {
             type: "state_transition";
         };
         /**
+         * StaticHeaderAuthDict
+         * @description Static workspace-level secret used verbatim as a single header value.
+         *
+         *     Replaces legacy ``api_key_header`` and ``bearer_token`` — bearer is just
+         *     ``header_name="Authorization"`` with the SSM secret holding ``"Bearer <token>"``.
+         */
+        StaticHeaderAuthDict: {
+            /** Header Name */
+            header_name: string;
+            /**
+             * Type
+             * @constant
+             */
+            type: "static_header";
+        };
+        /**
+         * StaticHeaderAuthRequest
+         * @description Static workspace-level secret used verbatim as a single header value.
+         */
+        StaticHeaderAuthRequest: {
+            /**
+             * Header Name
+             * @description Outbound header name (RFC 7230 tchar).
+             */
+            header_name: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "static_header";
+        };
+        /**
          * StaticToolDef
          * @description A built-in tool available to companion agents.
          */
         "StaticToolDef-Input": {
             /** Description */
             description: string;
-            /** Handler */
-            handler: string;
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -22652,7 +22437,7 @@ export interface components {
              * Tier
              * @enum {string}
              */
-            tier: "direct" | "companion" | "desktop" | "computer_use";
+            tier: "companion" | "desktop" | "computer_use";
             /**
              * Workspace Id
              * Format: uuid
@@ -22670,106 +22455,6 @@ export interface components {
             numbers: string[];
         };
         /**
-         * TestConnectionResponse
-         * @description Result of a pre-flight connection probe.
-         *
-         *     Exercised by the developer-console "Test Connection" button. Probes
-         *     auth resolution + upstream reachability without invoking any
-         *     specific endpoint, so it's safe to run on production integrations.
-         */
-        TestConnectionResponse: {
-            /**
-             * Auth Resolved
-             * @description True if the auth credential successfully resolved (SSM lookup, OAuth2 token mint, JWT signing). False does not necessarily mean the auth is wrong — for ``bearer_token_exchange`` it can mean per-call params weren't supplied.
-             * @default false
-             */
-            auth_resolved?: boolean;
-            /**
-             * Duration Ms
-             * @description End-to-end probe duration in milliseconds.
-             * @default 0
-             */
-            duration_ms?: number;
-            /**
-             * Http Status
-             * @description HTTP status code from the upstream HEAD probe (REST/FHIR/MCP-http only).
-             */
-            http_status?: number | null;
-            /**
-             * Message
-             * @description Human-readable summary suitable for direct display to the user.
-             * @default
-             */
-            message?: string;
-            /**
-             * Status
-             * @description Coarse classification of the probe outcome. The console maps each value to a distinct remediation message: ``healthy`` is green, ``auth_failed`` prompts re-auth, ``unreachable`` / ``timeout`` suggest checking the URL or VPN, ``ssl_error`` calls out cert issues, ``misconfigured`` highlights missing required fields.
-             * @enum {string}
-             */
-            status: "healthy" | "auth_failed" | "unreachable" | "timeout" | "ssl_error" | "misconfigured";
-            /**
-             * Tested At
-             * Format: date-time
-             * @description When the probe ran (server time, UTC).
-             */
-            tested_at: string;
-        };
-        /** TestEndpointRequest */
-        TestEndpointRequest: {
-            /**
-             * Params
-             * @default {}
-             */
-            params?: {
-                [key: string]: unknown;
-            };
-        };
-        /** TestEndpointResponse */
-        TestEndpointResponse: {
-            /**
-             * After Filter
-             * @description Response after filter transformations
-             */
-            after_filter?: unknown;
-            /**
-             * After Mapping
-             * @description Response after field mapping
-             */
-            after_mapping?: unknown;
-            /**
-             * Duration Ms
-             * @description Request duration in milliseconds
-             * @default 0
-             */
-            duration_ms?: number;
-            /**
-             * Error
-             * @description Error message if the request failed
-             */
-            error?: string | null;
-            /**
-             * Final Result
-             * @description Final processed result
-             */
-            final_result?: string | null;
-            /**
-             * Raw Response
-             * @description Raw response body from the endpoint
-             */
-            raw_response?: unknown;
-            /**
-             * Retries
-             * @description Number of retry attempts
-             * @default 0
-             */
-            retries?: number;
-            /**
-             * Status Code
-             * @description HTTP status code from the endpoint
-             */
-            status_code?: number | null;
-        };
-        /**
          * TestInvokeResponse
          * @description Response shape for ``POST /v1/{ws}/functions/{name}/test``.
          *
@@ -22777,8 +22462,8 @@ export interface components {
          *     ``error`` so the DC can render the executor's failure detail inline
          *     rather than a generic "Invocation failed." The underlying invoke
          *     uses the same path; ``status`` / ``error`` are filled in by
-         *     ``service.test`` after catching any ``ServiceUnavailableError`` from
-         *     the executor, so the route never bubbles a 5xx for a logical SQL
+         *     ``service.test`` after catching any ``HTTPException`` (503) from the
+         *     executor, so the route never bubbles a 5xx for a logical SQL
          *     failure — it's still a 200 with ``status=fail`` so the caller can
          *     show the message.
          *
@@ -23228,6 +22913,12 @@ export interface components {
             /** Audio Fillers */
             audio_fillers?: string[] | null;
             /**
+             * Delivery
+             * @default interrupt
+             * @enum {string}
+             */
+            delivery?: "interrupt" | "queue";
+            /**
              * Navigate On Completion
              * @default false
              */
@@ -23311,7 +23002,7 @@ export interface components {
             tool_name: components["schemas"]["NameString"];
             /**
              * Tool Type
-             * @description world_tool, skill, or integration
+             * @description world_tool — other tool families use their dedicated endpoints
              */
             tool_type: string;
         };
@@ -23650,44 +23341,6 @@ export interface components {
             timestamp: string | null;
             /** Transcript */
             transcript: string;
-        };
-        /** TrendResponse */
-        TrendResponse: {
-            /** Code */
-            code: string;
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["TrendRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** TrendRow */
-        TrendRow: {
-            /** Age Bucket */
-            age_bucket?: string | null;
-            /** Code */
-            code: string;
-            /** Code Display */
-            code_display?: string | null;
-            /** Code System Normalized */
-            code_system_normalized: string;
-            /** Condition Records */
-            condition_records: number;
-            /** Gender */
-            gender?: string | null;
-            /** Incident Patients */
-            incident_patients: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-            /** Year Month */
-            year_month: string;
         };
         /** TriggerCompletedEvent */
         TriggerCompletedEvent: {
@@ -24029,7 +23682,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -24350,31 +24003,6 @@ export interface components {
             /** Sync Strategy */
             sync_strategy?: ("manual" | "scheduled" | "webhook" | "continuous") | null;
         };
-        /** UpdateIntegrationRequest */
-        UpdateIntegrationRequest: {
-            auth?: components["schemas"]["AuthConfigWithSecrets"] | null;
-            /** Base Url */
-            base_url?: string | null;
-            display_name?: components["schemas"]["NameString"] | null;
-            /** Enabled */
-            enabled?: boolean | null;
-            /** Endpoints */
-            endpoints?: components["schemas"]["EndpointConfig-Input"][] | null;
-            /** Mcp Args */
-            mcp_args?: string[] | null;
-            /** Mcp Command */
-            mcp_command?: string | null;
-            /** Mcp Headers */
-            mcp_headers?: {
-                [key: string]: string;
-            } | null;
-            /** Mcp Transport */
-            mcp_transport?: ("stdio" | "sse" | "http") | null;
-            /** Mcp Url */
-            mcp_url?: string | null;
-            /** Protocol */
-            protocol?: ("rest" | "fhir" | "mcp") | null;
-        };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
             /** Connection Method */
@@ -24433,14 +24061,69 @@ export interface components {
             } | null;
             voice_config?: components["schemas"]["ServiceVoiceConfig-Input"] | null;
         };
+        /**
+         * UpdateSimulationCaseRequest
+         * @description Partial update for one durable simulation case.
+         */
+        UpdateSimulationCaseRequest: {
+            /** Assertions */
+            assertions?: {
+                [key: string]: unknown;
+            }[] | null;
+            /** Constraints */
+            constraints?: {
+                [key: string]: unknown;
+            } | null;
+            /** Description */
+            description?: string | null;
+            /** Fixtures */
+            fixtures?: {
+                [key: string]: unknown;
+            } | null;
+            /** Initial Message */
+            initial_message?: string | null;
+            /** Persona */
+            persona?: {
+                [key: string]: unknown;
+            } | null;
+            /** Provenance */
+            provenance?: string | null;
+            /** Scenario Instructions */
+            scenario_instructions?: string | null;
+            /** Service Id */
+            service_id?: string | null;
+            /** Tags */
+            tags?: string[] | null;
+            /** Target Spec */
+            target_spec?: {
+                [key: string]: unknown;
+            } | null;
+            /** Temperament */
+            temperament?: string | null;
+        };
+        /** UpdateSimulationSuiteRequest */
+        UpdateSimulationSuiteRequest: {
+            /** Case Ids */
+            case_ids?: string[] | null;
+            /** Description */
+            description?: string | null;
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /** Name */
+            name?: string | null;
+            /** Required Tags */
+            required_tags?: string[] | null;
+            /** Tags */
+            tags?: string[] | null;
+        };
         /** UpdateSkillRequest */
         UpdateSkillRequest: {
             /** Approval Required */
             approval_required?: boolean | null;
             /** Checkpoint Enabled */
             checkpoint_enabled?: boolean | null;
-            /** Delivery */
-            delivery?: ("interrupt" | "queue") | null;
             description?: components["schemas"]["DescriptionString"] | null;
             /** Enable Caching */
             enable_caching?: boolean | null;
@@ -24449,7 +24132,7 @@ export interface components {
             /** Enabled */
             enabled?: boolean | null;
             /** Execution Tier */
-            execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
+            execution_tier?: ("orchestrated" | "computer_use") | null;
             /** Input Schema */
             input_schema?: {
                 [key: string]: unknown;
@@ -24478,8 +24161,6 @@ export interface components {
             thinking_effort?: ("low" | "medium" | "high") | null;
             /** Timeout S */
             timeout_s?: number | null;
-            /** Urgency Keywords */
-            urgency_keywords?: string[] | null;
             /** Use Structured Output */
             use_structured_output?: boolean | null;
         };
@@ -24509,37 +24190,6 @@ export interface components {
             /** Submit Button Text */
             submit_button_text?: string | null;
             title?: components["schemas"]["NameString"] | null;
-        };
-        /**
-         * UpdateSyncStatusRequest
-         * @description Report sync status for a data source after a poll cycle.
-         */
-        UpdateSyncStatusRequest: {
-            /**
-             * Data Source Id
-             * Format: uuid
-             */
-            data_source_id: string;
-            /**
-             * Last Sync At
-             * Format: date-time
-             */
-            last_sync_at: string;
-            /**
-             * Last Sync Event Count
-             * @default 0
-             */
-            last_sync_event_count?: number;
-            /**
-             * Last Sync Status
-             * @enum {string}
-             */
-            last_sync_status: "success" | "partial" | "error";
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** UpdateTriggerRequest */
         UpdateTriggerRequest: {
@@ -25432,6 +25082,8 @@ export interface components {
             /** Start */
             start: string;
         };
+        /** @constant */
+        _SortField: "deployed_at";
         _ToolMockKey: string;
         _ToolMockValue: string;
         /**
@@ -25479,8 +25131,6 @@ export interface components {
         src__models__StaticToolDef: {
             /** Description */
             description: string;
-            /** Handler */
-            handler: string;
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -25658,7 +25308,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "frozen" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed";
             /**
              * Turn Count
              * @default 0
@@ -25671,6 +25321,306 @@ export interface components {
         src__routes__desktop_sessions__CreateSessionRequest: {
             integration_name: components["schemas"]["NameString"];
         };
+        /**
+         * Request
+         * @description Add a new endpoint to a REST integration (V186 flat shape).
+         */
+        src__routes__integrations__create_endpoint__Request: {
+            /**
+             * Body Format
+             * @description Outbound body encoding for write methods.
+             * @default json
+             * @enum {string}
+             */
+            body_format?: "json" | "form";
+            /**
+             * Description
+             * @description LLM-facing description shown in the tool definition.
+             */
+            description: string;
+            /**
+             * Headers
+             * @description Static headers merged into every request.
+             */
+            headers?: {
+                [key: string]: string;
+            };
+            /**
+             * Input Schema
+             * @description JSON Schema describing the tool's input arguments.
+             */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Max Response Length
+             * @description Truncate the rendered string to this many chars. 0 = no truncation.
+             * @default 0
+             */
+            max_response_length?: number;
+            /**
+             * Max Retries
+             * @description Retry attempts on transient failures.
+             * @default 2
+             */
+            max_retries?: number;
+            /**
+             * Method
+             * @description HTTP method.
+             * @default POST
+             * @enum {string}
+             */
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /**
+             * Name
+             * @description Slug-like identifier, immutable post-create.
+             */
+            name: string;
+            /**
+             * Path
+             * @description URL path appended to the integration's base_url. Must NOT start with `/` — the path is
+             *     joined onto the base URL (which already carries the leading slash). Supports `{param}` substitution.
+             */
+            path: string;
+            /**
+             * Response Template
+             * @description Jinja template (sandboxed, StrictUndefined) rendered against the parsed JSON response.
+             */
+            response_template?: string | null;
+            /**
+             * Retry On Status
+             * @description HTTP status codes that trigger a retry.
+             */
+            retry_on_status?: number[];
+            /**
+             * Static Body Fields
+             * @description Static body fields merged into POST/PUT/PATCH bodies. Keys are RFC 6901 JSON Pointers
+             *     (e.g. ``/meta/tool_name`` for nested, ``/foo`` for a root-level field).
+             */
+            static_body_fields?: {
+                [key: string]: string;
+            };
+            /**
+             * Timeout Seconds
+             * @description Per-request timeout.
+             * @default 30
+             */
+            timeout_seconds?: number;
+        };
+        /**
+         * Request
+         * @description Create body — REST only.
+         */
+        src__routes__integrations__create_integration__Request: {
+            /**
+             * Auth
+             * @description Auth configuration. When set, ``secret_value`` is required.
+             */
+            auth?: (components["schemas"]["StaticHeaderAuthRequest"] | components["schemas"]["OAuth2ClientCredentialsAuthRequest"] | components["schemas"]["OAuth2JwtBearerAuthRequest"] | components["schemas"]["CustomTokenExchangeAuthRequest"]) | null;
+            /**
+             * Base Url
+             * Format: uri
+             * @description Base URL for the upstream REST API.
+             */
+            base_url: string;
+            /** @description Human-readable name. */
+            display_name: components["schemas"]["NameString"];
+            /**
+             * Enabled
+             * @description Whether the integration is active on create.
+             * @default true
+             */
+            enabled?: boolean;
+            /**
+             * Name
+             * @description Slug-like identifier, lowercase alphanumeric + hyphens/underscores. Immutable post-create.
+             */
+            name: string;
+            /**
+             * Secret Value
+             * @description Inline secret literal — auto-provisioned to the per-integration SSM path.
+             *     Required when ``auth`` is set. Bounded to fit a PEM RSA-4096 key + cert chain.
+             */
+            secret_value?: string | null;
+        };
+        /** Response */
+        src__routes__integrations__list_endpoints__Response: {
+            /**
+             * Continuation Token
+             * @description Opaque token for the next page. Null when there are no more results.
+             */
+            continuation_token?: unknown;
+            /**
+             * Has More
+             * @description Whether there are more endpoints to retrieve.
+             */
+            has_more: boolean;
+            /**
+             * Items
+             * @description The endpoints under this integration.
+             */
+            items: components["schemas"]["EndpointResponse"][];
+        };
+        /** Response */
+        src__routes__integrations__list_integrations__Response: {
+            /**
+             * Continuation Token
+             * @description Opaque token for the next page. Null when there are no more results.
+             */
+            continuation_token?: unknown;
+            /**
+             * Has More
+             * @description Whether there are more integrations to retrieve.
+             */
+            has_more: boolean;
+            /**
+             * Items
+             * @description The integrations matching the request filters.
+             */
+            items: (components["schemas"]["RestIntegrationResponse"] | components["schemas"]["DesktopIntegrationResponse"])[];
+        };
+        /**
+         * Request
+         * @description Inputs to ``POST /{integration_id}/endpoints/{endpoint_id}/test``.
+         */
+        src__routes__integrations__test_endpoint__Request: {
+            /**
+             * Params
+             * @description Tool arguments.
+             */
+            params?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * Response
+         * @description Full breadcrumb returned by the test handler.
+         */
+        src__routes__integrations__test_endpoint__Response: {
+            /**
+             * Duration Ms
+             * @description Request duration in milliseconds.
+             * @default 0
+             */
+            duration_ms?: number;
+            /**
+             * Error
+             * @description Error message if the request failed.
+             */
+            error?: string | null;
+            /**
+             * Final Result
+             * @description Final processed result (rendered + truncated to max_response_length).
+             */
+            final_result?: string | null;
+            /**
+             * Raw Response
+             * @description Raw response body from the upstream call.
+             */
+            raw_response?: unknown;
+            /**
+             * Rendered
+             * @description Response after Jinja `response_template` rendering, pre-truncation.
+             */
+            rendered?: string | null;
+            /**
+             * Retries
+             * @description Number of retry attempts.
+             * @default 0
+             */
+            retries?: number;
+            /**
+             * Status Code
+             * @description HTTP status code from the upstream call.
+             */
+            status_code?: number | null;
+        };
+        /**
+         * Request
+         * @description Patch an existing endpoint (V186 flat shape). ``name`` is immutable.
+         */
+        src__routes__integrations__update_endpoint__Request: {
+            /**
+             * Body Format
+             * @enum {string}
+             */
+            body_format?: "json" | "form";
+            /** Description */
+            description?: string;
+            /** Headers */
+            headers?: {
+                [key: string]: string;
+            };
+            /** Input Schema */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /** Max Response Length */
+            max_response_length?: number;
+            /** Max Retries */
+            max_retries?: number;
+            /**
+             * Method
+             * @enum {string}
+             */
+            method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+            /**
+             * Path
+             * @description URL path appended to the integration's base_url. Must NOT start with `/`.
+             */
+            path?: string;
+            /**
+             * Response Template
+             * @description Jinja template; pass `null` to clear (the only DB-nullable column on this row).
+             */
+            response_template?: string | null;
+            /** Retry On Status */
+            retry_on_status?: number[];
+            /** Static Body Fields */
+            static_body_fields?: {
+                [key: string]: string;
+            };
+            /** Timeout Seconds */
+            timeout_seconds?: number;
+        };
+        /**
+         * Request
+         * @description PATCH body — each field is sentinel-defaulted; absent ≠ explicit-null.
+         */
+        src__routes__integrations__update_integration__Request: {
+            /**
+             * Auth
+             * @description New auth config. Absent ⇒ untouched; null ⇒ clear; value ⇒ replace.
+             *     Independent of ``secret_value`` — updating ``auth`` alone reuses the
+             *     existing SSM secret.
+             */
+            auth?: (components["schemas"]["StaticHeaderAuthRequest"] | components["schemas"]["OAuth2ClientCredentialsAuthRequest"] | components["schemas"]["OAuth2JwtBearerAuthRequest"] | components["schemas"]["CustomTokenExchangeAuthRequest"]) | null;
+            /**
+             * Base Url
+             * Format: uri
+             * @description New base URL.
+             */
+            base_url?: string;
+            /**
+             * Display Name
+             * @description New display name.
+             */
+            display_name?: components["schemas"]["NameString"];
+            /**
+             * Enabled
+             * @description Toggle the integration on/off.
+             */
+            enabled?: boolean;
+            /**
+             * Secret Value
+             * @description Rotate the per-integration SSM secret. Absent ⇒ existing secret
+             *     untouched; value ⇒ overwrite SSM at the canonical path. Explicit
+             *     ``null`` is rejected at validation — there is no "clear the secret"
+             *     operation (clearing ``auth`` makes the secret unreachable; that's the
+             *     intended clear path).
+             */
+            secret_value?: string;
+        };
         /** IntegrationToolRef */
         src__routes__internal_skills__IntegrationToolRef: {
             /** Endpoint */
@@ -25682,8 +25632,6 @@ export interface components {
         src__routes__internal_skills__StaticToolDef: {
             /** Description */
             description: string;
-            /** Handler */
-            handler: string;
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -25821,8 +25769,17 @@ export interface components {
              */
             row_count?: number;
         };
+        /** Response */
+        src__routes__workspace_data_queries__list_workspace_data_queries__Response: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Response__Item"][];
+        };
         /** Item */
-        src__routes__workspace_data_queries__list_workspace_data_queries__Item: {
+        src__routes__workspace_data_queries__list_workspace_data_queries__Response__Item: {
             /**
              * Deployed At
              * Format: date-time
@@ -25850,13 +25807,6 @@ export interface components {
             sql_template: string;
             /** Timeout Ms */
             timeout_ms: number;
-        };
-        /** Response */
-        src__routes__workspace_data_queries__list_workspace_data_queries__Response: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Item"][];
         };
         /**
          * Request
@@ -30983,7 +30933,7 @@ export interface operations {
                 /** @description Filter by channel */
                 channel_kind?: ("voice" | "sms" | "whatsapp" | "web" | "email") | null;
                 /** @description Filter by status */
-                status?: ("active" | "frozen" | "closed" | "completed" | "in-progress" | "failed") | null;
+                status?: ("active" | "closed" | "completed" | "in-progress" | "failed") | null;
                 limit?: number;
                 offset?: number;
             };
@@ -31854,7 +31804,20 @@ export interface operations {
     };
     "list-workspace-data-queries": {
         parameters: {
-            query?: never;
+            query?: {
+                /**
+                 * @description Sort axes, applied left-to-right. ``+field`` ascending, ``-field``
+                 *     descending. Defaults to ``[("deployed_at", -1)]`` (newest first).
+                 */
+                sort_by?: string[];
+                /** @description Maximum number of queries to return per page. */
+                limit?: number;
+                /**
+                 * @description Opaque continuation token from a prior response. Treat as a
+                 *     black box — the server decodes it.
+                 */
+                continuation_token?: unknown;
+            };
             header?: never;
             path: {
                 workspace_id: string;
@@ -31871,6 +31834,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["src__routes__workspace_data_queries__list_workspace_data_queries__Response"];
                 };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query parameter failed validation or continuation_token is unparseable. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -32308,228 +32292,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BriefResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_cohort_drivers_v1__workspace_id__epidemiology_cohort_drivers_get: {
-        parameters: {
-            query: {
-                code: string;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                min_support_only?: boolean;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CohortDriverResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_cooccurrence_v1__workspace_id__epidemiology_cooccurrence_get: {
-        parameters: {
-            query?: {
-                code?: string | null;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                sort_by?: "lift" | "pmi" | "chi_square" | "jaccard" | "n_patients_both";
-                min_support_only?: boolean;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CooccurrenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_patient_burden_v1__workspace_id__epidemiology_patient_burden_get: {
-        parameters: {
-            query?: {
-                min_charlson?: number | null;
-                age_min?: number | null;
-                age_max?: number | null;
-                gender?: string | null;
-                sort_by?: "age_adjusted_charlson_index" | "charlson_index" | "n_active_conditions" | "recent_onset_count_365d" | "age_now";
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PatientBurdenResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_patient_burden_v1__workspace_id__epidemiology_patient_burden__patient_entity_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                patient_entity_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PatientBurdenDetailResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_prevalence_v1__workspace_id__epidemiology_prevalence_get: {
-        parameters: {
-            query?: {
-                code?: string | null;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                age_bucket?: ("0-17" | "18-34" | "35-49" | "50-64" | "65-79" | "80+") | null;
-                gender?: string | null;
-                min_support_only?: boolean;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PrevalenceResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_trends_v1__workspace_id__epidemiology_trends_get: {
-        parameters: {
-            query: {
-                code: string;
-                code_system?: ("ICD10" | "SNOMED" | "ICD9" | "OTHER") | null;
-                start_month?: string | null;
-                end_month?: string | null;
-                age_bucket?: ("0-17" | "18-34" | "35-49" | "50-64" | "65-79" | "80+") | null;
-                gender?: string | null;
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TrendResponse"];
                 };
             };
             /** @description Validation Error */
@@ -33975,12 +33737,20 @@ export interface operations {
     "list-integrations": {
         parameters: {
             query?: {
+                /** @description Filter to integrations with this enabled flag. None matches both. */
                 enabled?: boolean | null;
-                protocol?: string | null;
+                /** @description Substring match against name, display_name, or id (case-insensitive). */
                 search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                /**
+                 * @description Sort axes. Repeated query param stacks left-to-right. Each entry is `+field` or `-field`
+                 *     (direction prefix REQUIRED). Allowed fields: ``name``, ``created_at``, ``updated_at``.
+                 *     Default: ``-created_at``. ``id`` is always appended as the final tiebreaker.
+                 */
+                sort_by?: string[];
+                /** @description The maximum number of integrations to return. */
                 limit?: number;
-                continuation_token?: number;
+                /** @description Opaque token from a prior response. Pass back unchanged with the same `sort_by` to advance. */
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -33996,7 +33766,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_IntegrationResponse_"];
+                    "application/json": components["schemas"]["src__routes__integrations__list_integrations__Response"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34013,14 +33783,12 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
+            /** @description Query parameter failed validation or continuation_token is unparseable. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+                content?: never;
             };
         };
     };
@@ -34035,7 +33803,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateIntegrationRequest"];
+                "application/json": components["schemas"]["src__routes__integrations__create_integration__Request"];
             };
         };
         responses: {
@@ -34045,7 +33813,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["IntegrationResponse"];
+                    "application/json": components["schemas"]["RestIntegrationResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34085,30 +33853,6 @@ export interface operations {
             };
         };
     };
-    "integration-health-check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
     "get-integration": {
         parameters: {
             query?: never;
@@ -34127,7 +33871,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["IntegrationResponse"];
+                    "application/json": components["schemas"]["RestIntegrationResponse"] | components["schemas"]["DesktopIntegrationResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34159,61 +33903,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-        };
-    };
-    "update-integration": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                integration_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateIntegrationRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntegrationResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Integration not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid request body. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -34257,6 +33946,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Integration referenced by one or more skills. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -34268,20 +33964,19 @@ export interface operations {
             };
         };
     };
-    "test-integration-endpoint": {
+    "update-integration": {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 workspace_id: string;
                 integration_id: string;
-                endpoint_name: string;
             };
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TestEndpointRequest"];
+                "application/json": components["schemas"]["src__routes__integrations__update_integration__Request"];
             };
         };
         responses: {
@@ -34291,7 +33986,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TestEndpointResponse"];
+                    "application/json": components["schemas"]["RestIntegrationResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34315,20 +34010,31 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
+            /** @description Invalid request body, NOT NULL field set to null, or no fields to update. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+                content?: never;
             };
         };
     };
-    "test-integration-connection": {
+    "list-integration-endpoints": {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Substring match against name or description (case-insensitive). */
+                search?: components["schemas"]["SearchString"] | null;
+                /**
+                 * @description Sort axes. Repeated query param stacks left-to-right. Each entry is `+field` or `-field`
+                 *     (direction prefix REQUIRED). Allowed fields: ``name``, ``created_at``, ``updated_at``.
+                 *     Default: ``-created_at``. ``id`` is always appended as the final tiebreaker.
+                 */
+                sort_by?: string[];
+                /** @description The maximum number of endpoints to return. */
+                limit?: number;
+                /** @description Opaque token from a prior response. Pass back unchanged with the same `sort_by` to advance. */
+                continuation_token?: unknown;
+            };
             header?: never;
             path: {
                 workspace_id: string;
@@ -34344,7 +34050,55 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["TestConnectionResponse"];
+                    "application/json": components["schemas"]["src__routes__integrations__list_endpoints__Response"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query parameter failed validation or continuation_token is unparseable. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-integration-endpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__integrations__create_endpoint__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34362,6 +34116,231 @@ export interface operations {
                 content?: never;
             };
             /** @description Integration not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Endpoint name already exists on this integration. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-integration-endpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+                endpoint_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-integration-endpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+                endpoint_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-integration-endpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+                endpoint_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__integrations__update_endpoint__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EndpointResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Endpoint not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid request body, NOT NULL field set to null, or no fields to update. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "test-integration-endpoint": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+                endpoint_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__integrations__test_endpoint__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__integrations__test_endpoint__Response"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Integration or endpoint not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -39384,67 +39363,6 @@ export interface operations {
             };
         };
     };
-    "list-simulation-branches": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
-    "create-simulation-branch": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateBranchRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "simulation-bridge": {
         parameters: {
             query?: never;
@@ -39597,6 +39515,86 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationCaseResponse"];
+                };
+            };
+            /** @description Simulation case not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Simulation case not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-simulation-case": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSimulationCaseRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -40405,11 +40403,202 @@ export interface operations {
             };
         };
     };
+    "list-simulation-suites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSimulationSuitesResponse"];
+                };
+            };
+        };
+    };
+    "create-simulation-suite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSimulationSuiteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSuiteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-suite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSuiteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-simulation-suite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-simulation-suite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSimulationSuiteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSuiteResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "run-simulation-suite": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSimulationBenchmarkRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationBenchmarkRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-skills": {
         parameters: {
             query?: {
                 enabled?: boolean | null;
-                execution_tier?: ("direct" | "orchestrated" | "computer_use") | null;
+                execution_tier?: ("orchestrated" | "computer_use") | null;
                 search?: components["schemas"]["SearchString"] | null;
                 sort_by?: string | null;
                 limit?: number;

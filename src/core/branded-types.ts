@@ -18,6 +18,7 @@ export type ContextGraphId = Brand<string, 'ContextGraphId'>
 export type CallId = Brand<string, 'CallId'>
 export type PhoneNumberId = Brand<string, 'PhoneNumberId'>
 export type IntegrationId = Brand<string, 'IntegrationId'>
+export type IntegrationEndpointId = Brand<string, 'IntegrationEndpointId'>
 export type EntityId = Brand<string, 'EntityId'>
 export type EventId = Brand<string, 'EventId'>
 export type SurfaceId = Brand<string, 'SurfaceId'>
@@ -40,6 +41,8 @@ export const contextGraphId = (id: string): ContextGraphId => id as ContextGraph
 export const callId = (id: string): CallId => id as CallId
 export const phoneNumberId = (id: string): PhoneNumberId => id as PhoneNumberId
 export const integrationId = (id: string): IntegrationId => id as IntegrationId
+export const integrationEndpointId = (id: string): IntegrationEndpointId =>
+  id as IntegrationEndpointId
 export const entityId = (id: string): EntityId => id as EntityId
 export const eventId = (id: string): EventId => id as EventId
 export const surfaceId = (id: string): SurfaceId => id as SurfaceId
