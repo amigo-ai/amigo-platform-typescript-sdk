@@ -5998,6 +5998,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/suite-runs/{suite_run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Suite Run Results
+         * @description Fetch aggregate results for a durable suite run.
+         */
+        get: operations["get-simulation-suite-run-results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/suites": {
         parameters: {
             query?: never;
@@ -6055,6 +6075,26 @@ export interface paths {
          * @description Run a first-class suite definition.
          */
         post: operations["run-simulation-suite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites/{suite_id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Simulation Suite Runs
+         * @description List durable suite-run groups for a first-class suite.
+         */
+        get: operations["list-simulation-suite-runs"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -11427,8 +11467,6 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** Discovered By */
-            discovered_by: string | null;
             /** Display Name */
             display_name: string | null;
             /** Entity Types */
@@ -11451,8 +11489,6 @@ export interface components {
             is_active: boolean;
             /** Is Stale */
             is_stale: boolean;
-            /** Last Health Check */
-            last_health_check: string | null;
             /** Last Sync At */
             last_sync_at: string | null;
             /** Last Sync Event Count */
@@ -15429,6 +15465,16 @@ export interface components {
              * @description Maximum allowed upload size in bytes.
              */
             max_upload_bytes: number;
+        };
+        /** ListSimulationSuiteRunsResponse */
+        ListSimulationSuiteRunsResponse: {
+            /** Runs */
+            runs: components["schemas"]["SimulationSuiteRunSummary"][];
+            /**
+             * Suite Id
+             * Format: uuid
+             */
+            suite_id: string;
         };
         /** ListSimulationSuitesResponse */
         ListSimulationSuitesResponse: {
@@ -20746,6 +20792,118 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** SimulationSuiteRunResultsResponse */
+        SimulationSuiteRunResultsResponse: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Breakdown */
+            capability_breakdown?: {
+                [key: string]: components["schemas"]["SimulationBenchmarkBreakdownSummary"];
+            };
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /**
+             * Metric Result Count
+             * @default 0
+             */
+            metric_result_count?: number;
+            /**
+             * Metric Status
+             * @default pending
+             * @enum {string}
+             */
+            metric_status?: "pending" | "available" | "unavailable";
+            /** Metrics Last Checked At */
+            metrics_last_checked_at?: string | null;
+            /** Missing Run Ids */
+            missing_run_ids?: string[];
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Per Run */
+            per_run?: components["schemas"]["SimulationBenchmarkPerRunSummary"][];
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Suite Id */
+            suite_id?: string | null;
+            /**
+             * Suite Run Id
+             * Format: uuid
+             */
+            suite_run_id: string;
+            summary: components["schemas"]["SimulationSuiteRunSummary"];
+            /** Total Runs */
+            total_runs: number;
+        };
+        /** SimulationSuiteRunSummary */
+        SimulationSuiteRunSummary: {
+            /** Case Ids */
+            case_ids?: string[];
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            };
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed";
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Suite Id */
+            suite_id?: string | null;
+            /**
+             * Suite Run Id
+             * Format: uuid
+             */
+            suite_run_id: string;
+            /** Tags */
+            tags?: string[];
+            /** Total Runs */
+            total_runs: number;
+            /**
+             * Total Sessions
+             * @default 0
+             */
+            total_sessions?: number;
+            /**
+             * Total Turns
+             * @default 0
+             */
+            total_turns?: number;
         };
         /** SimulationTurnPolicyResponse */
         SimulationTurnPolicyResponse: {
@@ -39858,6 +40016,38 @@ export interface operations {
             };
         };
     };
+    "get-simulation-suite-run-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSuiteRunResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-simulation-suites": {
         parameters: {
             query?: never;
@@ -40036,6 +40226,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SimulationBenchmarkRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-simulation-suite-runs": {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSimulationSuiteRunsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41999,6 +42223,8 @@ export interface operations {
                 entity_type?: string | null;
                 /** @description Search by display name */
                 q?: string | null;
+                /** @description Sort order: `+display_name` (default) or `-display_name` for alphabetical, `+last_event_at` for oldest activity first, `-last_event_at` for most recent first. All sort orders use entity id as a final tiebreaker for stable pagination. */
+                sort_by?: ("+display_name" | "-display_name" | "+last_event_at" | "-last_event_at") | null;
                 limit?: number;
                 offset?: number;
             };
