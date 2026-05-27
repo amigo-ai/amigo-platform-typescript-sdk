@@ -20741,6 +20741,53 @@ export interface components {
             /** Temperament */
             temperament?: string | null;
         };
+        /** SimulationEvalResultResponse */
+        SimulationEvalResultResponse: {
+            /** Actual */
+            actual?: unknown | null;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Case Id */
+            case_id?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Definition */
+            definition?: {
+                [key: string]: unknown;
+            };
+            /** Details */
+            details?: {
+                [key: string]: unknown;
+            };
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /** Expected */
+            expected?: unknown | null;
+            /** Id */
+            id?: string | null;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Passed */
+            passed?: boolean | null;
+            /** Rationale */
+            rationale?: string | null;
+            /** Run Id */
+            run_id?: string | null;
+            /** Score */
+            score?: number | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "passed" | "failed" | "pending" | "skipped" | "error";
+        };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
             /** Intelligence */
@@ -20804,6 +20851,28 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /**
+             * Eval Error Count
+             * @default 0
+             */
+            eval_error_count?: number;
+            /**
+             * Eval Fail Count
+             * @default 0
+             */
+            eval_fail_count?: number;
+            /**
+             * Eval Pass Count
+             * @default 0
+             */
+            eval_pass_count?: number;
+            /**
+             * Eval Result Count
+             * @default 0
+             */
+            eval_result_count?: number;
+            /** Eval Results */
+            eval_results?: components["schemas"]["SimulationEvalResultResponse"][];
             /**
              * Id
              * Format: uuid
