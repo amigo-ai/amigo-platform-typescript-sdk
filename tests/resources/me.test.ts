@@ -86,10 +86,7 @@ describe('MeResource', () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
-      fetch: recordingFetch(
-        () => Response.json(WORKSPACE_FIXTURE, { status: 201 }),
-        captured,
-      ),
+      fetch: recordingFetch(() => Response.json(WORKSPACE_FIXTURE, { status: 201 }), captured),
     })
 
     const result = await client.me.createWorkspace(requestBody)

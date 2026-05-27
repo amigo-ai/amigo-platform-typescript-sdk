@@ -8,7 +8,6 @@ const SOURCE_ID = 'src-001'
 const DS_ID = 'ds-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,

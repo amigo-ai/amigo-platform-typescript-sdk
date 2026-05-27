@@ -61,7 +61,6 @@ export class IntakeResource extends WorkspaceScopedResource {
         ),
       ),
   }
-
 }
 
 // Direct-upload endpoint `/v1/{workspace_id}/intake/files` requires a signed

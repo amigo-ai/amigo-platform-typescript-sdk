@@ -172,9 +172,9 @@ describe('SimulationsResource', () => {
     it('lists, creates, gets, completes, and adds sessions to a run', async () => {
       expect(await client.simulations.runs.list()).toMatchObject({ items: [{ id: RUN_ID }] })
       expect(
-        await client.simulations.runs.create({} as Parameters<
-          typeof client.simulations.runs.create
-        >[0]),
+        await client.simulations.runs.create(
+          {} as Parameters<typeof client.simulations.runs.create>[0],
+        ),
       ).toMatchObject({ id: RUN_ID })
       expect(await client.simulations.runs.get(RUN_ID)).toMatchObject({
         id: RUN_ID,
@@ -192,14 +192,14 @@ describe('SimulationsResource', () => {
   describe('bridge', () => {
     it('plans and runs a bridge', async () => {
       expect(
-        await client.simulations.bridge.plan({} as Parameters<
-          typeof client.simulations.bridge.plan
-        >[0]),
+        await client.simulations.bridge.plan(
+          {} as Parameters<typeof client.simulations.bridge.plan>[0],
+        ),
       ).toMatchObject({ candidates: [] })
       expect(
-        await client.simulations.bridge.run({} as Parameters<
-          typeof client.simulations.bridge.run
-        >[0]),
+        await client.simulations.bridge.run(
+          {} as Parameters<typeof client.simulations.bridge.run>[0],
+        ),
       ).toMatchObject({ run_id: RUN_ID })
     })
   })

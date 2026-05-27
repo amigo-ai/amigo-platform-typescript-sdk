@@ -8,7 +8,6 @@ const LINK_ID = 'lnk-001'
 const UPLOAD_ID = 'up-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
@@ -26,9 +25,7 @@ describe('IntakeResource', () => {
   it('manages links and reads uploads', async () => {
     expect(await client.intake.links.list()).toEqual([{ id: LINK_ID }])
     expect(
-      await client.intake.links.create({} as Parameters<
-        typeof client.intake.links.create
-      >[0]),
+      await client.intake.links.create({} as Parameters<typeof client.intake.links.create>[0]),
     ).toMatchObject({ id: LINK_ID })
     expect(await client.intake.links.listUploads(LINK_ID)).toEqual([{ id: UPLOAD_ID }])
     expect(await client.intake.links.downloadUpload(LINK_ID, UPLOAD_ID)).toMatchObject({

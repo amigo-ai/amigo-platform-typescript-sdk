@@ -59,11 +59,8 @@ export type SesSetupListResponse =
 type IsAny<T> = 0 extends 1 & T ? true : false
 type GUARD_FAILURE_MESSAGE =
   'SesSetupListResponse no longer matches the expected paginated shape ({ items, has_more, continuation_token? }) — has openapi-typescript renamed the generic encoding, or did the API drop a load-bearing field? Update the alias on line ~30 and this guard together.'
-type AssertSchemaShape<T, Shape> = IsAny<T> extends true
-  ? GUARD_FAILURE_MESSAGE
-  : [T] extends [Shape]
-    ? true
-    : GUARD_FAILURE_MESSAGE
+type AssertSchemaShape<T, Shape> =
+  IsAny<T> extends true ? GUARD_FAILURE_MESSAGE : [T] extends [Shape] ? true : GUARD_FAILURE_MESSAGE
 const _SES_SETUP_LIST_RESPONSE_GUARD: AssertSchemaShape<
   SesSetupListResponse,
   {

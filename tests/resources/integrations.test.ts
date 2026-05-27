@@ -93,7 +93,11 @@ const client = new AmigoClient({
       Response.json({ detail: 'Integration not found', error_code: 'not_found' }, { status: 404 }),
 
     [`PATCH ${BASE}/integrations/${INTEGRATION_ID}`]: () =>
-      Response.json({ ...INTEGRATION_FIXTURE, display_name: 'Updated Integration', enabled: false }),
+      Response.json({
+        ...INTEGRATION_FIXTURE,
+        display_name: 'Updated Integration',
+        enabled: false,
+      }),
 
     [`DELETE ${BASE}/integrations/${INTEGRATION_ID}`]: () => new Response(null, { status: 204 }),
 

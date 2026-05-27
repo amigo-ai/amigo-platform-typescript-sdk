@@ -110,7 +110,11 @@ describe('client.channels.sesSetup', () => {
       fetch: mockFetch({
         [`GET ${BASE}`]: () =>
           new Response(
-            JSON.stringify({ items: [LIST_ITEM_FIXTURE], has_more: false, continuation_token: null }),
+            JSON.stringify({
+              items: [LIST_ITEM_FIXTURE],
+              has_more: false,
+              continuation_token: null,
+            }),
             { status: 200, headers: { 'content-type': 'application/json' } },
           ),
       }),
