@@ -1,4 +1,19 @@
+import type { PlatformFetch } from '../core/openapi-client.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
+
+interface UntypedOpenApiResult<T> {
+  data?: T
+  error?: unknown
+  response?: Response
+}
+
+interface UntypedOpenApiClient {
+  GET<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
+}
+
+function untypedClient(client: PlatformFetch): UntypedOpenApiClient {
+  return client as unknown as UntypedOpenApiClient
+}
 
 /**
  * Tasks — long-running async jobs the platform spawns (intake processing,
@@ -11,7 +26,7 @@ export class TasksResource extends WorkspaceScopedResource {
   /** Get the current state of a single task */
   async get(taskId: string) {
     return extractData(
-      await this.client.GET('/v1/{workspace_id}/tasks/{task_id}', {
+      await untypedClient(this.client).GET('/v1/{workspace_id}/tasks/{task_id}', {
         params: { path: { workspace_id: this.workspaceId, task_id: taskId } },
       }),
     )
@@ -20,7 +35,7 @@ export class TasksResource extends WorkspaceScopedResource {
   /** List every task associated with a call (by Twilio call sid) */
   async listByCall(callSid: string) {
     return extractData(
-      await this.client.GET('/v1/{workspace_id}/tasks/by-call/{call_sid}', {
+      await untypedClient(this.client).GET('/v1/{workspace_id}/tasks/by-call/{call_sid}', {
         params: { path: { workspace_id: this.workspaceId, call_sid: callSid } },
       }),
     )

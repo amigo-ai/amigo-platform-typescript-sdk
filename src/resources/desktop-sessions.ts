@@ -1,16 +1,59 @@
-import type { components } from '../generated/api.js'
+import type { PlatformFetch } from '../core/openapi-client.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
-// Internal alias over the platform-keyed schema name
-// `src__routes__desktop_sessions__CreateSessionRequest`. The Python-module
-// prefix is unstable — once the platform team adds a `title=` annotation
-// the key disappears and the build fails. Kept module-private (no `export`)
-// so it never appears in the published `.d.ts` and downstream consumers
-// can't take a transitive dependency on the upstream key. Method
-// signatures consume it inline, so the class still exposes the right
-// structural body type to callers.
-type CreateDesktopSessionRequest =
-  components['schemas']['src__routes__desktop_sessions__CreateSessionRequest']
+interface UntypedOpenApiResult<T> {
+  data?: T
+  error?: unknown
+  response?: Response
+}
+
+interface UntypedOpenApiClient {
+  GET<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
+  POST<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
+  DELETE<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
+}
+
+interface CreateDesktopSessionRequest {
+  integration_name: string
+}
+
+type DesktopActionKind =
+  | 'click'
+  | 'double_click'
+  | 'type'
+  | 'key'
+  | 'scroll'
+  | 'move'
+  | 'drag'
+  | 'clipboard_type'
+
+interface DesktopActionRequest {
+  amount?: number | null
+  button?: string | null
+  direction?: 'up' | 'down' | 'left' | 'right' | null
+  key?: string | null
+  text?: string | null
+  type: DesktopActionKind
+  x?: number | null
+  x1?: number | null
+  x2?: number | null
+  y?: number | null
+  y1?: number | null
+  y2?: number | null
+}
+
+interface DesktopSessionResponse {
+  session_id?: string
+  [key: string]: unknown
+}
+
+interface DesktopActionResponse {
+  ok: boolean
+}
+
+function untypedClient(client: PlatformFetch): UntypedOpenApiClient {
+  return client as unknown as UntypedOpenApiClient
+}
 
 /**
  * Desktop sessions — remote-controlled desktop instances the agent can use
@@ -23,47 +66,62 @@ export class DesktopSessionsResource extends WorkspaceScopedResource {
   /** Spin up a new desktop session */
   async create(body: CreateDesktopSessionRequest) {
     return extractData(
-      await this.client.POST('/v1/{workspace_id}/desktop-sessions', {
-        params: { path: { workspace_id: this.workspaceId } },
-        body,
-      }),
+      await untypedClient(this.client).POST<DesktopSessionResponse>(
+        '/v1/{workspace_id}/desktop-sessions',
+        {
+          params: { path: { workspace_id: this.workspaceId } },
+          body,
+        },
+      ),
     )
   }
 
   /** Disconnect / tear down a desktop session */
   async disconnect(sessionId: string) {
     return extractData(
-      await this.client.DELETE('/v1/{workspace_id}/desktop-sessions/{session_id}', {
-        params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
-      }),
+      await untypedClient(this.client).DELETE<DesktopSessionResponse>(
+        '/v1/{workspace_id}/desktop-sessions/{session_id}',
+        {
+          params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
+        },
+      ),
     )
   }
 
   /** Drive a click / type / scroll action against the session */
-  async sendAction(sessionId: string, body: components['schemas']['ActionRequest']) {
+  async sendAction(sessionId: string, body: DesktopActionRequest) {
     return extractData(
-      await this.client.POST('/v1/{workspace_id}/desktop-sessions/{session_id}/action', {
-        params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
-        body,
-      }),
+      await untypedClient(this.client).POST<DesktopActionResponse>(
+        '/v1/{workspace_id}/desktop-sessions/{session_id}/action',
+        {
+          params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
+          body,
+        },
+      ),
     )
   }
 
   /** Get the latest screenshot for a session */
   async getScreenshot(sessionId: string) {
     return extractData(
-      await this.client.GET('/v1/{workspace_id}/desktop-sessions/{session_id}/screenshot', {
-        params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
-      }),
+      await untypedClient(this.client).GET<DesktopSessionResponse>(
+        '/v1/{workspace_id}/desktop-sessions/{session_id}/screenshot',
+        {
+          params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
+        },
+      ),
     )
   }
 
   /** Get the session's current connection + activity status */
   async getStatus(sessionId: string) {
     return extractData(
-      await this.client.GET('/v1/{workspace_id}/desktop-sessions/{session_id}/status', {
-        params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
-      }),
+      await untypedClient(this.client).GET<DesktopSessionResponse>(
+        '/v1/{workspace_id}/desktop-sessions/{session_id}/status',
+        {
+          params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
+        },
+      ),
     )
   }
 }

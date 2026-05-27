@@ -716,6 +716,8 @@ export type {
   ConversationListResponse,
   ConversationSummary,
   ConversationTurn,
+  ConversationTurnAvailableAction,
+  ConversationTurnStateTransition,
   CreateConversationRequest,
   ListConversationsParams,
   SessionConnectUrlParams,

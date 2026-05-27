@@ -11,6 +11,8 @@ import {
 import type {
   ConversationDetail,
   ConversationListResponse,
+  ConversationTurnAvailableAction,
+  ConversationTurnStateTransition,
   CreateConversationRequest,
   TurnConversationSnapshot,
   TurnRequest,
@@ -146,13 +148,30 @@ describe('ConversationsResource', () => {
 
   it('gets a conversation by ID', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
+    const availableActions: ConversationTurnAvailableAction[] = [
+      { description: 'Confirm appointment time' },
+    ]
+    const stateTransition: ConversationTurnStateTransition = {
+      from: 'collecting_preferences',
+      to: 'confirming_appointment',
+    }
     const apiResponse: ConversationDetail = {
       id: conversationId,
       channel_kind: 'web',
       status: 'active',
       lifecycle: 'active',
       turn_count: 2,
-      turns: [],
+      turns: [
+        {
+          role: 'agent',
+          text: 'Does 3 PM work?',
+          timestamp: '2026-01-01T00:01:00Z',
+          content: [{ type: 'text', text: 'Does 3 PM work?' }],
+          available_actions: availableActions,
+          selected_action_description: 'Ask the user to confirm the proposed time',
+          state_transition: stateTransition,
+        },
+      ],
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:01:00Z',
     }
@@ -168,6 +187,11 @@ describe('ConversationsResource', () => {
 
     expect(result.id).toBe(conversationId)
     expect(result.turn_count).toBe(2)
+    expect(result.turns?.[0]?.available_actions).toEqual(availableActions)
+    expect(result.turns?.[0]?.selected_action_description).toBe(
+      'Ask the user to confirm the proposed time',
+    )
+    expect(result.turns?.[0]?.state_transition).toEqual(stateTransition)
   })
 
   it.each([

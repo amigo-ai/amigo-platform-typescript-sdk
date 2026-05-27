@@ -8,6 +8,10 @@ export type ConversationListResponse = components['schemas']['ConversationListRe
 export type ConversationSummary =
   components['schemas']['src__routes__conversations__ConversationSummary']
 export type ConversationTurn = components['schemas']['ConversationTurn']
+export type ConversationTurnAvailableAction =
+  components['schemas']['ConversationTurnAvailableAction']
+export type ConversationTurnStateTransition =
+  components['schemas']['ConversationTurnStateTransition']
 export type CreateConversationRequest = components['schemas']['CreateConversationRequest']
 export type TurnRequest = components['schemas']['TurnRequest']
 export type TurnResponse = components['schemas']['TurnResponse']

@@ -12,7 +12,6 @@ const ACTION_FIXTURE = {
   workspace_id: TEST_WORKSPACE_ID,
   name: 'Appointment Lookup',
   description: 'Look up patient appointments in the scheduling system',
-  execution_tier: 'T2',
   enabled: true,
   input_schema: {
     type: 'object',
@@ -96,7 +95,8 @@ describe('ActionsResource', () => {
     const result = await client.actions.create({
       name: 'Appointment Lookup',
       description: 'Look up patient appointments',
-      execution_tier: 'T2',
+      slug: 'appointment_lookup',
+      input_schema: {},
     } as never)
     expect(result.id).toBe(ACTION_ID)
     expect(result.name).toBe('Appointment Lookup')
@@ -112,7 +112,7 @@ describe('ActionsResource', () => {
   it('gets an action by id', async () => {
     const result = await client.actions.get(ACTION_ID)
     expect(result.id).toBe(ACTION_ID)
-    expect(result.execution_tier).toBe('T2')
+    expect(result.name).toBe('Appointment Lookup')
   })
 
   it('throws NotFoundError for missing action', async () => {

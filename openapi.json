@@ -111,174 +111,6 @@
         "title": "Action",
         "type": "object"
       },
-      "ActionRequest": {
-        "properties": {
-          "amount": {
-            "anyOf": [
-              {
-                "maximum": 100,
-                "minimum": 1,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Amount"
-          },
-          "button": {
-            "anyOf": [
-              {
-                "maxLength": 32,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Button"
-          },
-          "direction": {
-            "anyOf": [
-              {
-                "enum": [
-                  "up",
-                  "down",
-                  "left",
-                  "right"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Direction"
-          },
-          "key": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Key"
-          },
-          "text": {
-            "anyOf": [
-              {
-                "maxLength": 10000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Text"
-          },
-          "type": {
-            "enum": [
-              "click",
-              "double_click",
-              "type",
-              "key",
-              "scroll",
-              "move",
-              "drag",
-              "clipboard_type"
-            ],
-            "title": "Type",
-            "type": "string"
-          },
-          "x": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "X"
-          },
-          "x1": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "X1"
-          },
-          "x2": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "X2"
-          },
-          "y": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Y"
-          },
-          "y1": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Y1"
-          },
-          "y2": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Y2"
-          }
-        },
-        "required": [
-          "type"
-        ],
-        "title": "ActionRequest",
-        "type": "object"
-      },
-      "ActionResponse": {
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "ok"
-        ],
-        "title": "ActionResponse",
-        "type": "object"
-      },
       "ActionState-Input": {
         "description": "User-facing engagement state with actions and exit conditions.",
         "properties": {
@@ -6343,13 +6175,18 @@
           },
           "source_type": {
             "enum": [
-              "ehr",
-              "fhir_store",
-              "smart_fhir",
               "rest_api",
               "webhook",
               "file_drop",
-              "lakebase_schema"
+              "fhir",
+              "fhir_store",
+              "ehr",
+              "database",
+              "custom",
+              "smart_fhir",
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -7663,6 +7500,15 @@
       },
       "ConversationTurn": {
         "properties": {
+          "available_actions": {
+            "default": [],
+            "description": "Action choices available in the turn's resolved context-graph state. Empty when actions cannot be resolved or the resolved state is not an action state.",
+            "items": {
+              "$ref": "#/components/schemas/ConversationTurnAvailableAction"
+            },
+            "title": "Available Actions",
+            "type": "array"
+          },
           "content": {
             "default": [],
             "items": {
@@ -7679,6 +7525,29 @@
             ],
             "title": "Role",
             "type": "string"
+          },
+          "selected_action_description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Description of the context-graph action selected for this turn. Null means no action was selected or no selected action was recorded.",
+            "title": "Selected Action Description"
+          },
+          "state_transition": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ConversationTurnStateTransition"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. If multiple transitions were recorded, the API reports the first source state and final destination state."
           },
           "text": {
             "title": "Text",
@@ -7701,6 +7570,40 @@
           "text"
         ],
         "title": "ConversationTurn",
+        "type": "object"
+      },
+      "ConversationTurnAvailableAction": {
+        "properties": {
+          "description": {
+            "description": "Human-readable description of an action available in the turn's state.",
+            "title": "Description",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description"
+        ],
+        "title": "ConversationTurnAvailableAction",
+        "type": "object"
+      },
+      "ConversationTurnStateTransition": {
+        "properties": {
+          "from": {
+            "description": "Source context-graph state before the turn's state transition.",
+            "title": "From",
+            "type": "string"
+          },
+          "to": {
+            "description": "Destination context-graph state after the turn's state transition.",
+            "title": "To",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to"
+        ],
+        "title": "ConversationTurnStateTransition",
         "type": "object"
       },
       "ConvertEnvironmentRequest": {
@@ -8310,7 +8213,9 @@
               "database",
               "custom",
               "smart_fhir",
-              "customer_intake"
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -8909,30 +8814,64 @@
         "title": "CreateSesSetupRequest",
         "type": "object"
       },
-      "CreateSessionResponse": {
+      "CreateSessionRequest": {
         "properties": {
-          "connected": {
-            "title": "Connected",
-            "type": "boolean"
+          "branch_name": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Branch Name"
           },
-          "display_size": {
-            "items": {
-              "type": "integer"
-            },
-            "title": "Display Size",
-            "type": "array"
+          "caller_id": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
+            "title": "Caller Id"
           },
-          "session_id": {
-            "title": "Session Id",
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
+            "title": "Entity Id"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
             "type": "string"
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Tags",
+            "type": "array"
           }
         },
         "required": [
-          "session_id",
-          "connected",
-          "display_size"
+          "service_id"
         ],
-        "title": "CreateSessionResponse",
+        "title": "CreateSessionRequest",
         "type": "object"
       },
       "CreateSimulationCaseItem": {
@@ -9123,15 +9062,6 @@
             "default": true,
             "title": "Enabled",
             "type": "boolean"
-          },
-          "execution_tier": {
-            "default": "orchestrated",
-            "enum": [
-              "orchestrated",
-              "computer_use"
-            ],
-            "title": "Execution Tier",
-            "type": "string"
           },
           "input_schema": {
             "additionalProperties": true,
@@ -10647,7 +10577,9 @@
               "database",
               "custom",
               "smart_fhir",
-              "customer_intake"
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -11374,257 +11306,6 @@
         "maxLength": 2000,
         "type": "string"
       },
-      "DesktopIntegrationResponse": {
-        "description": "Desktop variant — Computer Use connection fields. System-provisioned.",
-        "properties": {
-          "created_at": {
-            "description": "When the integration was created.",
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "desktop_allowed_domains": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Desktop Allowed Domains",
-            "type": "array"
-          },
-          "desktop_display_height": {
-            "title": "Desktop Display Height",
-            "type": "integer"
-          },
-          "desktop_display_width": {
-            "title": "Desktop Display Width",
-            "type": "integer"
-          },
-          "desktop_gateway_host": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway Host"
-          },
-          "desktop_gateway_password_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway Password Ssm Path"
-          },
-          "desktop_gateway_user_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway User Ssm Path"
-          },
-          "desktop_host": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Host"
-          },
-          "desktop_load_balance_info": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Load Balance Info"
-          },
-          "desktop_password_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Password Ssm Path"
-          },
-          "desktop_port": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Port"
-          },
-          "desktop_rdp_file": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Rdp File"
-          },
-          "desktop_remote_app": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Remote App"
-          },
-          "desktop_remote_app_cmd": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Remote App Cmd"
-          },
-          "desktop_security": {
-            "anyOf": [
-              {
-                "enum": [
-                  "nla",
-                  "tls",
-                  "rdp"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Security"
-          },
-          "desktop_start_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Start Url"
-          },
-          "desktop_type": {
-            "enum": [
-              "rdp",
-              "vnc",
-              "browser"
-            ],
-            "title": "Desktop Type",
-            "type": "string"
-          },
-          "desktop_username_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Username Ssm Path"
-          },
-          "display_name": {
-            "description": "Human-readable name.",
-            "title": "Display Name",
-            "type": "string"
-          },
-          "enabled": {
-            "description": "Whether the integration is active.",
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "id": {
-            "description": "Integration ID.",
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "kind": {
-            "const": "desktop",
-            "default": "desktop",
-            "description": "Discriminator.",
-            "title": "Kind",
-            "type": "string"
-          },
-          "name": {
-            "description": "Slug-like identifier, immutable post-create.",
-            "title": "Name",
-            "type": "string"
-          },
-          "updated_at": {
-            "description": "When the integration was last updated.",
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          },
-          "workspace_id": {
-            "description": "Workspace ID.",
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "display_name",
-          "enabled",
-          "created_at",
-          "updated_at",
-          "desktop_type",
-          "desktop_host",
-          "desktop_port",
-          "desktop_display_width",
-          "desktop_display_height",
-          "desktop_username_ssm_path",
-          "desktop_password_ssm_path",
-          "desktop_start_url",
-          "desktop_allowed_domains",
-          "desktop_gateway_host",
-          "desktop_gateway_user_ssm_path",
-          "desktop_gateway_password_ssm_path",
-          "desktop_remote_app",
-          "desktop_remote_app_cmd",
-          "desktop_load_balance_info",
-          "desktop_security",
-          "desktop_rdp_file"
-        ],
-        "title": "DesktopIntegrationResponse",
-        "type": "object"
-      },
       "DestroySessionResponse": {
         "properties": {
           "status": {
@@ -11826,19 +11507,6 @@
           "total_facts"
         ],
         "title": "DimensionScoresResponse",
-        "type": "object"
-      },
-      "DisconnectResponse": {
-        "properties": {
-          "ok": {
-            "title": "Ok",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "ok"
-        ],
-        "title": "DisconnectResponse",
         "type": "object"
       },
       "DistrictMetricsResponse": {
@@ -19731,322 +19399,6 @@
         "title": "InteractionDynamics",
         "type": "object"
       },
-      "InternalDesktopIntegrationItem": {
-        "description": "Wire format for desktop integrations consumed by agent-engine.",
-        "properties": {
-          "desktop_allowed_domains": {
-            "default": [],
-            "items": {
-              "type": "string"
-            },
-            "title": "Desktop Allowed Domains",
-            "type": "array"
-          },
-          "desktop_display_height": {
-            "default": 768,
-            "title": "Desktop Display Height",
-            "type": "integer"
-          },
-          "desktop_display_width": {
-            "default": 1024,
-            "title": "Desktop Display Width",
-            "type": "integer"
-          },
-          "desktop_gateway_host": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway Host"
-          },
-          "desktop_gateway_password_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway Password Ssm Path"
-          },
-          "desktop_gateway_user_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Gateway User Ssm Path"
-          },
-          "desktop_host": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Host"
-          },
-          "desktop_load_balance_info": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Load Balance Info"
-          },
-          "desktop_password_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Password Ssm Path"
-          },
-          "desktop_port": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Port"
-          },
-          "desktop_rdp_file": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Rdp File"
-          },
-          "desktop_remote_app": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Remote App"
-          },
-          "desktop_remote_app_cmd": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Remote App Cmd"
-          },
-          "desktop_security": {
-            "anyOf": [
-              {
-                "enum": [
-                  "nla",
-                  "tls",
-                  "rdp"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Security"
-          },
-          "desktop_start_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Start Url"
-          },
-          "desktop_type": {
-            "enum": [
-              "rdp",
-              "vnc",
-              "browser"
-            ],
-            "title": "Desktop Type",
-            "type": "string"
-          },
-          "desktop_username_ssm_path": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Desktop Username Ssm Path"
-          },
-          "display_name": {
-            "title": "Display Name",
-            "type": "string"
-          },
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "kind": {
-            "const": "desktop",
-            "default": "desktop",
-            "title": "Kind",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "display_name",
-          "desktop_type"
-        ],
-        "title": "InternalDesktopIntegrationItem",
-        "type": "object"
-      },
-      "InternalIntegrationsListResponse": {
-        "properties": {
-          "items": {
-            "items": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/InternalRestIntegrationItem"
-                },
-                {
-                  "$ref": "#/components/schemas/InternalDesktopIntegrationItem"
-                }
-              ]
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items"
-        ],
-        "title": "InternalIntegrationsListResponse",
-        "type": "object"
-      },
-      "InternalRestIntegrationItem": {
-        "description": "Wire format for REST integrations consumed by agent-engine.",
-        "properties": {
-          "auth": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StaticHeaderAuthDict"
-              },
-              {
-                "$ref": "#/components/schemas/OAuth2ClientCredentialsAuthDict"
-              },
-              {
-                "$ref": "#/components/schemas/OAuth2JwtBearerAuthDict"
-              },
-              {
-                "$ref": "#/components/schemas/CustomTokenExchangeAuthDict"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Auth"
-          },
-          "base_url": {
-            "title": "Base Url",
-            "type": "string"
-          },
-          "display_name": {
-            "title": "Display Name",
-            "type": "string"
-          },
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "endpoints": {
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/EndpointResponse"
-            },
-            "title": "Endpoints",
-            "type": "array"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "kind": {
-            "const": "rest",
-            "default": "rest",
-            "title": "Kind",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "name",
-          "display_name",
-          "base_url"
-        ],
-        "title": "InternalRestIntegrationItem",
-        "type": "object"
-      },
       "InternalServiceConfigResponse": {
         "description": "Composite response matching ServiceConfig shape for voice-agent consumption.",
         "properties": {
@@ -20098,15 +19450,6 @@
             "default": true,
             "title": "Enabled",
             "type": "boolean"
-          },
-          "execution_tier": {
-            "default": "orchestrated",
-            "enum": [
-              "orchestrated",
-              "computer_use"
-            ],
-            "title": "Execution Tier",
-            "type": "string"
           },
           "id": {
             "format": "uuid",
@@ -32003,39 +31346,6 @@
         "title": "SessionStartEvent",
         "type": "object"
       },
-      "SessionStatusResponse": {
-        "properties": {
-          "connected": {
-            "title": "Connected",
-            "type": "boolean"
-          },
-          "created_at": {
-            "title": "Created At",
-            "type": "number"
-          },
-          "healthy": {
-            "title": "Healthy",
-            "type": "boolean"
-          },
-          "idle_seconds": {
-            "title": "Idle Seconds",
-            "type": "integer"
-          },
-          "session_id": {
-            "title": "Session Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "session_id",
-          "connected",
-          "healthy",
-          "created_at",
-          "idle_seconds"
-        ],
-        "title": "SessionStatusResponse",
-        "type": "object"
-      },
       "SetColumnDefaultAction": {
         "properties": {
           "default": {
@@ -32989,6 +32299,186 @@
         "title": "SimulationCaseScenario",
         "type": "object"
       },
+      "SimulationEvalResultResponse": {
+        "properties": {
+          "actual": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual"
+          },
+          "assertion_kind": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assertion Kind"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "definition": {
+            "additionalProperties": true,
+            "title": "Definition",
+            "type": "object"
+          },
+          "details": {
+            "additionalProperties": true,
+            "title": "Details",
+            "type": "object"
+          },
+          "eval_key": {
+            "maxLength": 128,
+            "title": "Eval Key",
+            "type": "string"
+          },
+          "eval_type": {
+            "enum": [
+              "assertion",
+              "metric"
+            ],
+            "title": "Eval Type",
+            "type": "string"
+          },
+          "expected": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "metric_key": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metric Key"
+          },
+          "passed": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Passed"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "maxLength": 4000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "status": {
+            "enum": [
+              "passed",
+              "failed",
+              "pending",
+              "skipped",
+              "error"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "eval_key",
+          "eval_type",
+          "status"
+        ],
+        "title": "SimulationEvalResultResponse",
+        "type": "object"
+      },
       "SimulationIntelligenceResponse": {
         "properties": {
           "intelligence": {
@@ -33148,6 +32638,33 @@
               }
             ],
             "title": "Created At"
+          },
+          "eval_error_count": {
+            "default": 0,
+            "title": "Eval Error Count",
+            "type": "integer"
+          },
+          "eval_fail_count": {
+            "default": 0,
+            "title": "Eval Fail Count",
+            "type": "integer"
+          },
+          "eval_pass_count": {
+            "default": 0,
+            "title": "Eval Pass Count",
+            "type": "integer"
+          },
+          "eval_result_count": {
+            "default": 0,
+            "title": "Eval Result Count",
+            "type": "integer"
+          },
+          "eval_results": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationEvalResultResponse"
+            },
+            "title": "Eval Results",
+            "type": "array"
           },
           "id": {
             "format": "uuid",
@@ -33824,14 +33341,6 @@
             "title": "Enabled",
             "type": "boolean"
           },
-          "execution_tier": {
-            "enum": [
-              "orchestrated",
-              "computer_use"
-            ],
-            "title": "Execution Tier",
-            "type": "string"
-          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -33963,7 +33472,6 @@
           "integration_tools",
           "static_tools",
           "enabled",
-          "execution_tier",
           "max_agent_turns",
           "checkpoint_enabled",
           "approval_required",
@@ -34263,7 +33771,9 @@
               "database",
               "custom",
               "smart_fhir",
-              "customer_intake"
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -34404,7 +33914,9 @@
               "database",
               "custom",
               "smart_fhir",
-              "customer_intake"
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -34491,7 +34003,9 @@
               "database",
               "custom",
               "smart_fhir",
-              "customer_intake"
+              "customer_intake",
+              "lakebase_schema",
+              "crm"
             ],
             "title": "Source Type",
             "type": "string"
@@ -36678,183 +36192,6 @@
           }
         },
         "title": "TargetSpec",
-        "type": "object"
-      },
-      "TaskListResponse": {
-        "properties": {
-          "tasks": {
-            "items": {
-              "$ref": "#/components/schemas/TaskStateResponse"
-            },
-            "title": "Tasks",
-            "type": "array"
-          }
-        },
-        "required": [
-          "tasks"
-        ],
-        "title": "TaskListResponse",
-        "type": "object"
-      },
-      "TaskStateResponse": {
-        "properties": {
-          "cached_tokens": {
-            "default": 0,
-            "title": "Cached Tokens",
-            "type": "integer"
-          },
-          "call_sid": {
-            "title": "Call Sid",
-            "type": "string"
-          },
-          "completed_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completed At"
-          },
-          "dispatched_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dispatched At"
-          },
-          "duration_ms": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Ms"
-          },
-          "error": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error"
-          },
-          "error_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Error Type"
-          },
-          "input_tokens": {
-            "default": 0,
-            "title": "Input Tokens",
-            "type": "integer"
-          },
-          "output_tokens": {
-            "default": 0,
-            "title": "Output Tokens",
-            "type": "integer"
-          },
-          "progress_message": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Progress Message"
-          },
-          "progress_step": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Progress Step"
-          },
-          "result": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Result"
-          },
-          "skill": {
-            "title": "Skill",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "pending",
-              "dispatched",
-              "running",
-              "completed",
-              "failed",
-              "cancelled",
-              "timeout"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "sub_tool_count": {
-            "default": 0,
-            "title": "Sub Tool Count",
-            "type": "integer"
-          },
-          "task_id": {
-            "title": "Task Id",
-            "type": "string"
-          },
-          "tier": {
-            "enum": [
-              "companion",
-              "desktop",
-              "computer_use"
-            ],
-            "title": "Tier",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "task_id",
-          "call_sid",
-          "workspace_id",
-          "skill",
-          "tier",
-          "status"
-        ],
-        "title": "TaskStateResponse",
         "type": "object"
       },
       "TestCallerNumbersRequest": {
@@ -41344,21 +40681,6 @@
             ],
             "title": "Enabled"
           },
-          "execution_tier": {
-            "anyOf": [
-              {
-                "enum": [
-                  "orchestrated",
-                  "computer_use"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Execution Tier"
-          },
           "input_schema": {
             "anyOf": [
               {
@@ -44680,18 +44002,6 @@
         "title": "ConversationSummary",
         "type": "object"
       },
-      "src__routes__desktop_sessions__CreateSessionRequest": {
-        "properties": {
-          "integration_name": {
-            "$ref": "#/components/schemas/NameString"
-          }
-        },
-        "required": [
-          "integration_name"
-        ],
-        "title": "CreateSessionRequest",
-        "type": "object"
-      },
       "src__routes__integrations__create_endpoint__Request": {
         "description": "Add a new endpoint to a REST integration (V186 flat shape).",
         "properties": {
@@ -44946,21 +44256,7 @@
           "items": {
             "description": "The integrations matching the request filters.",
             "items": {
-              "discriminator": {
-                "mapping": {
-                  "desktop": "#/components/schemas/DesktopIntegrationResponse",
-                  "rest": "#/components/schemas/RestIntegrationResponse"
-                },
-                "propertyName": "kind"
-              },
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/RestIntegrationResponse"
-                },
-                {
-                  "$ref": "#/components/schemas/DesktopIntegrationResponse"
-                }
-              ]
+              "$ref": "#/components/schemas/RestIntegrationResponse"
             },
             "title": "Items",
             "type": "array"
@@ -45327,66 +44623,6 @@
           "source"
         ],
         "title": "AuditEventResponse",
-        "type": "object"
-      },
-      "src__routes__simulations__CreateSessionRequest": {
-        "properties": {
-          "branch_name": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Branch Name"
-          },
-          "caller_id": {
-            "anyOf": [
-              {
-                "maxLength": 64,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
-            "title": "Caller Id"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
-            "title": "Entity Id"
-          },
-          "service_id": {
-            "format": "uuid",
-            "title": "Service Id",
-            "type": "string"
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 20,
-            "title": "Tags",
-            "type": "array"
-          }
-        },
-        "required": [
-          "service_id"
-        ],
-        "title": "CreateSessionRequest",
         "type": "object"
       },
       "src__routes__workspace_data_queries__create_workspace_data_query__Request": {
@@ -52926,7 +52162,7 @@
     },
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
       "get": {
-        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 15 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).",
+        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).",
         "operationId": "get-call-trace-analysis",
         "parameters": [
           {
@@ -55874,279 +55110,6 @@
         "summary": "Invoke Workspace Data Query",
         "tags": [
           "Workspace Data Queries"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/desktop-sessions": {
-      "post": {
-        "operationId": "create_desktop_session_v1__workspace_id__desktop_sessions_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/src__routes__desktop_sessions__CreateSessionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateSessionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Create Desktop Session",
-        "tags": [
-          "Desktop Sessions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/desktop-sessions/{session_id}": {
-      "delete": {
-        "operationId": "disconnect_session_v1__workspace_id__desktop_sessions__session_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Session Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DisconnectResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Disconnect Session",
-        "tags": [
-          "Desktop Sessions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/action": {
-      "post": {
-        "operationId": "perform_action_v1__workspace_id__desktop_sessions__session_id__action_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Session Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ActionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ActionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Perform Action",
-        "tags": [
-          "Desktop Sessions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/screenshot": {
-      "get": {
-        "operationId": "get_screenshot_v1__workspace_id__desktop_sessions__session_id__screenshot_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Session Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Screenshot",
-        "tags": [
-          "Desktop Sessions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/status": {
-      "get": {
-        "operationId": "get_session_status_v1__workspace_id__desktop_sessions__session_id__status_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Session Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SessionStatusResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Session Status",
-        "tags": [
-          "Desktop Sessions"
         ]
       }
     },
@@ -59137,7 +58100,7 @@
     },
     "/v1/{workspace_id}/integrations": {
       "get": {
-        "description": "List every integration (REST + desktop) for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
+        "description": "List every integration for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
         "operationId": "list-integrations",
         "parameters": [
           {
@@ -59369,7 +58332,7 @@
         ]
       },
       "get": {
-        "description": "Retrieve an integration (REST or desktop) by ID. Requires `Integration.view` permission.",
+        "description": "Retrieve an integration by ID. Requires `Integration.view` permission.",
         "operationId": "get-integration",
         "parameters": [
           {
@@ -59398,22 +58361,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "discriminator": {
-                    "mapping": {
-                      "desktop": "#/components/schemas/DesktopIntegrationResponse",
-                      "rest": "#/components/schemas/RestIntegrationResponse"
-                    },
-                    "propertyName": "kind"
-                  },
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/RestIntegrationResponse"
-                    },
-                    {
-                      "$ref": "#/components/schemas/DesktopIntegrationResponse"
-                    }
-                  ],
-                  "title": "Response Get-Integration"
+                  "$ref": "#/components/schemas/RestIntegrationResponse"
                 }
               }
             },
@@ -69524,7 +68472,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/src__routes__simulations__CreateSessionRequest"
+                "$ref": "#/components/schemas/CreateSessionRequest"
               }
             }
           },
@@ -69979,7 +68927,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/src__routes__simulations__CreateSessionRequest"
+                "$ref": "#/components/schemas/CreateSessionRequest"
               }
             }
           },
@@ -70860,26 +69808,6 @@
                 }
               ],
               "title": "Enabled"
-            }
-          },
-          {
-            "in": "query",
-            "name": "execution_tier",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "orchestrated",
-                    "computer_use"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Execution Tier"
             }
           },
           {
@@ -72361,115 +71289,6 @@
         "summary": "Update Workspace Table",
         "tags": [
           "Workspace Tables"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/tasks/by-call/{call_sid}": {
-      "get": {
-        "description": "List all tasks for a call. Only returns tasks matching the current workspace.",
-        "operationId": "list_tasks_by_call_v1__workspace_id__tasks_by_call__call_sid__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "call_sid",
-            "required": true,
-            "schema": {
-              "title": "Call Sid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskListResponse"
-                }
-              }
-            },
-            "description": "List of tasks (may be empty)"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Tasks By Call",
-        "tags": [
-          "Tasks"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/tasks/{task_id}": {
-      "get": {
-        "description": "Get task state by ID. Requires workspace context — the task's workspace_id must match.",
-        "operationId": "get_task_v1__workspace_id__tasks__task_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "task_id",
-            "required": true,
-            "schema": {
-              "title": "Task Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TaskStateResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Task not found or expired"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Task",
-        "tags": [
-          "Tasks"
         ]
       }
     },
