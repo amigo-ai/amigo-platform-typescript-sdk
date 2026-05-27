@@ -43,12 +43,29 @@ interface DesktopActionRequest {
 }
 
 interface DesktopSessionResponse {
-  session_id?: string
-  [key: string]: unknown
+  connected: boolean
+  display_size: number[]
+  session_id: string
 }
 
 interface DesktopActionResponse {
   ok: boolean
+}
+
+interface DesktopDisconnectResponse {
+  ok: boolean
+}
+
+interface DesktopScreenshotResponse {
+  [key: string]: unknown
+}
+
+interface DesktopSessionStatusResponse {
+  connected: boolean
+  created_at: number
+  healthy: boolean
+  idle_seconds: number
+  session_id: string
 }
 
 function untypedClient(client: PlatformFetch): UntypedOpenApiClient {
@@ -79,7 +96,7 @@ export class DesktopSessionsResource extends WorkspaceScopedResource {
   /** Disconnect / tear down a desktop session */
   async disconnect(sessionId: string) {
     return extractData(
-      await untypedClient(this.client).DELETE<DesktopSessionResponse>(
+      await untypedClient(this.client).DELETE<DesktopDisconnectResponse>(
         '/v1/{workspace_id}/desktop-sessions/{session_id}',
         {
           params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
@@ -104,7 +121,7 @@ export class DesktopSessionsResource extends WorkspaceScopedResource {
   /** Get the latest screenshot for a session */
   async getScreenshot(sessionId: string) {
     return extractData(
-      await untypedClient(this.client).GET<DesktopSessionResponse>(
+      await untypedClient(this.client).GET<DesktopScreenshotResponse>(
         '/v1/{workspace_id}/desktop-sessions/{session_id}/screenshot',
         {
           params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
@@ -116,7 +133,7 @@ export class DesktopSessionsResource extends WorkspaceScopedResource {
   /** Get the session's current connection + activity status */
   async getStatus(sessionId: string) {
     return extractData(
-      await untypedClient(this.client).GET<DesktopSessionResponse>(
+      await untypedClient(this.client).GET<DesktopSessionStatusResponse>(
         '/v1/{workspace_id}/desktop-sessions/{session_id}/status',
         {
           params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
