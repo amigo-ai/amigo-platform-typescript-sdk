@@ -8,13 +8,11 @@ const TASK_ID = 'task-001'
 const CALL_SID = 'CA1234567890abcdef1234567890abcdef'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
-    [`GET ${BASE}/tasks/${TASK_ID}`]: () =>
-      Response.json({ id: TASK_ID, status: 'completed' }),
+    [`GET ${BASE}/tasks/${TASK_ID}`]: () => Response.json({ id: TASK_ID, status: 'completed' }),
     [`GET ${BASE}/tasks/by-call/${CALL_SID}`]: () => Response.json({ tasks: [] }),
   }),
 })

@@ -100,9 +100,7 @@ export class WorkspaceEventStreamError extends Error {
   }
 }
 
-export function isWorkspaceEventStreamError(
-  value: unknown,
-): value is WorkspaceEventStreamError {
+export function isWorkspaceEventStreamError(value: unknown): value is WorkspaceEventStreamError {
   return value instanceof WorkspaceEventStreamError
 }
 
@@ -706,8 +704,7 @@ function interpretServerErrorFrame(dataJson: string): {
   }
   const obj = payload as Record<string, unknown>
   const rawCode = typeof obj['code'] === 'string' ? (obj['code'] as string) : ''
-  const message =
-    typeof obj['message'] === 'string' ? (obj['message'] as string) : 'Stream error'
+  const message = typeof obj['message'] === 'string' ? (obj['message'] as string) : 'Stream error'
 
   if (rawCode in TERMINAL_SERVER_ERROR_CODES) {
     return {

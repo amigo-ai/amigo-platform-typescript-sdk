@@ -12,6 +12,7 @@ import type {
   ConversationDetail,
   ConversationListResponse,
   CreateConversationRequest,
+  TurnConversationSnapshot,
   TurnRequest,
   TurnResponse,
 } from '../../src/index.js'
@@ -97,11 +98,7 @@ describe('ConversationsResource', () => {
     expect(result.items[0]?.status).toBe('active')
     expect(result.total).toBe(3)
     // SDK passes lifecycle through unmodified for every enum value.
-    expect(result.items.map((item) => item.lifecycle)).toEqual([
-      'active',
-      'dormant',
-      'closed',
-    ])
+    expect(result.items.map((item) => item.lifecycle)).toEqual(['active', 'dormant', 'closed'])
     // Verify the ``status`` query parameter is actually forwarded to the
     // request URL. Without this, a future regression that drops the
     // filter param would still pass — the mock returns whatever it
@@ -200,8 +197,7 @@ describe('ConversationsResource', () => {
         apiKey: TEST_API_KEY,
         workspaceId: TEST_WORKSPACE_ID,
         fetch: mockFetch({
-          [`GET ${BASE}/conversations/${conversationId}`]: () =>
-            Response.json(apiResponse),
+          [`GET ${BASE}/conversations/${conversationId}`]: () => Response.json(apiResponse),
         }),
       })
 
@@ -276,6 +272,45 @@ describe('ConversationsResource', () => {
     expect(requestBody).toEqual({ message: 'Hello' })
     expect(result.turn_id).toBe('turn-001')
     expect(result.output).toHaveLength(1)
+  })
+
+  it('exposes context graph state on non-streaming turn responses', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const conversation: TurnConversationSnapshot = {
+      id: conversationId,
+      status: 'active',
+      turn_count: 1,
+      updated_at: '2026-01-01T00:00:01Z',
+      context_graph_state: {
+        type: 'annotation',
+        name: 'collect_intake',
+        inner_thought: 'Collect the missing intake details.',
+        next_state: 'confirm_intake',
+      },
+    }
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-001',
+      conversation,
+      input: {
+        role: 'user',
+        text: 'Hello',
+        timestamp: '2026-01-01T00:00:00Z',
+        content: [{ type: 'text', text: 'Hello' }],
+      },
+      output: [],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () => Response.json(apiResponse),
+      }),
+    })
+
+    const result = await client.conversations.createTurn(conversationId, { message: 'Hello' })
+
+    expect(result.conversation.context_graph_state).toEqual(conversation.context_graph_state)
   })
 
   it('forwards include_tool_calls when requested via createTurn options', async () => {
@@ -391,9 +426,9 @@ describe('ConversationsResource', () => {
       }),
     })
 
-    await expect(
-      client.conversations.create({ service_id: '' }),
-    ).rejects.toBeInstanceOf(ValidationError)
+    await expect(client.conversations.create({ service_id: '' })).rejects.toBeInstanceOf(
+      ValidationError,
+    )
   })
 
   it('routes DELETE failures through the central error pipeline', async () => {
@@ -907,9 +942,14 @@ describe('ConversationsResource', () => {
       fetch: mockFetch({
         [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: (req) => {
           requestUrl = req.url
-          return new Response(sseStream(['event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n']), {
-            headers: { 'content-type': 'text/event-stream' },
-          })
+          return new Response(
+            sseStream([
+              'event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n',
+            ]),
+            {
+              headers: { 'content-type': 'text/event-stream' },
+            },
+          )
         },
       }),
     })
@@ -1013,9 +1053,7 @@ describe('ConversationsResource', () => {
     // default of false. Those defaults are static-type defaults; on the
     // wire the fields are simply absent and pass through the parser.
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const stream = sseStream([
-      'event: error\ndata: {"message":"legacy"}\n\n',
-    ])
+    const stream = sseStream(['event: error\ndata: {"message":"legacy"}\n\n'])
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,

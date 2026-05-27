@@ -24,8 +24,7 @@ const client = new AmigoClient({
   baseUrl: process.env.AMIGO_BASE_URL,
 })
 
-const wsUrl =
-  client.conversations.textStreamUrl({ serviceId, token: apiKey }) + '&tool_events=true'
+const wsUrl = client.conversations.textStreamUrl({ serviceId, token: apiKey }) + '&tool_events=true'
 
 console.log(`Connecting to ${wsUrl.replace(apiKey, '***')}`)
 

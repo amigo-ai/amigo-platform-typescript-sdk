@@ -52,7 +52,7 @@ Notes:
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
 - Conversation helpers: `sessionConnectAuthProtocols`, `textStreamAuthProtocols`
-- Conversation types: `ConversationDetail`, `ConversationListResponse`, `ConversationSummary`, `ConversationTurn`, `CreateConversationRequest`, `ListConversationsParams`, `SessionConnectUrlParams`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
+- Conversation types: `ConversationDetail`, `ConversationListResponse`, `ConversationSummary`, `ConversationTurn`, `CreateConversationRequest`, `ListConversationsParams`, `SessionConnectUrlParams`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
 - Generated OpenAPI types: `paths`, `components`, `operations`
 - Generated API types are produced with `npm run gen-types` from the committed `openapi.json` snapshot.

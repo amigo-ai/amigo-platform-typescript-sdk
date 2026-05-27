@@ -62,15 +62,12 @@ export class PipelineResource extends WorkspaceScopedResource {
     /** Get the delivery log for a specific outbound data source */
     getLog: async (dataSourceId: string, params?: ListParams) =>
       extractData(
-        await this.client.GET(
-          '/v1/{workspace_id}/pipeline/outbound/{data_source_id}/log',
-          {
-            params: {
-              path: { workspace_id: this.workspaceId, data_source_id: dataSourceId },
-              query: params,
-            },
+        await this.client.GET('/v1/{workspace_id}/pipeline/outbound/{data_source_id}/log', {
+          params: {
+            path: { workspace_id: this.workspaceId, data_source_id: dataSourceId },
+            query: params,
           },
-        ),
+        }),
       ),
   }
 

@@ -27,7 +27,9 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   // ─── Integrations ─────────────────────────────────────────────────────────
 
   /** Create a new REST integration */
-  async create(body: components['schemas']['src__routes__integrations__create_integration__Request']) {
+  async create(
+    body: components['schemas']['src__routes__integrations__create_integration__Request'],
+  ) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/integrations', {
         params: { path: { workspace_id: this.workspaceId } },
@@ -92,10 +94,7 @@ export class IntegrationsResource extends WorkspaceScopedResource {
     )
   }
 
-  listEndpointsAutoPaging(
-    integrationId: IntegrationId | string,
-    params?: ListEndpointsParams,
-  ) {
+  listEndpointsAutoPaging(integrationId: IntegrationId | string, params?: ListEndpointsParams) {
     return this.iteratePaginatedList(
       (pageParams) => this.listEndpoints(integrationId, pageParams),
       params,

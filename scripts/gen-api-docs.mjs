@@ -39,25 +39,24 @@ const resourceFiles = collectResourceTsFiles(RESOURCES_DIR)
 
 const indexSource = loadSource(INDEX_FILE)
 const resourceClassMap = new Map(
-  resourceFiles
-    .flatMap((file) => {
-      const fullPath = path.join(RESOURCES_DIR, file)
-      const source = loadSource(fullPath)
-      // A nested resource module may export multiple classes (e.g.
-      // ``channels/index.ts`` declares ``ChannelsResource`` and
-      // re-exports ``SesSetupResource``); collect every class
-      // declaration so the class-name map covers all of them.
-      const classDeclarations = source.statements.filter(ts.isClassDeclaration)
-      return classDeclarations
-        .filter((decl) => Boolean(decl.name))
-        .map((decl) => [
-          decl.name.text,
-          {
-            file,
-            methods: collectResourceMethods(decl),
-          },
-        ])
-    }),
+  resourceFiles.flatMap((file) => {
+    const fullPath = path.join(RESOURCES_DIR, file)
+    const source = loadSource(fullPath)
+    // A nested resource module may export multiple classes (e.g.
+    // ``channels/index.ts`` declares ``ChannelsResource`` and
+    // re-exports ``SesSetupResource``); collect every class
+    // declaration so the class-name map covers all of them.
+    const classDeclarations = source.statements.filter(ts.isClassDeclaration)
+    return classDeclarations
+      .filter((decl) => Boolean(decl.name))
+      .map((decl) => [
+        decl.name.text,
+        {
+          file,
+          methods: collectResourceMethods(decl),
+        },
+      ])
+  }),
 )
 
 const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')

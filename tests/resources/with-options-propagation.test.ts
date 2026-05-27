@@ -45,12 +45,18 @@ describe('withOptions propagation into nested sub-resources', () => {
   it('analytics.surfaces.* uses the scoped client AND hits the right URL', async () => {
     const a = spyFetch()
     const b = spyFetch()
-    const ca = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch: a.fetch })
-    const cb = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch: b.fetch })
+    const ca = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: a.fetch,
+    })
+    const cb = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: b.fetch,
+    })
 
-    await ca.analytics
-      .withOptions({ headers: { 'x-trace': 'A' } })
-      .surfaces.getCompletionRates()
+    await ca.analytics.withOptions({ headers: { 'x-trace': 'A' } }).surfaces.getCompletionRates()
 
     // Only spy A should have seen the call; spy B must remain untouched —
     // proves we're observing this client's scoped pipeline, not a leak.
@@ -63,8 +69,16 @@ describe('withOptions propagation into nested sub-resources', () => {
   it('simulations.runs.list uses the scoped client AND hits the right URL', async () => {
     const a = spyFetch()
     const b = spyFetch()
-    const ca = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch: a.fetch })
-    const cb = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch: b.fetch })
+    const ca = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: a.fetch,
+    })
+    const cb = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: b.fetch,
+    })
 
     await ca.simulations.withOptions({ headers: { 'x-trace': 'B' } }).runs.list()
 
@@ -78,11 +92,9 @@ describe('withOptions propagation into nested sub-resources', () => {
     const { fetch, last } = spyFetch()
     const client = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch })
 
-    await client.simulations
-      .withOptions({ headers: { 'x-trace': 'class' } })
-      .createSession({
-        service_id: 'svc-1',
-      } as Parameters<typeof client.simulations.createSession>[0])
+    await client.simulations.withOptions({ headers: { 'x-trace': 'class' } }).createSession({
+      service_id: 'svc-1',
+    } as Parameters<typeof client.simulations.createSession>[0])
 
     expect(last.trace).toBe('class')
     expect(last.url).toBe(`/v1/${TEST_WORKSPACE_ID}/simulations/sessions`)

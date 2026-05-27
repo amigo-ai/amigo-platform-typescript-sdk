@@ -7,7 +7,6 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const SURFACE_ID = 'surf-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const SURFACE_FIXTURE = { id: SURFACE_ID, status: 'pending', title: 'Intake' }
 
 const client = new AmigoClient({
@@ -42,10 +41,7 @@ describe('SurfacesResource', () => {
     ).toMatchObject({ id: SURFACE_ID })
     expect(await client.surfaces.get(SURFACE_ID)).toMatchObject({ id: SURFACE_ID })
     expect(
-      await client.surfaces.update(
-        SURFACE_ID,
-        {} as Parameters<typeof client.surfaces.update>[1],
-      ),
+      await client.surfaces.update(SURFACE_ID, {} as Parameters<typeof client.surfaces.update>[1]),
     ).toMatchObject({ id: SURFACE_ID })
     expect(await client.surfaces.archive(SURFACE_ID)).toMatchObject({ archived_at: 'now' })
   })
@@ -60,10 +56,7 @@ describe('SurfacesResource', () => {
     expect(await client.surfaces.getProgress(SURFACE_ID)).toMatchObject({ percent: 50 })
     expect(await client.surfaces.approve(SURFACE_ID)).toMatchObject({ ok: true })
     expect(
-      await client.surfaces.reject(
-        SURFACE_ID,
-        {} as Parameters<typeof client.surfaces.reject>[1],
-      ),
+      await client.surfaces.reject(SURFACE_ID, {} as Parameters<typeof client.surfaces.reject>[1]),
     ).toMatchObject({ ok: true })
     expect(await client.surfaces.reshape(SURFACE_ID)).toMatchObject({ id: 'surf-002' })
   })

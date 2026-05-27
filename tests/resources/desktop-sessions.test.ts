@@ -7,7 +7,6 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const SESSION_ID = 'desktop-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
@@ -25,14 +24,15 @@ const client = new AmigoClient({
 describe('DesktopSessionsResource', () => {
   it('lifecycle: create → action → screenshot → status → disconnect', async () => {
     expect(
-      await client.desktopSessions.create({} as Parameters<
-        typeof client.desktopSessions.create
-      >[0]),
+      await client.desktopSessions.create(
+        {} as Parameters<typeof client.desktopSessions.create>[0],
+      ),
     ).toMatchObject({ session_id: SESSION_ID })
     expect(
-      await client.desktopSessions.sendAction(SESSION_ID, {} as Parameters<
-        typeof client.desktopSessions.sendAction
-      >[1]),
+      await client.desktopSessions.sendAction(
+        SESSION_ID,
+        {} as Parameters<typeof client.desktopSessions.sendAction>[1],
+      ),
     ).toMatchObject({ ok: true })
     expect(await client.desktopSessions.getScreenshot(SESSION_ID)).toBeDefined()
     expect(await client.desktopSessions.getStatus(SESSION_ID)).toMatchObject({

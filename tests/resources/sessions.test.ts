@@ -7,7 +7,6 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const CALL_SID = 'CA1234567890abcdef1234567890abcdef'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,

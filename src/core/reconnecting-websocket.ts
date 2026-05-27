@@ -469,7 +469,10 @@ async function runOneConnection(args: RunLoopArgs): Promise<ConnectionOutcome> {
       try {
         socket.removeEventListener('open', onOpen)
         socket.removeEventListener('message', onMessage)
-        socket.removeEventListener('close', onClose as unknown as Parameters<WebSocket['removeEventListener']>[1])
+        socket.removeEventListener(
+          'close',
+          onClose as unknown as Parameters<WebSocket['removeEventListener']>[1],
+        )
         socket.removeEventListener('error', onSocketError)
       } catch {
         // best effort
@@ -544,9 +547,7 @@ async function runOneConnection(args: RunLoopArgs): Promise<ConnectionOutcome> {
   })
 }
 
-function resolveWebSocketFactory(
-  factory: WebSocketFactory | undefined,
-): WebSocketFactory {
+function resolveWebSocketFactory(factory: WebSocketFactory | undefined): WebSocketFactory {
   if (factory) return factory
   const globalWs = (globalThis as { WebSocket?: typeof WebSocket }).WebSocket
   if (!globalWs) {

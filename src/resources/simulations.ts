@@ -22,9 +22,7 @@ export type ListSimulationRunsParams = NonNullable<
  */
 export class SimulationsResource extends WorkspaceScopedResource {
   /** Start a simulation session — returns the agent's greeting and initial snapshot */
-  async createSession(
-    body: CreateSimulationSessionRequest,
-  ) {
+  async createSession(body: CreateSimulationSessionRequest) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/simulations/sessions', {
         params: { path: { workspace_id: this.workspaceId } },
@@ -128,10 +126,7 @@ export class SimulationsResource extends WorkspaceScopedResource {
       ),
 
     /** Spin up a session under a run (single scenario inside the run's batch) */
-    createSession: async (
-      runId: SimulationRunId | string,
-      body: CreateSimulationSessionRequest,
-    ) =>
+    createSession: async (runId: SimulationRunId | string, body: CreateSimulationSessionRequest) =>
       extractData(
         await this.client.POST('/v1/{workspace_id}/simulations/runs/{run_id}/sessions', {
           params: { path: { workspace_id: this.workspaceId, run_id: runId } },
@@ -190,12 +185,9 @@ export class SimulationsResource extends WorkspaceScopedResource {
     /** Get the set of explored conversation paths through the graph */
     getGraphPaths: async (serviceId: ServiceId | string) =>
       extractData(
-        await this.client.GET(
-          '/v1/{workspace_id}/simulations/services/{service_id}/graph/paths',
-          {
-            params: { path: { workspace_id: this.workspaceId, service_id: serviceId } },
-          },
-        ),
+        await this.client.GET('/v1/{workspace_id}/simulations/services/{service_id}/graph/paths', {
+          params: { path: { workspace_id: this.workspaceId, service_id: serviceId } },
+        }),
       ),
 
     /** List recorded sessions for the service */

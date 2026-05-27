@@ -157,8 +157,7 @@ const client = new AmigoClient({
 
     [`GET ${BASE}/calls/${CALL_ID}/metrics`]: () => Response.json({ metrics: [] }),
 
-    [`POST ${BASE}/calls/outbound`]: () =>
-      Response.json({ call_id: CALL_ID }, { status: 202 }),
+    [`POST ${BASE}/calls/outbound`]: () => Response.json({ call_id: CALL_ID }, { status: 202 }),
   }),
 })
 

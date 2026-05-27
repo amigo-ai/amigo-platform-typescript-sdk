@@ -11,6 +11,7 @@ export type ConversationTurn = components['schemas']['ConversationTurn']
 export type CreateConversationRequest = components['schemas']['CreateConversationRequest']
 export type TurnRequest = components['schemas']['TurnRequest']
 export type TurnResponse = components['schemas']['TurnResponse']
+export type TurnConversationSnapshot = components['schemas']['TurnConversationSnapshot']
 export type TurnStreamEvent = components['schemas']['TurnStreamEvent']
 export type TurnTokenEvent = components['schemas']['TurnTokenEvent']
 export type TurnToolCallStartedEvent = components['schemas']['TurnToolCallStartedEvent']
@@ -510,9 +511,7 @@ interface SSEFrame {
   data: string
 }
 
-async function* parseSSEFrames(
-  stream: ReadableStream<Uint8Array>,
-): AsyncGenerator<SSEFrame> {
+async function* parseSSEFrames(stream: ReadableStream<Uint8Array>): AsyncGenerator<SSEFrame> {
   const reader = stream.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
@@ -549,9 +548,7 @@ async function* parseSSEFrames(
   }
 }
 
-function findFrameTerminator(
-  s: string,
-): { terminatorStart: number; terminatorEnd: number } | null {
+function findFrameTerminator(s: string): { terminatorStart: number; terminatorEnd: number } | null {
   // Prefer LF-LF; fall back to CRLF-CRLF if the server is using CRLF
   // line endings end-to-end.
   const lf = s.indexOf('\n\n')
@@ -616,4 +613,3 @@ function parseTurnStreamFrame(eventName: string, dataJson: string): TurnStreamEv
   // `event:` line). Reattach it so the union member is well-formed.
   return { ...(payload as Record<string, unknown>), event: eventName } as TurnStreamEvent
 }
-

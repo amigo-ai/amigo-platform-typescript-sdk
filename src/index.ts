@@ -726,6 +726,7 @@ export type {
   TurnMessageEvent,
   TurnRequest,
   TurnResponse,
+  TurnConversationSnapshot,
   TurnStreamEvent,
   TurnThinkingEvent,
   TurnTokenEvent,

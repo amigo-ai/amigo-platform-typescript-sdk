@@ -267,9 +267,7 @@ function parseOverride(observerUrl: string): URL {
   try {
     url = new URL(observerUrl)
   } catch (cause) {
-    throw new ConfigurationError(
-      `observerUrl must be an absolute URL: ${String(cause)}`,
-    )
+    throw new ConfigurationError(`observerUrl must be an absolute URL: ${String(cause)}`)
   }
   if (url.protocol !== 'ws:' && url.protocol !== 'wss:') {
     throw new ConfigurationError('observerUrl overrides must use ws: or wss: URLs')
@@ -287,9 +285,7 @@ function deriveFromBase(baseUrl: string, workspaceId: string, callSid: string): 
   try {
     parsed = new URL(baseUrl)
   } catch (cause) {
-    throw new ConfigurationError(
-      `observerUrl cannot be derived from baseUrl: ${String(cause)}`,
-    )
+    throw new ConfigurationError(`observerUrl cannot be derived from baseUrl: ${String(cause)}`)
   }
   // Map http(s) to ws(s) — the agent-engine ALB serves both on the same host.
   let scheme: string
@@ -307,7 +303,9 @@ function deriveFromBase(baseUrl: string, workspaceId: string, callSid: string): 
       'observerUrl can only be derived from an origin-only baseUrl; pass observerUrl explicitly when using path-prefixed gateways',
     )
   }
-  const out = new URL(`${scheme}//${parsed.host}/v1/${encodeURIComponent(workspaceId)}/observers/${encodeURIComponent(callSid)}/ws`)
+  const out = new URL(
+    `${scheme}//${parsed.host}/v1/${encodeURIComponent(workspaceId)}/observers/${encodeURIComponent(callSid)}/ws`,
+  )
   return out
 }
 
@@ -336,9 +334,7 @@ function parseObserverFrame(data: unknown): ObserverSSEEvent | null {
     // ``BufferSource``. Pass through as ``Uint8Array`` over the underlying
     // buffer so every TypedArray variant decodes consistently.
     const view = data as ArrayBufferView
-    text = new TextDecoder().decode(
-      new Uint8Array(view.buffer, view.byteOffset, view.byteLength),
-    )
+    text = new TextDecoder().decode(new Uint8Array(view.buffer, view.byteOffset, view.byteLength))
   } else {
     return null
   }

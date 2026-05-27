@@ -8,7 +8,6 @@ const ENTITY_ID = 'ent-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 const FIXTURE = { brief_text: 'Active patient.', generated_at: '2026-01-01T00:00:00Z' }
 
-
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,

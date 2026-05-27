@@ -39656,6 +39656,16 @@
       },
       "TurnConversationSnapshot": {
         "properties": {
+          "context_graph_state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ContextGraphState-Output"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
