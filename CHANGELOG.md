@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.59.0] - 2026-05-27
+
+### Improvements
+
+- Update SDK OpenAPI schema (#274)
+
 ## [0.58.0] - 2026-05-26
 
 ### Breaking Changes
