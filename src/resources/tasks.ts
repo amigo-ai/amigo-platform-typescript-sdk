@@ -1,15 +1,4 @@
-import type { PlatformFetch } from '../core/openapi-client.js'
-import { WorkspaceScopedResource, extractData } from './base.js'
-
-interface UntypedOpenApiResult<T> {
-  data?: T
-  error?: unknown
-  response?: Response
-}
-
-interface UntypedOpenApiClient {
-  GET<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
-}
+import { WorkspaceScopedResource, extractData, untypedClient } from './base.js'
 
 type TaskStatus =
   | 'pending'
@@ -44,10 +33,6 @@ interface TaskStateResponse {
 
 interface TaskListResponse {
   tasks: TaskStateResponse[]
-}
-
-function untypedClient(client: PlatformFetch): UntypedOpenApiClient {
-  return client as unknown as UntypedOpenApiClient
 }
 
 /**

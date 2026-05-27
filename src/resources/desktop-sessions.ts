@@ -1,17 +1,4 @@
-import type { PlatformFetch } from '../core/openapi-client.js'
-import { WorkspaceScopedResource, extractData } from './base.js'
-
-interface UntypedOpenApiResult<T> {
-  data?: T
-  error?: unknown
-  response?: Response
-}
-
-interface UntypedOpenApiClient {
-  GET<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
-  POST<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
-  DELETE<T>(path: string, init: object): Promise<UntypedOpenApiResult<T>>
-}
+import { WorkspaceScopedResource, extractData, untypedClient } from './base.js'
 
 interface CreateDesktopSessionRequest {
   integration_name: string
@@ -66,10 +53,6 @@ interface DesktopSessionStatusResponse {
   healthy: boolean
   idle_seconds: number
   session_id: string
-}
-
-function untypedClient(client: PlatformFetch): UntypedOpenApiClient {
-  return client as unknown as UntypedOpenApiClient
 }
 
 /**
