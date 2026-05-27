@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.60.0] - 2026-05-27
+
+### Improvements
+
+- Expose conversation detail turn metadata (#276)
+
 ## [0.59.0] - 2026-05-27
 
 ### Improvements
