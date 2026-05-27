@@ -10,12 +10,12 @@ type ActionsListQuery = NonNullable<
 export interface ListActionsParams extends ListParams {
   search?: string
   enabled?: boolean
-  execution_tier?: ActionsListQuery['execution_tier']
+  sort_by?: ActionsListQuery['sort_by']
 }
 
 /**
  * Manage actions — reusable AI capabilities that agents can call.
- * Actions define a structured input/output schema and an execution tier.
+ * Actions define structured input/output schemas and execution settings.
  *
  * Note: The underlying API paths use `/skills/` for backward compatibility.
  */

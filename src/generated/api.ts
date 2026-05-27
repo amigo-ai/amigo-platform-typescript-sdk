@@ -1689,7 +1689,7 @@ export interface paths {
          *
          *     **Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).
          *
-         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 15 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
+         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
          */
         get: operations["get-call-trace-analysis"];
         put?: never;
@@ -2301,91 +2301,6 @@ export interface paths {
         put?: never;
         /** Invoke Workspace Data Query */
         post: operations["invoke-workspace-data-query"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/desktop-sessions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Create Desktop Session */
-        post: operations["create_desktop_session_v1__workspace_id__desktop_sessions_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/desktop-sessions/{session_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Disconnect Session */
-        delete: operations["disconnect_session_v1__workspace_id__desktop_sessions__session_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/action": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Perform Action */
-        post: operations["perform_action_v1__workspace_id__desktop_sessions__session_id__action_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/screenshot": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Screenshot */
-        get: operations["get_screenshot_v1__workspace_id__desktop_sessions__session_id__screenshot_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/desktop-sessions/{session_id}/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Session Status */
-        get: operations["get_session_status_v1__workspace_id__desktop_sessions__session_id__status_get"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3107,7 +3022,7 @@ export interface paths {
         };
         /**
          * List integrations
-         * @description List every integration (REST + desktop) for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.
+         * @description List every integration for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.
          */
         get: operations["list-integrations"];
         put?: never;
@@ -3131,7 +3046,7 @@ export interface paths {
         };
         /**
          * Get an integration
-         * @description Retrieve an integration (REST or desktop) by ID. Requires `Integration.view` permission.
+         * @description Retrieve an integration by ID. Requires `Integration.view` permission.
          */
         get: operations["get-integration"];
         put?: never;
@@ -6508,46 +6423,6 @@ export interface paths {
         patch: operations["update-workspace-table"];
         trace?: never;
     };
-    "/v1/{workspace_id}/tasks/by-call/{call_sid}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Tasks By Call
-         * @description List all tasks for a call. Only returns tasks matching the current workspace.
-         */
-        get: operations["list_tasks_by_call_v1__workspace_id__tasks_by_call__call_sid__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/tasks/{task_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Task
-         * @description Get task state by ID. Requires workspace context — the task's workspace_id must match.
-         */
-        get: operations["get_task_v1__workspace_id__tasks__task_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/tools/execute": {
         parameters: {
             query?: never;
@@ -7311,41 +7186,6 @@ export interface components {
             description: string;
             /** Filler Hint */
             filler_hint?: string | null;
-        };
-        /** ActionRequest */
-        ActionRequest: {
-            /** Amount */
-            amount?: number | null;
-            /** Button */
-            button?: string | null;
-            /** Direction */
-            direction?: ("up" | "down" | "left" | "right") | null;
-            /** Key */
-            key?: string | null;
-            /** Text */
-            text?: string | null;
-            /**
-             * Type
-             * @enum {string}
-             */
-            type: "click" | "double_click" | "type" | "key" | "scroll" | "move" | "drag" | "clipboard_type";
-            /** X */
-            x?: number | null;
-            /** X1 */
-            x1?: number | null;
-            /** X2 */
-            x2?: number | null;
-            /** Y */
-            y?: number | null;
-            /** Y1 */
-            y1?: number | null;
-            /** Y2 */
-            y2?: number | null;
-        };
-        /** ActionResponse */
-        ActionResponse: {
-            /** Ok */
-            ok: boolean;
         };
         /**
          * ActionState
@@ -9710,7 +9550,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "ehr" | "fhir_store" | "smart_fhir" | "rest_api" | "webhook" | "file_drop" | "lakebase_schema";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -10213,6 +10053,12 @@ export interface components {
         /** ConversationTurn */
         ConversationTurn: {
             /**
+             * Available Actions
+             * @description Action choices available in the turn's resolved context-graph state. Empty when actions cannot be resolved or the resolved state is not an action state.
+             * @default []
+             */
+            available_actions?: components["schemas"]["ConversationTurnAvailableAction"][];
+            /**
              * Content
              * @default []
              */
@@ -10222,10 +10068,38 @@ export interface components {
              * @enum {string}
              */
             role: "agent" | "user" | "system";
+            /**
+             * Selected Action Description
+             * @description Description of the context-graph action selected for this turn. Null means no action was selected or no selected action was recorded.
+             */
+            selected_action_description?: string | null;
+            /** @description Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. If multiple transitions were recorded, the API reports the first source state and final destination state. */
+            state_transition?: components["schemas"]["ConversationTurnStateTransition"] | null;
             /** Text */
             text: string;
             /** Timestamp */
             timestamp?: string | null;
+        };
+        /** ConversationTurnAvailableAction */
+        ConversationTurnAvailableAction: {
+            /**
+             * Description
+             * @description Human-readable description of an action available in the turn's state.
+             */
+            description: string;
+        };
+        /** ConversationTurnStateTransition */
+        ConversationTurnStateTransition: {
+            /**
+             * From
+             * @description Source context-graph state before the turn's state transition.
+             */
+            from: string;
+            /**
+             * To
+             * @description Destination context-graph state after the turn's state transition.
+             */
+            to: string;
         };
         /** ConvertEnvironmentRequest */
         ConvertEnvironmentRequest: {
@@ -10457,7 +10331,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -10711,14 +10585,27 @@ export interface components {
              */
             tenant_name: string;
         };
-        /** CreateSessionResponse */
-        CreateSessionResponse: {
-            /** Connected */
-            connected: boolean;
-            /** Display Size */
-            display_size: number[];
-            /** Session Id */
-            session_id: string;
+        /** CreateSessionRequest */
+        CreateSessionRequest: {
+            /** Branch Name */
+            branch_name?: string | null;
+            /**
+             * Caller Id
+             * @description Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.
+             */
+            caller_id?: string | null;
+            /**
+             * Entity Id
+             * @description Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).
+             */
+            entity_id?: string | null;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /** Tags */
+            tags?: string[];
         };
         /**
          * CreateSimulationCaseItem
@@ -10802,12 +10689,6 @@ export interface components {
              * @default true
              */
             enabled?: boolean;
-            /**
-             * Execution Tier
-             * @default orchestrated
-             * @enum {string}
-             */
-            execution_tier?: "orchestrated" | "computer_use";
             /** Input Schema */
             input_schema: {
                 [key: string]: unknown;
@@ -11584,7 +11465,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Sync Schedule */
             sync_schedule: string | null;
             /**
@@ -11872,93 +11753,6 @@ export interface components {
             url?: string | null;
         };
         DescriptionString: string;
-        /**
-         * DesktopIntegrationResponse
-         * @description Desktop variant — Computer Use connection fields. System-provisioned.
-         */
-        DesktopIntegrationResponse: {
-            /**
-             * Created At
-             * Format: date-time
-             * @description When the integration was created.
-             */
-            created_at: string;
-            /** Desktop Allowed Domains */
-            desktop_allowed_domains: string[];
-            /** Desktop Display Height */
-            desktop_display_height: number;
-            /** Desktop Display Width */
-            desktop_display_width: number;
-            /** Desktop Gateway Host */
-            desktop_gateway_host: string | null;
-            /** Desktop Gateway Password Ssm Path */
-            desktop_gateway_password_ssm_path: string | null;
-            /** Desktop Gateway User Ssm Path */
-            desktop_gateway_user_ssm_path: string | null;
-            /** Desktop Host */
-            desktop_host: string | null;
-            /** Desktop Load Balance Info */
-            desktop_load_balance_info: string | null;
-            /** Desktop Password Ssm Path */
-            desktop_password_ssm_path: string | null;
-            /** Desktop Port */
-            desktop_port: number | null;
-            /** Desktop Rdp File */
-            desktop_rdp_file: string | null;
-            /** Desktop Remote App */
-            desktop_remote_app: string | null;
-            /** Desktop Remote App Cmd */
-            desktop_remote_app_cmd: string | null;
-            /** Desktop Security */
-            desktop_security: ("nla" | "tls" | "rdp") | null;
-            /** Desktop Start Url */
-            desktop_start_url: string | null;
-            /**
-             * Desktop Type
-             * @enum {string}
-             */
-            desktop_type: "rdp" | "vnc" | "browser";
-            /** Desktop Username Ssm Path */
-            desktop_username_ssm_path: string | null;
-            /**
-             * Display Name
-             * @description Human-readable name.
-             */
-            display_name: string;
-            /**
-             * Enabled
-             * @description Whether the integration is active.
-             */
-            enabled: boolean;
-            /**
-             * Id
-             * Format: uuid
-             * @description Integration ID.
-             */
-            id: string;
-            /**
-             * @description Discriminator. (enum property replaced by openapi-typescript)
-             * @enum {string}
-             */
-            kind: "desktop";
-            /**
-             * Name
-             * @description Slug-like identifier, immutable post-create.
-             */
-            name: string;
-            /**
-             * Updated At
-             * Format: date-time
-             * @description When the integration was last updated.
-             */
-            updated_at: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             * @description Workspace ID.
-             */
-            workspace_id: string;
-        };
         /** DestroySessionResponse */
         DestroySessionResponse: {
             /**
@@ -12037,11 +11831,6 @@ export interface components {
             entity_id: string;
             /** Total Facts */
             total_facts: number;
-        };
-        /** DisconnectResponse */
-        DisconnectResponse: {
-            /** Ok */
-            ok: boolean;
         };
         /** DistrictMetricsResponse */
         DistrictMetricsResponse: {
@@ -15053,128 +14842,6 @@ export interface components {
             turn_taking_quality?: string | null;
         };
         /**
-         * InternalDesktopIntegrationItem
-         * @description Wire format for desktop integrations consumed by agent-engine.
-         */
-        InternalDesktopIntegrationItem: {
-            /**
-             * Desktop Allowed Domains
-             * @default []
-             */
-            desktop_allowed_domains?: string[];
-            /**
-             * Desktop Display Height
-             * @default 768
-             */
-            desktop_display_height?: number;
-            /**
-             * Desktop Display Width
-             * @default 1024
-             */
-            desktop_display_width?: number;
-            /** Desktop Gateway Host */
-            desktop_gateway_host?: string | null;
-            /** Desktop Gateway Password Ssm Path */
-            desktop_gateway_password_ssm_path?: string | null;
-            /** Desktop Gateway User Ssm Path */
-            desktop_gateway_user_ssm_path?: string | null;
-            /** Desktop Host */
-            desktop_host?: string | null;
-            /** Desktop Load Balance Info */
-            desktop_load_balance_info?: string | null;
-            /** Desktop Password Ssm Path */
-            desktop_password_ssm_path?: string | null;
-            /** Desktop Port */
-            desktop_port?: number | null;
-            /** Desktop Rdp File */
-            desktop_rdp_file?: string | null;
-            /** Desktop Remote App */
-            desktop_remote_app?: string | null;
-            /** Desktop Remote App Cmd */
-            desktop_remote_app_cmd?: string | null;
-            /** Desktop Security */
-            desktop_security?: ("nla" | "tls" | "rdp") | null;
-            /** Desktop Start Url */
-            desktop_start_url?: string | null;
-            /**
-             * Desktop Type
-             * @enum {string}
-             */
-            desktop_type: "rdp" | "vnc" | "browser";
-            /** Desktop Username Ssm Path */
-            desktop_username_ssm_path?: string | null;
-            /** Display Name */
-            display_name: string;
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Kind
-             * @default desktop
-             * @constant
-             */
-            kind?: "desktop";
-            /** Name */
-            name: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** InternalIntegrationsListResponse */
-        InternalIntegrationsListResponse: {
-            /** Items */
-            items: (components["schemas"]["InternalRestIntegrationItem"] | components["schemas"]["InternalDesktopIntegrationItem"])[];
-        };
-        /**
-         * InternalRestIntegrationItem
-         * @description Wire format for REST integrations consumed by agent-engine.
-         */
-        InternalRestIntegrationItem: {
-            /** Auth */
-            auth?: components["schemas"]["StaticHeaderAuthDict"] | components["schemas"]["OAuth2ClientCredentialsAuthDict"] | components["schemas"]["OAuth2JwtBearerAuthDict"] | components["schemas"]["CustomTokenExchangeAuthDict"] | null;
-            /** Base Url */
-            base_url: string;
-            /** Display Name */
-            display_name: string;
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /**
-             * Endpoints
-             * @default []
-             */
-            endpoints?: components["schemas"]["EndpointResponse"][];
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Kind
-             * @default rest
-             * @constant
-             */
-            kind?: "rest";
-            /** Name */
-            name: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /**
          * InternalServiceConfigResponse
          * @description Composite response matching ServiceConfig shape for voice-agent consumption.
          */
@@ -15212,12 +14879,6 @@ export interface components {
              * @default true
              */
             enabled?: boolean;
-            /**
-             * Execution Tier
-             * @default orchestrated
-             * @enum {string}
-             */
-            execution_tier?: "orchestrated" | "computer_use";
             /**
              * Id
              * Format: uuid
@@ -19182,10 +18843,12 @@ export interface components {
              */
             id: string;
             /**
-             * @description Discriminator. (enum property replaced by openapi-typescript)
-             * @enum {string}
+             * Kind
+             * @description Discriminator.
+             * @default rest
+             * @constant
              */
-            kind: "rest";
+            kind?: "rest";
             /**
              * Name
              * @description Slug-like identifier, immutable post-create.
@@ -20314,19 +19977,6 @@ export interface components {
              */
             workspace_id?: string | null;
         };
-        /** SessionStatusResponse */
-        SessionStatusResponse: {
-            /** Connected */
-            connected: boolean;
-            /** Created At */
-            created_at: number;
-            /** Healthy */
-            healthy: boolean;
-            /** Idle Seconds */
-            idle_seconds: number;
-            /** Session Id */
-            session_id: string;
-        };
         /** SetColumnDefaultAction */
         SetColumnDefaultAction: {
             default: components["schemas"]["Default"];
@@ -20741,6 +20391,53 @@ export interface components {
             /** Temperament */
             temperament?: string | null;
         };
+        /** SimulationEvalResultResponse */
+        SimulationEvalResultResponse: {
+            /** Actual */
+            actual?: unknown | null;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Case Id */
+            case_id?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Definition */
+            definition?: {
+                [key: string]: unknown;
+            };
+            /** Details */
+            details?: {
+                [key: string]: unknown;
+            };
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /** Expected */
+            expected?: unknown | null;
+            /** Id */
+            id?: string | null;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Passed */
+            passed?: boolean | null;
+            /** Rationale */
+            rationale?: string | null;
+            /** Run Id */
+            run_id?: string | null;
+            /** Score */
+            score?: number | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "passed" | "failed" | "pending" | "skipped" | "error";
+        };
         /** SimulationIntelligenceResponse */
         SimulationIntelligenceResponse: {
             /** Intelligence */
@@ -20804,6 +20501,28 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /**
+             * Eval Error Count
+             * @default 0
+             */
+            eval_error_count?: number;
+            /**
+             * Eval Fail Count
+             * @default 0
+             */
+            eval_fail_count?: number;
+            /**
+             * Eval Pass Count
+             * @default 0
+             */
+            eval_pass_count?: number;
+            /**
+             * Eval Result Count
+             * @default 0
+             */
+            eval_result_count?: number;
+            /** Eval Results */
+            eval_results?: components["schemas"]["SimulationEvalResultResponse"][];
             /**
              * Id
              * Format: uuid
@@ -21154,11 +20873,6 @@ export interface components {
             /** Enabled */
             enabled: boolean;
             /**
-             * Execution Tier
-             * @enum {string}
-             */
-            execution_tier: "orchestrated" | "computer_use";
-            /**
              * Id
              * Format: uuid
              */
@@ -21312,7 +21026,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -21372,7 +21086,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -21411,7 +21125,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Status */
             status: string;
             /**
@@ -22378,71 +22092,6 @@ export interface components {
             non_desired_states?: components["schemas"]["NonDesiredState"][];
             /** Ordered Pathways */
             ordered_pathways?: components["schemas"]["OrderedPathway"][];
-        };
-        /** TaskListResponse */
-        TaskListResponse: {
-            /** Tasks */
-            tasks: components["schemas"]["TaskStateResponse"][];
-        };
-        /** TaskStateResponse */
-        TaskStateResponse: {
-            /**
-             * Cached Tokens
-             * @default 0
-             */
-            cached_tokens?: number;
-            /** Call Sid */
-            call_sid: string;
-            /** Completed At */
-            completed_at?: string | null;
-            /** Dispatched At */
-            dispatched_at?: string | null;
-            /** Duration Ms */
-            duration_ms?: number | null;
-            /** Error */
-            error?: string | null;
-            /** Error Type */
-            error_type?: string | null;
-            /**
-             * Input Tokens
-             * @default 0
-             */
-            input_tokens?: number;
-            /**
-             * Output Tokens
-             * @default 0
-             */
-            output_tokens?: number;
-            /** Progress Message */
-            progress_message?: string | null;
-            /** Progress Step */
-            progress_step?: number | null;
-            /** Result */
-            result?: string | null;
-            /** Skill */
-            skill: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "pending" | "dispatched" | "running" | "completed" | "failed" | "cancelled" | "timeout";
-            /**
-             * Sub Tool Count
-             * @default 0
-             */
-            sub_tool_count?: number;
-            /** Task Id */
-            task_id: string;
-            /**
-             * Tier
-             * @enum {string}
-             */
-            tier: "companion" | "desktop" | "computer_use";
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
         };
         /** TestCallerNumbersRequest */
         TestCallerNumbersRequest: {
@@ -24132,8 +23781,6 @@ export interface components {
             enable_citations?: boolean | null;
             /** Enabled */
             enabled?: boolean | null;
-            /** Execution Tier */
-            execution_tier?: ("orchestrated" | "computer_use") | null;
             /** Input Schema */
             input_schema?: {
                 [key: string]: unknown;
@@ -25318,10 +24965,6 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
-        /** CreateSessionRequest */
-        src__routes__desktop_sessions__CreateSessionRequest: {
-            integration_name: components["schemas"]["NameString"];
-        };
         /**
          * Request
          * @description Add a new endpoint to a REST integration (V186 flat shape).
@@ -25478,7 +25121,7 @@ export interface components {
              * Items
              * @description The integrations matching the request filters.
              */
-            items: (components["schemas"]["RestIntegrationResponse"] | components["schemas"]["DesktopIntegrationResponse"])[];
+            items: components["schemas"]["RestIntegrationResponse"][];
         };
         /**
          * Request
@@ -25679,28 +25322,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** CreateSessionRequest */
-        src__routes__simulations__CreateSessionRequest: {
-            /** Branch Name */
-            branch_name?: string | null;
-            /**
-             * Caller Id
-             * @description Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.
-             */
-            caller_id?: string | null;
-            /**
-             * Entity Id
-             * @description Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).
-             */
-            entity_id?: string | null;
-            /**
-             * Service Id
-             * Format: uuid
-             */
-            service_id: string;
-            /** Tags */
-            tags?: string[];
         };
         /**
          * Request
@@ -32073,173 +31694,6 @@ export interface operations {
             };
         };
     };
-    create_desktop_session_v1__workspace_id__desktop_sessions_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["src__routes__desktop_sessions__CreateSessionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateSessionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    disconnect_session_v1__workspace_id__desktop_sessions__session_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DisconnectResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    perform_action_v1__workspace_id__desktop_sessions__session_id__action_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ActionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ActionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_screenshot_v1__workspace_id__desktop_sessions__session_id__screenshot_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_session_status_v1__workspace_id__desktop_sessions__session_id__status_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                session_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionStatusResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_latest_brief_v1__workspace_id__entities__entity_id__brief_get: {
         parameters: {
             query?: never;
@@ -33872,7 +33326,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["RestIntegrationResponse"] | components["schemas"]["DesktopIntegrationResponse"];
+                    "application/json": components["schemas"]["RestIntegrationResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -39850,7 +39304,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["src__routes__simulations__CreateSessionRequest"];
+                "application/json": components["schemas"]["CreateSessionRequest"];
             };
         };
         responses: {
@@ -40068,7 +39522,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["src__routes__simulations__CreateSessionRequest"];
+                "application/json": components["schemas"]["CreateSessionRequest"];
             };
         };
         responses: {
@@ -40599,7 +40053,6 @@ export interface operations {
         parameters: {
             query?: {
                 enabled?: boolean | null;
-                execution_tier?: ("orchestrated" | "computer_use") | null;
                 search?: components["schemas"]["SearchString"] | null;
                 sort_by?: string | null;
                 limit?: number;
@@ -41717,77 +41170,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["src__routes__workspace_tables__update_workspace_table__Response"];
                 };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_tasks_by_call_v1__workspace_id__tasks_by_call__call_sid__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                call_sid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description List of tasks (may be empty) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TaskListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_task_v1__workspace_id__tasks__task_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                task_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TaskStateResponse"];
-                };
-            };
-            /** @description Task not found or expired */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -392,7 +392,6 @@ const action = await client.actions.create({
     },
     required: ['patient_id', 'appointment_type'],
   },
-  execution_tier: 'orchestrated',
 })
 
 // Test with a sample input

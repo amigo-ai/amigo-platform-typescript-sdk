@@ -10,12 +10,12 @@ type SkillsListQuery = NonNullable<
 export interface ListSkillsParams extends ListParams {
   search?: string
   enabled?: boolean
-  execution_tier?: SkillsListQuery['execution_tier']
+  sort_by?: SkillsListQuery['sort_by']
 }
 
 /**
  * Manage skills — reusable AI capabilities that agents can call.
- * Skills define a structured input/output schema and an execution tier.
+ * Skills define structured input/output schemas and execution settings.
  */
 export class SkillsResource extends WorkspaceScopedResource {
   /** Create a new skill */

@@ -30,7 +30,6 @@ export const fixtures = {
     input_schema: { type: 'object', properties: {} },
     result_schema: null,
     model: 'claude-sonnet-4-6',
-    execution_tier: 'direct',
     integration_tools: [],
     static_tools: [],
     version: 1,
