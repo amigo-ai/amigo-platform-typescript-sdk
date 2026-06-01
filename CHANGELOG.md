@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.61.1] - 2026-06-01
+
+### Features
+
+- add conversation state transitions (#285)
+
 ## [0.61.0] - 2026-05-29
 
 ### Maintenance
