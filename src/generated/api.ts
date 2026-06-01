@@ -5078,37 +5078,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/connectors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get connector settings
-         * @description Get connector definitions for this workspace.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-connector-settings"];
-        /**
-         * Update connector settings
-         * @description Replace all connector definitions for this workspace.
-         *
-         *     Validates connection_config per source_type. Syncs world.data_sources
-         *     index for FK compatibility.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-connector-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/environments": {
         parameters: {
             query?: never;
@@ -5998,6 +5967,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/suite-runs/{suite_run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Suite Run Results
+         * @description Fetch aggregate results for a durable suite run.
+         */
+        get: operations["get-simulation-suite-run-results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/suites": {
         parameters: {
             query?: never;
@@ -6055,6 +6044,26 @@ export interface paths {
          * @description Run a first-class suite definition.
          */
         post: operations["run-simulation-suite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/suites/{suite_id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Simulation Suite Runs
+         * @description List durable suite-run groups for a first-class suite.
+         */
+        get: operations["list-simulation-suite-runs"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -9513,53 +9522,6 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /**
-         * ConnectorDef
-         * @description A single connector definition stored in platform.connector_configs.
-         */
-        ConnectorDef: {
-            /** Connection Config */
-            connection_config?: {
-                [key: string]: unknown;
-            };
-            /** Connector Type */
-            connector_type?: string | null;
-            /** Display Name */
-            display_name?: string | null;
-            /** Entity Types */
-            entity_types?: string[];
-            /** Field Mappings */
-            field_mappings?: {
-                [key: string]: unknown;
-            };
-            /**
-             * Id
-             * Format: uuid
-             */
-            id?: string;
-            /**
-             * Is Active
-             * @default true
-             */
-            is_active?: boolean;
-            /** Name */
-            name: string;
-            /** Outbound Entity Types */
-            outbound_entity_types?: string[];
-            /**
-             * Source Type
-             * @enum {string}
-             */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
-            /** Sync Schedule */
-            sync_schedule?: string | null;
-            /**
-             * Sync Strategy
-             * @default manual
-             * @enum {string}
-             */
-            sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous" | "polling";
-        };
         /** ConnectorHealthItem */
         ConnectorHealthItem: {
             /**
@@ -9701,24 +9663,6 @@ export interface components {
              * @description Total number of matching resources
              */
             total: number;
-        };
-        /**
-         * ConnectorSettingsRequest
-         * @description Request for PUT /v1/{ws}/settings/connectors.
-         *
-         *     Replaces the entire connector list.
-         */
-        ConnectorSettingsRequest: {
-            /** Connectors */
-            connectors: components["schemas"]["ConnectorDef"][];
-        };
-        /**
-         * ConnectorSettingsResponse
-         * @description Response for GET /v1/{ws}/settings/connectors.
-         */
-        ConnectorSettingsResponse: {
-            /** Connectors */
-            connectors: components["schemas"]["ConnectorDef"][];
         };
         /** Constraint */
         Constraint: {
@@ -10073,8 +10017,17 @@ export interface components {
              * @description Description of the context-graph action selected for this turn. Null means no action was selected or no selected action was recorded.
              */
             selected_action_description?: string | null;
-            /** @description Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. If multiple transitions were recorded, the API reports the first source state and final destination state. */
+            /**
+             * @deprecated
+             * @description Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. Deprecated: use state_transitions instead. If multiple transitions were recorded, this field reports the first source state and final destination state.
+             */
             state_transition?: components["schemas"]["ConversationTurnStateTransition"] | null;
+            /**
+             * State Transitions
+             * @description Ordered context-graph state transitions that occurred during this turn.
+             * @default []
+             */
+            state_transitions?: components["schemas"]["ConversationTurnStateTransition"][];
             /** Text */
             text: string;
             /** Timestamp */
@@ -10331,7 +10284,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -11427,8 +11380,6 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** Discovered By */
-            discovered_by: string | null;
             /** Display Name */
             display_name: string | null;
             /** Entity Types */
@@ -11451,8 +11402,6 @@ export interface components {
             is_active: boolean;
             /** Is Stale */
             is_stale: boolean;
-            /** Last Health Check */
-            last_health_check: string | null;
             /** Last Sync At */
             last_sync_at: string | null;
             /** Last Sync Event Count */
@@ -11465,7 +11414,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Sync Schedule */
             sync_schedule: string | null;
             /**
@@ -13384,6 +13333,23 @@ export interface components {
         };
         ExternalSystemString: string;
         ExternalValueString: string;
+        /**
+         * FailureClass
+         * @description Why a tool result is a failure — produced by the executor at RUN time.
+         *
+         *     Unlike ``ResultDelivery`` (a fixed config-time axis), this is a runtime
+         *     classification the executor knows at the moment of failure. It flavors the
+         *     agent-facing failure wording and the world-event / status-tool observability,
+         *     and it is ALSO an optional routing key: a state x tool binding may set
+         *     ``ToolCallSpec.failure_delivery_by_class`` to deliver differently per class
+         *     (e.g. interrupt on timeout, queue on a generic error). With no per-class map
+         *     (the default), failed results route by the ``failure_delivery`` floor,
+         *     unchanged. Add a member only in the same change that wires a producer for it —
+         *     adding one also widens the per-class routing surface, so it must be a
+         *     deliberate, produced class.
+         * @enum {string}
+         */
+        FailureClass: "timeout" | "input_rejected" | "rounds_exhausted" | "generic";
         /** FeatureDef */
         FeatureDef: {
             /** Kind */
@@ -15429,6 +15395,16 @@ export interface components {
              * @description Maximum allowed upload size in bytes.
              */
             max_upload_bytes: number;
+        };
+        /** ListSimulationSuiteRunsResponse */
+        ListSimulationSuiteRunsResponse: {
+            /** Runs */
+            runs: components["schemas"]["SimulationSuiteRunSummary"][];
+            /**
+             * Suite Id
+             * Format: uuid
+             */
+            suite_id: string;
         };
         /** ListSimulationSuitesResponse */
         ListSimulationSuitesResponse: {
@@ -20747,6 +20723,118 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** SimulationSuiteRunResultsResponse */
+        SimulationSuiteRunResultsResponse: {
+            /** Average Score */
+            average_score?: number | null;
+            /** Capability Breakdown */
+            capability_breakdown?: {
+                [key: string]: components["schemas"]["SimulationBenchmarkBreakdownSummary"];
+            };
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count?: number;
+            /**
+             * Fail Count
+             * @default 0
+             */
+            fail_count?: number;
+            /**
+             * Failed Count
+             * @default 0
+             */
+            failed_count?: number;
+            /**
+             * Metric Result Count
+             * @default 0
+             */
+            metric_result_count?: number;
+            /**
+             * Metric Status
+             * @default pending
+             * @enum {string}
+             */
+            metric_status?: "pending" | "available" | "unavailable";
+            /** Metrics Last Checked At */
+            metrics_last_checked_at?: string | null;
+            /** Missing Run Ids */
+            missing_run_ids?: string[];
+            /**
+             * Pass Count
+             * @default 0
+             */
+            pass_count?: number;
+            /** Per Run */
+            per_run?: components["schemas"]["SimulationBenchmarkPerRunSummary"][];
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Scored Count
+             * @default 0
+             */
+            scored_count?: number;
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Suite Id */
+            suite_id?: string | null;
+            /**
+             * Suite Run Id
+             * Format: uuid
+             */
+            suite_run_id: string;
+            summary: components["schemas"]["SimulationSuiteRunSummary"];
+            /** Total Runs */
+            total_runs: number;
+        };
+        /** SimulationSuiteRunSummary */
+        SimulationSuiteRunSummary: {
+            /** Case Ids */
+            case_ids?: string[];
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Result Pointer */
+            result_pointer?: {
+                [key: string]: unknown;
+            };
+            /** Run Ids */
+            run_ids: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed";
+            /** Status Counts */
+            status_counts?: {
+                [key: string]: number;
+            };
+            /** Suite Id */
+            suite_id?: string | null;
+            /**
+             * Suite Run Id
+             * Format: uuid
+             */
+            suite_run_id: string;
+            /** Tags */
+            tags?: string[];
+            /** Total Runs */
+            total_runs: number;
+            /**
+             * Total Sessions
+             * @default 0
+             */
+            total_sessions?: number;
+            /**
+             * Total Turns
+             * @default 0
+             */
+            total_turns?: number;
+        };
         /** SimulationTurnPolicyResponse */
         SimulationTurnPolicyResponse: {
             /**
@@ -21026,7 +21114,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -21086,7 +21174,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -21125,7 +21213,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
             /** Status */
             status: string;
             /**
@@ -22567,6 +22655,18 @@ export interface components {
              * @enum {string}
              */
             delivery?: "interrupt" | "queue";
+            /**
+             * Execution
+             * @default background
+             * @enum {string}
+             */
+            execution?: "blocking" | "background";
+            /** Failure Delivery */
+            failure_delivery?: ("interrupt" | "queue") | null;
+            /** Failure Delivery By Class */
+            failure_delivery_by_class?: {
+                [key: string]: "interrupt" | "queue";
+            } | null;
             /**
              * Navigate On Completion
              * @default false
@@ -37914,82 +38014,6 @@ export interface operations {
             };
         };
     };
-    "get-connector-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConnectorSettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-connector-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConnectorSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConnectorSettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-environment-settings": {
         parameters: {
             query?: never;
@@ -39858,6 +39882,38 @@ export interface operations {
             };
         };
     };
+    "get-simulation-suite-run-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationSuiteRunResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-simulation-suites": {
         parameters: {
             query?: never;
@@ -40036,6 +40092,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SimulationBenchmarkRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-simulation-suite-runs": {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                suite_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListSimulationSuiteRunsResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41999,6 +42089,8 @@ export interface operations {
                 entity_type?: string | null;
                 /** @description Search by display name */
                 q?: string | null;
+                /** @description Sort order: `+display_name` (default) or `-display_name` for alphabetical, `+last_event_at` for oldest activity first, `-last_event_at` for most recent first. All sort orders use entity id as a final tiebreaker for stable pagination. */
+                sort_by?: ("+display_name" | "-display_name" | "+last_event_at" | "-last_event_at") | null;
                 limit?: number;
                 offset?: number;
             };

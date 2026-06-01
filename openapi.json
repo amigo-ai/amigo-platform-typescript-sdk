@@ -1538,7 +1538,7 @@
         "type": "object"
       },
       "ApproveRequest": {
-        "description": "Approve events — promotes confidence to 0.95.",
+        "description": "Approve events \u2014 promotes confidence to 0.95.",
         "properties": {
           "notes": {
             "anyOf": [
@@ -2484,7 +2484,7 @@
         "type": "object"
       },
       "BrandingSettingsRequest": {
-        "description": "Update workspace branding. All fields are optional — only provided\nfields are changed.",
+        "description": "Update workspace branding. All fields are optional \u2014 only provided\nfields are changed.",
         "properties": {
           "branding": {
             "$ref": "#/components/schemas/BrandingConfig"
@@ -2591,8 +2591,8 @@
           },
           "concurrency": {
             "default": 3,
-            "maximum": 20,
-            "minimum": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
           },
@@ -2621,15 +2621,15 @@
           },
           "max_turns": {
             "default": 20,
-            "maximum": 40,
-            "minimum": 1,
+            "maximum": 40.0,
+            "minimum": 1.0,
             "title": "Max Turns",
             "type": "integer"
           },
           "num_scenarios": {
             "default": 5,
-            "maximum": 50,
-            "minimum": 1,
+            "maximum": 50.0,
+            "minimum": 1.0,
             "title": "Num Scenarios",
             "type": "integer"
           },
@@ -2737,8 +2737,8 @@
         "description": "Wire shape for a Self-Image brief.\n\n``event_id`` is null when no brief has ever been generated for the\nentity. All other fields are nullable in that case so the UI can\nrender a consistent empty state.",
         "properties": {
           "confidence": {
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -2767,7 +2767,7 @@
             "title": "Content Md"
           },
           "event_count": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Event Count",
             "type": "integer"
           },
@@ -2933,7 +2933,7 @@
         "type": "object"
       },
       "CallDetailResponse": {
-        "description": "Full call detail — the canonical response for GET /calls/{call_id}.\n\nThis is the single source of truth for the call detail shape. The OpenAPI\nspec is generated from this model. The SDK TypeScript types are generated\nfrom the spec. The developer-console consumes SDK types directly.",
+        "description": "Full call detail \u2014 the canonical response for GET /calls/{call_id}.\n\nThis is the single source of truth for the call detail shape. The OpenAPI\nspec is generated from this model. The SDK TypeScript types are generated\nfrom the spec. The developer-console consumes SDK types directly.",
         "properties": {
           "audit": {
             "anyOf": [
@@ -2966,7 +2966,7 @@
             "title": "Call Analysis"
           },
           "call_duration_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Call Duration Seconds",
             "type": "number"
           },
@@ -3564,7 +3564,7 @@
         "type": "object"
       },
       "CallIntelligenceDetail": {
-        "description": "Layer 4 (Narrative) intelligence for a completed call.\n\nAggregated summaries, quality breakdown, and key moments — the\ninterpretive layer. Per-turn visualization data lives on the unified\ntimeline (call detail → PlaybackTimeline.segments), not here.",
+        "description": "Layer 4 (Narrative) intelligence for a completed call.\n\nAggregated summaries, quality breakdown, and key moments \u2014 the\ninterpretive layer. Per-turn visualization data lives on the unified\ntimeline (call detail \u2192 PlaybackTimeline.segments), not here.",
         "properties": {
           "call_id": {
             "description": "World entity ID for the call",
@@ -3649,7 +3649,7 @@
             "type": "string"
           },
           "duration_seconds": {
-            "default": 0,
+            "default": 0.0,
             "description": "Call duration in seconds",
             "title": "Duration Seconds",
             "type": "number"
@@ -3833,7 +3833,7 @@
             "type": "string"
           },
           "duration_seconds": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Duration Seconds",
             "type": "number"
           },
@@ -3859,8 +3859,8 @@
             "type": "object"
           },
           "quality_score": {
-            "maximum": 100,
-            "minimum": 0,
+            "maximum": 100.0,
+            "minimum": 0.0,
             "title": "Quality Score",
             "type": "number"
           },
@@ -4312,7 +4312,7 @@
                 "type": "null"
               }
             ],
-            "description": "Call source — real, simulation, or playground",
+            "description": "Call source \u2014 real, simulation, or playground",
             "title": "Source"
           },
           "started_at": {
@@ -5518,8 +5518,8 @@
           "moment_timestamp": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 0,
+                "maximum": 86400.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -5860,7 +5860,7 @@
               "active_calls": 0,
               "active_escalated": 0,
               "calls_today": 0,
-              "escalation_rate_today": 0
+              "escalation_rate_today": 0.0
             }
           },
           "workspace_id": {
@@ -6062,7 +6062,7 @@
         "type": "object"
       },
       "ConcurrentStartBlockParams": {
-        "description": "Disallow two slots starting at the same time within a TMS scope.\nNo additional params — the discriminator is the whole config.",
+        "description": "Disallow two slots starting at the same time within a TMS scope.\nNo additional params \u2014 the discriminator is the whole config.",
         "properties": {
           "rule_kind": {
             "const": "concurrent_start_block",
@@ -6108,141 +6108,27 @@
         "title": "ConfigToPolicyRequest",
         "type": "object"
       },
-      "ConnectorDef": {
-        "description": "A single connector definition stored in platform.connector_configs.",
-        "properties": {
-          "connection_config": {
-            "additionalProperties": true,
-            "title": "Connection Config",
-            "type": "object"
-          },
-          "connector_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Connector Type"
-          },
-          "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Display Name"
-          },
-          "entity_types": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Entity Types",
-            "type": "array"
-          },
-          "field_mappings": {
-            "additionalProperties": true,
-            "title": "Field Mappings",
-            "type": "object"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "is_active": {
-            "default": true,
-            "title": "Is Active",
-            "type": "boolean"
-          },
-          "name": {
-            "maxLength": 256,
-            "minLength": 1,
-            "title": "Name",
-            "type": "string"
-          },
-          "outbound_entity_types": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Outbound Entity Types",
-            "type": "array"
-          },
-          "source_type": {
-            "enum": [
-              "rest_api",
-              "webhook",
-              "file_drop",
-              "fhir",
-              "fhir_store",
-              "ehr",
-              "database",
-              "custom",
-              "smart_fhir",
-              "customer_intake",
-              "lakebase_schema",
-              "crm"
-            ],
-            "title": "Source Type",
-            "type": "string"
-          },
-          "sync_schedule": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Sync Schedule"
-          },
-          "sync_strategy": {
-            "default": "manual",
-            "enum": [
-              "manual",
-              "scheduled",
-              "webhook",
-              "continuous",
-              "polling"
-            ],
-            "title": "Sync Strategy",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "source_type"
-        ],
-        "title": "ConnectorDef",
-        "type": "object"
-      },
       "ConnectorHealthItem": {
         "properties": {
           "events_last_24h": {
             "description": "Events ingested in the last 24 hours (rolling, not calendar-day).",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Events Last 24H",
             "type": "integer"
           },
           "events_last_hour": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Events Last Hour",
             "type": "integer"
           },
           "events_per_minute": {
             "description": "Mean events/min over the last hour (events_last_hour / 60).",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Events Per Minute",
             "type": "number"
           },
           "freshness": {
-            "description": "fresh < 5min · stale 5-60min · quiet > 60min · never = no events in 24h",
+            "description": "fresh < 5min \u00b7 stale 5-60min \u00b7 quiet > 60min \u00b7 never = no events in 24h",
             "enum": [
               "fresh",
               "stale",
@@ -6525,45 +6411,10 @@
         "title": "ConnectorResourcesResponse",
         "type": "object"
       },
-      "ConnectorSettingsRequest": {
-        "description": "Request for PUT /v1/{ws}/settings/connectors.\n\nReplaces the entire connector list.",
-        "properties": {
-          "connectors": {
-            "items": {
-              "$ref": "#/components/schemas/ConnectorDef"
-            },
-            "maxItems": 100,
-            "title": "Connectors",
-            "type": "array"
-          }
-        },
-        "required": [
-          "connectors"
-        ],
-        "title": "ConnectorSettingsRequest",
-        "type": "object"
-      },
-      "ConnectorSettingsResponse": {
-        "description": "Response for GET /v1/{ws}/settings/connectors.",
-        "properties": {
-          "connectors": {
-            "items": {
-              "$ref": "#/components/schemas/ConnectorDef"
-            },
-            "title": "Connectors",
-            "type": "array"
-          }
-        },
-        "required": [
-          "connectors"
-        ],
-        "title": "ConnectorSettingsResponse",
-        "type": "object"
-      },
       "Constraint": {
         "properties": {
           "definition": {
-            "description": "``pg_get_constraintdef(oid)`` — the postgres-rendered definition.",
+            "description": "``pg_get_constraintdef(oid)`` \u2014 the postgres-rendered definition.",
             "title": "Definition",
             "type": "string"
           },
@@ -7460,8 +7311,8 @@
           "duration_ms": {
             "anyOf": [
               {
-                "maximum": 3600000,
-                "minimum": 0,
+                "maximum": 3600000.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -7547,7 +7398,17 @@
                 "type": "null"
               }
             ],
-            "description": "Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. If multiple transitions were recorded, the API reports the first source state and final destination state."
+            "deprecated": true,
+            "description": "Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. Deprecated: use state_transitions instead. If multiple transitions were recorded, this field reports the first source state and final destination state."
+          },
+          "state_transitions": {
+            "default": [],
+            "description": "Ordered context-graph state transitions that occurred during this turn.",
+            "items": {
+              "$ref": "#/components/schemas/ConversationTurnStateTransition"
+            },
+            "title": "State Transitions",
+            "type": "array"
           },
           "text": {
             "title": "Text",
@@ -7628,7 +7489,7 @@
         "type": "object"
       },
       "CorrectRequest": {
-        "description": "Submit corrected data — creates new event at confidence 1.0.",
+        "description": "Submit corrected data \u2014 creates new event at confidence 1.0.",
         "properties": {
           "corrected_data": {
             "additionalProperties": true,
@@ -7714,8 +7575,8 @@
           "timestamp_seconds": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 0,
+                "maximum": 86400.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -7807,8 +7668,8 @@
       "CreateApiKeyRequest": {
         "properties": {
           "duration_days": {
-            "maximum": 90,
-            "minimum": 1,
+            "maximum": 90.0,
+            "minimum": 1.0,
             "title": "Duration Days",
             "type": "integer"
           },
@@ -8144,8 +8005,8 @@
           },
           "refresh_interval": {
             "default": 300,
-            "maximum": 86400,
-            "minimum": 10,
+            "maximum": 86400.0,
+            "minimum": 10.0,
             "title": "Refresh Interval",
             "type": "integer"
           },
@@ -8207,7 +8068,6 @@
               "rest_api",
               "webhook",
               "file_drop",
-              "fhir",
               "fhir_store",
               "ehr",
               "database",
@@ -8268,15 +8128,15 @@
           },
           "expires_in_hours": {
             "default": 168,
-            "maximum": 720,
-            "minimum": 1,
+            "maximum": 720.0,
+            "minimum": 1.0,
             "title": "Expires In Hours",
             "type": "integer"
           },
           "max_uploads": {
             "default": 100,
-            "maximum": 10000,
-            "minimum": 1,
+            "maximum": 10000.0,
+            "minimum": 1.0,
             "title": "Max Uploads",
             "type": "integer"
           }
@@ -8431,7 +8291,7 @@
                 "type": "null"
               }
             ],
-            "description": "Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both."
+            "description": "Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event \u2014 correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both."
           },
           "patient_entity_id": {
             "anyOf": [
@@ -8757,8 +8617,8 @@
           },
           "tool_capacity": {
             "default": 3,
-            "maximum": 10,
-            "minimum": 1,
+            "maximum": 10.0,
+            "minimum": 1.0,
             "title": "Tool Capacity",
             "type": "integer"
           },
@@ -8838,7 +8698,7 @@
                 "type": "null"
               }
             ],
-            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context — same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
+            "description": "Simulated caller phone number used to resolve patient context when `entity_id` is not provided (or does not match a row). Omitted/blank values are normalized to the `sim-orchestrator` sentinel, which yields no phone match and an empty caller context \u2014 same default the voice test-call WebSocket uses, so patient lookups resolve consistently across modalities.",
             "title": "Caller Id"
           },
           "entity_id": {
@@ -8851,7 +8711,7 @@
                 "type": "null"
               }
             ],
-            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS — `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) — no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
+            "description": "Optional world entity UUID to bind caller context directly. Precedence rules: (1) when this resolves to a world entity in the workspace, it WINS \u2014 `caller_id` is not used for identity resolution, and the resolution provenance is `entity_id_lookup`; (2) when this is a well-formed UUID with no matching entity (stale, deleted, wrong workspace), the session falls back to phone lookup against `caller_id` (provenance `phone_lookup`) \u2014 no error is raised, the sim is survivable; (3) malformed UUIDs are rejected with HTTP 422 before the request reaches agent-engine. The supplied `caller_id` is still recorded on the active call and surfaced in the greeting metadata in case (1).",
             "title": "Entity Id"
           },
           "service_id": {
@@ -9078,16 +8938,16 @@
           },
           "max_agent_turns": {
             "default": 20,
-            "maximum": 200,
-            "minimum": 1,
+            "maximum": 200.0,
+            "minimum": 1.0,
             "title": "Max Agent Turns",
             "type": "integer"
           },
           "max_input_tokens": {
             "anyOf": [
               {
-                "maximum": 2000000,
-                "minimum": 1,
+                "maximum": 2000000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -9098,15 +8958,15 @@
           },
           "max_result_chars": {
             "default": 2000,
-            "maximum": 200000,
-            "minimum": 1,
+            "maximum": 200000.0,
+            "minimum": 1.0,
             "title": "Max Result Chars",
             "type": "integer"
           },
           "max_tokens": {
             "default": 4096,
-            "maximum": 200000,
-            "minimum": 1,
+            "maximum": 200000.0,
+            "minimum": 1.0,
             "title": "Max Tokens",
             "type": "integer"
           },
@@ -9174,8 +9034,8 @@
             "title": "Thinking Effort"
           },
           "timeout_s": {
-            "default": 60,
-            "maximum": 900,
+            "default": 60.0,
+            "maximum": 900.0,
             "minimum": 0.1,
             "title": "Timeout S",
             "type": "number"
@@ -9271,8 +9131,8 @@
           },
           "expires_in_hours": {
             "default": 168,
-            "maximum": 8760,
-            "minimum": 1,
+            "maximum": 8760.0,
+            "minimum": 1.0,
             "title": "Expires In Hours",
             "type": "integer"
           },
@@ -9516,7 +9376,7 @@
         "type": "object"
       },
       "CreateWorkspaceRequest": {
-        "description": "Request body for ``POST /v1/me/workspaces``.\n\n``region`` is intentionally not exposed here — the workspace is created\nin the region of the platform-api pod that handles the request (each\nregion's CD pipeline serves its own ingress host), and a workspace\ncannot migrate between regions. The handler derives it from\n``app.env.aws_region``.\n\n``environment`` has no default: it is a load-bearing routing field\n(staging vs production downstream), and ``PATCH .../convert_environment``\nis the supported migration path. Callers must commit to a value.",
+        "description": "Request body for ``POST /v1/me/workspaces``.\n\n``region`` is intentionally not exposed here \u2014 the workspace is created\nin the region of the platform-api pod that handles the request (each\nregion's CD pipeline serves its own ingress host), and a workspace\ncannot migrate between regions. The handler derives it from\n``app.env.aws_region``.\n\n``environment`` has no default: it is a load-bearing routing field\n(staging vs production downstream), and ``PATCH .../convert_environment``\nis the supported migration path. Callers must commit to a value.",
         "properties": {
           "backend_org_id": {
             "anyOf": [
@@ -9553,7 +9413,7 @@
         "type": "object"
       },
       "CustomTokenExchangeAuthDict": {
-        "description": "Pre-flight exchange that mints a downstream bearer.\n\nReplaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.\nDownstream call always receives ``Authorization: Bearer {token}``. No\nin-process caching — every call mints fresh.",
+        "description": "Pre-flight exchange that mints a downstream bearer.\n\nReplaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.\nDownstream call always receives ``Authorization: Bearer {token}``. No\nin-process caching \u2014 every call mints fresh.",
         "properties": {
           "body_encoding": {
             "enum": [
@@ -9619,7 +9479,7 @@
         "type": "object"
       },
       "CustomTokenExchangeAuthRequest": {
-        "description": "Pre-flight exchange that mints a downstream bearer.\n\nReplaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.\nPath-shaped fields (``response_token_path``, ``static_body_fields`` keys,\n``param_body_fields`` keys) MUST be valid RFC 6901 JSON Pointer — one\nsyntax throughout.",
+        "description": "Pre-flight exchange that mints a downstream bearer.\n\nReplaces legacy ``json_token_exchange`` AND ``bearer_token_exchange``.\nPath-shaped fields (``response_token_path``, ``static_body_fields`` keys,\n``param_body_fields`` keys) MUST be valid RFC 6901 JSON Pointer \u2014 one\nsyntax throughout.",
         "properties": {
           "body_encoding": {
             "default": "json",
@@ -9663,7 +9523,7 @@
             "type": "object"
           },
           "response_token_path": {
-            "description": "RFC 6901 JSON Pointer into the exchange response body that extracts the bearer token\n(e.g. ``/access_token`` or ``/data/bearer``). NO default — every config commits explicitly.",
+            "description": "RFC 6901 JSON Pointer into the exchange response body that extracts the bearer token\n(e.g. ``/access_token`` or ``/data/bearer``). NO default \u2014 every config commits explicitly.",
             "title": "Response Token Path",
             "type": "string"
           },
@@ -10344,7 +10204,7 @@
         "type": "object"
       },
       "DataQualityResponse": {
-        "description": "Data quality metrics — confidence distribution, review pipeline stats.",
+        "description": "Data quality metrics \u2014 confidence distribution, review pipeline stats.",
         "properties": {
           "confidence_by_source": {
             "additionalProperties": {
@@ -10456,17 +10316,6 @@
             "title": "Created At",
             "type": "string"
           },
-          "discovered_by": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Discovered By"
-          },
           "display_name": {
             "anyOf": [
               {
@@ -10519,18 +10368,6 @@
             "title": "Is Stale",
             "type": "boolean"
           },
-          "last_health_check": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Health Check"
-          },
           "last_sync_at": {
             "anyOf": [
               {
@@ -10571,7 +10408,6 @@
               "rest_api",
               "webhook",
               "file_drop",
-              "fhir",
               "fhir_store",
               "ehr",
               "database",
@@ -10633,8 +10469,6 @@
           "is_active",
           "is_stale",
           "health_status",
-          "last_health_check",
-          "discovered_by",
           "created_at",
           "updated_at"
         ],
@@ -10760,7 +10594,7 @@
         "type": "object"
       },
       "DataTemplate-Input": {
-        "description": "Named field template — reusable across multiple outreach rules.",
+        "description": "Named field template \u2014 reusable across multiple outreach rules.",
         "properties": {
           "fields": {
             "items": {
@@ -10788,7 +10622,7 @@
         "type": "object"
       },
       "DataTemplate-Output": {
-        "description": "Named field template — reusable across multiple outreach rules.",
+        "description": "Named field template \u2014 reusable across multiple outreach rules.",
         "properties": {
           "fields": {
             "items": {
@@ -10816,7 +10650,7 @@
         "type": "object"
       },
       "DataTemplateField": {
-        "description": "A field in a data template — maps to entity state path for gap detection.",
+        "description": "A field in a data template \u2014 maps to entity state path for gap detection.",
         "properties": {
           "field_type": {
             "$ref": "#/components/schemas/FieldType",
@@ -10887,7 +10721,7 @@
         "type": "object"
       },
       "DecisionState-Input": {
-        "description": "Passthrough routing state — Agent picks an exit condition, no user interaction.",
+        "description": "Passthrough routing state \u2014 Agent picks an exit condition, no user interaction.",
         "properties": {
           "channel_overrides": {
             "additionalProperties": {
@@ -10976,7 +10810,7 @@
         "type": "object"
       },
       "DecisionState-Output": {
-        "description": "Passthrough routing state — Agent picks an exit condition, no user interaction.",
+        "description": "Passthrough routing state \u2014 Agent picks an exit condition, no user interaction.",
         "properties": {
           "channel_overrides": {
             "additionalProperties": {
@@ -11171,7 +11005,7 @@
                 "type": "null"
               }
             ],
-            "description": "Only meaningful for ``kind=\"literal\"``. Other kinds ignore it.\nA ``dict`` value is rendered as a JSONB literal — pair it with a\n``jsonb`` column.",
+            "description": "Only meaningful for ``kind=\"literal\"``. Other kinds ignore it.\nA ``dict`` value is rendered as a JSONB literal \u2014 pair it with a\n``jsonb`` column.",
             "title": "Value"
           }
         },
@@ -12142,7 +11976,7 @@
         "type": "object"
       },
       "EmotionSummary": {
-        "description": "Aggregated emotional analysis across the call.\n\nFree-form residual on the raw ``emotion_summary`` JSONB:\n``compound_emotions: list[{name, score}]``. Not exposed via this\ntyped shape — readers wanting it consume the JSONB endpoint.",
+        "description": "Aggregated emotional analysis across the call.\n\nFree-form residual on the raw ``emotion_summary`` JSONB:\n``compound_emotions: list[{name, score}]``. Not exposed via this\ntyped shape \u2014 readers wanting it consume the JSONB endpoint.",
         "properties": {
           "average_arousal": {
             "anyOf": [
@@ -12246,8 +12080,8 @@
           "timestamp_seconds": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 0,
+                "maximum": 86400.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -12516,7 +12350,7 @@
             "type": "object"
           },
           "id": {
-            "description": "Endpoint ID — stable, used in subsequent GET/PATCH/DELETE/test URLs.",
+            "description": "Endpoint ID \u2014 stable, used in subsequent GET/PATCH/DELETE/test URLs.",
             "format": "uuid",
             "title": "Id",
             "type": "string"
@@ -12591,7 +12425,7 @@
             "type": "object"
           },
           "timeout_seconds": {
-            "default": 30,
+            "default": 30.0,
             "description": "Per-request timeout.",
             "title": "Timeout Seconds",
             "type": "number"
@@ -12780,9 +12614,9 @@
             "type": "string"
           },
           "min_confidence": {
-            "default": 0,
-            "maximum": 1,
-            "minimum": 0,
+            "default": 0.0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Min Confidence",
             "type": "number"
           },
@@ -12871,8 +12705,8 @@
           "min_confidence": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -13108,10 +12942,10 @@
       "EnrichmentWriteBody": {
         "properties": {
           "confidence": {
-            "default": 1,
+            "default": 1.0,
             "description": "Write confidence. Must be >= registry min_confidence for the key.",
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -13130,7 +12964,7 @@
           },
           "source": {
             "default": "manual",
-            "description": "Write source — e.g. manual, forms, auto_enrich.",
+            "description": "Write source \u2014 e.g. manual, forms, auto_enrich.",
             "maxLength": 64,
             "minLength": 1,
             "title": "Source",
@@ -13223,7 +13057,7 @@
                 "type": "null"
               }
             ],
-            "default": 1,
+            "default": 1.0,
             "title": "Confidence"
           },
           "created_at": {
@@ -13534,7 +13368,7 @@
       "EntityRelationshipResponse": {
         "properties": {
           "confidence": {
-            "default": 1,
+            "default": 1.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -13678,7 +13512,7 @@
         "type": "object"
       },
       "EntityResolveExternalId": {
-        "description": "Reference to an external-system identifier.\n\n``system`` labels which system minted the value (``epic``, ``charm``,\n``charmhealth``, …). The value is matched against any\nnested key in ``world.entities.external_ids`` whose value equals\n``value``. ``system`` is informational for scoring; it doesn't\nconstrain the lookup, since adapters disagree on naming.",
+        "description": "Reference to an external-system identifier.\n\n``system`` labels which system minted the value (``epic``, ``charm``,\n``charmhealth``, \u2026). The value is matched against any\nnested key in ``world.entities.external_ids`` whose value equals\n``value``. ``system`` is informational for scoring; it doesn't\nconstrain the lookup, since adapters disagree on naming.",
         "properties": {
           "system": {
             "$ref": "#/components/schemas/ExternalSystemString",
@@ -13701,8 +13535,8 @@
         "properties": {
           "confidence": {
             "description": "Match confidence (0-1).",
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -13744,7 +13578,7 @@
         "type": "object"
       },
       "EntityResolveRequest": {
-        "description": "Polymorphic identifier query.\n\nProvide ``entity_type`` plus any subset of identifier fields. Each\nidentifier is OR-ed in SQL; matches are ranked by confidence and\nby the number of identifiers that actually matched the row.\nReturns at most ``limit`` candidates (default 25, max 50).\n\nFor latency-sensitive callers (inbound voice, webhook handlers),\npass exactly one identifier — the indexed lookup is sub-10ms.\nMulti-identifier queries are useful for confirming a row matches\non more than one signal (phone + email + MRN).",
+        "description": "Polymorphic identifier query.\n\nProvide ``entity_type`` plus any subset of identifier fields. Each\nidentifier is OR-ed in SQL; matches are ranked by confidence and\nby the number of identifiers that actually matched the row.\nReturns at most ``limit`` candidates (default 25, max 50).\n\nFor latency-sensitive callers (inbound voice, webhook handlers),\npass exactly one identifier \u2014 the indexed lookup is sub-10ms.\nMulti-identifier queries are useful for confirming a row matches\non more than one signal (phone + email + MRN).",
         "properties": {
           "canonical_id": {
             "anyOf": [
@@ -13801,8 +13635,8 @@
           "limit": {
             "default": 25,
             "description": "Maximum candidates to return.",
-            "maximum": 50,
-            "minimum": 1,
+            "maximum": 50.0,
+            "minimum": 1.0,
             "title": "Limit",
             "type": "integer"
           },
@@ -13835,7 +13669,7 @@
           },
           "total": {
             "description": "Number of candidates returned.",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Total",
             "type": "integer"
           }
@@ -13847,7 +13681,7 @@
         "type": "object"
       },
       "EntityResolveSummary": {
-        "description": "Compact identity card returned for each match.\n\nExcludes the full ``state`` JSONB and the entity embedding — fetch\nvia ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields\nhere are the ones a UI / agent needs to confirm \"yes, that's the\nright person\" before paying for the full state read.",
+        "description": "Compact identity card returned for each match.\n\nExcludes the full ``state`` JSONB and the entity embedding \u2014 fetch\nvia ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields\nhere are the ones a UI / agent needs to confirm \"yes, that's the\nright person\" before paying for the full state read.",
         "properties": {
           "birth_date": {
             "anyOf": [
@@ -14047,7 +13881,7 @@
             "title": "Canonical Id"
           },
           "confidence": {
-            "default": 1,
+            "default": 1.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -14662,7 +14496,7 @@
           },
           "data": {
             "additionalProperties": true,
-            "description": "Event payload — shape varies by event_type",
+            "description": "Event payload \u2014 shape varies by event_type",
             "title": "Data",
             "type": "object"
           },
@@ -15146,7 +14980,7 @@
         "type": "string"
       },
       "EventSummary": {
-        "description": "Inline event data for review context — avoids extra API calls.",
+        "description": "Inline event data for review context \u2014 avoids extra API calls.",
         "properties": {
           "confidence": {
             "title": "Confidence",
@@ -15353,15 +15187,15 @@
           },
           "max_forks_per_scenario": {
             "default": 2,
-            "maximum": 5,
-            "minimum": 0,
+            "maximum": 5.0,
+            "minimum": 0.0,
             "title": "Max Forks Per Scenario",
             "type": "integer"
           },
           "recommend_candidates": {
             "default": 3,
-            "maximum": 10,
-            "minimum": 1,
+            "maximum": 10.0,
+            "minimum": 1.0,
             "title": "Recommend Candidates",
             "type": "integer"
           }
@@ -15378,6 +15212,17 @@
       "ExternalValueString": {
         "maxLength": 256,
         "minLength": 1,
+        "type": "string"
+      },
+      "FailureClass": {
+        "description": "Why a tool result is a failure \u2014 produced by the executor at RUN time.\n\nUnlike ``ResultDelivery`` (a fixed config-time axis), this is a runtime\nclassification the executor knows at the moment of failure. It flavors the\nagent-facing failure wording and the world-event / status-tool observability,\nand it is ALSO an optional routing key: a state x tool binding may set\n``ToolCallSpec.failure_delivery_by_class`` to deliver differently per class\n(e.g. interrupt on timeout, queue on a generic error). With no per-class map\n(the default), failed results route by the ``failure_delivery`` floor,\nunchanged. Add a member only in the same change that wires a producer for it \u2014\nadding one also widens the per-class routing surface, so it must be a\ndeliberate, produced class.",
+        "enum": [
+          "timeout",
+          "input_rejected",
+          "rounds_exhausted",
+          "generic"
+        ],
+        "title": "FailureClass",
         "type": "string"
       },
       "FeatureDef": {
@@ -16322,7 +16167,7 @@
             "title": "Canonical Id"
           },
           "confidence": {
-            "default": 1,
+            "default": 1.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -17545,8 +17390,8 @@
           "valence": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": -1,
+                "maximum": 1.0,
+                "minimum": -1.0,
                 "type": "number"
               },
               {
@@ -17707,7 +17552,7 @@
           },
           "version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Version",
             "type": "integer"
           }
@@ -17847,7 +17692,7 @@
           },
           "version": {
             "default": 1,
-            "minimum": 1,
+            "minimum": 1.0,
             "title": "Version",
             "type": "integer"
           }
@@ -17920,7 +17765,7 @@
                 "type": "null"
               }
             ],
-            "description": "Row grouping hint — fields with same layout_group render side-by-side",
+            "description": "Row grouping hint \u2014 fields with same layout_group render side-by-side",
             "title": "Layout Group"
           },
           "options": {
@@ -18080,7 +17925,7 @@
         "type": "object"
       },
       "ForwardAction": {
-        "description": "Cold-transfer the caller to the service's configured forwarding\ndestination (set via ``Service.voice_config.forwarding``).\n\nNo agent-side decision and no operator dashboard required — the engine\ninvokes the same forwarding callback used by the LLM-driven\n``forward_call`` tool, with no location override, which falls through to\nthe per-service ``ServiceForwardingConfig``.\n\nIf ``voice_config.forwarding`` is unset, the dispatcher falls back to the\noperator path (audit event + SSE only).",
+        "description": "Cold-transfer the caller to the service's configured forwarding\ndestination (set via ``Service.voice_config.forwarding``).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven\n``forward_call`` tool, with no location override, which falls through to\nthe per-service ``ServiceForwardingConfig``.\n\nIf ``voice_config.forwarding`` is unset, the dispatcher falls back to the\noperator path (audit event + SSE only).",
         "properties": {
           "type": {
             "const": "forward",
@@ -18227,8 +18072,8 @@
           "min_items": {
             "anyOf": [
               {
-                "maximum": 100,
-                "minimum": 0,
+                "maximum": 100.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -18403,8 +18248,8 @@
         "properties": {
           "limit": {
             "default": 50,
-            "maximum": 200,
-            "minimum": 1,
+            "maximum": 200.0,
+            "minimum": 1.0,
             "title": "Limit",
             "type": "integer"
           }
@@ -18417,8 +18262,8 @@
           "appointment_lookahead_hours": {
             "anyOf": [
               {
-                "maximum": 720,
-                "minimum": 1,
+                "maximum": 720.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -18442,8 +18287,8 @@
           "cooldown_hours": {
             "anyOf": [
               {
-                "maximum": 8760,
-                "minimum": 1,
+                "maximum": 8760.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -18466,8 +18311,8 @@
           "max_pending_surfaces": {
             "anyOf": [
               {
-                "maximum": 50,
-                "minimum": 0,
+                "maximum": 50.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -18480,8 +18325,8 @@
           "max_surfaces_per_tick": {
             "anyOf": [
               {
-                "maximum": 100,
-                "minimum": 1,
+                "maximum": 100.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -18493,8 +18338,8 @@
           "min_completion_rate": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -18522,8 +18367,8 @@
           "scan_interval_seconds": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 60,
+                "maximum": 86400.0,
+                "minimum": 60.0,
                 "type": "integer"
               },
               {
@@ -18772,8 +18617,8 @@
       "HealFieldResponse": {
         "properties": {
           "confidence": {
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -19050,7 +18895,7 @@
       "Index-Output": {
         "properties": {
           "definition": {
-            "description": "``pg_indexes.indexdef`` — the full CREATE INDEX statement.",
+            "description": "``pg_indexes.indexdef`` \u2014 the full CREATE INDEX statement.",
             "title": "Definition",
             "type": "string"
           },
@@ -19551,7 +19396,7 @@
             "title": "Thinking Effort"
           },
           "timeout_s": {
-            "default": 60,
+            "default": 60.0,
             "title": "Timeout S",
             "type": "number"
           },
@@ -19735,7 +19580,7 @@
         "type": "object"
       },
       "InvoiceLineItem": {
-        "description": "A single line item on an invoice.\n\n``metering_source`` defaults to ``\"production\"`` for backward\ncompatibility with invoices generated before the metering_source\ndimension was introduced — those invoices were production-only by\ndefinition. New invoices always carry an explicit value.",
+        "description": "A single line item on an invoice.\n\n``metering_source`` defaults to ``\"production\"`` for backward\ncompatibility with invoices generated before the metering_source\ndimension was introduced \u2014 those invoices were production-only by\ndefinition. New invoices always carry an explicit value.",
         "properties": {
           "description": {
             "default": "",
@@ -19799,7 +19644,7 @@
       "InvokeResponse": {
         "properties": {
           "duration_ms": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Ms",
             "type": "number"
           },
@@ -19888,8 +19733,8 @@
             "type": "string"
           },
           "window_days": {
-            "maximum": 365,
-            "minimum": 1,
+            "maximum": 365.0,
+            "minimum": 1.0,
             "title": "Window Days",
             "type": "integer"
           }
@@ -19990,8 +19835,8 @@
           "frequency_penalty": {
             "anyOf": [
               {
-                "maximum": 2,
-                "minimum": -2,
+                "maximum": 2.0,
+                "minimum": -2.0,
                 "type": "number"
               },
               {
@@ -20004,8 +19849,8 @@
             "anyOf": [
               {
                 "additionalProperties": {
-                  "maximum": 100,
-                  "minimum": -100,
+                  "maximum": 100.0,
+                  "minimum": -100.0,
                   "type": "number"
                 },
                 "type": "object"
@@ -20055,8 +19900,8 @@
           "presence_penalty": {
             "anyOf": [
               {
-                "maximum": 2,
-                "minimum": -2,
+                "maximum": 2.0,
+                "minimum": -2.0,
                 "type": "number"
               },
               {
@@ -20186,8 +20031,8 @@
           "temperature": {
             "anyOf": [
               {
-                "maximum": 2,
-                "minimum": 0,
+                "maximum": 2.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -20199,8 +20044,8 @@
           "top_logprobs": {
             "anyOf": [
               {
-                "maximum": 20,
-                "minimum": 0,
+                "maximum": 20.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -20212,8 +20057,8 @@
           "top_p": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -20564,7 +20409,7 @@
           },
           "max_upload_bytes": {
             "description": "Maximum allowed upload size in bytes.",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Max Upload Bytes",
             "type": "integer"
           }
@@ -20575,6 +20420,28 @@
           "max_upload_bytes"
         ],
         "title": "LinkInfoResponse",
+        "type": "object"
+      },
+      "ListSimulationSuiteRunsResponse": {
+        "properties": {
+          "runs": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationSuiteRunSummary"
+            },
+            "title": "Runs",
+            "type": "array"
+          },
+          "suite_id": {
+            "format": "uuid",
+            "title": "Suite Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "suite_id",
+          "runs"
+        ],
+        "title": "ListSimulationSuiteRunsResponse",
         "type": "object"
       },
       "ListSimulationSuitesResponse": {
@@ -20612,7 +20479,7 @@
       "LoopLatencyPointItem": {
         "properties": {
           "count": {
-            "description": "Sensing→action pairs whose sensing event lands in this hour.",
+            "description": "Sensing\u2192action pairs whose sensing event lands in this hour.",
             "title": "Count",
             "type": "integer"
           },
@@ -20801,7 +20668,7 @@
         "type": "object"
       },
       "MemoryDimension": {
-        "description": "A single memory dimension — defines what facts to extract from events.\n\nTwo extraction modes:\n- static: uses extract_paths (JSONPath) for fast, free extraction\n- llm: uses ai_extract with the dimension description as prompt\n  for semantic extraction. Only runs on new events (incremental MV refresh).",
+        "description": "A single memory dimension \u2014 defines what facts to extract from events.\n\nTwo extraction modes:\n- static: uses extract_paths (JSONPath) for fast, free extraction\n- llm: uses ai_extract with the dimension description as prompt\n  for semantic extraction. Only runs on new events (incremental MV refresh).",
         "properties": {
           "active": {
             "default": true,
@@ -20870,10 +20737,10 @@
             "$ref": "#/components/schemas/NameString"
           },
           "weight": {
-            "default": 1,
+            "default": 1.0,
             "description": "Relative importance for scoring (higher = more important)",
-            "maximum": 10,
-            "minimum": 0,
+            "maximum": 10.0,
+            "minimum": 0.0,
             "title": "Weight",
             "type": "number"
           }
@@ -20997,7 +20864,7 @@
         "type": "object"
       },
       "MemorySettingsRequest": {
-        "description": "Partial update — only provided fields are changed.\n\nThe dimensions list is replaced entirely when provided.\nBuilt-in dimensions can be deactivated (active=false) or have their\nweight changed, but their key cannot be reused for custom dimensions.",
+        "description": "Partial update \u2014 only provided fields are changed.\n\nThe dimensions list is replaced entirely when provided.\nBuilt-in dimensions can be deactivated (active=false) or have their\nweight changed, but their key cannot be reused for custom dimensions.",
         "properties": {
           "backfill_requested": {
             "anyOf": [
@@ -21105,7 +20972,7 @@
           },
           "metering_source": {
             "default": "production",
-            "description": "Traffic class — production or simulation, billed separately",
+            "description": "Traffic class \u2014 production or simulation, billed separately",
             "enum": [
               "production",
               "simulation"
@@ -21246,12 +21113,12 @@
             "title": "Metering Metadata"
           },
           "metering_quantity": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Metering Quantity",
             "type": "number"
           },
           "metering_source": {
-            "description": "Traffic class — 'production' or 'simulation'.",
+            "description": "Traffic class \u2014 'production' or 'simulation'.",
             "enum": [
               "production",
               "simulation"
@@ -21464,7 +21331,7 @@
         "type": "object"
       },
       "MetricDefinition": {
-        "description": "A single metric definition — what to extract and how.\n\nTwo broad modes:\n- Built-in metrics: extraction is handled by hardcoded pipeline logic\n  (extract_path + aggregation). Shipped with every workspace.\n- Custom metrics: extraction uses AI functions or static JSONB paths.\n  Defined per-workspace via settings API.\n\nFrozen: builtins are process-wide singletons exposed via the\n``BUILTIN_METRICS`` list. A mutable list field (e.g.\n``applies_to_product_types``) could otherwise be mutated by one caller\nand leak into every subsequent call in the same process.",
+        "description": "A single metric definition \u2014 what to extract and how.\n\nTwo broad modes:\n- Built-in metrics: extraction is handled by hardcoded pipeline logic\n  (extract_path + aggregation). Shipped with every workspace.\n- Custom metrics: extraction uses AI functions or static JSONB paths.\n  Defined per-workspace via settings API.\n\nFrozen: builtins are process-wide singletons exposed via the\n``BUILTIN_METRICS`` list. A mutable list field (e.g.\n``applies_to_product_types``) could otherwise be mutated by one caller\nand leak into every subsequent call in the same process.",
         "properties": {
           "active": {
             "default": true,
@@ -21513,7 +21380,7 @@
                 "type": "null"
               }
             ],
-            "description": "Model serving endpoint for ai_query. Optional — if omitted, platform resolves from model_tier automatically. Override for custom endpoints.",
+            "description": "Model serving endpoint for ai_query. Optional \u2014 if omitted, platform resolves from model_tier automatically. Override for custom endpoints.",
             "title": "Ai Query Endpoint"
           },
           "ai_query_prompt": {
@@ -21526,7 +21393,7 @@
                 "type": "null"
               }
             ],
-            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric — conversational_naturalness — is ~5KB).",
+            "description": "Prompt template for ai_query. Use {data} placeholder for event data. Example: 'Classify this call transcript into one of: {labels}. Transcript: {data}'. Budgeted at 8KB to hold the full rubric + output spec for standard quality judges (longest authored rubric \u2014 conversational_naturalness \u2014 is ~5KB).",
             "title": "Ai Query Prompt"
           },
           "ai_schema": {
@@ -21581,7 +21448,7 @@
           },
           "channel_scope": {
             "default": "all",
-            "description": "Business-logic channel filter. 'voice' — voice calls only. 'text' — SMS/text sessions. 'surface' — form submissions. 'inbound'/'outbound' — by direction. 'all' — no channel filter (default). Pipeline translates to appropriate source + event_type filters.",
+            "description": "Business-logic channel filter. 'voice' \u2014 voice calls only. 'text' \u2014 SMS/text sessions. 'surface' \u2014 form submissions. 'inbound'/'outbound' \u2014 by direction. 'all' \u2014 no channel filter (default). Pipeline translates to appropriate source + event_type filters.",
             "enum": [
               "all",
               "voice",
@@ -21642,7 +21509,7 @@
           },
           "extraction_mode": {
             "default": "static",
-            "description": "'static' — JSONB path extraction (fast, free). 'ai_classify' — AI classification into user-defined labels (free). 'ai_extract' — AI field extraction from text (free). 'ai_query' — LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' — Raw SQL expression for computed metrics.",
+            "description": "'static' \u2014 JSONB path extraction (fast, free). 'ai_classify' \u2014 AI classification into user-defined labels (free). 'ai_extract' \u2014 AI field extraction from text (free). 'ai_query' \u2014 LLM-powered extraction with custom prompt (uses model_tier). 'sql_expr' \u2014 Raw SQL expression for computed metrics.",
             "enum": [
               "static",
               "ai_classify",
@@ -21656,14 +21523,14 @@
           "freshness_sla_minutes": {
             "default": 60,
             "description": "Max acceptable staleness in minutes before alerting. Default: 60 (1 hour).",
-            "maximum": 1440,
-            "minimum": 5,
+            "maximum": 1440.0,
+            "minimum": 5.0,
             "title": "Freshness Sla Minutes",
             "type": "integer"
           },
           "granularity": {
             "default": "aggregate",
-            "description": "'aggregate' groups by (workspace, period) — one value per time bucket. 'per_entity' keeps entity_id — one value per entity (call, encounter). Judge metrics are typically per_entity. Computed metrics are typically aggregate.",
+            "description": "'aggregate' groups by (workspace, period) \u2014 one value per time bucket. 'per_entity' keeps entity_id \u2014 one value per entity (call, encounter). Judge metrics are typically per_entity. Computed metrics are typically aggregate.",
             "enum": [
               "aggregate",
               "per_entity"
@@ -21686,7 +21553,7 @@
           },
           "latency_tier": {
             "default": "batch",
-            "description": "'streaming' — seconds-latency via ZeroBus streaming ingestion (continuous pipeline). 'near_realtime' — minutes-latency via triggered pipeline refresh. 'batch' — hourly/daily scheduled refresh (default, cheapest).",
+            "description": "'streaming' \u2014 seconds-latency via ZeroBus streaming ingestion (continuous pipeline). 'near_realtime' \u2014 minutes-latency via triggered pipeline refresh. 'batch' \u2014 hourly/daily scheduled refresh (default, cheapest).",
             "enum": [
               "streaming",
               "near_realtime",
@@ -21706,7 +21573,7 @@
           },
           "model_tier": {
             "default": "free",
-            "description": "AI model tier for extraction quality/cost tradeoff. 'free' — platform managed models (ai_classify, ai_extract). 'fast' — optimized for simple classification, low latency. 'balanced' — quality scoring, moderate reasoning. 'max' — complex analysis, multi-step reasoning. 'custom' — use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.",
+            "description": "AI model tier for extraction quality/cost tradeoff. 'free' \u2014 platform managed models (ai_classify, ai_extract). 'fast' \u2014 optimized for simple classification, low latency. 'balanced' \u2014 quality scoring, moderate reasoning. 'max' \u2014 complex analysis, multi-step reasoning. 'custom' \u2014 use ai_query_endpoint directly. When extraction_mode='ai_query' and ai_query_endpoint is not set, platform resolves model_tier to the optimal model automatically.",
             "enum": [
               "free",
               "fast",
@@ -21722,7 +21589,7 @@
           },
           "period_granularity": {
             "default": "daily",
-            "description": "'hourly' — one row per workspace per hour. Use for near_realtime metrics where shift-level visibility matters (voice quality, latency). 'daily' — one row per workspace per day (default, cheapest).",
+            "description": "'hourly' \u2014 one row per workspace per hour. Use for near_realtime metrics where shift-level visibility matters (voice quality, latency). 'daily' \u2014 one row per workspace per day (default, cheapest).",
             "enum": [
               "hourly",
               "daily"
@@ -21920,7 +21787,7 @@
         "type": "object"
       },
       "MetricSettingsRequest": {
-        "description": "Partial update — only provided fields are changed.\n\nThe definitions list is replaced entirely when provided.\nBuilt-in metrics can be deactivated (active=false) or have their\nfreshness_sla_minutes changed, but their key cannot be reused\nfor custom metrics.",
+        "description": "Partial update \u2014 only provided fields are changed.\n\nThe definitions list is replaced entirely when provided.\nBuilt-in metrics can be deactivated (active=false) or have their\nfreshness_sla_minutes changed, but their key cannot be reused\nfor custom metrics.",
         "properties": {
           "definitions": {
             "anyOf": [
@@ -22270,8 +22137,8 @@
         "description": "Rolling-window cap on appointments per patient (e.g. 90 days\nbetween TMS sessions).",
         "properties": {
           "days": {
-            "maximum": 365,
-            "minimum": 1,
+            "maximum": 365.0,
+            "minimum": 1.0,
             "title": "Days",
             "type": "integer"
           },
@@ -22580,7 +22447,7 @@
         "type": "object"
       },
       "OAuth2ClientCredentialsAuthDict": {
-        "description": "OAuth 2.0 Client Credentials Grant — RFC 6749 § 4.4.",
+        "description": "OAuth 2.0 Client Credentials Grant \u2014 RFC 6749 \u00a7 4.4.",
         "properties": {
           "client_auth_method": {
             "enum": [
@@ -22629,11 +22496,11 @@
         "type": "object"
       },
       "OAuth2ClientCredentialsAuthRequest": {
-        "description": "OAuth 2.0 Client Credentials Grant — RFC 6749 § 4.4.\n\nStrict RFC 6749 § 4.4.2 access token request: ``grant_type`` + optional\n``scope``. Client authentication (RFC 6749 § 2.3.1) is orthogonal —\n``client_auth_method`` picks between HTTP Basic auth and form-body\ncredentials. RFC 8707 ``resource`` and non-standard ``audience`` extensions\nare NOT supported here — add them back when a vendor needs one.",
+        "description": "OAuth 2.0 Client Credentials Grant \u2014 RFC 6749 \u00a7 4.4.\n\nStrict RFC 6749 \u00a7 4.4.2 access token request: ``grant_type`` + optional\n``scope``. Client authentication (RFC 6749 \u00a7 2.3.1) is orthogonal \u2014\n``client_auth_method`` picks between HTTP Basic auth and form-body\ncredentials. RFC 8707 ``resource`` and non-standard ``audience`` extensions\nare NOT supported here \u2014 add them back when a vendor needs one.",
         "properties": {
           "client_auth_method": {
             "default": "basic",
-            "description": "RFC 6749 § 2.3.1: ``basic`` sends client_id+secret as HTTP Basic auth; ``body`` sends them in the form body.",
+            "description": "RFC 6749 \u00a7 2.3.1: ``basic`` sends client_id+secret as HTTP Basic auth; ``body`` sends them in the form body.",
             "enum": [
               "basic",
               "body"
@@ -22681,7 +22548,7 @@
         "type": "object"
       },
       "OAuth2JwtBearerAuthDict": {
-        "description": "OAuth 2.0 JWT Bearer Token Grant — RFC 7523 § 2.1.",
+        "description": "OAuth 2.0 JWT Bearer Token Grant \u2014 RFC 7523 \u00a7 2.1.",
         "properties": {
           "assertion_algorithm": {
             "enum": [
@@ -22768,7 +22635,7 @@
         "type": "object"
       },
       "OAuth2JwtBearerAuthRequest": {
-        "description": "OAuth 2.0 JWT Bearer Token Grant — RFC 7523 § 2.1.",
+        "description": "OAuth 2.0 JWT Bearer Token Grant \u2014 RFC 7523 \u00a7 2.1.",
         "properties": {
           "assertion_algorithm": {
             "default": "RS256",
@@ -22787,12 +22654,12 @@
             "type": "string"
           },
           "assertion_audience": {
-            "description": "RFC 7523 ``aud`` claim — typically the token_url.",
+            "description": "RFC 7523 ``aud`` claim \u2014 typically the token_url.",
             "title": "Assertion Audience",
             "type": "string"
           },
           "assertion_issuer": {
-            "description": "RFC 7523 ``iss`` claim — typically the service-account email or client_id.",
+            "description": "RFC 7523 ``iss`` claim \u2014 typically the service-account email or client_id.",
             "title": "Assertion Issuer",
             "type": "string"
           },
@@ -22802,20 +22669,20 @@
             "type": "integer"
           },
           "assertion_subject": {
-            "description": "RFC 7523 § 3 ``sub`` claim — MUST be present. For service-account flows\nwhere the client is its own subject, set to the same value as ``assertion_issuer``.\nUse a different value only for delegation / impersonation grants.",
+            "description": "RFC 7523 \u00a7 3 ``sub`` claim \u2014 MUST be present. For service-account flows\nwhere the client is its own subject, set to the same value as ``assertion_issuer``.\nUse a different value only for delegation / impersonation grants.",
             "title": "Assertion Subject",
             "type": "string"
           },
           "extra_claims": {
             "additionalProperties": true,
             "default": {},
-            "description": "RFC 7523 § 3 item 8 — arbitrary additional JWT claims (e.g. Google's\n``scope`` claim, Azure's tenant claim). Merged BEFORE the required claims so\nIdP-specific extensions can't override ``iss`` / ``sub`` / ``aud`` / ``exp`` /\n``iat`` / ``nbf`` / ``jti``.",
+            "description": "RFC 7523 \u00a7 3 item 8 \u2014 arbitrary additional JWT claims (e.g. Google's\n``scope`` claim, Azure's tenant claim). Merged BEFORE the required claims so\nIdP-specific extensions can't override ``iss`` / ``sub`` / ``aud`` / ``exp`` /\n``iat`` / ``nbf`` / ``jti``.",
             "title": "Extra Claims",
             "type": "object"
           },
           "include_iat": {
             "default": true,
-            "description": "RFC 7523 § 3 item 6 — ``iat`` claim set to mint time. Most IdPs (Google, Azure)\nrequire it for anti-replay; leave True unless a specific vendor rejects it.",
+            "description": "RFC 7523 \u00a7 3 item 6 \u2014 ``iat`` claim set to mint time. Most IdPs (Google, Azure)\nrequire it for anti-replay; leave True unless a specific vendor rejects it.",
             "title": "Include Iat",
             "type": "boolean"
           },
@@ -22837,7 +22704,7 @@
                 "type": "null"
               }
             ],
-            "description": "RFC 7523 § 2.1 ``scope`` form-body parameter. Vendors that put scopes inside\nthe JWT instead (Google service accounts) use ``extra_claims = {\"scope\": \"...\"}``\nand leave this empty.",
+            "description": "RFC 7523 \u00a7 2.1 ``scope`` form-body parameter. Vendors that put scopes inside\nthe JWT instead (Google service accounts) use ``extra_claims = {\"scope\": \"...\"}``\nand leave this empty.",
             "title": "Scopes"
           },
           "token_url": {
@@ -22988,8 +22855,8 @@
         "description": "Structured field extraction result for an uploaded image.",
         "properties": {
           "confidence": {
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Confidence",
             "type": "number"
           },
@@ -23006,7 +22873,7 @@
         "type": "object"
       },
       "OperatorAction": {
-        "description": "Today's behavior — write escalation.requested + publish SSE, wait for a\nhuman operator to join via the dashboard. No-op if no operators are staffed.",
+        "description": "Today's behavior \u2014 write escalation.requested + publish SSE, wait for a\nhuman operator to join via the dashboard. No-op if no operators are staffed.",
         "properties": {
           "type": {
             "const": "operator",
@@ -23019,7 +22886,7 @@
         "type": "object"
       },
       "OperatorIntelligenceSummary": {
-        "description": "Operator intervention summary.\n\nThree-valued semantics on ``operator_active``:\n- ``True``  — escalation occurred and an operator was active.\n- ``False`` — escalation occurred but no operator picked up.\n- ``None``  — no escalation occurred (producer omits the key).\n  Readers must distinguish; do not coerce ``None`` → ``False``.",
+        "description": "Operator intervention summary.\n\nThree-valued semantics on ``operator_active``:\n- ``True``  \u2014 escalation occurred and an operator was active.\n- ``False`` \u2014 escalation occurred but no operator picked up.\n- ``None``  \u2014 no escalation occurred (producer omits the key).\n  Readers must distinguish; do not coerce ``None`` \u2192 ``False``.",
         "properties": {
           "escalated": {
             "default": false,
@@ -23864,7 +23731,7 @@
         "type": "object"
       },
       "OutreachRule": {
-        "description": "A single outreach rule — defines WHEN, WHAT, and HOW to reach a patient.",
+        "description": "A single outreach rule \u2014 defines WHEN, WHAT, and HOW to reach a patient.",
         "properties": {
           "active": {
             "default": true,
@@ -23952,7 +23819,7 @@
         "type": "object"
       },
       "OutreachSettingsRequest": {
-        "description": "Partial update — only provided fields are changed.\n\nRules and data_templates lists are replaced entirely when provided.",
+        "description": "Partial update \u2014 only provided fields are changed.\n\nRules and data_templates lists are replaced entirely when provided.",
         "properties": {
           "data_templates": {
             "anyOf": [
@@ -25524,7 +25391,7 @@
         "type": "object"
       },
       "PatientListItem": {
-        "description": "Typed patient list item — replaces untyped dict.",
+        "description": "Typed patient list item \u2014 replaces untyped dict.",
         "properties": {
           "birth_date": {
             "anyOf": [
@@ -25929,7 +25796,7 @@
         "type": "object"
       },
       "PatientSurfaceSpec": {
-        "description": "Patient-facing surface spec — what forms-app renders.\n\nFree-form by design: ``fields``/``sections``/``branding`` are forwarded\nfrom the upstream surface document as raw dicts. Renamed from\n``SurfaceSpec`` to avoid an OpenAPI schema-name collision with\n``platform_lib.surfaces.models.SurfaceSpec`` (which would otherwise\nforce FastAPI to namespace both classes and rename the existing\n``SurfaceSpec`` schema in the committed openapi.json).",
+        "description": "Patient-facing surface spec \u2014 what forms-app renders.\n\nFree-form by design: ``fields``/``sections``/``branding`` are forwarded\nfrom the upstream surface document as raw dicts. Renamed from\n``SurfaceSpec`` to avoid an OpenAPI schema-name collision with\n``platform_lib.surfaces.models.SurfaceSpec`` (which would otherwise\nforce FastAPI to namespace both classes and rename the existing\n``SurfaceSpec`` schema in the committed openapi.json).",
         "properties": {
           "branding": {
             "anyOf": [
@@ -26267,8 +26134,8 @@
           "y_hat_asthma_12mo": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26280,8 +26147,8 @@
           "y_hat_chf_90d": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26293,8 +26160,8 @@
           "y_hat_ckd_1yr": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26306,8 +26173,8 @@
           "y_hat_composite": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26319,8 +26186,8 @@
           "y_hat_copd_12mo": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26332,8 +26199,8 @@
           "y_hat_htn_1yr": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26345,8 +26212,8 @@
           "y_hat_t2d_1yr": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -26801,17 +26668,17 @@
             "description": "Canonical timebase shared by waveform, overlays, seek state, zoom, and scroll transforms."
           },
           "total_agent_speech_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Total Agent Speech Seconds",
             "type": "number"
           },
           "total_silence_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Total Silence Seconds",
             "type": "number"
           },
           "total_user_speech_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Total User Speech Seconds",
             "type": "number"
           },
@@ -26956,7 +26823,7 @@
         "type": "object"
       },
       "PreloadSpec": {
-        "description": "A tool call executed deterministically by the engine on state entry.\n\nUnlike LLM-driven tool calls, preloads run before any LLM turn —\nthe results appear in the interaction log so the engage LLM sees\nthem as pre-loaded context.  All preloads in a state execute in\nparallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``\ntemplate variables resolved from the session's caller context.",
+        "description": "A tool call executed deterministically by the engine on state entry.\n\nUnlike LLM-driven tool calls, preloads run before any LLM turn \u2014\nthe results appear in the interaction log so the engage LLM sees\nthem as pre-loaded context.  All preloads in a state execute in\nparallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``\ntemplate variables resolved from the session's caller context.",
         "properties": {
           "params": {
             "additionalProperties": true,
@@ -27097,8 +26964,8 @@
           },
           "priority_score": {
             "description": "Priority score normalized to 0.0-1.0",
-            "maximum": 1,
-            "minimum": 0,
+            "maximum": 1.0,
+            "minimum": 0.0,
             "title": "Priority Score",
             "type": "number"
           },
@@ -27166,7 +27033,7 @@
             "type": "integer"
           },
           "wait_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Wait Seconds",
             "type": "number"
           }
@@ -27207,7 +27074,7 @@
       },
       "ProgressHint": {
         "additionalProperties": false,
-        "description": "How the agent narrates waiting on a tool.\n\n``deterministic=true``: scripted — ``phrases`` play verbatim in order.\n``deterministic=false``: engine picks — ``phrases`` are hints.\n``trigger_delay_ms``: milliseconds before first filler (0 = immediate).\n``interval_ms``: milliseconds between subsequent fillers.",
+        "description": "How the agent narrates waiting on a tool.\n\n``deterministic=true``: scripted \u2014 ``phrases`` play verbatim in order.\n``deterministic=false``: engine picks \u2014 ``phrases`` are hints.\n``trigger_delay_ms``: milliseconds before first filler (0 = immediate).\n``interval_ms``: milliseconds between subsequent fillers.",
         "properties": {
           "custom_phrase": {
             "anyOf": [
@@ -27230,8 +27097,8 @@
           "expected_latency_ms": {
             "anyOf": [
               {
-                "maximum": 60000,
-                "minimum": 0,
+                "maximum": 60000.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -27243,8 +27110,8 @@
           "interval_ms": {
             "anyOf": [
               {
-                "maximum": 30000,
-                "minimum": 100,
+                "maximum": 30000.0,
+                "minimum": 100.0,
                 "type": "integer"
               },
               {
@@ -27302,8 +27169,8 @@
           "trigger_delay_ms": {
             "anyOf": [
               {
-                "maximum": 30000,
-                "minimum": 0,
+                "maximum": 30000.0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -27317,7 +27184,7 @@
         "type": "object"
       },
       "PromptLogEntry": {
-        "description": "One ``prompt_log`` event projection — full LLM input + output for a turn.\n\nUnbounded string fields (``system_prompt``, ``full_prompt``,\n``llm_response``) reflect the producer's payload as-is — typically\n1-50 KB each, occasionally larger for long histories. SDK consumers\nshould not assume a max length.",
+        "description": "One ``prompt_log`` event projection \u2014 full LLM input + output for a turn.\n\nUnbounded string fields (``system_prompt``, ``full_prompt``,\n``llm_response``) reflect the producer's payload as-is \u2014 typically\n1-50 KB each, occasionally larger for long histories. SDK consumers\nshould not assume a max length.",
         "properties": {
           "action": {
             "anyOf": [
@@ -27558,7 +27425,7 @@
             "title": "Applied Time Window Days"
           },
           "count": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Count",
             "type": "integer"
           },
@@ -27806,7 +27673,7 @@
         "type": "object"
       },
       "QuietHours": {
-        "description": "Quiet hours — no outbound outreach during this window.",
+        "description": "Quiet hours \u2014 no outbound outreach during this window.",
         "properties": {
           "enabled": {
             "default": false,
@@ -27815,15 +27682,15 @@
           },
           "end_hour": {
             "default": 8,
-            "maximum": 23,
-            "minimum": 0,
+            "maximum": 23.0,
+            "minimum": 0.0,
             "title": "End Hour",
             "type": "integer"
           },
           "start_hour": {
             "default": 21,
-            "maximum": 23,
-            "minimum": 0,
+            "maximum": 23.0,
+            "minimum": 0.0,
             "title": "Start Hour",
             "type": "integer"
           },
@@ -27895,7 +27762,7 @@
             "type": "string"
           },
           "impact": {
-            "default": 0,
+            "default": 0.0,
             "title": "Impact",
             "type": "number"
           },
@@ -27943,17 +27810,17 @@
             "title": "Narrative"
           },
           "priority_score": {
-            "default": 0,
+            "default": 0.0,
             "title": "Priority Score",
             "type": "number"
           },
           "rate_per_1k": {
-            "default": 0,
+            "default": 0.0,
             "title": "Rate Per 1K",
             "type": "number"
           },
           "residual": {
-            "default": 0,
+            "default": 0.0,
             "title": "Residual",
             "type": "number"
           },
@@ -27969,7 +27836,7 @@
             "title": "Severity"
           },
           "territory_mean": {
-            "default": 0,
+            "default": 0.0,
             "title": "Territory Mean",
             "type": "number"
           }
@@ -27984,8 +27851,8 @@
         "properties": {
           "n": {
             "default": 5,
-            "maximum": 20,
-            "minimum": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
             "title": "N",
             "type": "integer"
           },
@@ -28268,8 +28135,8 @@
           },
           "timeout_ms": {
             "default": 30000,
-            "maximum": 60000,
-            "minimum": 100,
+            "maximum": 60000.0,
+            "minimum": 100.0,
             "title": "Timeout Ms",
             "type": "integer"
           },
@@ -28441,7 +28308,7 @@
         "type": "object"
       },
       "RejectRequest": {
-        "description": "Reject events — demotes confidence to 0.0.",
+        "description": "Reject events \u2014 demotes confidence to 0.0.",
         "properties": {
           "reason": {
             "maxLength": 2000,
@@ -28615,7 +28482,7 @@
         "type": "object"
       },
       "RestIntegrationResponse": {
-        "description": "REST variant — base URL, auth config, endpoint count.",
+        "description": "REST variant \u2014 base URL, auth config, endpoint count.",
         "properties": {
           "auth": {
             "anyOf": [
@@ -28714,8 +28581,8 @@
           "audit_log_days": {
             "anyOf": [
               {
-                "maximum": 36500,
-                "minimum": 365,
+                "maximum": 36500.0,
+                "minimum": 365.0,
                 "type": "integer"
               },
               {
@@ -28727,8 +28594,8 @@
           "call_recordings_days": {
             "anyOf": [
               {
-                "maximum": 36500,
-                "minimum": 365,
+                "maximum": 36500.0,
+                "minimum": 365.0,
                 "type": "integer"
               },
               {
@@ -28740,8 +28607,8 @@
           "call_transcripts_days": {
             "anyOf": [
               {
-                "maximum": 36500,
-                "minimum": 365,
+                "maximum": 36500.0,
+                "minimum": 365.0,
                 "type": "integer"
               },
               {
@@ -28774,8 +28641,8 @@
           "phi_data_days": {
             "anyOf": [
               {
-                "maximum": 36500,
-                "minimum": 365,
+                "maximum": 36500.0,
+                "minimum": 365.0,
                 "type": "integer"
               },
               {
@@ -28787,8 +28654,8 @@
           "world_events_days": {
             "anyOf": [
               {
-                "maximum": 36500,
-                "minimum": 365,
+                "maximum": 36500.0,
+                "minimum": 365.0,
                 "type": "integer"
               },
               {
@@ -29328,12 +29195,12 @@
         "description": "Per-workspace risk scoring config. Stored on Service.",
         "properties": {
           "alert_threshold": {
-            "default": 50,
+            "default": 50.0,
             "title": "Alert Threshold",
             "type": "number"
           },
           "auto_escalate_threshold": {
-            "default": 70,
+            "default": 70.0,
             "title": "Auto Escalate Threshold",
             "type": "number"
           },
@@ -29343,7 +29210,7 @@
             "type": "boolean"
           },
           "monitor_threshold": {
-            "default": 30,
+            "default": 30.0,
             "title": "Monitor Threshold",
             "type": "number"
           },
@@ -29360,10 +29227,10 @@
         "type": "object"
       },
       "RiskSummary": {
-        "description": "Aggregated risk signals across the call.\n\nFree-form residual on the raw ``risk_summary`` JSONB:\n``signals: list[{name, raw_score, weight, weighted_score, detail}]``\n— the per-signal breakdown that aggregates into ``composite_score``.\nNot exposed via this typed shape; consumers needing per-signal\ndetail read the JSONB endpoint.",
+        "description": "Aggregated risk signals across the call.\n\nFree-form residual on the raw ``risk_summary`` JSONB:\n``signals: list[{name, raw_score, weight, weighted_score, detail}]``\n\u2014 the per-signal breakdown that aggregates into ``composite_score``.\nNot exposed via this typed shape; consumers needing per-signal\ndetail read the JSONB endpoint.",
         "properties": {
           "composite_score": {
-            "default": 0,
+            "default": 0.0,
             "description": "Overall risk score 0.0 to 1.0",
             "title": "Composite Score",
             "type": "number"
@@ -29387,8 +29254,8 @@
       "RotateApiKeyRequest": {
         "properties": {
           "duration_days": {
-            "maximum": 90,
-            "minimum": 1,
+            "maximum": 90.0,
+            "minimum": 1.0,
             "title": "Duration Days",
             "type": "integer"
           }
@@ -29415,8 +29282,8 @@
           },
           "concurrency": {
             "default": 1,
-            "maximum": 20,
-            "minimum": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
           },
@@ -29445,15 +29312,15 @@
           },
           "max_cases": {
             "default": 20,
-            "maximum": 200,
-            "minimum": 1,
+            "maximum": 200.0,
+            "minimum": 1.0,
             "title": "Max Cases",
             "type": "integer"
           },
           "max_turns": {
             "default": 20,
-            "maximum": 40,
-            "minimum": 1,
+            "maximum": 40.0,
+            "minimum": 1.0,
             "title": "Max Turns",
             "type": "integer"
           },
@@ -29519,8 +29386,8 @@
           },
           "concurrency": {
             "default": 1,
-            "maximum": 20,
-            "minimum": 1,
+            "maximum": 20.0,
+            "minimum": 1.0,
             "title": "Concurrency",
             "type": "integer"
           },
@@ -29549,8 +29416,8 @@
           },
           "max_turns": {
             "default": 20,
-            "maximum": 40,
-            "minimum": 1,
+            "maximum": 40.0,
+            "minimum": 1.0,
             "title": "Max Turns",
             "type": "integer"
           },
@@ -29624,7 +29491,7 @@
         "type": "object"
       },
       "SafetySummary": {
-        "description": "Safety filter results.\n\nFree-form residual on the raw ``safety_summary`` JSONB:\n``actions: dict | list`` — escalation handler actions taken\nwhen ``match_count > 0``. Not exposed via this typed shape.",
+        "description": "Safety filter results.\n\nFree-form residual on the raw ``safety_summary`` JSONB:\n``actions: dict | list`` \u2014 escalation handler actions taken\nwhen ``match_count > 0``. Not exposed via this typed shape.",
         "properties": {
           "match_count": {
             "default": 0,
@@ -29786,7 +29653,7 @@
         "type": "object"
       },
       "SchedulingRuleSetResponse": {
-        "description": "Wire shape for a single rule set. ``params`` stays as ``dict``\nhere (not the discriminated union) so add-a-new-kind doesn't break\nolder clients still on the previous SDK version — the SDK's typed\nhelpers can re-validate into ``RuleParams`` when needed.",
+        "description": "Wire shape for a single rule set. ``params`` stays as ``dict``\nhere (not the discriminated union) so add-a-new-kind doesn't break\nolder clients still on the previous SDK version \u2014 the SDK's typed\nhelpers can re-validate into ``RuleParams`` when needed.",
         "properties": {
           "agent_kind": {
             "enum": [
@@ -29928,8 +29795,8 @@
       "ScoreSessionRequest": {
         "properties": {
           "score": {
-            "maximum": 100,
-            "minimum": 0,
+            "maximum": 100.0,
+            "minimum": 0.0,
             "title": "Score",
             "type": "number"
           },
@@ -30223,7 +30090,7 @@
         "type": "object"
       },
       "ServiceForwardingConfig": {
-        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by:\n  - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't\n    pass an explicit ``phone_number`` and no EHR location is configured).\n  - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no\n    overrides falls through to the same path.\n\nDistinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone\nlegacy shape with ``enabled``); per-service forwarding is a binary\npresence — set means tier 3 resolves to it, None means tier 3 has no\nstatic target.",
+        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by:\n  - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't\n    pass an explicit ``phone_number`` and no EHR location is configured).\n  - ``EscalationPolicy.ForwardAction`` \u2014 engine-fired escalation with no\n    overrides falls through to the same path.\n\nDistinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone\nlegacy shape with ``enabled``); per-service forwarding is a binary\npresence \u2014 set means tier 3 resolves to it, None means tier 3 has no\nstatic target.",
         "properties": {
           "forward_to": {
             "$ref": "#/components/schemas/PhoneE164"
@@ -30428,7 +30295,7 @@
         "type": "object"
       },
       "ServiceVoiceConfig-Input": {
-        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional — None means inherit from the layer above\n(workspace VoiceSettings → env vars → hardcoded defaults).",
+        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
         "properties": {
           "backchannel_delay_ms": {
             "default": 400,
@@ -30694,7 +30561,7 @@
         "type": "object"
       },
       "ServiceVoiceConfig-Output": {
-        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional — None means inherit from the layer above\n(workspace VoiceSettings → env vars → hardcoded defaults).",
+        "description": "Per-service voice pipeline tuning. Overrides workspace/env defaults.\n\nEach field is optional \u2014 None means inherit from the layer above\n(workspace VoiceSettings \u2192 env vars \u2192 hardcoded defaults).",
         "properties": {
           "backchannel_delay_ms": {
             "default": 400,
@@ -31089,7 +30956,7 @@
             "type": "string"
           },
           "duration_s": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration S",
             "type": "number"
           },
@@ -31192,7 +31059,7 @@
             "type": "string"
           },
           "duration_seconds": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Seconds",
             "type": "number"
           },
@@ -31202,7 +31069,7 @@
             "type": "string"
           },
           "start_time": {
-            "default": 0,
+            "default": 0.0,
             "title": "Start Time",
             "type": "number"
           },
@@ -32591,7 +32458,7 @@
         "type": "object"
       },
       "SimulationRunResponse": {
-        "description": "Full run payload — used by GET /runs/{run_id} for replay flows.",
+        "description": "Full run payload \u2014 used by GET /runs/{run_id} for replay flows.",
         "properties": {
           "branch_name": {
             "anyOf": [
@@ -32906,7 +32773,7 @@
               "block_forward_call": false,
               "block_forward_call_after_turns": -1,
               "context_strategy": "full",
-              "greeting_shield_s": 0,
+              "greeting_shield_s": 0.0,
               "safety_response": "suspend_forward"
             }
           }
@@ -33012,7 +32879,7 @@
         "description": "HTTP response shape for first-class simulation suites.",
         "properties": {
           "case_count": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Case Count",
             "type": "integer"
           },
@@ -33112,6 +32979,252 @@
         "title": "SimulationSuiteResponse",
         "type": "object"
       },
+      "SimulationSuiteRunResultsResponse": {
+        "properties": {
+          "average_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Average Score"
+          },
+          "capability_breakdown": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SimulationBenchmarkBreakdownSummary"
+            },
+            "title": "Capability Breakdown",
+            "type": "object"
+          },
+          "completed_count": {
+            "default": 0,
+            "title": "Completed Count",
+            "type": "integer"
+          },
+          "fail_count": {
+            "default": 0,
+            "title": "Fail Count",
+            "type": "integer"
+          },
+          "failed_count": {
+            "default": 0,
+            "title": "Failed Count",
+            "type": "integer"
+          },
+          "metric_result_count": {
+            "default": 0,
+            "title": "Metric Result Count",
+            "type": "integer"
+          },
+          "metric_status": {
+            "default": "pending",
+            "enum": [
+              "pending",
+              "available",
+              "unavailable"
+            ],
+            "title": "Metric Status",
+            "type": "string"
+          },
+          "metrics_last_checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Metrics Last Checked At"
+          },
+          "missing_run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Missing Run Ids",
+            "type": "array"
+          },
+          "pass_count": {
+            "default": 0,
+            "title": "Pass Count",
+            "type": "integer"
+          },
+          "per_run": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationBenchmarkPerRunSummary"
+            },
+            "title": "Per Run",
+            "type": "array"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "scored_count": {
+            "default": 0,
+            "title": "Scored Count",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_run_id": {
+            "format": "uuid",
+            "title": "Suite Run Id",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/SimulationSuiteRunSummary"
+          },
+          "total_runs": {
+            "title": "Total Runs",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_ids",
+          "total_runs",
+          "suite_run_id",
+          "summary"
+        ],
+        "title": "SimulationSuiteRunResultsResponse",
+        "type": "object"
+      },
+      "SimulationSuiteRunSummary": {
+        "properties": {
+          "case_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Case Ids",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "result_pointer": {
+            "additionalProperties": true,
+            "title": "Result Pointer",
+            "type": "object"
+          },
+          "run_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Run Ids",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_run_id": {
+            "format": "uuid",
+            "title": "Suite Run Id",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "maxLength": 128,
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
+          "total_runs": {
+            "title": "Total Runs",
+            "type": "integer"
+          },
+          "total_sessions": {
+            "default": 0,
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "default": 0,
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "suite_run_id",
+          "run_ids",
+          "total_runs",
+          "status"
+        ],
+        "title": "SimulationSuiteRunSummary",
+        "type": "object"
+      },
       "SimulationTurnPolicyResponse": {
         "properties": {
           "barge_in_enabled": {
@@ -33135,7 +33248,7 @@
             "type": "string"
           },
           "greeting_shield_s": {
-            "default": 0,
+            "default": 0.0,
             "title": "Greeting Shield S",
             "type": "number"
           },
@@ -33765,7 +33878,6 @@
               "rest_api",
               "webhook",
               "file_drop",
-              "fhir",
               "fhir_store",
               "ehr",
               "database",
@@ -33908,7 +34020,6 @@
               "rest_api",
               "webhook",
               "file_drop",
-              "fhir",
               "fhir_store",
               "ehr",
               "database",
@@ -33997,7 +34108,6 @@
               "rest_api",
               "webhook",
               "file_drop",
-              "fhir",
               "fhir_store",
               "ehr",
               "database",
@@ -34312,7 +34422,7 @@
             "title": "Operator Skill"
           },
           "topic_risk_score": {
-            "default": 0,
+            "default": 0.0,
             "title": "Topic Risk Score",
             "type": "number"
           }
@@ -34432,7 +34542,7 @@
         "type": "object"
       },
       "StaticHeaderAuthDict": {
-        "description": "Static workspace-level secret used verbatim as a single header value.\n\nReplaces legacy ``api_key_header`` and ``bearer_token`` — bearer is just\n``header_name=\"Authorization\"`` with the SSM secret holding ``\"Bearer <token>\"``.",
+        "description": "Static workspace-level secret used verbatim as a single header value.\n\nReplaces legacy ``api_key_header`` and ``bearer_token`` \u2014 bearer is just\n``header_name=\"Authorization\"`` with the SSM secret holding ``\"Bearer <token>\"``.",
         "properties": {
           "header_name": {
             "title": "Header Name",
@@ -34527,8 +34637,8 @@
           "valence": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": -1,
+                "maximum": 1.0,
+                "minimum": -1.0,
                 "type": "number"
               },
               {
@@ -34547,7 +34657,7 @@
       },
       "StoredParameter": {
         "additionalProperties": false,
-        "description": "One typed input parameter to a workspace data query — trusted shape.\n\nRead-path model: the DB's CHECK constraints already enforced ``name``\nregex and ``type`` enum on write, and the deploy endpoint's strict\n:class:`Parameter` validators enforced ``description`` length and\ntypo-rejection at the inbound network edge. After that, every\nconstruction of this model (DB read projection, executor binding,\nagent-engine spec, outbound response) is trusted — no 422 surface.\n\n``default is None`` is the canonical \"required\" signal: the executor\nraises if a caller omits a required argument, otherwise substitutes\nthe stored default.",
+        "description": "One typed input parameter to a workspace data query \u2014 trusted shape.\n\nRead-path model: the DB's CHECK constraints already enforced ``name``\nregex and ``type`` enum on write, and the deploy endpoint's strict\n:class:`Parameter` validators enforced ``description`` length and\ntypo-rejection at the inbound network edge. After that, every\nconstruction of this model (DB read projection, executor binding,\nagent-engine spec, outbound response) is trusted \u2014 no 422 surface.\n\n``default is None`` is the canonical \"required\" signal: the executor\nraises if a caller omits a required argument, otherwise substitutes\nthe stored default.",
         "properties": {
           "default": {
             "anyOf": [
@@ -34789,7 +34899,7 @@
       "SubToolLogItem": {
         "properties": {
           "duration_ms": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Ms",
             "type": "number"
           },
@@ -35751,8 +35861,8 @@
           },
           "expires_in_hours": {
             "default": 168,
-            "maximum": 8760,
-            "minimum": 1,
+            "maximum": 8760.0,
+            "minimum": 1.0,
             "title": "Expires In Hours",
             "type": "integer"
           },
@@ -36105,8 +36215,8 @@
         "description": "How long before a TMS mapping appointment its slot is released\nback to the pool. ``weekend_skip=True`` adds Saturday + Sunday days\nto the wall-clock countdown (clinic doesn't release on weekends).",
         "properties": {
           "reservation_window_hours": {
-            "maximum": 720,
-            "minimum": 0,
+            "maximum": 720.0,
+            "minimum": 0.0,
             "title": "Reservation Window Hours",
             "type": "integer"
           },
@@ -36141,8 +36251,8 @@
             "type": "array"
           },
           "interval_minutes": {
-            "maximum": 120,
-            "minimum": 5,
+            "maximum": 120.0,
+            "minimum": 5.0,
             "title": "Interval Minutes",
             "type": "integer"
           },
@@ -36228,10 +36338,10 @@
         "type": "object"
       },
       "TestInvokeResponse": {
-        "description": "Response shape for ``POST /v1/{ws}/functions/{name}/test``.\n\nStructural superset of :class:`InvokeResponse`. Adds ``status`` and\n``error`` so the DC can render the executor's failure detail inline\nrather than a generic \"Invocation failed.\" The underlying invoke\nuses the same path; ``status`` / ``error`` are filled in by\n``service.test`` after catching any ``HTTPException`` (503) from the\nexecutor, so the route never bubbles a 5xx for a logical SQL\nfailure — it's still a 200 with ``status=fail`` so the caller can\nshow the message.\n\nInvariant (enforced by :func:`_check_error_when_fail`):\n``status == \"fail\" → error is not None and len(error) > 0``.",
+        "description": "Response shape for ``POST /v1/{ws}/functions/{name}/test``.\n\nStructural superset of :class:`InvokeResponse`. Adds ``status`` and\n``error`` so the DC can render the executor's failure detail inline\nrather than a generic \"Invocation failed.\" The underlying invoke\nuses the same path; ``status`` / ``error`` are filled in by\n``service.test`` after catching any ``HTTPException`` (503) from the\nexecutor, so the route never bubbles a 5xx for a logical SQL\nfailure \u2014 it's still a 200 with ``status=fail`` so the caller can\nshow the message.\n\nInvariant (enforced by :func:`_check_error_when_fail`):\n``status == \"fail\" \u2192 error is not None and len(error) > 0``.",
         "properties": {
           "duration_ms": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Ms",
             "type": "number"
           },
@@ -36485,7 +36595,7 @@
         "type": "object"
       },
       "TextTurnResponse": {
-        "description": "Response body — the agent's text reply.\n\nReturned only on 200; 204 indicates the engine elected silence.",
+        "description": "Response body \u2014 the agent's text reply.\n\nReturned only on 200; 204 indicates the engine elected silence.",
         "properties": {
           "text": {
             "maxLength": 8192,
@@ -36990,7 +37100,7 @@
       "TimelineTimebase": {
         "properties": {
           "end": {
-            "default": 0,
+            "default": 0.0,
             "description": "Visible/canonical timeline range end in seconds.",
             "title": "End",
             "type": "number"
@@ -37007,7 +37117,7 @@
             "type": "string"
           },
           "start": {
-            "default": 0,
+            "default": 0.0,
             "description": "Visible/canonical timeline range start in seconds.",
             "title": "Start",
             "type": "number"
@@ -37354,6 +37464,51 @@
             "title": "Delivery",
             "type": "string"
           },
+          "execution": {
+            "default": "background",
+            "enum": [
+              "blocking",
+              "background"
+            ],
+            "title": "Execution",
+            "type": "string"
+          },
+          "failure_delivery": {
+            "anyOf": [
+              {
+                "enum": [
+                  "interrupt",
+                  "queue"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Delivery"
+          },
+          "failure_delivery_by_class": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "enum": [
+                    "interrupt",
+                    "queue"
+                  ],
+                  "type": "string"
+                },
+                "propertyNames": {
+                  "$ref": "#/components/schemas/FailureClass"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Failure Delivery By Class"
+          },
           "navigate_on_completion": {
             "default": false,
             "title": "Navigate On Completion",
@@ -37522,7 +37677,7 @@
             "description": "Fully qualified tool name"
           },
           "tool_type": {
-            "description": "world_tool — other tool families use their dedicated endpoints",
+            "description": "world_tool \u2014 other tool families use their dedicated endpoints",
             "maxLength": 64,
             "title": "Tool Type",
             "type": "string"
@@ -37551,7 +37706,7 @@
             "type": "boolean"
           },
           "duration_ms": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Ms",
             "type": "number"
           },
@@ -37629,7 +37784,7 @@
         "type": "object"
       },
       "ToolSummary": {
-        "description": "Tool usage statistics.\n\nFree-form residual on the raw ``tool_summary`` JSONB:\n``by_tool: list[{name, calls, succeeded, failed, avg_duration_ms}]``\n— per-tool breakdown. Not exposed via this typed shape.",
+        "description": "Tool usage statistics.\n\nFree-form residual on the raw ``tool_summary`` JSONB:\n``by_tool: list[{name, calls, succeeded, failed, avg_duration_ms}]``\n\u2014 per-tool breakdown. Not exposed via this typed shape.",
         "properties": {
           "failed": {
             "default": 0,
@@ -37638,7 +37793,7 @@
             "type": "integer"
           },
           "failure_rate": {
-            "default": 0,
+            "default": 0.0,
             "description": "Tool failure rate 0.0 to 1.0",
             "title": "Failure Rate",
             "type": "number"
@@ -37735,7 +37890,7 @@
           "key_moment_count": {
             "default": 0,
             "description": "Number of key moments identified",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Key Moment Count",
             "type": "integer"
           },
@@ -37938,7 +38093,7 @@
           "key_moment_count": {
             "default": 0,
             "description": "Number of key decision moments identified (typically 3-8)",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Key Moment Count",
             "type": "integer"
           },
@@ -38100,8 +38255,8 @@
           "timestamp_seconds": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 0,
+                "maximum": 86400.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -38488,7 +38643,7 @@
         "type": "object"
       },
       "TriggerSyncConflictDetails": {
-        "description": "Operational fields included in a 409 to power UI affordances like\n\"syncing for 30s\" — strict allowlist, never the whole status entry.",
+        "description": "Operational fields included in a 409 to power UI affordances like\n\"syncing for 30s\" \u2014 strict allowlist, never the whole status entry.",
         "properties": {
           "last_poll_at": {
             "anyOf": [
@@ -39140,7 +39295,7 @@
         "type": "object"
       },
       "TurnPolicy": {
-        "description": "Voice pipeline parameters declared per HSM state.\n\nLives on ActionState/DecisionState alongside guardrails, wait_for, and\nchannel_overrides.  The HSM state IS the policy — no shadow state machine.\nAll fields optional with safe defaults (production behavior unchanged\nwhen no turn_policy is set).",
+        "description": "Voice pipeline parameters declared per HSM state.\n\nLives on ActionState/DecisionState alongside guardrails, wait_for, and\nchannel_overrides.  The HSM state IS the policy \u2014 no shadow state machine.\nAll fields optional with safe defaults (production behavior unchanged\nwhen no turn_policy is set).",
         "properties": {
           "barge_in_enabled": {
             "default": true,
@@ -39154,7 +39309,7 @@
           },
           "block_forward_call_after_turns": {
             "default": -1,
-            "minimum": -1,
+            "minimum": -1.0,
             "title": "Block Forward Call After Turns",
             "type": "integer"
           },
@@ -39170,12 +39325,12 @@
           },
           "degradation_threshold": {
             "default": -1,
-            "minimum": -1,
+            "minimum": -1.0,
             "title": "Degradation Threshold",
             "type": "integer"
           },
           "greeting_shield_s": {
-            "default": 0,
+            "default": 0.0,
             "title": "Greeting Shield S",
             "type": "number"
           },
@@ -39289,8 +39444,8 @@
           "viewport_height": {
             "anyOf": [
               {
-                "maximum": 500,
-                "minimum": 5,
+                "maximum": 500.0,
+                "minimum": 5.0,
                 "type": "integer"
               },
               {
@@ -39302,8 +39457,8 @@
           "viewport_width": {
             "anyOf": [
               {
-                "maximum": 500,
-                "minimum": 20,
+                "maximum": 500.0,
+                "minimum": 20.0,
                 "type": "integer"
               },
               {
@@ -39471,8 +39626,8 @@
           "duration_ms": {
             "anyOf": [
               {
-                "maximum": 3600000,
-                "minimum": 0,
+                "maximum": 3600000.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -39590,8 +39745,8 @@
           "billing_day": {
             "anyOf": [
               {
-                "maximum": 28,
-                "minimum": 1,
+                "maximum": 28.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -39639,7 +39794,7 @@
           "minimum_charge": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -39866,8 +40021,8 @@
           "refresh_interval": {
             "anyOf": [
               {
-                "maximum": 86400,
-                "minimum": 10,
+                "maximum": 86400.0,
+                "minimum": 10.0,
                 "type": "integer"
               },
               {
@@ -40120,7 +40275,7 @@
         "type": "object"
       },
       "UpdateSchedulingRuleSetRequest": {
-        "description": "Partial update — fields not provided are unchanged. ``params``\nmust be the full per-kind shape (no patch within params); send the\nwhole RuleParams or omit.",
+        "description": "Partial update \u2014 fields not provided are unchanged. ``params``\nmust be the full per-kind shape (no patch within params); send the\nwhole RuleParams or omit.",
         "properties": {
           "is_active": {
             "anyOf": [
@@ -40321,8 +40476,8 @@
           "tool_capacity": {
             "anyOf": [
               {
-                "maximum": 10,
-                "minimum": 1,
+                "maximum": 10.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -40711,8 +40866,8 @@
           "max_agent_turns": {
             "anyOf": [
               {
-                "maximum": 200,
-                "minimum": 1,
+                "maximum": 200.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -40724,8 +40879,8 @@
           "max_input_tokens": {
             "anyOf": [
               {
-                "maximum": 2000000,
-                "minimum": 1,
+                "maximum": 2000000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -40737,8 +40892,8 @@
           "max_result_chars": {
             "anyOf": [
               {
-                "maximum": 200000,
-                "minimum": 1,
+                "maximum": 200000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -40750,8 +40905,8 @@
           "max_tokens": {
             "anyOf": [
               {
-                "maximum": 200000,
-                "minimum": 1,
+                "maximum": 200000.0,
+                "minimum": 1.0,
                 "type": "integer"
               },
               {
@@ -40839,7 +40994,7 @@
           "timeout_s": {
             "anyOf": [
               {
-                "maximum": 900,
+                "maximum": 900.0,
                 "minimum": 0.1,
                 "type": "number"
               },
@@ -41232,7 +41387,7 @@
           },
           "size_bytes": {
             "description": "Stored size in bytes.",
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Size Bytes",
             "type": "integer"
           }
@@ -42103,7 +42258,7 @@
       "VoiceJudgeRecentResponse": {
         "properties": {
           "count": {
-            "minimum": 0,
+            "minimum": 0.0,
             "title": "Count",
             "type": "integer"
           },
@@ -42196,7 +42351,7 @@
           "critical_count": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -42219,7 +42374,7 @@
           "flag_count": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -42333,7 +42488,7 @@
           "warning_count": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -42378,7 +42533,7 @@
             "type": "integer"
           },
           "escalation_rate_today": {
-            "default": 0,
+            "default": 0.0,
             "title": "Escalation Rate Today",
             "type": "number"
           }
@@ -42387,7 +42542,7 @@
         "type": "object"
       },
       "VoiceSettingsRequest": {
-        "description": "Voice experience control plane — PM-facing, high-level controls.\n\nControls the caller experience without exposing engineering internals.\nEmotion detection, filler speech, model selection, and buffer tuning\nare always-on internals managed by engineering.",
+        "description": "Voice experience control plane \u2014 PM-facing, high-level controls.\n\nControls the caller experience without exposing engineering internals.\nEmotion detection, filler speech, model selection, and buffer tuning\nare always-on internals managed by engineering.",
         "properties": {
           "correction_categories": {
             "anyOf": [
@@ -42579,7 +42734,7 @@
         "type": "object"
       },
       "VoiceSettingsResponse": {
-        "description": "Voice experience state — what the PM configured.",
+        "description": "Voice experience state \u2014 what the PM configured.",
         "properties": {
           "correction_categories": {
             "items": {
@@ -42808,7 +42963,7 @@
             "title": "Avg Quality Score"
           },
           "escalation_rate": {
-            "default": 0,
+            "default": 0.0,
             "title": "Escalation Rate",
             "type": "number"
           },
@@ -42909,7 +43064,7 @@
         "type": "object"
       },
       "WorkspaceDataQueryItem": {
-        "description": "Wire shape for the response of every read + create/update handler.\n\n``id`` (UUID) is the stable handle — every URL except list takes it.\n``name`` is the workspace-visible label (UNIQUE per workspace) and is\nstill what the LLM tool registry keys on (``wsq_<name>``), but it is\nnot the route identifier.\n\n``input_schema`` is deliberately NOT exposed — it is fully derivable\nfrom ``parameters[]``. UI consumers can build the JSON Schema view\nlocally if they need it.",
+        "description": "Wire shape for the response of every read + create/update handler.\n\n``id`` (UUID) is the stable handle \u2014 every URL except list takes it.\n``name`` is the workspace-visible label (UNIQUE per workspace) and is\nstill what the LLM tool registry keys on (``wsq_<name>``), but it is\nnot the route identifier.\n\n``input_schema`` is deliberately NOT exposed \u2014 it is fully derivable\nfrom ``parameters[]``. UI consumers can build the JSON Schema view\nlocally if they need it.",
         "properties": {
           "deployed_at": {
             "format": "date-time",
@@ -43361,8 +43516,8 @@
           "avg_confidence": {
             "anyOf": [
               {
-                "maximum": 1,
-                "minimum": 0,
+                "maximum": 1.0,
+                "minimum": 0.0,
                 "type": "number"
               },
               {
@@ -43401,7 +43556,7 @@
           "events_24h": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -43414,7 +43569,7 @@
           "events_7d": {
             "anyOf": [
               {
-                "minimum": 0,
+                "minimum": 0.0,
                 "type": "integer"
               },
               {
@@ -43520,7 +43675,7 @@
       },
       "platform_lib__platform_functions__models__Parameter": {
         "additionalProperties": false,
-        "description": "Typed declaration of one input parameter.\n\nFor SQL function types, ``name`` becomes the ``:name`` placeholder\nin the SQL template. For Python function types, ``name`` becomes\nthe positional argument name in ``def main(...)`` and the input\ncolumn name on the UC UDF signature.\n\nThe ``description`` propagates into the LLM tool spec (this is\nwhat Databricks' Agent Framework reads, and what Anthropic's\ntool-use spec exposes to the model). Missing descriptions\nsilently break tool selection — the registration layer rejects\nempty strings.",
+        "description": "Typed declaration of one input parameter.\n\nFor SQL function types, ``name`` becomes the ``:name`` placeholder\nin the SQL template. For Python function types, ``name`` becomes\nthe positional argument name in ``def main(...)`` and the input\ncolumn name on the UC UDF signature.\n\nThe ``description`` propagates into the LLM tool spec (this is\nwhat Databricks' Agent Framework reads, and what Anthropic's\ntool-use spec exposes to the model). Missing descriptions\nsilently break tool selection \u2014 the registration layer rejects\nempty strings.",
         "properties": {
           "default": {
             "anyOf": [
@@ -44039,16 +44194,16 @@
           "max_response_length": {
             "default": 0,
             "description": "Truncate the rendered string to this many chars. 0 = no truncation.",
-            "maximum": 1000000,
-            "minimum": 0,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
             "title": "Max Response Length",
             "type": "integer"
           },
           "max_retries": {
             "default": 2,
             "description": "Retry attempts on transient failures.",
-            "maximum": 10,
-            "minimum": 0,
+            "maximum": 10.0,
+            "minimum": 0.0,
             "title": "Max Retries",
             "type": "integer"
           },
@@ -44074,7 +44229,7 @@
             "type": "string"
           },
           "path": {
-            "description": "URL path appended to the integration's base_url. Must NOT start with `/` — the path is\njoined onto the base URL (which already carries the leading slash). Supports `{param}` substitution.",
+            "description": "URL path appended to the integration's base_url. Must NOT start with `/` \u2014 the path is\njoined onto the base URL (which already carries the leading slash). Supports `{param}` substitution.",
             "maxLength": 2048,
             "minLength": 1,
             "pattern": "^[^/]",
@@ -44113,10 +44268,10 @@
             "type": "object"
           },
           "timeout_seconds": {
-            "default": 30,
+            "default": 30.0,
             "description": "Per-request timeout.",
-            "exclusiveMinimum": 0,
-            "maximum": 600,
+            "exclusiveMinimum": 0.0,
+            "maximum": 600.0,
             "title": "Timeout Seconds",
             "type": "number"
           }
@@ -44130,7 +44285,7 @@
         "type": "object"
       },
       "src__routes__integrations__create_integration__Request": {
-        "description": "Create body — REST only.",
+        "description": "Create body \u2014 REST only.",
         "properties": {
           "auth": {
             "anyOf": [
@@ -44203,7 +44358,7 @@
                 "type": "null"
               }
             ],
-            "description": "Inline secret literal — auto-provisioned to the per-integration SSM path.\nRequired when ``auth`` is set. Bounded to fit a PEM RSA-4096 key + cert chain.",
+            "description": "Inline secret literal \u2014 auto-provisioned to the per-integration SSM path.\nRequired when ``auth`` is set. Bounded to fit a PEM RSA-4096 key + cert chain.",
             "title": "Secret Value"
           }
         },
@@ -44383,14 +44538,14 @@
             "type": "object"
           },
           "max_response_length": {
-            "maximum": 1000000,
-            "minimum": 0,
+            "maximum": 1000000.0,
+            "minimum": 0.0,
             "title": "Max Response Length",
             "type": "integer"
           },
           "max_retries": {
-            "maximum": 10,
-            "minimum": 0,
+            "maximum": 10.0,
+            "minimum": 0.0,
             "title": "Max Retries",
             "type": "integer"
           },
@@ -44443,8 +44598,8 @@
             "type": "object"
           },
           "timeout_seconds": {
-            "exclusiveMinimum": 0,
-            "maximum": 600,
+            "exclusiveMinimum": 0.0,
+            "maximum": 600.0,
             "title": "Timeout Seconds",
             "type": "number"
           }
@@ -44453,7 +44608,7 @@
         "type": "object"
       },
       "src__routes__integrations__update_integration__Request": {
-        "description": "PATCH body — each field is sentinel-defaulted; absent ≠ explicit-null.",
+        "description": "PATCH body \u2014 each field is sentinel-defaulted; absent \u2260 explicit-null.",
         "properties": {
           "auth": {
             "anyOf": [
@@ -44486,7 +44641,7 @@
                 "type": "null"
               }
             ],
-            "description": "New auth config. Absent ⇒ untouched; null ⇒ clear; value ⇒ replace.\nIndependent of ``secret_value`` — updating ``auth`` alone reuses the\nexisting SSM secret.",
+            "description": "New auth config. Absent \u21d2 untouched; null \u21d2 clear; value \u21d2 replace.\nIndependent of ``secret_value`` \u2014 updating ``auth`` alone reuses the\nexisting SSM secret.",
             "title": "Auth"
           },
           "base_url": {
@@ -44508,7 +44663,7 @@
             "type": "boolean"
           },
           "secret_value": {
-            "description": "Rotate the per-integration SSM secret. Absent ⇒ existing secret\nuntouched; value ⇒ overwrite SSM at the canonical path. Explicit\n``null`` is rejected at validation — there is no \"clear the secret\"\noperation (clearing ``auth`` makes the secret unreachable; that's the\nintended clear path).",
+            "description": "Rotate the per-integration SSM secret. Absent \u21d2 existing secret\nuntouched; value \u21d2 overwrite SSM at the canonical path. Explicit\n``null`` is rejected at validation \u2014 there is no \"clear the secret\"\noperation (clearing ``auth`` makes the secret unreachable; that's the\nintended clear path).",
             "maxLength": 8192,
             "minLength": 1,
             "title": "Secret Value",
@@ -44577,7 +44732,7 @@
           },
           "data": {
             "additionalProperties": true,
-            "description": "Audit payload — shape varies by event_type",
+            "description": "Audit payload \u2014 shape varies by event_type",
             "title": "Data",
             "type": "object"
           },
@@ -44627,7 +44782,7 @@
       },
       "src__routes__workspace_data_queries__create_workspace_data_query__Request": {
         "additionalProperties": false,
-        "description": "Create body — the authored shape of a new workspace data query.\n\nThe SQL template + parameters parity check + multi-statement /\nsession-state-command refusal runs inside :meth:`_validate_template`\nso a bad payload surfaces as a Pydantic 422 with the standard wire\nshape — no try/except in the handler.",
+        "description": "Create body \u2014 the authored shape of a new workspace data query.\n\nThe SQL template + parameters parity check + multi-statement /\nsession-state-command refusal runs inside :meth:`_validate_template`\nso a bad payload surfaces as a Pydantic 422 with the standard wire\nshape \u2014 no try/except in the handler.",
         "properties": {
           "description": {
             "maxLength": 2048,
@@ -44658,8 +44813,8 @@
           },
           "timeout_ms": {
             "default": 5000,
-            "maximum": 30000,
-            "minimum": 100,
+            "maximum": 30000.0,
+            "minimum": 100.0,
             "title": "Timeout Ms",
             "type": "integer"
           }
@@ -44743,7 +44898,7 @@
       "src__routes__workspace_data_queries__invoke_workspace_data_query__Response": {
         "properties": {
           "duration_ms": {
-            "default": 0,
+            "default": 0.0,
             "title": "Duration Ms",
             "type": "number"
           },
@@ -44853,7 +45008,7 @@
       },
       "src__routes__workspace_data_queries__update_workspace_data_query__Request": {
         "additionalProperties": false,
-        "description": "PATCH body — every field optional. Present ⇒ overwrite; absent ⇒ keep.",
+        "description": "PATCH body \u2014 every field optional. Present \u21d2 overwrite; absent \u21d2 keep.",
         "properties": {
           "description": {
             "anyOf": [
@@ -44913,8 +45068,8 @@
           "timeout_ms": {
             "anyOf": [
               {
-                "maximum": 30000,
-                "minimum": 100,
+                "maximum": 30000.0,
+                "minimum": 100.0,
                 "type": "integer"
               },
               {
@@ -45312,7 +45467,7 @@
   "paths": {
     "/s/f/{surface_id}": {
       "get": {
-        "description": "Short-URL redirect: ``/s/f/{surface_id}`` → ``/s/{token}``.\n\nGenerates a fresh HMAC token and issues a 302 redirect so that SMS\nmessages can contain a short, clickable link instead of the long\nbase64-encoded token URL.",
+        "description": "Short-URL redirect: ``/s/f/{surface_id}`` \u2192 ``/s/{token}``.\n\nGenerates a fresh HMAC token and issues a 302 redirect so that SMS\nmessages can contain a short, clickable link instead of the long\nbase64-encoded token URL.",
         "operationId": "redirect-to-surface",
         "parameters": [
           {
@@ -45363,7 +45518,7 @@
     },
     "/s/{token}": {
       "get": {
-        "description": "Render a patient-facing surface as HTML.\n\nToken-authenticated — no Bearer auth required.\nRecords a surface.opened lifecycle event on first view.",
+        "description": "Render a patient-facing surface as HTML.\n\nToken-authenticated \u2014 no Bearer auth required.\nRecords a surface.opened lifecycle event on first view.",
         "operationId": "render-surface",
         "parameters": [
           {
@@ -45702,7 +45857,7 @@
     },
     "/s/{token}/heal": {
       "post": {
-        "description": "Auto-heal a form field value using Claude Haiku.\n\nBest-effort LLM correction — returns original value with confidence 0\nif the service is unavailable or inference fails.\nToken-authenticated, no Bearer auth.",
+        "description": "Auto-heal a form field value using Claude Haiku.\n\nBest-effort LLM correction \u2014 returns original value with confidence 0\nif the service is unavailable or inference fails.\nToken-authenticated, no Bearer auth.",
         "operationId": "heal-surface-field",
         "parameters": [
           {
@@ -48780,7 +48935,7 @@
     },
     "/v1/{workspace_id}/analytics/dashboard": {
       "get": {
-        "description": "Composite analytics dashboard — top KPIs with period-over-period deltas.",
+        "description": "Composite analytics dashboard \u2014 top KPIs with period-over-period deltas.",
         "operationId": "get-analytics-dashboard",
         "parameters": [
           {
@@ -49082,7 +49237,7 @@
     },
     "/v1/{workspace_id}/analytics/latency": {
       "get": {
-        "description": "Voice latency metrics — p50/p95/p99 by component with trends.",
+        "description": "Voice latency metrics \u2014 p50/p95/p99 by component with trends.",
         "operationId": "get-latency-analytics",
         "parameters": [
           {
@@ -49723,7 +49878,7 @@
     },
     "/v1/{workspace_id}/analytics/tool-performance": {
       "get": {
-        "description": "Tool execution analytics — success rates, failure trends.",
+        "description": "Tool execution analytics \u2014 success rates, failure trends.",
         "operationId": "get-tool-performance",
         "parameters": [
           {
@@ -49986,7 +50141,7 @@
         ]
       },
       "post": {
-        "description": "Create a new API key for a workspace. The response includes the plaintext `api_key` — store it securely, it cannot be retrieved again.",
+        "description": "Create a new API key for a workspace. The response includes the plaintext `api_key` \u2014 store it securely, it cannot be retrieved again.",
         "operationId": "create-api-key",
         "parameters": [
           {
@@ -50385,7 +50540,7 @@
     },
     "/v1/{workspace_id}/audit/entity/{entity_id}/access-log": {
       "get": {
-        "description": "Per-entity access history — all audit events for a specific resource.\n\nPermissions: admin, owner",
+        "description": "Per-entity access history \u2014 all audit events for a specific resource.\n\nPermissions: admin, owner",
         "operationId": "get-entity-access-log",
         "parameters": [
           {
@@ -50628,7 +50783,7 @@
     },
     "/v1/{workspace_id}/audit/phi-access": {
       "get": {
-        "description": "PHI access report — who accessed what patient data, when, from where.\n\nRequired for HIPAA breach investigation (§164.312(b)).\n\nPermissions: admin, owner",
+        "description": "PHI access report \u2014 who accessed what patient data, when, from where.\n\nRequired for HIPAA breach investigation (\u00a7164.312(b)).\n\nPermissions: admin, owner",
         "operationId": "get-phi-access-report",
         "parameters": [
           {
@@ -50844,7 +50999,7 @@
     },
     "/v1/{workspace_id}/billing/dashboard": {
       "get": {
-        "description": "Composite billing dashboard — KPIs, period comparison, top meters, invoice summary.\n\nAll computation is server-side. Frontend is a pure renderer.",
+        "description": "Composite billing dashboard \u2014 KPIs, period comparison, top meters, invoice summary.\n\nAll computation is server-side. Frontend is a pure renderer.",
         "operationId": "get-billing-dashboard",
         "parameters": [
           {
@@ -51004,7 +51159,7 @@
     },
     "/v1/{workspace_id}/billing/invoices/{invoice_id}": {
       "get": {
-        "description": "Get invoice detail — scoped to workspace's billing customer.",
+        "description": "Get invoice detail \u2014 scoped to workspace's billing customer.",
         "operationId": "get-billing-invoice",
         "parameters": [
           {
@@ -51060,7 +51215,7 @@
     },
     "/v1/{workspace_id}/billing/invoices/{invoice_id}/pdf": {
       "get": {
-        "description": "Get presigned S3 URL for invoice PDF download — scoped to workspace's billing customer.",
+        "description": "Get presigned S3 URL for invoice PDF download \u2014 scoped to workspace's billing customer.",
         "operationId": "get-billing-invoice-pdf",
         "parameters": [
           {
@@ -51116,7 +51271,7 @@
     },
     "/v1/{workspace_id}/billing/usage": {
       "get": {
-        "description": "Aggregated billing summary — meters grouped by key, period range, totals.\n\nAll computation is server-side. Frontend is a pure renderer.",
+        "description": "Aggregated billing summary \u2014 meters grouped by key, period range, totals.\n\nAll computation is server-side. Frontend is a pure renderer.",
         "operationId": "get-billing-usage",
         "parameters": [
           {
@@ -51977,7 +52132,7 @@
     },
     "/v1/{workspace_id}/calls/{call_id}/intelligence": {
       "get": {
-        "description": "Aggregated intelligence for a completed call: quality breakdown, key moments, and summaries. Per-turn visualization lives on the unified timeline (call detail endpoint → timeline.segments).",
+        "description": "Aggregated intelligence for a completed call: quality breakdown, key moments, and summaries. Per-turn visualization lives on the unified timeline (call detail endpoint \u2192 timeline.segments).",
         "operationId": "get-call-intelligence",
         "parameters": [
           {
@@ -52604,7 +52759,7 @@
     },
     "/v1/{workspace_id}/compliance/dashboard": {
       "get": {
-        "description": "Composite compliance dashboard — HIPAA status, retention, credentials summary.\n\nAggregates compliance signals into a single dashboard view.\n\nPermissions: admin, owner.",
+        "description": "Composite compliance dashboard \u2014 HIPAA status, retention, credentials summary.\n\nAggregates compliance signals into a single dashboard view.\n\nPermissions: admin, owner.",
         "operationId": "get-compliance-dashboard",
         "parameters": [
           {
@@ -53676,7 +53831,7 @@
     },
     "/v1/{workspace_id}/conversations/{conversation_id}/turns/stream": {
       "post": {
-        "description": "Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header — no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.",
+        "description": "Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header \u2014 no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.",
         "operationId": "create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post",
         "parameters": [
           {
@@ -54603,7 +54758,7 @@
     },
     "/v1/{workspace_id}/data-sources/{data_source_id}/sync": {
       "post": {
-        "description": "Queues a one-off poll of the data source on connector-runner. Bypasses the business-hours gate and per-resource cadence counter. Returns 202 once the request is queued; the poll itself runs asynchronously. Returns 409 if the source is already mid-sync, 503 if connector-runner is unreachable. The 409 is best-effort: the status check and trigger are separate calls, so a scheduled poll can grab the lease between them — clients should treat 409 as a UX hint, not a hard guarantee.",
+        "description": "Queues a one-off poll of the data source on connector-runner. Bypasses the business-hours gate and per-resource cadence counter. Returns 202 once the request is queued; the poll itself runs asynchronously. Returns 409 if the source is already mid-sync, 503 if connector-runner is unreachable. The 409 is best-effort: the status check and trigger are separate calls, so a scheduled poll can grab the lease between them \u2014 clients should treat 409 as a UX hint, not a hard guarantee.",
         "operationId": "trigger-data-source-sync",
         "parameters": [
           {
@@ -54754,7 +54909,7 @@
     },
     "/v1/{workspace_id}/data_queries": {
       "get": {
-        "description": "List every registered query for a workspace. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed field: deployed_at). Default: `-deployed_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Workspace.view` permission.",
+        "description": "List every registered query for a workspace. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed field: deployed_at). Default: `-deployed_at`. Cursor opaque \u2014 round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Workspace.view` permission.",
         "operationId": "list-workspace-data-queries",
         "parameters": [
           {
@@ -54797,12 +54952,12 @@
             }
           },
           {
-            "description": "Opaque continuation token from a prior response. Treat as a\nblack box — the server decodes it.",
+            "description": "Opaque continuation token from a prior response. Treat as a\nblack box \u2014 the server decodes it.",
             "in": "query",
             "name": "continuation_token",
             "required": false,
             "schema": {
-              "description": "Opaque continuation token from a prior response. Treat as a\nblack box — the server decodes it.",
+              "description": "Opaque continuation token from a prior response. Treat as a\nblack box \u2014 the server decodes it.",
               "title": "Continuation Token"
             }
           }
@@ -57222,7 +57377,7 @@
     },
     "/v1/{workspace_id}/functions/{function_name}/invoke": {
       "post": {
-        "description": "Execute a registered function and return its rows.\n\nBound parameters are validated against the stored schema; ``ws_id``\nis auto-injected from the request context. Returns the executor's\nshaped response (``rows`` for ``returns=table``, scalar value for\n``returns=scalar``).\n\nPermissions: ``Workspace.view`` (read role and above). Read-only\nkeys are intentionally allowed — invocation runs a stored,\npre-validated SELECT against catalogs the workspace SP already has\nSELECT on; the gate on what can run is the deploy-time validator\n(read-only invariant), not the per-call permission.",
+        "description": "Execute a registered function and return its rows.\n\nBound parameters are validated against the stored schema; ``ws_id``\nis auto-injected from the request context. Returns the executor's\nshaped response (``rows`` for ``returns=table``, scalar value for\n``returns=scalar``).\n\nPermissions: ``Workspace.view`` (read role and above). Read-only\nkeys are intentionally allowed \u2014 invocation runs a stored,\npre-validated SELECT against catalogs the workspace SP already has\nSELECT on; the gate on what can run is the deploy-time validator\n(read-only invariant), not the per-call permission.",
         "operationId": "invoke-function",
         "parameters": [
           {
@@ -57284,7 +57439,7 @@
     },
     "/v1/{workspace_id}/functions/{function_name}/test": {
       "post": {
-        "description": "Test invoke — same as invoke + persists last_test_* on the row.\n\nReturns 200 with ``status=\"fail\"`` + populated ``error`` on\nexecution failure (instead of a 5xx) so the DC has a single\nhappy-path rendering.\n\nPermissions: admin, owner.",
+        "description": "Test invoke \u2014 same as invoke + persists last_test_* on the row.\n\nReturns 200 with ``status=\"fail\"`` + populated ``error`` on\nexecution failure (instead of a 5xx) so the DC has a single\nhappy-path rendering.\n\nPermissions: admin, owner.",
         "operationId": "test-function",
         "parameters": [
           {
@@ -58100,7 +58255,7 @@
     },
     "/v1/{workspace_id}/integrations": {
       "get": {
-        "description": "List every integration for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
+        "description": "List every integration for a workspace. Optionally filter by `enabled` or `search` (name/display_name/id ilike). Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque \u2014 round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
         "operationId": "list-integrations",
         "parameters": [
           {
@@ -58393,7 +58548,7 @@
         ]
       },
       "patch": {
-        "description": "Patch a REST integration. NOT NULL fields reject `null` at validation time; pass `auth: null` to clear the auth config. `auth` and `secret_value` are independent — update either alone to swap auth shape (reusing the existing secret) or rotate the secret (keeping the existing auth shape). Requires `Integration.update` permission.",
+        "description": "Patch a REST integration. NOT NULL fields reject `null` at validation time; pass `auth: null` to clear the auth config. `auth` and `secret_value` are independent \u2014 update either alone to swap auth shape (reusing the existing secret) or rotate the secret (keeping the existing auth shape). Requires `Integration.update` permission.",
         "operationId": "update-integration",
         "parameters": [
           {
@@ -58459,7 +58614,7 @@
     },
     "/v1/{workspace_id}/integrations/{integration_id}/endpoints": {
       "get": {
-        "description": "List endpoints on a REST integration. Optionally search by name/description. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque — round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
+        "description": "List endpoints on a REST integration. Optionally search by name/description. Sort via repeated `sort_by` query params; each entry is `+field` or `-field` (allowed fields: name, created_at, updated_at). Default: `-created_at`. Cursor opaque \u2014 round-trip `continuation_token` unchanged with the same `sort_by`. Requires `Integration.view` permission.",
         "operationId": "list-integration-endpoints",
         "parameters": [
           {
@@ -59344,7 +59499,7 @@
     },
     "/v1/{workspace_id}/m42/clusters/summary": {
       "get": {
-        "description": "Per-cluster cohort stats — size, mean age/BMI/HbA1c, prediabetes / T2D %, predicted-risk mean. Powers the Patient Profile cluster strip.",
+        "description": "Per-cluster cohort stats \u2014 size, mean age/BMI/HbA1c, prediabetes / T2D %, predicted-risk mean. Powers the Patient Profile cluster strip.",
         "operationId": "list_cluster_summary_v1__workspace_id__m42_clusters_summary_get",
         "parameters": [
           {
@@ -59765,7 +59920,7 @@
     },
     "/v1/{workspace_id}/m42/model-registry": {
       "get": {
-        "description": "Fitted GLM coefficients, training-set size, AUROC for each focus-area model. Inline JSON kept as strings — clients parse.",
+        "description": "Fitted GLM coefficients, training-set size, AUROC for each focus-area model. Inline JSON kept as strings \u2014 clients parse.",
         "operationId": "list_model_registry_v1__workspace_id__m42_model_registry_get",
         "parameters": [
           {
@@ -60093,7 +60248,7 @@
     },
     "/v1/{workspace_id}/m42/patients/{patient_id}/note": {
       "get": {
-        "description": "Patient's synthetic clinical note + LLM-extracted structured fields. NLP sample is 500 patients — returns 404 outside that set.",
+        "description": "Patient's synthetic clinical note + LLM-extracted structured fields. NLP sample is 500 patients \u2014 returns 404 outside that set.",
         "operationId": "get_patient_note_v1__workspace_id__m42_patients__patient_id__note_get",
         "parameters": [
           {
@@ -60389,7 +60544,7 @@
     },
     "/v1/{workspace_id}/memory/{entity_id}/facts": {
       "get": {
-        "description": "Get extracted facts for an entity, optionally filtered by dimension.\n\nReads pre-computed facts from ``memory.patient_memory``. Each row\nincludes the pre-extracted ``extracted_text`` — no inline JSONB\nextraction at query time.\n\nPermissions: authenticated (any role).",
+        "description": "Get extracted facts for an entity, optionally filtered by dimension.\n\nReads pre-computed facts from ``memory.patient_memory``. Each row\nincludes the pre-extracted ``extracted_text`` \u2014 no inline JSONB\nextraction at query time.\n\nPermissions: authenticated (any role).",
         "operationId": "get-entity-memory-facts",
         "parameters": [
           {
@@ -63301,7 +63456,7 @@
     },
     "/v1/{workspace_id}/prompt-logs": {
       "get": {
-        "description": "Lists ``prompt_log`` events emitted by agent-engine — full system prompt, conversation history, tool catalog, LLM model, and response — for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead — ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
+        "description": "Lists ``prompt_log`` events emitted by agent-engine \u2014 full system prompt, conversation history, tool catalog, LLM model, and response \u2014 for auditing and debugging. Reads the Delta ``world_events`` ledger via Databricks SQL; typical latency is 1-5s with a 15s ceiling on cold-start.\n\n**Conversation filter**: pass ``conversation_id`` for the canonical mental model. Text conversations resolve from ``world.conversations``; voice/call IDs resolve through the projected conversation entity. ``call_sid`` is the legacy direct-SID filter (Twilio CA-SID for voice, session_id UUID otherwise) and is mutually exclusive with ``conversation_id``.\n\n**Other filters**: ``prompt_type``, ``state_name``, ``from_ts``, ``to_ts``. When no selectivity-bearing filter (conversation_id / call_sid / time range) is supplied, the query is auto-capped to the last 7 days; the applied window is reported in ``applied_time_window_days``.\n\n**Pagination**: peek-ahead \u2014 ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.\n\n**Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.",
         "operationId": "list-prompt-logs",
         "parameters": [
           {
@@ -63315,7 +63470,7 @@
             }
           },
           {
-            "description": "Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
+            "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
             "in": "query",
             "name": "conversation_id",
             "required": false,
@@ -63329,12 +63484,12 @@
                   "type": "null"
                 }
               ],
-              "description": "Conversation entity UUID (canonical identifier across all modalities — voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
+              "description": "Conversation entity UUID (canonical identifier across all modalities \u2014 voice, text/web, sms, sim). Resolves text conversations through the durable ``world.conversations`` row, then falls back to the voice/call entity projection. Mutually exclusive with the ``call_sid`` query parameter.",
               "title": "Conversation Id"
             }
           },
           {
-            "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
+            "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
             "in": "query",
             "name": "call_sid",
             "required": false,
@@ -63348,7 +63503,7 @@
                   "type": "null"
                 }
               ],
-              "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead — this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
+              "description": "Direct conversation identifier as stored on the prompt-log event: Twilio CA-SID for voice calls, session_id UUID for text/sim sessions. Most callers should use ``conversation_id`` instead \u2014 this is kept for legacy callers and external systems that hold the SID directly. Mutually exclusive with ``conversation_id``.",
               "title": "Call Sid"
             }
           },
@@ -64564,7 +64719,7 @@
     },
     "/v1/{workspace_id}/review-queue/{item_id}": {
       "get": {
-        "description": "Returns review item with inline event data and entity state — no extra calls needed.",
+        "description": "Returns review item with inline event data and entity state \u2014 no extra calls needed.",
         "operationId": "get_review_item_v1__workspace_id__review_queue__item_id__get",
         "parameters": [
           {
@@ -64972,7 +65127,7 @@
     },
     "/v1/{workspace_id}/review-queue/{item_id}/unclaim": {
       "post": {
-        "description": "Clears assignment — only the current claimant can unclaim.",
+        "description": "Clears assignment \u2014 only the current claimant can unclaim.",
         "operationId": "unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post",
         "parameters": [
           {
@@ -65136,7 +65291,7 @@
         ]
       },
       "post": {
-        "description": "Create one rule set for `(agent_kind, rule_kind)`. Returns 409 if a row already exists for that key — use PATCH on the existing row or DELETE first.",
+        "description": "Create one rule set for `(agent_kind, rule_kind)`. Returns 409 if a row already exists for that key \u2014 use PATCH on the existing row or DELETE first.",
         "operationId": "create-scheduling-rule-set",
         "parameters": [
           {
@@ -65316,7 +65471,7 @@
         ]
       },
       "patch": {
-        "description": "Update `params` and/or `is_active` on an existing rule set. `agent_kind` and `rule_kind` are immutable — to change either, create a new rule set and delete the old one.",
+        "description": "Update `params` and/or `is_active` on an existing rule set. `agent_kind` and `rule_kind` are immutable \u2014 to change either, create a new rule set and delete the old one.",
         "operationId": "update-scheduling-rule-set",
         "parameters": [
           {
@@ -65467,7 +65622,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Sense→act latency distribution for the workspace",
+        "summary": "Sense\u2192act latency distribution for the workspace",
         "tags": [
           "Sensorium"
         ]
@@ -66046,7 +66201,7 @@
     },
     "/v1/{workspace_id}/services/{service_id}/voice-judge/recent": {
       "get": {
-        "description": "Returns the most recent per-call voice-judge scores for one service, ordered newest first. Produced by the Databricks `voice_judge` job (stereo audio → Gemini 2.5 Flash → 10-dimension rubric). Used by the Agent Readiness page to populate Voice Quality criterion cards.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not OLTP).\n\n**Default limit**: 20. Max 100.",
+        "description": "Returns the most recent per-call voice-judge scores for one service, ordered newest first. Produced by the Databricks `voice_judge` job (stereo audio \u2192 Gemini 2.5 Flash \u2192 10-dimension rubric). Used by the Agent Readiness page to populate Voice Quality criterion cards.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not OLTP).\n\n**Default limit**: 20. Max 100.",
         "operationId": "list-voice-judge-recent",
         "parameters": [
           {
@@ -66454,94 +66609,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/settings/connectors": {
-      "get": {
-        "description": "Get connector definitions for this workspace.\n\nPermissions: authenticated (any role).",
-        "operationId": "get-connector-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConnectorSettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Get connector settings",
-        "tags": [
-          "Settings"
-        ]
-      },
-      "put": {
-        "description": "Replace all connector definitions for this workspace.\n\nValidates connection_config per source_type. Syncs world.data_sources\nindex for FK compatibility.\n\nPermissions: admin, owner.",
-        "operationId": "update-connector-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConnectorSettingsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConnectorSettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Workspace not found"
-          },
-          "422": {
-            "description": "Validation error"
-          },
-          "429": {
-            "description": "Rate limited"
-          }
-        },
-        "summary": "Update connector settings",
-        "tags": [
-          "Settings"
-        ]
-      }
-    },
     "/v1/{workspace_id}/settings/environments": {
       "get": {
         "description": "Get per-environment config overrides.\n\nReturns empty environments when not configured.\n\nPermissions: authenticated (any role).",
@@ -66926,7 +66993,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace gap scanner settings.\n\nPartial updates supported — only provided fields are changed.\nRequirements list is replaced entirely when provided (not merged).\n\nPermissions: admin, owner.",
+        "description": "Update the workspace gap scanner settings.\n\nPartial updates supported \u2014 only provided fields are changed.\nRequirements list is replaced entirely when provided (not merged).\n\nPermissions: admin, owner.",
         "operationId": "update-gap-scanner-settings",
         "parameters": [
           {
@@ -66979,7 +67046,7 @@
     },
     "/v1/{workspace_id}/settings/gap-scanner/preview": {
       "post": {
-        "description": "Dry-run gap detection — returns entities with missing fields without creating surfaces.\n\nProxies to connector-runner /internal/gap-scanner/preview.\n\nPermissions: admin, owner.",
+        "description": "Dry-run gap detection \u2014 returns entities with missing fields without creating surfaces.\n\nProxies to connector-runner /internal/gap-scanner/preview.\n\nPermissions: admin, owner.",
         "operationId": "gap-scanner-preview",
         "parameters": [
           {
@@ -67048,7 +67115,7 @@
     },
     "/v1/{workspace_id}/settings/gap-scanner/scan": {
       "post": {
-        "description": "Trigger one scan tick immediately — creates surfaces for detected gaps.\n\nProxies to connector-runner /internal/gap-scanner/scan.\n\nPermissions: admin, owner.",
+        "description": "Trigger one scan tick immediately \u2014 creates surfaces for detected gaps.\n\nProxies to connector-runner /internal/gap-scanner/scan.\n\nPermissions: admin, owner.",
         "operationId": "gap-scanner-scan",
         "parameters": [
           {
@@ -67125,7 +67192,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace memory dimension settings.\n\nPartial updates supported — only provided fields are changed.\nThe dimensions list is replaced entirely when provided.\n\nPermissions: admin, owner.",
+        "description": "Update the workspace memory dimension settings.\n\nPartial updates supported \u2014 only provided fields are changed.\nThe dimensions list is replaced entirely when provided.\n\nPermissions: admin, owner.",
         "operationId": "update-memory-settings",
         "parameters": [
           {
@@ -67213,7 +67280,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace metric definitions.\n\nPartial updates supported — only provided fields are changed.\nThe definitions list is replaced entirely when provided.\n\nPermissions: admin, owner.",
+        "description": "Update the workspace metric definitions.\n\nPartial updates supported \u2014 only provided fields are changed.\nThe definitions list is replaced entirely when provided.\n\nPermissions: admin, owner.",
         "operationId": "update-metric-settings",
         "parameters": [
           {
@@ -67301,7 +67368,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace outreach settings.\n\nPartial updates supported — only provided fields are changed.\nRules and data_templates lists are replaced entirely when provided.\n\nValidates that data_template_id references in rules point to\ntemplates that exist in the same payload or current settings.\n\nPermissions: admin, owner.",
+        "description": "Update the workspace outreach settings.\n\nPartial updates supported \u2014 only provided fields are changed.\nRules and data_templates lists are replaced entirely when provided.\n\nValidates that data_template_id references in rules point to\ntemplates that exist in the same payload or current settings.\n\nPermissions: admin, owner.",
         "operationId": "update-outreach-settings",
         "parameters": [
           {
@@ -67354,7 +67421,7 @@
     },
     "/v1/{workspace_id}/settings/retention": {
       "get": {
-        "description": "Get the workspace retention policy.\n\nReturns HIPAA-compliant defaults (2190 days / 6 years) for any field\nnot explicitly configured. Advisory in v1 — no automated deletion.\n\nPermissions: authenticated (any role).",
+        "description": "Get the workspace retention policy.\n\nReturns HIPAA-compliant defaults (2190 days / 6 years) for any field\nnot explicitly configured. Advisory in v1 \u2014 no automated deletion.\n\nPermissions: authenticated (any role).",
         "operationId": "get-retention-policy",
         "parameters": [
           {
@@ -67389,7 +67456,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace retention policy.\n\nPartial updates supported — only provided fields are changed.\nAdvisory in v1: policy is stored and displayed but no automated\ndeletion is performed. Legal hold overrides all retention.\n\nPermissions: admin, owner.",
+        "description": "Update the workspace retention policy.\n\nPartial updates supported \u2014 only provided fields are changed.\nAdvisory in v1: policy is stored and displayed but no automated\ndeletion is performed. Legal hold overrides all retention.\n\nPermissions: admin, owner.",
         "operationId": "update-retention-policy",
         "parameters": [
           {
@@ -67477,7 +67544,7 @@
         ]
       },
       "put": {
-        "description": "Update the voice experience settings for a workspace.\n\nOnly provided fields are updated; omitted fields retain their current\nvalues. Set a field to ``null`` to reset it to default.\n\n**Voice Identity & Style**\n- **voice_id**: Voice identity UUID — determines the agent's voice persona\n- **tone**: Emotional baseline (``calm``, ``sympathetic``,\n  ``enthusiastic``, ``content``, ``curious``, ``cheerful``,\n  ``serious``, ``friendly``). The system also adapts tone dynamically\n  based on real-time caller emotion analysis; this setting provides\n  the baseline when no strong emotional signal is detected.\n- **speed**: Speech rate multiplier (0.5-2.0)\n- **volume**: Volume multiplier (0.0-1.0)\n- **language**: BCP-47 language tag (default ``en``)\n\n**Speech Recognition Boost**\n- **keyterms**: Exact words the speech recognition engine should\n  prioritize. Use for specific names, drug names, and org jargon.\n  Example: ``[\"Dr. Ramirez\", \"metformin\", \"HIPAA\"]``\n\n**Audio Correction Hints**\n- **correction_categories**: Broad categories of things callers\n  commonly say that speech-to-text gets wrong. Not exact words —\n  just what *kinds* of things to watch for. Example:\n  ``[\"medication names\", \"insurance carriers\", \"doctor last names\"]``\n\n**Post-Call Intelligence**\n- **post_call_analysis_enabled**: Run automated quality scoring after\n  each call ends (default ``true``)\n- **transcript_correction_enabled**: Re-verify transcripts with a\n  high-accuracy batch model after call ends (default ``true``)\n\n#### Permissions\n* Requires admin or owner role.",
+        "description": "Update the voice experience settings for a workspace.\n\nOnly provided fields are updated; omitted fields retain their current\nvalues. Set a field to ``null`` to reset it to default.\n\n**Voice Identity & Style**\n- **voice_id**: Voice identity UUID \u2014 determines the agent's voice persona\n- **tone**: Emotional baseline (``calm``, ``sympathetic``,\n  ``enthusiastic``, ``content``, ``curious``, ``cheerful``,\n  ``serious``, ``friendly``). The system also adapts tone dynamically\n  based on real-time caller emotion analysis; this setting provides\n  the baseline when no strong emotional signal is detected.\n- **speed**: Speech rate multiplier (0.5-2.0)\n- **volume**: Volume multiplier (0.0-1.0)\n- **language**: BCP-47 language tag (default ``en``)\n\n**Speech Recognition Boost**\n- **keyterms**: Exact words the speech recognition engine should\n  prioritize. Use for specific names, drug names, and org jargon.\n  Example: ``[\"Dr. Ramirez\", \"metformin\", \"HIPAA\"]``\n\n**Audio Correction Hints**\n- **correction_categories**: Broad categories of things callers\n  commonly say that speech-to-text gets wrong. Not exact words \u2014\n  just what *kinds* of things to watch for. Example:\n  ``[\"medication names\", \"insurance carriers\", \"doctor last names\"]``\n\n**Post-Call Intelligence**\n- **post_call_analysis_enabled**: Run automated quality scoring after\n  each call ends (default ``true``)\n- **transcript_correction_enabled**: Re-verify transcripts with a\n  high-accuracy batch model after call ends (default ``true``)\n\n#### Permissions\n* Requires admin or owner role.",
         "operationId": "update-voice-settings",
         "parameters": [
           {
@@ -67692,7 +67759,7 @@
     },
     "/v1/{workspace_id}/simulations/bridge/plan": {
       "post": {
-        "description": "Infer a TargetSpec from an NL objective — preview before running /bridge.\n\nUX: user types \"test scheduling failures in 20 different ways\", we return\na structured target_spec + rationale. The frontend shows both, lets the\nuser edit (add/remove states, tighten pathways), then POSTs the final\nspec to /bridge. Same LLM, same Vertex cost structure as /bridge, but\nno run is created — pure inference.",
+        "description": "Infer a TargetSpec from an NL objective \u2014 preview before running /bridge.\n\nUX: user types \"test scheduling failures in 20 different ways\", we return\na structured target_spec + rationale. The frontend shows both, lets the\nuser edit (add/remove states, tighten pathways), then POSTs the final\nspec to /bridge. Same LLM, same Vertex cost structure as /bridge, but\nno run is created \u2014 pure inference.",
         "operationId": "simulation-bridge-plan",
         "parameters": [
           {
@@ -68444,7 +68511,7 @@
     },
     "/v1/{workspace_id}/simulations/runs/{run_id}/sessions": {
       "post": {
-        "description": "Create a simulation session within a run. Proxies to agent-engine.\n\nentity_id ownership: agent-engine's _resolve_caller queries the entity\nwith workspace_id scoping — a workspace-A entity_id resolves to None in\nworkspace-B, so no cross-tenant data is exposed.",
+        "description": "Create a simulation session within a run. Proxies to agent-engine.\n\nentity_id ownership: agent-engine's _resolve_caller queries the entity\nwith workspace_id scoping \u2014 a workspace-A entity_id resolves to None in\nworkspace-B, so no cross-tenant data is exposed.",
         "operationId": "create-simulation-session",
         "parameters": [
           {
@@ -68561,7 +68628,7 @@
         ]
       },
       "get": {
-        "description": "Get the B&B knowledge graph for a service — topology + observations merged.",
+        "description": "Get the B&B knowledge graph for a service \u2014 topology + observations merged.",
         "operationId": "get-simulation-coverage-graph",
         "parameters": [
           {
@@ -69172,7 +69239,7 @@
     },
     "/v1/{workspace_id}/simulations/sessions/{session_id}/fork": {
       "post": {
-        "description": "Fork a session into N branches — clone + step each alternative atomically.",
+        "description": "Fork a session into N branches \u2014 clone + step each alternative atomically.",
         "operationId": "simulation-fork",
         "parameters": [
           {
@@ -69466,6 +69533,60 @@
           }
         },
         "summary": "Get Simulation Session Turns",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/suite-runs/{suite_run_id}": {
+      "get": {
+        "description": "Fetch aggregate results for a durable suite run.",
+        "operationId": "get-simulation-suite-run-results",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "suite_run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suite Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationSuiteRunResultsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Suite Run Results",
         "tags": [
           "Simulations"
         ]
@@ -69779,6 +69900,72 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/suites/{suite_id}/runs": {
+      "get": {
+        "description": "List durable suite-run groups for a first-class suite.",
+        "operationId": "list-simulation-suite-runs",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "suite_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Suite Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSimulationSuiteRunsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Simulation Suite Runs",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/skills": {
       "get": {
         "description": "List skills for a workspace with pagination. Optionally filter by enabled status. Requires `Skill.view` permission.",
@@ -69964,7 +70151,7 @@
     },
     "/v1/{workspace_id}/skills/{skill_id}": {
       "delete": {
-        "description": "Delete a skill.\n\n**Not idempotent.** A second concurrent caller racing the same delete will receive ``404 Not Found`` once the row is gone — clients should treat 404 as success-equivalent for cleanup workflows. Requires `Skill.delete` permission.",
+        "description": "Delete a skill.\n\n**Not idempotent.** A second concurrent caller racing the same delete will receive ``404 Not Found`` once the row is gone \u2014 clients should treat 404 as success-equivalent for cleanup workflows. Requires `Skill.delete` permission.",
         "operationId": "delete-skill",
         "parameters": [
           {
@@ -70088,7 +70275,7 @@
         ]
       },
       "put": {
-        "description": "Update a skill's configuration in place.\n\n**Field semantics.** Omitted fields and explicit ``null`` are treated identically — both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.\n\nRequires `Skill.update` permission.",
+        "description": "Update a skill's configuration in place.\n\n**Field semantics.** Omitted fields and explicit ``null`` are treated identically \u2014 both leave the existing value unchanged. Empty-string is rejected with 422 for fields that carry a ``minLength`` bound (``model``). Clearing a previously-set optional value back to ``null`` is not currently supported via PUT.\n\nRequires `Skill.update` permission.",
         "operationId": "update-skill",
         "parameters": [
           {
@@ -70785,7 +70972,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression — keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 — SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {
@@ -72088,7 +72275,7 @@
     },
     "/v1/{workspace_id}/use-cases/{use_case_id}": {
       "delete": {
-        "description": "Delete a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
+        "description": "Delete a use case. Refuses (409) while any service still binds the use case \u2014 call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
         "operationId": "delete-use-case",
         "parameters": [
           {
@@ -72259,7 +72446,7 @@
         ]
       },
       "put": {
-        "description": "Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.",
+        "description": "Bind this use case to a platform service in the current workspace. PUT semantics \u2014 rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.",
         "operationId": "bind-use-case-to-service",
         "parameters": [
           {
@@ -72425,6 +72612,30 @@
             }
           },
           {
+            "description": "Sort order: `+display_name` (default) or `-display_name` for alphabetical, `+last_event_at` for oldest activity first, `-last_event_at` for most recent first. All sort orders use entity id as a final tiebreaker for stable pagination.",
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "+display_name",
+                    "-display_name",
+                    "+last_event_at",
+                    "-last_event_at"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Sort order: `+display_name` (default) or `-display_name` for alphabetical, `+last_event_at` for oldest activity first, `-last_event_at` for most recent first. All sort orders use entity id as a final tiebreaker for stable pagination.",
+              "title": "Sort By"
+            }
+          },
+          {
             "in": "query",
             "name": "limit",
             "required": false,
@@ -72572,7 +72783,7 @@
     },
     "/v1/{workspace_id}/world/dashboard": {
       "get": {
-        "description": "Composite world health dashboard — entity counts by type, event velocity (24h/7d), average confidence, and source breakdown. All computation server-side.",
+        "description": "Composite world health dashboard \u2014 entity counts by type, event velocity (24h/7d), average confidence, and source breakdown. All computation server-side.",
         "operationId": "world-dashboard",
         "parameters": [
           {
@@ -72877,7 +73088,7 @@
     },
     "/v1/{workspace_id}/world/entities": {
       "get": {
-        "description": "List entities filtered by type with optional name search. Works for any entity type — patients, operators, calls, or any type created by T3 agents. Returns full projected state.",
+        "description": "List entities filtered by type with optional name search. Works for any entity type \u2014 patients, operators, calls, or any type created by T3 agents. Returns full projected state.",
         "operationId": "list-entities",
         "parameters": [
           {
@@ -73078,7 +73289,7 @@
     },
     "/v1/{workspace_id}/world/entities/duplicates": {
       "get": {
-        "description": "Suspected duplicate entities — same_as edges sorted by confidence.",
+        "description": "Suspected duplicate entities \u2014 same_as edges sorted by confidence.",
         "operationId": "get-entity-duplicates",
         "parameters": [
           {
@@ -73115,10 +73326,10 @@
             "name": "confidence_max",
             "required": false,
             "schema": {
-              "default": 1,
+              "default": 1.0,
               "description": "Max confidence threshold",
-              "maximum": 1,
-              "minimum": 0,
+              "maximum": 1.0,
+              "minimum": 0.0,
               "title": "Confidence Max",
               "type": "number"
             }
@@ -73189,7 +73400,7 @@
     },
     "/v1/{workspace_id}/world/entities/resolve": {
       "post": {
-        "description": "Polymorphic identifier → ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Uses indexed lookups (phone, email, canonical_id) and the external_ids GIN index — sub-10ms for single-identifier queries on warm pods. Returns matches ranked by confidence + number of identifiers matched.",
+        "description": "Polymorphic identifier \u2192 ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Uses indexed lookups (phone, email, canonical_id) and the external_ids GIN index \u2014 sub-10ms for single-identifier queries on warm pods. Returns matches ranked by confidence + number of identifiers matched.",
         "operationId": "resolve-entity",
         "parameters": [
           {
@@ -73249,7 +73460,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}": {
       "get": {
-        "description": "Fetch a single entity with its full projected state. The state is a computed projection from all events — never mutated directly. Enhanced entity types (patient, operator, call) have richer projections.",
+        "description": "Fetch a single entity with its full projected state. The state is a computed projection from all events \u2014 never mutated directly. Enhanced entity types (patient, operator, call) have richer projections.",
         "operationId": "get-entity",
         "parameters": [
           {
@@ -73396,7 +73607,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/enrichment/{key}": {
       "put": {
-        "description": "Writes a single per-key entity.enriched event for the given entity. Validates against the workspace's enrichment_keys registry — unknown key, wrong value type, enum violation, or confidence below the key's floor all return 400. SDP picks winners by confidence class.",
+        "description": "Writes a single per-key entity.enriched event for the given entity. Validates against the workspace's enrichment_keys registry \u2014 unknown key, wrong value type, enum violation, or confidence below the key's floor all return 400. SDP picks winners by confidence class.",
         "operationId": "put-entity-enrichment",
         "parameters": [
           {
@@ -73562,7 +73773,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/graph": {
       "get": {
-        "description": "Entity relationship graph — one level of edges with neighbor metadata.",
+        "description": "Entity relationship graph \u2014 one level of edges with neighbor metadata.",
         "operationId": "get-entity-graph",
         "parameters": [
           {
@@ -73624,7 +73835,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/lineage": {
       "get": {
-        "description": "Full data lineage — provenance + outbound sinks + review history.",
+        "description": "Full data lineage \u2014 provenance + outbound sinks + review history.",
         "operationId": "get-entity-lineage",
         "parameters": [
           {
@@ -73686,7 +73897,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/merged": {
       "get": {
-        "description": "Returns entities linked via same_as edges — cross-source merges where different data sources refer to the same real-world entity.",
+        "description": "Returns entities linked via same_as edges \u2014 cross-source merges where different data sources refer to the same real-world entity.",
         "operationId": "merged-entities",
         "parameters": [
           {
@@ -73746,7 +73957,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/provenance": {
       "get": {
-        "description": "Data lineage for an entity — sources, confidence history, merge history.",
+        "description": "Data lineage for an entity \u2014 sources, confidence history, merge history.",
         "operationId": "get-entity-provenance",
         "parameters": [
           {
@@ -73808,7 +74019,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/relationships": {
       "get": {
-        "description": "Get relationships for an entity — links to other entities in the knowledge graph. Filter by relationship type.",
+        "description": "Get relationships for an entity \u2014 links to other entities in the knowledge graph. Filter by relationship type.",
         "operationId": "get-entity-relationships",
         "parameters": [
           {
@@ -73889,7 +74100,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/timeline": {
       "get": {
-        "description": "Get the event timeline for an entity — all current events ordered by effective date. The entity's state is always a projection of these events. Filter by domain (clinical, operational, audit, etc.).",
+        "description": "Get the event timeline for an entity \u2014 all current events ordered by effective date. The entity's state is always a projection of these events. Filter by domain (clinical, operational, audit, etc.).",
         "operationId": "get-entity-timeline",
         "parameters": [
           {
@@ -73993,7 +74204,7 @@
     },
     "/v1/{workspace_id}/world/entity-stats": {
       "get": {
-        "description": "Aggregate stats for entities including sync status breakdown (pending, synced, failed). Filter by entity_type to get stats for a specific type (e.g. appointment, patient). Generic — works for any entity type in the Liquid World Model.",
+        "description": "Aggregate stats for entities including sync status breakdown (pending, synced, failed). Filter by entity_type to get stats for a specific type (e.g. appointment, patient). Generic \u2014 works for any entity type in the Liquid World Model.",
         "operationId": "entity-stats",
         "parameters": [
           {
@@ -74200,8 +74411,8 @@
             "schema": {
               "anyOf": [
                 {
-                  "maximum": 1,
-                  "minimum": 0,
+                  "maximum": 1.0,
+                  "minimum": 0.0,
                   "type": "number"
                 },
                 {
