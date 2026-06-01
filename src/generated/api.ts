@@ -10073,8 +10073,17 @@ export interface components {
              * @description Description of the context-graph action selected for this turn. Null means no action was selected or no selected action was recorded.
              */
             selected_action_description?: string | null;
-            /** @description Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. If multiple transitions were recorded, the API reports the first source state and final destination state. */
+            /**
+             * @deprecated
+             * @description Context-graph state transition that occurred during this turn. Null means no transition took place or no transition was recorded. Deprecated: use state_transitions instead. If multiple transitions were recorded, this field reports the first source state and final destination state.
+             */
             state_transition?: components["schemas"]["ConversationTurnStateTransition"] | null;
+            /**
+             * State Transitions
+             * @description Ordered context-graph state transitions that occurred during this turn.
+             * @default []
+             */
+            state_transitions?: components["schemas"]["ConversationTurnStateTransition"][];
             /** Text */
             text: string;
             /** Timestamp */

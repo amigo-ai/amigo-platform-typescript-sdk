@@ -155,6 +155,16 @@ describe('ConversationsResource', () => {
       from: 'collecting_preferences',
       to: 'confirming_appointment',
     }
+    const stateTransitions: ConversationTurnStateTransition[] = [
+      {
+        from: 'collecting_preferences',
+        to: 'selecting_slot',
+      },
+      {
+        from: 'selecting_slot',
+        to: 'confirming_appointment',
+      },
+    ]
     const apiResponse: ConversationDetail = {
       id: conversationId,
       channel_kind: 'web',
@@ -170,6 +180,7 @@ describe('ConversationsResource', () => {
           available_actions: availableActions,
           selected_action_description: 'Ask the user to confirm the proposed time',
           state_transition: stateTransition,
+          state_transitions: stateTransitions,
         },
       ],
       created_at: '2026-01-01T00:00:00Z',
@@ -192,6 +203,7 @@ describe('ConversationsResource', () => {
       'Ask the user to confirm the proposed time',
     )
     expect(result.turns?.[0]?.state_transition).toEqual(stateTransition)
+    expect(result.turns?.[0]?.state_transitions).toEqual(stateTransitions)
   })
 
   it.each([
