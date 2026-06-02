@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.0] - 2026-06-01
+
+### Breaking changes
+
+- `loginWithDeviceCode` now **requires** `workspaceId`. Device login is workspace-specific: the device code is pinned to the workspace at issuance, the browser approver must hold a session scoped to it, and the CLI receives a workspace-scoped token directly.
+- `onWorkspaceRequired` is now optional and deprecated. With `workspaceId` pinned it is never invoked; it survives only as a fallback for legacy/un-pinned device codes and will be removed in a future release.
+
 ## [0.61.1] - 2026-06-01
 
 ### Features

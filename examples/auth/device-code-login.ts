@@ -2,43 +2,31 @@
  * Device code login — authenticate a CLI or headless app via browser approval.
  *
  * Usage:
- *   npx tsx examples/auth/device-code-login.ts
+ *   AMIGO_WORKSPACE_ID=<workspace-uuid> npx tsx examples/auth/device-code-login.ts
  *
- * The script issues a device code, opens the approval page in the browser,
- * polls until the user approves, handles workspace selection, and prints
- * the resulting workspace-scoped JWT.
+ * Device login is workspace-specific: the device code is pinned to a workspace
+ * at issuance, the user approves it in their browser while signed into that
+ * workspace, and the CLI receives a workspace-scoped JWT. Provide the target
+ * workspace via AMIGO_WORKSPACE_ID.
  */
 
-import * as readline from 'node:readline'
 import {
   AmigoClient,
   loginWithDeviceCode,
   openBrowser,
   formatDeviceCodeInstructions,
-  formatWorkspaceList,
   TokenManager,
   FileTokenStorage,
-  type WorkspaceChoice,
 } from '@amigo-ai/platform-sdk'
 
-async function promptWorkspace(workspaces: WorkspaceChoice[]): Promise<string> {
-  console.log(formatWorkspaceList(workspaces))
-
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
-  const answer = await new Promise<string>((resolve) => {
-    rl.question('  Select workspace (number): ', resolve)
-  })
-  rl.close()
-
-  const index = parseInt(answer, 10) - 1
-  const workspace = workspaces[index]
-  if (!workspace) {
-    throw new Error(`Invalid selection: ${answer}`)
-  }
-  return workspace.workspace_id
-}
-
 async function main() {
+  // The CLI must know which workspace to authenticate for — there is no
+  // post-login workspace prompt anymore.
+  const workspaceId = process.env.AMIGO_WORKSPACE_ID
+  if (!workspaceId) {
+    throw new Error('Set AMIGO_WORKSPACE_ID to the workspace UUID you want to sign into.')
+  }
+
   const tokens = new TokenManager({ storage: new FileTokenStorage() })
 
   // Try cached credentials first
@@ -48,8 +36,9 @@ async function main() {
     return
   }
 
-  // No cached token — run device code flow
+  // No cached token — run device code flow for the requested workspace
   const result = await loginWithDeviceCode({
+    workspaceId,
     clientDescription: 'sdk-example',
     onCode: async (issuance) => {
       console.log(formatDeviceCodeInstructions(issuance))
@@ -63,7 +52,6 @@ async function main() {
         process.stdout.write('.')
       }
     },
-    onWorkspaceRequired: promptWorkspace,
   })
 
   await tokens.store(result)

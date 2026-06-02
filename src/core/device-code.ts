@@ -55,8 +55,12 @@ export type DeviceCodeStatus =
 export interface DeviceCodeLoginOptions {
   /** Identity service base URL. Default: https://api.platform.amigo.ai */
   identityBaseUrl?: string
-  /** Pre-select workspace (skips workspace selection prompt) */
-  workspaceId?: string
+  /**
+   * Workspace this device login targets. Required: the device code is pinned
+   * to this workspace at issuance, the browser approver must hold a session
+   * scoped to it, and the token returned to the CLI is scoped to it.
+   */
+  workspaceId: string
   /** Client description for audit logs */
   clientDescription?: string
   /** OAuth scope to request */
@@ -65,8 +69,13 @@ export interface DeviceCodeLoginOptions {
   onCode: (issuance: DeviceCodeIssuance) => void | Promise<void>
   /** Called with polling status updates */
   onStatus?: (status: DeviceCodeStatus) => void
-  /** Called when user must select a workspace — return the chosen workspace_id */
-  onWorkspaceRequired: (workspaces: WorkspaceChoice[]) => Promise<string>
+  /**
+   * Fallback workspace picker for legacy / un-pinned device codes only.
+   * With `workspaceId` pinned (now required), identity returns a
+   * workspace-scoped token directly and this is never invoked.
+   * @deprecated Pass `workspaceId`; this will be removed in a future release.
+   */
+  onWorkspaceRequired?: (workspaces: WorkspaceChoice[]) => Promise<string>
   /** AbortSignal to cancel the login flow */
   signal?: AbortSignal
   /** Custom fetch implementation */
@@ -149,12 +158,15 @@ async function identityPost(
 
 async function requestDeviceCode(
   baseUrl: string,
-  params: { clientDescription?: string; scope?: string },
+  params: { clientDescription?: string; scope?: string; workspaceId: string },
   fetchFn: typeof globalThis.fetch,
 ): Promise<DeviceCodeIssuance> {
   const body = new URLSearchParams()
   if (params.clientDescription) body.set('client_description', params.clientDescription)
   if (params.scope) body.set('scope', params.scope)
+  // Pin the workspace at issuance so identity binds the code to it: the
+  // approver must be scoped to this workspace and the resulting token is too.
+  body.set('workspace_id', params.workspaceId)
 
   const res = await identityPost(baseUrl, '/device/code', body, fetchFn)
 
@@ -316,6 +328,22 @@ async function fetchWorkspaces(
   return []
 }
 
+async function pickWorkspace(
+  options: DeviceCodeLoginOptions,
+  workspaces: WorkspaceChoice[],
+): Promise<string> {
+  // Reached only for legacy / un-pinned device codes that resolve to more
+  // than one workspace. With `workspaceId` pinned (now required) identity
+  // returns a scoped token directly and this is never hit.
+  if (!options.onWorkspaceRequired) {
+    throw new AmigoError(
+      'Identity returned multiple workspaces, but the device code was not pinned to one. Pass `workspaceId`.',
+      { errorCode: 'workspace_selection_required' },
+    )
+  }
+  return options.onWorkspaceRequired(workspaces)
+}
+
 async function resolveWorkspaceFromBootstrap(
   baseUrl: string,
   token: IdentityTokenResponse,
@@ -348,7 +376,7 @@ async function resolveWorkspaceFromBootstrap(
     return toAuthResult(scoped, workspaces[0].workspace_id)
   }
 
-  const workspaceId = await options.onWorkspaceRequired(workspaces)
+  const workspaceId = await pickWorkspace(options, workspaces)
   const scoped = await doRefreshToken(
     baseUrl,
     { refreshToken: token.refresh_token, workspaceId, scope: options.scope },
@@ -369,7 +397,7 @@ async function resolveWorkspaceFromMulti(
     })
   }
 
-  const workspaceId = await options.onWorkspaceRequired(multi.workspaces)
+  const workspaceId = await pickWorkspace(options, multi.workspaces)
   const scoped = await doRefreshToken(
     baseUrl,
     { refreshToken: multi.refresh_token, workspaceId, scope: options.scope },
@@ -384,7 +412,7 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
 
   const issuance = await requestDeviceCode(
     baseUrl,
-    { clientDescription: options.clientDescription, scope: options.scope },
+    { clientDescription: options.clientDescription, scope: options.scope, workspaceId: options.workspaceId },
     fetchFn,
   )
 

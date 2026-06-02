@@ -89,6 +89,7 @@ describe('loginWithDeviceCode', () => {
     const onCode = vi.fn()
     const result = await loginWithDeviceCode({
       onCode,
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       fetch: createFetchSequence([
         { status: 200, body: ISSUANCE },
@@ -101,6 +102,23 @@ describe('loginWithDeviceCode', () => {
     expect(onCode).toHaveBeenCalledWith(ISSUANCE)
     expect(result.workspaceId).toBe('ws1')
     expect(result.refreshToken).toBe('rt_abc')
+  })
+
+  it('pins workspace_id on the /device/code request (no onWorkspaceRequired needed)', async () => {
+    const fetch = createFetchSequence([
+      { status: 200, body: ISSUANCE },
+      { status: 200, body: TOKEN },
+    ])
+    const result = await loginWithDeviceCode({
+      onCode: vi.fn(),
+      workspaceId: 'ws1',
+      fetch,
+      identityBaseUrl: 'https://id.test',
+    })
+    const [url, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]!
+    expect(url).toBe('https://id.test/device/code')
+    expect(String((init as RequestInit).body)).toContain('workspace_id=ws1')
+    expect(result.workspaceId).toBe('ws1')
   })
 
   it('handles multi-workspace', async () => {
@@ -120,6 +138,7 @@ describe('loginWithDeviceCode', () => {
     const onWs = vi.fn().mockResolvedValue('ws-b')
     const result = await loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws-init',
       onWorkspaceRequired: onWs,
       fetch: createFetchSequence([
         { status: 200, body: ISSUANCE },
@@ -137,6 +156,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
@@ -151,6 +171,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
@@ -167,6 +188,7 @@ describe('loginWithDeviceCode', () => {
 
     const loginPromise = loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       onStatus,
       fetch: createFetchSequence([
@@ -192,6 +214,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: () => controller.abort(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         signal: controller.signal,
         fetch: createFetchSequence([{ status: 200, body: ISSUANCE }]),
@@ -392,6 +415,7 @@ describe('identity requests use redirect: manual', () => {
 
     await loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       fetch,
       identityBaseUrl: 'https://id.test',
@@ -411,6 +435,7 @@ describe('network errors', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: vi.fn().mockRejectedValue(new TypeError('fetch failed')),
         identityBaseUrl: 'https://id.test',
@@ -432,6 +457,7 @@ describe('rate limiting', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch,
         identityBaseUrl: 'https://id.test',
@@ -454,6 +480,7 @@ describe('toAuthResult edge cases', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
