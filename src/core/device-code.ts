@@ -337,7 +337,7 @@ async function pickWorkspace(
   // returns a scoped token directly and this is never hit.
   if (!options.onWorkspaceRequired) {
     throw new AmigoError(
-      'Identity returned multiple workspaces, but the device code was not pinned to one. Pass `workspaceId`.',
+      `Identity returned multiple workspaces despite workspaceId being set. Supply 'onWorkspaceRequired' as a legacy fallback, or report a server-side issue.`,
       { errorCode: 'workspace_selection_required' },
     )
   }
