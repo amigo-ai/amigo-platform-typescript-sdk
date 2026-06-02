@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.62.1] - 2026-06-01
+
+### Fixes
+
+- `pickWorkspace` error message no longer tells callers to "pass workspaceId" (it's already required); it now accurately describes a server returning multiple workspaces despite a pinned workspace.
+- Device-code tests assert the real wire format (parse `workspace_id` from the request body instead of a vacuous substring match) and assert the specific multi-workspace error rather than any throw.
+
 ## [0.62.0] - 2026-06-01
 
 ### Breaking changes

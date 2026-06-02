@@ -8,7 +8,6 @@ import {
   DeviceCodeDeniedError,
   RefreshTokenExpiredError,
   LoginCancelledError,
-  AmigoError,
   NetworkError,
   RateLimitError,
   formatDeviceCodeInstructions,
@@ -117,7 +116,11 @@ describe('loginWithDeviceCode', () => {
     })
     const [url, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]!
     expect(url).toBe('https://id.test/device/code')
-    expect(String((init as RequestInit).body)).toContain('workspace_id=ws1')
+    // Parse the body as form params so the assertion exercises the real wire
+    // format (a stringified URLSearchParams or a substring match could pass
+    // vacuously).
+    const body = new URLSearchParams((init as RequestInit).body as string)
+    expect(body.get('workspace_id')).toBe('ws1')
     expect(result.workspaceId).toBe('ws1')
   })
 
@@ -520,7 +523,9 @@ describe('toAuthResult edge cases', () => {
         ]),
         identityBaseUrl: 'https://id.test',
       }),
-    ).rejects.toThrow(AmigoError)
+      // Assert the specific failure, not just "some AmigoError", so a
+      // regression to a different throw (e.g. TypeError) is caught.
+    ).rejects.toThrow(/multiple workspaces/i)
   })
 })
 
