@@ -89,6 +89,7 @@ describe('loginWithDeviceCode', () => {
     const onCode = vi.fn()
     const result = await loginWithDeviceCode({
       onCode,
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       fetch: createFetchSequence([
         { status: 200, body: ISSUANCE },
@@ -101,6 +102,23 @@ describe('loginWithDeviceCode', () => {
     expect(onCode).toHaveBeenCalledWith(ISSUANCE)
     expect(result.workspaceId).toBe('ws1')
     expect(result.refreshToken).toBe('rt_abc')
+  })
+
+  it('pins workspace_id on the /device/code request (no onWorkspaceRequired needed)', async () => {
+    const fetch = createFetchSequence([
+      { status: 200, body: ISSUANCE },
+      { status: 200, body: TOKEN },
+    ])
+    const result = await loginWithDeviceCode({
+      onCode: vi.fn(),
+      workspaceId: 'ws1',
+      fetch,
+      identityBaseUrl: 'https://id.test',
+    })
+    const [url, init] = (fetch as ReturnType<typeof vi.fn>).mock.calls[0]!
+    expect(url).toBe('https://id.test/device/code')
+    expect(String((init as RequestInit).body)).toContain('workspace_id=ws1')
+    expect(result.workspaceId).toBe('ws1')
   })
 
   it('handles multi-workspace', async () => {
@@ -120,6 +138,7 @@ describe('loginWithDeviceCode', () => {
     const onWs = vi.fn().mockResolvedValue('ws-b')
     const result = await loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws-init',
       onWorkspaceRequired: onWs,
       fetch: createFetchSequence([
         { status: 200, body: ISSUANCE },
@@ -137,6 +156,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
@@ -151,6 +171,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
@@ -167,6 +188,7 @@ describe('loginWithDeviceCode', () => {
 
     const loginPromise = loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       onStatus,
       fetch: createFetchSequence([
@@ -192,6 +214,7 @@ describe('loginWithDeviceCode', () => {
     await expect(
       loginWithDeviceCode({
         onCode: () => controller.abort(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         signal: controller.signal,
         fetch: createFetchSequence([{ status: 200, body: ISSUANCE }]),
@@ -392,6 +415,7 @@ describe('identity requests use redirect: manual', () => {
 
     await loginWithDeviceCode({
       onCode: vi.fn(),
+      workspaceId: 'ws1',
       onWorkspaceRequired: vi.fn(),
       fetch,
       identityBaseUrl: 'https://id.test',
@@ -411,6 +435,7 @@ describe('network errors', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch: vi.fn().mockRejectedValue(new TypeError('fetch failed')),
         identityBaseUrl: 'https://id.test',
@@ -432,6 +457,7 @@ describe('rate limiting', () => {
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
+        workspaceId: 'ws1',
         onWorkspaceRequired: vi.fn(),
         fetch,
         identityBaseUrl: 'https://id.test',
@@ -443,21 +469,54 @@ describe('rate limiting', () => {
 // --- Token missing workspace_id ---
 
 describe('toAuthResult edge cases', () => {
-  it('throws when token has no workspace_id', async () => {
-    const noWsToken = {
-      access_token: makeJwt({ sub: 'e1', exp: 9999999999 }),
+  it('resolves to the pinned workspace even when the polled token is a bootstrap token', async () => {
+    // With workspaceId pinned, a bootstrap token (no workspace claim) is
+    // exchanged for a token scoped to the pinned workspace — the flow never
+    // dead-ends on a missing workspace_id anymore.
+    const bootstrap = {
+      access_token: makeJwt({ sub: 'e1', workspace_bootstrap: true, exp: 9999999999 }),
       token_type: 'Bearer',
       expires_in: 900,
       scope: 'ws:read',
-      refresh_token: 'rt',
+      refresh_token: 'rt_boot',
     }
+    const scoped = {
+      access_token: makeJwt({ sub: 'e1', workspace_id: 'ws1', exp: 9999999999 }),
+      token_type: 'Bearer',
+      expires_in: 900,
+      scope: 'ws:read',
+      refresh_token: 'rt_scoped',
+    }
+    const result = await loginWithDeviceCode({
+      onCode: vi.fn(),
+      workspaceId: 'ws1',
+      fetch: createFetchSequence([
+        { status: 200, body: ISSUANCE },
+        { status: 200, body: bootstrap },
+        { status: 200, body: scoped },
+      ]),
+      identityBaseUrl: 'https://id.test',
+    })
+    expect(result.workspaceId).toBe('ws1')
+  })
+
+  it('throws when a multi-workspace response has no workspace picker', async () => {
+    // workspaceId is pinned, so identity won't 300 in practice; but if a
+    // legacy/un-pinned 300 slips through without onWorkspaceRequired, fail loud.
     await expect(
       loginWithDeviceCode({
         onCode: vi.fn(),
-        onWorkspaceRequired: vi.fn(),
+        workspaceId: 'ws1',
         fetch: createFetchSequence([
           { status: 200, body: ISSUANCE },
-          { status: 200, body: noWsToken },
+          {
+            status: 300,
+            body: {
+              error: 'workspace_selection_required',
+              workspaces: [{ workspace_id: 'ws-a' }, { workspace_id: 'ws-b' }],
+              refresh_token: 'rt_boot',
+            },
+          },
         ]),
         identityBaseUrl: 'https://id.test',
       }),
