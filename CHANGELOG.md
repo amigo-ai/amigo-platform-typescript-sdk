@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.63.0] - 2026-06-04
+
+### Maintenance
+
+- sync API types from platform (d285ad20)
+
 ## [0.62.1] - 2026-06-01
 
 ### Fixes
