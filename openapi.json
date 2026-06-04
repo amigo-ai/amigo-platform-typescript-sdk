@@ -56030,6 +56030,51 @@
       }
     },
     "/v1/{workspace_id}/external-integrations/{integration_id}": {
+      "delete": {
+        "description": "Soft-deletes an active external integration by marking it inactive, then revokes any active client credentials for that integration in the same workspace-scoped transaction. Requires an admin or owner role with `ExternalIntegration.delete` and `ApiKey.delete` permissions.",
+        "operationId": "delete-external-integration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "integration_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Integration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete external integration",
+        "tags": [
+          "External Integrations"
+        ]
+      },
       "get": {
         "operationId": "get-external-integration",
         "parameters": [

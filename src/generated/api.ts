@@ -2380,7 +2380,11 @@ export interface paths {
         get: operations["get-external-integration"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete external integration
+         * @description Soft-deletes an active external integration by marking it inactive, then revokes any active client credentials for that integration in the same workspace-scoped transaction. Requires an admin or owner role with `ExternalIntegration.delete` and `ApiKey.delete` permissions.
+         */
+        delete: operations["delete-external-integration"];
         options?: never;
         head?: never;
         patch?: never;
@@ -32294,6 +32298,36 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExternalIntegrationResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-external-integration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
