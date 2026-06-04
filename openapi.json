@@ -15508,6 +15508,35 @@
         "title": "ExternalIntegrationResponse",
         "type": "object"
       },
+      "ExternalIntegrationUpdateRequest": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "display_name": {
+            "$ref": "#/components/schemas/NameString",
+            "title": "Display Name"
+          },
+          "name": {
+            "maxLength": 128,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "title": "ExternalIntegrationUpdateRequest",
+        "type": "object"
+      },
       "ExternalSystemString": {
         "maxLength": 64,
         "minLength": 1,
@@ -56030,6 +56059,51 @@
       }
     },
     "/v1/{workspace_id}/external-integrations/{integration_id}": {
+      "delete": {
+        "description": "Soft-deletes an active external integration by marking it inactive, then revokes any active client credentials for that integration in the same workspace-scoped transaction. Requires an admin or owner role with `ExternalIntegration.delete` and `ApiKey.delete` permissions.",
+        "operationId": "delete-external-integration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "integration_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Integration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete external integration",
+        "tags": [
+          "External Integrations"
+        ]
+      },
       "get": {
         "operationId": "get-external-integration",
         "parameters": [
@@ -56077,6 +56151,68 @@
           }
         },
         "summary": "Get External Integration",
+        "tags": [
+          "External Integrations"
+        ]
+      },
+      "patch": {
+        "description": "Updates external integration metadata. Supports partial updates for `name`, `display_name`, and `description`; pass `description: null` to clear the description. Requires an admin or owner role with `ExternalIntegration.update` permission.",
+        "operationId": "update-external-integration",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "integration_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Integration Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExternalIntegrationUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalIntegrationResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update external integration",
         "tags": [
           "External Integrations"
         ]
