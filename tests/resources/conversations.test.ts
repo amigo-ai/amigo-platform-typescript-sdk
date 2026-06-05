@@ -479,9 +479,10 @@ describe('ConversationsResource', () => {
     expect(requestBody).toEqual({})
   })
 
-  it('pollTurn without options sends poll=true and omits include_tool_calls', async () => {
+  it('pollTurn without options sends poll=true, empty body, and omits include_tool_calls', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     let requestUrl: string | undefined
+    let requestBody: unknown
     const apiResponse: TurnResponse = {
       turn_id: 'turn-poll',
       conversation: {
@@ -498,8 +499,9 @@ describe('ConversationsResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
-        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
           requestUrl = req.url
+          requestBody = await req.json()
           return Response.json(apiResponse)
         },
       }),
@@ -511,6 +513,7 @@ describe('ConversationsResource', () => {
     const url = new URL(requestUrl as string)
     expect(url.searchParams.get('poll')).toBe('true')
     expect(url.searchParams.has('include_tool_calls')).toBe(false)
+    expect(requestBody).toEqual({})
   })
 
   it('createTurn rejects poll combined with a message (fail fast, no server round-trip)', async () => {
