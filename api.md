@@ -250,6 +250,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `close`
 - `createTurn`
+- `pollTurn`
 - `createTurnStream`
 - `streamTurn`
 - `textStreamUrl`

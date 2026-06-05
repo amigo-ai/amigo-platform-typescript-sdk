@@ -154,24 +154,56 @@ export class ConversationsResource extends WorkspaceScopedResource {
    * alongside the response turns. Server-side default is `false` — without
    * this opt-in the `tool_calls` array on the `TurnResponse` will be empty
    * even when the agent invoked tools during the turn.
+   *
+   * Pass `options.poll: true` for a no-message drain-and-report poll (see
+   * {@link pollTurn} for the ergonomic wrapper): the agent surfaces any
+   * background tool results that completed since the last turn. A poll must
+   * NOT carry a `request.message` (the server rejects it 422); prefer
+   * {@link pollTurn}.
    */
   async createTurn(
     conversationId: string,
     request: TurnRequest,
-    options?: { includeToolCalls?: boolean },
+    options?: { includeToolCalls?: boolean; poll?: boolean },
   ): Promise<TurnResponse> {
+    if (options?.poll && request.message) {
+      // The server rejects poll + message with 422; fail fast with a clear
+      // SDK-level error instead of an opaque round-trip. Use pollTurn().
+      throw new ConfigurationError('poll cannot be combined with a message; use pollTurn() instead')
+    }
+    const query: { include_tool_calls?: boolean; poll?: boolean } = {}
+    if (options?.includeToolCalls !== undefined) query.include_tool_calls = options.includeToolCalls
+    if (options?.poll !== undefined) query.poll = options.poll
     return extractData(
       await this.client.POST('/v1/{workspace_id}/conversations/{conversation_id}/turns', {
         params: {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
-          ...(options?.includeToolCalls !== undefined && {
-            query: { include_tool_calls: options.includeToolCalls },
-          }),
+          ...(Object.keys(query).length > 0 && { query }),
         },
         body: request,
         headers: { Accept: 'application/json' },
       }),
     ) as TurnResponse
+  }
+
+  /**
+   * Poll a conversation for background tool results without sending a user
+   * message. Drains any background tool calls that completed since the last
+   * turn and returns the agent's report; when nothing is pending the response
+   * has empty `output` and `tool_calls` (the idle case) — treat that as "keep
+   * polling". Poll no more than once every ~5s per conversation.
+   *
+   * @example
+   * ```ts
+   * const res = await client.conversations.pollTurn(convId, { includeToolCalls: true });
+   * if (res.output.length || res.tool_calls?.length) render(res); // else poll again later
+   * ```
+   */
+  async pollTurn(
+    conversationId: string,
+    options?: { includeToolCalls?: boolean },
+  ): Promise<TurnResponse> {
+    return this.createTurn(conversationId, {}, { ...options, poll: true })
   }
 
   /**
