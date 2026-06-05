@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.64.0] - 2026-06-05
+
+### Features
+
+- poll option + pollTurn() for background tool results (#303)
+
+### Maintenance
+
+- sync API types from platform (230ae559) (#302)
+
 ## [0.63.0] - 2026-06-04
 
 ### Maintenance
