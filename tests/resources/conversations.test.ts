@@ -439,6 +439,46 @@ describe('ConversationsResource', () => {
     expect(url.searchParams.has('include_tool_calls')).toBe(false)
   })
 
+  it('pollTurn sends poll=true with an empty body and forwards include_tool_calls', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    let requestBody: unknown
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-poll',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: { role: 'user', text: '', content: [] },
+      // Idle poll: nothing pending → empty output + tool_calls.
+      output: [],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (req) => {
+          requestUrl = req.url
+          requestBody = await req.json()
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.pollTurn(conversationId, { includeToolCalls: true })
+
+    expect(requestUrl).toBeDefined()
+    const url = new URL(requestUrl as string)
+    // poll is a no-message drain — both query params must be forwarded and the
+    // body must carry no message (the server rejects poll + message with 422).
+    expect(url.searchParams.get('poll')).toBe('true')
+    expect(url.searchParams.get('include_tool_calls')).toBe('true')
+    expect(requestBody).toEqual({})
+  })
+
   it('routes GET failures through the central error pipeline', async () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
