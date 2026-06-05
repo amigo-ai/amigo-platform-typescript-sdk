@@ -2380,10 +2380,18 @@ export interface paths {
         get: operations["get-external-integration"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete external integration
+         * @description Soft-deletes an active external integration by marking it inactive, then revokes any active client credentials for that integration in the same workspace-scoped transaction. Requires an admin or owner role with `ExternalIntegration.delete` and `ApiKey.delete` permissions.
+         */
+        delete: operations["delete-external-integration"];
         options?: never;
         head?: never;
-        patch?: never;
+        /**
+         * Update external integration
+         * @description Updates external integration metadata. Supports partial updates for `name`, `display_name`, and `description`; pass `description: null` to clear the description. Requires an admin or owner role with `ExternalIntegration.update` permission.
+         */
+        patch: operations["update-external-integration"];
         trace?: never;
     };
     "/v1/{workspace_id}/external-integrations/{integration_id}/credentials": {
@@ -13549,6 +13557,15 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** ExternalIntegrationUpdateRequest */
+        ExternalIntegrationUpdateRequest: {
+            /** Description */
+            description?: string | null;
+            /** Display Name */
+            display_name?: components["schemas"]["NameString"];
+            /** Name */
+            name?: string;
         };
         ExternalSystemString: string;
         ExternalValueString: string;
@@ -31102,6 +31119,8 @@ export interface operations {
             query?: {
                 /** @description Include tool call details in response */
                 include_tool_calls?: boolean;
+                /** @description Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation — each poll loads session state. */
+                poll?: boolean;
             };
             header?: never;
             path: {
@@ -32285,6 +32304,72 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalIntegrationResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-external-integration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-external-integration": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                integration_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExternalIntegrationUpdateRequest"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
