@@ -166,6 +166,11 @@ export class ConversationsResource extends WorkspaceScopedResource {
     request: TurnRequest,
     options?: { includeToolCalls?: boolean; poll?: boolean },
   ): Promise<TurnResponse> {
+    if (options?.poll && request.message) {
+      // The server rejects poll + message with 422; fail fast with a clear
+      // SDK-level error instead of an opaque round-trip. Use pollTurn().
+      throw new ConfigurationError('poll cannot be combined with a message; use pollTurn() instead')
+    }
     const query: { include_tool_calls?: boolean; poll?: boolean } = {}
     if (options?.includeToolCalls !== undefined) query.include_tool_calls = options.includeToolCalls
     if (options?.poll !== undefined) query.poll = options.poll

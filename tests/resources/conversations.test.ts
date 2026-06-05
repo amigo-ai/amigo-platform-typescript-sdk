@@ -479,6 +479,60 @@ describe('ConversationsResource', () => {
     expect(requestBody).toEqual({})
   })
 
+  it('pollTurn without options sends poll=true and omits include_tool_calls', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const apiResponse: TurnResponse = {
+      turn_id: 'turn-poll',
+      conversation: {
+        id: conversationId,
+        status: 'active',
+        turn_count: 1,
+        updated_at: '2026-01-01T00:00:01Z',
+      },
+      input: { role: 'user', text: '', content: [] },
+      output: [],
+      tool_calls: [],
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (req) => {
+          requestUrl = req.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.pollTurn(conversationId)
+
+    expect(requestUrl).toBeDefined()
+    const url = new URL(requestUrl as string)
+    expect(url.searchParams.get('poll')).toBe('true')
+    expect(url.searchParams.has('include_tool_calls')).toBe(false)
+  })
+
+  it('createTurn rejects poll combined with a message (fail fast, no server round-trip)', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let called = false
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () => {
+          called = true
+          return Response.json({})
+        },
+      }),
+    })
+
+    await expect(
+      client.conversations.createTurn(conversationId, { message: 'book it' }, { poll: true }),
+    ).rejects.toThrow(/poll cannot be combined with a message/)
+    expect(called).toBe(false)
+  })
+
   it('routes GET failures through the central error pipeline', async () => {
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
