@@ -36979,6 +36979,64 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
+      "TextBackgroundResultEvent": {
+        "description": "A background (``execution=\"background\"``) tool finished for a web text\nconversation. Pushed live the instant the completion lands so a subscribed\nclient renders the result without polling or sending another message.\n\n``call_id`` is ``bg:<task_id>`` to match the card identity the next-turn drain\nsurfaces (``build_background_completion_effect``), so a client that receives\nboth the live push and the eventual drained card sees one consistent card.\nWeb-only: ``conversation_id`` is the durable conversation UUID (non-web\nchannels route by a composite key and deliver via their own transport).",
+        "properties": {
+          "call_id": {
+            "title": "Call Id",
+            "type": "string"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "depth": {
+            "title": "Depth",
+            "type": "integer"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Duration Ms"
+          },
+          "event_type": {
+            "const": "text.background_result",
+            "default": "text.background_result",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "result": {
+            "title": "Result",
+            "type": "string"
+          },
+          "succeeded": {
+            "title": "Succeeded",
+            "type": "boolean"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "tool_name",
+          "call_id",
+          "succeeded",
+          "result",
+          "depth"
+        ],
+        "title": "TextBackgroundResultEvent",
+        "type": "object"
+      },
       "TextCompletedEvent": {
         "properties": {
           "channel_kind": {
@@ -43817,6 +43875,7 @@
             "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
             "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
             "surface.updated": "#/components/schemas/SurfaceUpdatedEvent",
+            "text.background_result": "#/components/schemas/TextBackgroundResultEvent",
             "text.completed": "#/components/schemas/TextCompletedEvent",
             "text.started": "#/components/schemas/TextStartedEvent",
             "trigger.completed": "#/components/schemas/TriggerCompletedEvent",
@@ -43895,6 +43954,9 @@
           },
           {
             "$ref": "#/components/schemas/TextCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextBackgroundResultEvent"
           },
           {
             "$ref": "#/components/schemas/TriggerFiredEvent"
