@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.65.0] - 2026-06-06
+
+### Maintenance
+
+- sync API types from platform (caa14f52) (#304)
+
 ## [0.64.0] - 2026-06-05
 
 ### Features
