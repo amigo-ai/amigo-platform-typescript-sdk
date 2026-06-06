@@ -36979,6 +36979,32 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
+      "TextAgentMessageEvent": {
+        "description": "An agent text turn pushed live over workspace SSE \u2014 the outbox of the\ndurable text-conversation actor (text-conversation-actor Stage A).\n\nWhere ``TextBackgroundResultEvent`` surfaces the raw tool card,\nthis carries the agent's *narrated* response (the turn the actor produces after\nre-entering on a background completion or other off-request signal), so a\nsubscribed web client renders it as a normal agent message with no polling and\nno user turn. ``conversation_id`` is the durable conversation UUID (web-only).",
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "text.agent_message",
+            "default": "text.agent_message",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "text"
+        ],
+        "title": "TextAgentMessageEvent",
+        "type": "object"
+      },
       "TextBackgroundResultEvent": {
         "description": "A background (``execution=\"background\"``) tool finished for a web text\nconversation. Pushed live the instant the completion lands so a subscribed\nclient renders the result without polling or sending another message.\n\n``call_id`` is ``bg:<task_id>`` to match the card identity the next-turn drain\nsurfaces (``build_background_completion_effect``), so a client that receives\nboth the live push and the eventual drained card sees one consistent card.\nWeb-only: ``conversation_id`` is the durable conversation UUID (non-web\nchannels route by a composite key and deliver via their own transport).",
         "properties": {
@@ -43875,6 +43901,7 @@
             "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
             "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
             "surface.updated": "#/components/schemas/SurfaceUpdatedEvent",
+            "text.agent_message": "#/components/schemas/TextAgentMessageEvent",
             "text.background_result": "#/components/schemas/TextBackgroundResultEvent",
             "text.completed": "#/components/schemas/TextCompletedEvent",
             "text.started": "#/components/schemas/TextStartedEvent",
@@ -43957,6 +43984,9 @@
           },
           {
             "$ref": "#/components/schemas/TextBackgroundResultEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextAgentMessageEvent"
           },
           {
             "$ref": "#/components/schemas/TriggerFiredEvent"
