@@ -4420,6 +4420,82 @@
         "pattern": "^[A-Za-z0-9._-]+:[A-Za-z0-9._-]+:[A-Za-z0-9._-]+$",
         "type": "string"
       },
+      "CanonicalInboundEnvelopePayload": {
+        "description": "HTTP wire shape for :class:`CanonicalInboundEnvelope` (channel service \u2192 platform-api).\n\nFrozen \u2014 it is parsed once and immediately converted to the frozen in-core\ndataclass, so between-parse mutation is a bug.",
+        "properties": {
+          "authenticated": {
+            "default": false,
+            "title": "Authenticated",
+            "type": "boolean"
+          },
+          "caller_ref": {
+            "default": "",
+            "maxLength": 320,
+            "title": "Caller Ref",
+            "type": "string"
+          },
+          "channel_kind": {
+            "$ref": "#/components/schemas/ChannelKind"
+          },
+          "content_parts": {
+            "items": {
+              "$ref": "#/components/schemas/ContentPartPayload"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Content Parts",
+            "type": "array"
+          },
+          "idempotency_key": {
+            "default": "",
+            "maxLength": 256,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "inbound_message_ref": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Inbound Message Ref",
+            "type": "string"
+          },
+          "occurred_at": {
+            "default": 0.0,
+            "title": "Occurred At",
+            "type": "number"
+          },
+          "parent_outbound_ref": {
+            "default": "",
+            "maxLength": 256,
+            "title": "Parent Outbound Ref",
+            "type": "string"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "maxLength": 998,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subject"
+          },
+          "use_case_id": {
+            "format": "uuid",
+            "title": "Use Case Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channel_kind",
+          "use_case_id",
+          "inbound_message_ref",
+          "content_parts"
+        ],
+        "title": "CanonicalInboundEnvelopePayload",
+        "type": "object"
+      },
       "CatalogEntry": {
         "properties": {
           "description": {
@@ -5043,6 +5119,52 @@
           }
         },
         "title": "ChannelOverride",
+        "type": "object"
+      },
+      "ChannelTurnResponse": {
+        "properties": {
+          "event_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Id"
+          },
+          "is_new_session": {
+            "default": false,
+            "title": "Is New Session",
+            "type": "boolean"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "status": {
+            "enum": [
+              "accepted",
+              "skipped",
+              "duplicate"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "ChannelTurnResponse",
         "type": "object"
       },
       "ChannelType": {
@@ -36979,6 +37101,32 @@
         "title": "TestSkillResponse",
         "type": "object"
       },
+      "TextAgentMessageEvent": {
+        "description": "An agent text turn pushed live over workspace SSE \u2014 the outbox of the\ndurable text-conversation actor (text-conversation-actor Stage A).\n\nWhere ``TextBackgroundResultEvent`` surfaces the raw tool card,\nthis carries the agent's *narrated* response (the turn the actor produces after\nre-entering on a background completion or other off-request signal), so a\nsubscribed web client renders it as a normal agent message with no polling and\nno user turn. ``conversation_id`` is the durable conversation UUID (web-only).",
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "event_type": {
+            "const": "text.agent_message",
+            "default": "text.agent_message",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "text"
+        ],
+        "title": "TextAgentMessageEvent",
+        "type": "object"
+      },
       "TextBackgroundResultEvent": {
         "description": "A background (``execution=\"background\"``) tool finished for a web text\nconversation. Pushed live the instant the completion lands so a subscribed\nclient renders the result without polling or sending another message.\n\n``call_id`` is ``bg:<task_id>`` to match the card identity the next-turn drain\nsurfaces (``build_background_completion_effect``), so a client that receives\nboth the live push and the eventual drained card sees one consistent card.\nWeb-only: ``conversation_id`` is the durable conversation UUID (non-web\nchannels route by a composite key and deliver via their own transport).",
         "properties": {
@@ -43875,6 +44023,7 @@
             "surface.review_rejected": "#/components/schemas/SurfaceReviewRejectedEvent",
             "surface.submitted": "#/components/schemas/SurfaceSubmittedEvent",
             "surface.updated": "#/components/schemas/SurfaceUpdatedEvent",
+            "text.agent_message": "#/components/schemas/TextAgentMessageEvent",
             "text.background_result": "#/components/schemas/TextBackgroundResultEvent",
             "text.completed": "#/components/schemas/TextCompletedEvent",
             "text.started": "#/components/schemas/TextStartedEvent",
@@ -43957,6 +44106,9 @@
           },
           {
             "$ref": "#/components/schemas/TextBackgroundResultEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextAgentMessageEvent"
           },
           {
             "$ref": "#/components/schemas/TriggerFiredEvent"
