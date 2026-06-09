@@ -17,6 +17,13 @@ function requireEnv(name: string): string {
   return value
 }
 
+function renderOutput(output: { text?: string | null }[]): string {
+  return output
+    .map((message) => message.text)
+    .filter((text): text is string => Boolean(text))
+    .join('\n')
+}
+
 async function main() {
   const workspaceId = requireEnv('AMIGO_WORKSPACE_ID')
   const serviceId = requireEnv('AMIGO_SERVICE_ID')
@@ -56,7 +63,7 @@ async function main() {
   const firstTurn = await externalClient.conversations.createTurn(conversation.id, {
     message: 'Hello, I need help scheduling an appointment.',
   })
-  console.log(firstTurn.output.map((message) => message.text).join('\n'))
+  console.log(renderOutput(firstTurn.output))
 
   if (!externalSession.refresh_token) {
     throw new Error('external-user session did not include a refresh token')
@@ -75,7 +82,7 @@ async function main() {
   const secondTurn = await refreshedExternalClient.conversations.createTurn(conversation.id, {
     message: 'Tuesday morning works.',
   })
-  console.log(secondTurn.output.map((message) => message.text).join('\n'))
+  console.log(renderOutput(secondTurn.output))
 }
 
 main().catch((err) => {

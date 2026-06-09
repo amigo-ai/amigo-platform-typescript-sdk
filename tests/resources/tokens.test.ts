@@ -26,6 +26,11 @@ const EXTERNAL_USER_TOKEN_RESPONSE = {
   subject_type: 'user',
   consumer_entity_id: TEST_ENTITY_ID,
 }
+const REFRESH_TOKEN_RESPONSE = {
+  ...TOKEN_RESPONSE,
+  access_token: 'eyJhbGciOiJSUzI1NiJ9.refreshed',
+  refresh_token: 'rt_new',
+}
 
 interface CapturedTokenRequest {
   href: string
@@ -38,19 +43,7 @@ interface CapturedTokenRequest {
 }
 
 function recordingFetch(captured: CapturedTokenRequest): typeof globalThis.fetch {
-  return async (input, init) => {
-    const request = input instanceof Request ? input : new Request(input, init)
-
-    captured.href = request.url
-    captured.url = new URL(request.url).pathname
-    captured.method = request.method.toUpperCase()
-    captured.body = await request.clone().text()
-    captured.contentType = request.headers.get('Content-Type')
-    captured.authorization = request.headers.get('Authorization')
-    captured.traceId = request.headers.get('X-Trace-Id')
-
-    return Response.json(TOKEN_RESPONSE)
-  }
+  return recordingFetchWithResponse(captured, TOKEN_RESPONSE)
 }
 
 function recordingFetchWithResponse(
@@ -184,6 +177,9 @@ describe('TokensResource', () => {
     expect(form.get('consumer_entity_id')).toBe(TEST_ENTITY_ID)
     expect(form.get('ttl_seconds')).toBe('1800')
     expect(form.get('scope')).toBe('conversations:create conversations:turns:create')
+    expect(result.access_token).toBe(EXTERNAL_USER_TOKEN_RESPONSE.access_token)
+    expect(result.session_id).toBe(EXTERNAL_USER_TOKEN_RESPONSE.session_id)
+    expect(result.refresh_token).toBe(EXTERNAL_USER_TOKEN_RESPONSE.refresh_token)
     expect(result.consumer_subject_id).toBe(EXTERNAL_USER_TOKEN_RESPONSE.consumer_subject_id)
   })
 
@@ -211,10 +207,10 @@ describe('TokensResource', () => {
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,
-      fetch: recordingFetch(captured),
+      fetch: recordingFetchWithResponse(captured, REFRESH_TOKEN_RESPONSE),
     })
 
-    await client.tokens.refresh({
+    const result = await client.tokens.refresh({
       refreshToken: 'rt_old',
       workspaceId: TEST_WORKSPACE_ID,
       scope: 'conversations:create',
@@ -227,5 +223,7 @@ describe('TokensResource', () => {
     expect(form.get('refresh_token')).toBe('rt_old')
     expect(form.get('workspace_id')).toBe(TEST_WORKSPACE_ID)
     expect(form.get('scope')).toBe('conversations:create')
+    expect(result.access_token).toBe(REFRESH_TOKEN_RESPONSE.access_token)
+    expect(result.refresh_token).toBe(REFRESH_TOKEN_RESPONSE.refresh_token)
   })
 })

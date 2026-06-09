@@ -85,6 +85,14 @@ function setAuthorizationHeader(accessToken: string): Middleware {
   }
 }
 
+function formBody(fields: Record<string, string | undefined>): URLSearchParams {
+  const body = new URLSearchParams()
+  for (const [key, value] of Object.entries(fields)) {
+    if (value !== undefined) body.set(key, value)
+  }
+  return body
+}
+
 /**
  * Identity token operations exposed through the platform API base URL.
  *
@@ -94,14 +102,11 @@ function setAuthorizationHeader(accessToken: string): Middleware {
 export class TokensResource extends WorkspaceScopedResource {
   /** Exchange an API key for an identity-issued JWT access token. */
   async exchangeApiKey(request: ApiKeyTokenExchangeRequest): Promise<ApiKeyTokenExchangeResponse> {
-    const body: Record<string, string> = {
+    const body = formBody({
       grant_type: 'api_key',
       api_key: request.apiKey,
-    }
-
-    if (request.scope) {
-      body.scope = request.scope
-    }
+      scope: request.scope,
+    })
 
     return extractData(
       await this.client.POST(
@@ -126,15 +131,12 @@ export class TokensResource extends WorkspaceScopedResource {
   async exchangeClientCredentials(
     request: ClientCredentialsTokenRequest,
   ): Promise<ClientCredentialsTokenResponse> {
-    const body: Record<string, string> = {
+    const body = formBody({
       grant_type: 'client_credentials',
       client_id: request.clientId,
       client_secret: request.clientSecret,
-    }
-
-    if (request.scope) {
-      body.scope = request.scope
-    }
+      scope: request.scope,
+    })
 
     return extractData(
       await this.client.POST(
@@ -155,17 +157,16 @@ export class TokensResource extends WorkspaceScopedResource {
   async createExternalUserSession(
     request: ExternalUserSessionTokenRequest,
   ): Promise<ExternalUserSessionTokenResponse> {
-    const body: Record<string, string> = {
+    const body = formBody({
       grant_type: 'external_user_session',
       workspace_id: request.workspaceId ?? this.workspaceId,
       external_subject_key: request.externalSubjectKey,
       subject_type: request.subjectType,
       service_id: request.serviceId,
-    }
-
-    if (request.consumerEntityId) body.consumer_entity_id = request.consumerEntityId
-    if (request.ttlSeconds !== undefined) body.ttl_seconds = String(request.ttlSeconds)
-    if (request.scope) body.scope = request.scope
+      consumer_entity_id: request.consumerEntityId,
+      ttl_seconds: request.ttlSeconds === undefined ? undefined : String(request.ttlSeconds),
+      scope: request.scope,
+    })
 
     return extractData(
       await this.client.POST(
@@ -183,13 +184,12 @@ export class TokensResource extends WorkspaceScopedResource {
 
   /** Rotate a refresh token for a new access-token and refresh-token pair. */
   async refresh(request: RefreshTokenRequest): Promise<RefreshTokenResponse> {
-    const body: Record<string, string> = {
+    const body = formBody({
       grant_type: 'refresh_token',
       refresh_token: request.refreshToken,
-    }
-
-    if (request.workspaceId) body.workspace_id = request.workspaceId
-    if (request.scope) body.scope = request.scope
+      workspace_id: request.workspaceId,
+      scope: request.scope,
+    })
 
     return extractData(
       await this.client.POST(

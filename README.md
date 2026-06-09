@@ -208,7 +208,8 @@ const { client_secret, credential } = await admin.externalIntegrations.createCre
   },
 )
 
-console.log(credential.client_id, client_secret)
+console.log(credential.client_id)
+// Store client_secret immediately in your secrets manager. It is shown only once.
 ```
 
 At runtime, the backend sequence is:
@@ -221,6 +222,8 @@ At runtime, the backend sequence is:
 5. Rotate the refresh token before the access token expires.
 
 ```typescript
+import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+
 const backend = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
 
 const parent = await backend.tokens.exchangeClientCredentials({
@@ -426,6 +429,8 @@ external-user session tokens for customer text chat. See
 under Authentication for the full walkthroughs.
 
 ```typescript
+import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+
 const { access_token, expires_in } = await client.tokens.exchangeApiKey({
   apiKey: process.env.AMIGO_API_KEY!,
   scope: 'entities:read agents:read',

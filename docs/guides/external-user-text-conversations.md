@@ -60,7 +60,7 @@ const { credential, client_secret } = await admin.externalIntegrations.createCre
 )
 
 console.log('client_id:', credential.client_id)
-console.log('client_secret:', client_secret)
+// Store client_secret immediately in your secrets manager. It is shown only once.
 ```
 
 The credential can mint external-user sessions only for the configured
@@ -158,6 +158,11 @@ proactively when the access token is close to expiry, for example with a
 60-second buffer. Also handle a `token_expired` response by refreshing once and
 retrying the failed operation; if refresh fails, create a new external-user
 session from the parent credential.
+
+Refresh-token reuse or post-reuse family revocation returns HTTP 401 with
+`error: "invalid_grant"` and messages such as `Token reuse detected — session
+revoked` or `Session revoked due to security event`. Treat those as terminal
+security events: do not retry the same refresh token.
 
 ```typescript
 const REFRESH_SKEW_MS = 60_000
