@@ -52,6 +52,7 @@ import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
 import { ChannelsResource } from './resources/channels/index.js'
 import { IntegrationsResource } from './resources/integrations.js'
+import { ExternalIntegrationsResource } from './resources/external-integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
 import { SimulationsResource } from './resources/simulations.js'
 import { MetricsResource } from './resources/metrics.js'
@@ -207,6 +208,7 @@ export class AmigoClient {
   readonly conversations!: ConversationsResource
   readonly channels!: ChannelsResource
   readonly integrations!: IntegrationsResource
+  readonly externalIntegrations!: ExternalIntegrationsResource
   readonly analytics!: AnalyticsResource
   readonly simulations!: SimulationsResource
   readonly metrics!: MetricsResource
@@ -462,7 +464,7 @@ export class AmigoClient {
     // ``tests/resources/me.test.ts``.
     mutable.me = new MeResource(client, '_account')
     mutable.apiKeys = new ApiKeysResource(client, workspaceId)
-    mutable.tokens = new TokensResource(client, '_identity')
+    mutable.tokens = new TokensResource(client, workspaceId)
     mutable.agents = new AgentsResource(client, workspaceId)
     mutable.skills = new SkillsResource(client, workspaceId)
     mutable.actions = new ActionsResource(client, workspaceId)
@@ -477,6 +479,7 @@ export class AmigoClient {
     mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
     mutable.channels = new ChannelsResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
+    mutable.externalIntegrations = new ExternalIntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
     mutable.simulations = new SimulationsResource(client, workspaceId)
     mutable.metrics = new MetricsResource(client, workspaceId)
@@ -659,7 +662,29 @@ export type {
 } from './core/openapi-client.js'
 
 export { TokensResource } from './resources/tokens.js'
-export type { ApiKeyTokenExchangeRequest, ApiKeyTokenExchangeResponse } from './resources/tokens.js'
+export { EXTERNAL_USER_SESSION_CREATE_SCOPE } from './resources/tokens.js'
+export type {
+  ApiKeyTokenExchangeRequest,
+  ApiKeyTokenExchangeResponse,
+  ClientCredentialsTokenRequest,
+  ClientCredentialsTokenResponse,
+  ExternalUserSessionTokenRequest,
+  ExternalUserSessionTokenResponse,
+  RefreshTokenRequest,
+  RefreshTokenResponse,
+} from './resources/tokens.js'
+
+export { ExternalIntegrationsResource } from './resources/external-integrations.js'
+export type {
+  CreateExternalIntegrationCredentialRequest,
+  CreateExternalIntegrationRequest,
+  ExternalIntegration,
+  ExternalIntegrationCredential,
+  ExternalIntegrationCredentialSecret,
+  ExternalIntegrationListResponse,
+  ListExternalIntegrationsParams,
+  UpdateExternalIntegrationRequest,
+} from './resources/external-integrations.js'
 
 export type {
   MetricCatalogEntry,

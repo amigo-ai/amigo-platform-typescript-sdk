@@ -4,6 +4,8 @@ import { AmigoClient } from '../../src/index.js'
 const TEST_API_KEY = 'configured-api-key'
 const EXCHANGE_API_KEY = 'exchange-api-key'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
+const TEST_SERVICE_ID = 'svc-00000000-0000-0000-0000-000000000001'
+const TEST_ENTITY_ID = 'ent-00000000-0000-0000-0000-000000000001'
 const BASE_URL = 'https://platform-proxy.example'
 const TOKEN_RESPONSE = {
   access_token: 'eyJhbGciOiJSUzI1NiJ9.test',
@@ -12,6 +14,17 @@ const TOKEN_RESPONSE = {
   scope: 'entities:read agents:read',
   session_id: null,
   refresh_token: null,
+}
+const EXTERNAL_USER_TOKEN_RESPONSE = {
+  access_token: 'eyJhbGciOiJSUzI1NiJ9.external-user',
+  token_type: 'Bearer',
+  expires_in: 1800,
+  scope: 'conversations:create conversations:turns:create conversations:read',
+  session_id: 'ses-00000000-0000-0000-0000-000000000001',
+  refresh_token: 'rt_external_user',
+  consumer_subject_id: 'sub-00000000-0000-0000-0000-000000000001',
+  subject_type: 'user',
+  consumer_entity_id: TEST_ENTITY_ID,
 }
 
 interface CapturedTokenRequest {
@@ -37,6 +50,25 @@ function recordingFetch(captured: CapturedTokenRequest): typeof globalThis.fetch
     captured.traceId = request.headers.get('X-Trace-Id')
 
     return Response.json(TOKEN_RESPONSE)
+  }
+}
+
+function recordingFetchWithResponse(
+  captured: CapturedTokenRequest,
+  responseBody: unknown,
+): typeof globalThis.fetch {
+  return async (input, init) => {
+    const request = input instanceof Request ? input : new Request(input, init)
+
+    captured.href = request.url
+    captured.url = new URL(request.url).pathname
+    captured.method = request.method.toUpperCase()
+    captured.body = await request.clone().text()
+    captured.contentType = request.headers.get('Content-Type')
+    captured.authorization = request.headers.get('Authorization')
+    captured.traceId = request.headers.get('X-Trace-Id')
+
+    return Response.json(responseBody)
   }
 }
 
@@ -94,5 +126,106 @@ describe('TokensResource', () => {
       .exchangeApiKey({ apiKey: EXCHANGE_API_KEY })
 
     expect(captured.traceId).toBe('trace-token-exchange')
+  })
+
+  it('exchanges client credentials without forwarding configured Authorization', async () => {
+    const captured = createCapturedRequest()
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: BASE_URL,
+      fetch: recordingFetch(captured),
+    })
+
+    await client.tokens.exchangeClientCredentials({
+      clientId: 'ext-client-id',
+      clientSecret: 'ext-client-secret',
+      scope: 'external_user_sessions:create',
+    })
+
+    expect(captured.href).toBe(`${BASE_URL}/token`)
+    expect(captured.authorization).toBeNull()
+
+    const form = new URLSearchParams(captured.body)
+    expect(form.get('grant_type')).toBe('client_credentials')
+    expect(form.get('client_id')).toBe('ext-client-id')
+    expect(form.get('client_secret')).toBe('ext-client-secret')
+    expect(form.get('scope')).toBe('external_user_sessions:create')
+  })
+
+  it('mints an external-user session with parent bearer auth and workspace binding', async () => {
+    const captured = createCapturedRequest()
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: BASE_URL,
+      fetch: recordingFetchWithResponse(captured, EXTERNAL_USER_TOKEN_RESPONSE),
+    })
+
+    const result = await client.tokens.createExternalUserSession({
+      parentAccessToken: 'parent-jwt',
+      externalSubjectKey: 'customer-user-123',
+      subjectType: 'user',
+      serviceId: TEST_SERVICE_ID,
+      consumerEntityId: TEST_ENTITY_ID,
+      ttlSeconds: 1800,
+      scope: 'conversations:create conversations:turns:create',
+    })
+
+    expect(captured.href).toBe(`${BASE_URL}/token`)
+    expect(captured.authorization).toBe('Bearer parent-jwt')
+
+    const form = new URLSearchParams(captured.body)
+    expect(form.get('grant_type')).toBe('external_user_session')
+    expect(form.get('workspace_id')).toBe(TEST_WORKSPACE_ID)
+    expect(form.get('external_subject_key')).toBe('customer-user-123')
+    expect(form.get('subject_type')).toBe('user')
+    expect(form.get('service_id')).toBe(TEST_SERVICE_ID)
+    expect(form.get('consumer_entity_id')).toBe(TEST_ENTITY_ID)
+    expect(form.get('ttl_seconds')).toBe('1800')
+    expect(form.get('scope')).toBe('conversations:create conversations:turns:create')
+    expect(result.consumer_subject_id).toBe(EXTERNAL_USER_TOKEN_RESPONSE.consumer_subject_id)
+  })
+
+  it('uses the configured bearer token when no parentAccessToken override is provided', async () => {
+    const captured = createCapturedRequest()
+    const client = new AmigoClient({
+      apiKey: 'configured-parent-jwt',
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: BASE_URL,
+      fetch: recordingFetchWithResponse(captured, EXTERNAL_USER_TOKEN_RESPONSE),
+    })
+
+    await client.tokens.createExternalUserSession({
+      externalSubjectKey: 'anonymous-browser-session',
+      subjectType: 'anonymous',
+      serviceId: TEST_SERVICE_ID,
+    })
+
+    expect(captured.authorization).toBe('Bearer configured-parent-jwt')
+  })
+
+  it('rotates refresh tokens through POST /token without configured Authorization', async () => {
+    const captured = createCapturedRequest()
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      baseUrl: BASE_URL,
+      fetch: recordingFetch(captured),
+    })
+
+    await client.tokens.refresh({
+      refreshToken: 'rt_old',
+      workspaceId: TEST_WORKSPACE_ID,
+      scope: 'conversations:create',
+    })
+
+    expect(captured.authorization).toBeNull()
+
+    const form = new URLSearchParams(captured.body)
+    expect(form.get('grant_type')).toBe('refresh_token')
+    expect(form.get('refresh_token')).toBe('rt_old')
+    expect(form.get('workspace_id')).toBe(TEST_WORKSPACE_ID)
+    expect(form.get('scope')).toBe('conversations:create')
   })
 })

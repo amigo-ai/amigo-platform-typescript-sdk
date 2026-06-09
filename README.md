@@ -176,6 +176,93 @@ The response is the standard OAuth-style token payload (`access_token`,
 client — the configured key is not used to authenticate the exchange
 request itself.
 
+### External-user sessions for customer text chat
+
+Use external-user sessions when a customer backend needs to start or continue
+text conversations on behalf of one of its own users without giving that user a
+workspace membership. The customer backend first obtains a constrained parent
+JWT with `external_user_sessions:create`, then mints a short-lived
+`external_user` child JWT bound to one workspace, subject, and service.
+For a complete setup walkthrough, see
+[`docs/guides/external-user-text-conversations.md`](./docs/guides/external-user-text-conversations.md).
+
+Create a parent external-integration credential from an admin/owner backend.
+The plaintext `client_secret` is returned only once, from create or rotate:
+
+```typescript
+import { AmigoClient } from '@amigo-ai/platform-sdk'
+
+const admin = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
+
+const integration = await admin.externalIntegrations.create({
+  name: 'customer-portal',
+  display_name: 'Customer Portal',
+  description: 'Backend that mints external-user chat sessions',
+})
+
+const { client_secret, credential } = await admin.externalIntegrations.createCredential(
+  integration.id,
+  {
+    name: 'production backend',
+    service_ids: [serviceId],
+  },
+)
+
+console.log(credential.client_id, client_secret)
+```
+
+At runtime, the backend sequence is:
+
+1. Exchange `client_credentials` for the parent JWT.
+2. Mint an `external_user` session for `external_subject_key`, `subject_type`,
+   and `service_id`.
+3. Create a conversation with the child JWT.
+4. Send turns or stream turns with the child JWT.
+5. Rotate the refresh token before the access token expires.
+
+```typescript
+const backend = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
+
+const parent = await backend.tokens.exchangeClientCredentials({
+  clientId: process.env.AMIGO_EXTERNAL_INTEGRATION_CLIENT_ID!,
+  clientSecret: process.env.AMIGO_EXTERNAL_INTEGRATION_CLIENT_SECRET!,
+  scope: EXTERNAL_USER_SESSION_CREATE_SCOPE,
+})
+
+const session = await backend.tokens.createExternalUserSession({
+  parentAccessToken: parent.access_token,
+  externalSubjectKey: 'customer-user-123',
+  subjectType: 'user',
+  serviceId,
+  // Optional: include only when this subject is already linked to a world entity.
+  consumerEntityId,
+  ttlSeconds: 1800,
+})
+
+const externalUser = new AmigoClient({
+  apiKey: session.access_token,
+  workspaceId,
+})
+
+const conversation = await externalUser.conversations.create({ service_id: serviceId })
+await externalUser.conversations.createTurn(conversation.id, {
+  message: 'Hello, I need help scheduling',
+})
+
+const refreshed = await backend.tokens.refresh({
+  refreshToken: session.refresh_token!,
+  workspaceId,
+})
+```
+
+`external_user` tokens are intentionally conversation-scoped. They can create,
+read, close, send turns, and stream turns for their own service-bound
+conversation, but they cannot list workspace conversations or request
+`include_tool_calls`. A service or entity mismatch is rejected by the API.
+Handle `token_expired` by rotating with `client.tokens.refresh()`. Treat refresh
+reuse/theft errors as terminal and restart the session from the parent
+credential.
+
 ## Configuration
 
 | Option        | Type           | Required | Description                                                          |
@@ -332,14 +419,22 @@ const client = new AmigoClient({
 
 ### Tokens
 
-Exchange a long-lived API key for a short-lived identity-issued JWT. See
-[Exchange an API key for a JWT](#exchange-an-api-key-for-a-jwt) under
-Authentication for the full walkthrough.
+Exchange a long-lived API key for a short-lived identity-issued JWT, or mint
+external-user session tokens for customer text chat. See
+[Exchange an API key for a JWT](#exchange-an-api-key-for-a-jwt) and
+[External-user sessions for customer text chat](#external-user-sessions-for-customer-text-chat)
+under Authentication for the full walkthroughs.
 
 ```typescript
 const { access_token, expires_in } = await client.tokens.exchangeApiKey({
   apiKey: process.env.AMIGO_API_KEY!,
   scope: 'entities:read agents:read',
+})
+
+const parent = await client.tokens.exchangeClientCredentials({
+  clientId: process.env.AMIGO_EXTERNAL_INTEGRATION_CLIENT_ID!,
+  clientSecret: process.env.AMIGO_EXTERNAL_INTEGRATION_CLIENT_SECRET!,
+  scope: EXTERNAL_USER_SESSION_CREATE_SCOPE,
 })
 ```
 

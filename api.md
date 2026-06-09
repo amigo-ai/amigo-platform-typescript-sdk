@@ -93,6 +93,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `tokens`
 
 - `exchangeApiKey`
+- `exchangeClientCredentials`
+- `createExternalUserSession`
+- `refresh`
 
 ### `agents`
 
@@ -282,6 +285,19 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `updateEndpoint`
 - `deleteEndpoint`
 - `testEndpoint`
+
+### `externalIntegrations`
+
+- `list`
+- `listAutoPaging`
+- `create`
+- `get`
+- `update`
+- `delete`
+- `listCredentials`
+- `createCredential`
+- `revokeCredential`
+- `rotateCredential`
 
 ### `analytics`
 

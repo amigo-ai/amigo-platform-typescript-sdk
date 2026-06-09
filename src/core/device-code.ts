@@ -412,7 +412,11 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
 
   const issuance = await requestDeviceCode(
     baseUrl,
-    { clientDescription: options.clientDescription, scope: options.scope, workspaceId: options.workspaceId },
+    {
+      clientDescription: options.clientDescription,
+      scope: options.scope,
+      workspaceId: options.workspaceId,
+    },
     fetchFn,
   )
 
