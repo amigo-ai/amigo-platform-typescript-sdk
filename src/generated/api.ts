@@ -37062,8 +37062,6 @@ export interface operations {
                 order?: string | null;
                 limit?: number;
                 offset?: number;
-                /** @description Semantic search query (uses pgvector cosine similarity) */
-                semantic?: string | null;
             };
             header?: never;
             path: {

@@ -65195,24 +65195,6 @@
               "title": "Offset",
               "type": "integer"
             }
-          },
-          {
-            "description": "Semantic search query (uses pgvector cosine similarity)",
-            "in": "query",
-            "name": "semantic",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Semantic search query (uses pgvector cosine similarity)",
-              "title": "Semantic"
-            }
           }
         ],
         "responses": {
