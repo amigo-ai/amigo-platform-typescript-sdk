@@ -14,6 +14,11 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 - `AMIGO_API_KEY`
 - `AMIGO_WORKSPACE_ID`
 - `AMIGO_BASE_URL` (optional)
+- `AMIGO_SERVICE_ID` (conversation examples)
+- `AMIGO_EXTERNAL_INTEGRATION_CLIENT_ID` (external-user session example)
+- `AMIGO_EXTERNAL_INTEGRATION_CLIENT_SECRET` (external-user session example)
+- `AMIGO_EXTERNAL_SUBJECT_KEY` (external-user session example)
+- `AMIGO_CONSUMER_ENTITY_ID` (optional, external-user session example)
 - `AMIGO_WEBHOOK_SECRET` (webhook example)
 - `AMIGO_WEBHOOK_SIGNATURE` (webhook example)
 - `AMIGO_WEBHOOK_TIMESTAMP` (optional, webhook example)
@@ -22,6 +27,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 ## Examples
 
 - [examples/auth/exchange-api-key.ts](./auth/exchange-api-key.ts): exchange a long-lived API key for a short-lived identity-issued JWT, then use it with `AmigoClient`
+- [examples/auth/external-user-session.ts](./auth/external-user-session.ts): exchange external-integration client credentials, mint an external-user session, send turns, refresh, and continue the conversation
 - [examples/basic/list-agents.ts](./basic/list-agents.ts): list agents with the public client
 - [examples/analytics/dashboard.ts](./analytics/dashboard.ts): read dashboard and call analytics
 - [examples/advanced/scoped-request-control.ts](./advanced/scoped-request-control.ts): apply timeout, retry, and header overrides on the normal resource surface
@@ -36,3 +42,4 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 For full walkthroughs, see the guides:
 
 - [Build a Custom Patient Form](../docs/guides/build-a-form.md)
+- [External User Text Conversations](../docs/guides/external-user-text-conversations.md)
