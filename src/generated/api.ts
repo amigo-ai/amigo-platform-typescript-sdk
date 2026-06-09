@@ -25662,14 +25662,21 @@ export interface components {
         src__routes__integrations__test_endpoint__Request: {
             /**
              * Auth Params
-             * @description Caller-supplied values for auth-routed params.
+             * @description Caller-supplied values for auth-routed params — the AUTH-ONLY channel.
              *
              *     A ``custom_token_exchange`` integration declares ``param_headers`` /
              *     ``param_body_fields`` whose ``param_name`` placeholders are NOT part of the
              *     endpoint's ``input_schema`` (they feed the pre-flight token exchange, not the
              *     endpoint call). They never reach the auth renderer through ``params`` alone, so
              *     the renderer raised before any HTTP call. Supply them here to exercise the
-             *     exchange end-to-end. Keys here also override matching flat-``params`` keys.
+             *     exchange end-to-end.
+             *
+             *     PLA-980: these values resolve the token exchange but are STRIPPED before the
+             *     downstream endpoint request is built, so a pure-auth secret put here never
+             *     echoes into the outbound body/query. A param that legitimately feeds BOTH the
+             *     exchange and the endpoint call belongs in ``params`` (which keeps its existing
+             *     dual-use behavior). ``auth_params`` is for pure-auth keys absent from ``params``;
+             *     on a key collision the ``params`` value wins (for both the exchange and the call).
              */
             auth_params?: {
                 [key: string]: unknown;
