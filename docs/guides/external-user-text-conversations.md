@@ -97,6 +97,14 @@ const externalSession = await backend.tokens.createExternalUserSession({
   consumerEntityId: process.env.AMIGO_CONSUMER_ENTITY_ID,
   ttlSeconds: 1800,
 })
+
+const tokenState = {
+  accessToken: externalSession.access_token,
+  refreshToken: externalSession.refresh_token,
+  // Keep the absolute expiry in your own session store. Refresh before this
+  // time rather than waiting for the next API request to fail.
+  accessTokenExpiresAt: Date.now() + externalSession.expires_in * 1000,
+}
 ```
 
 `externalSubjectKey` should be stable in your system, such as your customer user
@@ -140,21 +148,43 @@ for await (const event of externalUser.conversations.streamTurn(conversation.id,
 
 ## 5. Refresh before expiry
 
-External-user access tokens are short-lived. Rotate the refresh token from your
-backend and replace the child-token client:
+External-user access tokens are short-lived. Check expiry on the customer
+backend before every conversation operation and before opening any stream. Do
+not expose refresh tokens to browsers or mobile clients.
+
+Use the `expires_in` value returned from `createExternalUserSession()` or
+`tokens.refresh()` to compute and persist an absolute expiry timestamp. Refresh
+proactively when the access token is close to expiry, for example with a
+60-second buffer. Also handle a `token_expired` response by refreshing once and
+retrying the failed operation; if refresh fails, create a new external-user
+session from the parent credential.
 
 ```typescript
-if (!externalSession.refresh_token) {
+const REFRESH_SKEW_MS = 60_000
+
+function shouldRefreshAccessToken(expiresAt: number): boolean {
+  return Date.now() >= expiresAt - REFRESH_SKEW_MS
+}
+```
+
+Rotate the refresh token from your backend and replace the child-token client:
+
+```typescript
+if (!tokenState.refreshToken) {
   throw new Error('external-user session did not include a refresh token')
 }
 
 const refreshed = await backend.tokens.refresh({
-  refreshToken: externalSession.refresh_token,
+  refreshToken: tokenState.refreshToken,
   workspaceId,
 })
 
+tokenState.accessToken = refreshed.access_token
+tokenState.refreshToken = refreshed.refresh_token
+tokenState.accessTokenExpiresAt = Date.now() + refreshed.expires_in * 1000
+
 const refreshedExternalUser = new AmigoClient({
-  apiKey: refreshed.access_token,
+  apiKey: tokenState.accessToken,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL,
 })
