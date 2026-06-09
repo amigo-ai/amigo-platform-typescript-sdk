@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.66.0] - 2026-06-09
+
+### Improvements
+
+- Add external user session SDK support (#308)
+
 ## [0.65.0] - 2026-06-06
 
 ### Maintenance
