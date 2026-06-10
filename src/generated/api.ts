@@ -1689,7 +1689,7 @@ export interface paths {
          *
          *     **Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).
          *
-         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
+         *     **Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).
          */
         get: operations["get-call-trace-analysis"];
         put?: never;
@@ -37062,8 +37062,6 @@ export interface operations {
                 order?: string | null;
                 limit?: number;
                 offset?: number;
-                /** @description Semantic search query (uses pgvector cosine similarity) */
-                semantic?: string | null;
             };
             header?: never;
             path: {
