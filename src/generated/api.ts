@@ -1689,12 +1689,64 @@ export interface paths {
          *
          *     **Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).
          *
-         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
+         *     **Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).
          */
         get: operations["get-call-trace-analysis"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/channels/email/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List email templates for an SES use case
+         * @description List the templates of one SES use case bound to this workspace. Unpaginated — templates per use case are a bounded, human-curated catalog. Template bodies are omitted; fetch one template for the full Jinja + required variables. Requires ``Channel.view`` permission.
+         */
+        get: operations["list-email-templates"];
+        put?: never;
+        /**
+         * Create an email template
+         * @description Create a Jinja email template under an SES use case bound to this workspace. Channel-manager validates the Jinja syntax and the unsubscribe-variable gate: the subject may not reference unsubscribe variables, and the body must reference both unsubscribe variables exactly when the use case is unsubscribable (marketing). The response carries the extracted ``required_{subject,body}_variables`` a send-time caller must supply. Requires ``Channel.create`` permission.
+         */
+        post: operations["create-email-template"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/channels/email/templates/{email_template_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an email template
+         * @description Full template detail including the Jinja subject/body and the extracted required variables. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.view`` permission.
+         */
+        get: operations["get-email-template"];
+        /**
+         * Update an email template
+         * @description Partial update: absent fields are untouched; ``description`` may be explicitly nulled; at least one field is required. Subject/body changes re-run channel-manager's Jinja validation and the unsubscribe-variable gate. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.create`` permission.
+         */
+        put: operations["update-email-template"];
+        post?: never;
+        /**
+         * Delete an email template
+         * @description Delete a template. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.delete`` permission.
+         */
+        delete: operations["delete-email-template"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1709,13 +1761,13 @@ export interface paths {
         };
         /**
          * List SES setups
-         * @description Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.
+         * @description Paginated list of the SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are scoped to the workspace that created them (intrinsic ownership); other tenants' setups are not returned. Requires ``Channel.view`` permission.
          */
         get: operations["list-ses-setups"];
         put?: never;
         /**
          * Create an SES setup
-         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.
+         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. The setup is owned by the creating workspace; only that workspace can list, get, verify, or delete it. Requires ``Channel.create`` permission.
          */
         post: operations["create-ses-setup"];
         delete?: never;
@@ -10495,6 +10547,39 @@ export interface components {
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
         };
+        /** CreateEmailTemplateRequest */
+        CreateEmailTemplateRequest: {
+            /**
+             * Body Template
+             * @description Jinja HTML body. For an unsubscribable (marketing) use case it MUST
+             *     reference both unsubscribe variables; for a transactional one it must
+             *     not — channel-manager enforces the gate bidirectionally.
+             */
+            body_template: string;
+            /**
+             * Description
+             * @description Agent-facing intent description — what the catalog shows an agent
+             *     picking a template (R3).
+             */
+            description?: string | null;
+            /**
+             * Name
+             * @description Template name, unique within the SES use case.
+             */
+            name: string;
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             * @description The email use case the template belongs to. Must be bound to this
+             *     workspace via its service binding.
+             */
+            ses_use_case_id: string;
+            /**
+             * Subject Template
+             * @description Jinja subject. May not reference unsubscribe variables.
+             */
+            subject_template: string;
+        };
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
@@ -12094,8 +12179,62 @@ export interface components {
             /** Region */
             region: string;
         };
+        /**
+         * EmailTemplateListResponse
+         * @description Plain (unpaginated) list — templates per use case are a bounded-small,
+         *     human-curated catalog. Template bodies stay behind the GET-by-id route so
+         *     a list never ships megabytes of Jinja.
+         */
+        EmailTemplateListResponse: {
+            /** Items */
+            items: components["schemas"]["src__routes__channels__email_templates__EmailTemplateListResponse__Item"][];
+        };
+        /** EmailTemplateResponse */
+        EmailTemplateResponse: {
+            /** Body Template */
+            body_template: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Required Body Variables */
+            required_body_variables: string[];
+            /**
+             * Required Subject Variables
+             * @description Jinja variables the subject references — the send-time caller must
+             *     supply every one via ``template_parameters``.
+             */
+            required_subject_variables: string[];
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             */
+            ses_use_case_id: string;
+            /** Subject Template */
+            subject_template: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** EmailUseCaseRequest */
         EmailUseCaseRequest: {
+            /**
+             * Accepts Cold Inbound
+             * @description Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.
+             */
+            accepts_cold_inbound: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -12122,6 +12261,11 @@ export interface components {
              * Format: uuid
              */
             setup_id: string;
+            /**
+             * Unsubscribable
+             * @description Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.
+             */
+            unsubscribable: boolean;
         };
         /** EmotionEvent */
         EmotionEvent: {
@@ -24187,6 +24331,22 @@ export interface components {
             /** Sync Strategy */
             sync_strategy?: ("manual" | "scheduled" | "webhook" | "continuous") | null;
         };
+        /**
+         * UpdateEmailTemplateRequest
+         * @description PATCH-style PUT mirroring channel-manager's update contract: absent
+         *     fields are untouched (MISSING sentinel), ``description`` may be explicitly
+         *     nulled, and at least one field must be provided.
+         */
+        UpdateEmailTemplateRequest: {
+            /** Body Template */
+            body_template?: string;
+            /** Description */
+            description?: string | null;
+            /** Name */
+            name?: string;
+            /** Subject Template */
+            subject_template?: string;
+        };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
             /** Connection Method */
@@ -24551,6 +24711,8 @@ export interface components {
         };
         /** UseCaseResponse */
         UseCaseResponse: {
+            /** Accepts Cold Inbound */
+            accepts_cold_inbound?: boolean | null;
             /** Channel */
             channel: string;
             /** Configuration Set Name */
@@ -24576,6 +24738,8 @@ export interface components {
             setup_id: string;
             /** Tier */
             tier?: string | null;
+            /** Unsubscribable */
+            unsubscribable?: boolean | null;
             /**
              * Updated At
              * Format: date-time
@@ -25368,7 +25532,7 @@ export interface components {
              * Resource Type
              * @description Type of resource that was accessed
              */
-            resource_type: string;
+            resource_type?: string | null;
             /**
              * Service
              * @description Service that produced the event
@@ -25433,6 +25597,33 @@ export interface components {
              * @default 0
              */
             unique_states?: number;
+        };
+        /** Item */
+        src__routes__channels__email_templates__EmailTemplateListResponse__Item: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             */
+            ses_use_case_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** ConversationSummary */
         src__routes__conversations__ConversationSummary: {
@@ -30237,6 +30428,322 @@ export interface operations {
             };
             /** @description Analytics warehouse not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-email-templates": {
+        parameters: {
+            query: {
+                ses_use_case_id: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SES use case not found or not bound to this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmailTemplateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SES use case not found or not bound to this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Template name already exists within the SES use case. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Jinja syntax error or unsubscribe-variable gate violation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "update-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEmailTemplateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description New template name already exists within the SES use case. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No fields provided, Jinja syntax error, or unsubscribe-variable gate violation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -37062,8 +37569,6 @@ export interface operations {
                 order?: string | null;
                 limit?: number;
                 offset?: number;
-                /** @description Semantic search query (uses pgvector cosine similarity) */
-                semantic?: string | null;
             };
             header?: never;
             path: {
