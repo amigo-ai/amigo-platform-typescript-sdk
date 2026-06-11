@@ -1689,7 +1689,7 @@ export interface paths {
          *
          *     **Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).
          *
-         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
+         *     **Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).
          */
         get: operations["get-call-trace-analysis"];
         put?: never;
@@ -12097,6 +12097,11 @@ export interface components {
         /** EmailUseCaseRequest */
         EmailUseCaseRequest: {
             /**
+             * Accepts Cold Inbound
+             * @description Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.
+             */
+            accepts_cold_inbound: boolean;
+            /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
@@ -12122,6 +12127,11 @@ export interface components {
              * Format: uuid
              */
             setup_id: string;
+            /**
+             * Unsubscribable
+             * @description Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.
+             */
+            unsubscribable: boolean;
         };
         /** EmotionEvent */
         EmotionEvent: {
@@ -24551,6 +24561,8 @@ export interface components {
         };
         /** UseCaseResponse */
         UseCaseResponse: {
+            /** Accepts Cold Inbound */
+            accepts_cold_inbound?: boolean | null;
             /** Channel */
             channel: string;
             /** Configuration Set Name */
@@ -24576,6 +24588,8 @@ export interface components {
             setup_id: string;
             /** Tier */
             tier?: string | null;
+            /** Unsubscribable */
+            unsubscribable?: boolean | null;
             /**
              * Updated At
              * Format: date-time
@@ -37062,8 +37076,6 @@ export interface operations {
                 order?: string | null;
                 limit?: number;
                 offset?: number;
-                /** @description Semantic search query (uses pgvector cosine similarity) */
-                semantic?: string | null;
             };
             header?: never;
             path: {

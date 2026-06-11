@@ -11777,6 +11777,11 @@
       },
       "EmailUseCaseRequest": {
         "properties": {
+          "accepts_cold_inbound": {
+            "description": "Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.",
+            "title": "Accepts Cold Inbound",
+            "type": "boolean"
+          },
           "channel": {
             "const": "email",
             "title": "Channel",
@@ -11825,6 +11830,11 @@
             "format": "uuid",
             "title": "Setup Id",
             "type": "string"
+          },
+          "unsubscribable": {
+            "description": "Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.",
+            "title": "Unsubscribable",
+            "type": "boolean"
           }
         },
         "required": [
@@ -11833,7 +11843,9 @@
           "name",
           "setup_id",
           "sender_email_address",
-          "email_type"
+          "email_type",
+          "unsubscribable",
+          "accepts_cold_inbound"
         ],
         "title": "EmailUseCaseRequest",
         "type": "object"
@@ -42235,6 +42247,17 @@
       },
       "UseCaseResponse": {
         "properties": {
+          "accepts_cold_inbound": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepts Cold Inbound"
+          },
           "channel": {
             "title": "Channel",
             "type": "string"
@@ -42314,6 +42337,17 @@
               }
             ],
             "title": "Tier"
+          },
+          "unsubscribable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsubscribable"
           },
           "updated_at": {
             "format": "date-time",
@@ -53014,7 +53048,7 @@
     },
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
       "get": {
-        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).",
+        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).",
         "operationId": "get-call-trace-analysis",
         "parameters": [
           {
@@ -65194,24 +65228,6 @@
               "minimum": 0,
               "title": "Offset",
               "type": "integer"
-            }
-          },
-          {
-            "description": "Semantic search query (uses pgvector cosine similarity)",
-            "in": "query",
-            "name": "semantic",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Semantic search query (uses pgvector cosine similarity)",
-              "title": "Semantic"
             }
           }
         ],
