@@ -8241,6 +8241,60 @@
         "title": "CreateDataSourceRequest",
         "type": "object"
       },
+      "CreateEmailTemplateRequest": {
+        "properties": {
+          "body_template": {
+            "description": "Jinja HTML body. For an unsubscribable (marketing) use case it MUST\nreference both unsubscribe variables; for a transactional one it must\nnot \u2014 channel-manager enforces the gate bidirectionally.",
+            "maxLength": 1000000,
+            "minLength": 1,
+            "title": "Body Template",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Agent-facing intent description \u2014 what the catalog shows an agent\npicking a template (R3).",
+            "title": "Description"
+          },
+          "name": {
+            "description": "Template name, unique within the SES use case.",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9 _-]+$",
+            "title": "Name",
+            "type": "string"
+          },
+          "ses_use_case_id": {
+            "description": "The email use case the template belongs to. Must be bound to this\nworkspace via its service binding.",
+            "format": "uuid",
+            "title": "Ses Use Case Id",
+            "type": "string"
+          },
+          "subject_template": {
+            "description": "Jinja subject. May not reference unsubscribe variables.",
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Subject Template",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ses_use_case_id",
+          "name",
+          "subject_template",
+          "body_template"
+        ],
+        "title": "CreateEmailTemplateRequest",
+        "type": "object"
+      },
       "CreateLinkRequest": {
         "properties": {
           "customer_slug": {
@@ -11775,8 +11829,108 @@
         "title": "EgressIpsResponse",
         "type": "object"
       },
+      "EmailTemplateListResponse": {
+        "description": "Plain (unpaginated) list \u2014 templates per use case are a bounded-small,\nhuman-curated catalog. Template bodies stay behind the GET-by-id route so\na list never ships megabytes of Jinja.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/src__routes__channels__email_templates__EmailTemplateListResponse__Item"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "EmailTemplateListResponse",
+        "type": "object"
+      },
+      "EmailTemplateResponse": {
+        "properties": {
+          "body_template": {
+            "title": "Body Template",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "required_body_variables": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Body Variables",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "required_subject_variables": {
+            "description": "Jinja variables the subject references \u2014 the send-time caller must\nsupply every one via ``template_parameters``.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Required Subject Variables",
+            "type": "array",
+            "uniqueItems": true
+          },
+          "ses_use_case_id": {
+            "format": "uuid",
+            "title": "Ses Use Case Id",
+            "type": "string"
+          },
+          "subject_template": {
+            "title": "Subject Template",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "ses_use_case_id",
+          "subject_template",
+          "body_template",
+          "required_subject_variables",
+          "required_body_variables",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "EmailTemplateResponse",
+        "type": "object"
+      },
       "EmailUseCaseRequest": {
         "properties": {
+          "accepts_cold_inbound": {
+            "description": "Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.",
+            "title": "Accepts Cold Inbound",
+            "type": "boolean"
+          },
           "channel": {
             "const": "email",
             "title": "Channel",
@@ -11825,6 +11979,11 @@
             "format": "uuid",
             "title": "Setup Id",
             "type": "string"
+          },
+          "unsubscribable": {
+            "description": "Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.",
+            "title": "Unsubscribable",
+            "type": "boolean"
           }
         },
         "required": [
@@ -11833,7 +11992,9 @@
           "name",
           "setup_id",
           "sender_email_address",
-          "email_type"
+          "email_type",
+          "unsubscribable",
+          "accepts_cold_inbound"
         ],
         "title": "EmailUseCaseRequest",
         "type": "object"
@@ -13642,7 +13803,7 @@
         "type": "object"
       },
       "EntityResolveExternalId": {
-        "description": "Reference to an external-system identifier.\n\n``system`` labels which system minted the value (``epic``, ``charm``,\n``charmhealth``, \u2026). The value is matched against any\nnested key in ``world.entities.external_ids`` whose value equals\n``value``. ``system`` is informational for scoring; it doesn't\nconstrain the lookup, since adapters disagree on naming.",
+        "description": "Reference to an external-system identifier.\n\n``system`` labels which system minted the value (``epic``, ``charm``,\n``charmhealth``, \u2026). Resolution probes the canonical entity map\n(``world.canonical_entity_map_synced``) with the candidate key forms\n``{system}:{ResourceType}:{value}`` (Patient / Practitioner /\nOrganization / Appointment) plus the bare ``value`` \u2014 so ``system``\nconstrains the probe keys, and the request's ``entity_type``\nconstrains the map slice. External aliases that were never minted as\ncanonical keys (the legacy ``external_ids`` JSONB junk-drawer\nentries) are no longer resolvable.",
         "properties": {
           "system": {
             "$ref": "#/components/schemas/ExternalSystemString",
@@ -13719,7 +13880,7 @@
                 "type": "null"
               }
             ],
-            "description": "Canonical/MRN identifier ('charm:Patient:42' or raw MRN)."
+            "description": "Canonical identifier as carried by the canonical entity map (e.g. 'charm:Patient:42'; a raw MRN resolves only when a producer minted it as the canonical_id)."
           },
           "email": {
             "anyOf": [
@@ -13811,7 +13972,7 @@
         "type": "object"
       },
       "EntityResolveSummary": {
-        "description": "Compact identity card returned for each match.\n\nExcludes the full ``state`` JSONB and the entity embedding \u2014 fetch\nvia ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields\nhere are the ones a UI / agent needs to confirm \"yes, that's the\nright person\" before paying for the full state read.",
+        "description": "Compact identity card returned for each match.\n\nExcludes full entity state \u2014 fetch via\n``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields here are\nthe ones a UI / agent needs to confirm \"yes, that's the right\nperson\" before paying for the full state read.\n\nStage-7 narrowing (resolver serves from ``entities_synced_v3`` +\nthe canonical entity map; fields retained for wire compatibility):\n``external_ids`` is always ``{}`` and ``tags`` is always ``[]`` \u2014\nneither survives on the synced serving table. ``canonical_id`` is\nthe canonical-map value when the row resolved through the map, else\nthe entity's MRN.",
         "properties": {
           "birth_date": {
             "anyOf": [
@@ -13833,6 +13994,7 @@
                 "type": "null"
               }
             ],
+            "description": "Canonical-map value when resolved through the map, else the entity's MRN.",
             "title": "Canonical Id"
           },
           "display_name": {
@@ -13864,6 +14026,7 @@
           },
           "external_ids": {
             "additionalProperties": true,
+            "description": "Always {} \u2014 external aliases live in the canonical entity map, not on the serving row.",
             "title": "External Ids",
             "type": "object"
           },
@@ -13913,6 +14076,7 @@
             "title": "Phone"
           },
           "tags": {
+            "description": "Always [] \u2014 no tags column on the synced serving table.",
             "items": {
               "type": "string"
             },
@@ -40864,6 +41028,45 @@
         "title": "UpdateDataSourceRequest",
         "type": "object"
       },
+      "UpdateEmailTemplateRequest": {
+        "description": "PATCH-style PUT mirroring channel-manager's update contract: absent\nfields are untouched (MISSING sentinel), ``description`` may be explicitly\nnulled, and at least one field must be provided.",
+        "properties": {
+          "body_template": {
+            "maxLength": 1000000,
+            "minLength": 1,
+            "title": "Body Template",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "maxLength": 4096,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "name": {
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9 _-]+$",
+            "title": "Name",
+            "type": "string"
+          },
+          "subject_template": {
+            "maxLength": 256,
+            "minLength": 1,
+            "title": "Subject Template",
+            "type": "string"
+          }
+        },
+        "title": "UpdateEmailTemplateRequest",
+        "type": "object"
+      },
       "UpdateOperatorRequest": {
         "properties": {
           "connection_method": {
@@ -42235,6 +42438,17 @@
       },
       "UseCaseResponse": {
         "properties": {
+          "accepts_cold_inbound": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accepts Cold Inbound"
+          },
           "channel": {
             "title": "Channel",
             "type": "string"
@@ -42314,6 +42528,17 @@
               }
             ],
             "title": "Tier"
+          },
+          "unsubscribable": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unsubscribable"
           },
           "updated_at": {
             "format": "date-time",
@@ -44544,9 +44769,16 @@
             "title": "Resource Name"
           },
           "resource_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "description": "Type of resource that was accessed",
-            "title": "Resource Type",
-            "type": "string"
+            "title": "Resource Type"
           },
           "service": {
             "description": "Service that produced the event",
@@ -44582,8 +44814,7 @@
           "workspace_id",
           "timestamp",
           "service",
-          "action",
-          "resource_type"
+          "action"
         ],
         "title": "AuditEventResponse",
         "type": "object"
@@ -44623,6 +44854,55 @@
           }
         },
         "title": "ConversationSummary",
+        "type": "object"
+      },
+      "src__routes__channels__email_templates__EmailTemplateListResponse__Item": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "ses_use_case_id": {
+            "format": "uuid",
+            "title": "Ses Use Case Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "ses_use_case_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "Item",
         "type": "object"
       },
       "src__routes__conversations__ConversationSummary": {
@@ -53014,7 +53294,7 @@
     },
     "/v1/{workspace_id}/calls/{call_id}/trace-analysis": {
       "get": {
-        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).",
+        "description": "Audio-native intelligence for a completed call: emotional arc, key decision moments with causal attribution, counterfactual reasoning, and actionable coaching. Produced by the Amigo intelligence pipeline from the raw call recording.\n\n**Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).\n\n**Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).",
         "operationId": "get-call-trace-analysis",
         "parameters": [
           {
@@ -53074,9 +53354,328 @@
         ]
       }
     },
+    "/v1/{workspace_id}/channels/email/templates": {
+      "get": {
+        "description": "List the templates of one SES use case bound to this workspace. Unpaginated \u2014 templates per use case are a bounded, human-curated catalog. Template bodies are omitted; fetch one template for the full Jinja + required variables. Requires ``Channel.view`` permission.",
+        "operationId": "list-email-templates",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "ses_use_case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Ses Use Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "SES use case not found or not bound to this workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "List email templates for an SES use case",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "post": {
+        "description": "Create a Jinja email template under an SES use case bound to this workspace. Channel-manager validates the Jinja syntax and the unsubscribe-variable gate: the subject may not reference unsubscribe variables, and the body must reference both unsubscribe variables exactly when the use case is unsubscribable (marketing). The response carries the extracted ``required_{subject,body}_variables`` a send-time caller must supply. Requires ``Channel.create`` permission.",
+        "operationId": "create-email-template",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmailTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "SES use case not found or not bound to this workspace."
+          },
+          "409": {
+            "description": "Template name already exists within the SES use case."
+          },
+          "422": {
+            "description": "Jinja syntax error or unsubscribe-variable gate violation."
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Create an email template",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/channels/email/templates/{email_template_id}": {
+      "delete": {
+        "description": "Delete a template. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.delete`` permission.",
+        "operationId": "delete-email-template",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "email_template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Email Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Email template not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Delete an email template",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "get": {
+        "description": "Full template detail including the Jinja subject/body and the extracted required variables. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.view`` permission.",
+        "operationId": "get-email-template",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "email_template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Email Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Email template not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Get an email template",
+        "tags": [
+          "Channels"
+        ]
+      },
+      "put": {
+        "description": "Partial update: absent fields are untouched; ``description`` may be explicitly nulled; at least one field is required. Subject/body changes re-run channel-manager's Jinja validation and the unsubscribe-variable gate. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.create`` permission.",
+        "operationId": "update-email-template",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "email_template_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Email Template Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmailTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailTemplateResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Email template not found."
+          },
+          "409": {
+            "description": "New template name already exists within the SES use case."
+          },
+          "422": {
+            "description": "No fields provided, Jinja syntax error, or unsubscribe-variable gate violation."
+          },
+          "502": {
+            "description": "Channel manager unavailable."
+          },
+          "504": {
+            "description": "Channel manager timed out."
+          }
+        },
+        "summary": "Update an email template",
+        "tags": [
+          "Channels"
+        ]
+      }
+    },
     "/v1/{workspace_id}/channels/ses-setup": {
       "get": {
-        "description": "Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.",
+        "description": "Paginated list of the SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are scoped to the workspace that created them (intrinsic ownership); other tenants' setups are not returned. Requires ``Channel.view`` permission.",
         "operationId": "list-ses-setups",
         "parameters": [
           {
@@ -53143,7 +53742,7 @@
         ]
       },
       "post": {
-        "description": "Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.",
+        "description": "Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. The setup is owned by the creating workspace; only that workspace can list, get, verify, or delete it. Requires ``Channel.create`` permission.",
         "operationId": "create-ses-setup",
         "parameters": [
           {
@@ -65195,24 +65794,6 @@
               "title": "Offset",
               "type": "integer"
             }
-          },
-          {
-            "description": "Semantic search query (uses pgvector cosine similarity)",
-            "in": "query",
-            "name": "semantic",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Semantic search query (uses pgvector cosine similarity)",
-              "title": "Semantic"
-            }
           }
         ],
         "responses": {
@@ -74806,7 +75387,7 @@
     },
     "/v1/{workspace_id}/world/entities/resolve": {
       "post": {
-        "description": "Polymorphic identifier \u2192 ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Uses indexed lookups (phone, email, canonical_id) and the external_ids GIN index \u2014 sub-10ms for single-identifier queries on warm pods. Returns matches ranked by confidence + number of identifiers matched.",
+        "description": "Polymorphic identifier \u2192 ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Served from the SDP serving surfaces: entity rows from ``world.entities_synced_v3``; canonical_id and external_id resolve through ``world.canonical_entity_map_synced`` point reads. Returns matches ranked by confidence + number of identifiers matched. Summary narrowing: ``external_ids`` is always ``{}``, ``tags`` is always ``[]``, and ``canonical_id`` is the canonical-map value or the entity's MRN.",
         "operationId": "resolve-entity",
         "parameters": [
           {
