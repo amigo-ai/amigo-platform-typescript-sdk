@@ -56,22 +56,6 @@ export class SettingsResource extends WorkspaceScopedResource {
       ),
   }
 
-  readonly memory = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/memory', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['MemorySettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/memory', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
-
   readonly retention = {
     get: async () =>
       extractData(

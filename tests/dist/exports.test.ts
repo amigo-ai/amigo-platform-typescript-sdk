@@ -43,7 +43,6 @@ describe('ESM exports', () => {
     const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })
     expect(client.agents).toBeDefined()
     expect(client.skills).toBeDefined()
-    expect(client.memory).toBeDefined()
     expect(client.world).toBeDefined()
   })
 })

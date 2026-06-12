@@ -32,11 +32,6 @@ const OUTREACH_FIXTURE = {
   data_templates: [{ name: 'reminder', fields: ['patient_name', 'appointment_date'] }],
 }
 
-const MEMORY_SETTINGS_FIXTURE = {
-  backfill_requested: false,
-  dimensions: [{ name: 'preferences', enabled: true }],
-}
-
 const RETENTION_FIXTURE = {
   call_recordings_days: 365,
   call_transcripts_days: 730,
@@ -95,11 +90,6 @@ const client = new AmigoClient({
         rules: [...OUTREACH_FIXTURE.rules, { name: 'Follow-up', schedule: '0 14 * * 1-5' }],
       }),
 
-    [`GET ${BASE}/settings/memory`]: () => Response.json(MEMORY_SETTINGS_FIXTURE),
-
-    [`PUT ${BASE}/settings/memory`]: () =>
-      Response.json({ ...MEMORY_SETTINGS_FIXTURE, backfill_requested: true }),
-
     [`GET ${BASE}/settings/retention`]: () => Response.json(RETENTION_FIXTURE),
 
     [`PUT ${BASE}/settings/retention`]: () =>
@@ -152,19 +142,6 @@ describe('SettingsResource', () => {
     it('updates outreach settings', async () => {
       const result = await client.settings.outreach.update({ rules: [] } as never)
       expect(result.rules).toHaveLength(2)
-    })
-  })
-
-  describe('memory', () => {
-    it('gets memory settings', async () => {
-      const result = await client.settings.memory.get()
-      expect(result.backfill_requested).toBe(false)
-      expect(result.dimensions).toHaveLength(1)
-    })
-
-    it('updates memory settings', async () => {
-      const result = await client.settings.memory.update({ backfill_requested: true } as never)
-      expect(result.backfill_requested).toBe(true)
     })
   })
 
