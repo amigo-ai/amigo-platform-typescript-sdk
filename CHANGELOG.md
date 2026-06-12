@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.69.0] - 2026-06-12
+
+### Features
+
+- support include_tool_calls on conversations.get() (#320)
+
 ## [0.68.0] - 2026-06-12
 
 ### Maintenance
