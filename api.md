@@ -355,8 +355,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `branding.update`
 - `outreach.get`
 - `outreach.update`
-- `memory.get`
-- `memory.update`
 - `retention.get`
 - `retention.update`
 - `gapScanner.get`
@@ -377,12 +375,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `listInvoicesAutoPaging`
 - `getInvoice`
 - `getInvoicePdf`
-
-### `memory`
-
-- `getEntityDimensions`
-- `getEntityFacts`
-- `getAnalytics`
 
 ### `reviewQueue`
 

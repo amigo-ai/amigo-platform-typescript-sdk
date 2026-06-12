@@ -84,10 +84,6 @@ describe('resource surface smoke tests', () => {
     await client.dataSources.getStatus('ds-001')
     await client.dataSources.getSyncHistory('ds-001')
 
-    await client.memory.getEntityDimensions('entity-001')
-    await client.memory.getEntityFacts('entity-001', { dimension: 'preferences' })
-    await client.memory.getAnalytics()
-
     await client.recordings.getUrls('call-001')
     await client.recordings.getMetadata('call-001')
     await client.recordings.download('call-001', 'audio.wav')

@@ -701,23 +701,6 @@ const comparison = await client.analytics.compareCallPeriods({
 })
 ```
 
-### Agent Memory
-
-Agent Memory tracks structured long-term facts about entities across conversations.
-
-```typescript
-// Get all dimension scores for an entity
-const dims = await client.memory.getEntityDimensions('entity-id')
-console.log(dims.dimensions) // preferences, health_history, etc.
-
-// Get individual facts for a dimension
-const facts = await client.memory.getEntityFacts('entity-id', { dimension: 'preferences' })
-
-// Workspace-level memory health
-const analytics = await client.memory.getAnalytics()
-console.log(analytics.coverage_rate, analytics.total_facts)
-```
-
 ### Integrations
 
 ```typescript
@@ -747,10 +730,6 @@ await client.settings.voice.update({ voice_id: 'new-voice-id', speed: 1.1 })
 // Retention
 const retention = await client.settings.retention.get()
 await client.settings.retention.update({ call_recordings_days: 90 })
-
-// Memory dimensions
-const memory = await client.settings.memory.get()
-console.log(memory.dimensions) // list of configured memory dimensions
 ```
 
 ### Surfaces (Patient Forms)

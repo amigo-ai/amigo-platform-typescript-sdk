@@ -58,7 +58,6 @@ import { SimulationsResource } from './resources/simulations.js'
 import { MetricsResource } from './resources/metrics.js'
 import { SettingsResource } from './resources/settings.js'
 import { BillingResource } from './resources/billing.js'
-import { MemoryResource } from './resources/memory.js'
 import { ReviewQueueResource } from './resources/review-queue.js'
 import { RecordingsResource } from './resources/recordings.js'
 import { AuditResource } from './resources/audit.js'
@@ -214,7 +213,6 @@ export class AmigoClient {
   readonly metrics!: MetricsResource
   readonly settings!: SettingsResource
   readonly billing!: BillingResource
-  readonly memory!: MemoryResource
   readonly reviewQueue!: ReviewQueueResource
   readonly recordings!: RecordingsResource
   readonly audit!: AuditResource
@@ -485,7 +483,6 @@ export class AmigoClient {
     mutable.metrics = new MetricsResource(client, workspaceId)
     mutable.settings = new SettingsResource(client, workspaceId)
     mutable.billing = new BillingResource(client, workspaceId)
-    mutable.memory = new MemoryResource(client, workspaceId)
     mutable.reviewQueue = new ReviewQueueResource(client, workspaceId)
     mutable.recordings = new RecordingsResource(client, workspaceId)
     mutable.audit = new AuditResource(client, workspaceId)

@@ -57,8 +57,8 @@ export interface paths {
          * Get Availability
          * @description Return available appointment slots for the surface's workspace.
          *
-         *     Queries FHIR Slot resources from world.entities that are free and
-         *     within the requested date range. Token-authenticated, no Bearer auth.
+         *     Queries FHIR Slot resources from world.entities_synced_v3 that are free
+         *     and within the requested date range. Token-authenticated, no Bearer auth.
          */
         get: operations["get-surface-availability"];
         put?: never;
@@ -1689,12 +1689,64 @@ export interface paths {
          *
          *     **Latency**: 500ms-2s (reads from analytics warehouse, not transactional store).
          *
-         *     **Status values**: `ready` = analysis complete, `pending` = call completed but analysis queued (retry in 30 minutes), `unavailable` = no recording or analysis transiently unavailable (retry later).
+         *     **Status values**: `ready` = analysis complete, `pending` = analysis started on first request (typically ready in 2-5 minutes; poll again), `unavailable` = no recording or analysis transiently unavailable (retry later).
          */
         get: operations["get-call-trace-analysis"];
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/channels/email/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List email templates for an SES use case
+         * @description List the templates of one SES use case bound to this workspace. Unpaginated — templates per use case are a bounded, human-curated catalog. Template bodies are omitted; fetch one template for the full Jinja + required variables. Requires ``Channel.view`` permission.
+         */
+        get: operations["list-email-templates"];
+        put?: never;
+        /**
+         * Create an email template
+         * @description Create a Jinja email template under an SES use case bound to this workspace. Channel-manager validates the Jinja syntax and the unsubscribe-variable gate: the subject may not reference unsubscribe variables, and the body must reference both unsubscribe variables exactly when the use case is unsubscribable (marketing). The response carries the extracted ``required_{subject,body}_variables`` a send-time caller must supply. Requires ``Channel.create`` permission.
+         */
+        post: operations["create-email-template"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/channels/email/templates/{email_template_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an email template
+         * @description Full template detail including the Jinja subject/body and the extracted required variables. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.view`` permission.
+         */
+        get: operations["get-email-template"];
+        /**
+         * Update an email template
+         * @description Partial update: absent fields are untouched; ``description`` may be explicitly nulled; at least one field is required. Subject/body changes re-run channel-manager's Jinja validation and the unsubscribe-variable gate. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.create`` permission.
+         */
+        put: operations["update-email-template"];
+        post?: never;
+        /**
+         * Delete an email template
+         * @description Delete a template. 404 unless the template's SES use case is bound to this workspace. Requires ``Channel.delete`` permission.
+         */
+        delete: operations["delete-email-template"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1709,13 +1761,13 @@ export interface paths {
         };
         /**
          * List SES setups
-         * @description Paginated list of every SES setup on the platform. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are shared platform-wide; any caller with ``Channel.view`` permission sees the full list.
+         * @description Paginated list of the SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are scoped to the workspace that created them (intrinsic ownership); other tenants' setups are not returned. Requires ``Channel.view`` permission.
          */
         get: operations["list-ses-setups"];
         put?: never;
         /**
          * Create an SES setup
-         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. Setups are shared platform-wide; any caller with ``Channel.create`` permission can create one.
+         * @description Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. The setup is owned by the creating workspace; only that workspace can list, get, verify, or delete it. Requires ``Channel.create`` permission.
          */
         post: operations["create-ses-setup"];
         delete?: never;
@@ -3652,84 +3704,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/memory/analytics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get workspace-level memory analytics
-         * @description Get workspace-level memory analytics.
-         *
-         *     Returns aggregate stats about the memory extraction pipeline:
-         *     per-dimension fact counts, coverage rates, source intelligence,
-         *     and recent activity. Cached in Valkey (60s TTL). Reads only Lakebase
-         *     memory projections on cache miss.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-memory-analytics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/memory/{entity_id}/dimensions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get memory dimension scores for an entity
-         * @description Get dimension completeness scores for an entity.
-         *
-         *     Reads pre-computed aggregates from ``memory.patient_dimensions``.
-         *     All 6 built-in dimensions are always returned (0 facts for empty ones).
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-entity-dimension-scores"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/memory/{entity_id}/facts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get memory facts for an entity
-         * @description Get extracted facts for an entity, optionally filtered by dimension.
-         *
-         *     Reads pre-computed facts from ``memory.patient_memory``. Each row
-         *     includes the pre-extracted ``extracted_text`` — no inline JSONB
-         *     extraction at query time.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-entity-memory-facts"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/metering/emit": {
         parameters: {
             query?: never;
@@ -5392,39 +5366,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/memory": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get memory dimension settings
-         * @description Get the workspace memory dimension settings.
-         *
-         *     Returns built-in defaults when not configured.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-memory-settings"];
-        /**
-         * Update memory dimension settings
-         * @description Update the workspace memory dimension settings.
-         *
-         *     Partial updates supported — only provided fields are changed.
-         *     The dimensions list is replaced entirely when provided.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-memory-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/metrics": {
         parameters: {
             query?: never;
@@ -6946,7 +6887,7 @@ export interface paths {
         put?: never;
         /**
          * Resolve entity by identifier
-         * @description Polymorphic identifier → ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Uses indexed lookups (phone, email, canonical_id) and the external_ids GIN index — sub-10ms for single-identifier queries on warm pods. Returns matches ranked by confidence + number of identifiers matched.
+         * @description Polymorphic identifier → ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Served from the SDP serving surfaces: entity rows from ``world.entities_synced_v3``; canonical_id and external_id resolve through ``world.canonical_entity_map_synced`` point reads. Returns matches ranked by confidence + number of identifiers matched. Summary narrowing: ``external_ids`` is always ``{}``, ``tags`` is always ``[]``, and ``canonical_id`` is the canonical-map value or the entity's MRN.
          */
         post: operations["resolve-entity"];
         delete?: never;
@@ -10495,6 +10436,39 @@ export interface components {
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
         };
+        /** CreateEmailTemplateRequest */
+        CreateEmailTemplateRequest: {
+            /**
+             * Body Template
+             * @description Jinja HTML body. For an unsubscribable (marketing) use case it MUST
+             *     reference both unsubscribe variables; for a transactional one it must
+             *     not — channel-manager enforces the gate bidirectionally.
+             */
+            body_template: string;
+            /**
+             * Description
+             * @description Agent-facing intent description — what the catalog shows an agent
+             *     picking a template (R3).
+             */
+            description?: string | null;
+            /**
+             * Name
+             * @description Template name, unique within the SES use case.
+             */
+            name: string;
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             * @description The email use case the template belongs to. Must be bound to this
+             *     workspace via its service binding.
+             */
+            ses_use_case_id: string;
+            /**
+             * Subject Template
+             * @description Jinja subject. May not reference unsubscribe variables.
+             */
+            subject_template: string;
+        };
         /** CreateLinkRequest */
         CreateLinkRequest: {
             customer_slug: components["schemas"]["SlugString"];
@@ -10573,7 +10547,7 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
-            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities.canonical_id. Resolved against the SDP-projected world.entities table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities_synced_v3.canonical_id. Resolved against the SDP-projected world.entities_synced_v3 table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
             patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
@@ -11912,76 +11886,6 @@ export interface components {
              */
             status: "destroyed";
         };
-        /**
-         * DimensionAnalytics
-         * @description Per-dimension aggregate stats across all entities.
-         */
-        DimensionAnalytics: {
-            /** Active */
-            active: boolean;
-            /** Avg Confidence */
-            avg_confidence: number;
-            /** Avg Facts Per Entity */
-            avg_facts_per_entity: number;
-            /** Builtin */
-            builtin: boolean;
-            /** Description */
-            description: string | null;
-            /** Dimension */
-            dimension: string;
-            /** Entity Count */
-            entity_count: number;
-            /** Extraction Mode */
-            extraction_mode: string;
-            /** Latest Fact At */
-            latest_fact_at: string | null;
-            /** Name */
-            name: string;
-            /**
-             * Sample Facts
-             * @default []
-             */
-            sample_facts?: components["schemas"]["SampleFact"][];
-            /** Source Breakdown */
-            source_breakdown: {
-                [key: string]: number;
-            };
-            /** Total Facts */
-            total_facts: number;
-            /** Weight */
-            weight: number;
-        };
-        /** DimensionScore */
-        DimensionScore: {
-            /** Avg Confidence */
-            avg_confidence: number;
-            /** Description */
-            description: string | null;
-            /** Dimension */
-            dimension: string;
-            /** Fact Count */
-            fact_count: number;
-            /** Latest Fact At */
-            latest_fact_at: string | null;
-            /** Name */
-            name: string;
-            /** Source Count */
-            source_count: number;
-            /** Weight */
-            weight: number;
-        };
-        /** DimensionScoresResponse */
-        DimensionScoresResponse: {
-            /** Dimensions */
-            dimensions: components["schemas"]["DimensionScore"][];
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Total Facts */
-            total_facts: number;
-        };
         /** DistrictMetricsResponse */
         DistrictMetricsResponse: {
             /** Count */
@@ -12094,8 +11998,62 @@ export interface components {
             /** Region */
             region: string;
         };
+        /**
+         * EmailTemplateListResponse
+         * @description Plain (unpaginated) list — templates per use case are a bounded-small,
+         *     human-curated catalog. Template bodies stay behind the GET-by-id route so
+         *     a list never ships megabytes of Jinja.
+         */
+        EmailTemplateListResponse: {
+            /** Items */
+            items: components["schemas"]["src__routes__channels__email_templates__EmailTemplateListResponse__Item"][];
+        };
+        /** EmailTemplateResponse */
+        EmailTemplateResponse: {
+            /** Body Template */
+            body_template: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Required Body Variables */
+            required_body_variables: string[];
+            /**
+             * Required Subject Variables
+             * @description Jinja variables the subject references — the send-time caller must
+             *     supply every one via ``template_parameters``.
+             */
+            required_subject_variables: string[];
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             */
+            ses_use_case_id: string;
+            /** Subject Template */
+            subject_template: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
         /** EmailUseCaseRequest */
         EmailUseCaseRequest: {
+            /**
+             * Accepts Cold Inbound
+             * @description Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.
+             */
+            accepts_cold_inbound: boolean;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -12122,6 +12080,11 @@ export interface components {
              * Format: uuid
              */
             setup_id: string;
+            /**
+             * Unsubscribable
+             * @description Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.
+             */
+            unsubscribable: boolean;
         };
         /** EmotionEvent */
         EmotionEvent: {
@@ -12831,10 +12794,14 @@ export interface components {
          * @description Reference to an external-system identifier.
          *
          *     ``system`` labels which system minted the value (``epic``, ``charm``,
-         *     ``charmhealth``, …). The value is matched against any
-         *     nested key in ``world.entities.external_ids`` whose value equals
-         *     ``value``. ``system`` is informational for scoring; it doesn't
-         *     constrain the lookup, since adapters disagree on naming.
+         *     ``charmhealth``, …). Resolution probes the canonical entity map
+         *     (``world.canonical_entity_map_synced``) with the candidate key forms
+         *     ``{system}:{ResourceType}:{value}`` (Patient / Practitioner /
+         *     Organization / Appointment) plus the bare ``value`` — so ``system``
+         *     constrains the probe keys, and the request's ``entity_type``
+         *     constrains the map slice. External aliases that were never minted as
+         *     canonical keys (the legacy ``external_ids`` JSONB junk-drawer
+         *     entries) are no longer resolvable.
          */
         EntityResolveExternalId: {
             /** @description External system label (lowercase, e.g. 'epic'). */
@@ -12881,7 +12848,7 @@ export interface components {
          *     on more than one signal (phone + email + MRN).
          */
         EntityResolveRequest: {
-            /** @description Canonical/MRN identifier ('charm:Patient:42' or raw MRN). */
+            /** @description Canonical identifier as carried by the canonical entity map (e.g. 'charm:Patient:42'; a raw MRN resolves only when a producer minted it as the canonical_id). */
             canonical_id?: components["schemas"]["CanonicalIdLookupString"] | null;
             /**
              * Email
@@ -12920,15 +12887,25 @@ export interface components {
          * EntityResolveSummary
          * @description Compact identity card returned for each match.
          *
-         *     Excludes the full ``state`` JSONB and the entity embedding — fetch
-         *     via ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields
-         *     here are the ones a UI / agent needs to confirm "yes, that's the
-         *     right person" before paying for the full state read.
+         *     Excludes full entity state — fetch via
+         *     ``GET /v1/{ws}/entities/{entity_id}`` if needed. The fields here are
+         *     the ones a UI / agent needs to confirm "yes, that's the right
+         *     person" before paying for the full state read.
+         *
+         *     Stage-7 narrowing (resolver serves from ``entities_synced_v3`` +
+         *     the canonical entity map; fields retained for wire compatibility):
+         *     ``external_ids`` is always ``{}`` and ``tags`` is always ``[]`` —
+         *     neither survives on the synced serving table. ``canonical_id`` is
+         *     the canonical-map value when the row resolved through the map, else
+         *     the entity's MRN.
          */
         EntityResolveSummary: {
             /** Birth Date */
             birth_date?: string | null;
-            /** Canonical Id */
+            /**
+             * Canonical Id
+             * @description Canonical-map value when resolved through the map, else the entity's MRN.
+             */
             canonical_id?: string | null;
             /** Display Name */
             display_name?: string | null;
@@ -12939,7 +12916,10 @@ export interface components {
              * @default 0
              */
             event_count?: number;
-            /** External Ids */
+            /**
+             * External Ids
+             * @description Always {} — external aliases live in the canonical entity map, not on the serving row.
+             */
             external_ids?: {
                 [key: string]: unknown;
             };
@@ -12951,7 +12931,10 @@ export interface components {
             name?: string | null;
             /** Phone */
             phone?: string | null;
-            /** Tags */
+            /**
+             * Tags
+             * @description Always [] — no tags column on the synced serving table.
+             */
             tags?: string[];
         };
         /** EntityResponse */
@@ -15826,146 +15809,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /** MemoryAnalyticsResponse */
-        MemoryAnalyticsResponse: {
-            /** Active Dimensions */
-            active_dimensions: number;
-            /** Builtin Dimensions */
-            builtin_dimensions: number;
-            /** Coverage Rate */
-            coverage_rate: number;
-            /** Custom Dimensions */
-            custom_dimensions: number;
-            /** Dimensions */
-            dimensions: components["schemas"]["DimensionAnalytics"][];
-            /** Facts Last 24H */
-            facts_last_24h: number;
-            /** Facts Last 30D */
-            facts_last_30d: number;
-            /** Facts Last 7D */
-            facts_last_7d: number;
-            /** Llm Dimensions */
-            llm_dimensions: number;
-            /** Top Sources */
-            top_sources: components["schemas"]["TopSource"][];
-            /** Total Entities In Workspace */
-            total_entities_in_workspace: number;
-            /** Total Entities With Memory */
-            total_entities_with_memory: number;
-            /** Total Facts */
-            total_facts: number;
-        };
-        /**
-         * MemoryDimension
-         * @description A single memory dimension — defines what facts to extract from events.
-         *
-         *     Two extraction modes:
-         *     - static: uses extract_paths (JSONPath) for fast, free extraction
-         *     - llm: uses ai_extract with the dimension description as prompt
-         *       for semantic extraction. Only runs on new events (incremental MV refresh).
-         */
-        MemoryDimension: {
-            /**
-             * Active
-             * @default true
-             */
-            active?: boolean;
-            /**
-             * Builtin
-             * @description True for platform-provided dimensions (read-only key)
-             * @default false
-             */
-            builtin?: boolean;
-            description?: components["schemas"]["DescriptionString"] | null;
-            /**
-             * Event Types
-             * @description Event types to scan (e.g. 'patient.created', 'condition.created', 'surface.submitted')
-             */
-            event_types: string[];
-            /**
-             * Extract Paths
-             * @description JSONB paths for static extraction (e.g. '$.active_conditions'). Ignored when extraction_mode='llm'.
-             */
-            extract_paths?: string[];
-            /**
-             * Extraction Mode
-             * @description 'static' uses extract_paths (fast, free). 'llm' uses ai_extract with description as prompt (semantic, incremental).
-             * @default static
-             * @enum {string}
-             */
-            extraction_mode?: "static" | "llm";
-            /**
-             * Id
-             * Format: uuid
-             */
-            id?: string;
-            /**
-             * Key
-             * @description Lowercase slug used as column key (e.g. 'clinical', 'cosmetic_preference')
-             */
-            key: string;
-            name: components["schemas"]["NameString"];
-            /**
-             * Weight
-             * @description Relative importance for scoring (higher = more important)
-             * @default 1
-             */
-            weight?: number;
-        };
-        /** MemoryFact */
-        MemoryFact: {
-            /** Confidence */
-            confidence: number;
-            /** Data */
-            data?: {
-                [key: string]: unknown;
-            } | null;
-            /** Dimension */
-            dimension: string;
-            /** Event Type */
-            event_type: string;
-            /** Extracted Text */
-            extracted_text: string | null;
-            /** Ingested At */
-            ingested_at: string | null;
-            /** Source */
-            source: string | null;
-        };
-        /** MemoryFactsResponse */
-        MemoryFactsResponse: {
-            /** Dimension */
-            dimension: string | null;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Facts */
-            facts: components["schemas"]["MemoryFact"][];
-            /** Total */
-            total: number;
-        };
-        /**
-         * MemorySettingsRequest
-         * @description Partial update — only provided fields are changed.
-         *
-         *     The dimensions list is replaced entirely when provided.
-         *     Built-in dimensions can be deactivated (active=false) or have their
-         *     weight changed, but their key cannot be reused for custom dimensions.
-         */
-        MemorySettingsRequest: {
-            /** Backfill Requested */
-            backfill_requested?: boolean | null;
-            /** Dimensions */
-            dimensions?: components["schemas"]["MemoryDimension"][] | null;
-        };
-        /** MemorySettingsResponse */
-        MemorySettingsResponse: {
-            /** Backfill Requested */
-            backfill_requested: boolean;
-            /** Dimensions */
-            dimensions: components["schemas"]["MemoryDimension"][];
-        };
         /** MergedEntitiesResponse */
         MergedEntitiesResponse: {
             /**
@@ -18615,7 +18458,7 @@ export interface components {
             next_offset?: number | null;
             /**
              * Resolved Call Sid
-             * @description When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.
+             * @description When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities_synced_v3``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.
              */
             resolved_call_sid?: string | null;
             /**
@@ -19591,21 +19434,6 @@ export interface components {
              * @default 0
              */
             match_count?: number;
-        };
-        /**
-         * SampleFact
-         * @description Representative fact snippet for a dimension (quality inspection / demos).
-         */
-        SampleFact: {
-            /** Confidence */
-            confidence: number;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Extracted Text */
-            extracted_text: string;
         };
         /** SampleResponse */
         SampleResponse: {
@@ -21651,7 +21479,7 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
-            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities_synced_v3 table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
             canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
@@ -23279,15 +23107,6 @@ export interface components {
              */
             total_calls?: number;
         };
-        /** TopSource */
-        TopSource: {
-            /** Entity Count */
-            entity_count: number;
-            /** Fact Count */
-            fact_count: number;
-            /** Source */
-            source: string;
-        };
         /**
          * TraceAnalysisListItem
          * @description Compact summary of a trace analysis row for list views.
@@ -23295,7 +23114,7 @@ export interface components {
         TraceAnalysisListItem: {
             /**
              * Call Entity Id
-             * @description Associated world.entities call row UUID
+             * @description Associated world.entities_synced_v3 call row UUID
              */
             call_entity_id?: string | null;
             /**
@@ -23375,7 +23194,7 @@ export interface components {
         TraceAnalysisResponse: {
             /**
              * Call Entity Id
-             * @description UUID string of the associated world.entities call row (if resolved)
+             * @description UUID string of the associated world.entities_synced_v3 call row (if resolved)
              */
             call_entity_id?: string | null;
             /**
@@ -24187,6 +24006,22 @@ export interface components {
             /** Sync Strategy */
             sync_strategy?: ("manual" | "scheduled" | "webhook" | "continuous") | null;
         };
+        /**
+         * UpdateEmailTemplateRequest
+         * @description PATCH-style PUT mirroring channel-manager's update contract: absent
+         *     fields are untouched (MISSING sentinel), ``description`` may be explicitly
+         *     nulled, and at least one field must be provided.
+         */
+        UpdateEmailTemplateRequest: {
+            /** Body Template */
+            body_template?: string;
+            /** Description */
+            description?: string | null;
+            /** Name */
+            name?: string;
+            /** Subject Template */
+            subject_template?: string;
+        };
         /** UpdateOperatorRequest */
         UpdateOperatorRequest: {
             /** Connection Method */
@@ -24551,6 +24386,8 @@ export interface components {
         };
         /** UseCaseResponse */
         UseCaseResponse: {
+            /** Accepts Cold Inbound */
+            accepts_cold_inbound?: boolean | null;
             /** Channel */
             channel: string;
             /** Configuration Set Name */
@@ -24576,6 +24413,8 @@ export interface components {
             setup_id: string;
             /** Tier */
             tier?: string | null;
+            /** Unsubscribable */
+            unsubscribable?: boolean | null;
             /**
              * Updated At
              * Format: date-time
@@ -25368,7 +25207,7 @@ export interface components {
              * Resource Type
              * @description Type of resource that was accessed
              */
-            resource_type: string;
+            resource_type?: string | null;
             /**
              * Service
              * @description Service that produced the event
@@ -25433,6 +25272,33 @@ export interface components {
              * @default 0
              */
             unique_states?: number;
+        };
+        /** Item */
+        src__routes__channels__email_templates__EmailTemplateListResponse__Item: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Ses Use Case Id
+             * Format: uuid
+             */
+            ses_use_case_id: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** ConversationSummary */
         src__routes__conversations__ConversationSummary: {
@@ -30237,6 +30103,322 @@ export interface operations {
             };
             /** @description Analytics warehouse not configured */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-email-templates": {
+        parameters: {
+            query: {
+                ses_use_case_id: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateListResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SES use case not found or not bound to this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmailTemplateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description SES use case not found or not bound to this workspace. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Template name already exists within the SES use case. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Jinja syntax error or unsubscribe-variable gate violation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "update-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEmailTemplateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmailTemplateResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description New template name already exists within the SES use case. */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No fields provided, Jinja syntax error, or unsubscribe-variable gate violation. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-email-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                email_template_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Email template not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Channel manager unavailable. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Channel manager timed out. */
+            504: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -35432,116 +35614,6 @@ export interface operations {
             };
         };
     };
-    "get-memory-analytics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemoryAnalyticsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-entity-dimension-scores": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                /** @description Entity UUID */
-                entity_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DimensionScoresResponse"];
-                };
-            };
-            /** @description Invalid entity_id */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-entity-memory-facts": {
-        parameters: {
-            query?: {
-                /** @description Filter by dimension key (clinical, behavioral, etc.) */
-                dimension?: string | null;
-                /** @description Max facts to return */
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                /** @description Entity UUID */
-                entity_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemoryFactsResponse"];
-                };
-            };
-            /** @description Invalid entity_id or dimension key */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "emit-metering-event": {
         parameters: {
             query?: never;
@@ -37062,8 +37134,6 @@ export interface operations {
                 order?: string | null;
                 limit?: number;
                 offset?: number;
-                /** @description Semantic search query (uses pgvector cosine similarity) */
-                semantic?: string | null;
             };
             header?: never;
             path: {
@@ -39276,82 +39346,6 @@ export interface operations {
             };
             /** @description Connector runner unavailable */
             503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-memory-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemorySettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-memory-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MemorySettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemorySettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
                 headers: {
                     [name: string]: unknown;
                 };

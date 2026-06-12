@@ -56,12 +56,11 @@ src/
     context-graphs.ts   -- Context graph (HSM) CRUD and versioning
     data-sources.ts     -- Connected data source management
     integrations.ts     -- Integration CRUD, endpoint testing, health check
-    memory.ts           -- Memory fact queries
     operators.ts        -- Operator CRUD, dashboard, queue, escalations, call actions
     recordings.ts       -- Call recording access
     review-queue.ts     -- Review queue management
     services.ts         -- Service CRUD
-    settings.ts         -- Workspace settings (voice, branding, outreach, memory, security, retention, workflows)
+    settings.ts         -- Workspace settings (voice, branding, outreach, security, retention, workflows)
     simulations.ts      -- Call simulation management
     triggers.ts         -- Trigger CRUD, fire, pause, resume, runs
     webhook-destinations.ts -- Webhook destination management
