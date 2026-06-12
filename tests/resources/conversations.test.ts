@@ -244,6 +244,70 @@ describe('ConversationsResource', () => {
     },
   )
 
+  it('forwards include_tool_calls on conversation detail fetches', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const apiResponse: ConversationDetail = {
+      id: conversationId,
+      channel_kind: 'web',
+      status: 'active',
+      lifecycle: 'active',
+      turn_count: 0,
+      turns: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:01:00Z',
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/conversations/${conversationId}`]: (req) => {
+          requestUrl = req.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.get(conversationId, { includeToolCalls: true })
+
+    expect(requestUrl).toBeDefined()
+    const url = new URL(requestUrl as string)
+    // Server defaults `include_tool_calls` to `false`; the SDK MUST forward
+    // the opt-in or per-turn `tool_calls` arrays stay empty even when the
+    // agent invoked tools. Caller-visible regression if dropped.
+    expect(url.searchParams.get('include_tool_calls')).toBe('true')
+  })
+
+  it('omits include_tool_calls from detail fetches when the option is not provided', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestUrl: string | undefined
+    const apiResponse: ConversationDetail = {
+      id: conversationId,
+      channel_kind: 'web',
+      status: 'active',
+      lifecycle: 'active',
+      turn_count: 0,
+      turns: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:01:00Z',
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/conversations/${conversationId}`]: (req) => {
+          requestUrl = req.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    await client.conversations.get(conversationId)
+
+    expect(requestUrl).toBeDefined()
+    expect(new URL(requestUrl as string).searchParams.has('include_tool_calls')).toBe(false)
+  })
+
   it('closes a conversation', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     let deleteCalled = false
