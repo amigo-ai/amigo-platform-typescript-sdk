@@ -1547,7 +1547,7 @@ export interface paths {
         put?: never;
         /**
          * Create an outbound call
-         * @description Initiate an outbound voice call from a workspace phone number. Provide either phone_from (direct caller ID) or use_case_id (channel-manager selects the optimal number). Supports idempotency via the idempotency_key field.
+         * @description Initiate an outbound voice call from a workspace phone number. channel-manager selects the optimal number for the given use_case_id. Supports idempotency via the idempotency_key field.
          */
         post: operations["create-outbound-call"];
         delete?: never;
@@ -10518,9 +10518,8 @@ export interface components {
          * CreateOutboundCallRequest
          * @description Request body for creating an outbound call.
          *
-         *     Exactly one of ``phone_from`` or ``use_case_id`` is required.
-         *     When ``use_case_id`` is provided, channel-manager selects the optimal
-         *     outbound phone number for that use case.
+         *     ``use_case_id`` is required: channel-manager selects the optimal outbound
+         *     phone number bound to that use case (the sole caller-ID resolution path).
          */
         CreateOutboundCallRequest: {
             /**
@@ -10554,8 +10553,6 @@ export interface components {
              * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
             patient_entity_id?: string | null;
-            /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
-            phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
             phone_to: components["schemas"]["PhoneE164"];
             /** @description Why the call is being made (e.g. appointment_reminder, follow_up, lab_results). */
@@ -10577,9 +10574,10 @@ export interface components {
             tags?: string[] | null;
             /**
              * Use Case Id
-             * @description Channel-manager use case ID. When provided, channel-manager selects the optimal outbound phone number for this use case.
+             * Format: uuid
+             * @description Channel-manager use case ID. channel-manager selects the optimal outbound phone number bound to this use case.
              */
-            use_case_id?: string | null;
+            use_case_id: string;
         };
         /**
          * CreateOutboundCallResponse
@@ -19713,10 +19711,10 @@ export interface components {
          *       - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no
          *         overrides falls through to the same path.
          *
-         *     Distinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone
-         *     legacy shape with ``enabled``); per-service forwarding is a binary
-         *     presence — set means tier 3 resolves to it, None means tier 3 has no
-         *     static target.
+         *     Per-service forwarding is a binary presence — set means tier 3 resolves
+         *     to it, None means tier 3 has no static target. (The legacy per-phone
+         *     forwarding shape, with its own ``enabled`` flag, was removed alongside
+         *     the legacy Twilio phone path.)
          */
         ServiceForwardingConfig: {
             forward_to: components["schemas"]["PhoneE164"];
@@ -29767,13 +29765,6 @@ export interface operations {
             };
             /** @description Invalid phone number format */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description phone_from does not belong to this workspace */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };
