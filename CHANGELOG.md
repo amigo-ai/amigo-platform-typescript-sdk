@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.68.0] - 2026-06-12
+
+### Maintenance
+
+- sync API types from platform — drop removed memory resources + #3653 posture fields (#317)
+
 ## [0.67.0] - 2026-06-09
 
 ### Maintenance
