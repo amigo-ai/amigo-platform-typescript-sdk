@@ -129,11 +129,25 @@ export class ConversationsResource extends WorkspaceScopedResource {
     )
   }
 
-  async get(conversationId: string): Promise<ConversationDetail> {
+  /**
+   * Fetch a conversation's detail, including its turns.
+   *
+   * Pass `options.includeToolCalls: true` to include per-turn `tool_calls`
+   * metadata on the returned turns. Server-side default is `false` — without
+   * this opt-in the `tool_calls` arrays will be empty even when the agent
+   * invoked tools, matching the `createTurn` opt-in.
+   */
+  async get(
+    conversationId: string,
+    options?: { includeToolCalls?: boolean },
+  ): Promise<ConversationDetail> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/conversations/{conversation_id}', {
         params: {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+          ...(options?.includeToolCalls !== undefined && {
+            query: { include_tool_calls: options.includeToolCalls },
+          }),
         },
       }),
     )
