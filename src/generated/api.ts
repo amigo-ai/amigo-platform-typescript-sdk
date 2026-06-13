@@ -1547,7 +1547,7 @@ export interface paths {
         put?: never;
         /**
          * Create an outbound call
-         * @description Initiate an outbound voice call from a workspace phone number. Provide either phone_from (direct caller ID) or use_case_id (channel-manager selects the optimal number). Supports idempotency via the idempotency_key field.
+         * @description Initiate an outbound voice call from a workspace phone number. channel-manager selects the optimal number for the given use_case_id. Supports idempotency via the idempotency_key field.
          */
         post: operations["create-outbound-call"];
         delete?: never;
@@ -4195,7 +4195,7 @@ export interface paths {
         };
         /**
          * Entity resolution metrics
-         * @description Same-as merge counts and entity resolution loop status.
+         * @description Historical same_as merge-edge counts (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced) and entity resolution loop status.
          */
         get: operations["get-entity-resolution"];
         put?: never;
@@ -6865,7 +6865,7 @@ export interface paths {
         };
         /**
          * Get Entity Duplicates
-         * @description Suspected duplicate entities — same_as edges sorted by confidence.
+         * @description Suspected duplicate entities — historical same_as merge edges sorted by confidence (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["get-entity-duplicates"];
         put?: never;
@@ -6985,7 +6985,7 @@ export interface paths {
         };
         /**
          * Get Entity Graph
-         * @description Entity relationship graph — one level of edges with neighbor metadata.
+         * @description Entity relationship graph — one level of edges with neighbor metadata. same_as edges are historical merge edges (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["get-entity-graph"];
         put?: never;
@@ -7025,7 +7025,7 @@ export interface paths {
         };
         /**
          * Get merged entities (same_as links)
-         * @description Returns entities linked via same_as edges — cross-source merges where different data sources refer to the same real-world entity.
+         * @description Returns entities linked via same_as edges — historical merge edges where different data sources refer to the same real-world entity (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["merged-entities"];
         put?: never;
@@ -7045,7 +7045,7 @@ export interface paths {
         };
         /**
          * Get Entity Provenance
-         * @description Data lineage for an entity — sources, confidence history, merge history.
+         * @description Data lineage for an entity — sources, confidence history, merge history (historical same_as edges from the pre-SDP resolver — new edges are not produced).
          */
         get: operations["get-entity-provenance"];
         put?: never;
@@ -10518,9 +10518,8 @@ export interface components {
          * CreateOutboundCallRequest
          * @description Request body for creating an outbound call.
          *
-         *     Exactly one of ``phone_from`` or ``use_case_id`` is required.
-         *     When ``use_case_id`` is provided, channel-manager selects the optimal
-         *     outbound phone number for that use case.
+         *     ``use_case_id`` is required: channel-manager selects the optimal outbound
+         *     phone number bound to that use case (the sole caller-ID resolution path).
          */
         CreateOutboundCallRequest: {
             /**
@@ -10554,8 +10553,6 @@ export interface components {
              * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
             patient_entity_id?: string | null;
-            /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
-            phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
             phone_to: components["schemas"]["PhoneE164"];
             /** @description Why the call is being made (e.g. appointment_reminder, follow_up, lab_results). */
@@ -10577,9 +10574,10 @@ export interface components {
             tags?: string[] | null;
             /**
              * Use Case Id
-             * @description Channel-manager use case ID. When provided, channel-manager selects the optimal outbound phone number for this use case.
+             * Format: uuid
+             * @description Channel-manager use case ID. channel-manager selects the optimal outbound phone number bound to this use case.
              */
-            use_case_id?: string | null;
+            use_case_id: string;
         };
         /**
          * CreateOutboundCallResponse
@@ -11016,6 +11014,10 @@ export interface components {
             body_encoding: "json" | "form";
             /** Exchange Url */
             exchange_url: string;
+            /** Identity Bindings */
+            identity_bindings: {
+                [key: string]: string;
+            };
             /** Param Body Fields */
             param_body_fields: {
                 [key: string]: components["schemas"]["ParamValueDict"];
@@ -11062,6 +11064,17 @@ export interface components {
              * Format: uri
              */
             exchange_url: string;
+            /**
+             * Identity Bindings
+             * @description Maps a declared ``param_name`` to the verified session-principal attribute that supplies it
+             *     at dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the
+             *     ``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.
+             *     Keys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.
+             * @default {}
+             */
+            identity_bindings?: {
+                [key: string]: "principal.subject_key" | "principal.subject_id";
+            };
             /**
              * Param Body Fields
              * @description Per-request params routed to body fields on the exchange request, keyed by RFC 6901 JSON Pointer.
@@ -12779,11 +12792,6 @@ export interface components {
             last_tick_at?: string | null;
             /** Loop Status */
             loop_status: string;
-            /**
-             * Merges Last Tick
-             * @default 0
-             */
-            merges_last_tick?: number;
             /** Recent Merges 24H */
             recent_merges_24h: number;
             /** Total Same As Edges */
@@ -19713,10 +19721,10 @@ export interface components {
          *       - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no
          *         overrides falls through to the same path.
          *
-         *     Distinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone
-         *     legacy shape with ``enabled``); per-service forwarding is a binary
-         *     presence — set means tier 3 resolves to it, None means tier 3 has no
-         *     static target.
+         *     Per-service forwarding is a binary presence — set means tier 3 resolves
+         *     to it, None means tier 3 has no static target. (The legacy per-phone
+         *     forwarding shape, with its own ``enabled`` flag, was removed alongside
+         *     the legacy Twilio phone path.)
          */
         ServiceForwardingConfig: {
             forward_to: components["schemas"]["PhoneE164"];
@@ -29767,13 +29775,6 @@ export interface operations {
             };
             /** @description Invalid phone number format */
             400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description phone_from does not belong to this workspace */
-            403: {
                 headers: {
                     [name: string]: unknown;
                 };
