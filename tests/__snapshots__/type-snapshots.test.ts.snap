@@ -308,6 +308,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "reject-integration-write",
   "reject-surface",
   "render-surface",
+  "request-channel-access",
   "reshape-surface",
   "resolve-entity",
   "resolve-form-template",

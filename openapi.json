@@ -4694,6 +4694,61 @@
         "title": "ChangeColumnTypeAction",
         "type": "object"
       },
+      "ChannelAccessRequest": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "sms",
+              "imessage",
+              "whatsapp"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional context from the requester (use case, volume, timeline). Do NOT include patient data (PHI) \u2014 delivered to an operator Slack channel."
+          }
+        },
+        "required": [
+          "channel"
+        ],
+        "title": "ChannelAccessRequest",
+        "type": "object"
+      },
+      "ChannelAccessRequestResponse": {
+        "properties": {
+          "channel": {
+            "enum": [
+              "email",
+              "sms",
+              "imessage",
+              "whatsapp"
+            ],
+            "title": "Channel",
+            "type": "string"
+          },
+          "status": {
+            "const": "received",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "channel"
+        ],
+        "title": "ChannelAccessRequestResponse",
+        "type": "object"
+      },
       "ChannelEmailBouncedEvent": {
         "properties": {
           "bounce_subtype": {
@@ -53302,6 +53357,63 @@
         "summary": "Deep call understanding",
         "tags": [
           "Calls"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/channels/access-requests": {
+      "post": {
+        "description": "Request operator enablement of an internal-preview channel (email, SMS, iMessage, WhatsApp). Does NOT provision anything \u2014 these channels are regulated / held internal and are provisioned out-of-band. Pings the Amigo operator to action the request. Requires Channel.view. Do NOT include patient data (PHI) in `note`: it is delivered to an internal operator Slack channel that is outside the tenant boundary.",
+        "operationId": "request-channel-access",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChannelAccessRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChannelAccessRequestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Request access to an internal-preview channel",
+        "tags": [
+          "Channels"
         ]
       }
     },

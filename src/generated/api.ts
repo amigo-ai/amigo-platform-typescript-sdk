@@ -1700,6 +1700,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/channels/access-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request access to an internal-preview channel
+         * @description Request operator enablement of an internal-preview channel (email, SMS, iMessage, WhatsApp). Does NOT provision anything — these channels are regulated / held internal and are provisioned out-of-band. Pings the Amigo operator to action the request. Requires Channel.view. Do NOT include patient data (PHI) in `note`: it is delivered to an internal operator Slack channel that is outside the tenant boundary.
+         */
+        post: operations["request-channel-access"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/channels/email/templates": {
         parameters: {
             query?: never;
@@ -9142,6 +9162,29 @@ export interface components {
              * @constant
              */
             op: "change_column_type";
+        };
+        /** ChannelAccessRequest */
+        ChannelAccessRequest: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "email" | "sms" | "imessage" | "whatsapp";
+            /** @description Optional context from the requester (use case, volume, timeline). Do NOT include patient data (PHI) — delivered to an operator Slack channel. */
+            note?: components["schemas"]["DescriptionString"] | null;
+        };
+        /** ChannelAccessRequestResponse */
+        ChannelAccessRequestResponse: {
+            /**
+             * Channel
+             * @enum {string}
+             */
+            channel: "email" | "sms" | "imessage" | "whatsapp";
+            /**
+             * Status
+             * @constant
+             */
+            status: "received";
         };
         /** ChannelEmailBouncedEvent */
         ChannelEmailBouncedEvent: {
@@ -30416,6 +30459,48 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "request-channel-access": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChannelAccessRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChannelAccessRequestResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
