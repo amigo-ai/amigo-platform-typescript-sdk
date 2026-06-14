@@ -1547,7 +1547,7 @@ export interface paths {
         put?: never;
         /**
          * Create an outbound call
-         * @description Initiate an outbound voice call from a workspace phone number. Provide either phone_from (direct caller ID) or use_case_id (channel-manager selects the optimal number). Supports idempotency via the idempotency_key field.
+         * @description Initiate an outbound voice call from a workspace phone number. channel-manager selects the optimal number for the given use_case_id. Supports idempotency via the idempotency_key field.
          */
         post: operations["create-outbound-call"];
         delete?: never;
@@ -2493,6 +2493,78 @@ export interface paths {
         /** Rotate External Integration Credential */
         post: operations["rotate-external-integration-credential"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-role-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List External Role Assignments */
+        get: operations["list-external-role-assignments"];
+        /** Upsert External Role Assignment */
+        put: operations["upsert-external-role-assignment"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-role-assignments/{assignment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get External Role Assignment */
+        get: operations["get-external-role-assignment"];
+        put?: never;
+        post?: never;
+        /** Delete External Role Assignment */
+        delete: operations["delete-external-role-assignment"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List External Roles */
+        get: operations["list-external-roles"];
+        put?: never;
+        /** Create External Role */
+        post: operations["create-external-role"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-roles/{role_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get External Role */
+        get: operations["get-external-role"];
+        put?: never;
+        post?: never;
+        /** Delete External Role */
+        delete: operations["delete-external-role"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4195,7 +4267,7 @@ export interface paths {
         };
         /**
          * Entity resolution metrics
-         * @description Same-as merge counts and entity resolution loop status.
+         * @description Historical same_as merge-edge counts (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced) and entity resolution loop status.
          */
         get: operations["get-entity-resolution"];
         put?: never;
@@ -4840,6 +4912,45 @@ export interface paths {
          */
         post: operations["unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/role-grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Role Grants */
+        get: operations["list-role-grants"];
+        put?: never;
+        /** Create Role Grant */
+        post: operations["create-role-grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/role-grants/{grant_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Role Grant */
+        get: operations["get-role-grant"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Role Grant
+         * @description Supersede an active grant (immutable history) — never a physical delete.
+         */
+        delete: operations["supersede-role-grant"];
         options?: never;
         head?: never;
         patch?: never;
@@ -6865,7 +6976,7 @@ export interface paths {
         };
         /**
          * Get Entity Duplicates
-         * @description Suspected duplicate entities — same_as edges sorted by confidence.
+         * @description Suspected duplicate entities — historical same_as merge edges sorted by confidence (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["get-entity-duplicates"];
         put?: never;
@@ -6985,7 +7096,7 @@ export interface paths {
         };
         /**
          * Get Entity Graph
-         * @description Entity relationship graph — one level of edges with neighbor metadata.
+         * @description Entity relationship graph — one level of edges with neighbor metadata. same_as edges are historical merge edges (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["get-entity-graph"];
         put?: never;
@@ -7025,7 +7136,7 @@ export interface paths {
         };
         /**
          * Get merged entities (same_as links)
-         * @description Returns entities linked via same_as edges — cross-source merges where different data sources refer to the same real-world entity.
+         * @description Returns entities linked via same_as edges — historical merge edges where different data sources refer to the same real-world entity (written by the pre-SDP resolver; merge detection now lives in the Databricks pipeline — new edges are not produced).
          */
         get: operations["merged-entities"];
         put?: never;
@@ -7045,7 +7156,7 @@ export interface paths {
         };
         /**
          * Get Entity Provenance
-         * @description Data lineage for an entity — sources, confidence history, merge history.
+         * @description Data lineage for an entity — sources, confidence history, merge history (historical same_as edges from the pre-SDP resolver — new edges are not produced).
          */
         get: operations["get-entity-provenance"];
         put?: never;
@@ -10518,9 +10629,8 @@ export interface components {
          * CreateOutboundCallRequest
          * @description Request body for creating an outbound call.
          *
-         *     Exactly one of ``phone_from`` or ``use_case_id`` is required.
-         *     When ``use_case_id`` is provided, channel-manager selects the optimal
-         *     outbound phone number for that use case.
+         *     ``use_case_id`` is required: channel-manager selects the optimal outbound
+         *     phone number bound to that use case (the sole caller-ID resolution path).
          */
         CreateOutboundCallRequest: {
             /**
@@ -10554,8 +10664,6 @@ export interface components {
              * @description Patient entity UUID in the world model. Must exist in workspace as a person entity. Provide either patient_entity_id or patient_canonical_id.
              */
             patient_entity_id?: string | null;
-            /** @description Caller ID phone number in E.164 format. Must belong to this workspace. */
-            phone_from?: components["schemas"]["PhoneE164"] | null;
             /** @description Destination phone number in E.164 format. */
             phone_to: components["schemas"]["PhoneE164"];
             /** @description Why the call is being made (e.g. appointment_reminder, follow_up, lab_results). */
@@ -10577,9 +10685,10 @@ export interface components {
             tags?: string[] | null;
             /**
              * Use Case Id
-             * @description Channel-manager use case ID. When provided, channel-manager selects the optimal outbound phone number for this use case.
+             * Format: uuid
+             * @description Channel-manager use case ID. channel-manager selects the optimal outbound phone number bound to this use case.
              */
-            use_case_id?: string | null;
+            use_case_id: string;
         };
         /**
          * CreateOutboundCallResponse
@@ -11016,6 +11125,10 @@ export interface components {
             body_encoding: "json" | "form";
             /** Exchange Url */
             exchange_url: string;
+            /** Identity Bindings */
+            identity_bindings: {
+                [key: string]: string;
+            };
             /** Param Body Fields */
             param_body_fields: {
                 [key: string]: components["schemas"]["ParamValueDict"];
@@ -11062,6 +11175,17 @@ export interface components {
              * Format: uri
              */
             exchange_url: string;
+            /**
+             * Identity Bindings
+             * @description Maps a declared ``param_name`` to the verified session-principal attribute that supplies it
+             *     at dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the
+             *     ``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.
+             *     Keys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.
+             * @default {}
+             */
+            identity_bindings?: {
+                [key: string]: "principal.subject_key" | "principal.subject_id";
+            };
             /**
              * Param Body Fields
              * @description Per-request params routed to body fields on the exchange request, keyed by RFC 6901 JSON Pointer.
@@ -12779,11 +12903,6 @@ export interface components {
             last_tick_at?: string | null;
             /** Loop Status */
             loop_status: string;
-            /**
-             * Merges Last Tick
-             * @default 0
-             */
-            merges_last_tick?: number;
             /** Recent Merges 24H */
             recent_merges_24h: number;
             /** Total Same As Edges */
@@ -13612,6 +13731,80 @@ export interface components {
             display_name?: components["schemas"]["NameString"];
             /** Name */
             name?: string;
+        };
+        /** ExternalRoleAssignmentItem */
+        ExternalRoleAssignmentItem: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** External Subject Id */
+            external_subject_id?: string | null;
+            /** External Subject Key */
+            external_subject_key: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Verified At */
+            last_verified_at?: string | null;
+            /**
+             * Provisioned Via
+             * @enum {string}
+             */
+            provisioned_via: "roster_sync" | "jit";
+            /** Roles */
+            roles: string[];
+            /** Roles Verified */
+            roles_verified: boolean;
+            /** Source */
+            source: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended" | "revoked";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /**
+         * ExternalRoleItem
+         * @description Wire shape for read + create responses.
+         */
+        ExternalRoleItem: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description?: string | null;
+            /** External Name */
+            external_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         ExternalSystemString: string;
         ExternalValueString: string;
@@ -19328,6 +19521,37 @@ export interface components {
              */
             level?: "low" | "medium" | "high" | "critical";
         };
+        /** RoleGrantItem */
+        RoleGrantItem: {
+            access: components["schemas"]["_Access"];
+            /** Changed By */
+            changed_by?: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Param Binding */
+            param_binding?: string | null;
+            /** Resource Key */
+            resource_key: string;
+            resource_type: components["schemas"]["_ResourceType"];
+            /**
+             * Role Id
+             * Format: uuid
+             */
+            role_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "superseded";
+        };
         /** RotateApiKeyRequest */
         RotateApiKeyRequest: {
             /** Duration Days */
@@ -19713,10 +19937,10 @@ export interface components {
          *       - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no
          *         overrides falls through to the same path.
          *
-         *     Distinct from ``platform_lib.phone_numbers.ForwardingConfig`` (per-phone
-         *     legacy shape with ``enabled``); per-service forwarding is a binary
-         *     presence — set means tier 3 resolves to it, None means tier 3 has no
-         *     static target.
+         *     Per-service forwarding is a binary presence — set means tier 3 resolves
+         *     to it, None means tier 3 has no static target. (The legacy per-phone
+         *     forwarding shape, with its own ``enabled`` flag, was removed alongside
+         *     the legacy Twilio phone path.)
          */
         ServiceForwardingConfig: {
             forward_to: components["schemas"]["PhoneE164"];
@@ -24280,6 +24504,34 @@ export interface components {
              */
             size_bytes: number;
         };
+        /** UpsertRequest */
+        UpsertRequest: {
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** External Subject Id */
+            external_subject_id?: string | null;
+            /** External Subject Key */
+            external_subject_key: string;
+            /**
+             * Provisioned Via
+             * @enum {string}
+             */
+            provisioned_via: "roster_sync" | "jit";
+            /** Roles */
+            roles?: string[];
+            /**
+             * Roles Verified
+             * @default false
+             */
+            roles_verified?: boolean;
+            /** Source */
+            source: string;
+        };
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
             version_set: components["schemas"]["VersionSet-Input"];
@@ -24761,6 +25013,8 @@ export interface components {
             sensitive_topics?: string[] | null;
             /** Speed */
             speed?: number | null;
+            /** Stt Provider */
+            stt_provider?: ("deepgram" | "openai" | "cartesia") | null;
             /** Tone */
             tone?: string | null;
             /** Transcript Correction Enabled */
@@ -24799,6 +25053,8 @@ export interface components {
             sensitive_topics: string[];
             /** Speed */
             speed: number | null;
+            /** Stt Provider */
+            stt_provider: ("deepgram" | "openai" | "cartesia") | null;
             /** Tone */
             tone: string | null;
             /** Transcript Correction Enabled */
@@ -25085,6 +25341,8 @@ export interface components {
             /** Success */
             success: boolean;
         };
+        /** @enum {string} */
+        _Access: "read" | "write";
         /**
          * _DayHours
          * @description Open-hours window for one weekday. Times in 24h ``HH:MM`` form,
@@ -25096,8 +25354,8 @@ export interface components {
             /** Start */
             start: string;
         };
-        /** @constant */
-        _SortField: "deployed_at";
+        /** @enum {string} */
+        _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
         _ToolMockKey: string;
         _ToolMockValue: string;
         /**
@@ -25354,6 +25612,37 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
+        /** ListResponse */
+        src__routes__external_role_assignments__ListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalRoleAssignmentItem"][];
+        };
+        /** @enum {string} */
+        src__routes__external_role_assignments___SortField: "created_at" | "external_subject_key";
+        /** CreateRequest */
+        src__routes__external_roles__CreateRequest: {
+            /** Description */
+            description?: string | null;
+            /** External Name */
+            external_name: string;
+            /** Name */
+            name: string;
+        };
+        /** ListResponse */
+        src__routes__external_roles__ListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalRoleItem"][];
+        };
+        /** @constant */
+        src__routes__external_roles___SortField: "created_at";
         /**
          * Request
          * @description Add a new endpoint to a REST integration (V186 flat shape).
@@ -25750,6 +26039,31 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** CreateRequest */
+        src__routes__role_grants__CreateRequest: {
+            access: components["schemas"]["_Access"];
+            /** Param Binding */
+            param_binding?: string | null;
+            /** Resource Key */
+            resource_key: string;
+            resource_type: components["schemas"]["_ResourceType"];
+            /**
+             * Role Id
+             * Format: uuid
+             */
+            role_id: string;
+        };
+        /** ListResponse */
+        src__routes__role_grants__ListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["RoleGrantItem"][];
+        };
+        /** @constant */
+        src__routes__role_grants___SortField: "created_at";
         /**
          * Request
          * @description Create body — the authored shape of a new workspace data query.
@@ -25857,6 +26171,8 @@ export interface components {
             /** Timeout Ms */
             timeout_ms: number;
         };
+        /** @constant */
+        src__routes__workspace_data_queries__list_workspace_data_queries___SortField: "deployed_at";
         /**
          * Request
          * @description PATCH body — every field optional. Present ⇒ overwrite; absent ⇒ keep.
@@ -29772,13 +30088,6 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description phone_from does not belong to this workspace */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
             /** @description No phone number available for use case */
             404: {
                 headers: {
@@ -32827,6 +33136,305 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ExternalIntegrationCredentialSecretResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-external-role-assignments": {
+        parameters: {
+            query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__external_role_assignments__ListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "upsert-external-role-assignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpsertRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalRoleAssignmentItem"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-external-role-assignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalRoleAssignmentItem"];
+                };
+            };
+            /** @description Assignment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-external-role-assignment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Assignment not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-external-roles": {
+        parameters: {
+            query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__external_roles__ListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-external-role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__external_roles__CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalRoleItem"];
+                };
+            };
+            /** @description An external role with the given name already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-external-role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalRoleItem"];
+                };
+            };
+            /** @description External role not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-external-role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                role_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description External role not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -37866,6 +38474,160 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ClaimResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-role-grants": {
+        parameters: {
+            query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
+                status?: ("active" | "superseded") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__role_grants__ListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-role-grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__role_grants__CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleGrantItem"];
+                };
+            };
+            /** @description An active grant for this (role, resource, access) already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-role-grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                grant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleGrantItem"];
+                };
+            };
+            /** @description Role grant not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "supersede-role-grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                grant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Active role grant not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
