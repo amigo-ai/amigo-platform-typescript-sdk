@@ -160,6 +160,23 @@ describe('resource surface smoke tests', () => {
     await client.workspaceDataQueries.invoke('query-001')
     await client.workspaceDataQueries.delete('query-001')
 
+    await client.surfaces.list({ limit: 5 })
+    await client.surfaces.listForReview({ limit: 5 })
+    await client.surfaces.create(EMPTY_BODY)
+    await client.surfaces.get('surface-001')
+    await client.surfaces.update('surface-001', EMPTY_BODY)
+    await client.surfaces.deliver('surface-001', EMPTY_BODY)
+    await client.surfaces.getProgress('surface-001')
+    await client.surfaces.approve('surface-001')
+    await client.surfaces.reject('surface-001', EMPTY_BODY)
+    await client.surfaces.reshape('surface-001')
+    await client.surfaces.archive('surface-001')
+
+    await client.analytics.surfaces.getCompletionRates({ days: 7 })
+    await client.analytics.surfaces.getChannelEffectiveness({ days: 7 })
+    await client.analytics.surfaces.getFieldAbandonment({ days: 7 })
+    await client.analytics.surfaces.getForEntity('entity-001')
+
     expect(fetchImpl).toHaveBeenCalled()
     expect(requests).toEqual(
       expect.arrayContaining([
@@ -168,6 +185,10 @@ describe('resource surface smoke tests', () => {
         `POST /v1/${TEST_WORKSPACE_ID}/data_queries/query-001/invoke`,
         `GET /v1/${TEST_WORKSPACE_ID}/world/entities/entity-001/graph`,
         `POST /v1/workspaces/${TEST_WORKSPACE_ID}/archive`,
+        `GET /v1/${TEST_WORKSPACE_ID}/surfaces`,
+        `POST /v1/${TEST_WORKSPACE_ID}/surfaces/surface-001/reshape`,
+        `GET /v1/${TEST_WORKSPACE_ID}/surfaces/surface-001/progress`,
+        `GET /v1/${TEST_WORKSPACE_ID}/analytics/surfaces/completion-rates`,
       ]),
     )
   })
