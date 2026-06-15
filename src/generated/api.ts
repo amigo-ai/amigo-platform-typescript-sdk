@@ -2067,6 +2067,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/conversations/{conversation_id}/approval": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve or reject a parked write in your own conversation (external-user self-approval)
+         * @description Lets the external user who owns a conversation approve or reject a write that the agent paused for their confirmation. Only the conversation's own external user may call this; it requires the `conversations:approve_own` scope.
+         */
+        post: operations["decide_conversation_approval_v1__workspace_id__conversations__conversation_id__approval_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
         parameters: {
             query?: never;
@@ -6424,7 +6444,9 @@ export interface paths {
          * Get Surface
          * @description Get a surface by ID.
          *
-         *     Returns the surface spec and current lifecycle status.
+         *     Returns the surface spec and current lifecycle status. Also mints the
+         *     patient-facing ``url`` so operators can copy/share the link from the read
+         *     view (the token isn't stored, so it's re-minted on each read).
          *
          *     Permissions: viewer, member, admin, owner (surfaces:read)
          */
@@ -10078,6 +10100,19 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * ConversationApprovalRequest
+         * @description An external user's decision on a parked, approval-gated write in their own conversation.
+         */
+        ConversationApprovalRequest: {
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "approve" | "reject";
+            /** Reason */
+            reason?: string | null;
         };
         /** ConversationConfig */
         ConversationConfig: {
@@ -22345,6 +22380,8 @@ export interface components {
             } | null;
             /** Title */
             title?: string | null;
+            /** Url */
+            url?: string | null;
             /** Use Case Id */
             use_case_id?: string | null;
         };
@@ -31736,6 +31773,61 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    decide_conversation_approval_v1__workspace_id__conversations__conversation_id__approval_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationApprovalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not an external_user token, or missing conversations:approve_own scope */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Conversation not found or not owned by the caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Decision store temporarily unavailable — safe to retry */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

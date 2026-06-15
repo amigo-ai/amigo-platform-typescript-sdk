@@ -6938,6 +6938,38 @@
         "title": "ContextGraphVersionResponse",
         "type": "object"
       },
+      "ConversationApprovalRequest": {
+        "additionalProperties": false,
+        "description": "An external user's decision on a parked, approval-gated write in their own conversation.",
+        "properties": {
+          "decision": {
+            "enum": [
+              "approve",
+              "reject"
+            ],
+            "title": "Decision",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "title": "ConversationApprovalRequest",
+        "type": "object"
+      },
       "ConversationConfig": {
         "properties": {
           "agent_id": {
@@ -36141,6 +36173,17 @@
             ],
             "title": "Title"
           },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
           "use_case_id": {
             "anyOf": [
               {
@@ -55000,6 +55043,72 @@
         ]
       }
     },
+    "/v1/{workspace_id}/conversations/{conversation_id}/approval": {
+      "post": {
+        "description": "Lets the external user who owns a conversation approve or reject a write that the agent paused for their confirmation. Only the conversation's own external user may call this; it requires the `conversations:approve_own` scope.",
+        "operationId": "decide_conversation_approval_v1__workspace_id__conversations__conversation_id__approval_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationApprovalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Not an external_user token, or missing conversations:approve_own scope"
+          },
+          "404": {
+            "description": "Conversation not found or not owned by the caller"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Decision store temporarily unavailable \u2014 safe to retry"
+          }
+        },
+        "summary": "Approve or reject a parked write in your own conversation (external-user self-approval)",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/conversations/{conversation_id}/turns": {
       "post": {
         "description": "Send a user message and receive the agent's response. Set `Accept: text/event-stream` to receive an SSE stream of typed `TurnStreamEvent` frames (token, tool_call_started, tool_call_completed, thinking, message, done, error) instead of the synchronous JSON response. For new integrations prefer `POST /turns/stream`, which is always SSE.",
@@ -73179,7 +73288,7 @@
         ]
       },
       "get": {
-        "description": "Get a surface by ID.\n\nReturns the surface spec and current lifecycle status.\n\nPermissions: viewer, member, admin, owner (surfaces:read)",
+        "description": "Get a surface by ID.\n\nReturns the surface spec and current lifecycle status. Also mints the\npatient-facing ``url`` so operators can copy/share the link from the read\nview (the token isn't stored, so it's re-minted on each read).\n\nPermissions: viewer, member, admin, owner (surfaces:read)",
         "operationId": "get-surface",
         "parameters": [
           {
