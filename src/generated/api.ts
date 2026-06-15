@@ -6424,7 +6424,9 @@ export interface paths {
          * Get Surface
          * @description Get a surface by ID.
          *
-         *     Returns the surface spec and current lifecycle status.
+         *     Returns the surface spec and current lifecycle status. Also mints the
+         *     patient-facing ``url`` so operators can copy/share the link from the read
+         *     view (the token isn't stored, so it's re-minted on each read).
          *
          *     Permissions: viewer, member, admin, owner (surfaces:read)
          */
@@ -22345,6 +22347,8 @@ export interface components {
             } | null;
             /** Title */
             title?: string | null;
+            /** Url */
+            url?: string | null;
             /** Use Case Id */
             use_case_id?: string | null;
         };
