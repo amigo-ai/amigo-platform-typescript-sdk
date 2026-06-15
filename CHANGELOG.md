@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.71.0] - 2026-06-15
+
+### Maintenance
+
+- sync API types from platform (b4049042) (#330)
+- cover the surfaces + analytics.surfaces wrappers in the smoke test (#328)
+
 ## [0.70.0] - 2026-06-14
 
 ### Maintenance
