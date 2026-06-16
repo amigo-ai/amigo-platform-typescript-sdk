@@ -19935,7 +19935,7 @@ export interface components {
              * Channel
              * @enum {string}
              */
-            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail" | "email";
+            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail" | "email" | "sms" | "imessage";
             /**
              * Created At
              * Format: date-time
@@ -43467,7 +43467,7 @@ export interface operations {
         parameters: {
             query?: {
                 entity_name?: string | null;
-                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email") | null;
+                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email" | "sms" | "imessage") | null;
                 setup_id?: string | null;
             };
             header?: never;
