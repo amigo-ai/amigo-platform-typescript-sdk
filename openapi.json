@@ -30553,7 +30553,9 @@
               "inbound_voice",
               "outbound_voice",
               "ringless_voicemail",
-              "email"
+              "email",
+              "sms",
+              "imessage"
             ],
             "title": "Channel",
             "type": "string"
@@ -74632,7 +74634,9 @@
                     "outbound_voice",
                     "inbound_voice",
                     "ringless_voicemail",
-                    "email"
+                    "email",
+                    "sms",
+                    "imessage"
                   ],
                   "type": "string"
                 },
