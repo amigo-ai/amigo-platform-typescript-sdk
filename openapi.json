@@ -9709,12 +9709,13 @@
             "additionalProperties": {
               "enum": [
                 "principal.subject_key",
-                "principal.subject_id"
+                "principal.subject_id",
+                "external_user.subject_key"
               ],
               "type": "string"
             },
             "default": {},
-            "description": "Maps a declared ``param_name`` to the verified session-principal attribute that supplies it\nat dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the\n``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.\nKeys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.",
+            "description": "Maps a declared ``param_name`` to the verified identity attribute that supplies it\nat dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the\nverified session context (never model-supplied), closing the per-user-identity impersonation hole.\nKeys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.",
             "maxProperties": 50,
             "title": "Identity Bindings",
             "type": "object"
@@ -73477,7 +73478,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {

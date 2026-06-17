@@ -6515,7 +6515,7 @@ export interface paths {
          * @description Record a real delivery handoff for a surface.
          *
          *     Email targets are delivered through channel-manager's
-         *     ``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,
+         *     ``POST /v1/email/`` (CM owns SES sender identity, IP pool, DKIM,
          *     suppression — keyed on the surface row's ``use_case_id``). Phone-shaped
          *     addresses return 422 — SMS surface delivery was removed in PR #2783.
          *     Other targets record an external handoff that was completed outside
@@ -11212,14 +11212,14 @@ export interface components {
             exchange_url: string;
             /**
              * Identity Bindings
-             * @description Maps a declared ``param_name`` to the verified session-principal attribute that supplies it
+             * @description Maps a declared ``param_name`` to the verified identity attribute that supplies it
              *     at dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the
-             *     ``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.
+             *     verified session context (never model-supplied), closing the per-user-identity impersonation hole.
              *     Keys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.
              * @default {}
              */
             identity_bindings?: {
-                [key: string]: "principal.subject_key" | "principal.subject_id";
+                [key: string]: "principal.subject_key" | "principal.subject_id" | "external_user.subject_key";
             };
             /**
              * Param Body Fields
