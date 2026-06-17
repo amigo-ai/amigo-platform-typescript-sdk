@@ -9216,6 +9216,20 @@
               }
             ]
           },
+          "temperature": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anthropic sampling temperature (0-1). Ignored on models that reject sampling params (Opus 4.7+/Fable, which 400 otherwise). Set at most one of temperature/top_p -- Claude 4+ rejects both; the runtime keeps temperature and drops top_p.",
+            "title": "Temperature"
+          },
           "thinking_effort": {
             "anyOf": [
               {
@@ -9238,6 +9252,20 @@
             "minimum": 0.1,
             "title": "Timeout S",
             "type": "number"
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anthropic nucleus sampling (0-1). Ignored on sampling-param-rejecting models; see temperature.",
+            "title": "Top P"
           },
           "use_structured_output": {
             "default": false,
@@ -9709,12 +9737,13 @@
             "additionalProperties": {
               "enum": [
                 "principal.subject_key",
-                "principal.subject_id"
+                "principal.subject_id",
+                "external_user.subject_key"
               ],
               "type": "string"
             },
             "default": {},
-            "description": "Maps a declared ``param_name`` to the verified session-principal attribute that supplies it\nat dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the\n``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.\nKeys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.",
+            "description": "Maps a declared ``param_name`` to the verified identity attribute that supplies it\nat dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the\nverified session context (never model-supplied), closing the per-user-identity impersonation hole.\nKeys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.",
             "maxProperties": 50,
             "title": "Identity Bindings",
             "type": "object"
@@ -20098,6 +20127,17 @@
             "title": "System Prompt",
             "type": "string"
           },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
           "thinking_effort": {
             "anyOf": [
               {
@@ -20118,6 +20158,17 @@
             "default": 60.0,
             "title": "Timeout S",
             "type": "number"
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top P"
           },
           "use_structured_output": {
             "default": false,
@@ -34037,6 +34088,17 @@
             "title": "System Prompt",
             "type": "string"
           },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature"
+          },
           "thinking_effort": {
             "anyOf": [
               {
@@ -34056,6 +34118,17 @@
           "timeout_s": {
             "title": "Timeout S",
             "type": "number"
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Top P"
           },
           "updated_at": {
             "format": "date-time",
@@ -34087,6 +34160,8 @@
           "max_input_tokens",
           "timeout_s",
           "thinking_effort",
+          "temperature",
+          "top_p",
           "enable_caching",
           "enable_citations",
           "use_structured_output",
@@ -41546,6 +41621,20 @@
               }
             ]
           },
+          "temperature": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anthropic sampling temperature (0-1); see CreateSkillRequest. null/absent leaves it unchanged.",
+            "title": "Temperature"
+          },
           "thinking_effort": {
             "anyOf": [
               {
@@ -41574,6 +41663,20 @@
               }
             ],
             "title": "Timeout S"
+          },
+          "top_p": {
+            "anyOf": [
+              {
+                "maximum": 1.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Anthropic nucleus sampling (0-1); see CreateSkillRequest. null/absent leaves it unchanged.",
+            "title": "Top P"
           },
           "use_structured_output": {
             "anyOf": [
@@ -73477,7 +73580,7 @@
     },
     "/v1/{workspace_id}/surfaces/{surface_id}/deliver": {
       "post": {
-        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
+        "description": "Record a real delivery handoff for a surface.\n\nEmail targets are delivered through channel-manager's\n``POST /v1/email/`` (CM owns SES sender identity, IP pool, DKIM,\nsuppression \u2014 keyed on the surface row's ``use_case_id``). Phone-shaped\naddresses return 422 \u2014 SMS surface delivery was removed in PR #2783.\nOther targets record an external handoff that was completed outside\nplatform-api.\n\nPermissions: member, admin, owner (surfaces:write)",
         "operationId": "deliver-surface",
         "parameters": [
           {

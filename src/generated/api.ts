@@ -6515,7 +6515,7 @@ export interface paths {
          * @description Record a real delivery handoff for a surface.
          *
          *     Email targets are delivered through channel-manager's
-         *     ``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,
+         *     ``POST /v1/email/`` (CM owns SES sender identity, IP pool, DKIM,
          *     suppression — keyed on the surface row's ``use_case_id``). Phone-shaped
          *     addresses return 422 — SMS surface delivery was removed in PR #2783.
          *     Other targets record an external handoff that was completed outside
@@ -10999,6 +10999,11 @@ export interface components {
             /** Static Tools */
             static_tools?: components["schemas"]["StaticToolDef-Input"][];
             system_prompt?: components["schemas"]["BackgroundString"] | null;
+            /**
+             * Temperature
+             * @description Anthropic sampling temperature (0-1). Ignored on models that reject sampling params (Opus 4.7+/Fable, which 400 otherwise). Set at most one of temperature/top_p -- Claude 4+ rejects both; the runtime keeps temperature and drops top_p.
+             */
+            temperature?: number | null;
             /** Thinking Effort */
             thinking_effort?: ("low" | "medium" | "high") | null;
             /**
@@ -11006,6 +11011,11 @@ export interface components {
              * @default 60
              */
             timeout_s?: number;
+            /**
+             * Top P
+             * @description Anthropic nucleus sampling (0-1). Ignored on sampling-param-rejecting models; see temperature.
+             */
+            top_p?: number | null;
             /**
              * Use Structured Output
              * @default false
@@ -11212,14 +11222,14 @@ export interface components {
             exchange_url: string;
             /**
              * Identity Bindings
-             * @description Maps a declared ``param_name`` to the verified session-principal attribute that supplies it
+             * @description Maps a declared ``param_name`` to the verified identity attribute that supplies it
              *     at dispatch. A bound param is dropped from the LLM-facing tool schema and injected from the
-             *     ``SessionPrincipal`` (never model-supplied), closing the per-user-identity impersonation hole.
+             *     verified session context (never model-supplied), closing the per-user-identity impersonation hole.
              *     Keys MUST reference a ``param_name`` declared on ``param_headers`` / ``param_body_fields``.
              * @default {}
              */
             identity_bindings?: {
-                [key: string]: "principal.subject_key" | "principal.subject_id";
+                [key: string]: "principal.subject_key" | "principal.subject_id" | "external_user.subject_key";
             };
             /**
              * Param Body Fields
@@ -15458,6 +15468,8 @@ export interface components {
              * @default
              */
             system_prompt?: string;
+            /** Temperature */
+            temperature?: number | null;
             /** Thinking Effort */
             thinking_effort?: ("low" | "medium" | "high") | null;
             /**
@@ -15465,6 +15477,8 @@ export interface components {
              * @default 60
              */
             timeout_s?: number;
+            /** Top P */
+            top_p?: number | null;
             /**
              * Use Structured Output
              * @default false
@@ -21450,10 +21464,14 @@ export interface components {
             static_tools: components["schemas"]["src__models__StaticToolDef"][];
             /** System Prompt */
             system_prompt: string;
+            /** Temperature */
+            temperature: number | null;
             /** Thinking Effort */
             thinking_effort: ("low" | "medium" | "high") | null;
             /** Timeout S */
             timeout_s: number;
+            /** Top P */
+            top_p: number | null;
             /**
              * Updated At
              * Format: date-time
@@ -24428,10 +24446,20 @@ export interface components {
             /** Static Tools */
             static_tools?: components["schemas"]["StaticToolDef-Input"][] | null;
             system_prompt?: components["schemas"]["BackgroundString"] | null;
+            /**
+             * Temperature
+             * @description Anthropic sampling temperature (0-1); see CreateSkillRequest. null/absent leaves it unchanged.
+             */
+            temperature?: number | null;
             /** Thinking Effort */
             thinking_effort?: ("low" | "medium" | "high") | null;
             /** Timeout S */
             timeout_s?: number | null;
+            /**
+             * Top P
+             * @description Anthropic nucleus sampling (0-1); see CreateSkillRequest. null/absent leaves it unchanged.
+             */
+            top_p?: number | null;
             /** Use Structured Output */
             use_structured_output?: boolean | null;
         };
