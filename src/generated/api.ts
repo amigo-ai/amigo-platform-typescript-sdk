@@ -6515,7 +6515,7 @@ export interface paths {
          * @description Record a real delivery handoff for a surface.
          *
          *     Email targets are delivered through channel-manager's
-         *     ``POST /v1/email/send`` (CM owns SES sender identity, IP pool, DKIM,
+         *     ``POST /v1/email/`` (CM owns SES sender identity, IP pool, DKIM,
          *     suppression — keyed on the surface row's ``use_case_id``). Phone-shaped
          *     addresses return 422 — SMS surface delivery was removed in PR #2783.
          *     Other targets record an external handoff that was completed outside
