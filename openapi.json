@@ -31061,6 +31061,21 @@
             ],
             "title": "Progress Vocabulary"
           },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
+          },
           "transition_deadline_ms": {
             "anyOf": [
               {
@@ -31326,6 +31341,21 @@
               }
             ],
             "title": "Progress Vocabulary"
+          },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
           },
           "transition_deadline_ms": {
             "anyOf": [
@@ -42604,6 +42634,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
@@ -42640,6 +42679,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
@@ -42661,6 +42709,21 @@
               }
             ],
             "title": "Language Providers"
+          },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
           },
           "similarity_boost": {
             "default": 0,

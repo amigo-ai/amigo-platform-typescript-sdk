@@ -20145,6 +20145,8 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -20213,6 +20215,8 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -24804,6 +24808,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /**
          * VersionSet
@@ -24818,6 +24828,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /** VoiceConfig */
         VoiceConfig: {
@@ -24825,6 +24841,8 @@ export interface components {
             language_providers?: {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /**
              * Similarity Boost
              * @default 0
