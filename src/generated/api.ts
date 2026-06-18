@@ -24804,6 +24804,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /**
          * VersionSet
@@ -24818,6 +24824,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /** VoiceConfig */
         VoiceConfig: {

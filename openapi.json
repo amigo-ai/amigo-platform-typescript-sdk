@@ -42604,6 +42604,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
@@ -42640,6 +42649,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
