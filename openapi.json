@@ -9676,6 +9676,13 @@
             "title": "Exchange Url",
             "type": "string"
           },
+          "identity_binding_test_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Identity Binding Test Values",
+            "type": "object"
+          },
           "identity_bindings": {
             "additionalProperties": {
               "type": "string"
@@ -9754,6 +9761,15 @@
             "minLength": 1,
             "title": "Exchange Url",
             "type": "string"
+          },
+          "identity_binding_test_values": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "Author-configured test values for identity-bound params.\n\nOnly ``external_user.subject_key`` bindings may carry test values. Runtime\ndispatch uses them only when a backend execution path explicitly opts in.",
+            "title": "Identity Binding Test Values",
+            "type": "object"
           },
           "identity_bindings": {
             "additionalProperties": {
