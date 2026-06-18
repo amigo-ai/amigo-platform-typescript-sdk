@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.74.0] - 2026-06-18
+
+### Maintenance
+
+- sync API types from platform (efa08720) (#338)
+
 ## [0.73.0] - 2026-06-18
 
 ### Maintenance
