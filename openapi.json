@@ -2220,6 +2220,28 @@
         "title": "BillingDashboardResponse",
         "type": "object"
       },
+      "Body_upload_intake_file_v1__workspace_id__intake_files_post": {
+        "properties": {
+          "dataset": {
+            "maxLength": 63,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset",
+          "file"
+        ],
+        "title": "Body_upload_intake_file_v1__workspace_id__intake_files_post",
+        "type": "object"
+      },
       "Body_voice-turn": {
         "properties": {
           "audio": {
@@ -10941,6 +10963,40 @@
         "title": "DataTemplateField",
         "type": "object"
       },
+      "DatasetRow": {
+        "description": "A registered schema in the Schemas list (intake-ui-mvp-design.md \u00a75.3).",
+        "properties": {
+          "field_count": {
+            "title": "Field Count",
+            "type": "integer"
+          },
+          "file_type": {
+            "title": "File Type",
+            "type": "string"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/Limits"
+          },
+          "name": {
+            "description": "Dataset slug (UI label \"Schema\").",
+            "title": "Name",
+            "type": "string"
+          },
+          "schema_version": {
+            "title": "Schema Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "schema_version",
+          "field_count",
+          "file_type",
+          "limits"
+        ],
+        "title": "DatasetRow",
+        "type": "object"
+      },
       "DecisionFactor": {
         "description": "A specific audio input that drove an agent decision.",
         "examples": [
@@ -19613,6 +19669,19 @@
         "title": "InjectResponse",
         "type": "object"
       },
+      "IntakeFieldType": {
+        "description": "Allowed ``schema[].type`` values for a registered contract.\n\nConfirmed set (intake-ui-mvp design contract point #1): scalars plus\nISO date/datetime. Coercion semantics live in :func:`_coerces`.",
+        "enum": [
+          "str",
+          "int",
+          "float",
+          "bool",
+          "date",
+          "datetime"
+        ],
+        "title": "IntakeFieldType",
+        "type": "string"
+      },
       "IntakeFileResponse": {
         "properties": {
           "id": {
@@ -19645,6 +19714,72 @@
           "scan_status"
         ],
         "title": "IntakeFileResponse",
+        "type": "object"
+      },
+      "IntakeFileRow": {
+        "description": "A file in the Files list (intake-ui-mvp-design.md \u00a75.1).",
+        "properties": {
+          "dataset": {
+            "description": "Schema slug (UI label \"Schema\").",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "error_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null unless rejected/failed.",
+            "title": "Error Reason"
+          },
+          "filename": {
+            "title": "Filename",
+            "type": "string"
+          },
+          "id": {
+            "description": "file_id \u2014 used for download.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "ingested_at": {
+            "description": "ISO-8601 timestamp the file was received.",
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "schema_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The contract version this file validated against (e.g. ``v1``).",
+            "title": "Schema Version"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/_FileStatus"
+          }
+        },
+        "required": [
+          "id",
+          "filename",
+          "dataset",
+          "status",
+          "size_bytes",
+          "ingested_at"
+        ],
+        "title": "IntakeFileRow",
         "type": "object"
       },
       "IntakeLinkResponse": {
@@ -21123,6 +21258,23 @@
           "success"
         ],
         "title": "LeaveCallResponse",
+        "type": "object"
+      },
+      "Limits": {
+        "properties": {
+          "max_size_mb": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Size Mb"
+          }
+        },
+        "title": "Limits",
         "type": "object"
       },
       "LinkErrorResponse": {
@@ -24762,6 +24914,49 @@
         "title": "PaginatedResponse[DataSourceResponse]",
         "type": "object"
       },
+      "PaginatedResponse_DatasetRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/DatasetRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[DatasetRow]",
+        "type": "object"
+      },
       "PaginatedResponse_EscalationEventResponse_": {
         "properties": {
           "continuation_token": {
@@ -24846,6 +25041,49 @@
           "has_more"
         ],
         "title": "PaginatedResponse[ExternalIntegrationResponse]",
+        "type": "object"
+      },
+      "PaginatedResponse_IntakeFileRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntakeFileRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[IntakeFileRow]",
         "type": "object"
       },
       "PaginatedResponse_InvoiceItem_": {
@@ -28555,6 +28793,57 @@
         "title": "RecordingUrlsResponse",
         "type": "object"
       },
+      "RegisterSchemaRequest": {
+        "description": "Create Schema payload (intake-ui-mvp-design.md \u00a75.4).\n\nThe backend applies the hidden defaults (``ingestion_mode=snapshot``,\n``on_schema_change=additive``, ``schema_version`` auto) \u2014 they are not part\nof the wire contract.",
+        "properties": {
+          "file_type": {
+            "const": "csv",
+            "title": "File Type",
+            "type": "string"
+          },
+          "max_size_mb": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Size Mb"
+          },
+          "name": {
+            "$ref": "#/components/schemas/_DatasetSlug"
+          },
+          "primary_key": {
+            "items": {
+              "$ref": "#/components/schemas/_FieldName"
+            },
+            "maxItems": 32,
+            "minItems": 1,
+            "title": "Primary Key",
+            "type": "array"
+          },
+          "schema": {
+            "description": "Canonical field list ``[{name, type}]`` (wire key ``schema``).",
+            "items": {
+              "$ref": "#/components/schemas/SchemaFieldSpec"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Schema",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "file_type",
+          "primary_key",
+          "schema"
+        ],
+        "title": "RegisterSchemaRequest",
+        "type": "object"
+      },
       "RegisteredFunction": {
         "additionalProperties": false,
         "description": "The authored shape of a platform function.\n\nIdentical wire format whether it's authored as a YAML file in the\nrepo or POSTed to ``/v1/{ws}/functions/deploy``. The deploy\npipeline validates this, derives the JSON Schema for the LLM tool\nspec, and INSERTs a row into ``platform.functions`` with the next\nmonotonic ``version`` per ``(workspace_id, name)``. For\n``python`` / ``udtf`` rows, deploy ALSO issues\n``CREATE OR REPLACE FUNCTION`` against the warehouse to materialize\nthe UC UDF.",
@@ -30303,6 +30592,22 @@
         "title": "SchedulingRuleSetResponse",
         "type": "object"
       },
+      "SchemaFieldSpec": {
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/_FieldName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/IntakeFieldType"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "SchemaFieldSpec",
+        "type": "object"
+      },
       "SchemaResponse": {
         "properties": {
           "ai_functions": {
@@ -31061,6 +31366,21 @@
             ],
             "title": "Progress Vocabulary"
           },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
+          },
           "transition_deadline_ms": {
             "anyOf": [
               {
@@ -31326,6 +31646,21 @@
               }
             ],
             "title": "Progress Vocabulary"
+          },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
           },
           "transition_deadline_ms": {
             "anyOf": [
@@ -42604,6 +42939,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
@@ -42640,6 +42984,15 @@
             },
             "title": "Llm Model Preferences",
             "type": "object"
+          },
+          "turn_runtime": {
+            "default": "native",
+            "enum": [
+              "native",
+              "openai-agents"
+            ],
+            "title": "Turn Runtime",
+            "type": "string"
           }
         },
         "title": "VersionSet",
@@ -42661,6 +43014,21 @@
               }
             ],
             "title": "Language Providers"
+          },
+          "session_provider": {
+            "anyOf": [
+              {
+                "enum": [
+                  "inhouse",
+                  "openai_realtime"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Provider"
           },
           "similarity_boost": {
             "default": 0,
@@ -44469,6 +44837,12 @@
         ],
         "type": "string"
       },
+      "_DatasetSlug": {
+        "maxLength": 63,
+        "minLength": 2,
+        "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+        "type": "string"
+      },
       "_DayHours": {
         "description": "Open-hours window for one weekday. Times in 24h ``HH:MM`` form,\ninterpreted in the rule set's ``timezone``.",
         "properties": {
@@ -44489,6 +44863,24 @@
         ],
         "title": "_DayHours",
         "type": "object"
+      },
+      "_FieldName": {
+        "maxLength": 128,
+        "minLength": 1,
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+        "type": "string"
+      },
+      "_FileStatus": {
+        "enum": [
+          "received",
+          "scanned",
+          "processing",
+          "curated",
+          "rejected",
+          "failed",
+          "held"
+        ],
+        "type": "string"
       },
       "_ResourceType": {
         "enum": [
@@ -60308,9 +60700,264 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/datasets": {
+      "get": {
+        "operationId": "list_intake_datasets_v1__workspace_id__intake_datasets_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "name",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_DatasetRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Datasets",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/intake/files": {
+      "get": {
+        "operationId": "list_intake_files_v1__workspace_id__intake_files_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "-ingested_at",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/_FileStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_IntakeFileRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Files",
+        "tags": [
+          "Intake"
+        ]
+      },
       "post": {
-        "operationId": "receive_intake_file_v1__workspace_id__intake_files_post",
+        "operationId": "upload_intake_file_v1__workspace_id__intake_files_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_intake_file_v1__workspace_id__intake_files_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeFileRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Intake File",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/files/external": {
+      "post": {
+        "operationId": "receive_intake_file_v1__workspace_id__intake_files_external_post",
         "parameters": [
           {
             "in": "path",
@@ -60407,6 +61054,57 @@
           }
         },
         "summary": "Receive Intake File",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/files/{file_id}/download": {
+      "get": {
+        "operationId": "download_intake_file_v1__workspace_id__intake_files__file_id__download_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "file_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "File Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Download Intake File",
         "tags": [
           "Intake"
         ]
@@ -60736,6 +61434,59 @@
           }
         },
         "summary": "Download an uploaded file",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/schema/register": {
+      "post": {
+        "operationId": "register_intake_schema_v1__workspace_id__intake_schema_register_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSchemaRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Intake Schema",
         "tags": [
           "Intake"
         ]
