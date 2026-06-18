@@ -57,7 +57,7 @@ export interface paths {
          * Get Availability
          * @description Return available appointment slots for the surface's workspace.
          *
-         *     Queries FHIR Slot resources from world.entities_synced_v3 that are free
+         *     Queries FHIR Slot resources from world.entities_synced that are free
          *     and within the requested date range. Token-authenticated, no Bearer auth.
          */
         get: operations["get-surface-availability"];
@@ -3160,7 +3160,42 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/datasets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Intake Datasets */
+        get: operations["list_intake_datasets_v1__workspace_id__intake_datasets_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/intake/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Intake Files */
+        get: operations["list_intake_files_v1__workspace_id__intake_files_get"];
+        put?: never;
+        /** Upload Intake File */
+        post: operations["upload_intake_file_v1__workspace_id__intake_files_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/files/external": {
         parameters: {
             query?: never;
             header?: never;
@@ -3170,7 +3205,24 @@ export interface paths {
         get?: never;
         put?: never;
         /** Receive Intake File */
-        post: operations["receive_intake_file_v1__workspace_id__intake_files_post"];
+        post: operations["receive_intake_file_v1__workspace_id__intake_files_external_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/files/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Intake File */
+        get: operations["download_intake_file_v1__workspace_id__intake_files__file_id__download_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -3246,6 +3298,23 @@ export interface paths {
         get: operations["download-intake-upload"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/schema/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Register Intake Schema */
+        post: operations["register_intake_schema_v1__workspace_id__intake_schema_register_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7020,7 +7089,7 @@ export interface paths {
         put?: never;
         /**
          * Resolve entity by identifier
-         * @description Polymorphic identifier → ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Served from the SDP serving surfaces: entity rows from ``world.entities_synced_v3``; canonical_id and external_id resolve through ``world.canonical_entity_map_synced`` point reads. Returns matches ranked by confidence + number of identifiers matched. Summary narrowing: ``external_ids`` is always ``{}``, ``tags`` is always ``[]``, and ``canonical_id`` is the canonical-map value or the entity's MRN.
+         * @description Polymorphic identifier → ranked entity candidates. Accepts any subset of {phone, email, canonical_id, external_id, entity_id} plus a required ``entity_type``. Served from the SDP serving surfaces: entity rows from ``world.entities_synced``; canonical_id and external_id resolve through ``world.canonical_entity_map_synced`` point reads. Returns matches ranked by confidence + number of identifiers matched. Summary narrowing: ``external_ids`` is always ``{}``, ``tags`` is always ``[]``, and ``canonical_id`` is the canonical-map value or the entity's MRN.
          */
         post: operations["resolve-entity"];
         delete?: never;
@@ -8248,6 +8317,13 @@ export interface components {
              * @description Workspace ID
              */
             workspace_id: string;
+        };
+        /** Body_upload_intake_file_v1__workspace_id__intake_files_post */
+        Body_upload_intake_file_v1__workspace_id__intake_files_post: {
+            /** Dataset */
+            dataset: string;
+            /** File */
+            file: string;
         };
         /** Body_voice-turn */
         "Body_voice-turn": {
@@ -10692,7 +10768,7 @@ export interface components {
              * @description World model outbound_task entity ID for completion feedback.
              */
             outbound_task_entity_id?: string | null;
-            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities_synced_v3.canonical_id. Resolved against the SDP-projected world.entities_synced_v3 table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
+            /** @description Patient world model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString rejects spaces, names, DOBs, and similar regulated content so PHI cannot leak into audit events or pipeline projections. The raw value is deliberately not recorded in the outbound.initiated event — correlation back to the source system is via the resolved entity_id joined to world.entities_synced.canonical_id. Resolved against the SDP-projected world.entities_synced table; an entity created moments ago may not yet be visible if the projection is lagging. Provide either patient_entity_id or patient_canonical_id, not both. */
             patient_canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Patient Entity Id
@@ -11873,6 +11949,24 @@ export interface components {
              * @default false
              */
             sensitive?: boolean;
+        };
+        /**
+         * DatasetRow
+         * @description A registered schema in the Schemas list (intake-ui-mvp-design.md §5.3).
+         */
+        DatasetRow: {
+            /** Field Count */
+            field_count: number;
+            /** File Type */
+            file_type: string;
+            limits: components["schemas"]["Limits"];
+            /**
+             * Name
+             * @description Dataset slug (UI label "Schema").
+             */
+            name: string;
+            /** Schema Version */
+            schema_version: string;
         };
         /**
          * DecisionFactor
@@ -13056,7 +13150,7 @@ export interface components {
          *     the ones a UI / agent needs to confirm "yes, that's the right
          *     person" before paying for the full state read.
          *
-         *     Stage-7 narrowing (resolver serves from ``entities_synced_v3`` +
+         *     Stage-7 narrowing (resolver serves from ``entities_synced`` +
          *     the canonical entity map; fields retained for wire compatibility):
          *     ``external_ids`` is always ``{}`` and ``tags`` is always ``[]`` —
          *     neither survives on the synced serving table. ``canonical_id`` is
@@ -15207,6 +15301,15 @@ export interface components {
              */
             status: "delivered" | "queued_no_subscriber";
         };
+        /**
+         * IntakeFieldType
+         * @description Allowed ``schema[].type`` values for a registered contract.
+         *
+         *     Confirmed set (intake-ui-mvp design contract point #1): scalars plus
+         *     ISO date/datetime. Coercion semantics live in :func:`_coerces`.
+         * @enum {string}
+         */
+        IntakeFieldType: "str" | "int" | "float" | "bool" | "date" | "datetime";
         /** IntakeFileResponse */
         IntakeFileResponse: {
             /**
@@ -15222,6 +15325,43 @@ export interface components {
             size_bytes: number;
             /** Volume Path */
             volume_path: string;
+        };
+        /**
+         * IntakeFileRow
+         * @description A file in the Files list (intake-ui-mvp-design.md §5.1).
+         */
+        IntakeFileRow: {
+            /**
+             * Dataset
+             * @description Schema slug (UI label "Schema").
+             */
+            dataset: string;
+            /**
+             * Error Reason
+             * @description Null unless rejected/failed.
+             */
+            error_reason?: string | null;
+            /** Filename */
+            filename: string;
+            /**
+             * Id
+             * Format: uuid
+             * @description file_id — used for download.
+             */
+            id: string;
+            /**
+             * Ingested At
+             * @description ISO-8601 timestamp the file was received.
+             */
+            ingested_at: string;
+            /**
+             * Schema Version
+             * @description The contract version this file validated against (e.g. ``v1``).
+             */
+            schema_version?: string | null;
+            /** Size Bytes */
+            size_bytes: number;
+            status: components["schemas"]["_FileStatus"];
         };
         /** IntakeLinkResponse */
         IntakeLinkResponse: {
@@ -15922,6 +16062,11 @@ export interface components {
         LeaveCallResponse: {
             /** Success */
             success: boolean;
+        };
+        /** Limits */
+        Limits: {
+            /** Max Size Mb */
+            max_size_mb?: number | null;
         };
         /**
          * LinkErrorResponse
@@ -17562,6 +17707,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[DatasetRow] */
+        PaginatedResponse_DatasetRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DatasetRow"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[EscalationEventResponse] */
         PaginatedResponse_EscalationEventResponse_: {
             /** Continuation Token */
@@ -17581,6 +17737,17 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["ExternalIntegrationResponse"][];
+            /** Total */
+            total?: number | null;
+        };
+        /** PaginatedResponse[IntakeFileRow] */
+        PaginatedResponse_IntakeFileRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["IntakeFileRow"][];
             /** Total */
             total?: number | null;
         };
@@ -18700,7 +18867,7 @@ export interface components {
             next_offset?: number | null;
             /**
              * Resolved Call Sid
-             * @description When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities_synced_v3``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.
+             * @description When ``conversation_id`` was supplied, this is the underlying ``call_sid`` that the lookup resolved to. Useful for callers that want to drill into per-call surfaces afterward without re-querying ``world.entities_synced``. Null when the caller filtered by ``call_sid`` directly or did not filter by conversation.
              */
             resolved_call_sid?: string | null;
             /**
@@ -19018,6 +19185,31 @@ export interface components {
              * @constant
              */
             status?: "available";
+        };
+        /**
+         * RegisterSchemaRequest
+         * @description Create Schema payload (intake-ui-mvp-design.md §5.4).
+         *
+         *     The backend applies the hidden defaults (``ingestion_mode=snapshot``,
+         *     ``on_schema_change=additive``, ``schema_version`` auto) — they are not part
+         *     of the wire contract.
+         */
+        RegisterSchemaRequest: {
+            /**
+             * File Type
+             * @constant
+             */
+            file_type: "csv";
+            /** Max Size Mb */
+            max_size_mb?: number | null;
+            name: components["schemas"]["_DatasetSlug"];
+            /** Primary Key */
+            primary_key: components["schemas"]["_FieldName"][];
+            /**
+             * Schema
+             * @description Canonical field list ``[{name, type}]`` (wire key ``schema``).
+             */
+            schema: components["schemas"]["SchemaFieldSpec"][];
         };
         /**
          * RegisteredFunction
@@ -19820,6 +20012,11 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** SchemaFieldSpec */
+        SchemaFieldSpec: {
+            name: components["schemas"]["_FieldName"];
+            type: components["schemas"]["IntakeFieldType"];
+        };
         /** SchemaResponse */
         SchemaResponse: {
             /** Ai Functions */
@@ -20145,6 +20342,8 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -20213,6 +20412,8 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -21756,7 +21957,7 @@ export interface components {
         };
         /** StartSessionRequest */
         StartSessionRequest: {
-            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities_synced_v3 table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
+            /** @description World model canonical_id of the form 'source:resource_type:id' (e.g. 'charmhealth:Patient:67890'). The structural regex on CanonicalIdString blocks spaces, names, DOBs, and similar regulated content. Resolved against the SDP-projected world.entities_synced table; a freshly-created entity may not be visible yet if the projection is lagging. Provide either entity_id or canonical_id, not both. */
             canonical_id?: components["schemas"]["CanonicalIdString"] | null;
             /**
              * Channel Kind
@@ -23393,7 +23594,7 @@ export interface components {
         TraceAnalysisListItem: {
             /**
              * Call Entity Id
-             * @description Associated world.entities_synced_v3 call row UUID
+             * @description Associated world.entities_synced call row UUID
              */
             call_entity_id?: string | null;
             /**
@@ -23473,7 +23674,7 @@ export interface components {
         TraceAnalysisResponse: {
             /**
              * Call Entity Id
-             * @description UUID string of the associated world.entities_synced_v3 call row (if resolved)
+             * @description UUID string of the associated world.entities_synced call row (if resolved)
              */
             call_entity_id?: string | null;
             /**
@@ -24804,6 +25005,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /**
          * VersionSet
@@ -24818,6 +25025,12 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
+            /**
+             * Turn Runtime
+             * @default native
+             * @enum {string}
+             */
+            turn_runtime?: "native" | "openai-agents";
         };
         /** VoiceConfig */
         VoiceConfig: {
@@ -24825,6 +25038,8 @@ export interface components {
             language_providers?: {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
+            /** Session Provider */
+            session_provider?: ("inhouse" | "openai_realtime") | null;
             /**
              * Similarity Boost
              * @default 0
@@ -25408,6 +25623,7 @@ export interface components {
         };
         /** @enum {string} */
         _Access: "read" | "write";
+        _DatasetSlug: string;
         /**
          * _DayHours
          * @description Open-hours window for one weekday. Times in 24h ``HH:MM`` form,
@@ -25419,6 +25635,9 @@ export interface components {
             /** Start */
             start: string;
         };
+        _FieldName: string;
+        /** @enum {string} */
+        _FileStatus: "received" | "scanned" | "processing" | "curated" | "rejected" | "failed" | "held";
         /** @enum {string} */
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
         _ToolMockKey: string;
@@ -34746,7 +34965,115 @@ export interface operations {
             };
         };
     };
-    receive_intake_file_v1__workspace_id__intake_files_post: {
+    list_intake_datasets_v1__workspace_id__intake_datasets_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+                search?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_DatasetRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_intake_files_v1__workspace_id__intake_files_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+                status?: components["schemas"]["_FileStatus"] | null;
+                search?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_IntakeFileRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_intake_file_v1__workspace_id__intake_files_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_intake_file_v1__workspace_id__intake_files_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeFileRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    receive_intake_file_v1__workspace_id__intake_files_external_post: {
         parameters: {
             query?: never;
             header: {
@@ -34771,6 +35098,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IntakeFileResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    download_intake_file_v1__workspace_id__intake_files__file_id__download_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description Validation Error */
@@ -34963,6 +35322,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    register_intake_schema_v1__workspace_id__intake_schema_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterSchemaRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
