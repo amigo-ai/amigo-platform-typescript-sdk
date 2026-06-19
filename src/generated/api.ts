@@ -20358,7 +20358,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -20428,7 +20428,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -25054,7 +25054,7 @@ export interface components {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /**
              * Similarity Boost
              * @default 0
