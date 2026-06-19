@@ -683,6 +683,28 @@ export type {
   UpdateExternalIntegrationRequest,
 } from './resources/external-integrations.js'
 
+export { IntegrationsResource } from './resources/integrations.js'
+export type {
+  CreateIntegrationEndpointRequest,
+  CreateIntegrationRequest,
+  CustomTokenExchangeIntegrationAuthRequest,
+  Integration,
+  IntegrationAuth,
+  IntegrationAuthRequest,
+  IntegrationEndpoint,
+  IntegrationEndpointListResponse,
+  IntegrationIdentityBinding,
+  IntegrationIdentityBindings,
+  IntegrationIdentityBindingTestValues,
+  IntegrationListResponse,
+  ListEndpointsParams,
+  ListIntegrationsParams,
+  TestIntegrationEndpointRequest,
+  TestIntegrationEndpointResponse,
+  UpdateIntegrationEndpointRequest,
+  UpdateIntegrationRequest,
+} from './resources/integrations.js'
+
 export type {
   MetricCatalogEntry,
   MetricCatalogResponse,
