@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.75.0] - 2026-06-19
+
+### Bug Fixes
+
+- expose integration identity binding types (#340)
+
 ## [0.74.0] - 2026-06-18
 
 ### Maintenance
