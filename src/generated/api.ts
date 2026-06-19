@@ -11246,6 +11246,10 @@ export interface components {
             body_encoding: "json" | "form";
             /** Exchange Url */
             exchange_url: string;
+            /** Identity Binding Test Values */
+            identity_binding_test_values?: {
+                [key: string]: string;
+            };
             /** Identity Bindings */
             identity_bindings: {
                 [key: string]: string;
@@ -11296,6 +11300,17 @@ export interface components {
              * Format: uri
              */
             exchange_url: string;
+            /**
+             * Identity Binding Test Values
+             * @description Author-configured test values for identity-bound params.
+             *
+             *     Only ``external_user.subject_key`` bindings may carry test values. Runtime
+             *     dispatch uses them only when a backend execution path explicitly opts in.
+             * @default {}
+             */
+            identity_binding_test_values?: {
+                [key: string]: string;
+            };
             /**
              * Identity Bindings
              * @description Maps a declared ``param_name`` to the verified identity attribute that supplies it

@@ -3,6 +3,38 @@ import type { IntegrationId, IntegrationEndpointId } from '../core/branded-types
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
+export type Integration = components['schemas']['RestIntegrationResponse']
+export type IntegrationAuth = NonNullable<Integration['auth']>
+export type IntegrationAuthRequest = NonNullable<CreateIntegrationRequest['auth']>
+export type CustomTokenExchangeIntegrationAuthRequest =
+  components['schemas']['CustomTokenExchangeAuthRequest']
+export type IntegrationIdentityBinding = NonNullable<
+  CustomTokenExchangeIntegrationAuthRequest['identity_bindings']
+>[string]
+export type IntegrationIdentityBindings = NonNullable<
+  CustomTokenExchangeIntegrationAuthRequest['identity_bindings']
+>
+export type IntegrationIdentityBindingTestValues = NonNullable<
+  CustomTokenExchangeIntegrationAuthRequest['identity_binding_test_values']
+>
+export type CreateIntegrationRequest =
+  components['schemas']['src__routes__integrations__create_integration__Request']
+export type UpdateIntegrationRequest =
+  components['schemas']['src__routes__integrations__update_integration__Request']
+export type IntegrationListResponse =
+  components['schemas']['src__routes__integrations__list_integrations__Response']
+export type IntegrationEndpoint = components['schemas']['EndpointResponse']
+export type CreateIntegrationEndpointRequest =
+  components['schemas']['src__routes__integrations__create_endpoint__Request']
+export type UpdateIntegrationEndpointRequest =
+  components['schemas']['src__routes__integrations__update_endpoint__Request']
+export type IntegrationEndpointListResponse =
+  components['schemas']['src__routes__integrations__list_endpoints__Response']
+export type TestIntegrationEndpointRequest =
+  components['schemas']['src__routes__integrations__test_endpoint__Request']
+export type TestIntegrationEndpointResponse =
+  components['schemas']['src__routes__integrations__test_endpoint__Response']
+
 export interface ListIntegrationsParams extends ListParams {
   enabled?: boolean | null
   search?: string | null
@@ -27,9 +59,7 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   // ─── Integrations ─────────────────────────────────────────────────────────
 
   /** Create a new REST integration */
-  async create(
-    body: components['schemas']['src__routes__integrations__create_integration__Request'],
-  ) {
+  async create(body: CreateIntegrationRequest): Promise<Integration> {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/integrations', {
         params: { path: { workspace_id: this.workspaceId } },
@@ -39,7 +69,7 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   }
 
   /** List integrations (REST + desktop) */
-  async list(params?: ListIntegrationsParams) {
+  async list(params?: ListIntegrationsParams): Promise<IntegrationListResponse> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/integrations', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -52,7 +82,7 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   }
 
   /** Get a single integration */
-  async get(integrationId: IntegrationId | string) {
+  async get(integrationId: IntegrationId | string): Promise<Integration> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/integrations/{integration_id}', {
         params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
@@ -63,8 +93,8 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   /** Patch a REST integration. Pass `auth: null` to clear auth. */
   async update(
     integrationId: IntegrationId | string,
-    body: components['schemas']['src__routes__integrations__update_integration__Request'],
-  ) {
+    body: UpdateIntegrationRequest,
+  ): Promise<Integration> {
     return extractData(
       await this.client.PATCH('/v1/{workspace_id}/integrations/{integration_id}', {
         params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
@@ -83,7 +113,10 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   // ─── Endpoints ────────────────────────────────────────────────────────────
 
   /** List endpoints on a REST integration */
-  async listEndpoints(integrationId: IntegrationId | string, params?: ListEndpointsParams) {
+  async listEndpoints(
+    integrationId: IntegrationId | string,
+    params?: ListEndpointsParams,
+  ): Promise<IntegrationEndpointListResponse> {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/integrations/{integration_id}/endpoints', {
         params: {
@@ -105,7 +138,7 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   async getEndpoint(
     integrationId: IntegrationId | string,
     endpointId: IntegrationEndpointId | string,
-  ) {
+  ): Promise<IntegrationEndpoint> {
     return extractData(
       await this.client.GET(
         '/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_id}',
@@ -125,8 +158,8 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   /** Add an endpoint to a REST integration */
   async createEndpoint(
     integrationId: IntegrationId | string,
-    body: components['schemas']['src__routes__integrations__create_endpoint__Request'],
-  ) {
+    body: CreateIntegrationEndpointRequest,
+  ): Promise<IntegrationEndpoint> {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/integrations/{integration_id}/endpoints', {
         params: { path: { workspace_id: this.workspaceId, integration_id: integrationId } },
@@ -139,8 +172,8 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   async updateEndpoint(
     integrationId: IntegrationId | string,
     endpointId: IntegrationEndpointId | string,
-    body: components['schemas']['src__routes__integrations__update_endpoint__Request'],
-  ) {
+    body: UpdateIntegrationEndpointRequest,
+  ): Promise<IntegrationEndpoint> {
     return extractData(
       await this.client.PATCH(
         '/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_id}',
@@ -184,8 +217,8 @@ export class IntegrationsResource extends WorkspaceScopedResource {
   async testEndpoint(
     integrationId: IntegrationId | string,
     endpointId: IntegrationEndpointId | string,
-    body: components['schemas']['src__routes__integrations__test_endpoint__Request'],
-  ) {
+    body: TestIntegrationEndpointRequest,
+  ): Promise<TestIntegrationEndpointResponse> {
     return extractData(
       await this.client.POST(
         '/v1/{workspace_id}/integrations/{integration_id}/endpoints/{endpoint_id}/test',

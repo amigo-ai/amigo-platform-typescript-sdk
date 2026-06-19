@@ -1,6 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, expectTypeOf } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
+import type {
+  CreateIntegrationRequest,
+  IntegrationIdentityBinding,
+  IntegrationIdentityBindings,
+  IntegrationIdentityBindingTestValues,
+} from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -122,6 +128,43 @@ const client = new AmigoClient({
 })
 
 describe('IntegrationsResource', () => {
+  it('exports custom token exchange identity binding types', () => {
+    const binding: IntegrationIdentityBinding = 'external_user.subject_key'
+    const bindings: IntegrationIdentityBindings = {
+      subject_key: binding,
+      principal_id: 'principal.subject_id',
+    }
+    const testValues: IntegrationIdentityBindingTestValues = {
+      subject_key: 'external-user-123',
+    }
+    const request: CreateIntegrationRequest = {
+      name: 'identity-bound-auth',
+      display_name: 'Identity Bound Auth',
+      base_url: 'https://api.example.com',
+      auth: {
+        type: 'custom_token_exchange',
+        exchange_url: 'https://auth.example.com/token',
+        response_token_path: '/access_token',
+        identity_bindings: bindings,
+        identity_binding_test_values: testValues,
+        param_headers: {
+          'X-Subject-Key': {
+            param_name: 'subject_key',
+            description: 'Verified external user subject key',
+          },
+        },
+      },
+    }
+
+    expect(request.auth?.type).toBe('custom_token_exchange')
+    if (request.auth?.type === 'custom_token_exchange') {
+      expect(request.auth.identity_bindings?.subject_key).toBe('external_user.subject_key')
+    }
+    expectTypeOf<IntegrationIdentityBinding>().toEqualTypeOf<
+      'principal.subject_key' | 'principal.subject_id' | 'external_user.subject_key'
+    >()
+  })
+
   it('creates an integration', async () => {
     const result = await client.integrations.create({
       name: 'athena-ehr',
