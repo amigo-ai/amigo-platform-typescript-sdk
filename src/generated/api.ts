@@ -3229,6 +3229,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/files/{file_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write Back Intake File Status
+         * @description Advance a file's status from the async CDC job (P4).
+         *
+         *     The job authenticates with the workspace's API key (Bearer) — the same
+         *     Databricks→platform-api path launch_dpc uses — so RLS scopes the update to
+         *     that workspace. Moves the row to its terminal verdict and records the
+         *     curated/cdc paths.
+         */
+        post: operations["write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/intake/links": {
         parameters: {
             query?: never;
@@ -6730,6 +6755,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/traces:export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export gen_ai.* traces as OTLP/JSON
+         * @description Export the workspace's durable ``gen_ai.*`` tool-call trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans. Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
+         */
+        post: operations["export_traces_v1__workspace_id__traces_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/triggers": {
         parameters: {
             query?: never;
@@ -7708,6 +7753,61 @@ export interface components {
             /** Workspace Id */
             workspace_id?: string | null;
         };
+        /**
+         * ActorAllocatedEvent
+         * @description The call was bound to its isolated runtime — one call = one Agones GameServer.
+         *
+         *     Emitted by the dispatcher the moment it allocates a warm GameServer for the call,
+         *     so an observer can see WHICH pod/node powers this call and how long allocation took.
+         */
+        ActorAllocatedEvent: {
+            /**
+             * Alloc Latency Ms
+             * @default null
+             */
+            alloc_latency_ms?: number | null;
+            /** Gameserver */
+            gameserver: string;
+            /**
+             * Node
+             * @default null
+             */
+            node?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "actor_allocated";
+        };
+        /**
+         * ActorShutdownEvent
+         * @description The call's GameServer was reaped (Allocated GameServers are deploy-immune).
+         *
+         *     Today only ``reason=call_ended`` is produced (normal call-end teardown).
+         *     ``orphan_no_media`` is reserved in the contract for the orphan reaper — a pod that
+         *     went Allocated but never received media — but that emit is not yet wired: at reap
+         *     time the reaper pod has no call identity (allocation is cross-pod), so plumbing the
+         *     call_sid to it is a follow-up. The value is pre-declared so adding it later is a
+         *     non-breaking widening for SDK consumers, not a breaking enum change.
+         */
+        ActorShutdownEvent: {
+            /**
+             * Lifetime S
+             * @default null
+             */
+            lifetime_s?: number | null;
+            /**
+             * Reason
+             * @default call_ended
+             * @enum {string}
+             */
+            reason?: "call_ended" | "orphan_no_media";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "actor_shutdown";
+        };
         /** AddColumnAction */
         AddColumnAction: {
             column: components["schemas"]["Column-Input"];
@@ -7981,6 +8081,9 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        AnyValue: {
+            [key: string]: unknown;
         };
         /** ApiKeyResponse */
         ApiKeyResponse: {
@@ -15316,6 +15419,13 @@ export interface components {
              */
             status: "delivered" | "queued_no_subscriber";
         };
+        /** InstrumentationScope */
+        InstrumentationScope: {
+            /** Name */
+            name: string;
+            /** Version */
+            version: string;
+        };
         /**
          * IntakeFieldType
          * @description Allowed ``schema[].type`` values for a registered contract.
@@ -15886,6 +15996,15 @@ export interface components {
              */
             type: "latency_spike" | "silence" | "barge_in" | "loop" | "tool_failure" | "escalation" | "safety_flag" | "high_risk" | "elevated_risk";
         };
+        /**
+         * KeyValue
+         * @description OTLP ``KeyValue`` attribute pair.
+         */
+        KeyValue: {
+            /** Key */
+            key: string;
+            value: components["schemas"]["AnyValue"];
+        };
         /** LLMConfig */
         LLMConfig: {
             experience_controls?: components["schemas"]["LLMExperienceControls"] | null;
@@ -16210,6 +16329,29 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * MediaAttachedEvent
+         * @description A media WebSocket actually reached the call's GameServer — the audio-path signal.
+         *
+         *     Fires once per leg (caller / agent). Its ABSENCE for a leg is the no-audio failure
+         *     mode (media never landed on the pod). The per-call cold-start / time-to-first-speech
+         *     metric is deliberately NOT carried here yet: TTFS is measured against the first
+         *     synthesized-audio frame, a signal not available at attach time, so it is wired in a
+         *     focused follow-up (Front 3) rather than shipped as a permanently-null field that would
+         *     lock a misleading shape into the SDK contract.
+         */
+        MediaAttachedEvent: {
+            /**
+             * Leg
+             * @enum {string}
+             */
+            leg: "caller" | "agent" | "operator";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "media_attached";
         };
         /** MergedEntitiesResponse */
         MergedEntitiesResponse: {
@@ -17056,7 +17198,7 @@ export interface components {
              */
             type: "oauth2_jwt_bearer";
         };
-        ObserverSSEEvent: components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
+        ObserverSSEEvent: components["schemas"]["ActorAllocatedEvent"] | components["schemas"]["ActorShutdownEvent"] | components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["MediaAttachedEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
         /** OcrRequest */
         OcrRequest: {
             /**
@@ -19429,6 +19571,17 @@ export interface components {
             /** Tool Type */
             tool_type: string;
         };
+        /** Resource */
+        Resource: {
+            /** Attributes */
+            attributes: components["schemas"]["KeyValue"][];
+        };
+        /** ResourceSpans */
+        ResourceSpans: {
+            resource: components["schemas"]["Resource"];
+            /** Scopespans */
+            scopeSpans: components["schemas"]["ScopeSpans"][];
+        };
         /**
          * RestIntegrationResponse
          * @description REST variant — base URL, auth config, endpoint count.
@@ -20049,6 +20202,12 @@ export interface components {
                 [key: string]: string;
             }[];
         };
+        /** ScopeSpans */
+        ScopeSpans: {
+            scope: components["schemas"]["InstrumentationScope"];
+            /** Spans */
+            spans: components["schemas"]["Span"][];
+        };
         /** ScoreSessionRequest */
         ScoreSessionRequest: {
             /** Score */
@@ -20358,7 +20517,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -20428,7 +20587,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -21913,6 +22072,27 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * Span
+         * @description OTLP ``Span`` in OTLP/JSON encoding (ids hex, timestamps decimal-string).
+         */
+        Span: {
+            /** Attributes */
+            attributes: components["schemas"]["KeyValue"][];
+            /** Endtimeunixnano */
+            endTimeUnixNano: string;
+            /** Kind */
+            kind: number;
+            /** Name */
+            name: string;
+            /** Spanid */
+            spanId: string;
+            /** Starttimeunixnano */
+            startTimeUnixNano: string;
+            status: components["schemas"]["Status"];
+            /** Traceid */
+            traceId: string;
+        };
         /** SpeakerAcoustics */
         SpeakerAcoustics: {
             /**
@@ -22135,6 +22315,29 @@ export interface components {
             };
             /** Name */
             name: string;
+        };
+        /**
+         * Status
+         * @description OTLP ``Status`` — 0=UNSET, 1=OK, 2=ERROR.
+         */
+        Status: {
+            /** Code */
+            code: number;
+        };
+        /**
+         * StatusWriteBackRequest
+         * @description Status advance written by the async CDC job (P4).
+         *
+         *     The job posts the terminal verdict after conform/validate/diff. ``error_reason``
+         *     must be PHI-safe (the engine reports column + type + counts only — never cell
+         *     values). ``curated_path``/``cdc_path`` are set only on a clean verdict.
+         */
+        StatusWriteBackRequest: {
+            cdc_path?: components["schemas"]["_VolumePath"] | null;
+            curated_path?: components["schemas"]["_VolumePath"] | null;
+            /** Error Reason */
+            error_reason?: string | null;
+            status: components["schemas"]["_FileStatus"];
         };
         /** StepRequest */
         StepRequest: {
@@ -23826,6 +24029,52 @@ export interface components {
              */
             what_happened: string;
         };
+        /** TracesExportRequest */
+        TracesExportRequest: {
+            /**
+             * Continuation Token
+             * @description Opaque page cursor — round-trip the value from the previous response.
+             */
+            continuation_token?: unknown;
+            /**
+             * End Time
+             * Format: date-time
+             * @description Exclusive upper bound on span ``effective_at`` (ISO-8601).
+             */
+            end_time: string;
+            /**
+             * Limit
+             * @description Max spans per page (1-1000).
+             * @default 500
+             */
+            limit?: number;
+            /**
+             * Start Time
+             * Format: date-time
+             * @description Inclusive lower bound on span ``effective_at`` (ISO-8601).
+             */
+            start_time: string;
+        };
+        /**
+         * TracesExportResponse
+         * @description Paginated PULL response — NOT a bare OTLP ``ExportTraceServiceRequest``.
+         *
+         *     ``resourceSpans`` is OTLP/JSON-conformant; to forward to an OTLP collector,
+         *     extract ``.resourceSpans`` and re-wrap as ``{"resourceSpans": [...]}`` (a
+         *     strict protojson push receiver rejects the ``has_more``/``continuation_token``
+         *     siblings). Round-trip ``continuation_token`` to page.
+         */
+        TracesExportResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /**
+             * Resourcespans
+             * @description OTLP/JSON ``ResourceSpans`` envelope (empty list when no spans match).
+             */
+            resourceSpans: components["schemas"]["ResourceSpans"][];
+        };
         /** TranscriptSegment */
         TranscriptSegment: {
             /** Confidence */
@@ -25054,7 +25303,7 @@ export interface components {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /**
              * Similarity Boost
              * @default 0
@@ -25657,6 +25906,7 @@ export interface components {
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
         _ToolMockKey: string;
         _ToolMockValue: string;
+        _VolumePath: string;
         /**
          * Parameter
          * @description Typed declaration of one input parameter.
@@ -35158,6 +35408,42 @@ export interface operations {
             };
         };
     };
+    write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusWriteBackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeFileRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-intake-links": {
         parameters: {
             query?: {
@@ -43499,6 +43785,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    export_traces_v1__workspace_id__traces_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TracesExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TracesExportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
