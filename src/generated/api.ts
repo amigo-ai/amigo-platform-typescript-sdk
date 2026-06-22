@@ -3229,6 +3229,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/files/{file_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Write Back Intake File Status
+         * @description Advance a file's status from the async CDC job (P4).
+         *
+         *     The job authenticates with the workspace's API key (Bearer) — the same
+         *     Databricks→platform-api path launch_dpc uses — so RLS scopes the update to
+         *     that workspace. Moves the row to its terminal verdict and records the
+         *     curated/cdc paths.
+         */
+        post: operations["write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/intake/links": {
         parameters: {
             query?: never;
@@ -6730,6 +6755,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/traces:export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export gen_ai.* traces as OTLP/JSON
+         * @description Export the workspace's durable ``gen_ai.*`` tool-call trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans. Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
+         */
+        post: operations["export_traces_v1__workspace_id__traces_export_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/triggers": {
         parameters: {
             query?: never;
@@ -7981,6 +8026,9 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        AnyValue: {
+            [key: string]: unknown;
         };
         /** ApiKeyResponse */
         ApiKeyResponse: {
@@ -15316,6 +15364,13 @@ export interface components {
              */
             status: "delivered" | "queued_no_subscriber";
         };
+        /** InstrumentationScope */
+        InstrumentationScope: {
+            /** Name */
+            name: string;
+            /** Version */
+            version: string;
+        };
         /**
          * IntakeFieldType
          * @description Allowed ``schema[].type`` values for a registered contract.
@@ -15885,6 +15940,15 @@ export interface components {
              * @enum {string}
              */
             type: "latency_spike" | "silence" | "barge_in" | "loop" | "tool_failure" | "escalation" | "safety_flag" | "high_risk" | "elevated_risk";
+        };
+        /**
+         * KeyValue
+         * @description OTLP ``KeyValue`` attribute pair.
+         */
+        KeyValue: {
+            /** Key */
+            key: string;
+            value: components["schemas"]["AnyValue"];
         };
         /** LLMConfig */
         LLMConfig: {
@@ -19429,6 +19493,17 @@ export interface components {
             /** Tool Type */
             tool_type: string;
         };
+        /** Resource */
+        Resource: {
+            /** Attributes */
+            attributes: components["schemas"]["KeyValue"][];
+        };
+        /** ResourceSpans */
+        ResourceSpans: {
+            resource: components["schemas"]["Resource"];
+            /** Scopespans */
+            scopeSpans: components["schemas"]["ScopeSpans"][];
+        };
         /**
          * RestIntegrationResponse
          * @description REST variant — base URL, auth config, endpoint count.
@@ -20049,6 +20124,12 @@ export interface components {
                 [key: string]: string;
             }[];
         };
+        /** ScopeSpans */
+        ScopeSpans: {
+            scope: components["schemas"]["InstrumentationScope"];
+            /** Spans */
+            spans: components["schemas"]["Span"][];
+        };
         /** ScoreSessionRequest */
         ScoreSessionRequest: {
             /** Score */
@@ -20358,7 +20439,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -20428,7 +20509,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -21913,6 +21994,27 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * Span
+         * @description OTLP ``Span`` in OTLP/JSON encoding (ids hex, timestamps decimal-string).
+         */
+        Span: {
+            /** Attributes */
+            attributes: components["schemas"]["KeyValue"][];
+            /** Endtimeunixnano */
+            endTimeUnixNano: string;
+            /** Kind */
+            kind: number;
+            /** Name */
+            name: string;
+            /** Spanid */
+            spanId: string;
+            /** Starttimeunixnano */
+            startTimeUnixNano: string;
+            status: components["schemas"]["Status"];
+            /** Traceid */
+            traceId: string;
+        };
         /** SpeakerAcoustics */
         SpeakerAcoustics: {
             /**
@@ -22135,6 +22237,29 @@ export interface components {
             };
             /** Name */
             name: string;
+        };
+        /**
+         * Status
+         * @description OTLP ``Status`` — 0=UNSET, 1=OK, 2=ERROR.
+         */
+        Status: {
+            /** Code */
+            code: number;
+        };
+        /**
+         * StatusWriteBackRequest
+         * @description Status advance written by the async CDC job (P4).
+         *
+         *     The job posts the terminal verdict after conform/validate/diff. ``error_reason``
+         *     must be PHI-safe (the engine reports column + type + counts only — never cell
+         *     values). ``curated_path``/``cdc_path`` are set only on a clean verdict.
+         */
+        StatusWriteBackRequest: {
+            cdc_path?: components["schemas"]["_VolumePath"] | null;
+            curated_path?: components["schemas"]["_VolumePath"] | null;
+            /** Error Reason */
+            error_reason?: string | null;
+            status: components["schemas"]["_FileStatus"];
         };
         /** StepRequest */
         StepRequest: {
@@ -23826,6 +23951,52 @@ export interface components {
              */
             what_happened: string;
         };
+        /** TracesExportRequest */
+        TracesExportRequest: {
+            /**
+             * Continuation Token
+             * @description Opaque page cursor — round-trip the value from the previous response.
+             */
+            continuation_token?: unknown;
+            /**
+             * End Time
+             * Format: date-time
+             * @description Exclusive upper bound on span ``effective_at`` (ISO-8601).
+             */
+            end_time: string;
+            /**
+             * Limit
+             * @description Max spans per page (1-1000).
+             * @default 500
+             */
+            limit?: number;
+            /**
+             * Start Time
+             * Format: date-time
+             * @description Inclusive lower bound on span ``effective_at`` (ISO-8601).
+             */
+            start_time: string;
+        };
+        /**
+         * TracesExportResponse
+         * @description Paginated PULL response — NOT a bare OTLP ``ExportTraceServiceRequest``.
+         *
+         *     ``resourceSpans`` is OTLP/JSON-conformant; to forward to an OTLP collector,
+         *     extract ``.resourceSpans`` and re-wrap as ``{"resourceSpans": [...]}`` (a
+         *     strict protojson push receiver rejects the ``has_more``/``continuation_token``
+         *     siblings). Round-trip ``continuation_token`` to page.
+         */
+        TracesExportResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /**
+             * Resourcespans
+             * @description OTLP/JSON ``ResourceSpans`` envelope (empty list when no spans match).
+             */
+            resourceSpans: components["schemas"]["ResourceSpans"][];
+        };
         /** TranscriptSegment */
         TranscriptSegment: {
             /** Confidence */
@@ -25054,7 +25225,7 @@ export interface components {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime") | null;
+            session_provider?: ("inhouse" | "openai_realtime" | "atlas") | null;
             /**
              * Similarity Boost
              * @default 0
@@ -25657,6 +25828,7 @@ export interface components {
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
         _ToolMockKey: string;
         _ToolMockValue: string;
+        _VolumePath: string;
         /**
          * Parameter
          * @description Typed declaration of one input parameter.
@@ -35158,6 +35330,42 @@ export interface operations {
             };
         };
     };
+    write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusWriteBackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeFileRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-intake-links": {
         parameters: {
             query?: {
@@ -43499,6 +43707,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    export_traces_v1__workspace_id__traces_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TracesExportRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TracesExportResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
