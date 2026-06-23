@@ -28405,7 +28405,8 @@
           "twilio",
           "websocket",
           "ses",
-          "sendblue"
+          "sendblue",
+          "infobip"
         ],
         "title": "ProviderType",
         "type": "string"
@@ -37928,6 +37929,12 @@
       "TextTurnRequest": {
         "description": "Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.",
         "properties": {
+          "agent_phone": {
+            "maxLength": 16,
+            "pattern": "^\\+[1-9]\\d{1,14}$",
+            "title": "Agent Phone",
+            "type": "string"
+          },
           "phone_number": {
             "maxLength": 16,
             "pattern": "^\\+[1-9]\\d{1,14}$",
@@ -37943,6 +37950,7 @@
         },
         "required": [
           "phone_number",
+          "agent_phone",
           "text"
         ],
         "title": "TextTurnRequest",

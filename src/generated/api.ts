@@ -19040,7 +19040,7 @@ export interface components {
          *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "websocket" | "ses" | "sendblue";
+        ProviderType: "twilio" | "websocket" | "ses" | "sendblue" | "infobip";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -23300,6 +23300,8 @@ export interface components {
          * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
          */
         TextTurnRequest: {
+            /** Agent Phone */
+            agent_phone: string;
             /** Phone Number */
             phone_number: string;
             /** Text */
