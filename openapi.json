@@ -28405,7 +28405,8 @@
           "twilio",
           "websocket",
           "ses",
-          "sendblue"
+          "sendblue",
+          "infobip"
         ],
         "title": "ProviderType",
         "type": "string"
@@ -37928,6 +37929,12 @@
       "TextTurnRequest": {
         "description": "Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.",
         "properties": {
+          "agent_phone": {
+            "maxLength": 16,
+            "pattern": "^\\+[1-9]\\d{1,14}$",
+            "title": "Agent Phone",
+            "type": "string"
+          },
           "phone_number": {
             "maxLength": 16,
             "pattern": "^\\+[1-9]\\d{1,14}$",
@@ -37943,6 +37950,7 @@
         },
         "required": [
           "phone_number",
+          "agent_phone",
           "text"
         ],
         "title": "TextTurnRequest",
@@ -75368,7 +75376,7 @@
     },
     "/v1/{workspace_id}/traces:export": {
       "post": {
-        "description": "Export the workspace's durable ``gen_ai.*`` tool-call trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans. Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API \u2014 extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).",
+        "description": "Export the workspace's durable trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans: ``gen_ai.*`` tool-call spans and the per-call voice-isolation ``voice.*`` infra spans (allocate / media-attach / reap). Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API \u2014 extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call + infra metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).",
         "operationId": "export_traces_v1__workspace_id__traces_export_post",
         "parameters": [
           {
@@ -75414,7 +75422,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Export gen_ai.* traces as OTLP/JSON",
+        "summary": "Export gen_ai.* + voice.* traces as OTLP/JSON",
         "tags": [
           "Traces"
         ]

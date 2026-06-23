@@ -6765,8 +6765,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Export gen_ai.* traces as OTLP/JSON
-         * @description Export the workspace's durable ``gen_ai.*`` tool-call trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans. Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
+         * Export gen_ai.* + voice.* traces as OTLP/JSON
+         * @description Export the workspace's durable trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans: ``gen_ai.*`` tool-call spans and the per-call voice-isolation ``voice.*`` infra spans (allocate / media-attach / reap). Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call + infra metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
          */
         post: operations["export_traces_v1__workspace_id__traces_export_post"];
         delete?: never;
@@ -19040,7 +19040,7 @@ export interface components {
          *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "websocket" | "ses" | "sendblue";
+        ProviderType: "twilio" | "websocket" | "ses" | "sendblue" | "infobip";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -23300,6 +23300,8 @@ export interface components {
          * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
          */
         TextTurnRequest: {
+            /** Agent Phone */
+            agent_phone: string;
             /** Phone Number */
             phone_number: string;
             /** Text */
