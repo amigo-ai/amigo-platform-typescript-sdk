@@ -33418,6 +33418,18 @@
             ],
             "title": "Id"
           },
+          "justification": {
+            "anyOf": [
+              {
+                "maxLength": 8000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
           "metric_key": {
             "anyOf": [
               {
@@ -33452,6 +33464,14 @@
               }
             ],
             "title": "Rationale"
+          },
+          "references": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 100,
+            "title": "References",
+            "type": "array"
           },
           "run_id": {
             "anyOf": [

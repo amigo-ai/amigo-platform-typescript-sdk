@@ -21275,12 +21275,16 @@ export interface components {
             expected?: unknown | null;
             /** Id */
             id?: string | null;
+            /** Justification */
+            justification?: string | null;
             /** Metric Key */
             metric_key?: string | null;
             /** Passed */
             passed?: boolean | null;
             /** Rationale */
             rationale?: string | null;
+            /** References */
+            references?: number[];
             /** Run Id */
             run_id?: string | null;
             /** Score */
