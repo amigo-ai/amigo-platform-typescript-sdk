@@ -6765,8 +6765,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Export gen_ai.* traces as OTLP/JSON
-         * @description Export the workspace's durable ``gen_ai.*`` tool-call trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans. Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
+         * Export gen_ai.* + voice.* traces as OTLP/JSON
+         * @description Export the workspace's durable trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans: ``gen_ai.*`` tool-call spans and the per-call voice-isolation ``voice.*`` infra spans (allocate / media-attach / reap). Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call + infra metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
          */
         post: operations["export_traces_v1__workspace_id__traces_export_post"];
         delete?: never;
@@ -12077,6 +12077,11 @@ export interface components {
             field_count: number;
             /** File Type */
             file_type: string;
+            /**
+             * Ingestion Mode
+             * @description `snapshot` (CSV/Excel → CDC) or `document` (PDF/docx → extraction).
+             */
+            ingestion_mode: string;
             limits: components["schemas"]["Limits"];
             /**
              * Name
@@ -12333,6 +12338,28 @@ export interface components {
              * @description Whether the live DNS lookup at the time of the GET found the entry.
              */
             verified: boolean;
+        };
+        /**
+         * DocumentProcessingSpec
+         * @description Processing config for a document dataset (``ingestion_mode=document``).
+         *
+         *     Documents have no schema/primary-key/CDC; this is what the contract carries
+         *     instead (docs/plans/intake_file_processing_pipeline.md §5.9). Page-split /
+         *     output-metadata rules are stored in the same jsonb and may be added later
+         *     without a migration.
+         */
+        DocumentProcessingSpec: {
+            /**
+             * Extraction Mode
+             * @default text_extract
+             * @enum {string}
+             */
+            extraction_mode?: "text_extract" | "OCR" | "hybrid";
+            /**
+             * Retain Source
+             * @default true
+             */
+            retain_source?: boolean;
         };
         /** DropColumnAction */
         DropColumnAction: {
@@ -17198,7 +17225,7 @@ export interface components {
              */
             type: "oauth2_jwt_bearer";
         };
-        ObserverSSEEvent: components["schemas"]["ActorAllocatedEvent"] | components["schemas"]["ActorShutdownEvent"] | components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["MediaAttachedEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
+        ObserverSSEEvent: components["schemas"]["ActorAllocatedEvent"] | components["schemas"]["ActorShutdownEvent"] | components["schemas"]["AgentTranscriptDeltaEvent"] | components["schemas"]["AgentTranscriptEvent"] | components["schemas"]["BargeInEvent"] | components["schemas"]["CompoundEmotionEvent"] | components["schemas"]["EmotionEvent"] | components["schemas"]["EmpathyClassifiedEvent"] | components["schemas"]["ForwardCallResolvedEvent"] | components["schemas"]["LatencyEvent"] | components["schemas"]["MediaAttachedEvent"] | components["schemas"]["NavTimingEvent"] | components["schemas"]["ParticipantJoinedEvent"] | components["schemas"]["ParticipantLeftEvent"] | components["schemas"]["SessionEndEvent"] | components["schemas"]["SessionInfoEvent"] | components["schemas"]["SessionStartEvent"] | components["schemas"]["SpeakerMutedEvent"] | components["schemas"]["StateTransitionEvent"] | components["schemas"]["ToolCallCompletedEvent"] | components["schemas"]["ToolCallStartedEvent"] | components["schemas"]["UserTranscriptEvent"] | components["schemas"]["VoiceContextAppliedEvent"];
         /** OcrRequest */
         OcrRequest: {
             /**
@@ -19040,7 +19067,7 @@ export interface components {
          *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "websocket" | "ses" | "sendblue";
+        ProviderType: "twilio" | "websocket" | "ses" | "sendblue" | "infobip";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
@@ -19345,28 +19372,34 @@ export interface components {
         };
         /**
          * RegisterSchemaRequest
-         * @description Create Schema payload (intake-ui-mvp-design.md §5.4).
+         * @description Create Schema payload (intake-ui-mvp-design.md §5.4, §5.9).
          *
-         *     The backend applies the hidden defaults (``ingestion_mode=snapshot``,
-         *     ``on_schema_change=additive``, ``schema_version`` auto) — they are not part
-         *     of the wire contract.
+         *     ``ingestion_mode`` is inferred from ``file_type`` (csv/xls/xlsx → snapshot;
+         *     else document) — not part of the wire contract. Snapshot datasets require
+         *     ``primary_key`` + ``schema``; document datasets take an optional
+         *     ``document_processing`` config and ignore primary_key/schema. The backend
+         *     applies the other hidden defaults (``on_schema_change=additive``,
+         *     ``schema_version`` auto).
          */
         RegisterSchemaRequest: {
-            /**
-             * File Type
-             * @constant
-             */
-            file_type: "csv";
+            /** @description Document only — extraction config; defaulted server-side when omitted. */
+            document_processing?: components["schemas"]["DocumentProcessingSpec"] | null;
+            file_type: components["schemas"]["_FileType"];
             /** Max Size Mb */
             max_size_mb?: number | null;
             name: components["schemas"]["_DatasetSlug"];
-            /** Primary Key */
-            primary_key: components["schemas"]["_FieldName"][];
+            /**
+             * Primary Key
+             * @description Snapshot only — the canonical PK column(s). Empty/ignored for documents.
+             * @default []
+             */
+            primary_key?: components["schemas"]["_FieldName"][];
             /**
              * Schema
-             * @description Canonical field list ``[{name, type}]`` (wire key ``schema``).
+             * @description Snapshot only — canonical field list ``[{name, type}]`` (wire key ``schema``).
+             * @default []
              */
-            schema: components["schemas"]["SchemaFieldSpec"][];
+            schema?: components["schemas"]["SchemaFieldSpec"][];
         };
         /**
          * RegisteredFunction
@@ -23300,6 +23333,8 @@ export interface components {
          * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
          */
         TextTurnRequest: {
+            /** Agent Phone */
+            agent_phone: string;
             /** Phone Number */
             phone_number: string;
             /** Text */
@@ -25902,6 +25937,7 @@ export interface components {
         _FieldName: string;
         /** @enum {string} */
         _FileStatus: "received" | "scanned" | "processing" | "curated" | "rejected" | "failed" | "held";
+        _FileType: string;
         /** @enum {string} */
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
         _ToolMockKey: string;
