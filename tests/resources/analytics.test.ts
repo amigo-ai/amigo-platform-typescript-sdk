@@ -37,10 +37,16 @@ const AGENTS_FIXTURE = {
 }
 
 const CALL_QUALITY_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  avg_sentiment: 0.78,
-  avg_transcription_confidence: 0.92,
-  flagged_calls: 3,
+  summary: {
+    avg_quality_score: 82.5,
+    p50_quality_score: 85,
+    p95_quality_score: 95,
+    total_calls: 150,
+    escalation_rate: 0.1,
+    avg_duration_seconds: 200,
+  },
+  trend: [{ date: '2026-01-01T00:00:00Z', avg_quality: 80, call_count: 50, escalation_count: 5 }],
+  quality_distribution: { excellent_90_100: 60, good_70_89: 70, fair_50_69: 15, poor_0_49: 5 },
 }
 
 const EMOTION_TRENDS_FIXTURE = {
@@ -200,8 +206,10 @@ describe('AnalyticsResource', () => {
 
   it('gets call quality', async () => {
     const result = await client.analytics.getCallQuality()
-    expect(result.avg_sentiment).toBe(0.78)
-    expect(result.flagged_calls).toBe(3)
+    expect(result.summary.total_calls).toBe(150)
+    expect(result.summary.avg_quality_score).toBe(82.5)
+    expect(result.quality_distribution.excellent_90_100).toBe(60)
+    expect(result.trend[0]?.call_count).toBe(50)
   })
 
   it('gets emotion trends', async () => {

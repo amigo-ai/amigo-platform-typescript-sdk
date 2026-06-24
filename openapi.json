@@ -4097,6 +4097,176 @@
         "title": "CallListResponse",
         "type": "object"
       },
+      "CallQualityAnalyticsResponse": {
+        "description": "Call quality score trends, distribution, and summary over time.\n\nServed from the live Delta projection ``analytics.source_call_intelligence``.",
+        "properties": {
+          "quality_distribution": {
+            "$ref": "#/components/schemas/CallQualityDistribution",
+            "description": "Call counts bucketed by quality-score band"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CallQualitySummary",
+            "description": "Aggregate call-quality metrics for the period"
+          },
+          "trend": {
+            "description": "Time series of call-quality metrics per interval bucket",
+            "items": {
+              "$ref": "#/components/schemas/CallQualityTrendPoint"
+            },
+            "maxItems": 2200,
+            "title": "Trend",
+            "type": "array"
+          }
+        },
+        "required": [
+          "summary",
+          "trend",
+          "quality_distribution"
+        ],
+        "title": "CallQualityAnalyticsResponse",
+        "type": "object"
+      },
+      "CallQualityDistribution": {
+        "description": "Call counts bucketed by quality-score band.",
+        "properties": {
+          "excellent_90_100": {
+            "description": "Calls with quality score 90-100",
+            "title": "Excellent 90 100",
+            "type": "integer"
+          },
+          "fair_50_69": {
+            "description": "Calls with quality score 50-69",
+            "title": "Fair 50 69",
+            "type": "integer"
+          },
+          "good_70_89": {
+            "description": "Calls with quality score 70-89",
+            "title": "Good 70 89",
+            "type": "integer"
+          },
+          "poor_0_49": {
+            "description": "Calls with quality score 0-49",
+            "title": "Poor 0 49",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "excellent_90_100",
+          "good_70_89",
+          "fair_50_69",
+          "poor_0_49"
+        ],
+        "title": "CallQualityDistribution",
+        "type": "object"
+      },
+      "CallQualitySummary": {
+        "description": "Aggregate call-quality stats for the period.",
+        "properties": {
+          "avg_duration_seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average call duration in seconds",
+            "title": "Avg Duration Seconds"
+          },
+          "avg_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mean quality score across calls (0-100)",
+            "title": "Avg Quality Score"
+          },
+          "escalation_rate": {
+            "description": "Fraction of calls escalated to an operator (0.0-1.0)",
+            "title": "Escalation Rate",
+            "type": "number"
+          },
+          "p50_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Median quality score (0-100)",
+            "title": "P50 Quality Score"
+          },
+          "p95_quality_score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "95th-percentile quality score (0-100)",
+            "title": "P95 Quality Score"
+          },
+          "total_calls": {
+            "description": "Total number of calls in the period",
+            "title": "Total Calls",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total_calls",
+          "escalation_rate"
+        ],
+        "title": "CallQualitySummary",
+        "type": "object"
+      },
+      "CallQualityTrendPoint": {
+        "description": "Single time-bucket data point in the call-quality trend series.",
+        "properties": {
+          "avg_quality": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Average quality score in this bucket (0-100)",
+            "title": "Avg Quality"
+          },
+          "call_count": {
+            "description": "Number of calls in this bucket",
+            "title": "Call Count",
+            "type": "integer"
+          },
+          "date": {
+            "description": "Time bucket as an ISO-8601 timestamp string (granularity follows `interval`)",
+            "title": "Date",
+            "type": "string"
+          },
+          "escalation_count": {
+            "description": "Number of escalated calls in this bucket",
+            "title": "Escalation Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "date",
+          "call_count",
+          "escalation_count"
+        ],
+        "title": "CallQualityTrendPoint",
+        "type": "object"
+      },
       "CallStartedEvent": {
         "properties": {
           "call_sid": {
@@ -33418,6 +33588,18 @@
             ],
             "title": "Id"
           },
+          "justification": {
+            "anyOf": [
+              {
+                "maxLength": 8000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
           "metric_key": {
             "anyOf": [
               {
@@ -33452,6 +33634,14 @@
               }
             ],
             "title": "Rationale"
+          },
+          "references": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 100,
+            "title": "References",
+            "type": "array"
           },
           "run_id": {
             "anyOf": [
@@ -50515,9 +50705,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Call-Quality-Analytics",
-                  "type": "object"
+                  "$ref": "#/components/schemas/CallQualityAnalyticsResponse"
                 }
               }
             },
