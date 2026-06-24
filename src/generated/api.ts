@@ -9049,6 +9049,111 @@ export interface components {
             /** Total */
             total: number;
         };
+        /**
+         * CallQualityAnalyticsResponse
+         * @description Call quality score trends, distribution, and summary over time.
+         *
+         *     Served from the live Delta projection ``analytics.source_call_intelligence``.
+         */
+        CallQualityAnalyticsResponse: {
+            /** @description Call counts bucketed by quality-score band */
+            quality_distribution: components["schemas"]["CallQualityDistribution"];
+            /** @description Aggregate call-quality metrics for the period */
+            summary: components["schemas"]["CallQualitySummary"];
+            /**
+             * Trend
+             * @description Time series of call-quality metrics per interval bucket
+             */
+            trend: components["schemas"]["CallQualityTrendPoint"][];
+        };
+        /**
+         * CallQualityDistribution
+         * @description Call counts bucketed by quality-score band.
+         */
+        CallQualityDistribution: {
+            /**
+             * Excellent 90 100
+             * @description Calls with quality score 90-100
+             */
+            excellent_90_100: number;
+            /**
+             * Fair 50 69
+             * @description Calls with quality score 50-69
+             */
+            fair_50_69: number;
+            /**
+             * Good 70 89
+             * @description Calls with quality score 70-89
+             */
+            good_70_89: number;
+            /**
+             * Poor 0 49
+             * @description Calls with quality score 0-49
+             */
+            poor_0_49: number;
+        };
+        /**
+         * CallQualitySummary
+         * @description Aggregate call-quality stats for the period.
+         */
+        CallQualitySummary: {
+            /**
+             * Avg Duration Seconds
+             * @description Average call duration in seconds
+             */
+            avg_duration_seconds?: number | null;
+            /**
+             * Avg Quality Score
+             * @description Mean quality score across calls (0-100)
+             */
+            avg_quality_score?: number | null;
+            /**
+             * Escalation Rate
+             * @description Fraction of calls escalated to an operator (0.0-1.0)
+             */
+            escalation_rate: number;
+            /**
+             * P50 Quality Score
+             * @description Median quality score (0-100)
+             */
+            p50_quality_score?: number | null;
+            /**
+             * P95 Quality Score
+             * @description 95th-percentile quality score (0-100)
+             */
+            p95_quality_score?: number | null;
+            /**
+             * Total Calls
+             * @description Total number of calls in the period
+             */
+            total_calls: number;
+        };
+        /**
+         * CallQualityTrendPoint
+         * @description Single time-bucket data point in the call-quality trend series.
+         */
+        CallQualityTrendPoint: {
+            /**
+             * Avg Quality
+             * @description Average quality score in this bucket (0-100)
+             */
+            avg_quality?: number | null;
+            /**
+             * Call Count
+             * @description Number of calls in this bucket
+             */
+            call_count: number;
+            /**
+             * Date
+             * @description Time bucket as an ISO-8601 timestamp string (granularity follows `interval`)
+             */
+            date: string;
+            /**
+             * Escalation Count
+             * @description Number of escalated calls in this bucket
+             */
+            escalation_count: number;
+        };
         /** CallStartedEvent */
         CallStartedEvent: {
             /** Call Sid */
@@ -21275,12 +21380,16 @@ export interface components {
             expected?: unknown | null;
             /** Id */
             id?: string | null;
+            /** Justification */
+            justification?: string | null;
             /** Metric Key */
             metric_key?: string | null;
             /** Passed */
             passed?: boolean | null;
             /** Rationale */
             rationale?: string | null;
+            /** References */
+            references?: number[];
             /** Run Id */
             run_id?: string | null;
             /** Score */
@@ -29143,9 +29252,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["CallQualityAnalyticsResponse"];
                 };
             };
             /** @description Validation Error */
