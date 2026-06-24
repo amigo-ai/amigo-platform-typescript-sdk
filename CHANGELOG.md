@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.78.0] - 2026-06-24
+
+### Bug Fixes
+
+- sync typed call-quality response + repair analytics test (#350)
+
 ## [0.77.0] - 2026-06-23
 
 ### Maintenance
