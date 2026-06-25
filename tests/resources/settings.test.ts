@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
 import type { SttProvider, TtsProvider } from '../../src/index.js'
+import { mockFetch } from '../helpers/mock-fetch.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -45,41 +46,6 @@ const RETENTION_FIXTURE = {
   phi_data_days: 2555,
   legal_hold: false,
   legal_hold_reason: null,
-}
-
-type MockRouteContext = { body: unknown }
-type MockRoute = (context: MockRouteContext) => Response | Promise<Response>
-
-async function parseBody(input: string | URL | Request, init?: RequestInit): Promise<unknown> {
-  if (input instanceof Request) {
-    if (!input.body) return undefined
-    return input.clone().json()
-  }
-  if (typeof init?.body !== 'string') return undefined
-  return JSON.parse(init.body)
-}
-
-function mockFetch(routes: Record<string, MockRoute>): typeof globalThis.fetch {
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    let url: string
-    let method: string
-    if (input instanceof Request) {
-      url = input.url
-      method = input.method.toUpperCase()
-    } else {
-      url = typeof input === 'string' ? input : input.toString()
-      method = (init?.method ?? 'GET').toUpperCase()
-    }
-    const pathname = new URL(url).pathname
-    const body = await parseBody(input, init)
-    for (const [pattern, handler] of Object.entries(routes)) {
-      const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler({ body })
-    }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
-      status: 500,
-    })
-  }
 }
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`

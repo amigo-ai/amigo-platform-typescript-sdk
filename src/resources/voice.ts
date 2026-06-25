@@ -14,6 +14,7 @@ export type AgentVoiceConfig = components['schemas']['VoiceConfig']
 export type VoiceSettingsRequest = components['schemas']['VoiceSettingsRequest']
 export type VoiceSettingsResponse = components['schemas']['VoiceSettingsResponse']
 
+// Force constant arrays to list every OpenAPI enum member after a spec refresh.
 type ExhaustiveProviderList<Union extends string, Values extends readonly Union[]> =
   Exclude<Union, Values[number]> extends never ? Values : never
 
@@ -27,12 +28,14 @@ export const VOICE_SESSION_PROVIDERS = voiceSessionProviders satisfies Exhaustiv
   typeof voiceSessionProviders
 >
 
-const sttProviders = [
-  'deepgram',
-  'openai',
-  // Cartesia ink-2 is a supported streaming STT provider behind platform routing gates.
-  'cartesia',
-] as const satisfies readonly SttProvider[]
+const sttProviders = ['deepgram', 'openai', 'cartesia'] as const satisfies readonly SttProvider[]
+/**
+ * Supported STT provider ids from the platform schema.
+ *
+ * Provider availability can still be workspace- or environment-gated at runtime
+ * (for example Cartesia ink-2), so treat this as the contract enum, not an
+ * entitlement check for a specific workspace.
+ */
 export const STT_PROVIDERS = sttProviders satisfies ExhaustiveProviderList<
   SttProvider,
   typeof sttProviders

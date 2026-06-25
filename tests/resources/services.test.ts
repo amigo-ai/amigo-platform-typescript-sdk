@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
+import { mockFetch } from '../helpers/mock-fetch.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -28,41 +29,6 @@ const SERVICE_FIXTURE = {
   },
   created_at: '2026-01-01T00:00:00Z',
   updated_at: '2026-01-01T00:00:00Z',
-}
-
-type MockRouteContext = { body: unknown }
-type MockRoute = (context: MockRouteContext) => Response | Promise<Response>
-
-async function parseBody(input: string | URL | Request, init?: RequestInit): Promise<unknown> {
-  if (input instanceof Request) {
-    if (!input.body) return undefined
-    return input.clone().json()
-  }
-  if (typeof init?.body !== 'string') return undefined
-  return JSON.parse(init.body)
-}
-
-function mockFetch(routes: Record<string, MockRoute>): typeof globalThis.fetch {
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    let url: string
-    let method: string
-    if (input instanceof Request) {
-      url = input.url
-      method = input.method.toUpperCase()
-    } else {
-      url = typeof input === 'string' ? input : input.toString()
-      method = (init?.method ?? 'GET').toUpperCase()
-    }
-    const pathname = new URL(url).pathname
-    const body = await parseBody(input, init)
-    for (const [pattern, handler] of Object.entries(routes)) {
-      const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler({ body })
-    }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
-      status: 500,
-    })
-  }
 }
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
@@ -119,6 +85,8 @@ describe('ServicesResource', () => {
     const result = await client.services.create(body)
     expect(result.id).toBe(SERVICE_ID)
     expect(result.name).toBe('Scheduling Service')
+    expect(result.voice_config?.session_provider).toBe(sessionProvider)
+    expect(result.voice_config?.tts_provider).toBe(ttsProvider)
     expect(lastCreateBody).toMatchObject({
       voice_config: {
         session_provider: sessionProvider,

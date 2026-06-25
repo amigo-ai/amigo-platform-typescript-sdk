@@ -10,9 +10,22 @@
  * resource builds a URL with a trailing slash (some FastAPI list endpoints
  * do), include the slash in the route key.
  */
-export function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
-): typeof globalThis.fetch {
+export type MockRouteContext = { body: unknown }
+export type MockRoute = (context: MockRouteContext) => Response | Promise<Response>
+
+async function parseBody(input: string | URL | Request, init?: RequestInit): Promise<unknown> {
+  if (input instanceof Request) {
+    if (!input.body) return undefined
+    const text = await input.clone().text()
+    return text ? JSON.parse(text) : undefined
+  }
+  if (init?.body == null) return undefined
+  if (typeof init.body === 'string') return JSON.parse(init.body)
+  console.warn('mockFetch received a non-string request body; body capture skipped')
+  return undefined
+}
+
+export function mockFetch(routes: Record<string, MockRoute>): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -24,9 +37,10 @@ export function mockFetch(
       method = (init?.method ?? 'GET').toUpperCase()
     }
     const pathname = new URL(url).pathname
+    const body = await parseBody(input, init)
     for (const [pattern, handler] of Object.entries(routes)) {
       const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+      if (pMethod === method && pPathParts.join(' ') === pathname) return handler({ body })
     }
     return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
       status: 500,

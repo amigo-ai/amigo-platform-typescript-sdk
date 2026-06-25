@@ -3,6 +3,7 @@ import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { components } from '../../src/generated/api.js'
 import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
+import { mockFetch } from '../helpers/mock-fetch.js'
 
 type CreateAgentVersionRequest = components['schemas']['CreateAgentVersionRequest']
 let lastCreateVersionBody: unknown
@@ -47,45 +48,6 @@ const AGENT_VERSION_FIXTURE = {
   updated_at: '2026-01-02T00:00:00Z',
 }
 
-type MockRouteContext = { body: unknown }
-type MockRoute = (context: MockRouteContext) => Response | Promise<Response>
-
-async function parseBody(input: string | URL | Request, init?: RequestInit): Promise<unknown> {
-  if (input instanceof Request) {
-    if (!input.body) return undefined
-    return input.clone().json()
-  }
-  if (typeof init?.body !== 'string') return undefined
-  return JSON.parse(init.body)
-}
-
-function mockFetch(routes: Record<string, MockRoute>): typeof globalThis.fetch {
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    let url: string
-    let method: string
-    if (input instanceof Request) {
-      url = input.url
-      method = input.method.toUpperCase()
-    } else {
-      url = typeof input === 'string' ? input : input.toString()
-      method = (init?.method ?? 'GET').toUpperCase()
-    }
-    const pathname = new URL(url).pathname
-    const body = await parseBody(input, init)
-
-    for (const [pattern, handler] of Object.entries(routes)) {
-      const [pMethod, ...pPathParts] = pattern.split(' ')
-      const pPath = pPathParts.join(' ')
-      if (pMethod === method && pathname === pPath) {
-        return handler({ body })
-      }
-    }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
-      status: 500,
-    })
-  }
-}
-
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
 const client = new AmigoClient({
@@ -112,7 +74,11 @@ const client = new AmigoClient({
       lastCreateVersionBody = body
       return Response.json({
         ...AGENT_VERSION_FIXTURE,
-        voice_config: { voice_id: 'voice-abc123', session_provider: 'openai_realtime' },
+        voice_config: {
+          voice_id: 'voice-abc123',
+          session_provider: 'openai_realtime',
+          tts_provider: 'elevenlabs',
+        },
       })
     },
   }),
@@ -217,6 +183,7 @@ describe('AgentsResource', () => {
     expect(result.version).toBe(2)
     expect(result.agent_id).toBe(AGENT_FIXTURE.id)
     expect(result.voice_config?.session_provider).toBe('openai_realtime')
+    expect(result.voice_config?.tts_provider).toBe('elevenlabs')
     expect(lastCreateVersionBody).toMatchObject({
       voice_config: {
         voice_id: 'voice-abc123',
