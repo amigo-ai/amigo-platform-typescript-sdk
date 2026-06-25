@@ -719,6 +719,18 @@ export type {
 /** @deprecated Use `MetricValue` instead. */
 export type MetricValueResponse = MetricValueAlias
 
+export { STT_PROVIDERS, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from './resources/voice.js'
+export type {
+  AgentVoiceConfig,
+  ServiceVoiceConfigInput,
+  ServiceVoiceConfigOutput,
+  SttProvider,
+  TtsProvider,
+  VoiceSessionProvider,
+  VoiceSettingsRequest,
+  VoiceSettingsResponse,
+} from './resources/voice.js'
+
 export type {
   CreateWorkspaceDataQueryRequest,
   InvokeWorkspaceDataQueryRequest,

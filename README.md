@@ -446,6 +446,8 @@ const parent = await client.tokens.exchangeClientCredentials({
 ### Agents
 
 ```typescript
+import { VOICE_SESSION_PROVIDERS } from '@amigo-ai/platform-sdk'
+
 // Create an agent
 const agent = await client.agents.create({
   name: 'Patient Intake Agent',
@@ -466,6 +468,10 @@ const version = await client.agents.createVersion(agent.id, {
       conversation_visibility: 'public',
       thought_visibility: 'private',
     },
+  },
+  voice_config: {
+    voice_id: 'voice-abc123',
+    session_provider: VOICE_SESSION_PROVIDERS[0], // "inhouse"
   },
 })
 
@@ -506,9 +512,18 @@ console.log(result.result, result.duration_ms)
 Services wire together an agent + context graph + phone channel.
 
 ```typescript
+import { VOICE_SESSION_PROVIDERS } from '@amigo-ai/platform-sdk'
+
 const { items: services } = await client.services.list()
 const service = await client.services.get('service-id')
 console.log(service.agent_name, service.channel_type, service.version_sets)
+
+await client.services.update(service.id, {
+  voice_config: {
+    ...(service.voice_config ?? {}),
+    session_provider: VOICE_SESSION_PROVIDERS[0], // "inhouse", "openai_realtime", or "atlas"
+  },
+})
 ```
 
 ### World Model
@@ -723,9 +738,16 @@ console.log(source.source_type, source.health_status, source.last_sync_at)
 ### Settings
 
 ```typescript
+import { STT_PROVIDERS, TTS_PROVIDERS } from '@amigo-ai/platform-sdk'
+
 // Voice
 const voice = await client.settings.voice.get()
-await client.settings.voice.update({ voice_id: 'new-voice-id', speed: 1.1 })
+await client.settings.voice.update({
+  voice_id: 'new-voice-id',
+  speed: 1.1,
+  stt_provider: STT_PROVIDERS[0], // "deepgram"
+  tts_provider: TTS_PROVIDERS[0], // "cartesia"
+})
 
 // Retention
 const retention = await client.settings.retention.get()

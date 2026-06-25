@@ -1,8 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { AmigoClient, STT_PROVIDERS, TTS_PROVIDERS } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
+let lastVoiceUpdateBody: unknown
 
 const VOICE_SETTINGS_FIXTURE = {
   language: 'en',
@@ -14,7 +15,10 @@ const VOICE_SETTINGS_FIXTURE = {
   voice_id: 'voice-abc123',
   pronunciation_dict_id: null,
   speed: null,
+  stt_provider: null,
   tone: null,
+  tts_config: null,
+  tts_provider: null,
   volume: null,
 }
 
@@ -42,9 +46,19 @@ const RETENTION_FIXTURE = {
   legal_hold_reason: null,
 }
 
-function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
-): typeof globalThis.fetch {
+type MockRouteContext = { body: unknown }
+type MockRoute = (context: MockRouteContext) => Response | Promise<Response>
+
+async function parseBody(input: string | URL | Request, init?: RequestInit): Promise<unknown> {
+  if (input instanceof Request) {
+    if (!input.body) return undefined
+    return input.clone().json()
+  }
+  if (typeof init?.body !== 'string') return undefined
+  return JSON.parse(init.body)
+}
+
+function mockFetch(routes: Record<string, MockRoute>): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
     let method: string
@@ -56,9 +70,10 @@ function mockFetch(
       method = (init?.method ?? 'GET').toUpperCase()
     }
     const pathname = new URL(url).pathname
+    const body = await parseBody(input, init)
     for (const [pattern, handler] of Object.entries(routes)) {
       const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+      if (pMethod === method && pPathParts.join(' ') === pathname) return handler({ body })
     }
     return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
       status: 500,
@@ -74,8 +89,10 @@ const client = new AmigoClient({
   fetch: mockFetch({
     [`GET ${BASE}/settings/voice`]: () => Response.json(VOICE_SETTINGS_FIXTURE),
 
-    [`PUT ${BASE}/settings/voice`]: () =>
-      Response.json({ ...VOICE_SETTINGS_FIXTURE, language: 'es' }),
+    [`PUT ${BASE}/settings/voice`]: ({ body }) => {
+      lastVoiceUpdateBody = body
+      return Response.json({ ...VOICE_SETTINGS_FIXTURE, language: 'es' })
+    },
 
     [`GET ${BASE}/settings/branding`]: () => Response.json(BRANDING_FIXTURE),
 
@@ -113,8 +130,14 @@ describe('SettingsResource', () => {
     })
 
     it('updates voice settings', async () => {
-      const result = await client.settings.voice.update({ language: 'es' } as never)
+      const body = {
+        language: 'es',
+        stt_provider: STT_PROVIDERS[0],
+        tts_provider: TTS_PROVIDERS[0],
+      }
+      const result = await client.settings.voice.update(body)
       expect(result.language).toBe('es')
+      expect(lastVoiceUpdateBody).toMatchObject(body)
     })
   })
 
