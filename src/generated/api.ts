@@ -8425,6 +8425,8 @@ export interface components {
         Body_upload_intake_file_v1__workspace_id__intake_files_post: {
             /** Dataset */
             dataset: string;
+            /** Document Id */
+            document_id?: string | null;
             /** File */
             file: string;
         };
@@ -12178,9 +12180,19 @@ export interface components {
          * @description A registered schema in the Schemas list (intake-ui-mvp-design.md §5.3).
          */
         DatasetRow: {
+            /**
+             * Accepted File Types
+             * @description Document datasets: the full accepted-type set (V265). Empty for snapshot
+             *     or legacy single-type documents (the UI falls back to ``file_type``).
+             * @default []
+             */
+            accepted_file_types?: string[];
             /** Field Count */
             field_count: number;
-            /** File Type */
+            /**
+             * File Type
+             * @description Primary/representative file type (the first accepted type).
+             */
             file_type: string;
             /**
              * Ingestion Mode
@@ -15594,6 +15606,12 @@ export interface components {
              */
             dataset: string;
             /**
+             * Document Id
+             * @description The document this version belongs to (§5.9). Null for snapshot/CSV rows;
+             *     set for documents — the console groups versions by it and the version chain.
+             */
+            document_id?: string | null;
+            /**
              * Error Reason
              * @description Null unless rejected/failed.
              */
@@ -15619,6 +15637,12 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
             status: components["schemas"]["_FileStatus"];
+            /**
+             * Version
+             * @description The file's version number (per-document for documents, per-dataset for
+             *     snapshot). Lets the UI render a document's version history.
+             */
+            version?: number | null;
         };
         /** IntakeLinkResponse */
         IntakeLinkResponse: {
@@ -19487,6 +19511,15 @@ export interface components {
          *     ``schema_version`` auto).
          */
         RegisterSchemaRequest: {
+            /**
+             * Accepted File Types
+             * @description Document only — the SET of accepted file types (V265, e.g.
+             *     ``["pdf","docx","md"]``). Empty → single-type (just ``file_type``).
+             *     ``file_type`` is included as the primary. Mixing in a tabular type
+             *     (csv/xls/xlsx) is rejected; snapshot datasets are single-type.
+             * @default []
+             */
+            accepted_file_types?: components["schemas"]["_FileType"][];
             /** @description Document only — extraction config; defaulted server-side when omitted. */
             document_processing?: components["schemas"]["DocumentProcessingSpec"] | null;
             file_type: components["schemas"]["_FileType"];

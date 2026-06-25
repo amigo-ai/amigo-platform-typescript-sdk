@@ -2313,6 +2313,18 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
           "file": {
             "contentMediaType": "application/octet-stream",
             "title": "File",
@@ -11236,11 +11248,21 @@
       "DatasetRow": {
         "description": "A registered schema in the Schemas list (intake-ui-mvp-design.md \u00a75.3).",
         "properties": {
+          "accepted_file_types": {
+            "default": [],
+            "description": "Document datasets: the full accepted-type set (V265). Empty for snapshot\nor legacy single-type documents (the UI falls back to ``file_type``).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted File Types",
+            "type": "array"
+          },
           "field_count": {
             "title": "Field Count",
             "type": "integer"
           },
           "file_type": {
+            "description": "Primary/representative file type (the first accepted type).",
             "title": "File Type",
             "type": "string"
           },
@@ -20040,6 +20062,19 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The document this version belongs to (\u00a75.9). Null for snapshot/CSV rows;\nset for documents \u2014 the console groups versions by it and the version chain.",
+            "title": "Document Id"
+          },
           "error_reason": {
             "anyOf": [
               {
@@ -20085,6 +20120,18 @@
           },
           "status": {
             "$ref": "#/components/schemas/_FileStatus"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The file's version number (per-document for documents, per-dataset for\nsnapshot). Lets the UI render a document's version history.",
+            "title": "Version"
           }
         },
         "required": [
@@ -29168,6 +29215,16 @@
       "RegisterSchemaRequest": {
         "description": "Create Schema payload (intake-ui-mvp-design.md \u00a75.4, \u00a75.9).\n\n``ingestion_mode`` is inferred from ``file_type`` (csv/xls/xlsx \u2192 snapshot;\nelse document) \u2014 not part of the wire contract. Snapshot datasets require\n``primary_key`` + ``schema``; document datasets take an optional\n``document_processing`` config and ignore primary_key/schema. The backend\napplies the other hidden defaults (``on_schema_change=additive``,\n``schema_version`` auto).",
         "properties": {
+          "accepted_file_types": {
+            "default": [],
+            "description": "Document only \u2014 the SET of accepted file types (V265, e.g.\n``[\"pdf\",\"docx\",\"md\"]``). Empty \u2192 single-type (just ``file_type``).\n``file_type`` is included as the primary. Mixing in a tabular type\n(csv/xls/xlsx) is rejected; snapshot datasets are single-type.",
+            "items": {
+              "$ref": "#/components/schemas/_FileType"
+            },
+            "maxItems": 16,
+            "title": "Accepted File Types",
+            "type": "array"
+          },
           "document_processing": {
             "anyOf": [
               {
