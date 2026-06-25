@@ -2313,6 +2313,18 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
           "file": {
             "contentMediaType": "application/octet-stream",
             "title": "File",
@@ -20040,6 +20052,19 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The document this version belongs to (\u00a75.9). Null for snapshot/CSV rows;\nset for documents \u2014 the console groups versions by it and the version chain.",
+            "title": "Document Id"
+          },
           "error_reason": {
             "anyOf": [
               {
@@ -20085,6 +20110,18 @@
           },
           "status": {
             "$ref": "#/components/schemas/_FileStatus"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The file's version number (per-document for documents, per-dataset for\nsnapshot). Lets the UI render a document's version history.",
+            "title": "Version"
           }
         },
         "required": [

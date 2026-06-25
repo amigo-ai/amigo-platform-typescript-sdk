@@ -8425,6 +8425,8 @@ export interface components {
         Body_upload_intake_file_v1__workspace_id__intake_files_post: {
             /** Dataset */
             dataset: string;
+            /** Document Id */
+            document_id?: string | null;
             /** File */
             file: string;
         };
@@ -15594,6 +15596,12 @@ export interface components {
              */
             dataset: string;
             /**
+             * Document Id
+             * @description The document this version belongs to (§5.9). Null for snapshot/CSV rows;
+             *     set for documents — the console groups versions by it and the version chain.
+             */
+            document_id?: string | null;
+            /**
              * Error Reason
              * @description Null unless rejected/failed.
              */
@@ -15619,6 +15627,12 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
             status: components["schemas"]["_FileStatus"];
+            /**
+             * Version
+             * @description The file's version number (per-document for documents, per-dataset for
+             *     snapshot). Lets the UI render a document's version history.
+             */
+            version?: number | null;
         };
         /** IntakeLinkResponse */
         IntakeLinkResponse: {
