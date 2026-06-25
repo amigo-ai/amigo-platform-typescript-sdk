@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AmigoClient, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from '../../src/index.js'
+import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
+import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -104,13 +105,15 @@ describe('ServicesResource', () => {
   })
 
   it('creates a service', async () => {
+    const sessionProvider = 'inhouse' satisfies VoiceSessionProvider
+    const ttsProvider = 'cartesia' satisfies TtsProvider
     const body = {
       name: 'Scheduling Service',
       channel_type: 'voice',
       context_graph_id: 'cg-00000000-0000-0000-0000-000000000001',
       voice_config: {
-        session_provider: VOICE_SESSION_PROVIDERS[0],
-        tts_provider: TTS_PROVIDERS[0],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     } as Parameters<typeof client.services.create>[0]
     const result = await client.services.create(body)
@@ -118,8 +121,8 @@ describe('ServicesResource', () => {
     expect(result.name).toBe('Scheduling Service')
     expect(lastCreateBody).toMatchObject({
       voice_config: {
-        session_provider: VOICE_SESSION_PROVIDERS[0],
-        tts_provider: TTS_PROVIDERS[0],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     })
   })
@@ -142,12 +145,14 @@ describe('ServicesResource', () => {
   })
 
   it('updates a service', async () => {
+    const sessionProvider = 'atlas' satisfies VoiceSessionProvider
+    const ttsProvider = 'groq' satisfies TtsProvider
     const body = {
       name: 'Updated Service',
       is_active: false,
       voice_config: {
-        session_provider: VOICE_SESSION_PROVIDERS[2],
-        tts_provider: TTS_PROVIDERS[2],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     } as Parameters<typeof client.services.update>[1]
     const result = await client.services.update(SERVICE_ID, body)
@@ -156,8 +161,8 @@ describe('ServicesResource', () => {
     expect(result.voice_config?.session_provider).toBe('atlas')
     expect(lastUpdateBody).toMatchObject({
       voice_config: {
-        session_provider: VOICE_SESSION_PROVIDERS[2],
-        tts_provider: TTS_PROVIDERS[2],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     })
   })

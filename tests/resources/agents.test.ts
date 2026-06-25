@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AmigoClient, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from '../../src/index.js'
+import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { components } from '../../src/generated/api.js'
+import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
 
 type CreateAgentVersionRequest = components['schemas']['CreateAgentVersionRequest']
 let lastCreateVersionBody: unknown
@@ -186,6 +187,8 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent version', async () => {
+    const sessionProvider = 'openai_realtime' satisfies VoiceSessionProvider
+    const ttsProvider = 'elevenlabs' satisfies TtsProvider
     const body: CreateAgentVersionRequest = {
       name: 'My Agent v2',
       background: '',
@@ -206,8 +209,8 @@ describe('AgentsResource', () => {
       },
       voice_config: {
         voice_id: 'voice-abc123',
-        session_provider: VOICE_SESSION_PROVIDERS[1],
-        tts_provider: TTS_PROVIDERS[1],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     }
     const result = await client.agents.createVersion(AGENT_FIXTURE.id, body)
@@ -217,8 +220,8 @@ describe('AgentsResource', () => {
     expect(lastCreateVersionBody).toMatchObject({
       voice_config: {
         voice_id: 'voice-abc123',
-        session_provider: VOICE_SESSION_PROVIDERS[1],
-        tts_provider: TTS_PROVIDERS[1],
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
       },
     })
   })

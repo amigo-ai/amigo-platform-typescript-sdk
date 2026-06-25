@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest'
-import { AmigoClient, STT_PROVIDERS, TTS_PROVIDERS } from '../../src/index.js'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { AmigoClient } from '../../src/index.js'
+import type { SttProvider, TtsProvider } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -15,10 +16,10 @@ const VOICE_SETTINGS_FIXTURE = {
   voice_id: 'voice-abc123',
   pronunciation_dict_id: null,
   speed: null,
-  stt_provider: null,
+  stt_provider: 'cartesia',
   tone: null,
-  tts_config: null,
-  tts_provider: null,
+  tts_config: { voice_id: 'voice-from-config' },
+  tts_provider: 'elevenlabs',
   volume: null,
 }
 
@@ -122,19 +123,28 @@ const client = new AmigoClient({
 })
 
 describe('SettingsResource', () => {
+  beforeEach(() => {
+    lastVoiceUpdateBody = undefined
+  })
+
   describe('voice', () => {
     it('gets voice settings', async () => {
       const result = await client.settings.voice.get()
       expect(result.language).toBe('en')
       expect(result.post_call_analysis_enabled).toBe(true)
+      expect(result.stt_provider).toBe('cartesia')
+      expect(result.tts_provider).toBe('elevenlabs')
+      expect(result.tts_config).toEqual({ voice_id: 'voice-from-config' })
     })
 
     it('updates voice settings', async () => {
+      const sttProvider = 'deepgram' satisfies SttProvider
+      const ttsProvider = 'cartesia' satisfies TtsProvider
       const body = {
         language: 'es',
-        stt_provider: STT_PROVIDERS[0],
-        tts_provider: TTS_PROVIDERS[0],
-      }
+        stt_provider: sttProvider,
+        tts_provider: ttsProvider,
+      } satisfies Parameters<typeof client.settings.voice.update>[0]
       const result = await client.settings.voice.update(body)
       expect(result.language).toBe('es')
       expect(lastVoiceUpdateBody).toMatchObject(body)
