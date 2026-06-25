@@ -1,9 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { components } from '../../src/generated/api.js'
+import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
+import { mockFetch } from '../helpers/mock-fetch.js'
 
 type CreateAgentVersionRequest = components['schemas']['CreateAgentVersionRequest']
+let lastCreateVersionBody: unknown
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -45,34 +48,6 @@ const AGENT_VERSION_FIXTURE = {
   updated_at: '2026-01-02T00:00:00Z',
 }
 
-function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
-): typeof globalThis.fetch {
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
-    let url: string
-    let method: string
-    if (input instanceof Request) {
-      url = input.url
-      method = input.method.toUpperCase()
-    } else {
-      url = typeof input === 'string' ? input : input.toString()
-      method = (init?.method ?? 'GET').toUpperCase()
-    }
-    const pathname = new URL(url).pathname
-
-    for (const [pattern, handler] of Object.entries(routes)) {
-      const [pMethod, ...pPathParts] = pattern.split(' ')
-      const pPath = pPathParts.join(' ')
-      if (pMethod === method && pathname === pPath) {
-        return handler()
-      }
-    }
-    return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
-      status: 500,
-    })
-  }
-}
-
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
 const client = new AmigoClient({
@@ -95,12 +70,25 @@ const client = new AmigoClient({
 
     [`DELETE ${BASE}/agents/${AGENT_FIXTURE.id}`]: () => new Response(null, { status: 204 }),
 
-    [`POST ${BASE}/agents/${AGENT_FIXTURE.id}/versions`]: () =>
-      Response.json(AGENT_VERSION_FIXTURE),
+    [`POST ${BASE}/agents/${AGENT_FIXTURE.id}/versions`]: ({ body }) => {
+      lastCreateVersionBody = body
+      return Response.json({
+        ...AGENT_VERSION_FIXTURE,
+        voice_config: {
+          voice_id: 'voice-abc123',
+          session_provider: 'openai_realtime',
+          tts_provider: 'elevenlabs',
+        },
+      })
+    },
   }),
 })
 
 describe('AgentsResource', () => {
+  beforeEach(() => {
+    lastCreateVersionBody = undefined
+  })
+
   it('lists agents', async () => {
     const result = await client.agents.list()
     expect(result.items).toHaveLength(1)
@@ -165,6 +153,8 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent version', async () => {
+    const sessionProvider = 'openai_realtime' satisfies VoiceSessionProvider
+    const ttsProvider = 'elevenlabs' satisfies TtsProvider
     const body: CreateAgentVersionRequest = {
       name: 'My Agent v2',
       background: '',
@@ -183,9 +173,23 @@ describe('AgentsResource', () => {
           thought_visibility: 'private',
         },
       },
+      voice_config: {
+        voice_id: 'voice-abc123',
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
+      },
     }
     const result = await client.agents.createVersion(AGENT_FIXTURE.id, body)
     expect(result.version).toBe(2)
     expect(result.agent_id).toBe(AGENT_FIXTURE.id)
+    expect(result.voice_config?.session_provider).toBe('openai_realtime')
+    expect(result.voice_config?.tts_provider).toBe('elevenlabs')
+    expect(lastCreateVersionBody).toMatchObject({
+      voice_config: {
+        voice_id: 'voice-abc123',
+        session_provider: sessionProvider,
+        tts_provider: ttsProvider,
+      },
+    })
   })
 })

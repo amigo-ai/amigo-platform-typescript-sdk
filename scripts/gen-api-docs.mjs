@@ -71,6 +71,8 @@ const conversationHelperExports = requireExportNames(
   './resources/conversations.js',
 )
 const conversationTypeExports = requireExportNames(exportMap.types, './resources/conversations.js')
+const voiceProviderExports = requireExportNames(exportMap.values, './resources/voice.js')
+const voiceProviderTypeExports = requireExportNames(exportMap.types, './resources/voice.js')
 function collectSubresources(className) {
   // Namespace resources (e.g. ``ChannelsResource``) carry typed
   // subresource fields (``readonly sesSetup: SesSetupResource``) that
@@ -159,6 +161,8 @@ const markdown = await prettier.format(
     `- Pagination and response helpers: ${formatNames(exportMap.values.get('./core/utils.js'))}`,
     `- Conversation helpers: ${formatNames(conversationHelperExports)}`,
     `- Conversation types: ${formatConversationTypeNames(conversationTypeExports)}`,
+    `- Voice provider constants: ${formatNames(voiceProviderExports)}`,
+    `- Voice provider types: ${formatNames(voiceProviderTypeExports)}`,
     `- Response and hook types: ${formatNames(
       [
         ...(exportMap.types.get('./core/utils.js') ?? []),
