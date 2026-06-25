@@ -719,6 +719,7 @@ export type {
 /** @deprecated Use `MetricValue` instead. */
 export type MetricValueResponse = MetricValueAlias
 
+/** Voice provider constants and types. */
 export { STT_PROVIDERS, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from './resources/voice.js'
 export type {
   AgentVoiceConfig,

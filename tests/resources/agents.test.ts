@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { AmigoClient, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { components } from '../../src/generated/api.js'
@@ -118,6 +118,10 @@ const client = new AmigoClient({
 })
 
 describe('AgentsResource', () => {
+  beforeEach(() => {
+    lastCreateVersionBody = undefined
+  })
+
   it('lists agents', async () => {
     const result = await client.agents.list()
     expect(result.items).toHaveLength(1)
@@ -211,7 +215,11 @@ describe('AgentsResource', () => {
     expect(result.agent_id).toBe(AGENT_FIXTURE.id)
     expect(result.voice_config?.session_provider).toBe('openai_realtime')
     expect(lastCreateVersionBody).toMatchObject({
-      voice_config: { voice_id: 'voice-abc123', session_provider: 'openai_realtime' },
+      voice_config: {
+        voice_id: 'voice-abc123',
+        session_provider: VOICE_SESSION_PROVIDERS[1],
+        tts_provider: TTS_PROVIDERS[1],
+      },
     })
   })
 })

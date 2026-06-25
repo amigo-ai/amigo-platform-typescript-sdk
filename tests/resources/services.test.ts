@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { AmigoClient, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 
@@ -98,6 +98,11 @@ const client = new AmigoClient({
 })
 
 describe('ServicesResource', () => {
+  beforeEach(() => {
+    lastCreateBody = undefined
+    lastUpdateBody = undefined
+  })
+
   it('creates a service', async () => {
     const body = {
       name: 'Scheduling Service',
@@ -112,7 +117,10 @@ describe('ServicesResource', () => {
     expect(result.id).toBe(SERVICE_ID)
     expect(result.name).toBe('Scheduling Service')
     expect(lastCreateBody).toMatchObject({
-      voice_config: { session_provider: 'inhouse', tts_provider: 'cartesia' },
+      voice_config: {
+        session_provider: VOICE_SESSION_PROVIDERS[0],
+        tts_provider: TTS_PROVIDERS[0],
+      },
     })
   })
 
@@ -147,7 +155,10 @@ describe('ServicesResource', () => {
     expect(result.is_active).toBe(false)
     expect(result.voice_config?.session_provider).toBe('atlas')
     expect(lastUpdateBody).toMatchObject({
-      voice_config: { session_provider: 'atlas', tts_provider: 'groq' },
+      voice_config: {
+        session_provider: VOICE_SESSION_PROVIDERS[2],
+        tts_provider: TTS_PROVIDERS[2],
+      },
     })
   })
 
