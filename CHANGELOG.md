@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.78.1] - 2026-06-25
+
+### Improvements
+
+- Productize voice provider controls in SDK (#351)
+
 ## [0.78.0] - 2026-06-24
 
 ### Bug Fixes
