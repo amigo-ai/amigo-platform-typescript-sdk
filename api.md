@@ -266,8 +266,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 **`channels.sesSetup`**
 
 - `create`
-- `list`
-- `listAutoPaging`
 - `get`
 - `verify`
 - `delete`
