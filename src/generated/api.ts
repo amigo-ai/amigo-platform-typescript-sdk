@@ -3342,6 +3342,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Intake Sources */
+        get: operations["list_intake_sources_v1__workspace_id__intake_sources_get"];
+        put?: never;
+        /** Register Intake Source */
+        post: operations["register_intake_source_v1__workspace_id__intake_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/sources/{source_id}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sync Intake Source */
+        post: operations["sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/integrations": {
         parameters: {
             query?: never;
@@ -12494,6 +12529,19 @@ export interface components {
              */
             retain_source?: boolean;
         };
+        /**
+         * DriveFolderMapping
+         * @description One Google Drive folder ↔ one intake dataset.
+         *
+         *     ``folder_id`` is the Drive folder id (the identity — never the folder name,
+         *     which can be renamed/moved). One folder maps to exactly one dataset.
+         */
+        DriveFolderMapping: {
+            /** Dataset */
+            dataset: string;
+            /** Folder Id */
+            folder_id: string;
+        };
         /** DropColumnAction */
         DropColumnAction: {
             name: components["schemas"]["IdentifierString"];
@@ -15751,6 +15799,38 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * IntakeSourceRow
+         * @description A registered intake source (Sources list).
+         */
+        IntakeSourceRow: {
+            /**
+             * Created Ts
+             * @description ISO-8601 timestamp.
+             */
+            created_ts: string;
+            /**
+             * Credential Ssm Param Path
+             * @description Where the SA key must be uploaded (derived; the secret itself is never returned).
+             */
+            credential_ssm_param_path: string;
+            /** Display Name */
+            display_name: string;
+            /** Drive Id */
+            drive_id?: string | null;
+            /** Folders */
+            folders: components["schemas"]["DriveFolderMapping"][];
+            /**
+             * Id
+             * Format: uuid
+             * @description source_id.
+             */
+            id: string;
+            /** Source Type */
+            source_type: string;
+            /** Status */
+            status: string;
+        };
         /** IntakeUploadResponse */
         IntakeUploadResponse: {
             /** Content Type */
@@ -18129,6 +18209,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[IntakeSourceRow] */
+        PaginatedResponse_IntakeSourceRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["IntakeSourceRow"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[InvoiceItem] */
         PaginatedResponse_InvoiceItem_: {
             /** Continuation Token */
@@ -19592,6 +19683,23 @@ export interface components {
              * @default []
              */
             schema?: components["schemas"]["SchemaFieldSpec"][];
+        };
+        /**
+         * RegisterSourceRequest
+         * @description Register a Google Shared Drive intake source (design §3).
+         *
+         *     The credential is not part of the wire contract — the server derives the
+         *     SA-key SSM path deterministically from the generated ``source_id`` (the
+         *     ``/data-sources/`` convention) and the operator uploads the key there
+         *     out-of-band. ``drive_id`` is optional (resolved at sync if omitted).
+         */
+        RegisterSourceRequest: {
+            /** Display Name */
+            display_name: string;
+            /** Drive Id */
+            drive_id?: string | null;
+            /** Folders */
+            folders: components["schemas"]["DriveFolderMapping"][];
         };
         /**
          * RegisteredFunction
@@ -22275,6 +22383,11 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** SourceSyncResponse */
+        SourceSyncResponse: {
+            /** Batches */
+            batches: components["schemas"]["SyncBatchRow"][];
+        };
         /**
          * Span
          * @description OTLP ``Span`` in OTLP/JSON encoding (ids hex, timestamps decimal-string).
@@ -23203,6 +23316,23 @@ export interface components {
              * @enum {string}
              */
             mode: "listen" | "takeover";
+        };
+        /**
+         * SyncBatchRow
+         * @description One batch produced by a source sync (one per mapped folder/dataset).
+         */
+        SyncBatchRow: {
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Dataset */
+            dataset: string;
+            /** Files Found */
+            files_found: number;
+            /** Status */
+            status: string;
         };
         /** SyncFailureEntry */
         SyncFailureEntry: {
@@ -35811,6 +35941,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DatasetRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_intake_sources_v1__workspace_id__intake_sources_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_IntakeSourceRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_intake_source_v1__workspace_id__intake_sources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeSourceRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceSyncResponse"];
                 };
             };
             /** @description Validation Error */
