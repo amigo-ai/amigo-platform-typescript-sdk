@@ -27,6 +27,7 @@ import {
   createReconnectingWebSocket,
   type ReconnectingWebSocketError,
   type ReconnectingWebSocketHandle,
+  type ReconnectingWebSocketReconnectReason,
   type ReconnectingWebSocketState,
   type WebSocketFactory,
 } from '../core/reconnecting-websocket.js'
@@ -87,11 +88,18 @@ export interface ObserverSubscribeOptions {
   onStateChange?: (state: ReconnectingWebSocketState) => void
 
   /**
-   * Fired just before each reconnect attempt with the planned delay and
-   * the close code that triggered the reconnect (or ``undefined`` for the
-   * first attempt after a watchdog-driven close).
+   * Fired just before each reconnect attempt with the planned delay, the
+   * close code that triggered the reconnect (or ``undefined`` for the first
+   * attempt after a watchdog-driven close), and a coarse ``reason``
+   * (``idle_watchdog`` / ``rate_limited`` / ``transient``) for tailoring the
+   * reconnect banner copy.
    */
-  onReconnect?: (info: { attempt: number; delayMs: number; closeCode: number | undefined }) => void
+  onReconnect?: (info: {
+    attempt: number
+    delayMs: number
+    closeCode: number | undefined
+    reason: ReconnectingWebSocketReconnectReason
+  }) => void
 
   /**
    * Fired exactly once on terminal failure (auth rejected, reconnect

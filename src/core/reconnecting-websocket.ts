@@ -6,11 +6,13 @@
  * lifecycle requirements:
  *
  *   * Resume on transient drops with exponential backoff + full jitter
- *   * Treat 4001 (client error) and 4403 (auth) close codes as terminal
- *   * Treat 4029 (rate limit / cap) as terminal-but-retryable on a slow timer
+ *   * Treat permanent-rejection close codes (1008 / 3003 / 4001 / 4003 /
+ *     4004 / 4100 / 4403) as terminal — fail fast, do not loop
+ *   * Treat 4029 / 1013 (rate limit / cap) as reconnectable on a slow floor,
+ *     surfacing a ``rate_limited`` reconnect reason
  *   * Watchdog the connection: if no message arrives within an idle window,
  *     the upstream is dead even if the TCP socket has not closed; force a
- *     reconnect
+ *     reconnect (with a NON-terminal close code so the loop actually rebuilds)
  *   * Surface every typed message through ``onMessage`` and every state
  *     transition through ``onStateChange``
  *
@@ -45,6 +47,19 @@ export type ReconnectingWebSocketErrorReason =
   | 'idle_watchdog'
   | 'open_failed'
   | 'unknown'
+
+/**
+ * Coarse cause surfaced to {@link ReconnectingWebSocketOptions.onReconnect}
+ * describing WHY the loop is reconnecting. Lets consumers vary the banner
+ * copy ("connection went quiet" vs. "too many connections — retrying").
+ *
+ *   * ``idle_watchdog`` — no frame arrived within ``idleTimeoutMs``; the
+ *     watchdog force-closed the (apparently dead) socket.
+ *   * ``rate_limited``  — the server closed with a rate-limit code (4029 /
+ *     1013); the backoff floor is raised before retrying.
+ *   * ``transient``     — an ordinary network drop / unclassified close code.
+ */
+export type ReconnectingWebSocketReconnectReason = 'idle_watchdog' | 'rate_limited' | 'transient'
 
 /** Structured terminal error surfaced to consumers. */
 export class ReconnectingWebSocketError extends Error {
@@ -86,8 +101,28 @@ export interface ReconnectingWebSocketOptions {
   /**
    * Optional WebSocket subprotocols. The platform's auth scheme passes the
    * bearer token here (``['auth', token]``) so it never appears in the URL.
+   *
+   * Frozen at subscribe time and reused verbatim on every (re)connect. For a
+   * long-lived stream whose bearer token can expire between reconnects, pass
+   * {@link getProtocols} instead so each (re)connect picks up a fresh token.
    */
   protocols?: string | string[]
+
+  /**
+   * Optional provider for the WebSocket subprotocols, invoked on EACH
+   * (re)connect to obtain fresh subprotocols (typically a refreshed bearer
+   * token in the ``['auth', token]`` pair). Use this for long-lived streams
+   * where the token can expire while the loop is reconnecting — the static
+   * {@link protocols} freeze the value at subscribe time and would replay a
+   * stale token on every retry, looping forever against a 4403.
+   *
+   * When provided, this takes precedence over {@link protocols}. May return
+   * synchronously or as a promise. If it throws / rejects, the connection
+   * attempt fails as ``open_failed`` and the reconnect loop retries (so a
+   * transient token-refresh hiccup is survivable). Falls back to
+   * {@link protocols} when absent — fully backward compatible.
+   */
+  getProtocols?: () => string | string[] | Promise<string | string[]>
 
   /**
    * Initial backoff delay (ms). Doubles with full jitter on each successive
@@ -139,15 +174,29 @@ export interface ReconnectingWebSocketOptions {
 
   /**
    * Invoked just before each reconnect attempt with the 1-based attempt
-   * number, the planned delay (ms), and the close code that triggered the
-   * reconnect.
+   * number, the planned delay (ms), the close code that triggered the
+   * reconnect, and a coarse ``reason`` describing WHY we are reconnecting.
+   *
+   * ``reason`` lets consumers tailor the banner copy: ``idle_watchdog`` →
+   * "connection went quiet, reconnecting…"; ``rate_limited`` → "too many
+   * connections — retrying…"; ``transient`` → generic "reconnecting…". The
+   * ``reason`` field is additive — existing consumers that ignore it keep
+   * working unchanged.
    */
-  onReconnect?: (info: { attempt: number; delayMs: number; closeCode: number | undefined }) => void
+  onReconnect?: (info: {
+    attempt: number
+    delayMs: number
+    closeCode: number | undefined
+    reason: ReconnectingWebSocketReconnectReason
+  }) => void
 
   /**
    * Invoked exactly once per ``ReconnectingWebSocket`` instance on a
    * terminal failure (consumer-aborted, reconnect budget exhausted, or a
-   * close code in the terminal set: 4001 / 4003 / 4403 / 4100 / 1008).
+   * close code in the terminal set: 1008 / 3003 / 4001 / 4003 / 4004 /
+   * 4100 / 4403). The {@link ReconnectingWebSocketError.closeCode} carries
+   * the originating wire close code (when one exists) so consumers can
+   * branch on it.
    */
   onError?: (error: ReconnectingWebSocketError) => void
 }
@@ -181,17 +230,33 @@ export interface ReconnectingWebSocketHandle {
  * Close codes that should NEVER be retried. The server is telling us the
  * connection cannot succeed regardless of how many times we try.
  *
- * 1008 (policy violation), 4001 (client error / bad params), 4003
- * (forbidden), 4100 (auth / not authenticated, used by some platform
+ * 1008 (policy violation), 3003 (workspace mismatch — the call/session does
+ * not belong to the authenticated workspace; retrying replays the same
+ * mismatch), 4001 (client error / bad params), 4003 (forbidden), 4004 (call
+ * / session not found — the target no longer exists, every retry 404s the
+ * same way), 4100 (auth / not authenticated, used by some platform
  * endpoints), 4403 (forbidden — used by platform-api session-connect for
  * auth and origin rejection).
  */
-const TERMINAL_CLOSE_CODES = new Set([1008, 4001, 4003, 4100, 4403])
+const TERMINAL_CLOSE_CODES = new Set([1008, 3003, 4001, 4003, 4004, 4100, 4403])
 
 /**
- * Close codes that are terminal-but-rate-limited. The reconnect loop honors
- * a longer floor (``RATE_LIMITED_FLOOR_MS``) before retrying so the client
- * does not amplify the problem it just hit.
+ * Dedicated NON-terminal close code the idle watchdog uses to force-close a
+ * stalled socket. It is deliberately OUTSIDE {@link TERMINAL_CLOSE_CODES} —
+ * the watchdog's entire purpose is to FORCE a reconnect, so closing with a
+ * terminal code (the original bug) made the loop give up instead. Picked in
+ * the application-private 4000–4999 range, clear of the platform's assigned
+ * 40xx codes.
+ */
+const WATCHDOG_CLOSE_CODE = 4099
+
+/**
+ * Close codes that are reconnectable-but-rate-limited. The reconnect loop
+ * still retries these (they are NOT terminal) but honors a longer floor
+ * (``RATE_LIMITED_FLOOR_MS``) before doing so, and surfaces a ``rate_limited``
+ * reason on ``onReconnect`` so consumers can message "too many connections —
+ * retrying…" instead of a generic banner. If the retries exhaust the budget,
+ * the terminal ``onError`` carries the originating 4029 / 1013 close code.
  *
  * 4029 (custom platform code for "too many connections / burst exceeded").
  * 1013 (try again later, RFC 6455 standard hint).
@@ -216,9 +281,16 @@ const DEFAULT_IDLE_TIMEOUT_MS = 45_000
  * ```ts
  * const handle = createReconnectingWebSocket({
  *   url: client.conversations.sessionConnectUrl({ serviceId, entityId }),
- *   protocols: sessionConnectAuthProtocols(apiKey),
+ *   // Re-mint the auth subprotocols on EACH (re)connect so a token that
+ *   // expires mid-stream is refreshed before the retry — falls back to the
+ *   // static `protocols` option when omitted.
+ *   getProtocols: async () => sessionConnectAuthProtocols(await freshToken()),
  *   onMessage: (e) => console.log('frame', e.data),
  *   onStateChange: (s) => console.log('state', s),
+ *   onReconnect: ({ reason, delayMs }) => {
+ *     if (reason === 'rate_limited') showBanner('Too many connections — retrying…');
+ *     else if (reason === 'idle_watchdog') showBanner('Connection went quiet — reconnecting…');
+ *   },
  *   onError: (err) => console.error('terminal:', err.reason, err.closeCode),
  * });
  *
@@ -333,17 +405,44 @@ interface ConnectionOutcome {
   aborted: boolean
 }
 
+/**
+ * Internal sentinel marking a pre-connect failure that the reconnect loop
+ * should RETRY (not treat as terminal). Currently only a {@link
+ * ReconnectingWebSocketOptions.getProtocols} rejection — a transient
+ * token-refresh hiccup — qualifies. Synchronous factory throws (bad URL, no
+ * global WebSocket) are NOT wrapped and remain terminal ``open_failed``.
+ */
+class RetryableOpenError extends Error {
+  constructor(message: string, cause: unknown) {
+    super(message, { cause })
+    this.name = 'RetryableOpenError'
+  }
+}
+
 async function runLoop(args: RunLoopArgs): Promise<void> {
   const { options, signal, setState, reportError, setSocket } = args
   let attempt = 0
   let delayMs = args.initialDelayMs
+  // Carried from the close that ENDED the previous connection so the
+  // ``onReconnect`` callback can report the originating close code and a
+  // coarse reason ("idle_watchdog" / "rate_limited" / "transient"). Seeded
+  // for the very first connection (attempt 0), where neither applies.
+  let pendingReconnect: {
+    closeCode: number | undefined
+    reason: ReconnectingWebSocketReconnectReason
+  } = { closeCode: undefined, reason: 'transient' }
 
   while (!signal.aborted) {
     if (attempt > 0) {
       setState('reconnecting')
       const sleepMs = jitter(delayMs)
       try {
-        options.onReconnect?.({ attempt, delayMs: sleepMs, closeCode: undefined })
+        options.onReconnect?.({
+          attempt,
+          delayMs: sleepMs,
+          closeCode: pendingReconnect.closeCode,
+          reason: pendingReconnect.reason,
+        })
       } catch {
         // ignore
       }
@@ -352,13 +451,22 @@ async function runLoop(args: RunLoopArgs): Promise<void> {
       delayMs = Math.min(delayMs * 2, args.maxDelayMs)
     }
 
-    setState(attempt === 0 ? 'connecting' : 'connecting')
+    setState('connecting')
 
     let outcome: ConnectionOutcome
     try {
       outcome = await runOneConnection(args)
     } catch (err) {
-      // Synchronous open failure (e.g., factory threw, invalid URL).
+      // A getProtocols() rejection is a TRANSIENT pre-connect failure (e.g. a
+      // token-refresh hiccup): retry it up to the reconnect budget rather
+      // than killing a long-lived stream over one bad refresh. A synchronous
+      // factory throw (invalid URL, no global WebSocket) is genuinely
+      // terminal — there is nothing to retry — so it fails fast as before.
+      if (err instanceof RetryableOpenError && attempt < args.maxReconnects) {
+        pendingReconnect = { closeCode: undefined, reason: 'transient' }
+        attempt += 1
+        continue
+      }
       reportError(
         new ReconnectingWebSocketError(
           err instanceof Error ? err.message : 'Failed to open WebSocket',
@@ -373,23 +481,37 @@ async function runLoop(args: RunLoopArgs): Promise<void> {
       setSocket(null)
     }
 
-    // Terminal close codes are reported BEFORE the abort check because the
-    // close arrived from the wire — the consumer's subsequent ``close()``
-    // call (which flips signal.aborted true) must not suppress the diagnostic.
-    if (outcome.closeCode !== undefined && TERMINAL_CLOSE_CODES.has(outcome.closeCode)) {
-      reportError(
-        new ReconnectingWebSocketError(
-          `Server closed with terminal code ${outcome.closeCode}: ${outcome.closeReason ?? ''}`,
-          outcome.closeCode === 4403 ? 'auth' : 'client_error',
-          outcome.closeCode,
-          outcome.closeReason,
-          attempt,
-        ),
-      )
-      return
-    }
+    // The idle watchdog forces a close purely to PROVOKE a reconnect — its
+    // synthetic close code must never be mistaken for a server-sent terminal
+    // rejection. Check ``watchdogTriggered`` first so that even if the
+    // watchdog code ever overlapped the terminal set, the loop still
+    // reconnects (defense-in-depth; the dedicated WATCHDOG_CLOSE_CODE 4099 is
+    // already outside TERMINAL_CLOSE_CODES).
+    if (!outcome.watchdogTriggered) {
+      // Terminal close codes are reported BEFORE the abort check because the
+      // close arrived from the wire — the consumer's subsequent ``close()``
+      // call (which flips signal.aborted true) must not suppress the
+      // diagnostic.
+      if (outcome.closeCode !== undefined && TERMINAL_CLOSE_CODES.has(outcome.closeCode)) {
+        reportError(
+          new ReconnectingWebSocketError(
+            `Server closed with terminal code ${outcome.closeCode}: ${outcome.closeReason ?? ''}`,
+            terminalReasonForCode(outcome.closeCode),
+            outcome.closeCode,
+            outcome.closeReason,
+            attempt,
+          ),
+        )
+        return
+      }
 
-    if (outcome.aborted || signal.aborted) {
+      if (outcome.aborted || signal.aborted) {
+        setState('closed')
+        return
+      }
+    } else if (signal.aborted) {
+      // Watchdog fired but the consumer also aborted in the same tick — honor
+      // the abort and stop, do not reconnect into a torn-down stream.
       setState('closed')
       return
     }
@@ -407,11 +529,22 @@ async function runLoop(args: RunLoopArgs): Promise<void> {
       return
     }
 
-    if (outcome.closeCode !== undefined && RATE_LIMITED_CLOSE_CODES.has(outcome.closeCode)) {
+    const isRateLimited =
+      outcome.closeCode !== undefined && RATE_LIMITED_CLOSE_CODES.has(outcome.closeCode)
+    if (isRateLimited) {
       // Pin the floor up so we do not hammer the server we just got
       // throttled by. Honor whichever is larger between the current
       // exponential delay and the rate-limited floor.
       delayMs = Math.max(delayMs, RATE_LIMITED_FLOOR_MS)
+    }
+
+    pendingReconnect = {
+      closeCode: outcome.closeCode,
+      reason: outcome.watchdogTriggered
+        ? 'idle_watchdog'
+        : isRateLimited
+          ? 'rate_limited'
+          : 'transient',
     }
 
     attempt += 1
@@ -420,12 +553,38 @@ async function runLoop(args: RunLoopArgs): Promise<void> {
   setState('closed')
 }
 
+/**
+ * Map a terminal close code to the {@link ReconnectingWebSocketErrorReason}
+ * surfaced on ``onError``. 4403 / 4100 are auth rejections; everything else
+ * in the terminal set is a client-side / target-not-found error.
+ */
+function terminalReasonForCode(code: number): ReconnectingWebSocketErrorReason {
+  if (code === 4403 || code === 4100) return 'auth'
+  return 'client_error'
+}
+
 async function runOneConnection(args: RunLoopArgs): Promise<ConnectionOutcome> {
   const { options, factory, signal, setState, setSocket, idleTimeoutMs } = args
 
+  // Resolve subprotocols freshly per (re)connect when a provider is given so
+  // an expired bearer token is replaced before each attempt; otherwise reuse
+  // the static value frozen at subscribe time (backward compatible). A
+  // provider rejection is wrapped as a RetryableOpenError so the loop treats
+  // a transient token-refresh hiccup as reconnectable rather than terminal.
+  let protocols: string | string[] | undefined
+  if (options.getProtocols) {
+    try {
+      protocols = await options.getProtocols()
+    } catch (err) {
+      throw new RetryableOpenError(err instanceof Error ? err.message : 'getProtocols failed', err)
+    }
+  } else {
+    protocols = options.protocols
+  }
+
   let socket: WebSocket
   try {
-    socket = factory(options.url, options.protocols)
+    socket = factory(options.url, protocols)
   } catch (err) {
     throw err instanceof Error ? err : new Error(String(err))
   }
@@ -447,17 +606,23 @@ async function runOneConnection(args: RunLoopArgs): Promise<ConnectionOutcome> {
       clearWatchdog()
       watchdogTimer = setTimeout(() => {
         if (resolved) return
-        try {
-          socket.close(4001, 'idle timeout')
-        } catch {
-          // already closed
-        }
+        // Finalize FIRST (flips ``resolved`` and detaches the ``close``
+        // listener) so that a runtime which dispatches the ``close`` event
+        // synchronously from ``socket.close()`` cannot re-enter ``onClose``
+        // and overwrite the outcome with ``watchdogTriggered: false``. The
+        // outcome must record the watchdog as the cause so the loop reconnects
+        // with the ``idle_watchdog`` reason rather than misclassifying it.
         finalize({
-          closeCode: 4001,
+          closeCode: WATCHDOG_CLOSE_CODE,
           closeReason: 'idle timeout',
           watchdogTriggered: true,
           aborted: false,
         })
+        try {
+          socket.close(WATCHDOG_CLOSE_CODE, 'idle timeout')
+        } catch {
+          // already closed
+        }
       }, idleTimeoutMs)
     }
 

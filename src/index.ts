@@ -821,6 +821,7 @@ export type {
   ReconnectingWebSocketErrorReason,
   ReconnectingWebSocketHandle,
   ReconnectingWebSocketOptions,
+  ReconnectingWebSocketReconnectReason,
   ReconnectingWebSocketState,
   WebSocketFactory,
 } from './core/reconnecting-websocket.js'
