@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.79.0] - 2026-06-26
+
+### Bug Fixes
+
+- reconnecting-websocket watchdog/terminal-code/rate-limit bugs + per-connect getProtocols (v0.79.0) (#355)
+
 ## [Unreleased]
 
 <!--
