@@ -11985,6 +11985,31 @@
         "title": "DocumentProcessingSpec",
         "type": "object"
       },
+      "DriveFolderMapping": {
+        "description": "One Google Drive folder \u2194 one intake dataset.\n\n``folder_id`` is the Drive folder id (the identity \u2014 never the folder name,\nwhich can be renamed/moved). One folder maps to exactly one dataset.",
+        "properties": {
+          "dataset": {
+            "maxLength": 63,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "folder_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Folder Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_id",
+          "dataset"
+        ],
+        "title": "DriveFolderMapping",
+        "type": "object"
+      },
       "DropColumnAction": {
         "properties": {
           "name": {
@@ -20352,6 +20377,68 @@
         "title": "IntakeLinkResponse",
         "type": "object"
       },
+      "IntakeSourceRow": {
+        "description": "A registered intake source (Sources list).",
+        "properties": {
+          "created_ts": {
+            "description": "ISO-8601 timestamp.",
+            "title": "Created Ts",
+            "type": "string"
+          },
+          "credential_ssm_param_path": {
+            "description": "Where the SA key must be uploaded (derived; the secret itself is never returned).",
+            "title": "Credential Ssm Param Path",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "drive_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drive Id"
+          },
+          "folders": {
+            "items": {
+              "$ref": "#/components/schemas/DriveFolderMapping"
+            },
+            "title": "Folders",
+            "type": "array"
+          },
+          "id": {
+            "description": "source_id.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "source_type",
+          "display_name",
+          "folders",
+          "credential_ssm_param_path",
+          "status",
+          "created_ts"
+        ],
+        "title": "IntakeSourceRow",
+        "type": "object"
+      },
       "IntakeUploadResponse": {
         "properties": {
           "content_type": {
@@ -25604,6 +25691,49 @@
         "title": "PaginatedResponse[IntakeFileRow]",
         "type": "object"
       },
+      "PaginatedResponse_IntakeSourceRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntakeSourceRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[IntakeSourceRow]",
+        "type": "object"
+      },
       "PaginatedResponse_InvoiceItem_": {
         "properties": {
           "continuation_token": {
@@ -29336,6 +29466,44 @@
           "file_type"
         ],
         "title": "RegisterSchemaRequest",
+        "type": "object"
+      },
+      "RegisterSourceRequest": {
+        "description": "Register a Google Shared Drive intake source (design \u00a73).\n\nThe credential is not part of the wire contract \u2014 the server derives the\nSA-key SSM path deterministically from the generated ``source_id`` (the\n``/data-sources/`` convention) and the operator uploads the key there\nout-of-band. ``drive_id`` is optional (resolved at sync if omitted).",
+        "properties": {
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "drive_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drive Id"
+          },
+          "folders": {
+            "items": {
+              "$ref": "#/components/schemas/DriveFolderMapping"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Folders",
+            "type": "array"
+          }
+        },
+        "required": [
+          "display_name",
+          "folders"
+        ],
+        "title": "RegisterSourceRequest",
         "type": "object"
       },
       "RegisteredFunction": {
@@ -62190,6 +62358,134 @@
           }
         },
         "summary": "Register Intake Schema",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/sources": {
+      "get": {
+        "operationId": "list_intake_sources_v1__workspace_id__intake_sources_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "-created_ts",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_IntakeSourceRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Sources",
+        "tags": [
+          "Intake"
+        ]
+      },
+      "post": {
+        "operationId": "register_intake_source_v1__workspace_id__intake_sources_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeSourceRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Intake Source",
         "tags": [
           "Intake"
         ]
