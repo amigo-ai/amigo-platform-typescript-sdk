@@ -24,6 +24,8 @@ class FakeWebSocket {
   readonly protocols: string | string[] | undefined
   readyState = 0 // CONNECTING
   sent: unknown[] = []
+  /** Last close code the lifecycle code (or the test) passed to close(). */
+  lastCloseCode: number | undefined
   private listeners = new Map<string, Set<(ev: unknown) => void>>()
   private autoOpen: boolean
 
@@ -58,6 +60,7 @@ class FakeWebSocket {
 
   close(code?: number, reason?: string): void {
     if (this.readyState >= 2) return
+    this.lastCloseCode = code ?? 1000
     this.readyState = 3 // CLOSED
     this.dispatch('close', { code: code ?? 1000, reason: reason ?? '' })
   }
@@ -418,5 +421,318 @@ describe('createReconnectingWebSocket', () => {
     expect(handle.state).toBe('open')
     handle.close()
     await handle.done
+  })
+
+  // --- H1: idle watchdog must FORCE a reconnect, never be terminal --------
+
+  it('idle watchdog forces a reconnect (NOT a terminal client_error)', async () => {
+    vi.useFakeTimers()
+
+    const errorSpy = vi.fn()
+    const reconnectSpy = vi.fn()
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      idleTimeoutMs: 100,
+      initialDelayMs: 10,
+      maxDelayMs: 20,
+      maxReconnects: 5,
+      onMessage: () => {},
+      onError: errorSpy,
+      onReconnect: reconnectSpy,
+    })
+
+    // Open.
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(FakeWebSocket.instances).toHaveLength(1)
+
+    // No message arrives — watchdog fires at 100ms and force-closes.
+    await vi.advanceTimersByTimeAsync(120)
+    // First socket was force-closed (watchdog), NOT a terminal failure.
+    expect(FakeWebSocket.instances[0]!.readyState).toBe(3)
+
+    // Let the backoff sleep elapse so the reconnect actually rebuilds.
+    await vi.advanceTimersByTimeAsync(40)
+    await vi.advanceTimersByTimeAsync(0)
+
+    // The loop reconnected (built a second socket) rather than going terminal.
+    expect(errorSpy).not.toHaveBeenCalled()
+    expect(FakeWebSocket.instances.length).toBeGreaterThanOrEqual(2)
+    expect(reconnectSpy).toHaveBeenCalled()
+    // The reconnect reason surfaced to consumers is the dedicated watchdog one.
+    expect(reconnectSpy.mock.calls[0]![0].reason).toBe('idle_watchdog')
+
+    handle.close()
+    await vi.runAllTimersAsync()
+  })
+
+  it('watchdog close code is non-terminal (not in the terminal set)', async () => {
+    vi.useFakeTimers()
+
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      idleTimeoutMs: 50,
+      initialDelayMs: 10,
+      maxReconnects: 3,
+      onMessage: () => {},
+    })
+
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(60)
+
+    // The watchdog closes with code 4099 (the dedicated non-terminal code).
+    // 4099 must NOT be confused with the terminal 4001 the original bug used.
+    expect(FakeWebSocket.instances[0]!.lastCloseCode).toBe(4099)
+
+    handle.close()
+    await vi.runAllTimersAsync()
+  })
+
+  // --- M4: permanent server rejections fail fast (no 12x retry) -----------
+
+  it('treats 4004 (call not found) as terminal and surfaces the close code', async () => {
+    const errorSpy = vi.fn()
+    const reconnectSpy = vi.fn()
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      maxReconnects: 12,
+      onMessage: () => {},
+      onError: errorSpy,
+      onReconnect: reconnectSpy,
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+    FakeWebSocket.instances[0]!.serverClose(4004, 'call not found')
+    await handle.done
+
+    expect(reconnectSpy).not.toHaveBeenCalled()
+    expect(errorSpy).toHaveBeenCalledOnce()
+    const [err] = errorSpy.mock.calls[0]!
+    expect(err.reason).toBe('client_error')
+    expect(err.closeCode).toBe(4004)
+    // Exactly one socket was ever built — no retry storm.
+    expect(FakeWebSocket.instances).toHaveLength(1)
+  })
+
+  it('treats 3003 (workspace mismatch) as terminal', async () => {
+    const errorSpy = vi.fn()
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      maxReconnects: 12,
+      onMessage: () => {},
+      onError: errorSpy,
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+    FakeWebSocket.instances[0]!.serverClose(3003, 'workspace mismatch')
+    await handle.done
+
+    expect(errorSpy).toHaveBeenCalledOnce()
+    expect(errorSpy.mock.calls[0]![0].closeCode).toBe(3003)
+    expect(FakeWebSocket.instances).toHaveLength(1)
+  })
+
+  // --- L3: rate-limited (4029) surfaces a usable reason -------------------
+
+  it('rate-limited close (4029) surfaces a rate_limited reconnect reason', async () => {
+    vi.useFakeTimers()
+
+    const reconnectSpy = vi.fn()
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      initialDelayMs: 100,
+      maxDelayMs: 60_000,
+      maxReconnects: 2,
+      onMessage: () => {},
+      onReconnect: reconnectSpy,
+    })
+
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(0)
+    FakeWebSocket.instances[0]!.serverClose(4029, 'too many connections')
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(reconnectSpy).toHaveBeenCalledOnce()
+    const info = reconnectSpy.mock.calls[0]![0]
+    expect(info.reason).toBe('rate_limited')
+    expect(info.closeCode).toBe(4029)
+
+    handle.close()
+    await vi.runAllTimersAsync()
+  })
+
+  it('rate-limited (4029) forwards the close code to onError when the budget is spent', async () => {
+    vi.useFakeTimers()
+
+    const errorSpy = vi.fn()
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      initialDelayMs: 1,
+      maxDelayMs: 4,
+      maxReconnects: 1,
+      onMessage: () => {},
+      onError: errorSpy,
+    })
+
+    for (let i = 0; i <= 2; i++) {
+      await vi.advanceTimersByTimeAsync(10)
+      const ws = FakeWebSocket.instances[i]
+      if (ws) ws.serverClose(4029, 'too many')
+      await vi.advanceTimersByTimeAsync(6_000) // clear the rate-limited floor
+    }
+    await vi.runAllTimersAsync()
+
+    expect(errorSpy).toHaveBeenCalledOnce()
+    const [err] = errorSpy.mock.calls[0]!
+    expect(err.reason).toBe('reconnect_budget_exhausted')
+    // The originating 4029 must be forwarded so consumers can still message it.
+    expect(err.closeCode).toBe(4029)
+    handle.close()
+  })
+
+  // --- M1 SDK-half: getProtocols re-evaluated on each (re)connect ---------
+
+  it('calls getProtocols on every (re)connect with the latest token', async () => {
+    vi.useFakeTimers()
+
+    const tokens = ['tok-0', 'tok-1', 'tok-2']
+    let call = 0
+    const getProtocols = vi.fn(() => ['auth', tokens[call++]!])
+
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      getProtocols,
+      initialDelayMs: 10,
+      maxDelayMs: 20,
+      maxReconnects: 5,
+      idleTimeoutMs: 0,
+      onMessage: () => {},
+    })
+
+    // First connect.
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(getProtocols).toHaveBeenCalledTimes(1)
+    expect(FakeWebSocket.instances[0]!.protocols).toEqual(['auth', 'tok-0'])
+
+    // Transient drop → reconnect picks up the NEXT token.
+    FakeWebSocket.instances[0]!.serverClose(1006, 'transient')
+    await vi.advanceTimersByTimeAsync(20)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(getProtocols).toHaveBeenCalledTimes(2)
+    expect(FakeWebSocket.instances[1]!.protocols).toEqual(['auth', 'tok-1'])
+
+    FakeWebSocket.instances[1]!.serverClose(1006, 'transient')
+    await vi.advanceTimersByTimeAsync(40)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(getProtocols).toHaveBeenCalledTimes(3)
+    expect(FakeWebSocket.instances[2]!.protocols).toEqual(['auth', 'tok-2'])
+
+    handle.close()
+    await vi.runAllTimersAsync()
+  })
+
+  it('supports an async getProtocols provider', async () => {
+    const getProtocols = vi.fn(async () => ['auth', 'async-tok'])
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      getProtocols,
+      onMessage: () => {},
+    })
+
+    // Open requires: getProtocols await + factory + open microtask.
+    await Promise.resolve()
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(handle.state).toBe('open')
+    expect(FakeWebSocket.instances[0]!.protocols).toEqual(['auth', 'async-tok'])
+
+    handle.close()
+    await handle.done
+  })
+
+  it('falls back to static protocols when getProtocols is absent', async () => {
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      protocols: ['auth', 'static-tok'],
+      onMessage: () => {},
+    })
+    await Promise.resolve()
+    await Promise.resolve()
+    expect(FakeWebSocket.instances[0]!.protocols).toEqual(['auth', 'static-tok'])
+    handle.close()
+    await handle.done
+  })
+
+  it('retries (does not go terminal) when getProtocols rejects transiently', async () => {
+    vi.useFakeTimers()
+
+    let calls = 0
+    const getProtocols = vi.fn(() => {
+      calls++
+      if (calls === 1) return Promise.reject(new Error('token refresh hiccup'))
+      return Promise.resolve(['auth', 'recovered-tok'])
+    })
+    const errorSpy = vi.fn()
+
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      getProtocols,
+      initialDelayMs: 10,
+      maxDelayMs: 20,
+      maxReconnects: 5,
+      onMessage: () => {},
+      onError: errorSpy,
+    })
+
+    // First attempt: getProtocols rejects → loop retries (not terminal).
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(20)
+    await vi.advanceTimersByTimeAsync(0)
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(errorSpy).not.toHaveBeenCalled()
+    expect(getProtocols).toHaveBeenCalledTimes(2)
+    // The second attempt succeeded and built a real socket with the new token.
+    expect(FakeWebSocket.instances).toHaveLength(1)
+    expect(FakeWebSocket.instances[0]!.protocols).toEqual(['auth', 'recovered-tok'])
+
+    handle.close()
+    await vi.runAllTimersAsync()
+  })
+
+  it('goes terminal open_failed when getProtocols keeps rejecting past the budget', async () => {
+    vi.useFakeTimers()
+
+    const getProtocols = vi.fn(() => Promise.reject(new Error('refresh down')))
+    const errorSpy = vi.fn()
+
+    const handle = createReconnectingWebSocket({
+      url: 'wss://example.test/ws',
+      webSocketFactory: makeFactory(),
+      getProtocols,
+      initialDelayMs: 1,
+      maxDelayMs: 2,
+      maxReconnects: 2,
+      onMessage: () => {},
+      onError: errorSpy,
+    })
+
+    await vi.runAllTimersAsync()
+
+    expect(errorSpy).toHaveBeenCalledOnce()
+    expect(errorSpy.mock.calls[0]![0].reason).toBe('open_failed')
+    handle.close()
   })
 })

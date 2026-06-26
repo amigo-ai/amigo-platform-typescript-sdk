@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+<!--
+Release versioning is owned by the Release workflow (.github/workflows/release.yml):
+it bumps package.json and prepends a stamped `## [X.Y.Z] - DATE` entry generated from
+commit history at release time. Do NOT hand-bump the version or hand-stamp a dated
+entry in a feature PR. The notes below describe the changes awaiting the next release.
+-->
+
+### Bug Fixes
+
+- **Reconnecting WebSocket: idle watchdog no longer permanently kills the socket.** The idle watchdog previously force-closed with terminal code `4001`, which the reconnect loop treated as a non-retryable `client_error` — so the watchdog (whose entire purpose is to FORCE a reconnect) silently gave up instead. The watchdog now closes with a dedicated NON-terminal code `4099`, and the loop additionally checks `watchdogTriggered` before the terminal branch (defense-in-depth). Watchdog-driven reconnects surface a distinct `idle_watchdog` reason on `onReconnect`.
+- **Reconnecting WebSocket: permanent server rejections fail fast.** Added the platform's permanent-rejection close codes `4004` (call/session not found) and `3003` (workspace mismatch) to the terminal set so they error immediately instead of looping the full reconnect budget (~12×). The terminal `onError` carries the originating `closeCode`.
+- **Reconnecting WebSocket: rate-limit (`4029`) is now messageable.** Rate-limited closes (`4029` / `1013`) surface a `rate_limited` reason on `onReconnect` (in addition to the existing slow-backoff floor) so consumers can show "too many connections — retrying…"; when the retry budget is exhausted, the originating close code is forwarded to `onError`.
+
+### Improvements
+
+- **Reconnecting WebSocket: fresh subprotocols per (re)connect.** New optional `getProtocols?: () => string | string[] | Promise<...>` option, invoked on EACH (re)connect to mint fresh auth subprotocols (e.g. a refreshed bearer token) so a long-lived stream whose token expires mid-reconnect no longer replays a stale token into a 4403 loop. Falls back to the static `protocols` option when omitted — fully backward compatible. A transient `getProtocols` rejection is retried up to the reconnect budget rather than treated as terminal.
+- Added `onReconnect` `reason` field (`idle_watchdog` | `rate_limited` | `transient`) and exported the `ReconnectingWebSocketReconnectReason` type.
+
 ## [0.78.1] - 2026-06-25
 
 ### Improvements
