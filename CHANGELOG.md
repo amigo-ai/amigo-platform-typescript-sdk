@@ -1,6 +1,13 @@
 # Changelog
 
-## [0.79.0] - 2026-06-25
+## [Unreleased]
+
+<!--
+Release versioning is owned by the Release workflow (.github/workflows/release.yml):
+it bumps package.json and prepends a stamped `## [X.Y.Z] - DATE` entry generated from
+commit history at release time. Do NOT hand-bump the version or hand-stamp a dated
+entry in a feature PR. The notes below describe the changes awaiting the next release.
+-->
 
 ### Bug Fixes
 
