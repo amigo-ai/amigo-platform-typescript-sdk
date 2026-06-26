@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.80.0] - 2026-06-26
+
+### Bug Fixes
+
+- drop ses-setup list surface to match post-#4083 spec (#356)
+
+### Maintenance
+
+- sync API types from platform (a8de1d3e) (#357)
+
 ## [0.79.0] - 2026-06-26
 
 ### Bug Fixes
