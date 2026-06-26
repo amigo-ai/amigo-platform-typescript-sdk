@@ -1759,11 +1759,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * List SES setups
-         * @description Paginated list of the SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are scoped to the workspace that created them (intrinsic ownership); other tenants' setups are not returned. Requires ``Channel.view`` permission.
-         */
-        get: operations["list-ses-setups"];
+        get?: never;
         put?: never;
         /**
          * Create an SES setup
@@ -5340,6 +5336,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/sessions/fleet-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Voice fleet capacity status
+         * @description Live Agones voice-fleet capacity: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. Workspace-GLOBAL — one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.
+         */
+        get: operations["get_fleet_status_v1__workspace_id__sessions_fleet_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/sessions/start": {
         parameters: {
             query?: never;
@@ -8425,6 +8441,8 @@ export interface components {
         Body_upload_intake_file_v1__workspace_id__intake_files_post: {
             /** Dataset */
             dataset: string;
+            /** Document Id */
+            document_id?: string | null;
             /** File */
             file: string;
         };
@@ -12178,9 +12196,19 @@ export interface components {
          * @description A registered schema in the Schemas list (intake-ui-mvp-design.md §5.3).
          */
         DatasetRow: {
+            /**
+             * Accepted File Types
+             * @description Document datasets: the full accepted-type set (V265). Empty for snapshot
+             *     or legacy single-type documents (the UI falls back to ``file_type``).
+             * @default []
+             */
+            accepted_file_types?: string[];
             /** Field Count */
             field_count: number;
-            /** File Type */
+            /**
+             * File Type
+             * @description Primary/representative file type (the first accepted type).
+             */
             file_type: string;
             /**
              * Ingestion Mode
@@ -14833,6 +14861,55 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /**
+         * FlagProviderHealthResponse
+         * @description Whether feature-flag flips are actually runtime-controllable.
+         *
+         *     Surfaces ``FeatureFlagClient.doctor()`` so operators can detect the
+         *     silently-inert state where flag flips, per-workspace ramps, kill switches,
+         *     and rollbacks resolve to code/env defaults instead of taking effect.
+         */
+        FlagProviderHealthResponse: {
+            /** Env Enabled */
+            env_enabled: boolean;
+            /** Provider Ready */
+            provider_ready: boolean;
+            /** Provider Registered */
+            provider_registered: boolean;
+            /** Reason */
+            reason: string;
+            /** Runtime Controllable */
+            runtime_controllable: boolean;
+        };
+        /**
+         * FleetStatusResponse
+         * @description Live voice Agones fleet capacity (workspace-global).
+         *
+         *     ``headroom`` = remaining isolated-call slots (``max_replicas - allocated``);
+         *     ``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.
+         *     The counts span the whole fleet (one fleet serves every workspace) — this is NOT
+         *     per-workspace.
+         */
+        FleetStatusResponse: {
+            /** Allocated */
+            allocated: number;
+            /** By State */
+            by_state: {
+                [key: string]: number;
+            };
+            /** Fleet */
+            fleet: string;
+            /** Headroom */
+            headroom: number | null;
+            /** Max Replicas */
+            max_replicas: number | null;
+            /** Namespace */
+            namespace: string;
+            /** Ready */
+            ready: number;
+            /** Total */
+            total: number;
+        };
         /** ForecastDrawPoint */
         ForecastDrawPoint: {
             /** Draw Id */
@@ -15594,6 +15671,12 @@ export interface components {
              */
             dataset: string;
             /**
+             * Document Id
+             * @description The document this version belongs to (§5.9). Null for snapshot/CSV rows;
+             *     set for documents — the console groups versions by it and the version chain.
+             */
+            document_id?: string | null;
+            /**
              * Error Reason
              * @description Null unless rejected/failed.
              */
@@ -15619,6 +15702,12 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
             status: components["schemas"]["_FileStatus"];
+            /**
+             * Version
+             * @description The file's version number (per-document for documents, per-dataset for
+             *     snapshot). Lets the UI render a document's version history.
+             */
+            version?: number | null;
         };
         /** IntakeLinkResponse */
         IntakeLinkResponse: {
@@ -18117,17 +18206,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[SesSetupListItemResponse] */
-        PaginatedResponse_SesSetupListItemResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SesSetupListItemResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[SimulationCaseResponse] */
         PaginatedResponse_SimulationCaseResponse_: {
             /** Continuation Token */
@@ -19487,6 +19565,15 @@ export interface components {
          *     ``schema_version`` auto).
          */
         RegisterSchemaRequest: {
+            /**
+             * Accepted File Types
+             * @description Document only — the SET of accepted file types (V265, e.g.
+             *     ``["pdf","docx","md"]``). Empty → single-type (just ``file_type``).
+             *     ``file_type`` is included as the primary. Mixing in a tabular type
+             *     (csv/xls/xlsx) is rejected; snapshot datasets are single-type.
+             * @default []
+             */
+            accepted_file_types?: components["schemas"]["_FileType"][];
             /** @description Document only — extraction config; defaulted server-side when omitted. */
             document_processing?: components["schemas"]["DocumentProcessingSpec"] | null;
             file_type: components["schemas"]["_FileType"];
@@ -20748,32 +20835,6 @@ export interface components {
             dns_checked_at: string | null;
             /** Dns Records */
             dns_records: components["schemas"]["DnsRecordResponse"][];
-            /** Domain Identity */
-            domain_identity: string;
-            /** Id */
-            id: string;
-            /** Tenant Name */
-            tenant_name: string;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
-        /** SesSetupListItemResponse */
-        SesSetupListItemResponse: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Dns Checked At */
-            dns_checked_at: string | null;
-            /**
-             * Dns Verified
-             * @description Aggregate of every DNS record's ``verified`` at the last refresh.
-             */
-            dns_verified: boolean;
             /** Domain Identity */
             domain_identity: string;
             /** Id */
@@ -31427,47 +31488,6 @@ export interface operations {
             };
         };
     };
-    "list-ses-setups": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SesSetupListItemResponse_"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "create-ses-setup": {
         parameters: {
             query?: never;
@@ -40516,6 +40536,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActiveSession"][];
+                };
+            };
+        };
+    };
+    get_fleet_status_v1__workspace_id__sessions_fleet_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FleetStatusResponse"];
                 };
             };
         };

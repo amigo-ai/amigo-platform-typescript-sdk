@@ -2313,6 +2313,18 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
           "file": {
             "contentMediaType": "application/octet-stream",
             "title": "File",
@@ -11236,11 +11248,21 @@
       "DatasetRow": {
         "description": "A registered schema in the Schemas list (intake-ui-mvp-design.md \u00a75.3).",
         "properties": {
+          "accepted_file_types": {
+            "default": [],
+            "description": "Document datasets: the full accepted-type set (V265). Empty for snapshot\nor legacy single-type documents (the UI falls back to ``file_type``).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted File Types",
+            "type": "array"
+          },
           "field_count": {
             "title": "Field Count",
             "type": "integer"
           },
           "file_type": {
+            "description": "Primary/representative file type (the first accepted type).",
             "title": "File Type",
             "type": "string"
           },
@@ -18194,6 +18216,106 @@
         "title": "FireTriggerRequest",
         "type": "object"
       },
+      "FlagProviderHealthResponse": {
+        "description": "Whether feature-flag flips are actually runtime-controllable.\n\nSurfaces ``FeatureFlagClient.doctor()`` so operators can detect the\nsilently-inert state where flag flips, per-workspace ramps, kill switches,\nand rollbacks resolve to code/env defaults instead of taking effect.",
+        "properties": {
+          "env_enabled": {
+            "title": "Env Enabled",
+            "type": "boolean"
+          },
+          "provider_ready": {
+            "title": "Provider Ready",
+            "type": "boolean"
+          },
+          "provider_registered": {
+            "title": "Provider Registered",
+            "type": "boolean"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          },
+          "runtime_controllable": {
+            "title": "Runtime Controllable",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "provider_registered",
+          "provider_ready",
+          "env_enabled",
+          "runtime_controllable",
+          "reason"
+        ],
+        "title": "FlagProviderHealthResponse",
+        "type": "object"
+      },
+      "FleetStatusResponse": {
+        "description": "Live voice Agones fleet capacity (workspace-global).\n\n``headroom`` = remaining isolated-call slots (``max_replicas - allocated``);\n``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.\nThe counts span the whole fleet (one fleet serves every workspace) \u2014 this is NOT\nper-workspace.",
+        "properties": {
+          "allocated": {
+            "title": "Allocated",
+            "type": "integer"
+          },
+          "by_state": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By State",
+            "type": "object"
+          },
+          "fleet": {
+            "title": "Fleet",
+            "type": "string"
+          },
+          "headroom": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Headroom"
+          },
+          "max_replicas": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Replicas"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          },
+          "ready": {
+            "title": "Ready",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fleet",
+          "namespace",
+          "ready",
+          "allocated",
+          "total",
+          "max_replicas",
+          "headroom",
+          "by_state"
+        ],
+        "title": "FleetStatusResponse",
+        "type": "object"
+      },
       "ForecastDrawPoint": {
         "properties": {
           "draw_id": {
@@ -20040,6 +20162,19 @@
             "title": "Dataset",
             "type": "string"
           },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The document this version belongs to (\u00a75.9). Null for snapshot/CSV rows;\nset for documents \u2014 the console groups versions by it and the version chain.",
+            "title": "Document Id"
+          },
           "error_reason": {
             "anyOf": [
               {
@@ -20085,6 +20220,18 @@
           },
           "status": {
             "$ref": "#/components/schemas/_FileStatus"
+          },
+          "version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The file's version number (per-document for documents, per-dataset for\nsnapshot). Lets the UI render a document's version history.",
+            "title": "Version"
           }
         },
         "required": [
@@ -25758,49 +25905,6 @@
         "title": "PaginatedResponse[ServiceResponse]",
         "type": "object"
       },
-      "PaginatedResponse_SesSetupListItemResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/SesSetupListItemResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[SesSetupListItemResponse]",
-        "type": "object"
-      },
       "PaginatedResponse_SimulationCaseResponse_": {
         "properties": {
           "continuation_token": {
@@ -29168,6 +29272,16 @@
       "RegisterSchemaRequest": {
         "description": "Create Schema payload (intake-ui-mvp-design.md \u00a75.4, \u00a75.9).\n\n``ingestion_mode`` is inferred from ``file_type`` (csv/xls/xlsx \u2192 snapshot;\nelse document) \u2014 not part of the wire contract. Snapshot datasets require\n``primary_key`` + ``schema``; document datasets take an optional\n``document_processing`` config and ignore primary_key/schema. The backend\napplies the other hidden defaults (``on_schema_change=additive``,\n``schema_version`` auto).",
         "properties": {
+          "accepted_file_types": {
+            "default": [],
+            "description": "Document only \u2014 the SET of accepted file types (V265, e.g.\n``[\"pdf\",\"docx\",\"md\"]``). Empty \u2192 single-type (just ``file_type``).\n``file_type`` is included as the primary. Mixing in a tabular type\n(csv/xls/xlsx) is rejected; snapshot datasets are single-type.",
+            "items": {
+              "$ref": "#/components/schemas/_FileType"
+            },
+            "maxItems": 16,
+            "title": "Accepted File Types",
+            "type": "array"
+          },
           "document_processing": {
             "anyOf": [
               {
@@ -32212,60 +32326,6 @@
           "updated_at"
         ],
         "title": "SesSetupDetailResponse",
-        "type": "object"
-      },
-      "SesSetupListItemResponse": {
-        "properties": {
-          "created_at": {
-            "format": "date-time",
-            "title": "Created At",
-            "type": "string"
-          },
-          "dns_checked_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dns Checked At"
-          },
-          "dns_verified": {
-            "description": "Aggregate of every DNS record's ``verified`` at the last refresh.",
-            "title": "Dns Verified",
-            "type": "boolean"
-          },
-          "domain_identity": {
-            "title": "Domain Identity",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "tenant_name": {
-            "title": "Tenant Name",
-            "type": "string"
-          },
-          "updated_at": {
-            "format": "date-time",
-            "title": "Updated At",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "tenant_name",
-          "domain_identity",
-          "dns_verified",
-          "dns_checked_at",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "SesSetupListItemResponse",
         "type": "object"
       },
       "SessionEndEvent": {
@@ -54811,73 +54871,6 @@
       }
     },
     "/v1/{workspace_id}/channels/ses-setup": {
-      "get": {
-        "description": "Paginated list of the SES setups owned by this workspace. Items carry the cached ``dns_verified`` aggregate; call ``GET /ses-setup/{id}`` for per-record DNS detail. Setups are scoped to the workspace that created them (intrinsic ownership); other tenants' setups are not returned. Requires ``Channel.view`` permission.",
-        "operationId": "list-ses-setups",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 100,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_SesSetupListItemResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List SES setups",
-        "tags": [
-          "Channels"
-        ]
-      },
       "post": {
         "description": "Create an SES tenant + verified email identity. Returns the DNS records the customer must publish (DKIM CNAMEs, MX, DMARC TXT). Subsequent ``GET`` or ``POST /verify`` calls re-run the live DNS lookup and update the per-record ``verified`` flag. The setup is owned by the creating workspace; only that workspace can list, get, verify, or delete it. Requires ``Channel.create`` permission.",
         "operationId": "create-ses-setup",
@@ -70541,6 +70534,40 @@
           }
         },
         "summary": "List active voice sessions",
+        "tags": [
+          "Sessions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/sessions/fleet-status": {
+      "get": {
+        "description": "Live Agones voice-fleet capacity: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. Workspace-GLOBAL \u2014 one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.",
+        "operationId": "get_fleet_status_v1__workspace_id__sessions_fleet_status_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FleetStatusResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Voice fleet capacity status",
         "tags": [
           "Sessions"
         ]
