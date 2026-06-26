@@ -10,7 +10,6 @@
  */
 
 import type { components } from '../../generated/api.js'
-import type { ListParams } from '../../core/utils.js'
 import { WorkspaceScopedResource, extractData } from '../base.js'
 
 // Re-export the generated schema types verbatim — never hand-roll a parallel
@@ -19,57 +18,7 @@ import { WorkspaceScopedResource, extractData } from '../base.js'
 // suffix; consumers think in terms of resource shapes, not REST artifacts).
 export type CreateSesSetupRequest = components['schemas']['CreateSesSetupRequest']
 export type SesSetupDetail = components['schemas']['SesSetupDetailResponse']
-export type SesSetupListItem = components['schemas']['SesSetupListItemResponse']
 export type DnsRecord = components['schemas']['DnsRecordResponse']
-// Named alias for the paginated list response so consumers can annotate
-// variables with the public type rather than reaching into the generated
-// schema by string. The underlying schema name is openapi-typescript's
-// double-underscore encoding of FastAPI's parameterized generic; aliasing
-// it here gives us a stable rename point if the generator output shifts.
-export type SesSetupListResponse =
-  components['schemas']['PaginatedResponse_SesSetupListItemResponse_']
-
-// Compile-time guard: pin the required fields the SDK depends on so a
-// generator rename of the double-underscore-encoded schema (or a
-// degradation that collapses the type to ``any``) fails at build time
-// rather than silently letting drift land on consumers.
-//
-// Design notes for the next person to extend this:
-//
-// 1. ``IsAny<T>`` rejection comes first — a one-way ``extends`` lets
-//    ``any`` slip through (``any`` extends everything). If the
-//    generator ever degrades this schema to ``any`` we want a hard
-//    compile error rather than a silent loss of typing.
-//
-// 2. The structural check is **one-way** (``[T] extends [Shape]``)
-//    on purpose — additive optional fields the generator might
-//    introduce (``total``, ``next_cursor``, etc.) are tolerated
-//    because they don't break the SDK contract. A bidirectional
-//    "exact" check would force a guard update on every additive
-//    schema change and is the wrong semantic for forward-compatible
-//    public types.
-//
-// 3. The failure branch is a string-literal type, not ``never`` —
-//    so when the guard does fire, the TypeScript error reads
-//    "Type 'true' is not assignable to type
-//    'SesSetupListResponse no longer matches …'" instead of the
-//    opaque "Type 'boolean' is not assignable to type 'never'".
-//    Future guards in other resources should follow the same
-//    template.
-type IsAny<T> = 0 extends 1 & T ? true : false
-type GUARD_FAILURE_MESSAGE =
-  'SesSetupListResponse no longer matches the expected paginated shape ({ items, has_more, continuation_token? }) — has openapi-typescript renamed the generic encoding, or did the API drop a load-bearing field? Update the alias on line ~30 and this guard together.'
-type AssertSchemaShape<T, Shape> =
-  IsAny<T> extends true ? GUARD_FAILURE_MESSAGE : [T] extends [Shape] ? true : GUARD_FAILURE_MESSAGE
-const _SES_SETUP_LIST_RESPONSE_GUARD: AssertSchemaShape<
-  SesSetupListResponse,
-  {
-    items: SesSetupListItem[]
-    has_more: boolean
-    continuation_token?: number | null
-  }
-> = true
-void _SES_SETUP_LIST_RESPONSE_GUARD
 
 export class SesSetupResource extends WorkspaceScopedResource {
   /**
@@ -86,25 +35,6 @@ export class SesSetupResource extends WorkspaceScopedResource {
         body,
       }),
     )
-  }
-
-  /**
-   * List SES setups owned by this workspace.
-   *
-   * Each item carries the cached ``dns_verified`` aggregate; call ``get``
-   * for per-record DNS detail.
-   */
-  async list(params?: ListParams): Promise<SesSetupListResponse> {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/channels/ses-setup', {
-        params: { path: { workspace_id: this.workspaceId }, query: params },
-      }),
-    )
-  }
-
-  /** Auto-paginating async iterable over every SES setup in the workspace. */
-  listAutoPaging(params?: ListParams): AsyncGenerator<SesSetupListItem> {
-    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
   }
 
   /**

@@ -35,16 +35,6 @@ const DETAIL_FIXTURE = {
   updated_at: '2026-05-05T12:00:00Z',
 }
 
-const LIST_ITEM_FIXTURE = {
-  id: SETUP_ID,
-  tenant_name: 'acme-prod',
-  domain_identity: 'mail.acme.com',
-  dns_verified: false,
-  dns_checked_at: '2026-05-05T12:00:00Z',
-  created_at: '2026-05-05T12:00:00Z',
-  updated_at: '2026-05-05T12:00:00Z',
-}
-
 type RouteHandler = (req: { url: URL }) => Response | Promise<Response>
 
 function mockFetch(
@@ -101,74 +91,6 @@ describe('client.channels.sesSetup', () => {
     expect(result.domain_identity).toBe('mail.acme.com')
     expect(result.dns_records).toHaveLength(3)
     expect(result.dns_records.map((r) => r.type).sort()).toEqual(['CNAME', 'MX', 'TXT'])
-  })
-
-  it('list returns paginated items', async () => {
-    const client = new AmigoClient({
-      apiKey: FAKE_API_KEY,
-      workspaceId: TEST_WORKSPACE_ID,
-      fetch: mockFetch({
-        [`GET ${BASE}`]: () =>
-          new Response(
-            JSON.stringify({
-              items: [LIST_ITEM_FIXTURE],
-              has_more: false,
-              continuation_token: null,
-            }),
-            { status: 200, headers: { 'content-type': 'application/json' } },
-          ),
-      }),
-    })
-    const result = await client.channels.sesSetup.list()
-    expect(result.items).toHaveLength(1)
-    expect(result.items[0]?.id).toBe(SETUP_ID)
-    expect(result.has_more).toBe(false)
-  })
-
-  it('listAutoPaging streams every item across pages', async () => {
-    // Token is a string in the generated pagination envelope (URL
-    // query params serialise stringly). Asserting inside the handler
-    // that the second-page request actually carried the token guards
-    // against a regression in client-side token forwarding (which
-    // would otherwise pass silently because of the page closure).
-    const PAGE_TOKEN = 'cursor-page-2'
-    const tokenObserved: string[] = []
-    let page = 0
-    const client = new AmigoClient({
-      apiKey: FAKE_API_KEY,
-      workspaceId: TEST_WORKSPACE_ID,
-      fetch: mockFetch({
-        [`GET ${BASE}`]: ({ url }) => {
-          page += 1
-          tokenObserved.push(url.searchParams.get('continuation_token') ?? '')
-          if (page === 1) {
-            return new Response(
-              JSON.stringify({
-                items: [LIST_ITEM_FIXTURE],
-                has_more: true,
-                continuation_token: PAGE_TOKEN,
-              }),
-              { status: 200, headers: { 'content-type': 'application/json' } },
-            )
-          }
-          return new Response(
-            JSON.stringify({
-              items: [{ ...LIST_ITEM_FIXTURE, id: 'bbbbbbbb-0000-0000-0000-000000000002' }],
-              has_more: false,
-              continuation_token: null,
-            }),
-            { status: 200, headers: { 'content-type': 'application/json' } },
-          )
-        },
-      }),
-    })
-    const seen: string[] = []
-    for await (const item of client.channels.sesSetup.listAutoPaging()) {
-      seen.push(item.id)
-    }
-    expect(seen).toEqual([SETUP_ID, 'bbbbbbbb-0000-0000-0000-000000000002'])
-    // First page request had no token; second carried the server-issued one.
-    expect(tokenObserved).toEqual(['', PAGE_TOKEN])
   })
 
   it('verify aliases get and re-runs the live DNS lookup', async () => {

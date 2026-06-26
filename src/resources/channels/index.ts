@@ -24,8 +24,6 @@ export type {
   CreateSesSetupRequest,
   DnsRecord,
   SesSetupDetail,
-  SesSetupListItem,
-  SesSetupListResponse,
 } from './ses-setup.js'
 
 export class ChannelsResource extends WorkspaceScopedResource {
