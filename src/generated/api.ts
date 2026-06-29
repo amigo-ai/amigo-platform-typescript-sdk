@@ -679,9 +679,33 @@ export interface paths {
         get: operations["get-test-caller-numbers"];
         /**
          * Update test caller numbers
-         * @description Set phone numbers to be treated as test callers. Calls from these numbers will have direction='test' and be excluded from outbound EHR sync.
+         * @description Set phone numbers to be treated as test callers. Calls from these numbers are tagged source='test' and excluded from billing, scores, analytics, outbound EHR sync, and entity views.
          */
         put: operations["update-test-caller-numbers"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/workspaces/{workspace_id}/test-credential-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get test credential IDs
+         * @description Get the credential IDs configured as test principals for this workspace's text channel.
+         */
+        get: operations["get-test-credential-ids"];
+        /**
+         * Update test credential IDs
+         * @description Set credential IDs to be treated as test principals. Text turns from these credentials are tagged source='test' and excluded from billing, scores, analytics, outbound EHR sync, and entity views.
+         */
+        put: operations["update-test-credential-ids"];
         post?: never;
         delete?: never;
         options?: never;
@@ -1694,6 +1718,45 @@ export interface paths {
         get: operations["get-call-trace-analysis"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/calls/{conversation_id}/eval-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Call Eval Results */
+        get: operations["get-call-eval-results"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/calls/{conversation_id}/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate Call
+         * @description Run the workspace's active eval definitions against one completed call and
+         *     persist the verdicts. Synchronous (the caller waits on the judge); the eager
+         *     post-call trigger is a separate change.
+         */
+        post: operations["evaluate-call"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3156,6 +3219,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/batches": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Intake Batches */
+        get: operations["list_intake_batches_v1__workspace_id__intake_batches_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/batches/{batch_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Intake Batch */
+        get: operations["get_intake_batch_v1__workspace_id__intake_batches__batch_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/batches/{batch_id}/process": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Process Intake Batch
+         * @description Start processing a batch (idempotent + resumable). Dispatches only the
+         *     still-``received`` files, so re-running picks up any that weren't triggered:
+         *
+         *     * **Snapshot/CSV — ordered:** CDC depends on the prior curated baseline, so
+         *       only the lowest-version file fires now; each verdict chains the next via the
+         *       status write-back.
+         *     * **Documents — one batch run:** a single extract-job run processes every
+         *       received file (it pulls them from the processing-manifest). NOT one run-now
+         *       per file — that serialised on the request path and 504'd for large batches.
+         *
+         *     The batch rolls up to completed/failed (via the write-back) once every file
+         *     reaches a terminal verdict. Allowed from ``ready`` or ``processing`` (re-kick
+         *     a partially-dispatched batch); a terminal batch is a 409.
+         */
+        post: operations["process_intake_batch_v1__workspace_id__intake_batches__batch_id__process_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/batches/{batch_id}/processing-manifest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Batch Processing Manifest
+         * @description The per-file params the batch-extract job needs to process every still-
+         *     ``received`` file in one run. Same workspace-scoped auth as the write-back
+         *     (the job holds the batch's agent-session token). Documents only — snapshot/CSV
+         *     batches process in version order via the chained per-file path, not here.
+         */
+        get: operations["get_batch_processing_manifest_v1__workspace_id__intake_batches__batch_id__processing_manifest_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/intake/datasets": {
         parameters: {
             query?: never;
@@ -3236,12 +3388,13 @@ export interface paths {
         put?: never;
         /**
          * Write Back Intake File Status
-         * @description Advance a file's status from the async CDC job (P4).
+         * @description Advance a file's status from the async CDC/extraction job (P4).
          *
          *     The job authenticates with the workspace's API key (Bearer) — the same
          *     Databricks→platform-api path launch_dpc uses — so RLS scopes the update to
          *     that workspace. Moves the row to its terminal verdict and records the
-         *     curated/cdc paths.
+         *     curated/cdc paths. For a batch-sourced file, advances its batch (chain the
+         *     next snapshot version + roll up) once the verdict is terminal.
          */
         post: operations["write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post"];
         delete?: never;
@@ -3336,6 +3489,41 @@ export interface paths {
         put?: never;
         /** Register Intake Schema */
         post: operations["register_intake_schema_v1__workspace_id__intake_schema_register_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Intake Sources */
+        get: operations["list_intake_sources_v1__workspace_id__intake_sources_get"];
+        put?: never;
+        /** Register Intake Source */
+        post: operations["register_intake_source_v1__workspace_id__intake_sources_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/sources/{source_id}/sync": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sync Intake Source */
+        post: operations["sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4566,6 +4754,43 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/production-eval-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Production Eval Definitions */
+        get: operations["list-production-eval-definitions"];
+        put?: never;
+        /** Create Production Eval Definition */
+        post: operations["create-production-eval-definition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/production-eval-definitions/{definition_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Production Eval Definition */
+        get: operations["get-production-eval-definition"];
+        put?: never;
+        post?: never;
+        /** Delete Production Eval Definition */
+        delete: operations["delete-production-eval-definition"];
+        options?: never;
+        head?: never;
+        /** Update Production Eval Definition */
+        patch: operations["update-production-eval-definition"];
         trace?: never;
     };
     "/v1/{workspace_id}/prompt-logs": {
@@ -8381,6 +8606,51 @@ export interface components {
             /** Notes */
             notes?: string | null;
         };
+        /** BatchDetail */
+        BatchDetail: {
+            /** Created Ts */
+            created_ts: string;
+            /** Dataset */
+            dataset: string;
+            /**
+             * Files
+             * @default []
+             */
+            files?: components["schemas"]["IntakeFileRow"][];
+            /** Files Found */
+            files_found: number;
+            /**
+             * Id
+             * Format: uuid
+             * @description batch_id.
+             */
+            id: string;
+            /** Source Id */
+            source_id?: string | null;
+            /**
+             * Status
+             * @description discovered | ready | processing | completed | failed.
+             */
+            status: string;
+        };
+        /**
+         * BatchProcessingManifest
+         * @description Per-file extraction params for a document batch's still-``received`` files —
+         *     consumed by the batch-extract job, which runs ONCE per batch and extracts
+         *     every file (instead of one run-now per file, which blows the request/gateway
+         *     timeout for large batches). Authenticated by the same short-lived
+         *     workspace-scoped token as the status write-back. ``document_processing`` is
+         *     dataset-wide (the contract); ``file_type`` is per-file (V265 multi-type).
+         *     Filenames are deliberately absent — PHI stays on the Lakebase row.
+         */
+        BatchProcessingManifest: {
+            /** Document Processing */
+            document_processing: {
+                [key: string]: unknown;
+            };
+            /** Files */
+            files: components["schemas"]["FileEntry"][];
+        };
         /**
          * BatchRejectRequest
          * @description Batch reject multiple review items.
@@ -8390,6 +8660,31 @@ export interface components {
             item_ids: string[];
             /** Reason */
             reason: string;
+        };
+        /**
+         * BatchRow
+         * @description A source-sync batch (Batches list / detail).
+         */
+        BatchRow: {
+            /** Created Ts */
+            created_ts: string;
+            /** Dataset */
+            dataset: string;
+            /** Files Found */
+            files_found: number;
+            /**
+             * Id
+             * Format: uuid
+             * @description batch_id.
+             */
+            id: string;
+            /** Source Id */
+            source_id?: string | null;
+            /**
+             * Status
+             * @description discovered | ready | processing | completed | failed.
+             */
+            status: string;
         };
         /** BillingDashboardResponse */
         BillingDashboardResponse: {
@@ -8897,6 +9192,78 @@ export interface components {
              * @enum {string}
              */
             trigger: "caller" | "ai" | "operator";
+        };
+        /**
+         * CallEvalResult
+         * @description One eval verdict for one production call, keyed by ``conversation_id``.
+         *     Mirrors the sim eval-result shape. ``justification`` and ``cited_turns`` come
+         *     from the justified ai_query metric compute. PHI: ``justification`` / ``actual``
+         *     can echo live transcript content; never log them.
+         */
+        CallEvalResult: {
+            /** Actual */
+            actual?: unknown;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Call Sid */
+            call_sid?: string | null;
+            /** Cited Turns */
+            cited_turns?: unknown[];
+            /** Computed At */
+            computed_at?: string | null;
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Created At */
+            created_at?: string | null;
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /** Expected */
+            expected?: unknown;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id?: string;
+            /** Justification */
+            justification?: string | null;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Passed */
+            passed?: boolean | null;
+            /** Rationale */
+            rationale?: string | null;
+            /** Score */
+            score?: number | null;
+            /** Service Id */
+            service_id?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "passed" | "failed" | "pending" | "skipped" | "error";
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /** CallEvalResultsResponse */
+        CallEvalResultsResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Results */
+            results: components["schemas"]["CallEvalResult"][];
         };
         /**
          * CallIntelligenceDetail
@@ -11058,6 +11425,33 @@ export interface components {
              */
             status: string;
         };
+        /** CreateProductionEvalDefinitionRequest */
+        CreateProductionEvalDefinitionRequest: {
+            /**
+             * Active
+             * @default true
+             */
+            active?: boolean;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /** Expected */
+            expected?: unknown;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+        };
         /** CreateRunRequest */
         CreateRunRequest: {
             /** Branch Name */
@@ -12493,6 +12887,19 @@ export interface components {
              * @default true
              */
             retain_source?: boolean;
+        };
+        /**
+         * DriveFolderMapping
+         * @description One Google Drive folder ↔ one intake dataset.
+         *
+         *     ``folder_id`` is the Drive folder id (the identity — never the folder name,
+         *     which can be renamed/moved). One folder maps to exactly one dataset.
+         */
+        DriveFolderMapping: {
+            /** Dataset */
+            dataset: string;
+            /** Folder Id */
+            folder_id: string;
         };
         /** DropColumnAction */
         DropColumnAction: {
@@ -14851,6 +15258,34 @@ export interface components {
          * @enum {string}
          */
         FieldType: "text" | "textarea" | "date" | "phone" | "email" | "number" | "select" | "multiselect" | "checkbox" | "photo" | "signature" | "file" | "heading" | "info";
+        /** FileEntry */
+        FileEntry: {
+            /** Content Type */
+            content_type: string;
+            /** Contract Id */
+            contract_id?: string | null;
+            /** Contract Version */
+            contract_version?: string | null;
+            /** Document Id */
+            document_id?: string | null;
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Type */
+            file_type: string;
+            /** Ingested At */
+            ingested_at: string;
+            /** Sha256 */
+            sha256: string;
+            /** Size Bytes */
+            size_bytes: number;
+            /** Source Path */
+            source_path: string;
+            /** Version */
+            version: number;
+        };
         /** FireTriggerRequest */
         FireTriggerRequest: {
             /**
@@ -15701,6 +16136,20 @@ export interface components {
             schema_version?: string | null;
             /** Size Bytes */
             size_bytes: number;
+            /**
+             * Source File Id
+             * @description The source's stable external id (e.g. the Google Drive file id) for the
+             *     document. Lets the console show provenance and confirm a re-synced file
+             *     bumped the *same* document. Null for manual uploads and snapshot rows.
+             */
+            source_file_id?: string | null;
+            /**
+             * Source Type
+             * @description Origin of the document this version belongs to — ``manual`` for console
+             *     uploads, ``google_shared_drive`` for the Drive connector (V269). Null for
+             *     snapshot/CSV rows.
+             */
+            source_type?: string | null;
             status: components["schemas"]["_FileStatus"];
             /**
              * Version
@@ -15750,6 +16199,38 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * IntakeSourceRow
+         * @description A registered intake source (Sources list).
+         */
+        IntakeSourceRow: {
+            /**
+             * Created Ts
+             * @description ISO-8601 timestamp.
+             */
+            created_ts: string;
+            /**
+             * Credential Ssm Param Path
+             * @description Where the SA key must be uploaded (derived; the secret itself is never returned).
+             */
+            credential_ssm_param_path: string;
+            /** Display Name */
+            display_name: string;
+            /** Drive Id */
+            drive_id?: string | null;
+            /** Folders */
+            folders: components["schemas"]["DriveFolderMapping"][];
+            /**
+             * Id
+             * Format: uuid
+             * @description source_id.
+             */
+            id: string;
+            /** Source Type */
+            source_type: string;
+            /** Status */
+            status: string;
         };
         /** IntakeUploadResponse */
         IntakeUploadResponse: {
@@ -18030,6 +18511,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[BatchRow] */
+        PaginatedResponse_BatchRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["BatchRow"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[ContextGraphResponse] */
         PaginatedResponse_ContextGraphResponse_: {
             /** Continuation Token */
@@ -18129,6 +18621,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[IntakeSourceRow] */
+        PaginatedResponse_IntakeSourceRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["IntakeSourceRow"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[InvoiceItem] */
         PaginatedResponse_InvoiceItem_: {
             /** Continuation Token */
@@ -18170,6 +18673,17 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["OutboundLogItem"][];
+            /** Total */
+            total?: number | null;
+        };
+        /** PaginatedResponse[ProductionEvalDefinition] */
+        PaginatedResponse_ProductionEvalDefinition_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ProductionEvalDefinition"][];
             /** Total */
             total?: number | null;
         };
@@ -19117,6 +19631,54 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * ProductionEvalDefinition
+         * @description An eval (assertion or metric-eval) that runs against a workspace's live
+         *     calls — the production analogue of a sim case's ``evals``. ``service_id``
+         *     None applies to every service in the workspace. ``expected`` is JSON: a
+         *     phrase string for assertions, or a ``{gte|lte|equals|...}`` threshold for
+         *     metric-evals.
+         */
+        ProductionEvalDefinition: {
+            /**
+             * Active
+             * @default true
+             */
+            active?: boolean;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Created At */
+            created_at?: string | null;
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /** Expected */
+            expected?: unknown;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id?: string;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            };
+            /** Service Id */
+            service_id?: string | null;
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /**
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
          *
@@ -19592,6 +20154,23 @@ export interface components {
              * @default []
              */
             schema?: components["schemas"]["SchemaFieldSpec"][];
+        };
+        /**
+         * RegisterSourceRequest
+         * @description Register a Google Shared Drive intake source (design §3).
+         *
+         *     The credential is not part of the wire contract — the server derives the
+         *     SA-key SSM path deterministically from the generated ``source_id`` (the
+         *     ``/data-sources/`` convention) and the operator uploads the key there
+         *     out-of-band. ``drive_id`` is optional (resolved at sync if omitted).
+         */
+        RegisterSourceRequest: {
+            /** Display Name */
+            display_name: string;
+            /** Drive Id */
+            drive_id?: string | null;
+            /** Folders */
+            folders: components["schemas"]["DriveFolderMapping"][];
         };
         /**
          * RegisteredFunction
@@ -22275,6 +22854,11 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** SourceSyncResponse */
+        SourceSyncResponse: {
+            /** Batches */
+            batches: components["schemas"]["SyncBatchRow"][];
+        };
         /**
          * Span
          * @description OTLP ``Span`` in OTLP/JSON encoding (ids hex, timestamps decimal-string).
@@ -23204,6 +23788,23 @@ export interface components {
              */
             mode: "listen" | "takeover";
         };
+        /**
+         * SyncBatchRow
+         * @description One batch produced by a source sync (one per mapped folder/dataset).
+         */
+        SyncBatchRow: {
+            /**
+             * Batch Id
+             * Format: uuid
+             */
+            batch_id: string;
+            /** Dataset */
+            dataset: string;
+            /** Files Found */
+            files_found: number;
+            /** Status */
+            status: string;
+        };
         /** SyncFailureEntry */
         SyncFailureEntry: {
             /** Created At */
@@ -23289,6 +23890,16 @@ export interface components {
         TestCallerNumbersResponse: {
             /** Numbers */
             numbers: string[];
+        };
+        /** TestCredentialIdsRequest */
+        TestCredentialIdsRequest: {
+            /** Credential Ids */
+            credential_ids: string[];
+        };
+        /** TestCredentialIdsResponse */
+        TestCredentialIdsResponse: {
+            /** Credential Ids */
+            credential_ids: string[];
         };
         /**
          * TestInvokeResponse
@@ -24987,6 +25598,27 @@ export interface components {
             status?: ("online" | "busy" | "offline") | null;
             /** Type */
             type?: ("clinical" | "administrative" | "crisis_counselor") | null;
+        };
+        /** UpdateProductionEvalDefinitionRequest */
+        UpdateProductionEvalDefinitionRequest: {
+            /** Active */
+            active?: boolean | null;
+            /** Assertion Kind */
+            assertion_kind?: string | null;
+            /** Eval Key */
+            eval_key?: string | null;
+            /** Eval Type */
+            eval_type?: ("assertion" | "metric") | null;
+            /** Expected */
+            expected?: unknown;
+            /** Metric Key */
+            metric_key?: string | null;
+            /** Params */
+            params?: {
+                [key: string]: unknown;
+            } | null;
+            /** Service Id */
+            service_id?: string | null;
         };
         /**
          * UpdateSchedulingRuleSetRequest
@@ -28790,6 +29422,63 @@ export interface operations {
             };
         };
     };
+    "get-test-credential-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCredentialIdsResponse"];
+                };
+            };
+        };
+    };
+    "update-test-credential-ids": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TestCredentialIdsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TestCredentialIdsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-agents": {
         parameters: {
             query?: {
@@ -31169,6 +31858,70 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "get-call-eval-results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallEvalResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "evaluate-call": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CallEvalResultsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -35393,6 +36146,138 @@ export interface operations {
             };
         };
     };
+    list_intake_batches_v1__workspace_id__intake_batches_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+                source_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_BatchRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_intake_batch_v1__workspace_id__intake_batches__batch_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    process_intake_batch_v1__workspace_id__intake_batches__batch_id__process_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_batch_processing_manifest_v1__workspace_id__intake_batches__batch_id__processing_manifest_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                batch_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchProcessingManifest"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_intake_datasets_v1__workspace_id__intake_datasets_get: {
         parameters: {
             query?: {
@@ -35811,6 +36696,108 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DatasetRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_intake_sources_v1__workspace_id__intake_sources_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_IntakeSourceRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_intake_source_v1__workspace_id__intake_sources_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterSourceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IntakeSourceRow"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceSyncResponse"];
                 };
             };
             /** @description Validation Error */
@@ -38599,6 +39586,175 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "list-production-eval-definitions": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+                active?: boolean | null;
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_ProductionEvalDefinition_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-production-eval-definition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductionEvalDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionEvalDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-production-eval-definition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionEvalDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-production-eval-definition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "update-production-eval-definition": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductionEvalDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductionEvalDefinition"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
