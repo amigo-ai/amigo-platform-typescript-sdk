@@ -2186,6 +2186,85 @@
         "title": "BatchApproveRequest",
         "type": "object"
       },
+      "BatchDetail": {
+        "properties": {
+          "created_ts": {
+            "title": "Created Ts",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "files": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/IntakeFileRow"
+            },
+            "title": "Files",
+            "type": "array"
+          },
+          "files_found": {
+            "title": "Files Found",
+            "type": "integer"
+          },
+          "id": {
+            "description": "batch_id.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "status": {
+            "description": "discovered | ready | processing | completed | failed.",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "dataset",
+          "status",
+          "files_found",
+          "created_ts"
+        ],
+        "title": "BatchDetail",
+        "type": "object"
+      },
+      "BatchProcessingManifest": {
+        "description": "Per-file extraction params for a document batch's still-``received`` files \u2014\nconsumed by the batch-extract job, which runs ONCE per batch and extracts\nevery file (instead of one run-now per file, which blows the request/gateway\ntimeout for large batches). Authenticated by the same short-lived\nworkspace-scoped token as the status write-back. ``document_processing`` is\ndataset-wide (the contract); ``file_type`` is per-file (V265 multi-type).\nFilenames are deliberately absent \u2014 PHI stays on the Lakebase row.",
+        "properties": {
+          "document_processing": {
+            "additionalProperties": true,
+            "title": "Document Processing",
+            "type": "object"
+          },
+          "files": {
+            "items": {
+              "$ref": "#/components/schemas/FileEntry"
+            },
+            "title": "Files",
+            "type": "array"
+          }
+        },
+        "required": [
+          "document_processing",
+          "files"
+        ],
+        "title": "BatchProcessingManifest",
+        "type": "object"
+      },
       "BatchRejectRequest": {
         "description": "Batch reject multiple review items.",
         "properties": {
@@ -2211,6 +2290,55 @@
           "reason"
         ],
         "title": "BatchRejectRequest",
+        "type": "object"
+      },
+      "BatchRow": {
+        "description": "A source-sync batch (Batches list / detail).",
+        "properties": {
+          "created_ts": {
+            "title": "Created Ts",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "files_found": {
+            "title": "Files Found",
+            "type": "integer"
+          },
+          "id": {
+            "description": "batch_id.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "status": {
+            "description": "discovered | ready | processing | completed | failed.",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "dataset",
+          "status",
+          "files_found",
+          "created_ts"
+        ],
+        "title": "BatchRow",
         "type": "object"
       },
       "BillingDashboardResponse": {
@@ -11985,6 +12113,31 @@
         "title": "DocumentProcessingSpec",
         "type": "object"
       },
+      "DriveFolderMapping": {
+        "description": "One Google Drive folder \u2194 one intake dataset.\n\n``folder_id`` is the Drive folder id (the identity \u2014 never the folder name,\nwhich can be renamed/moved). One folder maps to exactly one dataset.",
+        "properties": {
+          "dataset": {
+            "maxLength": 63,
+            "minLength": 2,
+            "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+            "title": "Dataset",
+            "type": "string"
+          },
+          "folder_id": {
+            "maxLength": 256,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Folder Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "folder_id",
+          "dataset"
+        ],
+        "title": "DriveFolderMapping",
+        "type": "object"
+      },
       "DropColumnAction": {
         "properties": {
           "name": {
@@ -18197,6 +18350,90 @@
         "title": "FieldType",
         "type": "string"
       },
+      "FileEntry": {
+        "properties": {
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "contract_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Id"
+          },
+          "contract_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Version"
+          },
+          "document_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Id"
+          },
+          "file_id": {
+            "format": "uuid",
+            "title": "File Id",
+            "type": "string"
+          },
+          "file_type": {
+            "title": "File Type",
+            "type": "string"
+          },
+          "ingested_at": {
+            "title": "Ingested At",
+            "type": "string"
+          },
+          "sha256": {
+            "title": "Sha256",
+            "type": "string"
+          },
+          "size_bytes": {
+            "title": "Size Bytes",
+            "type": "integer"
+          },
+          "source_path": {
+            "title": "Source Path",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "file_id",
+          "version",
+          "source_path",
+          "file_type",
+          "content_type",
+          "sha256",
+          "size_bytes",
+          "ingested_at"
+        ],
+        "title": "FileEntry",
+        "type": "object"
+      },
       "FireTriggerRequest": {
         "properties": {
           "input": {
@@ -20218,6 +20455,30 @@
             "title": "Size Bytes",
             "type": "integer"
           },
+          "source_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The source's stable external id (e.g. the Google Drive file id) for the\ndocument. Lets the console show provenance and confirm a re-synced file\nbumped the *same* document. Null for manual uploads and snapshot rows.",
+            "title": "Source File Id"
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Origin of the document this version belongs to \u2014 ``manual`` for console\nuploads, ``google_shared_drive`` for the Drive connector (V269). Null for\nsnapshot/CSV rows.",
+            "title": "Source Type"
+          },
           "status": {
             "$ref": "#/components/schemas/_FileStatus"
           },
@@ -20350,6 +20611,68 @@
           "last_upload_at"
         ],
         "title": "IntakeLinkResponse",
+        "type": "object"
+      },
+      "IntakeSourceRow": {
+        "description": "A registered intake source (Sources list).",
+        "properties": {
+          "created_ts": {
+            "description": "ISO-8601 timestamp.",
+            "title": "Created Ts",
+            "type": "string"
+          },
+          "credential_ssm_param_path": {
+            "description": "Where the SA key must be uploaded (derived; the secret itself is never returned).",
+            "title": "Credential Ssm Param Path",
+            "type": "string"
+          },
+          "display_name": {
+            "title": "Display Name",
+            "type": "string"
+          },
+          "drive_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drive Id"
+          },
+          "folders": {
+            "items": {
+              "$ref": "#/components/schemas/DriveFolderMapping"
+            },
+            "title": "Folders",
+            "type": "array"
+          },
+          "id": {
+            "description": "source_id.",
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source_type": {
+            "title": "Source Type",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "source_type",
+          "display_name",
+          "folders",
+          "credential_ssm_param_path",
+          "status",
+          "created_ts"
+        ],
+        "title": "IntakeSourceRow",
         "type": "object"
       },
       "IntakeUploadResponse": {
@@ -25217,6 +25540,49 @@
         "title": "PaginatedResponse[AuditEventResponse]",
         "type": "object"
       },
+      "PaginatedResponse_BatchRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BatchRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[BatchRow]",
+        "type": "object"
+      },
       "PaginatedResponse_ContextGraphResponse_": {
         "properties": {
           "continuation_token": {
@@ -25602,6 +25968,49 @@
           "has_more"
         ],
         "title": "PaginatedResponse[IntakeFileRow]",
+        "type": "object"
+      },
+      "PaginatedResponse_IntakeSourceRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/IntakeSourceRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[IntakeSourceRow]",
         "type": "object"
       },
       "PaginatedResponse_InvoiceItem_": {
@@ -29336,6 +29745,44 @@
           "file_type"
         ],
         "title": "RegisterSchemaRequest",
+        "type": "object"
+      },
+      "RegisterSourceRequest": {
+        "description": "Register a Google Shared Drive intake source (design \u00a73).\n\nThe credential is not part of the wire contract \u2014 the server derives the\nSA-key SSM path deterministically from the generated ``source_id`` (the\n``/data-sources/`` convention) and the operator uploads the key there\nout-of-band. ``drive_id`` is optional (resolved at sync if omitted).",
+        "properties": {
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Display Name",
+            "type": "string"
+          },
+          "drive_id": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Drive Id"
+          },
+          "folders": {
+            "items": {
+              "$ref": "#/components/schemas/DriveFolderMapping"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Folders",
+            "type": "array"
+          }
+        },
+        "required": [
+          "display_name",
+          "folders"
+        ],
+        "title": "RegisterSourceRequest",
         "type": "object"
       },
       "RegisteredFunction": {
@@ -35575,6 +36022,22 @@
         "title": "SourceStatus",
         "type": "object"
       },
+      "SourceSyncResponse": {
+        "properties": {
+          "batches": {
+            "items": {
+              "$ref": "#/components/schemas/SyncBatchRow"
+            },
+            "title": "Batches",
+            "type": "array"
+          }
+        },
+        "required": [
+          "batches"
+        ],
+        "title": "SourceSyncResponse",
+        "type": "object"
+      },
       "Span": {
         "description": "OTLP ``Span`` in OTLP/JSON encoding (ids hex, timestamps decimal-string).",
         "properties": {
@@ -37673,6 +38136,36 @@
         "title": "SwitchModeResponse",
         "type": "object"
       },
+      "SyncBatchRow": {
+        "description": "One batch produced by a source sync (one per mapped folder/dataset).",
+        "properties": {
+          "batch_id": {
+            "format": "uuid",
+            "title": "Batch Id",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "files_found": {
+            "title": "Files Found",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "batch_id",
+          "dataset",
+          "files_found",
+          "status"
+        ],
+        "title": "SyncBatchRow",
+        "type": "object"
+      },
       "SyncFailureEntry": {
         "properties": {
           "created_at": {
@@ -37892,6 +38385,41 @@
           "numbers"
         ],
         "title": "TestCallerNumbersResponse",
+        "type": "object"
+      },
+      "TestCredentialIdsRequest": {
+        "properties": {
+          "credential_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 100,
+            "title": "Credential Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "credential_ids"
+        ],
+        "title": "TestCredentialIdsRequest",
+        "type": "object"
+      },
+      "TestCredentialIdsResponse": {
+        "properties": {
+          "credential_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Credential Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "credential_ids"
+        ],
+        "title": "TestCredentialIdsResponse",
         "type": "object"
       },
       "TestInvokeResponse": {
@@ -49909,7 +50437,7 @@
         ]
       },
       "put": {
-        "description": "Set phone numbers to be treated as test callers. Calls from these numbers will have direction='test' and be excluded from outbound EHR sync.",
+        "description": "Set phone numbers to be treated as test callers. Calls from these numbers are tagged source='test' and excluded from billing, scores, analytics, outbound EHR sync, and entity views.",
         "operationId": "update-test-caller-numbers",
         "parameters": [
           {
@@ -49956,6 +50484,92 @@
           }
         },
         "summary": "Update test caller numbers",
+        "tags": [
+          "Workspaces"
+        ]
+      }
+    },
+    "/v1/workspaces/{workspace_id}/test-credential-ids": {
+      "get": {
+        "description": "Get the credential IDs configured as test principals for this workspace's text channel.",
+        "operationId": "get-test-credential-ids",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestCredentialIdsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get test credential IDs",
+        "tags": [
+          "Workspaces"
+        ]
+      },
+      "put": {
+        "description": "Set credential IDs to be treated as test principals. Text turns from these credentials are tagged source='test' and excluded from billing, scores, analytics, outbound EHR sync, and entity views.",
+        "operationId": "update-test-credential-ids",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TestCredentialIdsRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TestCredentialIdsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update test credential IDs",
         "tags": [
           "Workspaces"
         ]
@@ -61339,6 +61953,261 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/batches": {
+      "get": {
+        "operationId": "list_intake_batches_v1__workspace_id__intake_batches_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "-created_ts",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_BatchRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Batches",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/batches/{batch_id}": {
+      "get": {
+        "operationId": "get_intake_batch_v1__workspace_id__intake_batches__batch_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Batch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Intake Batch",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/batches/{batch_id}/process": {
+      "post": {
+        "description": "Start processing a batch (idempotent + resumable). Dispatches only the\nstill-``received`` files, so re-running picks up any that weren't triggered:\n\n* **Snapshot/CSV \u2014 ordered:** CDC depends on the prior curated baseline, so\n  only the lowest-version file fires now; each verdict chains the next via the\n  status write-back.\n* **Documents \u2014 one batch run:** a single extract-job run processes every\n  received file (it pulls them from the processing-manifest). NOT one run-now\n  per file \u2014 that serialised on the request path and 504'd for large batches.\n\nThe batch rolls up to completed/failed (via the write-back) once every file\nreaches a terminal verdict. Allowed from ``ready`` or ``processing`` (re-kick\na partially-dispatched batch); a terminal batch is a 409.",
+        "operationId": "process_intake_batch_v1__workspace_id__intake_batches__batch_id__process_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Batch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Process Intake Batch",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/batches/{batch_id}/processing-manifest": {
+      "get": {
+        "description": "The per-file params the batch-extract job needs to process every still-\n``received`` file in one run. Same workspace-scoped auth as the write-back\n(the job holds the batch's agent-session token). Documents only \u2014 snapshot/CSV\nbatches process in version order via the chained per-file path, not here.",
+        "operationId": "get_batch_processing_manifest_v1__workspace_id__intake_batches__batch_id__processing_manifest_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "batch_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Batch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchProcessingManifest"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Batch Processing Manifest",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/intake/datasets": {
       "get": {
         "operationId": "list_intake_datasets_v1__workspace_id__intake_datasets_get",
@@ -61751,7 +62620,7 @@
     },
     "/v1/{workspace_id}/intake/files/{file_id}/status": {
       "post": {
-        "description": "Advance a file's status from the async CDC job (P4).\n\nThe job authenticates with the workspace's API key (Bearer) \u2014 the same\nDatabricks\u2192platform-api path launch_dpc uses \u2014 so RLS scopes the update to\nthat workspace. Moves the row to its terminal verdict and records the\ncurated/cdc paths.",
+        "description": "Advance a file's status from the async CDC/extraction job (P4).\n\nThe job authenticates with the workspace's API key (Bearer) \u2014 the same\nDatabricks\u2192platform-api path launch_dpc uses \u2014 so RLS scopes the update to\nthat workspace. Moves the row to its terminal verdict and records the\ncurated/cdc paths. For a batch-sourced file, advances its batch (chain the\nnext snapshot version + roll up) once the verdict is terminal.",
         "operationId": "write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post",
         "parameters": [
           {
@@ -62190,6 +63059,187 @@
           }
         },
         "summary": "Register Intake Schema",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/sources": {
+      "get": {
+        "operationId": "list_intake_sources_v1__workspace_id__intake_sources_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "-created_ts",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_IntakeSourceRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Sources",
+        "tags": [
+          "Intake"
+        ]
+      },
+      "post": {
+        "operationId": "register_intake_source_v1__workspace_id__intake_sources_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterSourceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IntakeSourceRow"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Intake Source",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/sources/{source_id}/sync": {
+      "post": {
+        "operationId": "sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SourceSyncResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Sync Intake Source",
         "tags": [
           "Intake"
         ]
