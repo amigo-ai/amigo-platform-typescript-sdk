@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.82.0] - 2026-06-30
+
+### Improvements
+
+- feat(sdk)!: remove channels resource (client.channels.sesSetup) (#366)
+
 ## [0.81.0] - 2026-06-30
 
 ### Maintenance
