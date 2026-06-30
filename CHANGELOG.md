@@ -31,6 +31,14 @@ commit history at release time. Do NOT hand-bump the version or hand-stamp a dat
 entry in a feature PR. The notes below describe the changes awaiting the next release.
 -->
 
+### Breaking Changes
+
+- **Removed the `channels` resource (`client.channels.sesSetup.*`).** The email-channel
+  configuration surface (SES setup) was retired from platform-api, so the SDK no longer
+  ships `ChannelsResource` / `SesSetupResource` or the `CreateSesSetupRequest`, `DnsRecord`,
+  and `SesSetupDetail` types. The corresponding `/v1/{workspace_id}/channels/*` operations
+  are gone from the generated types.
+
 ### Bug Fixes
 
 - **Reconnecting WebSocket: idle watchdog no longer permanently kills the socket.** The idle watchdog previously force-closed with terminal code `4001`, which the reconnect loop treated as a non-retryable `client_error` — so the watchdog (whose entire purpose is to FORCE a reconnect) silently gave up instead. The watchdog now closes with a dedicated NON-terminal code `4099`, and the loop additionally checks `watchdogTriggered` before the terminal branch (defense-in-depth). Watchdog-driven reconnects surface a distinct `idle_watchdog` reason on `onReconnect`.

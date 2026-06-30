@@ -261,15 +261,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `textStreamUrl`
 - `sessionConnectUrl`
 
-### `channels`
-
-**`channels.sesSetup`**
-
-- `create`
-- `get`
-- `verify`
-- `delete`
-
 ### `integrations`
 
 - `create`
