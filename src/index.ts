@@ -50,7 +50,6 @@ import { DataSourcesResource } from './resources/data-sources.js'
 import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
-import { ChannelsResource } from './resources/channels/index.js'
 import { IntegrationsResource } from './resources/integrations.js'
 import { ExternalIntegrationsResource } from './resources/external-integrations.js'
 import { AnalyticsResource } from './resources/analytics.js'
@@ -205,7 +204,6 @@ export class AmigoClient {
   readonly world!: WorldResource
   readonly calls!: CallsResource
   readonly conversations!: ConversationsResource
-  readonly channels!: ChannelsResource
   readonly integrations!: IntegrationsResource
   readonly externalIntegrations!: ExternalIntegrationsResource
   readonly analytics!: AnalyticsResource
@@ -475,7 +473,6 @@ export class AmigoClient {
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
     mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)
-    mutable.channels = new ChannelsResource(client, workspaceId)
     mutable.integrations = new IntegrationsResource(client, workspaceId)
     mutable.externalIntegrations = new ExternalIntegrationsResource(client, workspaceId)
     mutable.analytics = new AnalyticsResource(client, workspaceId)
@@ -792,14 +789,6 @@ export type {
   TurnToolCallCompletedEvent,
   TurnToolCallStartedEvent,
 } from './resources/conversations.js'
-
-// Channels — workspace-scoped channel-manager proxy (SES setup, future Twilio, etc.)
-export { ChannelsResource, SesSetupResource } from './resources/channels/index.js'
-export type {
-  CreateSesSetupRequest,
-  DnsRecord,
-  SesSetupDetail,
-} from './resources/channels/index.js'
 
 // Voice-call observer real-time stream
 export { ObserversResource, observerAuthProtocols } from './resources/observers.js'
