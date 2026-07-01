@@ -1984,7 +1984,7 @@ export interface paths {
         /** List all conversations (voice + text) */
         get: operations["list_conversations_v1__workspace_id__conversations_get"];
         put?: never;
-        /** Create a new text conversation */
+        /** Create or start a conversation (web inbound, or outbound on a channel) */
         post: operations["create_conversation_v1__workspace_id__conversations_post"];
         delete?: never;
         options?: never;
@@ -2024,6 +2024,26 @@ export interface paths {
          * @description Lets the external user who owns a conversation approve or reject a write that the agent paused for their confirmation. Only the conversation's own external user may call this; it requires the `conversations:approve_own` scope.
          */
         post: operations["decide_conversation_approval_v1__workspace_id__conversations__conversation_id__approval_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}/channel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Switch a conversation to another channel
+         * @description Move an active conversation onto a different channel (sms/imessage today). The durable conversation id is preserved — the same conversation continues; only its routing changes. Optionally dispatch a first agent turn on the new channel.
+         */
+        post: operations["switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10837,6 +10857,8 @@ export interface components {
              * @default []
              */
             available_actions?: components["schemas"]["ConversationTurnAvailableAction"][];
+            /** @description Channel this turn occurred on. A conversation that switched channels has a self-describing per-turn history; null on turns written before per-turn attribution or on channel-less internal turns. */
+            channel?: components["schemas"]["ChannelKind"] | null;
             /**
              * Content
              * @default []
@@ -11057,13 +11079,24 @@ export interface components {
         };
         /** CreateConversationRequest */
         CreateConversationRequest: {
+            /** @default web */
+            channel?: components["schemas"]["ChannelKind"];
             /** Entity Id */
             entity_id?: string | null;
+            /** @description Optional context steering what the agent opens with on an outbound conversation. */
+            instruction?: components["schemas"]["BackgroundString"] | null;
+            /** @description Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web. */
+            recipient?: components["schemas"]["PhoneE164"] | null;
             /**
              * Service Id
              * Format: uuid
              */
             service_id: string;
+            /**
+             * Use Case Id
+             * @description Channel-manager use case the outbound conversation is sent through. Required for non-web; channel-manager resolves the sender (FROM) from it (never caller-supplied). Must be owned by this workspace.
+             */
+            use_case_id?: string | null;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -23502,6 +23535,28 @@ export interface components {
              */
             surface_id: string;
         };
+        /** SwitchChannelRequest */
+        SwitchChannelRequest: {
+            /** @description Target channel to move the conversation to (sms or imessage). */
+            channel: components["schemas"]["ChannelKind"];
+            /**
+             * Dispatch Opener
+             * @description If true, immediately drive one agent turn on the new channel (e.g. 'I'll text you now').
+             * @default false
+             */
+            dispatch_opener?: boolean;
+            /** @description Optional context steering the opener when dispatch_opener=true. */
+            instruction?: components["schemas"]["BackgroundString"] | null;
+            /** @description Why the conversation is being moved (e.g. escalation, customer_request). */
+            reason: components["schemas"]["NameString"];
+            /** @description Recipient address on the new channel (E.164). Required for sms/imessage. */
+            recipient?: components["schemas"]["PhoneE164"] | null;
+            /**
+             * Use Case Id
+             * @description Channel-manager use case for the new channel (resolves the sender). Required for sms/imessage.
+             */
+            use_case_id?: string | null;
+        };
         /**
          * SwitchModeRequest
          * @description Request to toggle operator mode on an active call.
@@ -32426,6 +32481,42 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwitchChannelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

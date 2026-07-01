@@ -8130,6 +8130,17 @@
             "title": "Available Actions",
             "type": "array"
           },
+          "channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChannelKind"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel this turn occurred on. A conversation that switched channels has a self-describing per-turn history; null on turns written before per-turn attribution or on channel-less internal turns."
+          },
           "content": {
             "default": [],
             "items": {
@@ -8647,6 +8658,10 @@
       },
       "CreateConversationRequest": {
         "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelKind",
+            "default": "web"
+          },
           "entity_id": {
             "anyOf": [
               {
@@ -8659,10 +8674,45 @@
             ],
             "title": "Entity Id"
           },
+          "instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional context steering what the agent opens with on an outbound conversation."
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web."
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel-manager use case the outbound conversation is sent through. Required for non-web; channel-manager resolves the sender (FROM) from it (never caller-supplied). Must be owned by this workspace.",
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -38246,6 +38296,65 @@
         "title": "SurfaceUpdatedEvent",
         "type": "object"
       },
+      "SwitchChannelRequest": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelKind",
+            "description": "Target channel to move the conversation to (sms or imessage)."
+          },
+          "dispatch_opener": {
+            "default": false,
+            "description": "If true, immediately drive one agent turn on the new channel (e.g. 'I'll text you now').",
+            "title": "Dispatch Opener",
+            "type": "boolean"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional context steering the opener when dispatch_opener=true."
+          },
+          "reason": {
+            "$ref": "#/components/schemas/NameString",
+            "description": "Why the conversation is being moved (e.g. escalation, customer_request)."
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Recipient address on the new channel (E.164). Required for sms/imessage."
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel-manager use case for the new channel (resolves the sender). Required for sms/imessage.",
+            "title": "Use Case Id"
+          }
+        },
+        "required": [
+          "channel",
+          "reason"
+        ],
+        "title": "SwitchChannelRequest",
+        "type": "object"
+      },
       "SwitchModeRequest": {
         "description": "Request to toggle operator mode on an active call.",
         "properties": {
@@ -56403,7 +56512,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create a new text conversation",
+        "summary": "Create or start a conversation (web inbound, or outbound on a channel)",
         "tags": [
           "conversations"
         ]
@@ -56579,6 +56688,70 @@
           }
         },
         "summary": "Approve or reject a parked write in your own conversation (external-user self-approval)",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/channel": {
+      "post": {
+        "description": "Move an active conversation onto a different channel (sms/imessage today). The durable conversation id is preserved \u2014 the same conversation continues; only its routing changes. Optionally dispatch a first agent turn on the new channel.",
+        "operationId": "switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchChannelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Switch a conversation to another channel",
         "tags": [
           "conversations"
         ]
