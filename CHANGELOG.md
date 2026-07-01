@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.83.0] - 2026-07-01
+
+### Features
+
+- getFleetStatus — Agones fleet capacity (voice | tool-runner) (#374)
+
+### Maintenance
+
+- sync API types from platform (8ef6b2ba) (#373)
+- alert on npm publish failure (publish.yml was silent) (#367)
+
 ## [0.82.0] - 2026-06-30
 
 ### Improvements
