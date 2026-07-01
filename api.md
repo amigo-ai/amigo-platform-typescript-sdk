@@ -541,6 +541,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 ### `sessions`
 
 - `listActive`
+- `getFleetStatus`
 - `inject`
 
 ### `workspaceDatabase`
