@@ -1984,7 +1984,7 @@ export interface paths {
         /** List all conversations (voice + text) */
         get: operations["list_conversations_v1__workspace_id__conversations_get"];
         put?: never;
-        /** Create a new text conversation */
+        /** Create or start a conversation (web inbound, or outbound on a channel) */
         post: operations["create_conversation_v1__workspace_id__conversations_post"];
         delete?: never;
         options?: never;
@@ -2024,6 +2024,26 @@ export interface paths {
          * @description Lets the external user who owns a conversation approve or reject a write that the agent paused for their confirmation. Only the conversation's own external user may call this; it requires the `conversations:approve_own` scope.
          */
         post: operations["decide_conversation_approval_v1__workspace_id__conversations__conversation_id__approval_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}/channel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Switch a conversation to another channel
+         * @description Move an active conversation onto a different channel (sms/imessage today). The durable conversation id is preserved — the same conversation continues; only its routing changes. Optionally dispatch a first agent turn on the new channel.
+         */
+        post: operations["switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3356,6 +3376,60 @@ export interface paths {
         get: operations["download-intake-upload"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/materializations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Intake Materializations
+         * @description Per-dataset materialization status for the workspace's Destinations tab.
+         *
+         *     Lists each registered dataset alongside its customer-data destination table's
+         *     status — ``materialized`` (with row count + last-write time) or
+         *     ``not_materialized`` (no table yet). The dataset list + pagination mirror
+         *     ``GET /datasets`` (the contracts registry); the destination status is read
+         *     from the ``customer_data_<env>`` catalog via the SQL warehouse. Member read.
+         */
+        get: operations["list_intake_materializations_v1__workspace_id__intake_materializations_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/materialize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Materialize Intake
+         * @description Trigger the intake → customer-data materializer for this workspace.
+         *
+         *     Fires the materializer Databricks job (run-now); it rescans the workspace's
+         *     curated intake files and (re)materializes each snapshot dataset into
+         *     ``customer_data_<env>.<workspace_id>.<dataset>``. Every write is an idempotent
+         *     keyed MERGE / full overwrite, so a re-click is safe. Optionally scope to one
+         *     ``dataset``; omit for all curated snapshot datasets. Returns ``202`` with the
+         *     job ``run_id`` (``null`` when the job is not configured in this environment).
+         *     Same auth gate as ``POST /batches/{batch_id}/process``.
+         */
+        post: operations["materialize_intake_v1__workspace_id__intake_materialize_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -7021,32 +7095,56 @@ export interface paths {
          */
         get: operations["list-use-cases"];
         put?: never;
-        /**
-         * Create a channel use case
-         * @description Create a voice or email use case. Body is a discriminated union on the `channel` field. Requires Channel.create permission.
-         */
-        post: operations["create-use-case"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/use-cases/{use_case_id}": {
+    "/v1/{workspace_id}/use-cases/ownership": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List use cases this workspace owns
+         * @description Return the ids of the channel-manager use cases this workspace owns. Requires Channel.view permission.
+         */
+        get: operations["list-owned-use-cases"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/use-cases/{use_case_id}/ownership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
         /**
-         * Delete a channel use case
-         * @description Delete a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.
+         * Check whether this workspace owns a use case
+         * @description Return the ownership record if the current workspace owns the use case, or 404 if it does not (no existence leak). Requires Channel.view permission.
          */
-        delete: operations["delete-use-case"];
+        get: operations["get-use-case-ownership"];
+        /**
+         * Assign ownership of a use case to this workspace
+         * @description Claim ownership of a channel-manager use case for the current workspace. Idempotent — re-assigning an already-owned use case returns 200. 404 if the use case does not exist in channel-manager. 409 if the use case is already owned by another workspace. Requires Channel.ManageOwnership permission (admin tier).
+         */
+        put: operations["assign-use-case-ownership"];
+        post?: never;
+        /**
+         * Release this workspace's ownership of a use case
+         * @description Release the current workspace's ownership of a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. 404 if this workspace does not own the use case. Requires Channel.ManageOwnership permission (admin tier).
+         */
+        delete: operations["release-use-case-ownership"];
         options?: never;
         head?: never;
         patch?: never;
@@ -10837,6 +10935,8 @@ export interface components {
              * @default []
              */
             available_actions?: components["schemas"]["ConversationTurnAvailableAction"][];
+            /** @description Channel this turn occurred on. A conversation that switched channels has a self-describing per-turn history; null on turns written before per-turn attribution or on channel-less internal turns. */
+            channel?: components["schemas"]["ChannelKind"] | null;
             /**
              * Content
              * @default []
@@ -11057,13 +11157,24 @@ export interface components {
         };
         /** CreateConversationRequest */
         CreateConversationRequest: {
+            /** @default web */
+            channel?: components["schemas"]["ChannelKind"];
             /** Entity Id */
             entity_id?: string | null;
+            /** @description Optional context steering what the agent opens with on an outbound conversation. */
+            instruction?: components["schemas"]["BackgroundString"] | null;
+            /** @description Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web. */
+            recipient?: components["schemas"]["PhoneE164"] | null;
             /**
              * Service Id
              * Format: uuid
              */
             service_id: string;
+            /**
+             * Use Case Id
+             * @description Channel-manager use case the outbound conversation is sent through. Required for non-web; channel-manager resolves the sender (FROM) from it (never caller-supplied). Must be owned by this workspace.
+             */
+            use_case_id?: string | null;
         };
         /** CreateCustomerRequest */
         CreateCustomerRequest: {
@@ -12758,45 +12869,6 @@ export interface components {
             note: string;
             /** Region */
             region: string;
-        };
-        /** EmailUseCaseRequest */
-        EmailUseCaseRequest: {
-            /**
-             * Accepts Cold Inbound
-             * @description Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.
-             */
-            accepts_cold_inbound: boolean;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            channel: "email";
-            /** Description */
-            description?: string | null;
-            /**
-             * Email Type
-             * @enum {string}
-             */
-            email_type: "transactional" | "marketing";
-            /** Entity Name */
-            entity_name: string;
-            /** Name */
-            name: string;
-            /**
-             * Sender Email Address
-             * Format: email
-             */
-            sender_email_address: string;
-            /**
-             * Setup Id
-             * Format: uuid
-             */
-            setup_id: string;
-            /**
-             * Unsubscribable
-             * @description Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.
-             */
-            unsubscribable: boolean;
         };
         /** EmotionEvent */
         EmotionEvent: {
@@ -16797,6 +16869,35 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * MaterializationRow
+         * @description Per-dataset status of the customer-data destination table
+         *     (``customer_data_<env>.<workspace_id>.<dataset>``).
+         */
+        MaterializationRow: {
+            /** Dataset */
+            dataset: string;
+            /** Ingestion Mode */
+            ingestion_mode: string;
+            /** Last Materialized At */
+            last_materialized_at?: string | null;
+            /** Row Count */
+            row_count?: number | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "materialized" | "not_materialized";
+        };
+        /** MaterializeRequest */
+        MaterializeRequest: {
+            dataset?: components["schemas"]["_DatasetSlug"] | null;
+        };
+        /** MaterializeResponse */
+        MaterializeResponse: {
+            /** Run Id */
+            run_id?: number | null;
+        };
+        /**
          * MediaAttachedEvent
          * @description A media WebSocket actually reached the call's GameServer — the audio-path signal.
          *
@@ -18220,6 +18321,24 @@ export interface components {
             /** Rules */
             rules: components["schemas"]["OutreachRule"][];
         };
+        /** OwnedUseCasesResponse */
+        OwnedUseCasesResponse: {
+            /** Items */
+            items: string[];
+        };
+        /** OwnershipResponse */
+        OwnershipResponse: {
+            /**
+             * Use Case Id
+             * Format: uuid
+             */
+            use_case_id: string;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** PaginatedResponse[ActiveEscalationItem] */
         PaginatedResponse_ActiveEscalationItem_: {
             /** Continuation Token */
@@ -18404,6 +18523,17 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["InvoiceItem"][];
+            /** Total */
+            total?: number | null;
+        };
+        /** PaginatedResponse[MaterializationRow] */
+        PaginatedResponse_MaterializationRow_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["MaterializationRow"][];
             /** Total */
             total?: number | null;
         };
@@ -23502,6 +23632,28 @@ export interface components {
              */
             surface_id: string;
         };
+        /** SwitchChannelRequest */
+        SwitchChannelRequest: {
+            /** @description Target channel to move the conversation to (sms or imessage). */
+            channel: components["schemas"]["ChannelKind"];
+            /**
+             * Dispatch Opener
+             * @description If true, immediately drive one agent turn on the new channel (e.g. 'I'll text you now').
+             * @default false
+             */
+            dispatch_opener?: boolean;
+            /** @description Optional context steering the opener when dispatch_opener=true. */
+            instruction?: components["schemas"]["BackgroundString"] | null;
+            /** @description Why the conversation is being moved (e.g. escalation, customer_request). */
+            reason: components["schemas"]["NameString"];
+            /** @description Recipient address on the new channel (E.164). Required for sms/imessage. */
+            recipient?: components["schemas"]["PhoneE164"] | null;
+            /**
+             * Use Case Id
+             * @description Channel-manager use case for the new channel (resolves the sender). Required for sms/imessage.
+             */
+            use_case_id?: string | null;
+        };
         /**
          * SwitchModeRequest
          * @description Request to toggle operator mode on an active call.
@@ -23849,6 +24001,40 @@ export interface components {
             service_id: string;
             /** Session Id */
             session_id: string;
+        };
+        /**
+         * TextToolStartedEvent
+         * @description A slow text tool *began* running for a web text conversation — pushed live
+         *     the instant the tool is dispatched, before the 15s blocking floor elapses, so a
+         *     subscribed client shows progress immediately instead of waiting out the floor in
+         *     silence (PLA-986). Emitted for tools that route through the background/floor-promoted
+         *     dispatch paths (companion skills and ``execution="background"`` tools) — the ones
+         *     that can outlast the turn's synchronous response.
+         *
+         *     The start/completion pair share one card identity: ``call_id`` is ``bg:<task_id>``,
+         *     matching the eventual ``TextBackgroundResultEvent`` (and the next-turn drained card
+         *     from ``build_background_completion_effect``), so a client collapses started → result
+         *     into one card rather than rendering two. Web-only: ``conversation_id`` is the durable
+         *     conversation UUID (non-web channels route by a composite key and deliver via their own
+         *     transport).
+         */
+        TextToolStartedEvent: {
+            /** Call Id */
+            call_id: string;
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /** Depth */
+            depth: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event_type: "text.tool_started";
+            /** Tool Name */
+            tool_name: string;
         };
         /**
          * TextTurnRequest
@@ -25144,6 +25330,27 @@ export interface components {
         };
         /** TurnResponse */
         TurnResponse: {
+            /**
+             * Background Pending
+             * @description Whether this turn's ``output`` is the final answer, or only an acknowledgement that
+             *     work is still running in the background.
+             *
+             *     ``false`` (default): ``output`` is the complete agent response for this turn.
+             *
+             *     ``true``: a tool crossed the server's blocking window and was handed to a background
+             *     task, so ``output`` is NOT the final answer — the definitive assistant answer is
+             *     produced later, out-of-band. It is **durable on the conversation**: drain it by
+             *     re-issuing ``POST …/turns`` with ``poll=true`` (a no-message drain-and-report), by
+             *     sending the next user turn, or by reading the conversation back
+             *     (``GET …/conversations/{id}``). This is the per-conversation delivery contract — see
+             *     the web-integration paved path. (The workspace observer bus,
+             *     ``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``
+             *     / ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many
+             *     conversations, but is not the per-chat delivery path.) A client that treats a
+             *     ``background_pending=true`` turn as complete without draining will miss the final answer.
+             * @default false
+             */
+            background_pending?: boolean;
             conversation: components["schemas"]["TurnConversationSnapshot"];
             input: components["schemas"]["ConversationTurn"];
             /** Output */
@@ -26182,25 +26389,6 @@ export interface components {
             /** Volume */
             volume: number | null;
         };
-        /** VoiceUseCaseRequest */
-        VoiceUseCaseRequest: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail";
-            /** Description */
-            description?: string | null;
-            /** Entity Name */
-            entity_name: string;
-            /** Name */
-            name: string;
-            /**
-             * Setup Id
-             * Format: uuid
-             */
-            setup_id: string;
-        };
         /**
          * WorkspaceBenchmarks
          * @description Workspace-level call quality benchmarks for contextual comparison.
@@ -26399,7 +26587,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextToolStartedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -32429,6 +32617,42 @@ export interface operations {
             };
         };
     };
+    switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SwitchChannelRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     create_turn_v1__workspace_id__conversations__conversation_id__turns_post: {
         parameters: {
             query?: {
@@ -35841,6 +36065,77 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    list_intake_materializations_v1__workspace_id__intake_materializations_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: number;
+                sort_by?: string;
+                search?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_MaterializationRow_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    materialize_intake_v1__workspace_id__intake_materialize_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MaterializeRequest"] | null;
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterializeResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -44774,7 +45069,7 @@ export interface operations {
             };
         };
     };
-    "create-use-case": {
+    "list-owned-use-cases": {
         parameters: {
             query?: never;
             header?: never;
@@ -44783,19 +45078,15 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VoiceUseCaseRequest"] | components["schemas"]["EmailUseCaseRequest"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
-            201: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UseCaseResponse"];
+                    "application/json": components["schemas"]["OwnedUseCasesResponse"];
                 };
             };
             /** @description Insufficient permissions. */
@@ -44805,14 +45096,90 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Setup not found. */
+        };
+    };
+    "get-use-case-ownership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                use_case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found. */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Use case already exists or setup not approved. */
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "assign-use-case-ownership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                use_case_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnershipResponse"];
+                };
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Use case is owned by another workspace. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -44828,23 +45195,9 @@ export interface operations {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
-            /** @description Channel manager unavailable. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager timed out. */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
         };
     };
-    "delete-use-case": {
+    "release-use-case-ownership": {
         parameters: {
             query?: never;
             header?: never;
@@ -44877,7 +45230,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Use case is bound to a service, or still has active phone assignments. */
+            /** @description Use case is bound to a service; unbind it first. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -44892,20 +45245,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Channel manager unavailable. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager timed out. */
-            504: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
