@@ -8130,6 +8130,17 @@
             "title": "Available Actions",
             "type": "array"
           },
+          "channel": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChannelKind"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel this turn occurred on. A conversation that switched channels has a self-describing per-turn history; null on turns written before per-turn attribution or on channel-less internal turns."
+          },
           "content": {
             "default": [],
             "items": {
@@ -8647,6 +8658,10 @@
       },
       "CreateConversationRequest": {
         "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelKind",
+            "default": "web"
+          },
           "entity_id": {
             "anyOf": [
               {
@@ -8659,10 +8674,45 @@
             ],
             "title": "Entity Id"
           },
+          "instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional context steering what the agent opens with on an outbound conversation."
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web."
+          },
           "service_id": {
             "format": "uuid",
             "title": "Service Id",
             "type": "string"
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel-manager use case the outbound conversation is sent through. Required for non-web; channel-manager resolves the sender (FROM) from it (never caller-supplied). Must be owned by this workspace.",
+            "title": "Use Case Id"
           }
         },
         "required": [
@@ -12393,81 +12443,6 @@
           "note"
         ],
         "title": "EgressIpsResponse",
-        "type": "object"
-      },
-      "EmailUseCaseRequest": {
-        "properties": {
-          "accepts_cold_inbound": {
-            "description": "Whether inbound email addressed to sender_email_address that does NOT reply to one of our outbound messages is accepted (after DMARC/spam gates). False = strict thread-only inbox.",
-            "title": "Accepts Cold Inbound",
-            "type": "boolean"
-          },
-          "channel": {
-            "const": "email",
-            "title": "Channel",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "email_type": {
-            "enum": [
-              "transactional",
-              "marketing"
-            ],
-            "title": "Email Type",
-            "type": "string"
-          },
-          "entity_name": {
-            "maxLength": 31,
-            "minLength": 1,
-            "pattern": "^[A-Za-z\\- ]+$",
-            "title": "Entity Name",
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 31,
-            "minLength": 1,
-            "pattern": "^[A-Za-z\\- ]+$",
-            "title": "Name",
-            "type": "string"
-          },
-          "sender_email_address": {
-            "format": "email",
-            "title": "Sender Email Address",
-            "type": "string"
-          },
-          "setup_id": {
-            "format": "uuid",
-            "title": "Setup Id",
-            "type": "string"
-          },
-          "unsubscribable": {
-            "description": "Whether sends carry RFC 8058 unsubscribe (List-Unsubscribe header + footer links) and honor the per-use-case unsubscribe list. Marketing email_type must be unsubscribable; transactional may opt out for must-send flows.",
-            "title": "Unsubscribable",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "channel",
-          "entity_name",
-          "name",
-          "setup_id",
-          "sender_email_address",
-          "email_type",
-          "unsubscribable",
-          "accepts_cold_inbound"
-        ],
-        "title": "EmailUseCaseRequest",
         "type": "object"
       },
       "EmotionEvent": {
@@ -22378,6 +22353,89 @@
         "title": "M42CatalogResponse",
         "type": "object"
       },
+      "MaterializationRow": {
+        "description": "Per-dataset status of the customer-data destination table\n(``customer_data_<env>.<workspace_id>.<dataset>``).",
+        "properties": {
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "ingestion_mode": {
+            "title": "Ingestion Mode",
+            "type": "string"
+          },
+          "last_materialized_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Materialized At"
+          },
+          "row_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Row Count"
+          },
+          "status": {
+            "enum": [
+              "materialized",
+              "not_materialized"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dataset",
+          "ingestion_mode",
+          "status"
+        ],
+        "title": "MaterializationRow",
+        "type": "object"
+      },
+      "MaterializeRequest": {
+        "properties": {
+          "dataset": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/_DatasetSlug"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "MaterializeRequest",
+        "type": "object"
+      },
+      "MaterializeResponse": {
+        "properties": {
+          "run_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          }
+        },
+        "title": "MaterializeResponse",
+        "type": "object"
+      },
       "MediaAttachedEvent": {
         "description": "A media WebSocket actually reached the call's GameServer \u2014 the audio-path signal.\n\nFires once per leg (caller / agent). Its ABSENCE for a leg is the no-audio failure\nmode (media never landed on the pod). The per-call cold-start / time-to-first-speech\nmetric is deliberately NOT carried here yet: TTFS is measured against the first\nsynthesized-audio frame, a signal not available at attach time, so it is wired in a\nfocused follow-up (Front 3) rather than shipped as a permanently-null field that would\nlock a misleading shape into the SDK contract.",
         "properties": {
@@ -25389,6 +25447,43 @@
         "title": "OutreachSettingsResponse",
         "type": "object"
       },
+      "OwnedUseCasesResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "OwnedUseCasesResponse",
+        "type": "object"
+      },
+      "OwnershipResponse": {
+        "properties": {
+          "use_case_id": {
+            "format": "uuid",
+            "title": "Use Case Id",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "use_case_id",
+          "workspace_id"
+        ],
+        "title": "OwnershipResponse",
+        "type": "object"
+      },
       "PaginatedResponse_ActiveEscalationItem_": {
         "properties": {
           "continuation_token": {
@@ -26118,6 +26213,49 @@
           "has_more"
         ],
         "title": "PaginatedResponse[InvoiceItem]",
+        "type": "object"
+      },
+      "PaginatedResponse_MaterializationRow_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MaterializationRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[MaterializationRow]",
         "type": "object"
       },
       "PaginatedResponse_MeterValueItem_": {
@@ -38246,6 +38384,65 @@
         "title": "SurfaceUpdatedEvent",
         "type": "object"
       },
+      "SwitchChannelRequest": {
+        "properties": {
+          "channel": {
+            "$ref": "#/components/schemas/ChannelKind",
+            "description": "Target channel to move the conversation to (sms or imessage)."
+          },
+          "dispatch_opener": {
+            "default": false,
+            "description": "If true, immediately drive one agent turn on the new channel (e.g. 'I'll text you now').",
+            "title": "Dispatch Opener",
+            "type": "boolean"
+          },
+          "instruction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BackgroundString"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional context steering the opener when dispatch_opener=true."
+          },
+          "reason": {
+            "$ref": "#/components/schemas/NameString",
+            "description": "Why the conversation is being moved (e.g. escalation, customer_request)."
+          },
+          "recipient": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Recipient address on the new channel (E.164). Required for sms/imessage."
+          },
+          "use_case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Channel-manager use case for the new channel (resolves the sender). Required for sms/imessage.",
+            "title": "Use Case Id"
+          }
+        },
+        "required": [
+          "channel",
+          "reason"
+        ],
+        "title": "SwitchChannelRequest",
+        "type": "object"
+      },
       "SwitchModeRequest": {
         "description": "Request to toggle operator mode on an active call.",
         "properties": {
@@ -38897,6 +39094,42 @@
           "channel_kind"
         ],
         "title": "TextStartedEvent",
+        "type": "object"
+      },
+      "TextToolStartedEvent": {
+        "description": "A slow text tool *began* running for a web text conversation \u2014 pushed live\nthe instant the tool is dispatched, before the 15s blocking floor elapses, so a\nsubscribed client shows progress immediately instead of waiting out the floor in\nsilence (PLA-986). Emitted for tools that route through the background/floor-promoted\ndispatch paths (companion skills and ``execution=\"background\"`` tools) \u2014 the ones\nthat can outlast the turn's synchronous response.\n\nThe start/completion pair share one card identity: ``call_id`` is ``bg:<task_id>``,\nmatching the eventual ``TextBackgroundResultEvent`` (and the next-turn drained card\nfrom ``build_background_completion_effect``), so a client collapses started \u2192 result\ninto one card rather than rendering two. Web-only: ``conversation_id`` is the durable\nconversation UUID (non-web channels route by a composite key and deliver via their own\ntransport).",
+        "properties": {
+          "call_id": {
+            "title": "Call Id",
+            "type": "string"
+          },
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "depth": {
+            "title": "Depth",
+            "type": "integer"
+          },
+          "event_type": {
+            "const": "text.tool_started",
+            "default": "text.tool_started",
+            "title": "Event Type",
+            "type": "string"
+          },
+          "tool_name": {
+            "title": "Tool Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "tool_name",
+          "call_id",
+          "depth"
+        ],
+        "title": "TextToolStartedEvent",
         "type": "object"
       },
       "TextTurnRequest": {
@@ -40972,53 +41205,165 @@
       },
       "TriggerRunResponse": {
         "properties": {
+          "attempt_count": {
+            "description": "Number of claim attempts",
+            "title": "Attempt Count",
+            "type": "integer"
+          },
+          "claimed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the run was claimed",
+            "title": "Claimed At"
+          },
+          "claimed_by": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dispatcher consumer that claimed the run",
+            "title": "Claimed By"
+          },
           "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the run was created",
-            "title": "Created At"
-          },
-          "data": {
-            "additionalProperties": true,
-            "description": "Run result data",
-            "title": "Data",
-            "type": "object"
-          },
-          "effective_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the run took effect",
-            "title": "Effective At"
-          },
-          "event_id": {
-            "format": "uuid",
-            "title": "Event Id",
+            "description": "When the run was enqueued",
+            "format": "date-time",
+            "title": "Created At",
             "type": "string"
           },
-          "event_type": {
-            "description": "Event type of the run",
-            "title": "Event Type",
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Failure detail, if any",
+            "title": "Error"
+          },
+          "fired_event_id": {
+            "format": "uuid",
+            "title": "Fired Event Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "input_override": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Per-run input overrides",
+            "title": "Input Override"
+          },
+          "lease_expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "When the running lease expires",
+            "title": "Lease Expires At"
+          },
+          "max_attempts": {
+            "description": "Maximum claim attempts before dead-lettering",
+            "title": "Max Attempts",
+            "type": "integer"
+          },
+          "next_attempt_at": {
+            "description": "Next eligible claim time",
+            "format": "date-time",
+            "title": "Next Attempt At",
+            "type": "string"
+          },
+          "result_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Text result emitted by the action",
+            "title": "Result Text"
+          },
+          "source": {
+            "description": "Source that fired the trigger",
+            "enum": [
+              "cron",
+              "manual",
+              "webhook",
+              "event"
+            ],
+            "title": "Source",
+            "type": "string"
+          },
+          "status": {
+            "description": "Run status",
+            "enum": [
+              "queued",
+              "running",
+              "succeeded",
+              "failed",
+              "dead"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "format": "uuid",
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "updated_at": {
+            "description": "When the run row last changed",
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
             "type": "string"
           }
         },
         "required": [
-          "event_id",
-          "event_type",
-          "data"
+          "id",
+          "workspace_id",
+          "trigger_id",
+          "fired_event_id",
+          "source",
+          "status",
+          "attempt_count",
+          "max_attempts",
+          "next_attempt_at",
+          "created_at",
+          "updated_at"
         ],
         "title": "TriggerRunResponse",
         "type": "object"
@@ -41854,6 +42199,12 @@
       },
       "TurnResponse": {
         "properties": {
+          "background_pending": {
+            "default": false,
+            "description": "Whether this turn's ``output`` is the final answer, or only an acknowledgement that\nwork is still running in the background.\n\n``false`` (default): ``output`` is the complete agent response for this turn.\n\n``true``: a tool crossed the server's blocking window and was handed to a background\ntask, so ``output`` is NOT the final answer \u2014 the definitive assistant answer is\nproduced later, out-of-band. It is **durable on the conversation**: drain it by\nre-issuing ``POST \u2026/turns`` with ``poll=true`` (a no-message drain-and-report), by\nsending the next user turn, or by reading the conversation back\n(``GET \u2026/conversations/{id}``). This is the per-conversation delivery contract \u2014 see\nthe web-integration paved path. (The workspace observer bus,\n``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``\n/ ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many\nconversations, but is not the per-chat delivery path.) A client that treats a\n``background_pending=true`` turn as complete without draining will miss the final answer.",
+            "title": "Background Pending",
+            "type": "boolean"
+          },
           "conversation": {
             "$ref": "#/components/schemas/TurnConversationSnapshot"
           },
@@ -45509,58 +45860,6 @@
         "title": "VoiceSettingsResponse",
         "type": "object"
       },
-      "VoiceUseCaseRequest": {
-        "properties": {
-          "channel": {
-            "enum": [
-              "outbound_voice",
-              "inbound_voice",
-              "ringless_voicemail"
-            ],
-            "title": "Channel",
-            "type": "string"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description"
-          },
-          "entity_name": {
-            "maxLength": 31,
-            "minLength": 1,
-            "pattern": "^[A-Za-z\\- ]+$",
-            "title": "Entity Name",
-            "type": "string"
-          },
-          "name": {
-            "maxLength": 31,
-            "minLength": 1,
-            "pattern": "^[A-Za-z\\- ]+$",
-            "title": "Name",
-            "type": "string"
-          },
-          "setup_id": {
-            "format": "uuid",
-            "title": "Setup Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "channel",
-          "entity_name",
-          "name",
-          "setup_id"
-        ],
-        "title": "VoiceUseCaseRequest",
-        "type": "object"
-      },
       "WorkspaceBenchmarks": {
         "description": "Workspace-level call quality benchmarks for contextual comparison.",
         "properties": {
@@ -45991,6 +46290,7 @@
             "text.background_result": "#/components/schemas/TextBackgroundResultEvent",
             "text.completed": "#/components/schemas/TextCompletedEvent",
             "text.started": "#/components/schemas/TextStartedEvent",
+            "text.tool_started": "#/components/schemas/TextToolStartedEvent",
             "trigger.completed": "#/components/schemas/TriggerCompletedEvent",
             "trigger.failed": "#/components/schemas/TriggerFailedEvent",
             "trigger.fired": "#/components/schemas/TriggerFiredEvent",
@@ -46067,6 +46367,9 @@
           },
           {
             "$ref": "#/components/schemas/TextCompletedEvent"
+          },
+          {
+            "$ref": "#/components/schemas/TextToolStartedEvent"
           },
           {
             "$ref": "#/components/schemas/TextBackgroundResultEvent"
@@ -56403,7 +56706,7 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create a new text conversation",
+        "summary": "Create or start a conversation (web inbound, or outbound on a channel)",
         "tags": [
           "conversations"
         ]
@@ -56579,6 +56882,70 @@
           }
         },
         "summary": "Approve or reject a parked write in your own conversation (external-user self-approval)",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/channel": {
+      "post": {
+        "description": "Move an active conversation onto a different channel (sms/imessage today). The durable conversation id is preserved \u2014 the same conversation continues; only its routing changes. Optionally dispatch a first agent turn on the new channel.",
+        "operationId": "switch_conversation_channel_v1__workspace_id__conversations__conversation_id__channel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwitchChannelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Switch a conversation to another channel",
         "tags": [
           "conversations"
         ]
@@ -62731,6 +63098,162 @@
           }
         },
         "summary": "Download an uploaded file",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/materializations": {
+      "get": {
+        "description": "Per-dataset materialization status for the workspace's Destinations tab.\n\nLists each registered dataset alongside its customer-data destination table's\nstatus \u2014 ``materialized`` (with row count + last-write time) or\n``not_materialized`` (no table yet). The dataset list + pagination mirror\n``GET /datasets`` (the contracts registry); the destination status is read\nfrom the ``customer_data_<env>`` catalog via the SQL warehouse. Member read.",
+        "operationId": "list_intake_materializations_v1__workspace_id__intake_materializations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": "name",
+              "maxLength": 64,
+              "title": "Sort By",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_MaterializationRow_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Intake Materializations",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/materialize": {
+      "post": {
+        "description": "Trigger the intake \u2192 customer-data materializer for this workspace.\n\nFires the materializer Databricks job (run-now); it rescans the workspace's\ncurated intake files and (re)materializes each snapshot dataset into\n``customer_data_<env>.<workspace_id>.<dataset>``. Every write is an idempotent\nkeyed MERGE / full overwrite, so a re-click is safe. Optionally scope to one\n``dataset``; omit for all curated snapshot datasets. Returns ``202`` with the\njob ``run_id`` (``null`` when the job is not configured in this environment).\nSame auth gate as ``POST /batches/{batch_id}/process``.",
+        "operationId": "materialize_intake_v1__workspace_id__intake_materialize_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MaterializeRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaterializeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Materialize Intake",
         "tags": [
           "Intake"
         ]
@@ -77242,7 +77765,7 @@
     },
     "/v1/{workspace_id}/triggers/{trigger_id}/runs": {
       "get": {
-        "description": "Execution history from the Lakebase entity-event timeline read model.",
+        "description": "Execution history from the durable trigger run table.",
         "operationId": "list-trigger-runs",
         "parameters": [
           {
@@ -77421,10 +77944,12 @@
         "tags": [
           "Use Cases"
         ]
-      },
-      "post": {
-        "description": "Create a voice or email use case. Body is a discriminated union on the `channel` field. Requires Channel.create permission.",
-        "operationId": "create-use-case",
+      }
+    },
+    "/v1/{workspace_id}/use-cases/ownership": {
+      "get": {
+        "description": "Return the ids of the channel-manager use cases this workspace owns. Requires Channel.view permission.",
+        "operationId": "list-owned-use-cases",
         "parameters": [
           {
             "in": "path",
@@ -77437,39 +77962,12 @@
             }
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "discriminator": {
-                  "mapping": {
-                    "email": "#/components/schemas/EmailUseCaseRequest",
-                    "inbound_voice": "#/components/schemas/VoiceUseCaseRequest",
-                    "outbound_voice": "#/components/schemas/VoiceUseCaseRequest",
-                    "ringless_voicemail": "#/components/schemas/VoiceUseCaseRequest"
-                  },
-                  "propertyName": "channel"
-                },
-                "oneOf": [
-                  {
-                    "$ref": "#/components/schemas/VoiceUseCaseRequest"
-                  },
-                  {
-                    "$ref": "#/components/schemas/EmailUseCaseRequest"
-                  }
-                ],
-                "title": "Body"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
-          "201": {
+          "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UseCaseResponse"
+                  "$ref": "#/components/schemas/OwnedUseCasesResponse"
                 }
               }
             },
@@ -77477,40 +77975,18 @@
           },
           "403": {
             "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Setup not found."
-          },
-          "409": {
-            "description": "Use case already exists or setup not approved."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "502": {
-            "description": "Channel manager unavailable."
-          },
-          "504": {
-            "description": "Channel manager timed out."
           }
         },
-        "summary": "Create a channel use case",
+        "summary": "List use cases this workspace owns",
         "tags": [
           "Use Cases"
         ]
       }
     },
-    "/v1/{workspace_id}/use-cases/{use_case_id}": {
+    "/v1/{workspace_id}/use-cases/{use_case_id}/ownership": {
       "delete": {
-        "description": "Delete a use case. Refuses (409) while any service still binds the use case \u2014 call DELETE `/use-cases/{id}/service-binding` first. Also refuses if a Twilio use case still has phone-number assignments. Requires Channel.delete permission.",
-        "operationId": "delete-use-case",
+        "description": "Release the current workspace's ownership of a use case. Refuses (409) while any service still binds the use case \u2014 call DELETE `/use-cases/{id}/service-binding` first. 404 if this workspace does not own the use case. Requires Channel.ManageOwnership permission (admin tier).",
+        "operationId": "release-use-case-ownership",
         "parameters": [
           {
             "in": "path",
@@ -77544,7 +78020,7 @@
             "description": "Use case not found."
           },
           "409": {
-            "description": "Use case is bound to a service, or still has active phone assignments."
+            "description": "Use case is bound to a service; unbind it first."
           },
           "422": {
             "content": {
@@ -77555,15 +78031,128 @@
               }
             },
             "description": "Validation Error"
-          },
-          "502": {
-            "description": "Channel manager unavailable."
-          },
-          "504": {
-            "description": "Channel manager timed out."
           }
         },
-        "summary": "Delete a channel use case",
+        "summary": "Release this workspace's ownership of a use case",
+        "tags": [
+          "Use Cases"
+        ]
+      },
+      "get": {
+        "description": "Return the ownership record if the current workspace owns the use case, or 404 if it does not (no existence leak). Requires Channel.view permission.",
+        "operationId": "get-use-case-ownership",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "use_case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Use Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Use case not found."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Check whether this workspace owns a use case",
+        "tags": [
+          "Use Cases"
+        ]
+      },
+      "put": {
+        "description": "Claim ownership of a channel-manager use case for the current workspace. Idempotent \u2014 re-assigning an already-owned use case returns 200. 404 if the use case does not exist in channel-manager. 409 if the use case is already owned by another workspace. Requires Channel.ManageOwnership permission (admin tier).",
+        "operationId": "assign-use-case-ownership",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "use_case_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Use Case Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnershipResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "404": {
+            "description": "Use case not found."
+          },
+          "409": {
+            "description": "Use case is owned by another workspace."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Assign ownership of a use case to this workspace",
         "tags": [
           "Use Cases"
         ]
