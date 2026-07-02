@@ -33574,6 +33574,296 @@
         "title": "SignalResponseAlignment",
         "type": "object"
       },
+      "SimCaseAssertionResponse": {
+        "properties": {
+          "eval_key": {
+            "maxLength": 128,
+            "title": "Eval Key",
+            "type": "string"
+          },
+          "eval_type": {
+            "enum": [
+              "assertion",
+              "metric"
+            ],
+            "title": "Eval Type",
+            "type": "string"
+          },
+          "failed": {
+            "default": 0,
+            "title": "Failed",
+            "type": "integer"
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "passed": {
+            "default": 0,
+            "title": "Passed",
+            "type": "integer"
+          },
+          "pending": {
+            "default": 0,
+            "title": "Pending",
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/SimulationEvalResultResponse"
+            },
+            "title": "Results",
+            "type": "array"
+          }
+        },
+        "required": [
+          "eval_key",
+          "eval_type"
+        ],
+        "title": "SimCaseAssertionResponse",
+        "type": "object"
+      },
+      "SimCasePerfResponse": {
+        "properties": {
+          "assertions": {
+            "items": {
+              "$ref": "#/components/schemas/SimCaseAssertionResponse"
+            },
+            "title": "Assertions",
+            "type": "array"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "case_name": {
+            "maxLength": 512,
+            "title": "Case Name",
+            "type": "string"
+          },
+          "latest_run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Run At"
+          },
+          "latest_run_id": {
+            "format": "uuid",
+            "title": "Latest Run Id",
+            "type": "string"
+          },
+          "measured": {
+            "default": 0,
+            "title": "Measured",
+            "type": "integer"
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "passed": {
+            "default": 0,
+            "title": "Passed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "case_name",
+          "latest_run_id"
+        ],
+        "title": "SimCasePerfResponse",
+        "type": "object"
+      },
+      "SimMetricPerfResponse": {
+        "properties": {
+          "label": {
+            "maxLength": 128,
+            "title": "Label",
+            "type": "string"
+          },
+          "metric_key": {
+            "maxLength": 128,
+            "title": "Metric Key",
+            "type": "string"
+          },
+          "per_run": {
+            "items": {
+              "$ref": "#/components/schemas/SimMetricRunPointResponse"
+            },
+            "title": "Per Run",
+            "type": "array"
+          }
+        },
+        "required": [
+          "metric_key",
+          "label"
+        ],
+        "title": "SimMetricPerfResponse",
+        "type": "object"
+      },
+      "SimMetricRunPointResponse": {
+        "description": "One run's contribution to a metric: the mean value that run (null for\nnon-numeric metrics) plus how many conversations passed / were measured.",
+        "properties": {
+          "at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "At"
+          },
+          "measured": {
+            "default": 0,
+            "title": "Measured",
+            "type": "integer"
+          },
+          "passed": {
+            "default": 0,
+            "title": "Passed",
+            "type": "integer"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "title": "SimMetricRunPointResponse",
+        "type": "object"
+      },
+      "SimPerformanceOverviewResponse": {
+        "properties": {
+          "evals_run": {
+            "default": 0,
+            "title": "Evals Run",
+            "type": "integer"
+          },
+          "needs_attention_count": {
+            "default": 0,
+            "title": "Needs Attention Count",
+            "type": "integer"
+          },
+          "overall_pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Overall Pass Rate"
+          },
+          "runs_analyzed": {
+            "default": 0,
+            "title": "Runs Analyzed",
+            "type": "integer"
+          }
+        },
+        "title": "SimPerformanceOverviewResponse",
+        "type": "object"
+      },
+      "SimSuitePerfResponse": {
+        "properties": {
+          "cases": {
+            "items": {
+              "$ref": "#/components/schemas/SimCasePerfResponse"
+            },
+            "title": "Cases",
+            "type": "array"
+          },
+          "latest_run_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Run At"
+          },
+          "measured": {
+            "default": 0,
+            "title": "Measured",
+            "type": "integer"
+          },
+          "pass_rate": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pass Rate"
+          },
+          "passed": {
+            "default": 0,
+            "title": "Passed",
+            "type": "integer"
+          },
+          "suite_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suite Id"
+          },
+          "suite_name": {
+            "maxLength": 512,
+            "title": "Suite Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "suite_name"
+        ],
+        "title": "SimSuitePerfResponse",
+        "type": "object"
+      },
       "SimulationBenchmarkAggregateSummary": {
         "properties": {
           "average_score": {
@@ -34741,6 +35031,40 @@
           "is_terminal"
         ],
         "title": "SimulationObservation",
+        "type": "object"
+      },
+      "SimulationPerformanceResponse": {
+        "description": "Aggregated Simulations overview: one request in place of the console's\nformer one-detail-fetch-per-run fan-out.",
+        "properties": {
+          "by_case": {
+            "items": {
+              "$ref": "#/components/schemas/SimCasePerfResponse"
+            },
+            "title": "By Case",
+            "type": "array"
+          },
+          "by_suite": {
+            "items": {
+              "$ref": "#/components/schemas/SimSuitePerfResponse"
+            },
+            "title": "By Suite",
+            "type": "array"
+          },
+          "metrics": {
+            "items": {
+              "$ref": "#/components/schemas/SimMetricPerfResponse"
+            },
+            "title": "Metrics",
+            "type": "array"
+          },
+          "overview": {
+            "$ref": "#/components/schemas/SimPerformanceOverviewResponse"
+          }
+        },
+        "required": [
+          "overview"
+        ],
+        "title": "SimulationPerformanceResponse",
         "type": "object"
       },
       "SimulationRunResponse": {
@@ -44432,6 +44756,18 @@
       },
       "Usage": {
         "properties": {
+          "cache_creation_tokens": {
+            "default": 0,
+            "description": "Cache-WRITE input tokens (Anthropic cache_creation_input_tokens; 0 on providers without it).",
+            "title": "Cache Creation Tokens",
+            "type": "integer"
+          },
+          "cached_tokens": {
+            "default": 0,
+            "description": "Cache-READ input tokens (billed at the provider's cache-hit rate).",
+            "title": "Cached Tokens",
+            "type": "integer"
+          },
           "input_tokens": {
             "default": 0,
             "title": "Input Tokens",
@@ -74227,6 +74563,77 @@
           }
         },
         "summary": "Config To Turn Policy",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/performance": {
+      "get": {
+        "description": "Aggregate recent graded (case/suite) runs into the Simulations overview:\noverall pass rate, per-metric trend series, and per-case / per-suite rollups\n(each with its per-conversation verdicts).\n\n``limit`` bounds how many recent runs are read (capped at 50). One request\nreplaces the console's former one-fetch-per-run fan-out.",
+        "operationId": "get-simulation-performance",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 15,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationPerformanceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Performance",
         "tags": [
           "Simulations"
         ]

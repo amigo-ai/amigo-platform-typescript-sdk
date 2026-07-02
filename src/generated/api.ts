@@ -6179,6 +6179,31 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/performance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Performance
+         * @description Aggregate recent graded (case/suite) runs into the Simulations overview:
+         *     overall pass rate, per-metric trend series, and per-case / per-suite rollups
+         *     (each with its per-conversation verdicts).
+         *
+         *     ``limit`` bounds how many recent runs are read (capped at 50). One request
+         *     replaces the console's former one-fetch-per-run fan-out.
+         */
+        get: operations["get-simulation-performance"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/runs": {
         parameters: {
             query?: never;
@@ -21624,6 +21649,136 @@ export interface components {
              */
             signal: string;
         };
+        /** SimCaseAssertionResponse */
+        SimCaseAssertionResponse: {
+            /** Eval Key */
+            eval_key: string;
+            /**
+             * Eval Type
+             * @enum {string}
+             */
+            eval_type: "assertion" | "metric";
+            /**
+             * Failed
+             * @default 0
+             */
+            failed?: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed?: number;
+            /**
+             * Pending
+             * @default 0
+             */
+            pending?: number;
+            /** Results */
+            results?: components["schemas"]["SimulationEvalResultResponse"][];
+        };
+        /** SimCasePerfResponse */
+        SimCasePerfResponse: {
+            /** Assertions */
+            assertions?: components["schemas"]["SimCaseAssertionResponse"][];
+            /** Case Id */
+            case_id?: string | null;
+            /** Case Name */
+            case_name: string;
+            /** Latest Run At */
+            latest_run_at?: string | null;
+            /**
+             * Latest Run Id
+             * Format: uuid
+             */
+            latest_run_id: string;
+            /**
+             * Measured
+             * @default 0
+             */
+            measured?: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed?: number;
+        };
+        /** SimMetricPerfResponse */
+        SimMetricPerfResponse: {
+            /** Label */
+            label: string;
+            /** Metric Key */
+            metric_key: string;
+            /** Per Run */
+            per_run?: components["schemas"]["SimMetricRunPointResponse"][];
+        };
+        /**
+         * SimMetricRunPointResponse
+         * @description One run's contribution to a metric: the mean value that run (null for
+         *     non-numeric metrics) plus how many conversations passed / were measured.
+         */
+        SimMetricRunPointResponse: {
+            /** At */
+            at?: string | null;
+            /**
+             * Measured
+             * @default 0
+             */
+            measured?: number;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed?: number;
+            /** Value */
+            value?: number | null;
+        };
+        /** SimPerformanceOverviewResponse */
+        SimPerformanceOverviewResponse: {
+            /**
+             * Evals Run
+             * @default 0
+             */
+            evals_run?: number;
+            /**
+             * Needs Attention Count
+             * @default 0
+             */
+            needs_attention_count?: number;
+            /** Overall Pass Rate */
+            overall_pass_rate?: number | null;
+            /**
+             * Runs Analyzed
+             * @default 0
+             */
+            runs_analyzed?: number;
+        };
+        /** SimSuitePerfResponse */
+        SimSuitePerfResponse: {
+            /** Cases */
+            cases?: components["schemas"]["SimCasePerfResponse"][];
+            /** Latest Run At */
+            latest_run_at?: string | null;
+            /**
+             * Measured
+             * @default 0
+             */
+            measured?: number;
+            /** Pass Rate */
+            pass_rate?: number | null;
+            /**
+             * Passed
+             * @default 0
+             */
+            passed?: number;
+            /** Suite Id */
+            suite_id?: string | null;
+            /** Suite Name */
+            suite_name: string;
+        };
         /** SimulationBenchmarkAggregateSummary */
         SimulationBenchmarkAggregateSummary: {
             /** Average Score */
@@ -22088,6 +22243,20 @@ export interface components {
              * @default []
              */
             tools_called?: string[];
+        };
+        /**
+         * SimulationPerformanceResponse
+         * @description Aggregated Simulations overview: one request in place of the console's
+         *     former one-detail-fetch-per-run fan-out.
+         */
+        SimulationPerformanceResponse: {
+            /** By Case */
+            by_case?: components["schemas"]["SimCasePerfResponse"][];
+            /** By Suite */
+            by_suite?: components["schemas"]["SimSuitePerfResponse"][];
+            /** Metrics */
+            metrics?: components["schemas"]["SimMetricPerfResponse"][];
+            overview: components["schemas"]["SimPerformanceOverviewResponse"];
         };
         /**
          * SimulationRunResponse
@@ -26036,6 +26205,18 @@ export interface components {
         };
         /** Usage */
         Usage: {
+            /**
+             * Cache Creation Tokens
+             * @description Cache-WRITE input tokens (Anthropic cache_creation_input_tokens; 0 on providers without it).
+             * @default 0
+             */
+            cache_creation_tokens?: number;
+            /**
+             * Cached Tokens
+             * @description Cache-READ input tokens (billed at the provider's cache-hit rate).
+             * @default 0
+             */
+            cached_tokens?: number;
             /**
              * Input Tokens
              * @default 0
@@ -42714,6 +42895,40 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-performance": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationPerformanceResponse"];
                 };
             };
             /** @description Validation Error */
