@@ -713,6 +713,80 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/agent-definitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Agent Definitions */
+        get: operations["list_agent_definitions_v1__workspace_id__agent_definitions_get"];
+        put?: never;
+        /** Register Agent Definition */
+        post: operations["register_agent_definition_v1__workspace_id__agent_definitions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/agent-definitions/validate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Validate Agent Definition
+         * @description Dry-run clamp validation — nothing is stored. 422 with the offending
+         *     paths on failure (the same shape push returns).
+         */
+        post: operations["validate_agent_definition_v1__workspace_id__agent_definitions_validate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/agent-definitions/{definition_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Agent Definition */
+        get: operations["get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get"];
+        put?: never;
+        post?: never;
+        /** Archive Agent Definition */
+        delete: operations["archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/agent-definitions/{definition_id}/versions/{version}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Agent Definition Version */
+        get: operations["get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/agent-runs": {
         parameters: {
             query?: never;
@@ -8152,6 +8226,97 @@ export interface components {
             /** Period */
             period?: string | null;
         };
+        /** AgentDefinitionDetail */
+        AgentDefinitionDetail: {
+            /**
+             * Definition Id
+             * Format: uuid
+             */
+            definition_id: string;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+            /** Versions */
+            versions: components["schemas"]["AgentDefinitionVersionMeta"][];
+        };
+        /** AgentDefinitionListResponse */
+        AgentDefinitionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentDefinitionSummary"][];
+        };
+        /** AgentDefinitionSummary */
+        AgentDefinitionSummary: {
+            /**
+             * Definition Id
+             * Format: uuid
+             */
+            definition_id: string;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            /** Name */
+            name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "archived";
+        };
+        /** AgentDefinitionVersionDetail */
+        AgentDefinitionVersionDetail: {
+            /** Agent Count */
+            agent_count: number;
+            /** Body */
+            body: {
+                [key: string]: unknown;
+            };
+            /** Body Sha256 */
+            body_sha256: string;
+            /**
+             * Definition Id
+             * Format: uuid
+             */
+            definition_id: string;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            /** Has Write Tools */
+            has_write_tools: boolean;
+            /** Validator Rev */
+            validator_rev: string;
+            /** Version */
+            version: number;
+        };
+        /** AgentDefinitionVersionMeta */
+        AgentDefinitionVersionMeta: {
+            /** Agent Count */
+            agent_count: number;
+            /** Body Sha256 */
+            body_sha256: string;
+            /** Has Write Tools */
+            has_write_tools: boolean;
+            /** Validator Rev */
+            validator_rev: string;
+            /** Version */
+            version: number;
+        };
         /** AgentResponse */
         AgentResponse: {
             /**
@@ -11177,20 +11342,21 @@ export interface components {
         CreateAgentRunRequest: {
             /**
              * Framework
-             * @description Agent framework the run executes on — runs unmodified in the framework's own design.
-             * @enum {string}
+             * @description Framework a PLATFORM run executes on. For a native run the framework comes from the definition.
              */
-            framework: "claude-agent-sdk" | "openai-agents";
+            framework?: ("claude-agent-sdk" | "openai-agents") | null;
             /**
              * Message
              * @description User message the framework agent is invoked with.
              */
             message: string;
+            /** @description Run a native (bring-your-own) agent definition instead of a platform service. */
+            native?: components["schemas"]["NativeRunRef"] | null;
             /**
              * Service Id
-             * Format: uuid
+             * @description Platform-authored run: the service whose pinned config the agent runs.
              */
-            service_id: string;
+            service_id?: string | null;
             /**
              * Timeout S
              * @description Server-side wall-clock budget for the run, in seconds (max 300).
@@ -11198,7 +11364,7 @@ export interface components {
              */
             timeout_s?: number;
             /**
-             * @description Named version set on the service whose pinned config the run uses.
+             * @description Named version set on the service whose pinned config the run uses (platform runs).
              * @default release
              */
             version_set?: components["schemas"]["NameString"];
@@ -16133,6 +16299,14 @@ export interface components {
              */
             source_file_id?: string | null;
             /**
+             * Source Folder Path
+             * @description Where the file lived within the mapped Drive folder tree (V279) — the
+             *     relative path, folder names joined by ``/`` (e.g. ``clinical/notes``); ``''``
+             *     at the mapped root. Lets the console show the original folder structure. Null
+             *     for manual uploads and snapshot rows.
+             */
+            source_folder_path?: string | null;
+            /**
              * Source Type
              * @description Origin of the document this version belongs to — ``manual`` for console
              *     uploads, ``google_shared_drive`` for the Drive connector (V269). Null for
@@ -17589,6 +17763,32 @@ export interface components {
             target_entity_type: string;
             /** Version */
             version: string;
+        };
+        /**
+         * NativeRunRef
+         * @description Run a customer-authored NATIVE agent definition (inc-10): a REGISTERED
+         *     definition by id (``version`` omitted = latest), or an INLINE body for
+         *     dev/playground iteration. The definition's own ``framework`` selects the
+         *     runtime — no top-level ``framework`` needed.
+         */
+        NativeRunRef: {
+            /**
+             * Definition Id
+             * @description Registered definition to run. Omit `version` for the latest.
+             */
+            definition_id?: string | null;
+            /**
+             * Inline
+             * @description Inline definition document (dev/playground). Validated by the platform clamp schema.
+             */
+            inline?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Version
+             * @description Pinned definition version; omit for latest.
+             */
+            version?: number | null;
         };
         /** NavTimingEvent */
         NavTimingEvent: {
@@ -20161,6 +20361,44 @@ export interface components {
              * @constant
              */
             status?: "available";
+        };
+        /** RegisterAgentDefinitionRequest */
+        RegisterAgentDefinitionRequest: {
+            /**
+             * Body
+             * @description The framework-native definition document (its 'framework' field selects the shape). Validated by the platform clamp schema — a non-whitelisted field is rejected.
+             */
+            body: {
+                [key: string]: unknown;
+            };
+            /** @description Stable slug identifying this definition within the workspace. */
+            name: components["schemas"]["SlugString"];
+        };
+        /** RegisterAgentDefinitionResponse */
+        RegisterAgentDefinitionResponse: {
+            /** Agent Count */
+            agent_count: number;
+            /** Body Sha256 */
+            body_sha256: string;
+            /**
+             * Created
+             * @description False when an identical body was already registered (idempotent push).
+             */
+            created: boolean;
+            /**
+             * Definition Id
+             * Format: uuid
+             */
+            definition_id: string;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            /** Has Write Tools */
+            has_write_tools: boolean;
+            /** Version */
+            version: number;
         };
         /**
          * RegisterSchemaRequest
@@ -26405,6 +26643,23 @@ export interface components {
              */
             type: "user_transcript";
         };
+        /** ValidateAgentDefinitionResponse */
+        ValidateAgentDefinitionResponse: {
+            /** Agent Count */
+            agent_count: number;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            /** Has Write Tools */
+            has_write_tools: boolean;
+            /**
+             * Valid
+             * @constant
+             */
+            valid: true;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -29745,6 +30000,207 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TestCredentialIdsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_agent_definitions_v1__workspace_id__agent_definitions_get: {
+        parameters: {
+            query?: {
+                framework?: ("claude-agent-sdk" | "openai-agents" | "crewai") | null;
+                include_archived?: boolean;
+                limit?: number;
+                continuation_token?: unknown;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentDefinitionListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_agent_definition_v1__workspace_id__agent_definitions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAgentDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterAgentDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    validate_agent_definition_v1__workspace_id__agent_definitions_validate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterAgentDefinitionRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ValidateAgentDefinitionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentDefinitionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                definition_id: string;
+                version: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentDefinitionVersionDetail"];
                 };
             };
             /** @description Validation Error */
