@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.85.1] - 2026-07-02
+
+### Features
+
+- add use cases sdk resource (#380)
+
 ## [0.85.0] - 2026-07-02
 
 ### Maintenance
