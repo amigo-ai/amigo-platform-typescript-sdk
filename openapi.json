@@ -934,6 +934,202 @@
         "title": "AgentAnalyticsResponse",
         "type": "object"
       },
+      "AgentDefinitionDetail": {
+        "properties": {
+          "definition_id": {
+            "format": "uuid",
+            "title": "Definition Id",
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents",
+              "crewai"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDefinitionVersionMeta"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "definition_id",
+          "name",
+          "framework",
+          "status",
+          "versions"
+        ],
+        "title": "AgentDefinitionDetail",
+        "type": "object"
+      },
+      "AgentDefinitionListResponse": {
+        "properties": {
+          "continuation_token": {
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AgentDefinitionSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "AgentDefinitionListResponse",
+        "type": "object"
+      },
+      "AgentDefinitionSummary": {
+        "properties": {
+          "definition_id": {
+            "format": "uuid",
+            "title": "Definition Id",
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents",
+              "crewai"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "definition_id",
+          "name",
+          "framework",
+          "status"
+        ],
+        "title": "AgentDefinitionSummary",
+        "type": "object"
+      },
+      "AgentDefinitionVersionDetail": {
+        "properties": {
+          "agent_count": {
+            "title": "Agent Count",
+            "type": "integer"
+          },
+          "body": {
+            "additionalProperties": true,
+            "title": "Body",
+            "type": "object"
+          },
+          "body_sha256": {
+            "title": "Body Sha256",
+            "type": "string"
+          },
+          "definition_id": {
+            "format": "uuid",
+            "title": "Definition Id",
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents",
+              "crewai"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "has_write_tools": {
+            "title": "Has Write Tools",
+            "type": "boolean"
+          },
+          "validator_rev": {
+            "title": "Validator Rev",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "body_sha256",
+          "validator_rev",
+          "has_write_tools",
+          "agent_count",
+          "definition_id",
+          "framework",
+          "body"
+        ],
+        "title": "AgentDefinitionVersionDetail",
+        "type": "object"
+      },
+      "AgentDefinitionVersionMeta": {
+        "properties": {
+          "agent_count": {
+            "title": "Agent Count",
+            "type": "integer"
+          },
+          "body_sha256": {
+            "title": "Body Sha256",
+            "type": "string"
+          },
+          "has_write_tools": {
+            "title": "Has Write Tools",
+            "type": "boolean"
+          },
+          "validator_rev": {
+            "title": "Validator Rev",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "version",
+          "body_sha256",
+          "validator_rev",
+          "has_write_tools",
+          "agent_count"
+        ],
+        "title": "AgentDefinitionVersionMeta",
+        "type": "object"
+      },
       "AgentResponse": {
         "properties": {
           "created_at": {
@@ -30161,6 +30357,76 @@
         "title": "RecordingUrlsResponse",
         "type": "object"
       },
+      "RegisterAgentDefinitionRequest": {
+        "properties": {
+          "body": {
+            "additionalProperties": true,
+            "description": "The framework-native definition document (its 'framework' field selects the shape). Validated by the platform clamp schema \u2014 a non-whitelisted field is rejected.",
+            "title": "Body",
+            "type": "object"
+          },
+          "name": {
+            "$ref": "#/components/schemas/SlugString",
+            "description": "Stable slug identifying this definition within the workspace."
+          }
+        },
+        "required": [
+          "name",
+          "body"
+        ],
+        "title": "RegisterAgentDefinitionRequest",
+        "type": "object"
+      },
+      "RegisterAgentDefinitionResponse": {
+        "properties": {
+          "agent_count": {
+            "title": "Agent Count",
+            "type": "integer"
+          },
+          "body_sha256": {
+            "title": "Body Sha256",
+            "type": "string"
+          },
+          "created": {
+            "description": "False when an identical body was already registered (idempotent push).",
+            "title": "Created",
+            "type": "boolean"
+          },
+          "definition_id": {
+            "format": "uuid",
+            "title": "Definition Id",
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents",
+              "crewai"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "has_write_tools": {
+            "title": "Has Write Tools",
+            "type": "boolean"
+          },
+          "version": {
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "definition_id",
+          "version",
+          "created",
+          "framework",
+          "has_write_tools",
+          "agent_count",
+          "body_sha256"
+        ],
+        "title": "RegisterAgentDefinitionResponse",
+        "type": "object"
+      },
       "RegisterSchemaRequest": {
         "description": "Create Schema payload (intake-ui-mvp-design.md \u00a75.4, \u00a75.9).\n\n``ingestion_mode`` is inferred from ``file_type`` (csv/xls/xlsx \u2192 snapshot;\nelse document) \u2014 not part of the wire contract. Snapshot datasets require\n``primary_key`` + ``schema``; document datasets take an optional\n``document_processing`` config and ignore primary_key/schema. The backend\napplies the other hidden defaults (``on_schema_change=additive``,\n``schema_version`` auto).",
         "properties": {
@@ -45149,6 +45415,40 @@
         "title": "UserTranscriptEvent",
         "type": "object"
       },
+      "ValidateAgentDefinitionResponse": {
+        "properties": {
+          "agent_count": {
+            "title": "Agent Count",
+            "type": "integer"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents",
+              "crewai"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "has_write_tools": {
+            "title": "Has Write Tools",
+            "type": "boolean"
+          },
+          "valid": {
+            "const": true,
+            "title": "Valid",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "valid",
+          "framework",
+          "has_write_tools",
+          "agent_count"
+        ],
+        "title": "ValidateAgentDefinitionResponse",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -51533,6 +51833,364 @@
         "summary": "Update test credential IDs",
         "tags": [
           "Workspaces"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-definitions": {
+      "get": {
+        "operationId": "list_agent_definitions_v1__workspace_id__agent_definitions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "framework",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "claude-agent-sdk",
+                    "openai-agents",
+                    "crewai"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Framework"
+            }
+          },
+          {
+            "in": "query",
+            "name": "include_archived",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Archived",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "exclusiveMinimum": 0,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "title": "Continuation Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinitionListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Agent Definitions",
+        "tags": [
+          "Agent Definitions"
+        ]
+      },
+      "post": {
+        "operationId": "register_agent_definition_v1__workspace_id__agent_definitions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAgentDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterAgentDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Register Agent Definition",
+        "tags": [
+          "Agent Definitions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-definitions/validate": {
+      "post": {
+        "description": "Dry-run clamp validation \u2014 nothing is stored. 422 with the offending\npaths on failure (the same shape push returns).",
+        "operationId": "validate_agent_definition_v1__workspace_id__agent_definitions_validate_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterAgentDefinitionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAgentDefinitionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Validate Agent Definition",
+        "tags": [
+          "Agent Definitions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-definitions/{definition_id}": {
+      "delete": {
+        "operationId": "archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "definition_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Definition Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Archive Agent Definition",
+        "tags": [
+          "Agent Definitions"
+        ]
+      },
+      "get": {
+        "operationId": "get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "definition_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Definition Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinitionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Agent Definition",
+        "tags": [
+          "Agent Definitions"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-definitions/{definition_id}/versions/{version}": {
+      "get": {
+        "operationId": "get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "definition_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Definition Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version",
+            "required": true,
+            "schema": {
+              "title": "Version",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentDefinitionVersionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Agent Definition Version",
+        "tags": [
+          "Agent Definitions"
         ]
       }
     },
