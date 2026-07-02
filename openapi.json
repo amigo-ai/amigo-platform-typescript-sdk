@@ -981,6 +981,71 @@
         "title": "AgentResponse",
         "type": "object"
       },
+      "AgentRunDetail": {
+        "properties": {
+          "duration_ms": {
+            "default": 0.0,
+            "minimum": 0.0,
+            "title": "Duration Ms",
+            "type": "number"
+          },
+          "error": {
+            "default": "",
+            "description": "Failure detail for failed/timed_out runs. Empty otherwise.",
+            "title": "Error",
+            "type": "string"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "succeeded",
+              "failed",
+              "timed_out"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "text": {
+            "default": "",
+            "description": "Final agent text. Empty while the run is still running or on failure.",
+            "title": "Text",
+            "type": "string"
+          },
+          "trajectory": {
+            "default": [],
+            "description": "AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) \u2014 the adapter's normalize() over the framework's NATIVE output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.",
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Trajectory",
+            "type": "array"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        },
+        "required": [
+          "run_id",
+          "status",
+          "framework"
+        ],
+        "title": "AgentRunDetail",
+        "type": "object"
+      },
       "AgentTranscriptDeltaEvent": {
         "properties": {
           "delta": {
@@ -8399,6 +8464,71 @@
           "name"
         ],
         "title": "CreateAgentRequest",
+        "type": "object"
+      },
+      "CreateAgentRunRequest": {
+        "properties": {
+          "framework": {
+            "description": "Agent framework the run executes on \u2014 runs unmodified in the framework's own design.",
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "message": {
+            "description": "User message the framework agent is invoked with.",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "timeout_s": {
+            "default": 120,
+            "description": "Server-side wall-clock budget for the run, in seconds (max 300).",
+            "exclusiveMinimum": 0.0,
+            "maximum": 300.0,
+            "title": "Timeout S",
+            "type": "integer"
+          },
+          "version_set": {
+            "$ref": "#/components/schemas/NameString",
+            "default": "release",
+            "description": "Named version set on the service whose pinned config the run uses."
+          }
+        },
+        "required": [
+          "service_id",
+          "framework",
+          "message"
+        ],
+        "title": "CreateAgentRunRequest",
+        "type": "object"
+      },
+      "CreateAgentRunResponse": {
+        "properties": {
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "const": "running",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "status"
+        ],
+        "title": "CreateAgentRunResponse",
         "type": "object"
       },
       "CreateAgentVersionRequest": {
@@ -44300,6 +44430,22 @@
         "title": "UpsertVersionSetRequest",
         "type": "object"
       },
+      "Usage": {
+        "properties": {
+          "input_tokens": {
+            "default": 0,
+            "title": "Input Tokens",
+            "type": "integer"
+          },
+          "output_tokens": {
+            "default": 0,
+            "title": "Output Tokens",
+            "type": "integer"
+          }
+        },
+        "title": "Usage",
+        "type": "object"
+      },
       "UsageBucket": {
         "properties": {
           "avg_duration_seconds": {
@@ -51051,6 +51197,114 @@
         "summary": "Update test credential IDs",
         "tags": [
           "Workspaces"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-runs": {
+      "post": {
+        "description": "Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking \u2014 poll GET /agent-runs/{run_id} for the result.",
+        "operationId": "create_agent_run_v1__workspace_id__agent_runs_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAgentRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAgentRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Dispatch a framework agent run",
+        "tags": [
+          "Agent Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-runs/{run_id}": {
+      "get": {
+        "description": "Run status, final text, token usage, and the adapter-normalized trajectory of the framework's native output.",
+        "operationId": "get_agent_run_v1__workspace_id__agent_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a framework agent run",
+        "tags": [
+          "Agent Runs"
         ]
       }
     },
