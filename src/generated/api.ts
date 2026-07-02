@@ -713,6 +713,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/agent-runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dispatch a framework agent run
+         * @description Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking — poll GET /agent-runs/{run_id} for the result.
+         */
+        post: operations["create_agent_run_v1__workspace_id__agent_runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/agent-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a framework agent run
+         * @description Run status, final text, token usage, and the adapter-normalized trajectory of the framework's native output.
+         */
+        get: operations["get_agent_run_v1__workspace_id__agent_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/agents": {
         parameters: {
             query?: never;
@@ -8119,6 +8159,50 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** AgentRunDetail */
+        AgentRunDetail: {
+            /**
+             * Duration Ms
+             * @default 0
+             */
+            duration_ms?: number;
+            /**
+             * Error
+             * @description Failure detail for failed/timed_out runs. Empty otherwise.
+             * @default
+             */
+            error?: string;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents";
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "succeeded" | "failed" | "timed_out";
+            /**
+             * Text
+             * @description Final agent text. Empty while the run is still running or on failure.
+             * @default
+             */
+            text?: string;
+            /**
+             * Trajectory
+             * @description AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) — the adapter's normalize() over the framework's NATIVE output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.
+             * @default []
+             */
+            trajectory?: {
+                [key: string]: unknown;
+            }[];
+            usage?: components["schemas"]["Usage"];
+        };
         /** AgentTranscriptDeltaEvent */
         AgentTranscriptDeltaEvent: {
             /** Delta */
@@ -11063,6 +11147,49 @@ export interface components {
             /** @default  */
             description?: components["schemas"]["DescriptionString"];
             name: components["schemas"]["NameString"];
+        };
+        /** CreateAgentRunRequest */
+        CreateAgentRunRequest: {
+            /**
+             * Framework
+             * @description Agent framework the run executes on — runs unmodified in the framework's own design.
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents";
+            /**
+             * Message
+             * @description User message the framework agent is invoked with.
+             */
+            message: string;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /**
+             * Timeout S
+             * @description Server-side wall-clock budget for the run, in seconds (max 300).
+             * @default 120
+             */
+            timeout_s?: number;
+            /**
+             * @description Named version set on the service whose pinned config the run uses.
+             * @default release
+             */
+            version_set?: components["schemas"]["NameString"];
+        };
+        /** CreateAgentRunResponse */
+        CreateAgentRunResponse: {
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /**
+             * Status
+             * @constant
+             */
+            status: "running";
         };
         /** CreateAgentVersionRequest */
         CreateAgentVersionRequest: {
@@ -25907,6 +26034,19 @@ export interface components {
         UpsertVersionSetRequest: {
             version_set: components["schemas"]["VersionSet-Input"];
         };
+        /** Usage */
+        Usage: {
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens?: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens?: number;
+        };
         /** UsageBucket */
         UsageBucket: {
             /**
@@ -29424,6 +29564,73 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TestCredentialIdsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_agent_run_v1__workspace_id__agent_runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAgentRunRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateAgentRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_agent_run_v1__workspace_id__agent_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunDetail"];
                 };
             };
             /** @description Validation Error */
