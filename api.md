@@ -570,4 +570,15 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `delete`
 - `invoke`
 
+### `useCases`
+
+- `list`
+- `listOwned`
+- `getOwnership`
+- `assignOwnership`
+- `releaseOwnership`
+- `getServiceBinding`
+- `bindToService`
+- `unbindFromService`
+
 ### `api`
