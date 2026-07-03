@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.88.0] - 2026-07-03
+
+### Features
+
+- agentRuns + agentDefinitions clients (frameworks layer) (#386)
+
 ## [0.87.0] - 2026-07-03
 
 ### Maintenance
