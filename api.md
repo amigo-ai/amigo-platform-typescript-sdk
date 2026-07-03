@@ -112,6 +112,22 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getVersion`
 - `createVersion`
 
+### `agentRuns`
+
+- `create`
+- `get`
+- `harnessContext`
+
+### `agentDefinitions`
+
+- `list`
+- `listAutoPaging`
+- `register`
+- `validate`
+- `get`
+- `getVersion`
+- `archive`
+
 ### `skills`
 
 - `create`
