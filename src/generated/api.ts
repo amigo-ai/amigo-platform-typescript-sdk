@@ -807,6 +807,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/agent-runs/harness-context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch the neutral session-bootstrap context for a service
+         * @description The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and the REAL server-enforced write-floor — the byte-identical projection the hosted runner renders from, so a customer's own framework can bootstrap a session against the same world model. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).
+         */
+        get: operations["get_harness_context_v1__workspace_id__agent_runs_harness_context_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/agent-runs/{run_id}": {
         parameters: {
             query?: never;
@@ -8237,7 +8257,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Name */
             name: string;
             /**
@@ -8268,7 +8288,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Name */
             name: string;
             /**
@@ -8296,7 +8316,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /** Validator Rev */
@@ -8316,6 +8336,46 @@ export interface components {
             validator_rev: string;
             /** Version */
             version: number;
+        };
+        /**
+         * AgentIdentity
+         * @description Who the agent IS — platform-authored only; ``None`` for native runs
+         *     (a customer's own definition carries its own identity). Named
+         *     ``AgentIdentity`` (not ``Identity``) to avoid colliding with the existing
+         *     ``config.models.Identity`` OpenAPI schema (a same-name collision would
+         *     force-rename that shipped schema — a breaking spec change).
+         */
+        AgentIdentity: {
+            /**
+             * Developed By
+             * @default
+             */
+            developed_by?: string;
+            /**
+             * Entry Actor Name
+             * @default
+             */
+            entry_actor_name?: string;
+            /**
+             * Initial State
+             * @default
+             */
+            initial_state?: string;
+            /**
+             * Instructions
+             * @default
+             */
+            instructions?: string;
+            /**
+             * Name
+             * @default
+             */
+            name?: string;
+            /**
+             * Role
+             * @default
+             */
+            role?: string;
         };
         /** AgentResponse */
         AgentResponse: {
@@ -16017,6 +16077,26 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** Guardrails */
+        Guardrails: {
+            /**
+             * Global Action Guidelines
+             * @default []
+             */
+            global_action_guidelines?: string[];
+            /**
+             * Global Boundary Constraints
+             * @default []
+             */
+            global_boundary_constraints?: string[];
+            /**
+             * Guardrails
+             * @default []
+             */
+            guardrails?: {
+                [key: string]: unknown;
+            }[];
+        };
         /** HTTPValidationError */
         HTTPValidationError: {
             /** Detail */
@@ -16058,6 +16138,33 @@ export interface components {
             reason: string;
             /** Regulatory Basis */
             regulatory_basis: string;
+        };
+        /**
+         * HarnessContext
+         * @description The neutral, retrievable session-bootstrap context for ANY framework.
+         */
+        HarnessContext: {
+            /**
+             * Config Fingerprint
+             * @default
+             */
+            config_fingerprint?: string;
+            /**
+             * Context Version
+             * @default 1
+             */
+            context_version?: number;
+            guardrails: components["schemas"]["Guardrails"];
+            identity?: components["schemas"]["AgentIdentity"] | null;
+            runtime: components["schemas"]["Runtime"];
+            /**
+             * Source
+             * @default
+             */
+            source?: string;
+            tools: components["schemas"]["Tools"];
+            world_scope: components["schemas"]["WorldScope"];
+            write_floor: components["schemas"]["WriteFloor"];
         };
         /** HealFieldRequest */
         HealFieldRequest: {
@@ -20394,7 +20501,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /** Version */
@@ -21113,6 +21220,29 @@ export interface components {
             service_id?: string | null;
             /** Tags */
             tags?: string[];
+        };
+        /** Runtime */
+        Runtime: {
+            /**
+             * Caller Context
+             * @default
+             */
+            caller_context?: string;
+            /**
+             * Channel Kind
+             * @default
+             */
+            channel_kind?: string;
+            /**
+             * Engage Model
+             * @default
+             */
+            engage_model?: string;
+            /**
+             * Language
+             * @default
+             */
+            language?: string;
         };
         /** SafetyState */
         SafetyState: {
@@ -24965,6 +25095,23 @@ export interface components {
              */
             type: "tool_call_started";
         };
+        /** ToolDescriptor */
+        ToolDescriptor: {
+            /**
+             * Description
+             * @default
+             */
+            description?: string;
+            /**
+             * Input Schema
+             * @default {}
+             */
+            input_schema?: {
+                [key: string]: unknown;
+            };
+            /** Name */
+            name: string;
+        };
         /** ToolExecuteRequest */
         ToolExecuteRequest: {
             /**
@@ -25088,6 +25235,28 @@ export interface components {
              * @default 0
              */
             total_calls?: number;
+        };
+        /**
+         * Tools
+         * @description Discovery hint — the neutral descriptors. NOT the enforcement (the MCP
+         *     edge is; a remote agent discovers live schemas from the server too).
+         */
+        Tools: {
+            /**
+             * Descriptors
+             * @default []
+             */
+            descriptors?: components["schemas"]["ToolDescriptor"][];
+            /**
+             * Read Tool Names
+             * @default []
+             */
+            read_tool_names?: string[];
+            /**
+             * Write Tool Names
+             * @default []
+             */
+            write_tool_names?: string[];
         };
         /**
          * TraceAnalysisListItem
@@ -26651,7 +26820,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /**
@@ -27261,6 +27430,28 @@ export interface components {
             sources?: components["schemas"]["SourceBreakdownItem"][];
         };
         /**
+         * WorldScope
+         * @description The world slice — ids only (the leaf stays I/O-free). This is the
+         *     read/subject scope, NOT the write bound (see ``write_floor``).
+         */
+        WorldScope: {
+            /**
+             * Allow Create
+             * @default false
+             */
+            allow_create?: boolean;
+            /**
+             * Scoped Entity Ids
+             * @default []
+             */
+            scoped_entity_ids?: string[];
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /**
          * WrapUpRequest
          * @description Request to record operator intervention wrap-up.
          */
@@ -27282,6 +27473,48 @@ export interface components {
         WrapUpResponse: {
             /** Success */
             success: boolean;
+        };
+        /**
+         * WriteFloor
+         * @description The REAL server-enforced write bound (audit G8) — advisory to render;
+         *     the MCP edge enforces it regardless of what a client does.
+         */
+        WriteFloor: {
+            /**
+             * Allow Create
+             * @default false
+             */
+            allow_create?: boolean;
+            /**
+             * Clinical Write Principal
+             * @default provider-only
+             */
+            clinical_write_principal?: string;
+            /**
+             * Clinical Write Scope
+             * @default any-entity-in-workspace
+             */
+            clinical_write_scope?: string;
+            /**
+             * Enforced At
+             * @default mcp-world-tools-edge
+             */
+            enforced_at?: string;
+            /**
+             * Enrichment Write Scope
+             * @default caller-anchor-only
+             */
+            enrichment_write_scope?: string;
+            /**
+             * Requires Entity Anchor
+             * @default true
+             */
+            requires_entity_anchor?: boolean;
+            /**
+             * Unanchored Or Api Key Writes
+             * @default none
+             */
+            unanchored_or_api_key_writes?: string;
         };
         /** @enum {string} */
         _Access: "read" | "write";
@@ -30016,7 +30249,7 @@ export interface operations {
     list_agent_definitions_v1__workspace_id__agent_definitions_get: {
         parameters: {
             query?: {
-                framework?: ("claude-agent-sdk" | "openai-agents" | "crewai") | null;
+                framework?: ("claude-agent-sdk" | "openai-agents") | null;
                 include_archived?: boolean;
                 limit?: number;
                 continuation_token?: unknown;
@@ -30236,6 +30469,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreateAgentRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_harness_context_v1__workspace_id__agent_runs_harness_context_get: {
+        parameters: {
+            query: {
+                service_id: string;
+                version_set?: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HarnessContext"];
                 };
             };
             /** @description Validation Error */

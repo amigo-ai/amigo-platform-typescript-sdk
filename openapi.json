@@ -944,8 +944,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -1014,8 +1013,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -1065,8 +1063,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -1128,6 +1125,43 @@
           "agent_count"
         ],
         "title": "AgentDefinitionVersionMeta",
+        "type": "object"
+      },
+      "AgentIdentity": {
+        "description": "Who the agent IS \u2014 platform-authored only; ``None`` for native runs\n(a customer's own definition carries its own identity). Named\n``AgentIdentity`` (not ``Identity``) to avoid colliding with the existing\n``config.models.Identity`` OpenAPI schema (a same-name collision would\nforce-rename that shipped schema \u2014 a breaking spec change).",
+        "properties": {
+          "developed_by": {
+            "default": "",
+            "title": "Developed By",
+            "type": "string"
+          },
+          "entry_actor_name": {
+            "default": "",
+            "title": "Entry Actor Name",
+            "type": "string"
+          },
+          "initial_state": {
+            "default": "",
+            "title": "Initial State",
+            "type": "string"
+          },
+          "instructions": {
+            "default": "",
+            "title": "Instructions",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "role": {
+            "default": "",
+            "title": "Role",
+            "type": "string"
+          }
+        },
+        "title": "AgentIdentity",
         "type": "object"
       },
       "AgentResponse": {
@@ -20237,6 +20271,37 @@
         "title": "Guardrail",
         "type": "object"
       },
+      "Guardrails": {
+        "properties": {
+          "global_action_guidelines": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Global Action Guidelines",
+            "type": "array"
+          },
+          "global_boundary_constraints": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Global Boundary Constraints",
+            "type": "array"
+          },
+          "guardrails": {
+            "default": [],
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Guardrails",
+            "type": "array"
+          }
+        },
+        "title": "Guardrails",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -20319,6 +20384,60 @@
           "detection"
         ],
         "title": "HardEscalationRule",
+        "type": "object"
+      },
+      "HarnessContext": {
+        "description": "The neutral, retrievable session-bootstrap context for ANY framework.",
+        "properties": {
+          "config_fingerprint": {
+            "default": "",
+            "title": "Config Fingerprint",
+            "type": "string"
+          },
+          "context_version": {
+            "default": 1,
+            "title": "Context Version",
+            "type": "integer"
+          },
+          "guardrails": {
+            "$ref": "#/components/schemas/Guardrails"
+          },
+          "identity": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AgentIdentity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "runtime": {
+            "$ref": "#/components/schemas/Runtime"
+          },
+          "source": {
+            "default": "",
+            "title": "Source",
+            "type": "string"
+          },
+          "tools": {
+            "$ref": "#/components/schemas/Tools"
+          },
+          "world_scope": {
+            "$ref": "#/components/schemas/WorldScope"
+          },
+          "write_floor": {
+            "$ref": "#/components/schemas/WriteFloor"
+          }
+        },
+        "required": [
+          "world_scope",
+          "tools",
+          "guardrails",
+          "write_floor",
+          "runtime"
+        ],
+        "title": "HarnessContext",
         "type": "object"
       },
       "HealFieldRequest": {
@@ -30482,8 +30601,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -32123,6 +32241,32 @@
           }
         },
         "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
+      "Runtime": {
+        "properties": {
+          "caller_context": {
+            "default": "",
+            "title": "Caller Context",
+            "type": "string"
+          },
+          "channel_kind": {
+            "default": "",
+            "title": "Channel Kind",
+            "type": "string"
+          },
+          "engage_model": {
+            "default": "",
+            "title": "Engage Model",
+            "type": "string"
+          },
+          "language": {
+            "default": "",
+            "title": "Language",
+            "type": "string"
+          }
+        },
+        "title": "Runtime",
         "type": "object"
       },
       "SafetyState": {
@@ -41018,6 +41162,30 @@
         "title": "ToolCallStartedEvent",
         "type": "object"
       },
+      "ToolDescriptor": {
+        "properties": {
+          "description": {
+            "default": "",
+            "title": "Description",
+            "type": "string"
+          },
+          "input_schema": {
+            "additionalProperties": true,
+            "default": {},
+            "title": "Input Schema",
+            "type": "object"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ToolDescriptor",
+        "type": "object"
+      },
       "ToolExecuteRequest": {
         "properties": {
           "dry_run": {
@@ -41191,6 +41359,37 @@
           }
         },
         "title": "ToolSummary",
+        "type": "object"
+      },
+      "Tools": {
+        "description": "Discovery hint \u2014 the neutral descriptors. NOT the enforcement (the MCP\nedge is; a remote agent discovers live schemas from the server too).",
+        "properties": {
+          "descriptors": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ToolDescriptor"
+            },
+            "title": "Descriptors",
+            "type": "array"
+          },
+          "read_tool_names": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Read Tool Names",
+            "type": "array"
+          },
+          "write_tool_names": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Write Tool Names",
+            "type": "array"
+          }
+        },
+        "title": "Tools",
         "type": "object"
       },
       "TraceAnalysisListItem": {
@@ -45506,8 +45705,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -47401,6 +47599,35 @@
         "title": "WorldDashboardResponse",
         "type": "object"
       },
+      "WorldScope": {
+        "description": "The world slice \u2014 ids only (the leaf stays I/O-free). This is the\nread/subject scope, NOT the write bound (see ``write_floor``).",
+        "properties": {
+          "allow_create": {
+            "default": false,
+            "title": "Allow Create",
+            "type": "boolean"
+          },
+          "scoped_entity_ids": {
+            "default": [],
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Scoped Entity Ids",
+            "type": "array"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "workspace_id"
+        ],
+        "title": "WorldScope",
+        "type": "object"
+      },
       "WrapUpRequest": {
         "description": "Request to record operator intervention wrap-up.",
         "properties": {
@@ -47444,6 +47671,48 @@
           "success"
         ],
         "title": "WrapUpResponse",
+        "type": "object"
+      },
+      "WriteFloor": {
+        "description": "The REAL server-enforced write bound (audit G8) \u2014 advisory to render;\nthe MCP edge enforces it regardless of what a client does.",
+        "properties": {
+          "allow_create": {
+            "default": false,
+            "title": "Allow Create",
+            "type": "boolean"
+          },
+          "clinical_write_principal": {
+            "default": "provider-only",
+            "title": "Clinical Write Principal",
+            "type": "string"
+          },
+          "clinical_write_scope": {
+            "default": "any-entity-in-workspace",
+            "title": "Clinical Write Scope",
+            "type": "string"
+          },
+          "enforced_at": {
+            "default": "mcp-world-tools-edge",
+            "title": "Enforced At",
+            "type": "string"
+          },
+          "enrichment_write_scope": {
+            "default": "caller-anchor-only",
+            "title": "Enrichment Write Scope",
+            "type": "string"
+          },
+          "requires_entity_anchor": {
+            "default": true,
+            "title": "Requires Entity Anchor",
+            "type": "boolean"
+          },
+          "unanchored_or_api_key_writes": {
+            "default": "none",
+            "title": "Unanchored Or Api Key Writes",
+            "type": "string"
+          }
+        },
+        "title": "WriteFloor",
         "type": "object"
       },
       "_Access": {
@@ -51941,8 +52210,7 @@
                 {
                   "enum": [
                     "claude-agent-sdk",
-                    "openai-agents",
-                    "crewai"
+                    "openai-agents"
                   ],
                   "type": "string"
                 },
@@ -52325,6 +52593,71 @@
           }
         },
         "summary": "Dispatch a framework agent run",
+        "tags": [
+          "Agent Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/agent-runs/harness-context": {
+      "get": {
+        "description": "The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and the REAL server-enforced write-floor \u2014 the byte-identical projection the hosted runner renders from, so a customer's own framework can bootstrap a session against the same world model. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).",
+        "operationId": "get_harness_context_v1__workspace_id__agent_runs_harness_context_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "version_set",
+            "required": false,
+            "schema": {
+              "default": "release",
+              "maxLength": 255,
+              "title": "Version Set",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarnessContext"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fetch the neutral session-bootstrap context for a service",
         "tags": [
           "Agent Runs"
         ]
