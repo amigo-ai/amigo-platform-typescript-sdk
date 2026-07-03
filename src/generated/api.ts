@@ -8237,7 +8237,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Name */
             name: string;
             /**
@@ -8268,7 +8268,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Name */
             name: string;
             /**
@@ -8296,7 +8296,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /** Validator Rev */
@@ -20394,7 +20394,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /** Version */
@@ -26651,7 +26651,7 @@ export interface components {
              * Framework
              * @enum {string}
              */
-            framework: "claude-agent-sdk" | "openai-agents" | "crewai";
+            framework: "claude-agent-sdk" | "openai-agents";
             /** Has Write Tools */
             has_write_tools: boolean;
             /**
@@ -30016,7 +30016,7 @@ export interface operations {
     list_agent_definitions_v1__workspace_id__agent_definitions_get: {
         parameters: {
             query?: {
-                framework?: ("claude-agent-sdk" | "openai-agents" | "crewai") | null;
+                framework?: ("claude-agent-sdk" | "openai-agents") | null;
                 include_archived?: boolean;
                 limit?: number;
                 continuation_token?: unknown;

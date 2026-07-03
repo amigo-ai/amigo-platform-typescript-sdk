@@ -944,8 +944,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -1014,8 +1013,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -1065,8 +1063,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -30482,8 +30479,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -45506,8 +45502,7 @@
           "framework": {
             "enum": [
               "claude-agent-sdk",
-              "openai-agents",
-              "crewai"
+              "openai-agents"
             ],
             "title": "Framework",
             "type": "string"
@@ -51941,8 +51936,7 @@
                 {
                   "enum": [
                     "claude-agent-sdk",
-                    "openai-agents",
-                    "crewai"
+                    "openai-agents"
                   ],
                   "type": "string"
                 },
