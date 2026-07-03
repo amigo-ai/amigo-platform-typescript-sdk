@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.87.0] - 2026-07-03
+
+### Maintenance
+
+- sync API types from platform (6dda4e01) (#385)
+
 ## [0.86.0] - 2026-07-02
 
 ### Maintenance
