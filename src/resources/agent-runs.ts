@@ -46,6 +46,7 @@ export class AgentRunsResource extends WorkspaceScopedResource {
       await this.client.GET('/v1/{workspace_id}/agent-runs/harness-context', {
         params: {
           path: { workspace_id: this.workspaceId },
+          // camelCase args → snake_case wire query (service_id / version_set).
           query: { service_id: params.serviceId, version_set: params.versionSet },
         },
       }),

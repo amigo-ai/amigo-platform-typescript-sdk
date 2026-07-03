@@ -85,4 +85,29 @@ describe('AgentRunsResource', () => {
     expect(res.write_floor.clinical_write_principal).toBe('provider-only')
     expect(res.tools.read_tool_names).toContain('world_read')
   })
+
+  it('harnessContext() serializes camelCase params to the snake_case query', async () => {
+    let capturedUrl = ''
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request): Promise<Response> => {
+        capturedUrl = input instanceof Request ? input.url : input.toString()
+        return Response.json({
+          source: 'api',
+          context_version: 1,
+          identity: null,
+          world_scope: {},
+          tools: { read_tool_names: [], write_tool_names: [] },
+          guardrails: {},
+          write_floor: { clinical_write_principal: 'provider-only' },
+          runtime: {},
+        })
+      },
+    })
+    await capturing.agentRuns.harnessContext({ serviceId: 'svc-1', versionSet: 'edge' })
+    const query = new URL(capturedUrl).searchParams
+    expect(query.get('service_id')).toBe('svc-1')
+    expect(query.get('version_set')).toBe('edge')
+  })
 })

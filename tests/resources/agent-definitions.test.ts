@@ -128,4 +128,44 @@ describe('AgentDefinitionsResource', () => {
   it('archive() deletes a definition', async () => {
     await expect(client.agentDefinitions.archive(DEF_ID)).resolves.toBeUndefined()
   })
+
+  it('register() serializes the definition body over the wire', async () => {
+    let capturedBody: Record<string, unknown> | undefined
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+        // The client dispatches a Request object, so the body lives on it (not
+        // on `init`). Fall back to `init.body` for the string-input case.
+        let raw: string | undefined
+        if (input instanceof Request) {
+          raw = await input.clone().text()
+        } else if (typeof init?.body === 'string') {
+          raw = init.body
+        }
+        capturedBody = raw ? (JSON.parse(raw) as Record<string, unknown>) : undefined
+        return Response.json({
+          definition_id: DEF_ID,
+          framework: 'claude-agent-sdk',
+          created: true,
+          version: 1,
+          has_write_tools: false,
+          agent_count: 1,
+        })
+      },
+    })
+    await capturing.agentDefinitions.register({
+      name: 'triage',
+      body: {
+        framework: 'claude-agent-sdk',
+        system_prompt: 'You are a scheduler.',
+        model: 'claude-opus-4-7',
+        allowed_world_tools: ['world_read'],
+      },
+    })
+    expect(capturedBody?.name).toBe('triage')
+    const body = capturedBody?.body as Record<string, unknown>
+    expect(body?.model).toBe('claude-opus-4-7')
+    expect(body?.allowed_world_tools).toContain('world_read')
+  })
 })

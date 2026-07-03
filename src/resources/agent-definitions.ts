@@ -3,7 +3,11 @@ import type { ListParams } from '../core/utils.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
 export interface ListAgentDefinitionsParams extends ListParams {
-  /** Filter to a single native framework. */
+  /**
+   * Filter to a single native framework. Reuses the summary schema's framework
+   * enum — identical to the GET query-param enum's non-null members
+   * (claude-agent-sdk | openai-agents), so the two cannot drift.
+   */
   framework?: components['schemas']['AgentDefinitionSummary']['framework']
   /** Include archived definitions (default: active only). */
   include_archived?: boolean
