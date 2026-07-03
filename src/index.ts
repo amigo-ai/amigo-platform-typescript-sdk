@@ -39,6 +39,8 @@ import { WorkspacesResource } from './resources/workspaces.js'
 import { ApiKeysResource } from './resources/api-keys.js'
 import { TokensResource } from './resources/tokens.js'
 import { AgentsResource } from './resources/agents.js'
+import { AgentRunsResource } from './resources/agent-runs.js'
+import { AgentDefinitionsResource } from './resources/agent-definitions.js'
 import { SkillsResource } from './resources/skills.js'
 import { ActionsResource } from './resources/actions.js'
 import { OperatorsResource } from './resources/operators.js'
@@ -193,6 +195,8 @@ export class AmigoClient {
   readonly apiKeys!: ApiKeysResource
   readonly tokens!: TokensResource
   readonly agents!: AgentsResource
+  readonly agentRuns!: AgentRunsResource
+  readonly agentDefinitions!: AgentDefinitionsResource
   /** @deprecated Use `actions` instead */
   readonly skills!: SkillsResource
   readonly actions!: ActionsResource
@@ -465,6 +469,8 @@ export class AmigoClient {
     mutable.apiKeys = new ApiKeysResource(client, workspaceId)
     mutable.tokens = new TokensResource(client, workspaceId)
     mutable.agents = new AgentsResource(client, workspaceId)
+    mutable.agentRuns = new AgentRunsResource(client, workspaceId)
+    mutable.agentDefinitions = new AgentDefinitionsResource(client, workspaceId)
     mutable.skills = new SkillsResource(client, workspaceId)
     mutable.actions = new ActionsResource(client, workspaceId)
     mutable.operators = new OperatorsResource(client, workspaceId)
