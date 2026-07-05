@@ -1276,6 +1276,123 @@
         "title": "AgentRunDetail",
         "type": "object"
       },
+      "AgentRunListResponse": {
+        "properties": {
+          "continuation_token": {
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AgentRunSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "AgentRunListResponse",
+        "type": "object"
+      },
+      "AgentRunSummary": {
+        "description": "One row of the framework-runs LIST, projected from ``world.agent_runs``.\n\n``run_id`` is the framework run's external call_sid (a string identifier\nstamped by agent-runner), NOT a Lakebase row UUID \u2014 kept ``str``. ``entity_id``\nIS a world-model row reference, so it stays ``uuid.UUID`` per repo type rigor.",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "input_tokens": {
+            "default": 0,
+            "title": "Input Tokens",
+            "type": "integer"
+          },
+          "origin_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Source"
+          },
+          "output_tokens": {
+            "default": 0,
+            "title": "Output Tokens",
+            "type": "integer"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "started_at": {
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "step_count": {
+            "default": 0,
+            "title": "Step Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "framework",
+          "started_at",
+          "created_at"
+        ],
+        "title": "AgentRunSummary",
+        "type": "object"
+      },
       "AgentTranscriptDeltaEvent": {
         "properties": {
           "delta": {
@@ -31270,6 +31387,12 @@
             "title": "Kind",
             "type": "string"
           },
+          "managed": {
+            "default": false,
+            "description": "Whether the integration is system-managed and protected from workspace CRUD.",
+            "title": "Managed",
+            "type": "boolean"
+          },
           "name": {
             "description": "Slug-like identifier, immutable post-create.",
             "title": "Name",
@@ -32063,6 +32186,158 @@
         "title": "RotateApiKeyRequest",
         "type": "object"
       },
+      "Run": {
+        "description": "The universal agent-run object.\n\n``run_id`` is a dedicated UUID (not an overloaded ``call_sid`` / ``conversation_id``);\nthe originating subsystem's ids are kept as ``source_*`` provenance fields so a\nrun can always be traced back to its channel/framework origin. Conversation runs\ncarry a ``channel`` and no ``framework``; framework runs carry a ``framework`` and\nno ``channel`` \u2014 enforced below.",
+        "properties": {
+          "channel": {
+            "anyOf": [
+              {
+                "enum": [
+                  "voice",
+                  "text",
+                  "sms",
+                  "email",
+                  "web"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Channel"
+          },
+          "ended_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended At"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "framework": {
+            "anyOf": [
+              {
+                "enum": [
+                  "claude-agent-sdk",
+                  "openai-agents"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Framework"
+          },
+          "kind": {
+            "enum": [
+              "conversation",
+              "framework"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "service_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service Id"
+          },
+          "source_call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Call Sid"
+          },
+          "source_conversation_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Conversation Id"
+          },
+          "source_framework_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Framework Run Id"
+          },
+          "started_at": {
+            "format": "date-time",
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "paused",
+              "completed",
+              "failed",
+              "timed_out"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "workspace_id",
+          "kind",
+          "status",
+          "started_at"
+        ],
+        "title": "Run",
+        "type": "object"
+      },
       "RunSimulationBenchmarkRequest": {
         "properties": {
           "branch_name": {
@@ -32241,6 +32516,30 @@
           }
         },
         "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
+      "RunsResponse": {
+        "properties": {
+          "continuation_token": {
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/Run"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "RunsResponse",
         "type": "object"
       },
       "Runtime": {
@@ -48566,6 +48865,12 @@
             "title": "Enabled",
             "type": "boolean"
           },
+          "managed": {
+            "default": false,
+            "description": "Whether this is a system-managed integration protected from workspace CRUD.",
+            "title": "Managed",
+            "type": "boolean"
+          },
           "name": {
             "description": "Slug-like identifier, lowercase alphanumeric + hyphens/underscores. Immutable post-create.",
             "maxLength": 128,
@@ -48907,6 +49212,11 @@
             "title": "Enabled",
             "type": "boolean"
           },
+          "managed": {
+            "description": "Mark/unmark the integration as system-managed. Requires ``platform:admin`` scope.",
+            "title": "Managed",
+            "type": "boolean"
+          },
           "secret_value": {
             "description": "Rotate the per-integration SSM secret. Absent \u21d2 existing secret\nuntouched; value \u21d2 overwrite SSM at the canonical path. Explicit\n``null`` is rejected at validation \u2014 there is no \"clear the secret\"\noperation (clearing ``auth`` makes the secret unreachable; that's the\nintended clear path).",
             "maxLength": 8192,
@@ -49093,6 +49403,13 @@
       },
       "src__routes__role_grants___SortField": {
         "const": "created_at",
+        "type": "string"
+      },
+      "src__routes__runs___SortField": {
+        "enum": [
+          "started_at",
+          "created_at"
+        ],
         "type": "string"
       },
       "src__routes__workspace_data_queries__create_workspace_data_query__Request": {
@@ -52545,6 +52862,110 @@
       }
     },
     "/v1/{workspace_id}/agent-runs": {
+      "get": {
+        "description": "Paginated list of framework agent runs for the workspace, newest first, read from the durable ``world.agent_runs`` read model. Filter by ``framework`` / ``status``. ``continuation_token`` is an opaque page cursor.",
+        "operationId": "list_agent_runs_v1__workspace_id__agent_runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "exclusiveMinimum": 0,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "title": "Continuation Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "framework",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "claude-agent-sdk",
+                    "openai-agents"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Framework"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "timed_out"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List framework agent runs",
+        "tags": [
+          "Agent Runs"
+        ]
+      },
       "post": {
         "description": "Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking \u2014 poll GET /agent-runs/{run_id} for the result.",
         "operationId": "create_agent_run_v1__workspace_id__agent_runs_post",
@@ -65523,7 +65944,7 @@
             "description": "Integration not found."
           },
           "409": {
-            "description": "Integration referenced by one or more skills."
+            "description": "Integration is managed or referenced by one or more skills."
           },
           "422": {
             "content": {
@@ -65656,6 +66077,9 @@
           },
           "404": {
             "description": "Integration not found."
+          },
+          "409": {
+            "description": "Managed integration mutation blocked."
           },
           "422": {
             "description": "Invalid request body, NOT NULL field set to null, or no fields to update."
@@ -65832,7 +66256,7 @@
             "description": "Integration not found."
           },
           "409": {
-            "description": "Endpoint name already exists on this integration."
+            "description": "Integration is managed or endpoint name already exists."
           },
           "422": {
             "description": "Invalid request body."
@@ -65892,6 +66316,9 @@
           },
           "404": {
             "description": "Endpoint not found."
+          },
+          "409": {
+            "description": "Managed integration endpoint mutation blocked."
           },
           "422": {
             "content": {
@@ -66044,6 +66471,9 @@
           },
           "404": {
             "description": "Endpoint not found."
+          },
+          "409": {
+            "description": "Managed integration endpoint mutation blocked."
           },
           "422": {
             "description": "Invalid request body, NOT NULL field set to null, or no fields to update."
@@ -72601,6 +73031,150 @@
         "summary": "Get Role Grant",
         "tags": [
           "Role Grants"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/runs": {
+      "get": {
+        "description": "Paginated, newest-first list of runs for the workspace behind the unified ``Run`` contract. Federates framework runs (Delta ``world.runs`` MV) and conversation runs (Lakebase ``world.conversations``) at read time. Filter by ``kind`` (conversation / framework), ``channel`` (voice/text/sms/email/web \u2014 conversation runs only), and ``status`` (``live`` expands to running + paused). ``continuation_token`` is an opaque page cursor.",
+        "operationId": "list_runs_v1__workspace_id__runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort_by",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "string"
+              },
+              "title": "Sort By",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "exclusiveMinimum": 0,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "title": "Continuation Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "live",
+                    "running",
+                    "paused",
+                    "completed",
+                    "failed",
+                    "timed_out"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "conversation",
+                    "framework"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "voice",
+                    "text",
+                    "sms",
+                    "email",
+                    "web"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List runs (framework + conversation)",
+        "tags": [
+          "Runs"
         ]
       }
     },
