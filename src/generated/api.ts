@@ -794,7 +794,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * List framework agent runs
+         * @description Paginated list of framework agent runs for the workspace, newest first, read from the durable ``world.agent_runs`` read model. Filter by ``framework`` / ``status``. ``continuation_token`` is an opaque page cursor.
+         */
+        get: operations["list_agent_runs_v1__workspace_id__agent_runs_get"];
         put?: never;
         /**
          * Dispatch a framework agent run
@@ -8452,6 +8456,59 @@ export interface components {
                 [key: string]: unknown;
             }[];
             usage?: components["schemas"]["Usage"];
+        };
+        /** AgentRunListResponse */
+        AgentRunListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentRunSummary"][];
+        };
+        /**
+         * AgentRunSummary
+         * @description One row of the framework-runs LIST, projected from ``world.agent_runs``.
+         *
+         *     ``run_id`` is the framework run's external call_sid (a string identifier
+         *     stamped by agent-runner), NOT a Lakebase row UUID — kept ``str``. ``entity_id``
+         *     IS a world-model row reference, so it stays ``uuid.UUID`` per repo type rigor.
+         */
+        AgentRunSummary: {
+            /** Created At */
+            created_at: string;
+            /** Duration Ms */
+            duration_ms?: number | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /**
+             * Framework
+             * @enum {string}
+             */
+            framework: "claude-agent-sdk" | "openai-agents";
+            /**
+             * Input Tokens
+             * @default 0
+             */
+            input_tokens?: number;
+            /** Origin Source */
+            origin_source?: string | null;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens?: number;
+            /** Run Id */
+            run_id: string;
+            /** Started At */
+            started_at: string;
+            /** Status */
+            status?: string | null;
+            /**
+             * Step Count
+             * @default 0
+             */
+            step_count?: number;
         };
         /** AgentTranscriptDeltaEvent */
         AgentTranscriptDeltaEvent: {
@@ -30434,6 +30491,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AgentDefinitionVersionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_agent_runs_v1__workspace_id__agent_runs_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: unknown;
+                framework?: ("claude-agent-sdk" | "openai-agents") | null;
+                status?: ("running" | "succeeded" | "failed" | "timed_out") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentRunListResponse"];
                 };
             };
             /** @description Validation Error */

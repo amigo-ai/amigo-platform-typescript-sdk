@@ -1276,6 +1276,123 @@
         "title": "AgentRunDetail",
         "type": "object"
       },
+      "AgentRunListResponse": {
+        "properties": {
+          "continuation_token": {
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AgentRunSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "AgentRunListResponse",
+        "type": "object"
+      },
+      "AgentRunSummary": {
+        "description": "One row of the framework-runs LIST, projected from ``world.agent_runs``.\n\n``run_id`` is the framework run's external call_sid (a string identifier\nstamped by agent-runner), NOT a Lakebase row UUID \u2014 kept ``str``. ``entity_id``\nIS a world-model row reference, so it stays ``uuid.UUID`` per repo type rigor.",
+        "properties": {
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "framework": {
+            "enum": [
+              "claude-agent-sdk",
+              "openai-agents"
+            ],
+            "title": "Framework",
+            "type": "string"
+          },
+          "input_tokens": {
+            "default": 0,
+            "title": "Input Tokens",
+            "type": "integer"
+          },
+          "origin_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Source"
+          },
+          "output_tokens": {
+            "default": 0,
+            "title": "Output Tokens",
+            "type": "integer"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "started_at": {
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "step_count": {
+            "default": 0,
+            "title": "Step Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "run_id",
+          "framework",
+          "started_at",
+          "created_at"
+        ],
+        "title": "AgentRunSummary",
+        "type": "object"
+      },
       "AgentTranscriptDeltaEvent": {
         "properties": {
           "delta": {
@@ -52545,6 +52662,110 @@
       }
     },
     "/v1/{workspace_id}/agent-runs": {
+      "get": {
+        "description": "Paginated list of framework agent runs for the workspace, newest first, read from the durable ``world.agent_runs`` read model. Filter by ``framework`` / ``status``. ``continuation_token`` is an opaque page cursor.",
+        "operationId": "list_agent_runs_v1__workspace_id__agent_runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "exclusiveMinimum": 0,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "title": "Continuation Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "framework",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "claude-agent-sdk",
+                    "openai-agents"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Framework"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "running",
+                    "succeeded",
+                    "failed",
+                    "timed_out"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentRunListResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List framework agent runs",
+        "tags": [
+          "Agent Runs"
+        ]
+      },
       "post": {
         "description": "Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking \u2014 poll GET /agent-runs/{run_id} for the result.",
         "operationId": "create_agent_run_v1__workspace_id__agent_runs_post",
