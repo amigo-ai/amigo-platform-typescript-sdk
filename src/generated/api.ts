@@ -5407,6 +5407,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run counts (framework + conversation)
+         * @description Aggregate counts for the workspace's runs behind the unified ``Run`` contract: ``total``, ``live`` (running + paused), each canonical status, a full ``by_status`` map, and ``by_kind`` (conversation vs framework). Federates the Delta ``world.runs`` MV and Lakebase ``world.conversations`` with a cheap GROUP BY. Optional ``kind`` / ``channel`` filters mirror the list; a ``channel`` filter restricts to conversation runs.
+         */
+        get: operations["runs_summary_v1__workspace_id__runs_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/scheduling-rule-sets": {
         parameters: {
             query?: never;
@@ -6337,6 +6357,29 @@ export interface paths {
          * @description Create a simulation coverage run with an optional Lakebase branch.
          */
         post: operations["create-simulation-run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Runs Summary
+         * @description Aggregate run counts (total + by status) for the Runs summary strip.
+         *
+         *     Registered *before* ``/runs/{run_id}`` so the static ``summary`` path
+         *     segment is matched here rather than parsed as a run UUID (which would 422).
+         */
+        get: operations["get-simulation-runs-summary"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -21411,6 +21454,39 @@ export interface components {
             /** Items */
             items: components["schemas"]["Run"][];
         };
+        /**
+         * RunsSummaryResponse
+         * @description Aggregate run counts for the Runs page summary strip.
+         *
+         *     Honest workspace totals the paginated list cannot derive client-side (it only
+         *     holds the loaded page). ``by_status`` carries the full canonical breakdown
+         *     (incl. any status beyond the named convenience fields); ``by_kind`` splits
+         *     framework vs conversation. ``live`` = running + paused.
+         */
+        RunsSummaryResponse: {
+            /** By Kind */
+            by_kind: {
+                [key: string]: number;
+            };
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** Completed */
+            completed: number;
+            /** Failed */
+            failed: number;
+            /** Live */
+            live: number;
+            /** Paused */
+            paused: number;
+            /** Running */
+            running: number;
+            /** Timed Out */
+            timed_out: number;
+            /** Total */
+            total: number;
+        };
         /** Runtime */
         Runtime: {
             /**
@@ -22905,6 +22981,36 @@ export interface components {
              * @default 0
              */
             total_turns?: number;
+        };
+        /**
+         * SimulationRunSummaryResponse
+         * @description Aggregate counts across a workspace's simulation runs, for the Runs page
+         *     summary strip.
+         *
+         *     A cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` — honest
+         *     totals the 50-row list view cannot derive client-side. ``by_status`` carries
+         *     the full breakdown (incl. any status beyond the three named convenience
+         *     fields) so a new lifecycle state surfaces without a schema change.
+         */
+        SimulationRunSummaryResponse: {
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** Completed */
+            completed: number;
+            /** Failed */
+            failed: number;
+            /** Last Created At */
+            last_created_at?: string | null;
+            /** Running */
+            running: number;
+            /** Total */
+            total: number;
+            /** Total Sessions */
+            total_sessions: number;
+            /** Total Turns */
+            total_turns: number;
         };
         /** SimulationSessionResponse */
         SimulationSessionResponse: {
@@ -26292,10 +26398,20 @@ export interface components {
              * @default
              */
             message?: string;
+            /**
+             * Suppress Filler
+             * @description Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).
+             */
+            suppress_filler?: boolean | null;
             /** Viewport Height */
             viewport_height?: number | null;
             /** Viewport Width */
             viewport_width?: number | null;
+            /**
+             * Wait For Final
+             * @description Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` — resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).
+             */
+            wait_for_final?: boolean | null;
         };
         /** TurnResponse */
         TurnResponse: {
@@ -41725,6 +41841,40 @@ export interface operations {
             };
         };
     };
+    runs_summary_v1__workspace_id__runs_summary_get: {
+        parameters: {
+            query?: {
+                kind?: ("conversation" | "framework") | null;
+                channel?: ("voice" | "text" | "sms" | "email" | "web") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunsSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-scheduling-rule-sets": {
         parameters: {
             query?: {
@@ -44034,6 +44184,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-runs-summary": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationRunSummaryResponse"];
                 };
             };
             /** @description Validation Error */

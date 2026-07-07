@@ -200,6 +200,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "get-simulation-coverage-paths",
   "get-simulation-performance",
   "get-simulation-run",
+  "get-simulation-runs-summary",
   "get-simulation-session-turns",
   "get-simulation-suite",
   "get-simulation-suite-run-results",
