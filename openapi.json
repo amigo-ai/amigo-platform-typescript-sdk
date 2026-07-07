@@ -43626,6 +43626,18 @@
             "title": "Message",
             "type": "string"
           },
+          "suppress_filler": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).",
+            "title": "Suppress Filler"
+          },
           "viewport_height": {
             "anyOf": [
               {
@@ -43651,6 +43663,18 @@
               }
             ],
             "title": "Viewport Width"
+          },
+          "wait_for_final": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` \u2014 resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).",
+            "title": "Wait For Final"
           }
         },
         "title": "TurnRequest",
