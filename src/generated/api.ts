@@ -6343,6 +6343,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Runs Summary
+         * @description Aggregate run counts (total + by status) for the Runs summary strip.
+         *
+         *     Registered *before* ``/runs/{run_id}`` so the static ``summary`` path
+         *     segment is matched here rather than parsed as a run UUID (which would 422).
+         */
+        get: operations["get-simulation-runs-summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/runs/{run_id}": {
         parameters: {
             query?: never;
@@ -22906,6 +22929,36 @@ export interface components {
              */
             total_turns?: number;
         };
+        /**
+         * SimulationRunSummaryResponse
+         * @description Aggregate counts across a workspace's simulation runs, for the Runs page
+         *     summary strip.
+         *
+         *     A cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` — honest
+         *     totals the 50-row list view cannot derive client-side. ``by_status`` carries
+         *     the full breakdown (incl. any status beyond the three named convenience
+         *     fields) so a new lifecycle state surfaces without a schema change.
+         */
+        SimulationRunSummaryResponse: {
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** Completed */
+            completed: number;
+            /** Failed */
+            failed: number;
+            /** Last Created At */
+            last_created_at?: string | null;
+            /** Running */
+            running: number;
+            /** Total */
+            total: number;
+            /** Total Sessions */
+            total_sessions: number;
+            /** Total Turns */
+            total_turns: number;
+        };
         /** SimulationSessionResponse */
         SimulationSessionResponse: {
             /** Greeting */
@@ -26292,10 +26345,20 @@ export interface components {
              * @default
              */
             message?: string;
+            /**
+             * Suppress Filler
+             * @description Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).
+             */
+            suppress_filler?: boolean | null;
             /** Viewport Height */
             viewport_height?: number | null;
             /** Viewport Width */
             viewport_width?: number | null;
+            /**
+             * Wait For Final
+             * @description Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` — resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).
+             */
+            wait_for_final?: boolean | null;
         };
         /** TurnResponse */
         TurnResponse: {
@@ -44034,6 +44097,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-runs-summary": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationRunSummaryResponse"];
                 };
             };
             /** @description Validation Error */

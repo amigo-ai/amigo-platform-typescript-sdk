@@ -36169,6 +36169,64 @@
         "title": "SimulationRunResponse",
         "type": "object"
       },
+      "SimulationRunSummaryResponse": {
+        "description": "Aggregate counts across a workspace's simulation runs, for the Runs page\nsummary strip.\n\nA cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` \u2014 honest\ntotals the 50-row list view cannot derive client-side. ``by_status`` carries\nthe full breakdown (incl. any status beyond the three named convenience\nfields) so a new lifecycle state surfaces without a schema change.",
+        "properties": {
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Status",
+            "type": "object"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "last_created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Created At"
+          },
+          "running": {
+            "title": "Running",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_sessions": {
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "running",
+          "completed",
+          "failed",
+          "by_status",
+          "total_sessions",
+          "total_turns"
+        ],
+        "title": "SimulationRunSummaryResponse",
+        "type": "object"
+      },
       "SimulationSessionResponse": {
         "properties": {
           "greeting": {
@@ -43626,6 +43684,18 @@
             "title": "Message",
             "type": "string"
           },
+          "suppress_filler": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).",
+            "title": "Suppress Filler"
+          },
           "viewport_height": {
             "anyOf": [
               {
@@ -43651,6 +43721,18 @@
               }
             ],
             "title": "Viewport Width"
+          },
+          "wait_for_final": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` \u2014 resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).",
+            "title": "Wait For Final"
           }
         },
         "title": "TurnRequest",
@@ -76573,6 +76655,67 @@
           }
         },
         "summary": "Create Simulation Run",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/runs/summary": {
+      "get": {
+        "description": "Aggregate run counts (total + by status) for the Runs summary strip.\n\nRegistered *before* ``/runs/{run_id}`` so the static ``summary`` path\nsegment is matched here rather than parsed as a run UUID (which would 422).",
+        "operationId": "get-simulation-runs-summary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationRunSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Runs Summary",
         "tags": [
           "Simulations"
         ]
