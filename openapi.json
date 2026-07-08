@@ -13890,6 +13890,15 @@
               }
             ]
           },
+          "tags": {
+            "description": "Routing tags. 'memory_extract' opts this key into memory extraction \u2014 the conversation extractor will infer it from transcripts as a workspace-custom memory dimension (person keys with a description only).",
+            "items": {
+              "const": "memory_extract",
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
+          },
           "value_type": {
             "enum": [
               "string",
@@ -13984,6 +13993,22 @@
                 "type": "null"
               }
             ]
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "const": "memory_extract",
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Replaces the full tags list when set. Pass [] to remove all tags.",
+            "title": "Tags"
           }
         },
         "title": "EnrichmentKeyPatchBody",
@@ -14055,6 +14080,14 @@
               }
             ],
             "title": "Source Hint"
+          },
+          "tags": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Tags",
+            "type": "array"
           },
           "updated_at": {
             "format": "date-time",
@@ -16947,6 +16980,221 @@
         "maxLength": 256,
         "minLength": 1,
         "type": "string"
+      },
+      "ExternalWriteProposal": {
+        "description": "A human-review proposal for an external (EHR) write-back \u2014 the Review Queue.\n\nStaged by connector-runner when a `review_required` sink would otherwise\nauto-push (world.external_write_proposals); a reviewer approves/rejects, and the\negress drain delivers approved ones. ``proposed_payload`` is the full FHIR write\nbody and MAY contain PHI \u2014 this surface is workspace-scoped (FORCE-RLS) and\npermission-gated (ReviewQueue); never log it. ``connector_type``/``fhir_*``/\n``status``/``idempotency_key`` are opaque strings; the ids are uuid.",
+        "properties": {
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
+          },
+          "connector_type": {
+            "title": "Connector Type",
+            "type": "string"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "data_source_id": {
+            "format": "uuid",
+            "title": "Data Source Id",
+            "type": "string"
+          },
+          "decided_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided At"
+          },
+          "decided_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decided By"
+          },
+          "entity_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Entity Id"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "event_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Event Type"
+          },
+          "fhir_resource_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fhir Resource Id"
+          },
+          "fhir_resource_type": {
+            "title": "Fhir Resource Type",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "origin_event_id": {
+            "format": "uuid",
+            "title": "Origin Event Id",
+            "type": "string"
+          },
+          "origin_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Run Id"
+          },
+          "origin_run_kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Origin Run Kind"
+          },
+          "proposed_payload": {
+            "additionalProperties": true,
+            "title": "Proposed Payload",
+            "type": "object"
+          },
+          "push_attempt_count": {
+            "default": 0,
+            "title": "Push Attempt Count",
+            "type": "integer"
+          },
+          "reject_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reject Reason"
+          },
+          "status": {
+            "enum": [
+              "proposed",
+              "approved",
+              "rejected",
+              "pushing",
+              "pushed",
+              "failed",
+              "superseded"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "vendor_resource_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vendor Resource Id"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "connector_type",
+          "data_source_id",
+          "fhir_resource_type",
+          "origin_event_id",
+          "status"
+        ],
+        "title": "ExternalWriteProposal",
+        "type": "object"
       },
       "FailureClass": {
         "description": "Why a tool result is a failure \u2014 produced by the executor at RUN time.\n\nUnlike ``ResultDelivery`` (a fixed config-time axis), this is a runtime\nclassification the executor knows at the moment of failure. It flavors the\nagent-facing failure wording and the world-event / status-tool observability,\nand it is ALSO an optional routing key: a state x tool binding may set\n``ToolCallSpec.failure_delivery_by_class`` to deliver differently per class\n(e.g. interrupt on timeout, queue on a generic error). With no per-class map\n(the default), failed results route by the ``failure_delivery`` floor,\nunchanged. Add a member only in the same change that wires a producer for it \u2014\nadding one also widens the per-class routing surface, so it must be a\ndeliberate, produced class.",
@@ -26765,6 +27013,49 @@
         "title": "PaginatedResponse[ExternalIntegrationResponse]",
         "type": "object"
       },
+      "PaginatedResponse_ExternalWriteProposal_": {
+        "properties": {
+          "continuation_token": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ExternalWriteProposal"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "PaginatedResponse[ExternalWriteProposal]",
+        "type": "object"
+      },
       "PaginatedResponse_IntakeFileRow_": {
         "properties": {
           "continuation_token": {
@@ -31138,6 +31429,21 @@
         "title": "RegisteredFunctionResponse",
         "type": "object"
       },
+      "RejectProposalRequest": {
+        "properties": {
+          "reason": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "RejectProposalRequest",
+        "type": "object"
+      },
       "RejectRequest": {
         "description": "Reject events \u2014 demotes confidence to 0.0.",
         "properties": {
@@ -32652,6 +32958,66 @@
           "has_more"
         ],
         "title": "RunsResponse",
+        "type": "object"
+      },
+      "RunsSummaryResponse": {
+        "description": "Aggregate run counts for the Runs page summary strip.\n\nHonest workspace totals the paginated list cannot derive client-side (it only\nholds the loaded page). ``by_status`` carries the full canonical breakdown\n(incl. any status beyond the named convenience fields); ``by_kind`` splits\nframework vs conversation. ``live`` = running + paused.",
+        "properties": {
+          "by_kind": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Kind",
+            "type": "object"
+          },
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Status",
+            "type": "object"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "live": {
+            "title": "Live",
+            "type": "integer"
+          },
+          "paused": {
+            "title": "Paused",
+            "type": "integer"
+          },
+          "running": {
+            "title": "Running",
+            "type": "integer"
+          },
+          "timed_out": {
+            "title": "Timed Out",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "live",
+          "running",
+          "paused",
+          "completed",
+          "failed",
+          "timed_out",
+          "by_status",
+          "by_kind"
+        ],
+        "title": "RunsSummaryResponse",
         "type": "object"
       },
       "Runtime": {
@@ -36167,6 +36533,64 @@
           "status"
         ],
         "title": "SimulationRunResponse",
+        "type": "object"
+      },
+      "SimulationRunSummaryResponse": {
+        "description": "Aggregate counts across a workspace's simulation runs, for the Runs page\nsummary strip.\n\nA cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` \u2014 honest\ntotals the 50-row list view cannot derive client-side. ``by_status`` carries\nthe full breakdown (incl. any status beyond the three named convenience\nfields) so a new lifecycle state surfaces without a schema change.",
+        "properties": {
+          "by_status": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "By Status",
+            "type": "object"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "integer"
+          },
+          "failed": {
+            "title": "Failed",
+            "type": "integer"
+          },
+          "last_created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Created At"
+          },
+          "running": {
+            "title": "Running",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "total_sessions": {
+            "title": "Total Sessions",
+            "type": "integer"
+          },
+          "total_turns": {
+            "title": "Total Turns",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "running",
+          "completed",
+          "failed",
+          "by_status",
+          "total_sessions",
+          "total_turns"
+        ],
+        "title": "SimulationRunSummaryResponse",
         "type": "object"
       },
       "SimulationSessionResponse": {
@@ -43626,6 +44050,18 @@
             "title": "Message",
             "type": "string"
           },
+          "suppress_filler": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).",
+            "title": "Suppress Filler"
+          },
           "viewport_height": {
             "anyOf": [
               {
@@ -43651,6 +44087,18 @@
               }
             ],
             "title": "Viewport Width"
+          },
+          "wait_for_final": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` \u2014 resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).",
+            "title": "Wait For Final"
           }
         },
         "title": "TurnRequest",
@@ -61885,6 +62333,265 @@
         ]
       }
     },
+    "/v1/{workspace_id}/external-write-proposals": {
+      "get": {
+        "operationId": "list-external-write-proposals",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "proposed",
+                    "approved",
+                    "rejected",
+                    "pushing",
+                    "pushed",
+                    "failed",
+                    "superseded"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "exclusiveMinimum": 0,
+              "maximum": 100,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "title": "Continuation Token",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginatedResponse_ExternalWriteProposal_"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List External Write Proposals",
+        "tags": [
+          "Review Queue"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}": {
+      "get": {
+        "operationId": "get-external-write-proposal",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalWriteProposal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get External Write Proposal",
+        "tags": [
+          "Review Queue"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}/approve": {
+      "post": {
+        "operationId": "approve-external-write-proposal",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalWriteProposal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Approve External Write Proposal",
+        "tags": [
+          "Review Queue"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}/reject": {
+      "post": {
+        "operationId": "reject-external-write-proposal",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "proposal_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Proposal Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectProposalRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExternalWriteProposal"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reject External Write Proposal",
+        "tags": [
+          "Review Queue"
+        ]
+      }
+    },
     "/v1/{workspace_id}/fhir/import": {
       "post": {
         "description": "Import a FHIR Bundle. Decomposes supported resources into upserted world events and creates patient entities. Unsupported resource types are skipped and reported; omitted resources are not deleted.",
@@ -73334,6 +74041,93 @@
         ]
       }
     },
+    "/v1/{workspace_id}/runs/summary": {
+      "get": {
+        "description": "Aggregate counts for the workspace's runs behind the unified ``Run`` contract: ``total``, ``live`` (running + paused), each canonical status, a full ``by_status`` map, and ``by_kind`` (conversation vs framework). Federates the Delta ``world.runs`` MV and Lakebase ``world.conversations`` with a cheap GROUP BY. Optional ``kind`` / ``channel`` filters mirror the list; a ``channel`` filter restricts to conversation runs.",
+        "operationId": "runs_summary_v1__workspace_id__runs_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "kind",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "conversation",
+                    "framework"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Kind"
+            }
+          },
+          {
+            "in": "query",
+            "name": "channel",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "voice",
+                    "text",
+                    "sms",
+                    "email",
+                    "web"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Channel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunsSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run counts (framework + conversation)",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
     "/v1/{workspace_id}/scheduling-rule-sets": {
       "get": {
         "description": "List all scheduling rule sets for the workspace. Optional filters: `agent_kind` (tms / ketamine / general), `is_active`. Used by the agent-engine rules engine and by operators inspecting config.",
@@ -76573,6 +77367,67 @@
           }
         },
         "summary": "Create Simulation Run",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/simulations/runs/summary": {
+      "get": {
+        "description": "Aggregate run counts (total + by status) for the Runs summary strip.\n\nRegistered *before* ``/runs/{run_id}`` so the static ``summary`` path\nsegment is matched here rather than parsed as a run UUID (which would 422).",
+        "operationId": "get-simulation-runs-summary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "service_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Service Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationRunSummaryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Simulation Runs Summary",
         "tags": [
           "Simulations"
         ]
@@ -81225,7 +82080,7 @@
         ]
       },
       "post": {
-        "description": "Registers a new (entity_type, key) in this workspace's enrichment key registry. Future writes against this key will pass validation. value_type governs what values are accepted; enum types require allowed_values.",
+        "description": "Registers a new (entity_type, key) in this workspace's enrichment key registry. Future writes against this key will pass validation. value_type governs what values are accepted; enum types require allowed_values. Tag a person key with 'memory_extract' (description required) to make it a workspace-custom memory dimension the conversation extractor infers from transcripts.",
         "operationId": "create-enrichment-key",
         "parameters": [
           {
@@ -81339,7 +82194,7 @@
         ]
       },
       "patch": {
-        "description": "Update allowed_values, source_hint, description, min_confidence, or is_pii. key and value_type are immutable.",
+        "description": "Update allowed_values, source_hint, description, min_confidence, is_pii, or tags. key and value_type are immutable.",
         "operationId": "patch-enrichment-key",
         "parameters": [
           {

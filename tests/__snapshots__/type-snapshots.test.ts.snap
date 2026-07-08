@@ -11,6 +11,7 @@ exports[`Generated type snapshots > keeps exported type names stable 1`] = `
 
 exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
 [
+  "approve-external-write-proposal",
   "approve-integration-write",
   "approve-surface",
   "archive-surface",
@@ -164,6 +165,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "get-external-integration",
   "get-external-role",
   "get-external-role-assignment",
+  "get-external-write-proposal",
   "get-form-template",
   "get-function",
   "get-gap-scanner-settings",
@@ -200,6 +202,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "get-simulation-coverage-paths",
   "get-simulation-performance",
   "get-simulation-run",
+  "get-simulation-runs-summary",
   "get-simulation-session-turns",
   "get-simulation-suite",
   "get-simulation-suite-run-results",
@@ -255,6 +258,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "list-external-integrations",
   "list-external-role-assignments",
   "list-external-roles",
+  "list-external-write-proposals",
   "list-form-templates",
   "list-functions",
   "list-intake-link-uploads",
@@ -306,6 +310,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "put-entity-enrichment",
   "query-simulation-turns",
   "redirect-to-surface",
+  "reject-external-write-proposal",
   "reject-integration-write",
   "reject-surface",
   "release-use-case-ownership",
