@@ -2691,6 +2691,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/external-write-proposals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List External Write Proposals */
+        get: operations["list-external-write-proposals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get External Write Proposal */
+        get: operations["get-external-write-proposal"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve External Write Proposal */
+        post: operations["approve-external-write-proposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-write-proposals/{proposal_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject External Write Proposal */
+        post: operations["reject-external-write-proposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/fhir/import": {
         parameters: {
             query?: never;
@@ -5407,6 +5475,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Run counts (framework + conversation)
+         * @description Aggregate counts for the workspace's runs behind the unified ``Run`` contract: ``total``, ``live`` (running + paused), each canonical status, a full ``by_status`` map, and ``by_kind`` (conversation vs framework). Federates the Delta ``world.runs`` MV and Lakebase ``world.conversations`` with a cheap GROUP BY. Optional ``kind`` / ``channel`` filters mirror the list; a ``channel`` filter restricts to conversation runs.
+         */
+        get: operations["runs_summary_v1__workspace_id__runs_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/scheduling-rule-sets": {
         parameters: {
             query?: never;
@@ -6337,6 +6425,29 @@ export interface paths {
          * @description Create a simulation coverage run with an optional Lakebase branch.
          */
         post: operations["create-simulation-run"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/simulations/runs/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Simulation Runs Summary
+         * @description Aggregate run counts (total + by status) for the Runs summary strip.
+         *
+         *     Registered *before* ``/runs/{run_id}`` so the static ``summary`` path
+         *     segment is matched here rather than parsed as a run UUID (which would 422).
+         */
+        get: operations["get-simulation-runs-summary"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7456,7 +7567,7 @@ export interface paths {
         put?: never;
         /**
          * Register an enrichment key
-         * @description Registers a new (entity_type, key) in this workspace's enrichment key registry. Future writes against this key will pass validation. value_type governs what values are accepted; enum types require allowed_values.
+         * @description Registers a new (entity_type, key) in this workspace's enrichment key registry. Future writes against this key will pass validation. value_type governs what values are accepted; enum types require allowed_values. Tag a person key with 'memory_extract' (description required) to make it a workspace-custom memory dimension the conversation extractor infers from transcripts.
          */
         post: operations["create-enrichment-key"];
         delete?: never;
@@ -7484,7 +7595,7 @@ export interface paths {
         head?: never;
         /**
          * Update a registered enrichment key
-         * @description Update allowed_values, source_hint, description, min_confidence, or is_pii. key and value_type are immutable.
+         * @description Update allowed_values, source_hint, description, min_confidence, is_pii, or tags. key and value_type are immutable.
          */
         patch: operations["patch-enrichment-key"];
         trace?: never;
@@ -13748,6 +13859,11 @@ export interface components {
             min_confidence?: number;
             source_hint?: components["schemas"]["DescriptionString"] | null;
             /**
+             * Tags
+             * @description Routing tags. 'memory_extract' opts this key into memory extraction — the conversation extractor will infer it from transcripts as a workspace-custom memory dimension (person keys with a description only).
+             */
+            tags?: "memory_extract"[];
+            /**
              * Value Type
              * @enum {string}
              */
@@ -13768,6 +13884,11 @@ export interface components {
             /** Min Confidence */
             min_confidence?: number | null;
             source_hint?: components["schemas"]["DescriptionString"] | null;
+            /**
+             * Tags
+             * @description Replaces the full tags list when set. Pass [] to remove all tags.
+             */
+            tags?: "memory_extract"[] | null;
         };
         /** EnrichmentKeyResponse */
         EnrichmentKeyResponse: {
@@ -13795,6 +13916,11 @@ export interface components {
             min_confidence: number;
             /** Source Hint */
             source_hint?: string | null;
+            /**
+             * Tags
+             * @default []
+             */
+            tags?: string[];
             /**
              * Updated At
              * Format: date-time
@@ -14932,6 +15058,83 @@ export interface components {
         };
         ExternalSystemString: string;
         ExternalValueString: string;
+        /**
+         * ExternalWriteProposal
+         * @description A human-review proposal for an external (EHR) write-back — the Review Queue.
+         *
+         *     Staged by connector-runner when a `review_required` sink would otherwise
+         *     auto-push (world.external_write_proposals); a reviewer approves/rejects, and the
+         *     egress drain delivers approved ones. ``proposed_payload`` is the full FHIR write
+         *     body and MAY contain PHI — this surface is workspace-scoped (FORCE-RLS) and
+         *     permission-gated (ReviewQueue); never log it. ``connector_type``/``fhir_*``/
+         *     ``status``/``idempotency_key`` are opaque strings; the ids are uuid.
+         */
+        ExternalWriteProposal: {
+            /** Confidence */
+            confidence?: number | null;
+            /** Connector Type */
+            connector_type: string;
+            /** Created At */
+            created_at?: string | null;
+            /**
+             * Data Source Id
+             * Format: uuid
+             */
+            data_source_id: string;
+            /** Decided At */
+            decided_at?: string | null;
+            /** Decided By */
+            decided_by?: string | null;
+            /** Entity Id */
+            entity_id?: string | null;
+            /** Error */
+            error?: string | null;
+            /** Event Type */
+            event_type?: string | null;
+            /** Fhir Resource Id */
+            fhir_resource_id?: string | null;
+            /** Fhir Resource Type */
+            fhir_resource_type: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Origin Event Id
+             * Format: uuid
+             */
+            origin_event_id: string;
+            /** Origin Run Id */
+            origin_run_id?: string | null;
+            /** Origin Run Kind */
+            origin_run_kind?: string | null;
+            /** Proposed Payload */
+            proposed_payload?: {
+                [key: string]: unknown;
+            };
+            /**
+             * Push Attempt Count
+             * @default 0
+             */
+            push_attempt_count?: number;
+            /** Reject Reason */
+            reject_reason?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded";
+            /** Updated At */
+            updated_at?: string | null;
+            /** Vendor Resource Id */
+            vendor_resource_id?: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /**
          * FailureClass
          * @description Why a tool result is a failure — produced by the executor at RUN time.
@@ -19061,6 +19264,17 @@ export interface components {
             /** Total */
             total?: number | null;
         };
+        /** PaginatedResponse[ExternalWriteProposal] */
+        PaginatedResponse_ExternalWriteProposal_: {
+            /** Continuation Token */
+            continuation_token?: number | null;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalWriteProposal"][];
+            /** Total */
+            total?: number | null;
+        };
         /** PaginatedResponse[IntakeFileRow] */
         PaginatedResponse_IntakeFileRow_: {
             /** Continuation Token */
@@ -20787,6 +21001,11 @@ export interface components {
              */
             when_to_use?: string;
         };
+        /** RejectProposalRequest */
+        RejectProposalRequest: {
+            /** Reason */
+            reason: string;
+        };
         /**
          * RejectRequest
          * @description Reject events — demotes confidence to 0.0.
@@ -21410,6 +21629,39 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["Run"][];
+        };
+        /**
+         * RunsSummaryResponse
+         * @description Aggregate run counts for the Runs page summary strip.
+         *
+         *     Honest workspace totals the paginated list cannot derive client-side (it only
+         *     holds the loaded page). ``by_status`` carries the full canonical breakdown
+         *     (incl. any status beyond the named convenience fields); ``by_kind`` splits
+         *     framework vs conversation. ``live`` = running + paused.
+         */
+        RunsSummaryResponse: {
+            /** By Kind */
+            by_kind: {
+                [key: string]: number;
+            };
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** Completed */
+            completed: number;
+            /** Failed */
+            failed: number;
+            /** Live */
+            live: number;
+            /** Paused */
+            paused: number;
+            /** Running */
+            running: number;
+            /** Timed Out */
+            timed_out: number;
+            /** Total */
+            total: number;
         };
         /** Runtime */
         Runtime: {
@@ -22905,6 +23157,36 @@ export interface components {
              * @default 0
              */
             total_turns?: number;
+        };
+        /**
+         * SimulationRunSummaryResponse
+         * @description Aggregate counts across a workspace's simulation runs, for the Runs page
+         *     summary strip.
+         *
+         *     A cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` — honest
+         *     totals the 50-row list view cannot derive client-side. ``by_status`` carries
+         *     the full breakdown (incl. any status beyond the three named convenience
+         *     fields) so a new lifecycle state surfaces without a schema change.
+         */
+        SimulationRunSummaryResponse: {
+            /** By Status */
+            by_status: {
+                [key: string]: number;
+            };
+            /** Completed */
+            completed: number;
+            /** Failed */
+            failed: number;
+            /** Last Created At */
+            last_created_at?: string | null;
+            /** Running */
+            running: number;
+            /** Total */
+            total: number;
+            /** Total Sessions */
+            total_sessions: number;
+            /** Total Turns */
+            total_turns: number;
         };
         /** SimulationSessionResponse */
         SimulationSessionResponse: {
@@ -26292,10 +26574,20 @@ export interface components {
              * @default
              */
             message?: string;
+            /**
+             * Suppress Filler
+             * @description Synchronous callers only: when a turn ends ``background_pending``, omit the filler/acknowledgement text from ``output`` so a batch caller never mistakes the ack for the answer (``output`` is empty; ``background_pending=true`` is the poll-later signal). ``null`` (default) inherits the channel policy. Ignored with ``poll=true`` (422).
+             */
+            suppress_filler?: boolean | null;
             /** Viewport Height */
             viewport_height?: number | null;
             /** Viewport Width */
             viewport_width?: number | null;
+            /**
+             * Wait For Final
+             * @description Synchronous callers only: when a turn hands work to a background tool (``background_pending``), await the real answer inline (bounded, ~30s) instead of returning the acknowledgement immediately. On completion the response carries the final answer with ``background_pending=false``; on timeout it returns ``background_pending=true`` — resolve it later with ``poll=true``. ``null`` (default) inherits the channel policy (web = do not wait). Ignored with ``poll=true`` (422).
+             */
+            wait_for_final?: boolean | null;
         };
         /** TurnResponse */
         TurnResponse: {
@@ -35787,6 +36079,141 @@ export interface operations {
             };
         };
     };
+    "list-external-write-proposals": {
+        parameters: {
+            query?: {
+                status?: ("proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded") | null;
+                limit?: number;
+                continuation_token?: number;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedResponse_ExternalWriteProposal_"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-external-write-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalWriteProposal"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "approve-external-write-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalWriteProposal"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "reject-external-write-proposal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                proposal_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectProposalRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalWriteProposal"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "fhir-import": {
         parameters: {
             query?: never;
@@ -41725,6 +42152,40 @@ export interface operations {
             };
         };
     };
+    runs_summary_v1__workspace_id__runs_summary_get: {
+        parameters: {
+            query?: {
+                kind?: ("conversation" | "framework") | null;
+                channel?: ("voice" | "text" | "sms" | "email" | "web") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunsSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-scheduling-rule-sets": {
         parameters: {
             query?: {
@@ -44034,6 +44495,39 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-simulation-runs-summary": {
+        parameters: {
+            query?: {
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationRunSummaryResponse"];
                 };
             };
             /** @description Validation Error */
