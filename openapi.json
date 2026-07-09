@@ -2033,25 +2033,6 @@
         "title": "ApiKeyResponse",
         "type": "object"
       },
-      "ApproveRequest": {
-        "description": "Approve events \u2014 promotes confidence to 0.95.",
-        "properties": {
-          "notes": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          }
-        },
-        "title": "ApproveRequest",
-        "type": "object"
-      },
       "ArchiveResponse": {
         "properties": {
           "status": {
@@ -2538,66 +2519,6 @@
         "title": "BargeInEvent",
         "type": "object"
       },
-      "BatchActionResponse": {
-        "description": "Result of a batch operation.",
-        "properties": {
-          "failed": {
-            "items": {
-              "additionalProperties": {
-                "type": "string"
-              },
-              "type": "object"
-            },
-            "title": "Failed",
-            "type": "array"
-          },
-          "succeeded": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Succeeded",
-            "type": "array"
-          }
-        },
-        "required": [
-          "succeeded",
-          "failed"
-        ],
-        "title": "BatchActionResponse",
-        "type": "object"
-      },
-      "BatchApproveRequest": {
-        "description": "Batch approve multiple review items.",
-        "properties": {
-          "item_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Item Ids",
-            "type": "array"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          }
-        },
-        "required": [
-          "item_ids"
-        ],
-        "title": "BatchApproveRequest",
-        "type": "object"
-      },
       "BatchDetail": {
         "properties": {
           "created_ts": {
@@ -2675,33 +2596,6 @@
           "files"
         ],
         "title": "BatchProcessingManifest",
-        "type": "object"
-      },
-      "BatchRejectRequest": {
-        "description": "Batch reject multiple review items.",
-        "properties": {
-          "item_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "maxItems": 100,
-            "minItems": 1,
-            "title": "Item Ids",
-            "type": "array"
-          },
-          "reason": {
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
-          }
-        },
-        "required": [
-          "item_ids",
-          "reason"
-        ],
-        "title": "BatchRejectRequest",
         "type": "object"
       },
       "BatchRow": {
@@ -6260,29 +6154,6 @@
         "title": "ChatRequest",
         "type": "object"
       },
-      "ClaimResponse": {
-        "properties": {
-          "assigned_to": {
-            "title": "Assigned To",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "assigned_to",
-          "status"
-        ],
-        "title": "ClaimResponse",
-        "type": "object"
-      },
       "ClientConfigResponse": {
         "description": "Client-safe configuration values.\n\nValues returned here are safe to embed in browser-side code.\nAPI keys are restricted by HTTP referrer or similar origin\ncontrols at the provider level.",
         "properties": {
@@ -8688,66 +8559,6 @@
           "confirm_slug"
         ],
         "title": "ConvertEnvironmentRequest",
-        "type": "object"
-      },
-      "CorrectRequest": {
-        "description": "Submit corrected data \u2014 creates new event at confidence 1.0.",
-        "properties": {
-          "corrected_data": {
-            "additionalProperties": true,
-            "title": "Corrected Data",
-            "type": "object"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "maxLength": 2000,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          }
-        },
-        "required": [
-          "corrected_data"
-        ],
-        "title": "CorrectRequest",
-        "type": "object"
-      },
-      "CorrectionSchemaResponse": {
-        "description": "Schema hints for building a correction form.",
-        "properties": {
-          "current_values": {
-            "additionalProperties": true,
-            "title": "Current Values",
-            "type": "object"
-          },
-          "fhir_resource_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fhir Resource Type"
-          },
-          "fields": {
-            "additionalProperties": true,
-            "title": "Fields",
-            "type": "object"
-          }
-        },
-        "required": [
-          "fhir_resource_type",
-          "fields",
-          "current_values"
-        ],
-        "title": "CorrectionSchemaResponse",
         "type": "object"
       },
       "Counterfactual": {
@@ -15480,58 +15291,6 @@
         "title": "EntityStatsSummary",
         "type": "object"
       },
-      "EntitySummary": {
-        "description": "Inline entity state for review context.",
-        "properties": {
-          "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Display Name"
-          },
-          "entity_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Type"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "state": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "State"
-          }
-        },
-        "required": [
-          "id",
-          "entity_type",
-          "display_name",
-          "state"
-        ],
-        "title": "EntitySummary",
-        "type": "object"
-      },
       "EntityTimelineResponse": {
         "properties": {
           "entity_id": {
@@ -16168,6 +15927,225 @@
         "title": "EscalationStatsResponse",
         "type": "object"
       },
+      "EvaluationResultView": {
+        "description": "One check as the console renders it, derived from a single eval result.\n\nBoth metric and assertion verdicts normalize to this shape so the frontend\nrenders a check without knowing where the value was stored.",
+        "properties": {
+          "actual": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual"
+          },
+          "actual_display": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actual Display"
+          },
+          "case_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Case Id"
+          },
+          "evaluation_method": {
+            "anyOf": [
+              {
+                "enum": [
+                  "threshold",
+                  "equals",
+                  "contains",
+                  "regex",
+                  "tool_called",
+                  "llm_judge",
+                  "custom"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evaluation Method"
+          },
+          "expected": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected"
+          },
+          "expected_display": {
+            "anyOf": [
+              {
+                "maxLength": 2000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Display"
+          },
+          "key": {
+            "maxLength": 128,
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "maxLength": 8000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          },
+          "references": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 100,
+            "title": "References",
+            "type": "array"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "score_label": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score Label"
+          },
+          "session_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Id"
+          },
+          "source_type": {
+            "enum": [
+              "metric",
+              "assertion"
+            ],
+            "title": "Source Type",
+            "type": "string"
+          },
+          "trace_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trace Id"
+          },
+          "value_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "numeric",
+                  "boolean",
+                  "categorical",
+                  "text",
+                  "structured"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Type"
+          },
+          "verdict": {
+            "enum": [
+              "passed",
+              "failed",
+              "pending",
+              "skipped",
+              "error"
+            ],
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source_type",
+          "key",
+          "verdict"
+        ],
+        "title": "EvaluationResultView",
+        "type": "object"
+      },
       "EventBreakdownItem": {
         "description": "Single row in an event breakdown aggregation.",
         "properties": {
@@ -16269,98 +16247,6 @@
       "EventStatusString": {
         "maxLength": 128,
         "type": "string"
-      },
-      "EventSummary": {
-        "description": "Inline event data for review context \u2014 avoids extra API calls.",
-        "properties": {
-          "confidence": {
-            "title": "Confidence",
-            "type": "number"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the event was created",
-            "title": "Created At"
-          },
-          "data": {
-            "additionalProperties": true,
-            "title": "Data",
-            "type": "object"
-          },
-          "event_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Event Type"
-          },
-          "fhir_resource_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fhir Resource Id"
-          },
-          "fhir_resource_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fhir Resource Type"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "review_status": {
-            "enum": [
-              "pending",
-              "raw",
-              "uncertain",
-              "verified",
-              "approved",
-              "human_approved",
-              "auto_approved",
-              "rejected",
-              "corrected",
-              "flagged"
-            ],
-            "title": "Review Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "event_type",
-          "fhir_resource_type",
-          "fhir_resource_id",
-          "data",
-          "confidence",
-          "review_status"
-        ],
-        "title": "EventSummary",
-        "type": "object"
       },
       "EventTypeRegistryResponse": {
         "properties": {
@@ -27400,49 +27286,6 @@
         "title": "PaginatedResponse[ProductionEvalDefinition]",
         "type": "object"
       },
-      "PaginatedResponse_ReviewItemResponse_": {
-        "properties": {
-          "continuation_token": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/ReviewItemResponse"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Total"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "PaginatedResponse[ReviewItemResponse]",
-        "type": "object"
-      },
       "PaginatedResponse_SchedulingRuleSetResponse_": {
         "properties": {
           "continuation_token": {
@@ -31444,22 +31287,6 @@
         "title": "RejectProposalRequest",
         "type": "object"
       },
-      "RejectRequest": {
-        "description": "Reject events \u2014 demotes confidence to 0.0.",
-        "properties": {
-          "reason": {
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Reason",
-            "type": "string"
-          }
-        },
-        "required": [
-          "reason"
-        ],
-        "title": "RejectRequest",
-        "type": "object"
-      },
       "RejectSurfaceRequest": {
         "properties": {
           "reason": {
@@ -31969,261 +31796,6 @@
         "title": "ReviewActionResponse",
         "type": "object"
       },
-      "ReviewDashboardResponse": {
-        "description": "Composite dashboard for the review queue page.",
-        "properties": {
-          "completion_rate_24h": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completion Rate 24H"
-          },
-          "pending_by_priority": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "Pending By Priority",
-            "type": "object"
-          },
-          "pending_by_reason": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Pending By Reason",
-            "type": "array"
-          },
-          "recent_completed": {
-            "items": {
-              "$ref": "#/components/schemas/ReviewItemResponse"
-            },
-            "title": "Recent Completed",
-            "type": "array"
-          },
-          "stats": {
-            "$ref": "#/components/schemas/ReviewStatsResponse"
-          }
-        },
-        "required": [
-          "stats",
-          "pending_by_priority",
-          "pending_by_reason",
-          "recent_completed",
-          "completion_rate_24h"
-        ],
-        "title": "ReviewDashboardResponse",
-        "type": "object"
-      },
-      "ReviewDiffResponse": {
-        "description": "Original vs corrected event data for a completed correction.",
-        "properties": {
-          "corrected_events": {
-            "items": {
-              "$ref": "#/components/schemas/EventSummary"
-            },
-            "title": "Corrected Events",
-            "type": "array"
-          },
-          "item_id": {
-            "title": "Item Id",
-            "type": "string"
-          },
-          "original_events": {
-            "items": {
-              "$ref": "#/components/schemas/EventSummary"
-            },
-            "title": "Original Events",
-            "type": "array"
-          }
-        },
-        "required": [
-          "item_id",
-          "original_events",
-          "corrected_events"
-        ],
-        "title": "ReviewDiffResponse",
-        "type": "object"
-      },
-      "ReviewItemResponse": {
-        "properties": {
-          "assigned_to": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Assigned To"
-          },
-          "completed_action": {
-            "anyOf": [
-              {
-                "enum": [
-                  "approve",
-                  "reject",
-                  "correct",
-                  "approved",
-                  "rejected",
-                  "corrected"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completed Action"
-          },
-          "completed_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completed At"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the review item was created",
-            "title": "Created At"
-          },
-          "entity": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EntitySummary"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "entity_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Type"
-          },
-          "event_ids": {
-            "items": {
-              "format": "uuid",
-              "type": "string"
-            },
-            "title": "Event Ids",
-            "type": "array"
-          },
-          "events": {
-            "anyOf": [
-              {
-                "items": {
-                  "$ref": "#/components/schemas/EventSummary"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Events"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "judge_analysis": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Judge Analysis"
-          },
-          "priority": {
-            "title": "Priority",
-            "type": "integer"
-          },
-          "reason": {
-            "title": "Reason",
-            "type": "string"
-          },
-          "session_id": {
-            "title": "Session Id",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "pending",
-              "in_progress",
-              "completed",
-              "rejected"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "workspace_id",
-          "session_id",
-          "event_ids",
-          "entity_id",
-          "entity_type",
-          "priority",
-          "reason",
-          "judge_analysis",
-          "status",
-          "assigned_to",
-          "completed_at",
-          "completed_action"
-        ],
-        "title": "ReviewItemResponse",
-        "type": "object"
-      },
       "ReviewMetrics": {
         "properties": {
           "approved_7d": {
@@ -32269,41 +31841,6 @@
           "rejected_7d"
         ],
         "title": "ReviewMetrics",
-        "type": "object"
-      },
-      "ReviewStatsResponse": {
-        "properties": {
-          "avg_review_minutes": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Avg Review Minutes"
-          },
-          "completed": {
-            "title": "Completed",
-            "type": "integer"
-          },
-          "pending": {
-            "title": "Pending",
-            "type": "integer"
-          },
-          "rejected": {
-            "title": "Rejected",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "pending",
-          "completed",
-          "rejected",
-          "avg_review_minutes"
-        ],
-        "title": "ReviewStatsResponse",
         "type": "object"
       },
       "ReviewSubmittedEvent": {
@@ -34845,6 +34382,15 @@
       },
       "SimCaseAssertionResponse": {
         "properties": {
+          "checks": {
+            "description": "Normalized per-check view of ``results`` (metric + assertion verdicts),\nso the console renders each drill-down verdict without parsing raw shapes.",
+            "items": {
+              "$ref": "#/components/schemas/EvaluationResultView"
+            },
+            "readOnly": true,
+            "title": "Checks",
+            "type": "array"
+          },
           "eval_key": {
             "maxLength": 128,
             "title": "Eval Key",
@@ -34894,7 +34440,8 @@
         },
         "required": [
           "eval_key",
-          "eval_type"
+          "eval_type",
+          "checks"
         ],
         "title": "SimCaseAssertionResponse",
         "type": "object"
@@ -36363,6 +35910,15 @@
             ],
             "title": "Bridge Request"
           },
+          "checks": {
+            "description": "Normalized per-check view of ``eval_results``. Raw ``eval_results``\nstay intact; this rides alongside so the console renders checks without\nreverse-engineering actual.latest vs actual.judge vs score.",
+            "items": {
+              "$ref": "#/components/schemas/EvaluationResultView"
+            },
+            "readOnly": true,
+            "title": "Checks",
+            "type": "array"
+          },
           "completed_at": {
             "anyOf": [
               {
@@ -36530,7 +36086,8 @@
         "required": [
           "id",
           "service_id",
-          "status"
+          "status",
+          "checks"
         ],
         "title": "SimulationRunResponse",
         "type": "object"
@@ -47454,23 +47011,6 @@
       "VoiceSettingsRequest": {
         "description": "Voice experience control plane \u2014 PM-facing, high-level controls.\n\nControls the caller experience without exposing engineering internals.\nEmotion detection, filler speech, model selection, and buffer tuning\nare always-on internals managed by engineering.",
         "properties": {
-          "correction_categories": {
-            "anyOf": [
-              {
-                "items": {
-                  "maxLength": 128,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                "maxItems": 50,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Correction Categories"
-          },
           "keyterms": {
             "anyOf": [
               {
@@ -47662,13 +47202,6 @@
       "VoiceSettingsResponse": {
         "description": "Voice experience state \u2014 what the PM configured.",
         "properties": {
-          "correction_categories": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Correction Categories",
-            "type": "array"
-          },
           "keyterms": {
             "items": {
               "type": "string"
@@ -47816,7 +47349,6 @@
           "volume",
           "language",
           "keyterms",
-          "correction_categories",
           "pronunciation_dict_id",
           "sensitive_topics",
           "post_call_analysis_enabled",
@@ -72491,1158 +72023,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/review-queue": {
-      "get": {
-        "description": "Returns review items with rich filtering and sorting.",
-        "operationId": "list_review_items_v1__workspace_id__review_queue_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "entity_type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Entity Type"
-            }
-          },
-          {
-            "in": "query",
-            "name": "priority",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "integer"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Priority"
-            }
-          },
-          {
-            "in": "query",
-            "name": "reason",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Reason"
-            }
-          },
-          {
-            "in": "query",
-            "name": "assigned_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Assigned To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "created_after",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date-time",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Created After"
-            }
-          },
-          {
-            "in": "query",
-            "name": "created_before",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date-time",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Created Before"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort_by",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Sort By"
-            }
-          },
-          {
-            "in": "query",
-            "name": "sort_order",
-            "required": false,
-            "schema": {
-              "default": "asc",
-              "title": "Sort Order",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 100,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_ReviewItemResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List review queue items",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/batch-approve": {
-      "post": {
-        "description": "Approves multiple items in one call. Each item is processed independently.",
-        "operationId": "batch_approve_v1__workspace_id__review_queue_batch_approve_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BatchApproveRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchActionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Batch approve review items",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/batch-reject": {
-      "post": {
-        "description": "Rejects multiple items in one call. Each item is processed independently.",
-        "operationId": "batch_reject_v1__workspace_id__review_queue_batch_reject_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BatchRejectRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BatchActionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Batch reject review items",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/dashboard": {
-      "get": {
-        "description": "Aggregated view for the review queue page: stats, priority breakdown, recent completions.",
-        "operationId": "review_dashboard_v1__workspace_id__review_queue_dashboard_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewDashboardResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Review queue dashboard composite",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/history": {
-      "get": {
-        "description": "Returns completed review items for auditing. Filter by action, reviewer, and date range.",
-        "operationId": "review_history_v1__workspace_id__review_queue_history_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "action",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Action"
-            }
-          },
-          {
-            "in": "query",
-            "name": "reviewed_by",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Reviewed By"
-            }
-          },
-          {
-            "in": "query",
-            "name": "completed_after",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date-time",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Completed After"
-            }
-          },
-          {
-            "in": "query",
-            "name": "completed_before",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date-time",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Completed Before"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 100,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_ReviewItemResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Review history / audit trail",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/my-queue": {
-      "get": {
-        "operationId": "my_queue_v1__workspace_id__review_queue_my_queue_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 10,
-              "exclusiveMinimum": 0,
-              "maximum": 100,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Continuation Token",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PaginatedResponse_ReviewItemResponse_"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Items assigned to current API key",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/performance": {
-      "get": {
-        "description": "Items reviewed, avg time, approval/reject/correct ratio per reviewer.",
-        "operationId": "reviewer_performance_v1__workspace_id__review_queue_performance_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "days",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "title": "Days",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Reviewer Performance V1  Workspace Id  Review Queue Performance Get",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Per-reviewer performance stats",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/stats": {
-      "get": {
-        "operationId": "review_stats_v1__workspace_id__review_queue_stats_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewStatsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Review queue statistics",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/trends": {
-      "get": {
-        "description": "Daily buckets: queue depth, completion rate, avg review time.",
-        "operationId": "review_trends_v1__workspace_id__review_queue_trends_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "days",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "title": "Days",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Review Trends V1  Workspace Id  Review Queue Trends Get",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Review queue trends over time",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}": {
-      "get": {
-        "description": "Returns review item with inline event data and entity state \u2014 no extra calls needed.",
-        "operationId": "get_review_item_v1__workspace_id__review_queue__item_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewItemResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get review item with full context",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/approve": {
-      "post": {
-        "description": "Marks the review item approved and lets SDP projections rebuild entity state.",
-        "operationId": "approve_review_item_v1__workspace_id__review_queue__item_id__approve_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ApproveRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewItemResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Approve review item",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/claim": {
-      "post": {
-        "description": "Assigns the review item to the current API key, preventing concurrent reviews.",
-        "operationId": "claim_review_item_v1__workspace_id__review_queue__item_id__claim_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClaimResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Claim a review item",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/correct": {
-      "post": {
-        "description": "Creates a corrected event and lets SDP projections rebuild entity state.",
-        "operationId": "correct_review_item_v1__workspace_id__review_queue__item_id__correct_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CorrectRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewItemResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Submit corrected data",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/correction-schema": {
-      "get": {
-        "description": "Returns expected fields for the FHIR resource type, plus current event data as defaults.",
-        "operationId": "get_correction_schema_v1__workspace_id__review_queue__item_id__correction_schema_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CorrectionSchemaResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get correction form schema hints",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/diff": {
-      "get": {
-        "description": "Shows original event data vs corrected event data side-by-side.",
-        "operationId": "get_review_diff_v1__workspace_id__review_queue__item_id__diff_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewDiffResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get event diff for a corrected review item",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/reject": {
-      "post": {
-        "description": "Marks the review item rejected and lets SDP projections rebuild entity state.",
-        "operationId": "reject_review_item_v1__workspace_id__review_queue__item_id__reject_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RejectRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ReviewItemResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Reject review item",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/review-queue/{item_id}/unclaim": {
-      "post": {
-        "description": "Clears assignment \u2014 only the current claimant can unclaim.",
-        "operationId": "unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "item_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Item Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ClaimResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Release a claimed review item",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
     "/v1/{workspace_id}/role-grants": {
       "get": {
         "operationId": "list-role-grants",
@@ -76463,7 +74843,7 @@
         ]
       },
       "put": {
-        "description": "Update the voice experience settings for a workspace.\n\nOnly provided fields are updated; omitted fields retain their current\nvalues. Set a field to ``null`` to reset it to default.\n\n**Voice Identity & Style**\n- **voice_id**: Voice identity UUID \u2014 determines the agent's voice persona\n- **tone**: Emotional baseline (``calm``, ``sympathetic``,\n  ``enthusiastic``, ``content``, ``curious``, ``cheerful``,\n  ``serious``, ``friendly``). The system also adapts tone dynamically\n  based on real-time caller emotion analysis; this setting provides\n  the baseline when no strong emotional signal is detected.\n- **speed**: Speech rate multiplier (0.5-2.0)\n- **volume**: Volume multiplier (0.0-1.0)\n- **language**: BCP-47 language tag (default ``en``)\n\n**Speech Recognition Boost**\n- **keyterms**: Exact words the speech recognition engine should\n  prioritize. Use for specific names, drug names, and org jargon.\n  Example: ``[\"Dr. Ramirez\", \"metformin\", \"HIPAA\"]``\n\n**Audio Correction Hints**\n- **correction_categories**: Broad categories of things callers\n  commonly say that speech-to-text gets wrong. Not exact words \u2014\n  just what *kinds* of things to watch for. Example:\n  ``[\"medication names\", \"insurance carriers\", \"doctor last names\"]``\n\n**Post-Call Intelligence**\n- **post_call_analysis_enabled**: Run automated quality scoring after\n  each call ends (default ``true``)\n- **transcript_correction_enabled**: Re-verify transcripts with a\n  high-accuracy batch model after call ends (default ``true``)\n\n#### Permissions\n* Requires admin or owner role.",
+        "description": "Update the voice experience settings for a workspace.\n\nOnly provided fields are updated; omitted fields retain their current\nvalues. Set a field to ``null`` to reset it to default.\n\n**Voice Identity & Style**\n- **voice_id**: Voice identity UUID \u2014 determines the agent's voice persona\n- **tone**: Emotional baseline (``calm``, ``sympathetic``,\n  ``enthusiastic``, ``content``, ``curious``, ``cheerful``,\n  ``serious``, ``friendly``). The system also adapts tone dynamically\n  based on real-time caller emotion analysis; this setting provides\n  the baseline when no strong emotional signal is detected.\n- **speed**: Speech rate multiplier (0.5-2.0)\n- **volume**: Volume multiplier (0.0-1.0)\n- **language**: BCP-47 language tag (default ``en``)\n\n**Speech Recognition Boost**\n- **keyterms**: Exact words the speech recognition engine should\n  prioritize. Use for specific names, drug names, and org jargon.\n  Example: ``[\"Dr. Ramirez\", \"metformin\", \"HIPAA\"]``\n\n**Post-Call Intelligence**\n- **post_call_analysis_enabled**: Run automated quality scoring after\n  each call ends (default ``true``)\n- **transcript_correction_enabled**: Re-verify transcripts with a\n  high-accuracy batch model after call ends (default ``true``)\n\n#### Permissions\n* Requires admin or owner role.",
         "operationId": "update-voice-settings",
         "parameters": [
           {
