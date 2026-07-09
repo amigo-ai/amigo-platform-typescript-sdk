@@ -10,7 +10,6 @@ let lastVoiceUpdateBody: unknown
 const VOICE_SETTINGS_FIXTURE = {
   language: 'en',
   post_call_analysis_enabled: true,
-  correction_categories: [],
   keyterms: [],
   sensitive_topics: [],
   transcript_correction_enabled: false,

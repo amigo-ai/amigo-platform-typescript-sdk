@@ -5082,340 +5082,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/review-queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List review queue items
-         * @description Returns review items with rich filtering and sorting.
-         */
-        get: operations["list_review_items_v1__workspace_id__review_queue_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/batch-approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batch approve review items
-         * @description Approves multiple items in one call. Each item is processed independently.
-         */
-        post: operations["batch_approve_v1__workspace_id__review_queue_batch_approve_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/batch-reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Batch reject review items
-         * @description Rejects multiple items in one call. Each item is processed independently.
-         */
-        post: operations["batch_reject_v1__workspace_id__review_queue_batch_reject_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Review queue dashboard composite
-         * @description Aggregated view for the review queue page: stats, priority breakdown, recent completions.
-         */
-        get: operations["review_dashboard_v1__workspace_id__review_queue_dashboard_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/history": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Review history / audit trail
-         * @description Returns completed review items for auditing. Filter by action, reviewer, and date range.
-         */
-        get: operations["review_history_v1__workspace_id__review_queue_history_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/my-queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Items assigned to current API key */
-        get: operations["my_queue_v1__workspace_id__review_queue_my_queue_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/performance": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Per-reviewer performance stats
-         * @description Items reviewed, avg time, approval/reject/correct ratio per reviewer.
-         */
-        get: operations["reviewer_performance_v1__workspace_id__review_queue_performance_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Review queue statistics */
-        get: operations["review_stats_v1__workspace_id__review_queue_stats_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/trends": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Review queue trends over time
-         * @description Daily buckets: queue depth, completion rate, avg review time.
-         */
-        get: operations["review_trends_v1__workspace_id__review_queue_trends_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get review item with full context
-         * @description Returns review item with inline event data and entity state — no extra calls needed.
-         */
-        get: operations["get_review_item_v1__workspace_id__review_queue__item_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Approve review item
-         * @description Marks the review item approved and lets SDP projections rebuild entity state.
-         */
-        post: operations["approve_review_item_v1__workspace_id__review_queue__item_id__approve_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/claim": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Claim a review item
-         * @description Assigns the review item to the current API key, preventing concurrent reviews.
-         */
-        post: operations["claim_review_item_v1__workspace_id__review_queue__item_id__claim_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/correct": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Submit corrected data
-         * @description Creates a corrected event and lets SDP projections rebuild entity state.
-         */
-        post: operations["correct_review_item_v1__workspace_id__review_queue__item_id__correct_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/correction-schema": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get correction form schema hints
-         * @description Returns expected fields for the FHIR resource type, plus current event data as defaults.
-         */
-        get: operations["get_correction_schema_v1__workspace_id__review_queue__item_id__correction_schema_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/diff": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get event diff for a corrected review item
-         * @description Shows original event data vs corrected event data side-by-side.
-         */
-        get: operations["get_review_diff_v1__workspace_id__review_queue__item_id__diff_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Reject review item
-         * @description Marks the review item rejected and lets SDP projections rebuild entity state.
-         */
-        post: operations["reject_review_item_v1__workspace_id__review_queue__item_id__reject_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/review-queue/{item_id}/unclaim": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Release a claimed review item
-         * @description Clears assignment — only the current claimant can unclaim.
-         */
-        post: operations["unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/role-grants": {
         parameters: {
             query?: never;
@@ -6181,12 +5847,6 @@ export interface paths {
          *     - **keyterms**: Exact words the speech recognition engine should
          *       prioritize. Use for specific names, drug names, and org jargon.
          *       Example: ``["Dr. Ramirez", "metformin", "HIPAA"]``
-         *
-         *     **Audio Correction Hints**
-         *     - **correction_categories**: Broad categories of things callers
-         *       commonly say that speech-to-text gets wrong. Not exact words —
-         *       just what *kinds* of things to watch for. Example:
-         *       ``["medication names", "insurance carriers", "doctor last names"]``
          *
          *     **Post-Call Intelligence**
          *     - **post_call_analysis_enabled**: Run automated quality scoring after
@@ -8872,14 +8532,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /**
-         * ApproveRequest
-         * @description Approve events — promotes confidence to 0.95.
-         */
-        ApproveRequest: {
-            /** Notes */
-            notes?: string | null;
-        };
         /** ArchiveResponse */
         ArchiveResponse: {
             /**
@@ -9088,28 +8740,6 @@ export interface components {
              */
             type: "barge_in";
         };
-        /**
-         * BatchActionResponse
-         * @description Result of a batch operation.
-         */
-        BatchActionResponse: {
-            /** Failed */
-            failed: {
-                [key: string]: string;
-            }[];
-            /** Succeeded */
-            succeeded: string[];
-        };
-        /**
-         * BatchApproveRequest
-         * @description Batch approve multiple review items.
-         */
-        BatchApproveRequest: {
-            /** Item Ids */
-            item_ids: string[];
-            /** Notes */
-            notes?: string | null;
-        };
         /** BatchDetail */
         BatchDetail: {
             /** Created Ts */
@@ -9154,16 +8784,6 @@ export interface components {
             };
             /** Files */
             files: components["schemas"]["FileEntry"][];
-        };
-        /**
-         * BatchRejectRequest
-         * @description Batch reject multiple review items.
-         */
-        BatchRejectRequest: {
-            /** Item Ids */
-            item_ids: string[];
-            /** Reason */
-            reason: string;
         };
         /**
          * BatchRow
@@ -10583,15 +10203,6 @@ export interface components {
              */
             message: string;
         };
-        /** ClaimResponse */
-        ClaimResponse: {
-            /** Assigned To */
-            assigned_to: string;
-            /** Id */
-            id: string;
-            /** Status */
-            status: string;
-        };
         /**
          * ClientConfigResponse
          * @description Client-safe configuration values.
@@ -11525,34 +11136,6 @@ export interface components {
              * @enum {string}
              */
             target: "production" | "staging";
-        };
-        /**
-         * CorrectRequest
-         * @description Submit corrected data — creates new event at confidence 1.0.
-         */
-        CorrectRequest: {
-            /** Corrected Data */
-            corrected_data: {
-                [key: string]: unknown;
-            };
-            /** Notes */
-            notes?: string | null;
-        };
-        /**
-         * CorrectionSchemaResponse
-         * @description Schema hints for building a correction form.
-         */
-        CorrectionSchemaResponse: {
-            /** Current Values */
-            current_values: {
-                [key: string]: unknown;
-            };
-            /** Fhir Resource Type */
-            fhir_resource_type: string | null;
-            /** Fields */
-            fields: {
-                [key: string]: unknown;
-            };
         };
         /**
          * Counterfactual
@@ -14476,25 +14059,6 @@ export interface components {
             /** Total Events */
             total_events: number;
         };
-        /**
-         * EntitySummary
-         * @description Inline entity state for review context.
-         */
-        EntitySummary: {
-            /** Display Name */
-            display_name: string | null;
-            /** Entity Type */
-            entity_type: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** State */
-            state: {
-                [key: string]: unknown;
-            } | null;
-        };
         /** EntityTimelineResponse */
         EntityTimelineResponse: {
             /**
@@ -14733,6 +14297,57 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * EvaluationResultView
+         * @description One check as the console renders it, derived from a single eval result.
+         *
+         *     Both metric and assertion verdicts normalize to this shape so the frontend
+         *     renders a check without knowing where the value was stored.
+         */
+        EvaluationResultView: {
+            /** Actual */
+            actual?: unknown | null;
+            /** Actual Display */
+            actual_display?: string | null;
+            /** Case Id */
+            case_id?: string | null;
+            /** Evaluation Method */
+            evaluation_method?: ("threshold" | "equals" | "contains" | "regex" | "tool_called" | "llm_judge" | "custom") | null;
+            /** Expected */
+            expected?: unknown | null;
+            /** Expected Display */
+            expected_display?: string | null;
+            /** Key */
+            key: string;
+            /** Label */
+            label?: string | null;
+            /** Rationale */
+            rationale?: string | null;
+            /** References */
+            references?: number[];
+            /** Run Id */
+            run_id?: string | null;
+            /** Score */
+            score?: number | null;
+            /** Score Label */
+            score_label?: string | null;
+            /** Session Id */
+            session_id?: string | null;
+            /**
+             * Source Type
+             * @enum {string}
+             */
+            source_type: "metric" | "assertion";
+            /** Trace Id */
+            trace_id?: string | null;
+            /** Value Type */
+            value_type?: ("numeric" | "boolean" | "categorical" | "text" | "structured") | null;
+            /**
+             * Verdict
+             * @enum {string}
+             */
+            verdict: "passed" | "failed" | "pending" | "skipped" | "error";
+        };
+        /**
          * EventBreakdownItem
          * @description Single row in an event breakdown aggregation.
          */
@@ -14791,39 +14406,6 @@ export interface components {
         EventDisplayNameString: string;
         EventOutcomeString: string;
         EventStatusString: string;
-        /**
-         * EventSummary
-         * @description Inline event data for review context — avoids extra API calls.
-         */
-        EventSummary: {
-            /** Confidence */
-            confidence: number;
-            /**
-             * Created At
-             * @description When the event was created
-             */
-            created_at?: string | null;
-            /** Data */
-            data: {
-                [key: string]: unknown;
-            };
-            /** Event Type */
-            event_type: string | null;
-            /** Fhir Resource Id */
-            fhir_resource_id: string | null;
-            /** Fhir Resource Type */
-            fhir_resource_type: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Review Status
-             * @enum {string}
-             */
-            review_status: "pending" | "raw" | "uncertain" | "verified" | "approved" | "human_approved" | "auto_approved" | "rejected" | "corrected" | "flagged";
-        };
         /** EventTypeRegistryResponse */
         EventTypeRegistryResponse: {
             /** Event Types */
@@ -19363,17 +18945,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[ReviewItemResponse] */
-        PaginatedResponse_ReviewItemResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ReviewItemResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[SchedulingRuleSetResponse] */
         PaginatedResponse_SchedulingRuleSetResponse_: {
             /** Continuation Token */
@@ -21006,14 +20577,6 @@ export interface components {
             /** Reason */
             reason: string;
         };
-        /**
-         * RejectRequest
-         * @description Reject events — demotes confidence to 0.0.
-         */
-        RejectRequest: {
-            /** Reason */
-            reason: string;
-        };
         /** RejectSurfaceRequest */
         RejectSurfaceRequest: {
             /** Reason */
@@ -21258,85 +20821,6 @@ export interface components {
              */
             surface_id: string;
         };
-        /**
-         * ReviewDashboardResponse
-         * @description Composite dashboard for the review queue page.
-         */
-        ReviewDashboardResponse: {
-            /** Completion Rate 24H */
-            completion_rate_24h: number | null;
-            /** Pending By Priority */
-            pending_by_priority: {
-                [key: string]: number;
-            };
-            /** Pending By Reason */
-            pending_by_reason: {
-                [key: string]: unknown;
-            }[];
-            /** Recent Completed */
-            recent_completed: components["schemas"]["ReviewItemResponse"][];
-            stats: components["schemas"]["ReviewStatsResponse"];
-        };
-        /**
-         * ReviewDiffResponse
-         * @description Original vs corrected event data for a completed correction.
-         */
-        ReviewDiffResponse: {
-            /** Corrected Events */
-            corrected_events: components["schemas"]["EventSummary"][];
-            /** Item Id */
-            item_id: string;
-            /** Original Events */
-            original_events: components["schemas"]["EventSummary"][];
-        };
-        /** ReviewItemResponse */
-        ReviewItemResponse: {
-            /** Assigned To */
-            assigned_to: string | null;
-            /** Completed Action */
-            completed_action: ("approve" | "reject" | "correct" | "approved" | "rejected" | "corrected") | null;
-            /** Completed At */
-            completed_at: string | null;
-            /**
-             * Created At
-             * @description When the review item was created
-             */
-            created_at?: string | null;
-            entity?: components["schemas"]["EntitySummary"] | null;
-            /** Entity Id */
-            entity_id: string | null;
-            /** Entity Type */
-            entity_type: string | null;
-            /** Event Ids */
-            event_ids: string[];
-            /** Events */
-            events?: components["schemas"]["EventSummary"][] | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Judge Analysis */
-            judge_analysis: {
-                [key: string]: unknown;
-            } | null;
-            /** Priority */
-            priority: number;
-            /** Reason */
-            reason: string;
-            /** Session Id */
-            session_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "pending" | "in_progress" | "completed" | "rejected";
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** ReviewMetrics */
         ReviewMetrics: {
             /** Approved 7D */
@@ -21356,17 +20840,6 @@ export interface components {
              * @default 0
              */
             total_items?: number;
-        };
-        /** ReviewStatsResponse */
-        ReviewStatsResponse: {
-            /** Avg Review Minutes */
-            avg_review_minutes: number | null;
-            /** Completed */
-            completed: number;
-            /** Pending */
-            pending: number;
-            /** Rejected */
-            rejected: number;
         };
         /** ReviewSubmittedEvent */
         ReviewSubmittedEvent: {
@@ -22461,6 +21934,12 @@ export interface components {
         };
         /** SimCaseAssertionResponse */
         SimCaseAssertionResponse: {
+            /**
+             * Checks
+             * @description Normalized per-check view of ``results`` (metric + assertion verdicts),
+             *     so the console renders each drill-down verdict without parsing raw shapes.
+             */
+            readonly checks: components["schemas"]["EvaluationResultView"][];
             /** Eval Key */
             eval_key: string;
             /**
@@ -23079,6 +22558,13 @@ export interface components {
             bridge_request?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Checks
+             * @description Normalized per-check view of ``eval_results``. Raw ``eval_results``
+             *     stay intact; this rides alongside so the console renders checks without
+             *     reverse-engineering actual.latest vs actual.judge vs score.
+             */
+            readonly checks: components["schemas"]["EvaluationResultView"][];
             /** Completed At */
             completed_at?: string | null;
             /** Created At */
@@ -27617,8 +27103,6 @@ export interface components {
          *     are always-on internals managed by engineering.
          */
         VoiceSettingsRequest: {
-            /** Correction Categories */
-            correction_categories?: string[] | null;
             /** Keyterms */
             keyterms?: string[] | null;
             /** Language */
@@ -27657,8 +27141,6 @@ export interface components {
          * @description Voice experience state — what the PM configured.
          */
         VoiceSettingsResponse: {
-            /** Correction Categories */
-            correction_categories: string[];
             /** Keyterms */
             keyterms: string[];
             /** Language */
@@ -41390,573 +40872,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    list_review_items_v1__workspace_id__review_queue_get: {
-        parameters: {
-            query?: {
-                status?: string | null;
-                entity_type?: string | null;
-                priority?: number | null;
-                reason?: string | null;
-                assigned_to?: string | null;
-                created_after?: string | null;
-                created_before?: string | null;
-                sort_by?: string | null;
-                sort_order?: string;
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ReviewItemResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    batch_approve_v1__workspace_id__review_queue_batch_approve_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BatchApproveRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BatchActionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    batch_reject_v1__workspace_id__review_queue_batch_reject_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BatchRejectRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BatchActionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    review_dashboard_v1__workspace_id__review_queue_dashboard_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewDashboardResponse"];
-                };
-            };
-        };
-    };
-    review_history_v1__workspace_id__review_queue_history_get: {
-        parameters: {
-            query?: {
-                action?: string | null;
-                reviewed_by?: string | null;
-                completed_after?: string | null;
-                completed_before?: string | null;
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ReviewItemResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    my_queue_v1__workspace_id__review_queue_my_queue_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ReviewItemResponse_"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reviewer_performance_v1__workspace_id__review_queue_performance_get: {
-        parameters: {
-            query?: {
-                days?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    review_stats_v1__workspace_id__review_queue_stats_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewStatsResponse"];
-                };
-            };
-        };
-    };
-    review_trends_v1__workspace_id__review_queue_trends_get: {
-        parameters: {
-            query?: {
-                days?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_review_item_v1__workspace_id__review_queue__item_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewItemResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    approve_review_item_v1__workspace_id__review_queue__item_id__approve_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ApproveRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewItemResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    claim_review_item_v1__workspace_id__review_queue__item_id__claim_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClaimResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    correct_review_item_v1__workspace_id__review_queue__item_id__correct_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CorrectRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewItemResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_correction_schema_v1__workspace_id__review_queue__item_id__correction_schema_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CorrectionSchemaResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_review_diff_v1__workspace_id__review_queue__item_id__diff_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewDiffResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reject_review_item_v1__workspace_id__review_queue__item_id__reject_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RejectRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ReviewItemResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    unclaim_review_item_v1__workspace_id__review_queue__item_id__unclaim_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                item_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ClaimResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };

@@ -383,29 +383,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getInvoice`
 - `getInvoicePdf`
 
-### `reviewQueue`
-
-- `list`
-- `listAutoPaging`
-- `get`
-- `getStats`
-- `getDashboard`
-- `getMyQueue`
-- `getMyQueueAutoPaging`
-- `approve`
-- `reject`
-- `claim`
-- `unclaim`
-- `correct`
-- `batchApprove`
-- `batchReject`
-- `getHistory`
-- `getHistoryAutoPaging`
-- `getTrends`
-- `getPerformance`
-- `getCorrectionSchema`
-- `getDiff`
-
 ### `recordings`
 
 - `getUrls`
