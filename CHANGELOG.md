@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.91.0] - 2026-07-09
+
+### Documentation
+
+- add explicit migration block to 0.33.0 entry (#184)
+
+### Maintenance
+
+- sync API types from platform (d359e61a) (#400)
+
 ## [0.90.0] - 2026-07-08
 
 ### Maintenance
