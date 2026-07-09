@@ -784,6 +784,7 @@ export { WorkspaceEventStreamError, isWorkspaceEventStreamError } from './resour
 
 export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
 export type {
+  ChannelKind,
   ConversationDetail,
   ConversationListResponse,
   ConversationSummary,
@@ -793,6 +794,7 @@ export type {
   CreateConversationRequest,
   ListConversationsParams,
   SessionConnectUrlParams,
+  SwitchChannelRequest,
   TextStreamAuthProtocols,
   TextStreamUrlParams,
   TurnDoneEvent,

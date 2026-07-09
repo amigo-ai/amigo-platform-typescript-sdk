@@ -578,23 +578,41 @@ const benchmarks = await client.calls.getBenchmarks({ days: 30 })
 
 ### Text conversations
 
-Use `client.conversations.sendMessage()` for user-first synchronous text turns. Omit
-`conversation_id` to start a new durable conversation; pass the returned ID to resume it.
+Use `client.conversations.create()` to start a new durable conversation, then
+`client.conversations.createTurn()` for user-first synchronous text turns (or
+`streamTurn()` for a typed SSE event stream).
 
 ```typescript
-const firstTurn = await client.conversations.sendMessage({
+const conversation = await client.conversations.create({
   service_id: 'service-id',
-  message: 'Hello, I need help scheduling',
   entity_id: 'entity-id',
 })
 
-const nextTurn = await client.conversations.sendMessage({
-  service_id: 'service-id',
-  conversation_id: firstTurn.conversation_id,
+const firstTurn = await client.conversations.createTurn(conversation.id, {
+  message: 'Hello, I need help scheduling',
+})
+
+const nextTurn = await client.conversations.createTurn(conversation.id, {
   message: 'Tuesday morning works',
 })
 
-console.log(nextTurn.messages.map((message) => message.text))
+console.log(nextTurn.output.map((message) => message.text))
+```
+
+Move an active conversation to a different channel (e.g. hand off web chat to
+iMessage/SMS) with `switchChannel()`; close it with `close()` so the customer
+can start fresh on the next inbound message:
+
+```typescript
+await client.conversations.switchChannel(conversation.id, {
+  channel: 'imessage',
+  reason: 'customer_request',
+  recipient: '+15555550123', // required for sms/imessage
+  use_case_id: 'use-case-id', // required for sms/imessage
+  dispatch_opener: true,
+})
+
+await client.conversations.close(conversation.id)
 ```
 
 For real-time browser clients, build the text-stream URL and use WebSocket

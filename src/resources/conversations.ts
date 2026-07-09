@@ -3,6 +3,7 @@ import { type PlatformFetch } from '../core/openapi-client.js'
 import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
+export type ChannelKind = components['schemas']['ChannelKind']
 export type ConversationDetail = components['schemas']['ConversationDetail']
 export type ConversationListResponse = components['schemas']['ConversationListResponse']
 export type ConversationSummary =
@@ -13,6 +14,7 @@ export type ConversationTurnAvailableAction =
 export type ConversationTurnStateTransition =
   components['schemas']['ConversationTurnStateTransition']
 export type CreateConversationRequest = components['schemas']['CreateConversationRequest']
+export type SwitchChannelRequest = components['schemas']['SwitchChannelRequest']
 export type TurnRequest = components['schemas']['TurnRequest']
 export type TurnResponse = components['schemas']['TurnResponse']
 export type TurnConversationSnapshot = components['schemas']['TurnConversationSnapshot']
@@ -159,6 +161,27 @@ export class ConversationsResource extends WorkspaceScopedResource {
         path: { workspace_id: this.workspaceId, conversation_id: conversationId },
       },
     })
+  }
+
+  /**
+   * Move a conversation to a different channel (e.g. web → sms/imessage).
+   *
+   * `recipient` (E.164) is required when switching to sms/imessage. Pass
+   * `dispatch_opener: true` to have the agent immediately send one turn on
+   * the new channel, optionally steered by `instruction`.
+   */
+  async switchChannel(
+    conversationId: string,
+    request: SwitchChannelRequest,
+  ): Promise<ConversationDetail> {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/conversations/{conversation_id}/channel', {
+        params: {
+          path: { workspace_id: this.workspaceId, conversation_id: conversationId },
+        },
+        body: request,
+      }),
+    )
   }
 
   /**
