@@ -9,11 +9,13 @@ import {
   textStreamAuthProtocols,
 } from '../../src/index.js'
 import type {
+  ChannelKind,
   ConversationDetail,
   ConversationListResponse,
   ConversationTurnAvailableAction,
   ConversationTurnStateTransition,
   CreateConversationRequest,
+  SwitchChannelRequest,
   TurnConversationSnapshot,
   TurnRequest,
   TurnResponse,
@@ -326,6 +328,76 @@ describe('ConversationsResource', () => {
 
     expect(deleteCalled).toBe(true)
     expect(result).toBeUndefined()
+  })
+
+  it('switches a conversation channel', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestBody: unknown
+    // Typed against the exported ChannelKind alias so a drift between the
+    // named export and the generated schema fails compilation here.
+    const targetChannel: ChannelKind = 'imessage'
+    const request: SwitchChannelRequest = {
+      channel: targetChannel,
+      reason: 'customer_request',
+      recipient: '+15555550123',
+      use_case_id: '00000000-0000-4000-8000-0000000000aa',
+      dispatch_opener: true,
+      instruction: 'Confirm the Tuesday slot over text',
+    }
+    const apiResponse: ConversationDetail = {
+      id: conversationId,
+      channel_kind: 'imessage',
+      status: 'active',
+      lifecycle: 'active',
+      turn_count: 3,
+      turns: [],
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:05:00Z',
+    }
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/channel`]: async (req) => {
+          requestBody = await req.json()
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    const result = await client.conversations.switchChannel(conversationId, request)
+
+    // The SDK forwards the request body verbatim — no renamed keys, no
+    // dropped optional fields.
+    expect(requestBody).toEqual({
+      channel: 'imessage',
+      reason: 'customer_request',
+      recipient: '+15555550123',
+      use_case_id: '00000000-0000-4000-8000-0000000000aa',
+      dispatch_opener: true,
+      instruction: 'Confirm the Tuesday slot over text',
+    })
+    expect(result.id).toBe(conversationId)
+    expect(result.channel_kind).toBe('imessage')
+  })
+
+  it('routes switchChannel failures through the central error pipeline', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/channel`]: () =>
+          Response.json({ detail: 'recipient required for imessage' }, { status: 422 }),
+      }),
+    })
+
+    await expect(
+      client.conversations.switchChannel(conversationId, {
+        channel: 'imessage',
+        reason: 'customer_request',
+      }),
+    ).rejects.toBeInstanceOf(ValidationError)
   })
 
   it('creates a turn in a conversation', async () => {
