@@ -8221,6 +8221,54 @@
         "title": "ConversationListResponse",
         "type": "object"
       },
+      "ConversationStatusTransitionRequest": {
+        "properties": {
+          "reason": {
+            "description": "Low-cardinality transition tag (e.g. hsm_terminal, use_case_rebind) recorded on the audit event and the conversation world event.",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "ConversationStatusTransitionRequest",
+        "type": "object"
+      },
+      "ConversationStatusTransitionResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "status"
+        ],
+        "title": "ConversationStatusTransitionResponse",
+        "type": "object"
+      },
       "ConversationThreadRequest": {
         "properties": {
           "channel_kind": {
@@ -8985,6 +9033,12 @@
               }
             ],
             "title": "Entity Id"
+          },
+          "force_new": {
+            "default": false,
+            "description": "Outbound thread-keyed channels (sms/imessage) only: close any existing ACTIVE conversation on the computed provider thread (recipient + use case) before dispatching, so the opener materializes a brand-new conversation instead of continuing the old thread. Rejected with 422 on channel=web \u2014 every web create already starts a new conversation, so force_new is meaningless there.",
+            "title": "Force New",
+            "type": "boolean"
           },
           "instruction": {
             "anyOf": [

@@ -10988,6 +10988,32 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** ConversationStatusTransitionRequest */
+        ConversationStatusTransitionRequest: {
+            /**
+             * Reason
+             * @description Low-cardinality transition tag (e.g. hsm_terminal, use_case_rebind) recorded on the audit event and the conversation world event.
+             */
+            reason: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "closed";
+        };
+        /** ConversationStatusTransitionResponse */
+        ConversationStatusTransitionResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "closed";
+        };
         /** ConversationThreadRequest */
         ConversationThreadRequest: {
             channel_kind: components["schemas"]["ChannelKind"];
@@ -11310,6 +11336,12 @@ export interface components {
             channel?: components["schemas"]["ChannelKind"];
             /** Entity Id */
             entity_id?: string | null;
+            /**
+             * Force New
+             * @description Outbound thread-keyed channels (sms/imessage) only: close any existing ACTIVE conversation on the computed provider thread (recipient + use case) before dispatching, so the opener materializes a brand-new conversation instead of continuing the old thread. Rejected with 422 on channel=web — every web create already starts a new conversation, so force_new is meaningless there.
+             * @default false
+             */
+            force_new?: boolean;
             /** @description Optional context steering what the agent opens with on an outbound conversation. */
             instruction?: components["schemas"]["BackgroundString"] | null;
             /** @description Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web. */
