@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.94.1] - 2026-07-10
+
+### Maintenance
+
+- lock in latest-model id passthrough; bump PR-review orchestrator to claude-opus-4-7 (#414)
+
 ## [0.94.0] - 2026-07-10
 
 ### Features
