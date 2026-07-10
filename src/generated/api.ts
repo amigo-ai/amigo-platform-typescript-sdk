@@ -5334,6 +5334,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/services/{service_id}/dynamic_behaviors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List dynamic behaviors for a service */
+        get: operations["list-dynamic-behaviors"];
+        put?: never;
+        /** Create a dynamic behavior */
+        post: operations["create-dynamic-behavior"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/services/{service_id}/dynamic_behaviors/{behavior_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a dynamic behavior */
+        get: operations["get-dynamic-behavior"];
+        /** Replace a dynamic behavior (full replace; triggers re-embedded) */
+        put: operations["replace-dynamic-behavior"];
+        post?: never;
+        /** Delete a dynamic behavior */
+        delete: operations["delete-dynamic-behavior"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/services/{service_id}/text-turn": {
         parameters: {
             query?: never;
@@ -8842,6 +8879,42 @@ export interface components {
              */
             status: string;
         };
+        /** BehaviorResponse */
+        BehaviorResponse: {
+            /** Cooldown Turns */
+            cooldown_turns: number;
+            /** Created At */
+            created_at?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            instruction_action?: components["schemas"]["InstructionActionBody"] | null;
+            /** Name */
+            name: string;
+            /** Priority */
+            priority: number;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            tool_action?: components["schemas"]["ToolActionBody"] | null;
+            /** Triggers */
+            triggers: components["schemas"]["Trigger"][];
+            /** Updated At */
+            updated_at?: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
         /** BillingDashboardResponse */
         BillingDashboardResponse: {
             /**
@@ -11340,6 +11413,33 @@ export interface components {
             permissions: string[];
             /** Role */
             role: string;
+        };
+        /** CreateBehaviorRequest */
+        CreateBehaviorRequest: {
+            /**
+             * Cooldown Turns
+             * @default 0
+             */
+            cooldown_turns?: number;
+            description?: components["schemas"]["DescriptionString"] | null;
+            /**
+             * Enabled
+             * @default true
+             */
+            enabled?: boolean;
+            instruction_action?: components["schemas"]["InstructionActionBody"] | null;
+            name: components["schemas"]["NameString"];
+            /**
+             * Priority
+             * @default 0
+             */
+            priority?: number;
+            tool_action?: components["schemas"]["ToolActionBody"] | null;
+            /**
+             * Triggers
+             * @description Natural-language utterances that should activate this behavior (embedded on write).
+             */
+            triggers: string[];
         };
         /** CreateContextGraphRequest */
         CreateContextGraphRequest: {
@@ -16184,6 +16284,17 @@ export interface components {
              */
             status: "delivered" | "queued_no_subscriber";
         };
+        /** InstructionActionBody */
+        InstructionActionBody: {
+            /** Instruction */
+            instruction: string;
+            /**
+             * Overrides Guidelines
+             * @description When true, REPLACES the state guidelines for the turn instead of merging (explicit opt-in).
+             * @default false
+             */
+            overrides_guidelines?: boolean;
+        };
         /** InstrumentationScope */
         InstrumentationScope: {
             /** Name */
@@ -17075,6 +17186,15 @@ export interface components {
              * @description Maximum allowed upload size in bytes.
              */
             max_upload_bytes: number;
+        };
+        /** ListBehaviorsResponse */
+        ListBehaviorsResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["BehaviorResponse"][];
         };
         /** ListSimulationSuiteRunsResponse */
         ListSimulationSuiteRunsResponse: {
@@ -21312,7 +21432,7 @@ export interface components {
              * @description Delivery status
              * @enum {string}
              */
-            status: "delivered" | "failed";
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
         };
         /**
          * Service
@@ -24756,6 +24876,16 @@ export interface components {
              */
             unit?: "seconds";
         };
+        /** ToolActionBody */
+        ToolActionBody: {
+            /**
+             * Overrides Existing
+             * @default false
+             */
+            overrides_existing?: boolean;
+            /** Tool Ids */
+            tool_ids: string[];
+        };
         /** ToolCall */
         ToolCall: {
             /** Call Id */
@@ -25410,6 +25540,21 @@ export interface components {
             timestamp: string | null;
             /** Transcript */
             transcript: string;
+        };
+        /** Trigger */
+        Trigger: {
+            /**
+             * Embedded
+             * @description False when the embedding write failed — re-save to re-embed.
+             */
+            embedded: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Trigger Text */
+            trigger_text: string;
         };
         /** TriggerCompletedEvent */
         TriggerCompletedEvent: {
@@ -27664,6 +27809,8 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
+        /** @enum {string} */
+        src__routes__dynamic_behaviors___SortField: "created_at" | "name" | "priority";
         /** ListResponse */
         src__routes__external_role_assignments__ListResponse: {
             /** Continuation Token */
@@ -41706,6 +41853,235 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "list-dynamic-behaviors": {
+        parameters: {
+            query?: {
+                limit?: number;
+                continuation_token?: unknown;
+                enabled?: boolean | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": string[];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ListBehaviorsResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "create-dynamic-behavior": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBehaviorRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BehaviorResponse"];
+                };
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-dynamic-behavior": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+                behavior_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BehaviorResponse"];
+                };
+            };
+            /** @description Behavior not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "replace-dynamic-behavior": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+                behavior_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBehaviorRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BehaviorResponse"];
+                };
+            };
+            /** @description Behavior not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "delete-dynamic-behavior": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+                behavior_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Behavior not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

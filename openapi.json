@@ -2627,6 +2627,115 @@
         "title": "BatchRow",
         "type": "object"
       },
+      "BehaviorResponse": {
+        "properties": {
+          "cooldown_turns": {
+            "title": "Cooldown Turns",
+            "type": "integer"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "enabled": {
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "instruction_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionActionBody"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          },
+          "service_id": {
+            "format": "uuid",
+            "title": "Service Id",
+            "type": "string"
+          },
+          "tool_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolActionBody"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "triggers": {
+            "items": {
+              "$ref": "#/components/schemas/Trigger"
+            },
+            "title": "Triggers",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          },
+          "workspace_id": {
+            "format": "uuid",
+            "title": "Workspace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "workspace_id",
+          "service_id",
+          "name",
+          "priority",
+          "cooldown_turns",
+          "enabled",
+          "triggers"
+        ],
+        "title": "BehaviorResponse",
+        "type": "object"
+      },
       "BillingDashboardResponse": {
         "properties": {
           "current_period_total": {
@@ -8940,6 +9049,80 @@
           "created_by_credential_id"
         ],
         "title": "CreateApiKeyResponse",
+        "type": "object"
+      },
+      "CreateBehaviorRequest": {
+        "properties": {
+          "cooldown_turns": {
+            "default": 0,
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Cooldown Turns",
+            "type": "integer"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DescriptionString"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "enabled": {
+            "default": true,
+            "title": "Enabled",
+            "type": "boolean"
+          },
+          "instruction_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InstructionActionBody"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "$ref": "#/components/schemas/NameString"
+          },
+          "priority": {
+            "default": 0,
+            "maximum": 1000.0,
+            "minimum": -1000.0,
+            "title": "Priority",
+            "type": "integer"
+          },
+          "tool_action": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolActionBody"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "triggers": {
+            "description": "Natural-language utterances that should activate this behavior (embedded on write).",
+            "items": {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Triggers",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "triggers"
+        ],
+        "title": "CreateBehaviorRequest",
         "type": "object"
       },
       "CreateContextGraphRequest": {
@@ -20995,6 +21178,27 @@
         "title": "InjectResponse",
         "type": "object"
       },
+      "InstructionActionBody": {
+        "properties": {
+          "instruction": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Instruction",
+            "type": "string"
+          },
+          "overrides_guidelines": {
+            "default": false,
+            "description": "When true, REPLACES the state guidelines for the turn instead of merging (explicit opt-in).",
+            "title": "Overrides Guidelines",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "instruction"
+        ],
+        "title": "InstructionActionBody",
+        "type": "object"
+      },
       "InstrumentationScope": {
         "properties": {
           "name": {
@@ -22827,6 +23031,30 @@
           "max_upload_bytes"
         ],
         "title": "LinkInfoResponse",
+        "type": "object"
+      },
+      "ListBehaviorsResponse": {
+        "properties": {
+          "continuation_token": {
+            "title": "Continuation Token"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/BehaviorResponse"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "has_more"
+        ],
+        "title": "ListBehaviorsResponse",
         "type": "object"
       },
       "ListSimulationSuiteRunsResponse": {
@@ -32851,7 +33079,10 @@
             "description": "Delivery status",
             "enum": [
               "delivered",
-              "failed"
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
             ],
             "title": "Status",
             "type": "string"
@@ -40854,6 +41085,31 @@
         "title": "TimelineTimebase",
         "type": "object"
       },
+      "ToolActionBody": {
+        "properties": {
+          "overrides_existing": {
+            "default": false,
+            "title": "Overrides Existing",
+            "type": "boolean"
+          },
+          "tool_ids": {
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Tool Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tool_ids"
+        ],
+        "title": "ToolActionBody",
+        "type": "object"
+      },
       "ToolCall": {
         "properties": {
           "call_id": {
@@ -42147,6 +42403,31 @@
           "confidence"
         ],
         "title": "TranscriptSegment",
+        "type": "object"
+      },
+      "Trigger": {
+        "properties": {
+          "embedded": {
+            "description": "False when the embedding write failed \u2014 re-save to re-embed.",
+            "title": "Embedded",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "trigger_text": {
+            "title": "Trigger Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "trigger_text",
+          "embedded"
+        ],
+        "title": "Trigger",
         "type": "object"
       },
       "TriggerCompletedEvent": {
@@ -48545,6 +48826,14 @@
         ],
         "title": "ConversationSummary",
         "type": "object"
+      },
+      "src__routes__dynamic_behaviors___SortField": {
+        "enum": [
+          "created_at",
+          "name",
+          "priority"
+        ],
+        "type": "string"
       },
       "src__routes__external_role_assignments__ListResponse": {
         "properties": {
@@ -73199,6 +73488,368 @@
         "summary": "Update a service",
         "tags": [
           "Services"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/services/{service_id}/dynamic_behaviors": {
+      "get": {
+        "operationId": "list-dynamic-behaviors",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "exclusiveMinimum": 0,
+              "maximum": 200,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "continuation_token",
+            "required": false,
+            "schema": {
+              "title": "Continuation Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "enabled",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Enabled"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "default": [],
+                "items": {
+                  "type": "string"
+                },
+                "title": "Sort By",
+                "type": "array"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListBehaviorsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "List dynamic behaviors for a service",
+        "tags": [
+          "Dynamic Behaviors"
+        ]
+      },
+      "post": {
+        "operationId": "create-dynamic-behavior",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBehaviorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BehaviorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Create a dynamic behavior",
+        "tags": [
+          "Dynamic Behaviors"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/services/{service_id}/dynamic_behaviors/{behavior_id}": {
+      "delete": {
+        "operationId": "delete-dynamic-behavior",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "behavior_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Behavior Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Behavior not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Delete a dynamic behavior",
+        "tags": [
+          "Dynamic Behaviors"
+        ]
+      },
+      "get": {
+        "operationId": "get-dynamic-behavior",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "behavior_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Behavior Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BehaviorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Behavior not found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Get a dynamic behavior",
+        "tags": [
+          "Dynamic Behaviors"
+        ]
+      },
+      "put": {
+        "operationId": "replace-dynamic-behavior",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "service_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Service Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "behavior_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Behavior Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBehaviorRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BehaviorResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Behavior not found"
+          },
+          "422": {
+            "description": "Validation error"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Replace a dynamic behavior (full replace; triggers re-embedded)",
+        "tags": [
+          "Dynamic Behaviors"
         ]
       }
     },
