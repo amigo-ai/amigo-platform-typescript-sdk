@@ -8352,6 +8352,12 @@
             "title": "Status",
             "type": "string"
           },
+          "turn_count": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
           "workspace_id": {
             "format": "uuid",
             "title": "Workspace Id",
@@ -38898,6 +38904,28 @@
       },
       "SurfaceResponse": {
         "properties": {
+          "archive_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archive Reason"
+          },
+          "archived_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Archived At"
+          },
           "channel": {
             "anyOf": [
               {
@@ -39026,6 +39054,40 @@
               }
             ],
             "title": "Resource Type"
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          },
+          "reviewed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed At"
+          },
+          "reviewed_by": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reviewed By"
           },
           "status": {
             "$ref": "#/components/schemas/SurfaceStatus"
@@ -43131,6 +43193,34 @@
           "turn_count": {
             "title": "Turn Count",
             "type": "integer"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Identifier of the user exchange this turn belongs to \u2014 identical to the ``turn_id`` on the non-streaming ``POST /turns`` response and on this conversation's history turns, so a streaming client can anchor durable per-turn artifacts (e.g. feedback) without a follow-up read. Stamped by platform-api at the proxy boundary (agent-engine frames do not carry it). Null when the conversation has no user exchange yet (a greeting kickoff stream on a fresh conversation).",
+            "title": "Turn Id"
+          },
+          "turn_index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Zero-based ordinal of the user exchange (0 = first user turn). Derived server-side; null exactly when ``turn_id`` is null.",
+            "title": "Turn Index"
           }
         },
         "required": [
@@ -51980,7 +52070,7 @@
             "description": "Workspace not found."
           },
           "422": {
-            "description": "Invalid request body."
+            "description": "Invalid request body, or region provided (immutable)."
           }
         },
         "summary": "Update a workspace",
@@ -55551,7 +55641,7 @@
     },
     "/v1/{workspace_id}/audit": {
       "get": {
-        "description": "List audit events with filters and pagination.\n\nPermissions: admin, owner",
+        "description": "List audit events with filters and pagination.\n\nPermissions: admin, owner (``Audit.view``)",
         "operationId": "list-audit-events",
         "parameters": [
           {
@@ -55770,7 +55860,7 @@
     },
     "/v1/{workspace_id}/audit/entity/{entity_id}/access-log": {
       "get": {
-        "description": "Per-entity access history \u2014 all audit events for a specific resource.\n\nPermissions: admin, owner",
+        "description": "Per-entity access history \u2014 all audit events for a specific resource.\n\nPermissions: admin, owner (``Audit.view``)",
         "operationId": "get-entity-access-log",
         "parameters": [
           {
@@ -55895,7 +55985,7 @@
     },
     "/v1/{workspace_id}/audit/export": {
       "post": {
-        "description": "Export audit events to S3 as NDJSON. Returns a presigned download URL.\n\nPermissions: admin, owner",
+        "description": "Export audit events to the UC Volume as NDJSON.\n\nReturns a platform-api proxy download path (UC Volumes have no presigned\nURLs \u2014 ``download_audit_export`` streams the bytes).\n\nPermissions: admin, owner",
         "operationId": "create-audit-export",
         "parameters": [
           {
@@ -55952,7 +56042,7 @@
     },
     "/v1/{workspace_id}/audit/exports": {
       "get": {
-        "description": "List past audit exports with presigned download URLs.\n\nPermissions: admin, owner",
+        "description": "List past audit exports with platform-api proxy download paths.\n\nPermissions: admin, owner",
         "operationId": "list-audit-exports",
         "parameters": [
           {
@@ -56011,9 +56101,60 @@
         ]
       }
     },
+    "/v1/{workspace_id}/audit/exports/download/{filename}": {
+      "get": {
+        "description": "Proxy-download an audit export artifact (NDJSON) from the UC Volume.\n\n``filename`` must be a bare export filename (``{export_id}.ndjson``);\npath separators and traversal sequences are rejected with 422. The volume\nkey is reconstructed server-side as ``exports/{workspace_id}/{filename}``,\nso a caller can never reach outside its own workspace prefix. The bytes\nare streamed volume\u2192client without buffering the artifact in memory.\n\nPermissions: admin, owner (``Audit.export`` \u2014 same gate as create/list).",
+        "operationId": "download-audit-export",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "filename",
+            "required": true,
+            "schema": {
+              "title": "Filename",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/x-ndjson": {}
+            },
+            "description": "The export artifact, streamed as NDJSON."
+          },
+          "404": {
+            "description": "Audit export not found"
+          },
+          "422": {
+            "description": "Invalid export filename"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Download Audit Export",
+        "tags": [
+          "Audit"
+        ]
+      }
+    },
     "/v1/{workspace_id}/audit/phi-access": {
       "get": {
-        "description": "PHI access report \u2014 who accessed what patient data, when, from where.\n\nRequired for HIPAA breach investigation (\u00a7164.312(b)).\n\nPermissions: admin, owner",
+        "description": "PHI access report \u2014 who accessed what patient data, when, from where.\n\nRequired for HIPAA breach investigation (\u00a7164.312(b)).\n\nPermissions: admin, owner (``Audit.view``)",
         "operationId": "get-phi-access-report",
         "parameters": [
           {
@@ -56144,7 +56285,7 @@
     },
     "/v1/{workspace_id}/audit/summary": {
       "get": {
-        "description": "Audit summary statistics for compliance dashboard.\n\nPermissions: admin, owner",
+        "description": "Audit summary statistics for compliance dashboard.\n\nPermissions: admin, owner (``Audit.view``)",
         "operationId": "get-audit-summary",
         "parameters": [
           {
@@ -74120,7 +74261,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace gap scanner settings.\n\nPartial updates supported \u2014 only provided fields are changed.\nRequirements list is replaced entirely when provided (not merged).\n\nPermissions: admin, owner.",
+        "description": "Update the workspace gap scanner settings.\n\nPartial updates supported \u2014 only provided fields are changed.\nRequirements list is replaced entirely when provided (not merged).\n\nPermissions: admin, owner (enforced via ``Workspace.update``, matching\nthe outreach-settings sibling).",
         "operationId": "update-gap-scanner-settings",
         "parameters": [
           {
@@ -74173,7 +74314,7 @@
     },
     "/v1/{workspace_id}/settings/gap-scanner/preview": {
       "post": {
-        "description": "Dry-run gap detection \u2014 returns entities with missing fields without creating surfaces.\n\nProxies to connector-runner /internal/gap-scanner/preview.\n\nPermissions: admin, owner.",
+        "description": "Dry-run gap detection \u2014 returns entities with missing fields without creating surfaces.\n\nProxies to connector-runner /internal/gap-scanner/preview.\n\nPermissions: admin, owner (enforced via ``Workspace.update``).",
         "operationId": "gap-scanner-preview",
         "parameters": [
           {
@@ -74242,7 +74383,7 @@
     },
     "/v1/{workspace_id}/settings/gap-scanner/scan": {
       "post": {
-        "description": "Trigger one scan tick immediately \u2014 creates surfaces for detected gaps.\n\nProxies to connector-runner /internal/gap-scanner/scan.\n\nPermissions: admin, owner.",
+        "description": "Trigger one scan tick immediately \u2014 creates surfaces for detected gaps.\n\nProxies to connector-runner /internal/gap-scanner/scan.\n\nPermissions: admin, owner (enforced via ``Workspace.update`` \u2014 this\ncreates patient-facing surfaces, so it must not be reachable below\nadmin tier).",
         "operationId": "gap-scanner-scan",
         "parameters": [
           {
@@ -74495,7 +74636,7 @@
         ]
       },
       "put": {
-        "description": "Update the workspace retention policy.\n\nPartial updates supported \u2014 only provided fields are changed.\nAdvisory in v1: policy is stored and displayed but no automated\ndeletion is performed. Legal hold overrides all retention.\n\nPermissions: admin, owner.",
+        "description": "Update the workspace retention policy.\n\nPartial updates supported \u2014 only provided fields are changed.\nAdvisory in v1: policy is stored and displayed but no automated\ndeletion is performed. Legal hold overrides all retention.\n\nPermissions: admin, owner (``Workspace.update``).",
         "operationId": "update-retention-policy",
         "parameters": [
           {
