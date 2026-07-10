@@ -139,4 +139,34 @@ describe('ActionsResource', () => {
     expect(result.result).toBe('Appointment found for 2026-02-01')
     expect(result.duration_ms).toBe(245)
   })
+
+  it('create() passes latest model ids through as opaque strings', async () => {
+    let capturedBody: Record<string, unknown> | undefined
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+        // The client dispatches a Request object, so the body lives on it (not
+        // on `init`). Fall back to `init.body` for the string-input case.
+        let raw: string | undefined
+        if (input instanceof Request) {
+          raw = await input.clone().text()
+        } else if (typeof init?.body === 'string') {
+          raw = init.body
+        }
+        capturedBody = raw ? (JSON.parse(raw) as Record<string, unknown>) : undefined
+        return Response.json({ ...ACTION_FIXTURE, model: 'claude-sonnet-5' }, { status: 201 })
+      },
+    })
+    const result = await capturing.actions.create({
+      name: 'Appointment Lookup',
+      description: 'Look up patient appointments',
+      slug: 'appointment_lookup',
+      input_schema: {},
+      model: 'claude-sonnet-5',
+    })
+    expect(capturedBody).toBeDefined()
+    expect(capturedBody?.model).toBe('claude-sonnet-5')
+    expect(result.model).toBe('claude-sonnet-5')
+  })
 })

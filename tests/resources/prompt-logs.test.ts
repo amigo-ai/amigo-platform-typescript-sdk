@@ -109,6 +109,25 @@ describe('PromptLogsResource', () => {
     expect(page.resolved_conversation_kind).toBe('call')
   })
 
+  it('passes latest model ids through as opaque strings', async () => {
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch(() =>
+        Response.json({
+          items: [{ ...ENTRY_FIXTURE, llm_model: 'gpt-5.6-sol' }],
+          count: 1,
+          has_more: false,
+        }),
+      ),
+    })
+
+    const page = await client.promptLogs.list()
+
+    expect(page.items).toHaveLength(1)
+    expect(page.items[0]?.llm_model).toBe('gpt-5.6-sol')
+  })
+
   it('listAutoPaging walks next_offset until has_more is false', async () => {
     const pages = [
       {
