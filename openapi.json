@@ -8352,6 +8352,12 @@
             "title": "Status",
             "type": "string"
           },
+          "turn_count": {
+            "default": 0,
+            "minimum": 0.0,
+            "title": "Turn Count",
+            "type": "integer"
+          },
           "workspace_id": {
             "format": "uuid",
             "title": "Workspace Id",
@@ -43131,6 +43137,34 @@
           "turn_count": {
             "title": "Turn Count",
             "type": "integer"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Identifier of the user exchange this turn belongs to \u2014 identical to the ``turn_id`` on the non-streaming ``POST /turns`` response and on this conversation's history turns, so a streaming client can anchor durable per-turn artifacts (e.g. feedback) without a follow-up read. Stamped by platform-api at the proxy boundary (agent-engine frames do not carry it). Null when the conversation has no user exchange yet (a greeting kickoff stream on a fresh conversation).",
+            "title": "Turn Id"
+          },
+          "turn_index": {
+            "anyOf": [
+              {
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Zero-based ordinal of the user exchange (0 = first user turn). Derived server-side; null exactly when ``turn_id`` is null.",
+            "title": "Turn Index"
           }
         },
         "required": [

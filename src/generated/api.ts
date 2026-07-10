@@ -11048,6 +11048,11 @@ export interface components {
              */
             status: "active";
             /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
+            /**
              * Workspace Id
              * Format: uuid
              */
@@ -25803,6 +25808,18 @@ export interface components {
             status: string;
             /** Turn Count */
             turn_count: number;
+            /**
+             * Turn Id
+             * @description Identifier of the user exchange this turn belongs to — identical to the ``turn_id`` on the non-streaming ``POST /turns`` response and on this conversation's history turns, so a streaming client can anchor durable per-turn artifacts (e.g. feedback) without a follow-up read. Stamped by platform-api at the proxy boundary (agent-engine frames do not carry it). Null when the conversation has no user exchange yet (a greeting kickoff stream on a fresh conversation).
+             * @default null
+             */
+            turn_id?: string | null;
+            /**
+             * Turn Index
+             * @description Zero-based ordinal of the user exchange (0 = first user turn). Derived server-side; null exactly when ``turn_id`` is null.
+             * @default null
+             */
+            turn_index?: number | null;
         };
         /**
          * TurnErrorEvent
