@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.92.0] - 2026-07-10
+
+### Features
+
+- switchChannel wrapper + ChannelKind export + README fix (#403)
+
+### Maintenance
+
+- sync openapi with platform (drop correction_categories + retired review-queue) (#402)
+
 ## [0.91.0] - 2026-07-09
 
 ### Documentation
