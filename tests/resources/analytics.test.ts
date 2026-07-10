@@ -274,3 +274,69 @@ describe('AnalyticsResource', () => {
     expect(result.delta).toBeDefined()
   })
 })
+
+function capturingClient() {
+  const captured: { url?: string } = {}
+  const client = new AmigoClient({
+    apiKey: TEST_API_KEY,
+    workspaceId: TEST_WORKSPACE_ID,
+    fetch: async (input: string | URL | Request): Promise<Response> => {
+      captured.url = input instanceof Request ? input.url : input.toString()
+      return Response.json({})
+    },
+  })
+  return { client, captured }
+}
+
+describe('AnalyticsResource surfaces analytics param forwarding', () => {
+  it('forwards completion-rates filters (date range, interval, entity)', async () => {
+    const { client, captured } = capturingClient()
+    await client.analytics.surfaces.getCompletionRates({
+      days: 30,
+      date_from: '2026-06-01',
+      date_to: '2026-06-30',
+      interval: '1d',
+      entity_id: 'ent-001',
+    })
+    const query = new URL(captured.url!).searchParams
+    expect(query.get('days')).toBe('30')
+    expect(query.get('date_from')).toBe('2026-06-01')
+    expect(query.get('date_to')).toBe('2026-06-30')
+    expect(query.get('interval')).toBe('1d')
+    expect(query.get('entity_id')).toBe('ent-001')
+  })
+
+  it('forwards channel-effectiveness date range', async () => {
+    const { client, captured } = capturingClient()
+    await client.analytics.surfaces.getChannelEffectiveness({
+      days: 14,
+      date_from: '2026-06-01',
+      date_to: '2026-06-14',
+    })
+    const query = new URL(captured.url!).searchParams
+    expect(query.get('days')).toBe('14')
+    expect(query.get('date_from')).toBe('2026-06-01')
+    expect(query.get('date_to')).toBe('2026-06-14')
+  })
+
+  it('forwards field-abandonment date range', async () => {
+    const { client, captured } = capturingClient()
+    await client.analytics.surfaces.getFieldAbandonment({
+      days: 7,
+      date_from: '2026-06-01',
+      date_to: '2026-06-07',
+    })
+    const query = new URL(captured.url!).searchParams
+    expect(query.get('days')).toBe('7')
+    expect(query.get('date_from')).toBe('2026-06-01')
+    expect(query.get('date_to')).toBe('2026-06-07')
+  })
+
+  it('forwards the entity surface-history limit', async () => {
+    const { client, captured } = capturingClient()
+    await client.analytics.surfaces.getForEntity('ent-001', { limit: 5 })
+    const url = new URL(captured.url!)
+    expect(url.pathname).toBe(`/v1/${TEST_WORKSPACE_ID}/analytics/surfaces/entity/ent-001`)
+    expect(url.searchParams.get('limit')).toBe('5')
+  })
+})

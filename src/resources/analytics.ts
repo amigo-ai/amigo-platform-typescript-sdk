@@ -1,4 +1,18 @@
+import type { operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
+
+export type SurfaceCompletionRatesParams = NonNullable<
+  operations['get-surface-completion-rates']['parameters']['query']
+>
+export type SurfaceChannelEffectivenessParams = NonNullable<
+  operations['get-surface-channel-effectiveness']['parameters']['query']
+>
+export type SurfaceFieldAbandonmentParams = NonNullable<
+  operations['get-surface-field-abandonment']['parameters']['query']
+>
+export type EntitySurfaceHistoryParams = NonNullable<
+  operations['get-entity-surface-history']['parameters']['query']
+>
 
 /**
  * Analytics — aggregate metrics about calls, agents, quality, and usage.
@@ -176,21 +190,21 @@ export class AnalyticsResource extends WorkspaceScopedResource {
    * surfaces analytics tab.
    */
   readonly surfaces = {
-    getCompletionRates: async (params?: { days?: number }) =>
+    getCompletionRates: async (params?: SurfaceCompletionRatesParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/analytics/surfaces/completion-rates', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
         }),
       ),
 
-    getChannelEffectiveness: async (params?: { days?: number }) =>
+    getChannelEffectiveness: async (params?: SurfaceChannelEffectivenessParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/analytics/surfaces/channel-effectiveness', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
         }),
       ),
 
-    getFieldAbandonment: async (params?: { days?: number }) =>
+    getFieldAbandonment: async (params?: SurfaceFieldAbandonmentParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/analytics/surfaces/field-abandonment', {
           params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -198,10 +212,10 @@ export class AnalyticsResource extends WorkspaceScopedResource {
       ),
 
     /** Per-entity surfaces analytics (which surfaces a specific entity has seen) */
-    getForEntity: async (entityId: string) =>
+    getForEntity: async (entityId: string, params?: EntitySurfaceHistoryParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/analytics/surfaces/entity/{entity_id}', {
-          params: { path: { workspace_id: this.workspaceId, entity_id: entityId } },
+          params: { path: { workspace_id: this.workspaceId, entity_id: entityId }, query: params },
         }),
       ),
   }

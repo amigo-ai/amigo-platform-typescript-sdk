@@ -1,9 +1,13 @@
-import type { components } from '../generated/api.js'
+import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
+export type ListTriggersParams = ListParams &
+  NonNullable<operations['list-triggers']['parameters']['query']>
+export type FireTriggerRequest = components['schemas']['FireTriggerRequest']
+
 export class TriggersResource extends WorkspaceScopedResource {
-  async list(params?: ListParams) {
+  async list(params?: ListTriggersParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/triggers', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -11,7 +15,7 @@ export class TriggersResource extends WorkspaceScopedResource {
     )
   }
 
-  listAutoPaging(params?: ListParams) {
+  listAutoPaging(params?: ListTriggersParams) {
     return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
   }
 
@@ -47,10 +51,20 @@ export class TriggersResource extends WorkspaceScopedResource {
     })
   }
 
-  async fire(triggerId: string) {
+  /**
+   * Fire a trigger immediately. The optional body carries per-fire `input`
+   * overrides merged into the trigger's `input_template` at fire time.
+   *
+   * The spec types the body as `FireTriggerRequest | null`, but the `null`
+   * branch only matters when the caller wants to *explicitly* clear the
+   * body. Modeling as `body?: FireTriggerRequest` keeps the SDK surface
+   * consistent with the other optional-body POST wrappers.
+   */
+  async fire(triggerId: string, body?: FireTriggerRequest) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/triggers/{trigger_id}/fire', {
         params: { path: { workspace_id: this.workspaceId, trigger_id: triggerId } },
+        body,
       }),
     )
   }
