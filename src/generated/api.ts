@@ -11130,6 +11130,16 @@ export interface components {
              * @default []
              */
             tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
+            /**
+             * Turn Id
+             * @description Stable identifier of the user exchange this message belongs to, derived deterministically from (conversation_id, turn_index) — identical across ``POST /turns`` responses and re-reads of the conversation history. User and agent messages from the same exchange share this value. Null on messages that precede the first user turn (proactive greetings, channel-event preludes).
+             */
+            turn_id?: string | null;
+            /**
+             * Turn Index
+             * @description Zero-based ordinal of the user exchange this message belongs to (0 = first user turn). Derived server-side from the conversation's user-turn count — never stored. Null exactly when ``turn_id`` is null.
+             */
+            turn_index?: number | null;
         };
         /** ConversationTurnAvailableAction */
         ConversationTurnAvailableAction: {
@@ -21524,7 +21534,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime" | "atlas" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -21594,7 +21604,7 @@ export interface components {
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime" | "atlas" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -25960,8 +25970,11 @@ export interface components {
              * @default []
              */
             tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
-            /** Turn Id */
-            turn_id: string;
+            /**
+             * Turn Id
+             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
+             */
+            turn_id: string | null;
         };
         TurnStreamEvent: components["schemas"]["TurnTokenEvent"] | components["schemas"]["TurnToolCallStartedEvent"] | components["schemas"]["TurnToolCallCompletedEvent"] | components["schemas"]["TurnThinkingEvent"] | components["schemas"]["TurnMessageEvent"] | components["schemas"]["TurnDoneEvent"] | components["schemas"]["TurnErrorEvent"];
         /** TurnThinkingEvent */
@@ -26717,7 +26730,7 @@ export interface components {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
             /** Session Provider */
-            session_provider?: ("inhouse" | "openai_realtime" | "atlas" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
             /**
              * Similarity Boost
              * @default 0

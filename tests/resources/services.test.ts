@@ -24,7 +24,7 @@ const SERVICE_FIXTURE = {
   tags: [],
   tool_capacity: 5,
   voice_config: {
-    session_provider: 'inhouse',
+    session_provider: 'amigo',
     tts_provider: 'cartesia',
   },
   created_at: '2026-01-01T00:00:00Z',
@@ -56,7 +56,7 @@ const client = new AmigoClient({
         ...SERVICE_FIXTURE,
         name: 'Updated Service',
         is_active: false,
-        voice_config: { session_provider: 'atlas', tts_provider: 'groq' },
+        voice_config: { session_provider: 'gpt_realtime', tts_provider: 'groq' },
       })
     },
 
@@ -71,7 +71,7 @@ describe('ServicesResource', () => {
   })
 
   it('creates a service', async () => {
-    const sessionProvider = 'inhouse' satisfies VoiceSessionProvider
+    const sessionProvider = 'amigo' satisfies VoiceSessionProvider
     const ttsProvider = 'cartesia' satisfies TtsProvider
     const body = {
       name: 'Scheduling Service',
@@ -113,7 +113,7 @@ describe('ServicesResource', () => {
   })
 
   it('updates a service', async () => {
-    const sessionProvider = 'atlas' satisfies VoiceSessionProvider
+    const sessionProvider = 'gpt_realtime' satisfies VoiceSessionProvider
     const ttsProvider = 'groq' satisfies TtsProvider
     const body = {
       name: 'Updated Service',
@@ -126,7 +126,7 @@ describe('ServicesResource', () => {
     const result = await client.services.update(SERVICE_ID, body)
     expect(result.name).toBe('Updated Service')
     expect(result.is_active).toBe(false)
-    expect(result.voice_config?.session_provider).toBe('atlas')
+    expect(result.voice_config?.session_provider).toBe('gpt_realtime')
     expect(lastUpdateBody).toMatchObject({
       voice_config: {
         session_provider: sessionProvider,

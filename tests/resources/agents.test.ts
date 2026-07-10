@@ -76,7 +76,7 @@ const client = new AmigoClient({
         ...AGENT_VERSION_FIXTURE,
         voice_config: {
           voice_id: 'voice-abc123',
-          session_provider: 'openai_realtime',
+          session_provider: 'gpt_realtime',
           tts_provider: 'elevenlabs',
         },
       })
@@ -153,7 +153,7 @@ describe('AgentsResource', () => {
   })
 
   it('creates an agent version', async () => {
-    const sessionProvider = 'openai_realtime' satisfies VoiceSessionProvider
+    const sessionProvider = 'gpt_realtime' satisfies VoiceSessionProvider
     const ttsProvider = 'elevenlabs' satisfies TtsProvider
     const body: CreateAgentVersionRequest = {
       name: 'My Agent v2',
@@ -182,7 +182,7 @@ describe('AgentsResource', () => {
     const result = await client.agents.createVersion(AGENT_FIXTURE.id, body)
     expect(result.version).toBe(2)
     expect(result.agent_id).toBe(AGENT_FIXTURE.id)
-    expect(result.voice_config?.session_provider).toBe('openai_realtime')
+    expect(result.voice_config?.session_provider).toBe('gpt_realtime')
     expect(result.voice_config?.tts_provider).toBe('elevenlabs')
     expect(lastCreateVersionBody).toMatchObject({
       voice_config: {

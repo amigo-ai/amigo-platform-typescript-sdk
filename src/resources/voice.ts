@@ -18,12 +18,14 @@ export type VoiceSettingsResponse = components['schemas']['VoiceSettingsResponse
 type ExhaustiveProviderList<Union extends string, Values extends readonly Union[]> =
   Exclude<Union, Values[number]> extends never ? Values : never
 
+// Voice MODEL FAMILIES (2026-07-09 rename): amigo = Amigo's own pipeline (the default),
+// gpt_realtime = OpenAI's GPT-Realtime family, gpt_live = OpenAI's GPT-Live full-duplex
+// family (dark until its API is GA — accepted by the contract, never selected by default).
+// Families name models; runtimes are platform-internal. Legacy values
+// (inhouse/atlas/openai_realtime) are normalized server-side and never appear here.
 const voiceSessionProviders = [
-  'inhouse',
-  'openai_realtime',
-  'atlas',
-  // GPT-Live full-duplex family on the Atlas runtime. Dark until the GPT-Live API is
-  // GA — accepted by the platform config contract, never selected by default.
+  'amigo',
+  'gpt_realtime',
   'gpt_live',
 ] as const satisfies readonly VoiceSessionProvider[]
 export const VOICE_SESSION_PROVIDERS = voiceSessionProviders satisfies ExhaustiveProviderList<

@@ -8525,6 +8525,32 @@
             },
             "title": "Tool Calls",
             "type": "array"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Stable identifier of the user exchange this message belongs to, derived deterministically from (conversation_id, turn_index) \u2014 identical across ``POST /turns`` responses and re-reads of the conversation history. User and agent messages from the same exchange share this value. Null on messages that precede the first user turn (proactive greetings, channel-event preludes).",
+            "title": "Turn Id"
+          },
+          "turn_index": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zero-based ordinal of the user exchange this message belongs to (0 = first user turn). Derived server-side from the conversation's user-turn count \u2014 never stored. Null exactly when ``turn_id`` is null.",
+            "title": "Turn Index"
           }
         },
         "required": [
@@ -33422,9 +33448,8 @@
             "anyOf": [
               {
                 "enum": [
-                  "inhouse",
-                  "openai_realtime",
-                  "atlas",
+                  "amigo",
+                  "gpt_realtime",
                   "gpt_live"
                 ],
                 "type": "string"
@@ -33705,9 +33730,8 @@
             "anyOf": [
               {
                 "enum": [
-                  "inhouse",
-                  "openai_realtime",
-                  "atlas",
+                  "amigo",
+                  "gpt_realtime",
                   "gpt_live"
                 ],
                 "type": "string"
@@ -43419,8 +43443,17 @@
             "type": "array"
           },
           "turn_id": {
-            "title": "Turn Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Identifier of the user exchange this turn created \u2014 or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).",
+            "title": "Turn Id"
           }
         },
         "required": [
@@ -46050,9 +46083,8 @@
             "anyOf": [
               {
                 "enum": [
-                  "inhouse",
-                  "openai_realtime",
-                  "atlas",
+                  "amigo",
+                  "gpt_realtime",
                   "gpt_live"
                 ],
                 "type": "string"
