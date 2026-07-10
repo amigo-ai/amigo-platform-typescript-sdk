@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.95.0] - 2026-07-10
+
+### Features
+
+- expose is_active filter, fire input override, surface-analytics params (#412)
+
 ## [0.94.1] - 2026-07-10
 
 ### Maintenance
