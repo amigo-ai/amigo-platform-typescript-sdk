@@ -33424,7 +33424,8 @@
                 "enum": [
                   "inhouse",
                   "openai_realtime",
-                  "atlas"
+                  "atlas",
+                  "gpt_live"
                 ],
                 "type": "string"
               },
@@ -33706,7 +33707,8 @@
                 "enum": [
                   "inhouse",
                   "openai_realtime",
-                  "atlas"
+                  "atlas",
+                  "gpt_live"
                 ],
                 "type": "string"
               },
@@ -46050,7 +46052,8 @@
                 "enum": [
                   "inhouse",
                   "openai_realtime",
-                  "atlas"
+                  "atlas",
+                  "gpt_live"
                 ],
                 "type": "string"
               },
