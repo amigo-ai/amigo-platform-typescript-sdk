@@ -15,7 +15,7 @@ name: PR Review (Claude on Vertex)
 #   vars.VERTEX_PROJECT             GCP project (default: amigo-platform)
 #   vars.VERTEX_REGION              Claude region on Vertex (default: global)
 #   vars.REVIEW_MODEL               specialist model (default: claude-sonnet-4-6)
-#   vars.REVIEW_ORCHESTRATOR_MODEL  consolidator (default: claude-opus-4-6)
+#   vars.REVIEW_ORCHESTRATOR_MODEL  consolidator (default: claude-opus-4-7)
 #
 # Disable per-PR by including "[skip review]" in the PR title. Drafts are
 # skipped. The orchestrator replaces its prior comment on re-runs so PRs don't
@@ -59,7 +59,8 @@ jobs:
       VERTEX_PROJECT: ${{ vars.VERTEX_PROJECT || 'amigo-platform' }}
       VERTEX_REGION: ${{ vars.VERTEX_REGION || 'global' }}
       REVIEW_MODEL: ${{ vars.REVIEW_MODEL || 'claude-sonnet-4-6' }}
-      REVIEW_ORCHESTRATOR_MODEL: ${{ vars.REVIEW_ORCHESTRATOR_MODEL || 'claude-opus-4-6' }}
+      # claude-opus-4-7 requires the Vertex "global" endpoint (regional 404s).
+      REVIEW_ORCHESTRATOR_MODEL: ${{ vars.REVIEW_ORCHESTRATOR_MODEL || 'claude-opus-4-7' }}
     steps:
       - name: Guard — skip if WIF provider not configured
         id: guard
