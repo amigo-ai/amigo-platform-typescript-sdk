@@ -1362,7 +1362,7 @@ export interface paths {
          * List Audit Events
          * @description List audit events with filters and pagination.
          *
-         *     Permissions: admin, owner
+         *     Permissions: admin, owner (``Audit.view``)
          */
         get: operations["list-audit-events"];
         put?: never;
@@ -1384,7 +1384,7 @@ export interface paths {
          * Get Entity Access Log
          * @description Per-entity access history — all audit events for a specific resource.
          *
-         *     Permissions: admin, owner
+         *     Permissions: admin, owner (``Audit.view``)
          */
         get: operations["get-entity-access-log"];
         put?: never;
@@ -1406,7 +1406,10 @@ export interface paths {
         put?: never;
         /**
          * Create Audit Export
-         * @description Export audit events to S3 as NDJSON. Returns a presigned download URL.
+         * @description Export audit events to the UC Volume as NDJSON.
+         *
+         *     Returns a platform-api proxy download path (UC Volumes have no presigned
+         *     URLs — ``download_audit_export`` streams the bytes).
          *
          *     Permissions: admin, owner
          */
@@ -1426,11 +1429,39 @@ export interface paths {
         };
         /**
          * List Audit Exports
-         * @description List past audit exports with presigned download URLs.
+         * @description List past audit exports with platform-api proxy download paths.
          *
          *     Permissions: admin, owner
          */
         get: operations["list-audit-exports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/audit/exports/download/{filename}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download Audit Export
+         * @description Proxy-download an audit export artifact (NDJSON) from the UC Volume.
+         *
+         *     ``filename`` must be a bare export filename (``{export_id}.ndjson``);
+         *     path separators and traversal sequences are rejected with 422. The volume
+         *     key is reconstructed server-side as ``exports/{workspace_id}/{filename}``,
+         *     so a caller can never reach outside its own workspace prefix. The bytes
+         *     are streamed volume→client without buffering the artifact in memory.
+         *
+         *     Permissions: admin, owner (``Audit.export`` — same gate as create/list).
+         */
+        get: operations["download-audit-export"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1452,7 +1483,7 @@ export interface paths {
          *
          *     Required for HIPAA breach investigation (§164.312(b)).
          *
-         *     Permissions: admin, owner
+         *     Permissions: admin, owner (``Audit.view``)
          */
         get: operations["get-phi-access-report"];
         put?: never;
@@ -1474,7 +1505,7 @@ export interface paths {
          * Get Audit Summary
          * @description Audit summary statistics for compliance dashboard.
          *
-         *     Permissions: admin, owner
+         *     Permissions: admin, owner (``Audit.view``)
          */
         get: operations["get-audit-summary"];
         put?: never;
@@ -5796,7 +5827,7 @@ export interface paths {
          *     Advisory in v1: policy is stored and displayed but no automated
          *     deletion is performed. Legal hold overrides all retention.
          *
-         *     Permissions: admin, owner.
+         *     Permissions: admin, owner (``Workspace.update``).
          */
         put: operations["update-retention-policy"];
         post?: never;
@@ -11047,6 +11078,11 @@ export interface components {
              * @constant
              */
             status: "active";
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
             /**
              * Workspace Id
              * Format: uuid
@@ -25803,6 +25839,18 @@ export interface components {
             status: string;
             /** Turn Count */
             turn_count: number;
+            /**
+             * Turn Id
+             * @description Identifier of the user exchange this turn belongs to — identical to the ``turn_id`` on the non-streaming ``POST /turns`` response and on this conversation's history turns, so a streaming client can anchor durable per-turn artifacts (e.g. feedback) without a follow-up read. Stamped by platform-api at the proxy boundary (agent-engine frames do not carry it). Null when the conversation has no user exchange yet (a greeting kickoff stream on a fresh conversation).
+             * @default null
+             */
+            turn_id?: string | null;
+            /**
+             * Turn Index
+             * @description Zero-based ordinal of the user exchange (0 = first user turn). Derived server-side; null exactly when ``turn_id`` is null.
+             * @default null
+             */
+            turn_index?: number | null;
         };
         /**
          * TurnErrorEvent
@@ -29775,7 +29823,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Invalid request body. */
+            /** @description Invalid request body, or region provided (immutable). */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -32002,6 +32050,51 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "download-audit-export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                filename: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The export artifact, streamed as NDJSON. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                    "application/x-ndjson": unknown;
+                };
+            };
+            /** @description Audit export not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid export filename */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Rate limited */
             429: {
