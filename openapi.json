@@ -150,16 +150,6 @@
             "title": "Channel Overrides",
             "type": "object"
           },
-          "escalation_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StateRiskOverride"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "exit_condition_tool_call_specs": {
             "default": [],
             "items": {
@@ -300,16 +290,6 @@
             },
             "title": "Channel Overrides",
             "type": "object"
-          },
-          "escalation_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/StateRiskOverride"
-              },
-              {
-                "type": "null"
-              }
-            ]
           },
           "exit_condition_tool_call_specs": {
             "default": [],
@@ -8221,6 +8201,54 @@
         "title": "ConversationListResponse",
         "type": "object"
       },
+      "ConversationStatusTransitionRequest": {
+        "properties": {
+          "reason": {
+            "description": "Low-cardinality transition tag (e.g. hsm_terminal, use_case_rebind) recorded on the audit event and the conversation world event.",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "title": "ConversationStatusTransitionRequest",
+        "type": "object"
+      },
+      "ConversationStatusTransitionResponse": {
+        "properties": {
+          "conversation_id": {
+            "format": "uuid",
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "completed",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "status"
+        ],
+        "title": "ConversationStatusTransitionResponse",
+        "type": "object"
+      },
       "ConversationThreadRequest": {
         "properties": {
           "channel_kind": {
@@ -8497,6 +8525,32 @@
             },
             "title": "Tool Calls",
             "type": "array"
+          },
+          "turn_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Stable identifier of the user exchange this message belongs to, derived deterministically from (conversation_id, turn_index) \u2014 identical across ``POST /turns`` responses and re-reads of the conversation history. User and agent messages from the same exchange share this value. Null on messages that precede the first user turn (proactive greetings, channel-event preludes).",
+            "title": "Turn Id"
+          },
+          "turn_index": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Zero-based ordinal of the user exchange this message belongs to (0 = first user turn). Derived server-side from the conversation's user-turn count \u2014 never stored. Null exactly when ``turn_id`` is null.",
+            "title": "Turn Index"
           }
         },
         "required": [
@@ -8985,6 +9039,12 @@
               }
             ],
             "title": "Entity Id"
+          },
+          "force_new": {
+            "default": false,
+            "description": "Outbound thread-keyed channels (sms/imessage) only: close any existing ACTIVE conversation on the computed provider thread (recipient + use case) before dispatching, so the opener materializes a brand-new conversation instead of continuing the old thread. Rejected with 422 on channel=web \u2014 every web create already starts a new conversation, so force_new is meaningless there.",
+            "title": "Force New",
+            "type": "boolean"
           },
           "instruction": {
             "anyOf": [
@@ -9771,16 +9831,6 @@
             "title": "Environment",
             "type": "string"
           },
-          "escalation_policy": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EscalationPolicy"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "is_active": {
             "default": true,
             "title": "Is Active",
@@ -9798,11 +9848,6 @@
           },
           "name": {
             "$ref": "#/components/schemas/NameString"
-          },
-          "safety_filters_enabled": {
-            "default": true,
-            "title": "Safety Filters Enabled",
-            "type": "boolean"
           },
           "tags": {
             "items": {
@@ -15595,79 +15640,6 @@
         "title": "EscalationEventResponse",
         "type": "object"
       },
-      "EscalationPolicy": {
-        "description": "Per-service routing for engine-detected escalation triggers.\n\nEach trigger source maps to one EscalationAction. The three enumerated\nfields below are the trigger_sources actually emitted by the agent-engine\ntoday; new triggers can be added as fields without breaking back-compat.\n\nPartial policies are intentional: every field defaults to OperatorAction,\nso a PUT body like ``{\"context_window_exhaustion\": {\"type\": \"forward\"}}``\noverrides only that trigger and leaves the others on the operator default.\nTo opt the entire service back to today's behavior, set\n``Service.escalation_policy = None`` (caveat: the platform-api Service\nupdate path uses ``exclude_none=True`` and currently has no clears-via-null\nbranch, so this requires a direct config edit; see follow-up issue).\n\nResolution lookup is done against ``model_fields``: a trigger_source that\nis not an enumerated field name falls through to OperatorAction, never\na non-Action Pydantic internal.",
-        "properties": {
-          "context_window_exhaustion": {
-            "discriminator": {
-              "mapping": {
-                "forward": "#/components/schemas/ForwardAction",
-                "hangup": "#/components/schemas/HangupAction",
-                "operator": "#/components/schemas/OperatorAction"
-              },
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/OperatorAction"
-              },
-              {
-                "$ref": "#/components/schemas/ForwardAction"
-              },
-              {
-                "$ref": "#/components/schemas/HangupAction"
-              }
-            ],
-            "title": "Context Window Exhaustion"
-          },
-          "conversation_monitor": {
-            "discriminator": {
-              "mapping": {
-                "forward": "#/components/schemas/ForwardAction",
-                "hangup": "#/components/schemas/HangupAction",
-                "operator": "#/components/schemas/OperatorAction"
-              },
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/OperatorAction"
-              },
-              {
-                "$ref": "#/components/schemas/ForwardAction"
-              },
-              {
-                "$ref": "#/components/schemas/HangupAction"
-              }
-            ],
-            "title": "Conversation Monitor"
-          },
-          "risk_scorer": {
-            "discriminator": {
-              "mapping": {
-                "forward": "#/components/schemas/ForwardAction",
-                "hangup": "#/components/schemas/HangupAction",
-                "operator": "#/components/schemas/OperatorAction"
-              },
-              "propertyName": "type"
-            },
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/OperatorAction"
-              },
-              {
-                "$ref": "#/components/schemas/ForwardAction"
-              },
-              {
-                "$ref": "#/components/schemas/HangupAction"
-              }
-            ],
-            "title": "Risk Scorer"
-          }
-        },
-        "title": "EscalationPolicy",
-        "type": "object"
-      },
       "EscalationState": {
         "properties": {
           "agent_confidence": {
@@ -19976,19 +19948,6 @@
         "title": "FormTemplateUpdateRequest",
         "type": "object"
       },
-      "ForwardAction": {
-        "description": "Cold-transfer the caller to the service's configured forwarding\ndestination (set via ``Service.voice_config.forwarding``).\n\nNo agent-side decision and no operator dashboard required \u2014 the engine\ninvokes the same forwarding callback used by the LLM-driven\n``forward_call`` tool, with no location override, which falls through to\nthe per-service ``ServiceForwardingConfig``.\n\nIf ``voice_config.forwarding`` is unset, the dispatcher falls back to the\noperator path (audit event + SSE only).",
-        "properties": {
-          "type": {
-            "const": "forward",
-            "default": "forward",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "ForwardAction",
-        "type": "object"
-      },
       "ForwardCallResolvedEvent": {
         "properties": {
           "error": {
@@ -20580,77 +20539,6 @@
           }
         },
         "title": "HTTPValidationError",
-        "type": "object"
-      },
-      "HangupAction": {
-        "description": "End the call gracefully via the existing speaker-drain hangup path.",
-        "properties": {
-          "type": {
-            "const": "hangup",
-            "default": "hangup",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "HangupAction",
-        "type": "object"
-      },
-      "HardEscalationRule": {
-        "description": "Non-negotiable escalation rule for healthcare compliance.",
-        "properties": {
-          "detection": {
-            "enum": [
-              "intent",
-              "state",
-              "fhir"
-            ],
-            "title": "Detection",
-            "type": "string"
-          },
-          "immediate": {
-            "default": false,
-            "title": "Immediate",
-            "type": "boolean"
-          },
-          "intent_patterns": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Intent Patterns"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "operator_type": {
-            "title": "Operator Type",
-            "type": "string"
-          },
-          "reason": {
-            "title": "Reason",
-            "type": "string"
-          },
-          "regulatory_basis": {
-            "title": "Regulatory Basis",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "operator_type",
-          "reason",
-          "regulatory_basis",
-          "detection"
-        ],
-        "title": "HardEscalationRule",
         "type": "object"
       },
       "HarnessContext": {
@@ -25253,19 +25141,6 @@
           "confidence"
         ],
         "title": "OcrResponse",
-        "type": "object"
-      },
-      "OperatorAction": {
-        "description": "Today's behavior \u2014 write escalation.requested + publish SSE, wait for a\nhuman operator to join via the dashboard. No-op if no operators are staffed.",
-        "properties": {
-          "type": {
-            "const": "operator",
-            "default": "operator",
-            "title": "Type",
-            "type": "string"
-          }
-        },
-        "title": "OperatorAction",
         "type": "object"
       },
       "OperatorIntelligenceSummary": {
@@ -31918,41 +31793,6 @@
         "title": "ReviewSubmittedEvent",
         "type": "object"
       },
-      "RiskSignalConfig": {
-        "description": "Per-workspace risk scoring config. Stored on Service.",
-        "properties": {
-          "alert_threshold": {
-            "default": 50.0,
-            "title": "Alert Threshold",
-            "type": "number"
-          },
-          "auto_escalate_threshold": {
-            "default": 70.0,
-            "title": "Auto Escalate Threshold",
-            "type": "number"
-          },
-          "enabled": {
-            "default": true,
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "monitor_threshold": {
-            "default": 30.0,
-            "title": "Monitor Threshold",
-            "type": "number"
-          },
-          "weights": {
-            "additionalProperties": {
-              "type": "number"
-            },
-            "default": {},
-            "title": "Weights",
-            "type": "object"
-          }
-        },
-        "title": "RiskSignalConfig",
-        "type": "object"
-      },
       "RiskSummary": {
         "description": "Aggregated risk signals across the call.\n\nFree-form residual on the raw ``risk_summary`` JSONB:\n``signals: list[{name, raw_score, weight, weighted_score, detail}]``\n\u2014 the per-signal breakdown that aggregates into ``composite_score``.\nNot exposed via this typed shape; consumers needing per-signal\ndetail read the JSONB endpoint.",
         "properties": {
@@ -33065,24 +32905,6 @@
             "title": "Environment",
             "type": "string"
           },
-          "escalation_policy": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EscalationPolicy"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "hard_escalation_rules": {
-            "default": [],
-            "items": {
-              "$ref": "#/components/schemas/HardEscalationRule"
-            },
-            "title": "Hard Escalation Rules",
-            "type": "array"
-          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -33102,21 +32924,6 @@
           "name": {
             "title": "Name",
             "type": "string"
-          },
-          "risk_signal_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RiskSignalConfig"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "safety_filters_enabled": {
-            "default": true,
-            "title": "Safety Filters Enabled",
-            "type": "boolean"
           },
           "tags": {
             "items": {
@@ -33240,7 +33047,7 @@
         "type": "object"
       },
       "ServiceForwardingConfig": {
-        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by:\n  - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't\n    pass an explicit ``phone_number`` and no EHR location is configured).\n  - ``EscalationPolicy.ForwardAction`` \u2014 engine-fired escalation with no\n    overrides falls through to the same path.\n\nPer-service forwarding is a binary presence \u2014 set means tier 3 resolves\nto it, None means tier 3 has no static target. (The legacy per-phone\nforwarding shape, with its own ``enabled`` flag, was removed alongside\nthe legacy Twilio phone path.)",
+        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by the LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM\ndoesn't pass an explicit ``phone_number`` and no EHR location is configured).\n\nPer-service forwarding is a binary presence \u2014 set means tier 3 resolves\nto it, None means tier 3 has no static target. (The legacy per-phone\nforwarding shape, with its own ``enabled`` flag, was removed alongside\nthe legacy Twilio phone path.)",
         "properties": {
           "forward_to": {
             "$ref": "#/components/schemas/PhoneE164"
@@ -33323,16 +33130,6 @@
             "title": "Environment",
             "type": "string"
           },
-          "escalation_policy": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EscalationPolicy"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -33357,11 +33154,6 @@
           "name": {
             "title": "Name",
             "type": "string"
-          },
-          "safety_filters_enabled": {
-            "default": true,
-            "title": "Safety Filters Enabled",
-            "type": "boolean"
           },
           "tags": {
             "items": {
@@ -37974,45 +37766,6 @@
           "created_at"
         ],
         "title": "StartSessionResponse",
-        "type": "object"
-      },
-      "StateRiskOverride": {
-        "description": "Per-state escalation tuning. Stored on ActionState.",
-        "properties": {
-          "auto_escalate_threshold": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Auto Escalate Threshold"
-          },
-          "max_loop_count": {
-            "default": 3,
-            "title": "Max Loop Count",
-            "type": "integer"
-          },
-          "operator_skill": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Operator Skill"
-          },
-          "topic_risk_score": {
-            "default": 0.0,
-            "title": "Topic Risk Score",
-            "type": "number"
-          }
-        },
-        "title": "StateRiskOverride",
         "type": "object"
       },
       "StateTransition": {
@@ -43483,7 +43236,6 @@
             "default": "full",
             "enum": [
               "full",
-              "summarize",
               "compact"
             ],
             "title": "Context Strategy",
@@ -43691,8 +43443,17 @@
             "type": "array"
           },
           "turn_id": {
-            "title": "Turn Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Identifier of the user exchange this turn created \u2014 or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).",
+            "title": "Turn Id"
           }
         },
         "required": [
@@ -44691,16 +44452,6 @@
             ],
             "title": "Environment"
           },
-          "escalation_policy": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/EscalationPolicy"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
           "is_active": {
             "anyOf": [
               {
@@ -44738,17 +44489,6 @@
                 "type": "null"
               }
             ]
-          },
-          "safety_filters_enabled": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Safety Filters Enabled"
           },
           "tags": {
             "anyOf": [
