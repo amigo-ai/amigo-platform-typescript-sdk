@@ -7716,7 +7716,6 @@ export interface components {
             channel_overrides?: {
                 [key: string]: components["schemas"]["ChannelOverride"];
             };
-            escalation_config?: components["schemas"]["StateRiskOverride"] | null;
             /**
              * Exit Condition Tool Call Specs
              * @default []
@@ -7770,7 +7769,6 @@ export interface components {
             channel_overrides?: {
                 [key: string]: components["schemas"]["ChannelOverride"];
             };
-            escalation_config?: components["schemas"]["StateRiskOverride"] | null;
             /**
              * Exit Condition Tool Call Specs
              * @default []
@@ -10988,6 +10986,32 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** ConversationStatusTransitionRequest */
+        ConversationStatusTransitionRequest: {
+            /**
+             * Reason
+             * @description Low-cardinality transition tag (e.g. hsm_terminal, use_case_rebind) recorded on the audit event and the conversation world event.
+             */
+            reason: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "closed";
+        };
+        /** ConversationStatusTransitionResponse */
+        ConversationStatusTransitionResponse: {
+            /**
+             * Conversation Id
+             * Format: uuid
+             */
+            conversation_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "completed" | "closed";
+        };
         /** ConversationThreadRequest */
         ConversationThreadRequest: {
             channel_kind: components["schemas"]["ChannelKind"];
@@ -11310,6 +11334,12 @@ export interface components {
             channel?: components["schemas"]["ChannelKind"];
             /** Entity Id */
             entity_id?: string | null;
+            /**
+             * Force New
+             * @description Outbound thread-keyed channels (sms/imessage) only: close any existing ACTIVE conversation on the computed provider thread (recipient + use case) before dispatching, so the opener materializes a brand-new conversation instead of continuing the old thread. Rejected with 422 on channel=web — every web create already starts a new conversation, so force_new is meaningless there.
+             * @default false
+             */
+            force_new?: boolean;
             /** @description Optional context steering what the agent opens with on an outbound conversation. */
             instruction?: components["schemas"]["BackgroundString"] | null;
             /** @description Destination address for an outbound conversation (E.164 for sms/imessage). Required for non-web. */
@@ -11619,7 +11649,6 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
-            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Is Active
              * @default true
@@ -11628,11 +11657,6 @@ export interface components {
             /** Keyterms */
             keyterms?: string[];
             name: components["schemas"]["NameString"];
-            /**
-             * Safety Filters Enabled
-             * @default true
-             */
-            safety_filters_enabled?: boolean;
             /** Tags */
             tags?: components["schemas"]["ServiceTag"][];
             /**
@@ -14200,34 +14224,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /**
-         * EscalationPolicy
-         * @description Per-service routing for engine-detected escalation triggers.
-         *
-         *     Each trigger source maps to one EscalationAction. The three enumerated
-         *     fields below are the trigger_sources actually emitted by the agent-engine
-         *     today; new triggers can be added as fields without breaking back-compat.
-         *
-         *     Partial policies are intentional: every field defaults to OperatorAction,
-         *     so a PUT body like ``{"context_window_exhaustion": {"type": "forward"}}``
-         *     overrides only that trigger and leaves the others on the operator default.
-         *     To opt the entire service back to today's behavior, set
-         *     ``Service.escalation_policy = None`` (caveat: the platform-api Service
-         *     update path uses ``exclude_none=True`` and currently has no clears-via-null
-         *     branch, so this requires a direct config edit; see follow-up issue).
-         *
-         *     Resolution lookup is done against ``model_fields``: a trigger_source that
-         *     is not an enumerated field name falls through to OperatorAction, never
-         *     a non-Action Pydantic internal.
-         */
-        EscalationPolicy: {
-            /** Context Window Exhaustion */
-            context_window_exhaustion?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
-            /** Conversation Monitor */
-            conversation_monitor?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
-            /** Risk Scorer */
-            risk_scorer?: components["schemas"]["OperatorAction"] | components["schemas"]["ForwardAction"] | components["schemas"]["HangupAction"];
-        };
         /** EscalationState */
         EscalationState: {
             /** Agent Confidence */
@@ -15702,26 +15698,6 @@ export interface components {
             /** Templates */
             templates: components["schemas"]["FormTemplate-Input"][];
         };
-        /**
-         * ForwardAction
-         * @description Cold-transfer the caller to the service's configured forwarding
-         *     destination (set via ``Service.voice_config.forwarding``).
-         *
-         *     No agent-side decision and no operator dashboard required — the engine
-         *     invokes the same forwarding callback used by the LLM-driven
-         *     ``forward_call`` tool, with no location override, which falls through to
-         *     the per-service ``ServiceForwardingConfig``.
-         *
-         *     If ``voice_config.forwarding`` is unset, the dispatcher falls back to the
-         *     operator path (audit event + SSE only).
-         */
-        ForwardAction: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "forward";
-        };
         /** ForwardCallResolvedEvent */
         ForwardCallResolvedEvent: {
             /**
@@ -15972,43 +15948,6 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * HangupAction
-         * @description End the call gracefully via the existing speaker-drain hangup path.
-         */
-        HangupAction: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "hangup";
-        };
-        /**
-         * HardEscalationRule
-         * @description Non-negotiable escalation rule for healthcare compliance.
-         */
-        HardEscalationRule: {
-            /**
-             * Detection
-             * @enum {string}
-             */
-            detection: "intent" | "state" | "fhir";
-            /**
-             * Immediate
-             * @default false
-             */
-            immediate?: boolean;
-            /** Intent Patterns */
-            intent_patterns?: string[] | null;
-            /** Name */
-            name: string;
-            /** Operator Type */
-            operator_type: string;
-            /** Reason */
-            reason: string;
-            /** Regulatory Basis */
-            regulatory_basis: string;
         };
         /**
          * HarnessContext
@@ -18143,18 +18082,6 @@ export interface components {
             extracted_fields?: {
                 [key: string]: unknown;
             };
-        };
-        /**
-         * OperatorAction
-         * @description Today's behavior — write escalation.requested + publish SSE, wait for a
-         *     human operator to join via the dashboard. No-op if no operators are staffed.
-         */
-        OperatorAction: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            type: "operator";
         };
         /**
          * OperatorIntelligenceSummary
@@ -20875,39 +20802,6 @@ export interface components {
             item_id?: string | null;
         };
         /**
-         * RiskSignalConfig
-         * @description Per-workspace risk scoring config. Stored on Service.
-         */
-        RiskSignalConfig: {
-            /**
-             * Alert Threshold
-             * @default 50
-             */
-            alert_threshold?: number;
-            /**
-             * Auto Escalate Threshold
-             * @default 70
-             */
-            auto_escalate_threshold?: number;
-            /**
-             * Enabled
-             * @default true
-             */
-            enabled?: boolean;
-            /**
-             * Monitor Threshold
-             * @default 30
-             */
-            monitor_threshold?: number;
-            /**
-             * Weights
-             * @default {}
-             */
-            weights?: {
-                [key: string]: number;
-            };
-        };
-        /**
          * RiskSummary
          * @description Aggregated risk signals across the call.
          *
@@ -21402,12 +21296,6 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
-            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
-            /**
-             * Hard Escalation Rules
-             * @default []
-             */
-            hard_escalation_rules?: components["schemas"]["HardEscalationRule"][];
             /**
              * Id
              * Format: uuid
@@ -21419,12 +21307,6 @@ export interface components {
             keyterms: string[];
             /** Name */
             name: string;
-            risk_signal_config?: components["schemas"]["RiskSignalConfig"] | null;
-            /**
-             * Safety Filters Enabled
-             * @default true
-             */
-            safety_filters_enabled?: boolean;
             /** Tags */
             tags: components["schemas"]["ServiceTag"][];
             /**
@@ -21485,11 +21367,8 @@ export interface components {
          * ServiceForwardingConfig
          * @description Per-service call-forwarding destination + transfer mechanism.
          *
-         *     Read by:
-         *       - LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM doesn't
-         *         pass an explicit ``phone_number`` and no EHR location is configured).
-         *       - ``EscalationPolicy.ForwardAction`` — engine-fired escalation with no
-         *         overrides falls through to the same path.
+         *     Read by the LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM
+         *     doesn't pass an explicit ``phone_number`` and no EHR location is configured).
          *
          *     Per-service forwarding is a binary presence — set means tier 3 resolves
          *     to it, None means tier 3 has no static target. (The legacy per-phone
@@ -21544,7 +21423,6 @@ export interface components {
              * @enum {string}
              */
             environment?: "sandbox" | "production";
-            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /**
              * Id
              * Format: uuid
@@ -21561,11 +21439,6 @@ export interface components {
             keyterms: string[];
             /** Name */
             name: string;
-            /**
-             * Safety Filters Enabled
-             * @default true
-             */
-            safety_filters_enabled?: boolean;
             /** Tags */
             tags: components["schemas"]["ServiceTag"][];
             /** Tool Capacity */
@@ -23485,26 +23358,6 @@ export interface components {
              * @enum {string}
              */
             session_status: "created" | "already_active";
-        };
-        /**
-         * StateRiskOverride
-         * @description Per-state escalation tuning. Stored on ActionState.
-         */
-        StateRiskOverride: {
-            /** Auto Escalate Threshold */
-            auto_escalate_threshold?: number | null;
-            /**
-             * Max Loop Count
-             * @default 3
-             */
-            max_loop_count?: number;
-            /** Operator Skill */
-            operator_skill?: string | null;
-            /**
-             * Topic Risk Score
-             * @default 0
-             */
-            topic_risk_score?: number;
         };
         /** StateTransition */
         StateTransition: {
@@ -26018,7 +25871,7 @@ export interface components {
              * @default full
              * @enum {string}
              */
-            context_strategy?: "full" | "summarize" | "compact";
+            context_strategy?: "full" | "compact";
             /**
              * Degradation Threshold
              * @default -1
@@ -26328,14 +26181,11 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             /** Environment */
             environment?: ("sandbox" | "production") | null;
-            escalation_policy?: components["schemas"]["EscalationPolicy"] | null;
             /** Is Active */
             is_active?: boolean | null;
             /** Keyterms */
             keyterms?: string[] | null;
             name?: components["schemas"]["NameString"] | null;
-            /** Safety Filters Enabled */
-            safety_filters_enabled?: boolean | null;
             /** Tags */
             tags?: components["schemas"]["ServiceTag"][] | null;
             /** Tool Capacity */
