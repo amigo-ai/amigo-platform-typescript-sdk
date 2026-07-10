@@ -1,6 +1,6 @@
 import type { SttProvider, TtsProvider, VoiceSessionProvider } from '@amigo-ai/platform-sdk'
 
-export const defaultVoiceRuntime = 'inhouse' satisfies VoiceSessionProvider
+export const defaultVoiceRuntime = 'amigo' satisfies VoiceSessionProvider
 export const defaultSttProvider = 'deepgram' satisfies SttProvider
 export const defaultTtsProvider = 'cartesia' satisfies TtsProvider
 
