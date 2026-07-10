@@ -22,6 +22,9 @@ const voiceSessionProviders = [
   'inhouse',
   'openai_realtime',
   'atlas',
+  // GPT-Live full-duplex family on the Atlas runtime. Dark until the GPT-Live API is
+  // GA — accepted by the platform config contract, never selected by default.
+  'gpt_live',
 ] as const satisfies readonly VoiceSessionProvider[]
 export const VOICE_SESSION_PROVIDERS = voiceSessionProviders satisfies ExhaustiveProviderList<
   VoiceSessionProvider,
