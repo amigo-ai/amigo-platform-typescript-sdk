@@ -161,4 +161,66 @@ describe('TriggersResource', () => {
     expect(result.items).toHaveLength(1)
     expect(result.items[0]).toBeDefined()
   })
+
+  it('forwards the is_active filter when listing triggers', async () => {
+    let capturedUrl = ''
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request): Promise<Response> => {
+        capturedUrl = input instanceof Request ? input.url : input.toString()
+        return Response.json({
+          items: [TRIGGER_FIXTURE],
+          has_more: false,
+          continuation_token: null,
+        })
+      },
+    })
+    await capturing.triggers.list({ is_active: true, limit: 10 })
+    const query = new URL(capturedUrl).searchParams
+    expect(query.get('is_active')).toBe('true')
+    expect(query.get('limit')).toBe('10')
+  })
+
+  it('fires a trigger with a per-fire input override body', async () => {
+    let capturedBody: unknown
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+        if (input instanceof Request) {
+          const raw = await input.clone().text()
+          capturedBody = raw ? JSON.parse(raw) : undefined
+        } else if (typeof init?.body === 'string') {
+          capturedBody = JSON.parse(init.body)
+        }
+        return Response.json(FIRE_RESULT_FIXTURE)
+      },
+    })
+    const result = await capturing.triggers.fire(TRIGGER_ID, {
+      input: { message_template: 'urgent' },
+    })
+    expect(result.status).toBe('dispatched')
+    expect(capturedBody).toEqual({ input: { message_template: 'urgent' } })
+  })
+
+  it('fires a trigger without a body when no input override is given', async () => {
+    let capturedBody: unknown
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+        if (input instanceof Request) {
+          const raw = await input.clone().text()
+          capturedBody = raw ? JSON.parse(raw) : undefined
+        } else if (typeof init?.body === 'string') {
+          capturedBody = JSON.parse(init.body)
+        }
+        return Response.json(FIRE_RESULT_FIXTURE)
+      },
+    })
+    const result = await capturing.triggers.fire(TRIGGER_ID)
+    expect(result.status).toBe('dispatched')
+    expect(capturedBody).toBeUndefined()
+  })
 })
