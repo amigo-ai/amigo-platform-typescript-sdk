@@ -164,7 +164,8 @@ describe('ActionsResource', () => {
       slug: 'appointment_lookup',
       input_schema: {},
       model: 'claude-sonnet-5',
-    } as never)
+    })
+    expect(capturedBody).toBeDefined()
     expect(capturedBody?.model).toBe('claude-sonnet-5')
     expect(result.model).toBe('claude-sonnet-5')
   })
