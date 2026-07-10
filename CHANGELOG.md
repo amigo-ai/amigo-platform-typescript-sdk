@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.94.0] - 2026-07-10
+
+### Features
+
+- gpt_live session provider (GPT-Live full-duplex family, dark) (#407)
+
+### Improvements
+
+- feat(voice)!: session_provider = model families (amigo | gpt_realtime | gpt_live) (#408)
+
 ## [0.93.0] - 2026-07-10
 
 ### Maintenance
