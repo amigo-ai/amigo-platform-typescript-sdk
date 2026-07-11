@@ -21312,7 +21312,7 @@ export interface components {
              * @description Delivery status
              * @enum {string}
              */
-            status: "delivered" | "failed";
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
         };
         /**
          * Service
@@ -22086,6 +22086,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Fail Count
              * @default 0
@@ -22491,6 +22493,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Eval Error Count
              * @default 0
@@ -22842,6 +22846,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Expected Case Count */
+            expected_case_count?: number | null;
             /** Result Pointer */
             result_pointer?: {
                 [key: string]: unknown;

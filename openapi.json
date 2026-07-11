@@ -32851,7 +32851,10 @@
             "description": "Delivery status",
             "enum": [
               "delivered",
-              "failed"
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
             ],
             "title": "Status",
             "type": "string"
@@ -34706,6 +34709,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "fail_count": {
             "default": 0,
             "title": "Fail Count",
@@ -35739,6 +35754,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "eval_error_count": {
             "default": 0,
             "title": "Eval Error Count",
@@ -36438,6 +36465,18 @@
               }
             ],
             "title": "Created At"
+          },
+          "expected_case_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Case Count"
           },
           "result_pointer": {
             "additionalProperties": true,
