@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Features
+
+- `simulations.forkSession(sessionId, body)` and `simulations.scoreSession(sessionId, body)` — typed wrappers for the `POST /simulations/sessions/{id}/fork` and `/score` endpoints (types were already generated; no resource method existed). `forkSession` requires the session to belong to a coverage run.
+
 ## [0.96.0] - 2026-07-10
 
 ### Maintenance

@@ -101,6 +101,12 @@ const client = new AmigoClient({
     [`GET ${BASE}/simulations/sessions/${SESSION_ID}/intelligence`]: () =>
       Response.json(INTELLIGENCE_FIXTURE),
 
+    [`POST ${BASE}/simulations/sessions/${SESSION_ID}/fork`]: () =>
+      Response.json({ fork_turn_index: 1, branches: [{ session_id: 'sim-fork-1' }] }),
+
+    [`POST ${BASE}/simulations/sessions/${SESSION_ID}/score`]: () =>
+      Response.json({ status: 'scored' }),
+
     [`GET ${BASE}/simulations/runs`]: () => Response.json({ items: [{ id: RUN_ID }] }),
     [`POST ${BASE}/simulations/runs`]: () => Response.json({ id: RUN_ID }, { status: 201 }),
     [`GET ${BASE}/simulations/runs/${RUN_ID}`]: () =>
@@ -166,6 +172,22 @@ describe('SimulationsResource', () => {
     const result = await client.simulations.getIntelligence(SESSION_ID)
     expect(result.session_id).toBe(SESSION_ID)
     expect(result.intelligence).toBeDefined()
+  })
+
+  it('forks a session into branches', async () => {
+    const result = await client.simulations.forkSession(SESSION_ID, {
+      alternatives: [{ caller_text: 'What if I ask about pricing?' }],
+    })
+    const branches = (result as { branches?: { session_id: string }[] }).branches
+    expect(branches?.[0]?.session_id).toBe('sim-fork-1')
+  })
+
+  it('scores a session', async () => {
+    const result = await client.simulations.scoreSession(SESSION_ID, {
+      score: 0.9,
+      score_rationale: 'clear and complete',
+    })
+    expect((result as { status?: string }).status).toBe('scored')
   })
 
   describe('runs', () => {
