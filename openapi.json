@@ -29850,6 +29850,34 @@
         "title": "ProgressHint",
         "type": "object"
       },
+      "PromoteSessionResponse": {
+        "description": "Result of binding a run-less session to a (newly created) coverage run.",
+        "properties": {
+          "already_bound": {
+            "description": "True when the session was already run-scoped; the existing run is returned unchanged",
+            "title": "Already Bound",
+            "type": "boolean"
+          },
+          "run_id": {
+            "description": "The coverage run the session is now bound to",
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "session_id": {
+            "description": "The promoted session id (unchanged)",
+            "title": "Session Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "session_id",
+          "already_bound"
+        ],
+        "title": "PromoteSessionResponse",
+        "type": "object"
+      },
       "PromptLogEntry": {
         "description": "One ``prompt_log`` event projection \u2014 full LLM input + output for a turn.\n\nUnbounded string fields (``system_prompt``, ``full_prompt``,\n``llm_response``) reflect the producer's payload as-is \u2014 typically\n1-50 KB each, occasionally larger for long histories. SDK consumers\nshould not assume a max length.",
         "properties": {
@@ -32112,6 +32140,11 @@
             "title": "Status",
             "type": "string"
           },
+          "takeover": {
+            "$ref": "#/components/schemas/TakeoverEligibility",
+            "description": "Channel-neutral takeover eligibility, derived from this run's own fields.\n\nA computed field (not a stored one) so eligibility is derived in ONE place and\ncan never drift across the reader's per-source builders \u2014 every ``Run``, however\nconstructed, exposes a consistent ``takeover`` on the wire + in OpenAPI.",
+            "readOnly": true
+          },
           "turn_count": {
             "anyOf": [
               {
@@ -32134,9 +32167,93 @@
           "workspace_id",
           "kind",
           "status",
-          "started_at"
+          "started_at",
+          "takeover"
         ],
         "title": "Run",
+        "type": "object"
+      },
+      "RunGuidanceRequest": {
+        "description": "Operator guidance for a live run. ``operator_id`` is in the body because this\nrouter is not under ``/operators/{operator_id}`` \u2014 it is bound to the authenticated\ncaller by ``_enforce_operator_identity`` (no impersonation).",
+        "properties": {
+          "message": {
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id",
+          "message"
+        ],
+        "title": "RunGuidanceRequest",
+        "type": "object"
+      },
+      "RunGuidanceResponse": {
+        "properties": {
+          "run_id": {
+            "description": "Run the guidance was sent to",
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "description": "Delivery status",
+            "enum": [
+              "delivered",
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "run_id"
+        ],
+        "title": "RunGuidanceResponse",
+        "type": "object"
+      },
+      "RunHandbackRequest": {
+        "properties": {
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id"
+        ],
+        "title": "RunHandbackRequest",
+        "type": "object"
+      },
+      "RunHandbackResponse": {
+        "properties": {
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "run_id",
+          "success"
+        ],
+        "title": "RunHandbackResponse",
         "type": "object"
       },
       "RunSimulationBenchmarkRequest": {
@@ -32317,6 +32434,74 @@
           }
         },
         "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
+      "RunTakeoverRequest": {
+        "properties": {
+          "mode": {
+            "default": "takeover",
+            "enum": [
+              "listen",
+              "takeover"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id"
+        ],
+        "title": "RunTakeoverRequest",
+        "type": "object"
+      },
+      "RunTakeoverResponse": {
+        "properties": {
+          "conference_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conference Sid"
+          },
+          "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "participant_call_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Participant Call Sid"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "mode"
+        ],
+        "title": "RunTakeoverResponse",
         "type": "object"
       },
       "RunsResponse": {
@@ -32851,7 +33036,10 @@
             "description": "Delivery status",
             "enum": [
               "delivered",
-              "failed"
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
             ],
             "title": "Status",
             "type": "string"
@@ -34706,6 +34894,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "fail_count": {
             "default": 0,
             "title": "Fail Count",
@@ -35739,6 +35939,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "eval_error_count": {
             "default": 0,
             "title": "Eval Error Count",
@@ -36438,6 +36650,18 @@
               }
             ],
             "title": "Created At"
+          },
+          "expected_case_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Case Count"
           },
           "result_pointer": {
             "additionalProperties": true,
@@ -39829,6 +40053,43 @@
         "title": "TMSSessionGridParams",
         "type": "object"
       },
+      "TakeoverEligibility": {
+        "description": "Whether an operator can take a run over, and how \u2014 the channel-neutral signal the\nconsole keys on instead of a per-channel heuristic.\n\n``eligible`` = an operator may take this run over right now. ``mode_options`` = the\ntakeover modes valid for the run's channel (voice exposes ``listen`` + ``takeover``;\nother channels none yet). ``reason`` = a short, human-facing explanation when NOT\neligible (e.g. ``\"run is not live\"``, ``\"channel not yet supported\"``), so the\nconsole can render an honest disabled-state tooltip rather than a bare greyed button.\nServer-computed (see ``Run.takeover``) so eligibility rules live in one place and the\nconsole never re-derives them.",
+        "properties": {
+          "eligible": {
+            "title": "Eligible",
+            "type": "boolean"
+          },
+          "mode_options": {
+            "default": [],
+            "items": {
+              "enum": [
+                "listen",
+                "takeover"
+              ],
+              "type": "string"
+            },
+            "title": "Mode Options",
+            "type": "array"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "eligible"
+        ],
+        "title": "TakeoverEligibility",
+        "type": "object"
+      },
       "TargetSpec": {
         "properties": {
           "completion_criteria": {
@@ -41367,6 +41628,22 @@
           "call_id"
         ],
         "title": "ToolCallStartedEvent",
+        "type": "object"
+      },
+      "ToolCatalogResponse": {
+        "properties": {
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedToolItem"
+            },
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tools"
+        ],
+        "title": "ToolCatalogResponse",
         "type": "object"
       },
       "ToolDescriptor": {
@@ -72389,6 +72666,198 @@
         ]
       }
     },
+    "/v1/{workspace_id}/runs/{run_id}/guidance": {
+      "post": {
+        "description": "Send text guidance to the agent handling a LIVE run, addressed by the channel-neutral ``run_id``. The agent incorporates it into its next response without the operator taking over. Requires ``admin`` (Operator:Update) and is bound to the caller's own operator identity (no impersonation). 404 if the run is not a live run in this workspace; 409 if its channel has no live guidance transport yet.",
+        "operationId": "send_run_guidance_v1__workspace_id__runs__run_id__guidance_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunGuidanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunGuidanceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send operator guidance to a live run",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/runs/{run_id}/handback": {
+      "post": {
+        "description": "Release the caller's operator from a run they took over \u2014 the agent resumes. Addressed by ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet.",
+        "operationId": "hand_back_run_v1__workspace_id__runs__run_id__handback_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunHandbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunHandbackResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Hand a taken-over run back to the agent",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/runs/{run_id}/takeover": {
+      "post": {
+        "description": "Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet. For voice, the response carries the conference/participant SIDs the console needs to attach browser audio.",
+        "operationId": "take_over_run_v1__workspace_id__runs__run_id__takeover_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunTakeoverRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunTakeoverResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Take over a live run as operator",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
     "/v1/{workspace_id}/scheduling-rule-sets": {
       "get": {
         "description": "List all scheduling rule sets for the workspace. Optional filters: `agent_kind` (tms / ketamine / general), `is_active`. Used by the agent-engine rules engine and by operators inspecting config.",
@@ -76669,6 +77138,59 @@
         ]
       }
     },
+    "/v1/{workspace_id}/simulations/sessions/{session_id}/promote": {
+      "post": {
+        "description": "Promote a run-less (interactive playground) session into a coverage run.\n\nInteractive text sessions are created run-less, so ``fork`` \u2014 which requires\na ``run_id`` \u2014 404s on them. This creates a coverage run, binds the existing\nagent-engine session to it (``adopt-run``, a Valkey meta update \u2014 the session\nitself is not recreated), and writes the platform-api ``SimulationCoverageSession``\nrecord that ``get_session_metadata`` returns, unblocking fork/score.\n\nIdempotent: a session that already has a coverage record returns its existing\nrun with ``already_bound=True``.",
+        "operationId": "promote-simulation-session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "session_id",
+            "required": true,
+            "schema": {
+              "title": "Session Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PromoteSessionResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Promote Simulation Session",
+        "tags": [
+          "Simulations"
+        ]
+      }
+    },
     "/v1/{workspace_id}/simulations/sessions/{session_id}/score": {
       "post": {
         "description": "ASI assigns a score to a completed simulation session.",
@@ -78791,6 +79313,49 @@
         "summary": "Update Workspace Table",
         "tags": [
           "Workspace Tables"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/tools/catalog": {
+      "get": {
+        "description": "List the platform's built-in world + surface tools (workspace-independent).",
+        "operationId": "list-tool-catalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolCatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "503": {
+            "description": "Voice agent service unavailable."
+          }
+        },
+        "summary": "List built-in tool catalog",
+        "tags": [
+          "Tool Testing"
         ]
       }
     },
