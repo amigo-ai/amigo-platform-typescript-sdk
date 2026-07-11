@@ -32139,6 +32139,56 @@
         "title": "Run",
         "type": "object"
       },
+      "RunGuidanceRequest": {
+        "description": "Operator guidance for a live run. ``operator_id`` is in the body because this\nrouter is not under ``/operators/{operator_id}`` \u2014 it is bound to the authenticated\ncaller by ``_enforce_operator_identity`` (no impersonation).",
+        "properties": {
+          "message": {
+            "maxLength": 5000,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          },
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id",
+          "message"
+        ],
+        "title": "RunGuidanceRequest",
+        "type": "object"
+      },
+      "RunGuidanceResponse": {
+        "properties": {
+          "run_id": {
+            "description": "Run the guidance was sent to",
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "status": {
+            "description": "Delivery status",
+            "enum": [
+              "delivered",
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "run_id"
+        ],
+        "title": "RunGuidanceResponse",
+        "type": "object"
+      },
       "RunSimulationBenchmarkRequest": {
         "properties": {
           "branch_name": {
@@ -32851,7 +32901,10 @@
             "description": "Delivery status",
             "enum": [
               "delivered",
-              "failed"
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
             ],
             "title": "Status",
             "type": "string"
@@ -34706,6 +34759,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "fail_count": {
             "default": 0,
             "title": "Fail Count",
@@ -35739,6 +35804,18 @@
             ],
             "title": "Created At"
           },
+          "error": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
           "eval_error_count": {
             "default": 0,
             "title": "Eval Error Count",
@@ -36438,6 +36515,18 @@
               }
             ],
             "title": "Created At"
+          },
+          "expected_case_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Case Count"
           },
           "result_pointer": {
             "additionalProperties": true,
@@ -41367,6 +41456,22 @@
           "call_id"
         ],
         "title": "ToolCallStartedEvent",
+        "type": "object"
+      },
+      "ToolCatalogResponse": {
+        "properties": {
+          "tools": {
+            "items": {
+              "$ref": "#/components/schemas/ResolvedToolItem"
+            },
+            "title": "Tools",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tools"
+        ],
+        "title": "ToolCatalogResponse",
         "type": "object"
       },
       "ToolDescriptor": {
@@ -72389,6 +72494,70 @@
         ]
       }
     },
+    "/v1/{workspace_id}/runs/{run_id}/guidance": {
+      "post": {
+        "description": "Send text guidance to the agent handling a LIVE run, addressed by the channel-neutral ``run_id``. The agent incorporates it into its next response without the operator taking over. Requires ``admin`` (Operator:Update) and is bound to the caller's own operator identity (no impersonation). 404 if the run is not a live run in this workspace; 409 if its channel has no live guidance transport yet.",
+        "operationId": "send_run_guidance_v1__workspace_id__runs__run_id__guidance_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunGuidanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunGuidanceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Send operator guidance to a live run",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
     "/v1/{workspace_id}/scheduling-rule-sets": {
       "get": {
         "description": "List all scheduling rule sets for the workspace. Optional filters: `agent_kind` (tms / ketamine / general), `is_active`. Used by the agent-engine rules engine and by operators inspecting config.",
@@ -78791,6 +78960,49 @@
         "summary": "Update Workspace Table",
         "tags": [
           "Workspace Tables"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/tools/catalog": {
+      "get": {
+        "description": "List the platform's built-in world + surface tools (workspace-independent).",
+        "operationId": "list-tool-catalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolCatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid credentials."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          },
+          "503": {
+            "description": "Voice agent service unavailable."
+          }
+        },
+        "summary": "List built-in tool catalog",
+        "tags": [
+          "Tool Testing"
         ]
       }
     },

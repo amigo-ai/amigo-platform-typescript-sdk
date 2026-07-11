@@ -285,6 +285,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "list-source-events",
   "list-surface-review-queue",
   "list-surfaces",
+  "list-tool-catalog",
   "list-trigger-runs",
   "list-triggers",
   "list-use-cases",
