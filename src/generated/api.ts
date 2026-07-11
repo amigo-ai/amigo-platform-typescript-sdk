@@ -5192,6 +5192,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/runs/{run_id}/guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send operator guidance to a live run
+         * @description Send text guidance to the agent handling a LIVE run, addressed by the channel-neutral ``run_id``. The agent incorporates it into its next response without the operator taking over. Requires ``admin`` (Operator:Update) and is bound to the caller's own operator identity (no impersonation). 404 if the run is not a live run in this workspace; 409 if its channel has no live guidance transport yet.
+         */
+        post: operations["send_run_guidance_v1__workspace_id__runs__run_id__guidance_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/handback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hand a taken-over run back to the agent
+         * @description Release the caller's operator from a run they took over — the agent resumes. Addressed by ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet.
+         */
+        post: operations["hand_back_run_v1__workspace_id__runs__run_id__handback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/takeover": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take over a live run as operator
+         * @description Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet. For voice, the response carries the conference/participant SIDs the console needs to attach browser audio.
+         */
+        post: operations["take_over_run_v1__workspace_id__runs__run_id__takeover_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/scheduling-rule-sets": {
         parameters: {
             query?: never;
@@ -6398,6 +6458,35 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/simulations/sessions/{session_id}/promote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Promote Simulation Session
+         * @description Promote a run-less (interactive playground) session into a coverage run.
+         *
+         *     Interactive text sessions are created run-less, so ``fork`` — which requires
+         *     a ``run_id`` — 404s on them. This creates a coverage run, binds the existing
+         *     agent-engine session to it (``adopt-run``, a Valkey meta update — the session
+         *     itself is not recreated), and writes the platform-api ``SimulationCoverageSession``
+         *     record that ``get_session_metadata`` returns, unblocking fork/score.
+         *
+         *     Idempotent: a session that already has a coverage record returns its existing
+         *     run with ``already_bound=True``.
+         */
+        post: operations["promote-simulation-session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/simulations/sessions/{session_id}/score": {
         parameters: {
             query?: never;
@@ -6920,6 +7009,26 @@ export interface paths {
         head?: never;
         /** Update Workspace Table */
         patch: operations["update-workspace-table"];
+        trace?: never;
+    };
+    "/v1/{workspace_id}/tools/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List built-in tool catalog
+         * @description List the platform's built-in world + surface tools (workspace-independent).
+         */
+        get: operations["list-tool-catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/v1/{workspace_id}/tools/execute": {
@@ -19936,6 +20045,28 @@ export interface components {
             trigger_delay_ms?: number | null;
         };
         /**
+         * PromoteSessionResponse
+         * @description Result of binding a run-less session to a (newly created) coverage run.
+         */
+        PromoteSessionResponse: {
+            /**
+             * Already Bound
+             * @description True when the session was already run-scoped; the existing run is returned unchanged
+             */
+            already_bound: boolean;
+            /**
+             * Run Id
+             * Format: uuid
+             * @description The coverage run the session is now bound to
+             */
+            run_id: string;
+            /**
+             * Session Id
+             * @description The promoted session id (unchanged)
+             */
+            session_id: string;
+        };
+        /**
          * PromptLogEntry
          * @description One ``prompt_log`` event projection — full LLM input + output for a turn.
          *
@@ -20970,6 +21101,14 @@ export interface components {
              * @enum {string}
              */
             status: "running" | "paused" | "completed" | "failed" | "timed_out";
+            /**
+             * @description Channel-neutral takeover eligibility, derived from this run's own fields.
+             *
+             *     A computed field (not a stored one) so eligibility is derived in ONE place and
+             *     can never drift across the reader's per-source builders — every ``Run``, however
+             *     constructed, exposes a consistent ``takeover`` on the wire + in OpenAPI.
+             */
+            readonly takeover: components["schemas"]["TakeoverEligibility"];
             /** Turn Count */
             turn_count?: number | null;
             /**
@@ -20977,6 +21116,54 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * RunGuidanceRequest
+         * @description Operator guidance for a live run. ``operator_id`` is in the body because this
+         *     router is not under ``/operators/{operator_id}`` — it is bound to the authenticated
+         *     caller by ``_enforce_operator_identity`` (no impersonation).
+         */
+        RunGuidanceRequest: {
+            /** Message */
+            message: string;
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+        };
+        /** RunGuidanceResponse */
+        RunGuidanceResponse: {
+            /**
+             * Run Id
+             * Format: uuid
+             * @description Run the guidance was sent to
+             */
+            run_id: string;
+            /**
+             * Status
+             * @description Delivery status
+             * @enum {string}
+             */
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
+        };
+        /** RunHandbackRequest */
+        RunHandbackRequest: {
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+        };
+        /** RunHandbackResponse */
+        RunHandbackResponse: {
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Success */
+            success: boolean;
         };
         /** RunSimulationBenchmarkRequest */
         RunSimulationBenchmarkRequest: {
@@ -21036,6 +21223,37 @@ export interface components {
             service_id?: string | null;
             /** Tags */
             tags?: string[];
+        };
+        /** RunTakeoverRequest */
+        RunTakeoverRequest: {
+            /**
+             * Mode
+             * @default takeover
+             * @enum {string}
+             */
+            mode?: "listen" | "takeover";
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+        };
+        /** RunTakeoverResponse */
+        RunTakeoverResponse: {
+            /** Conference Sid */
+            conference_sid?: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
+            /** Participant Call Sid */
+            participant_call_sid?: string | null;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
         };
         /** RunsResponse */
         RunsResponse: {
@@ -21312,7 +21530,7 @@ export interface components {
              * @description Delivery status
              * @enum {string}
              */
-            status: "delivered" | "failed";
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
         };
         /**
          * Service
@@ -22086,6 +22304,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Fail Count
              * @default 0
@@ -22491,6 +22711,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Eval Error Count
              * @default 0
@@ -22842,6 +23064,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Expected Case Count */
+            expected_case_count?: number | null;
             /** Result Pointer */
             result_pointer?: {
                 [key: string]: unknown;
@@ -24299,6 +24523,30 @@ export interface components {
              */
             rule_kind: "tms_session_grid";
         };
+        /**
+         * TakeoverEligibility
+         * @description Whether an operator can take a run over, and how — the channel-neutral signal the
+         *     console keys on instead of a per-channel heuristic.
+         *
+         *     ``eligible`` = an operator may take this run over right now. ``mode_options`` = the
+         *     takeover modes valid for the run's channel (voice exposes ``listen`` + ``takeover``;
+         *     other channels none yet). ``reason`` = a short, human-facing explanation when NOT
+         *     eligible (e.g. ``"run is not live"``, ``"channel not yet supported"``), so the
+         *     console can render an honest disabled-state tooltip rather than a bare greyed button.
+         *     Server-computed (see ``Run.takeover``) so eligibility rules live in one place and the
+         *     console never re-derives them.
+         */
+        TakeoverEligibility: {
+            /** Eligible */
+            eligible: boolean;
+            /**
+             * Mode Options
+             * @default []
+             */
+            mode_options?: ("listen" | "takeover")[];
+            /** Reason */
+            reason?: string | null;
+        };
         /** TargetSpec */
         TargetSpec: {
             completion_criteria?: components["schemas"]["CompletionCriteria"];
@@ -24964,6 +25212,11 @@ export interface components {
              * @enum {string}
              */
             type: "tool_call_started";
+        };
+        /** ToolCatalogResponse */
+        ToolCatalogResponse: {
+            /** Tools */
+            tools: components["schemas"]["ResolvedToolItem"][];
         };
         /** ToolDescriptor */
         ToolDescriptor: {
@@ -41070,6 +41323,114 @@ export interface operations {
             };
         };
     };
+    send_run_guidance_v1__workspace_id__runs__run_id__guidance_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunGuidanceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunGuidanceResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    hand_back_run_v1__workspace_id__runs__run_id__handback_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunHandbackRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunHandbackResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    take_over_run_v1__workspace_id__runs__run_id__takeover_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunTakeoverRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunTakeoverResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-scheduling-rule-sets": {
         parameters: {
             query?: {
@@ -43951,6 +44312,38 @@ export interface operations {
             };
         };
     };
+    "promote-simulation-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                session_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PromoteSessionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "score-simulation-session": {
         parameters: {
             query?: never;
@@ -45446,6 +45839,49 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "list-tool-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ToolCatalogResponse"];
+                };
+            };
+            /** @description Missing or invalid credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Voice agent service unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

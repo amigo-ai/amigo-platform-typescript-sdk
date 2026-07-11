@@ -107,6 +107,9 @@ const client = new AmigoClient({
     [`POST ${BASE}/simulations/sessions/${SESSION_ID}/score`]: () =>
       Response.json({ status: 'scored' }),
 
+    [`POST ${BASE}/simulations/sessions/${SESSION_ID}/promote`]: () =>
+      Response.json({ run_id: RUN_ID, session_id: SESSION_ID, already_bound: false }),
+
     [`GET ${BASE}/simulations/runs`]: () => Response.json({ items: [{ id: RUN_ID }] }),
     [`POST ${BASE}/simulations/runs`]: () => Response.json({ id: RUN_ID }, { status: 201 }),
     [`GET ${BASE}/simulations/runs/${RUN_ID}`]: () =>
@@ -188,6 +191,13 @@ describe('SimulationsResource', () => {
       score_rationale: 'clear and complete',
     })
     expect((result as { status?: string }).status).toBe('scored')
+  })
+
+  it('promotes a run-less session into a coverage run', async () => {
+    const result = await client.simulations.promoteSession(SESSION_ID)
+    expect(result.run_id).toBe(RUN_ID)
+    expect(result.session_id).toBe(SESSION_ID)
+    expect(result.already_bound).toBe(false)
   })
 
   describe('runs', () => {

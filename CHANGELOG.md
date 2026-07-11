@@ -1,16 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Features
+
+- `simulations.promoteSession(sessionId)` — typed wrapper for `POST /simulations/sessions/{id}/promote`. Promotes a run-less (interactive playground) session into a coverage run so it can be forked/scored; idempotent (`already_bound: true` when the session already belongs to a run). Regenerates types with the new `promote-simulation-session` operation + `PromoteSessionResponse` schema.
+
 ## [0.97.0] - 2026-07-11
 
 ### Features
 
 - add forkSession + scoreSession resource methods (#418)
-
-## [Unreleased]
-
-### Features
-
-- `simulations.forkSession(sessionId, body)` and `simulations.scoreSession(sessionId, body)` — typed wrappers for the `POST /simulations/sessions/{id}/fork` and `/score` endpoints (types were already generated; no resource method existed). `forkSession` requires the session to belong to a coverage run.
 
 ## [0.96.0] - 2026-07-10
 
