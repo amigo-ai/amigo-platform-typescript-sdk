@@ -5192,6 +5192,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/runs/{run_id}/guidance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send operator guidance to a live run
+         * @description Send text guidance to the agent handling a LIVE run, addressed by the channel-neutral ``run_id``. The agent incorporates it into its next response without the operator taking over. Requires ``admin`` (Operator:Update) and is bound to the caller's own operator identity (no impersonation). 404 if the run is not a live run in this workspace; 409 if its channel has no live guidance transport yet.
+         */
+        post: operations["send_run_guidance_v1__workspace_id__runs__run_id__guidance_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/scheduling-rule-sets": {
         parameters: {
             query?: never;
@@ -20978,6 +20998,36 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * RunGuidanceRequest
+         * @description Operator guidance for a live run. ``operator_id`` is in the body because this
+         *     router is not under ``/operators/{operator_id}`` — it is bound to the authenticated
+         *     caller by ``_enforce_operator_identity`` (no impersonation).
+         */
+        RunGuidanceRequest: {
+            /** Message */
+            message: string;
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+        };
+        /** RunGuidanceResponse */
+        RunGuidanceResponse: {
+            /**
+             * Run Id
+             * Format: uuid
+             * @description Run the guidance was sent to
+             */
+            run_id: string;
+            /**
+             * Status
+             * @description Delivery status
+             * @enum {string}
+             */
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
+        };
         /** RunSimulationBenchmarkRequest */
         RunSimulationBenchmarkRequest: {
             /** Branch Name */
@@ -21312,7 +21362,7 @@ export interface components {
              * @description Delivery status
              * @enum {string}
              */
-            status: "delivered" | "failed";
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
         };
         /**
          * Service
@@ -22086,6 +22136,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Fail Count
              * @default 0
@@ -22491,6 +22543,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Error */
+            error?: string | null;
             /**
              * Eval Error Count
              * @default 0
@@ -22842,6 +22896,8 @@ export interface components {
             completed_at?: string | null;
             /** Created At */
             created_at?: string | null;
+            /** Expected Case Count */
+            expected_case_count?: number | null;
             /** Result Pointer */
             result_pointer?: {
                 [key: string]: unknown;
@@ -41057,6 +41113,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunsSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    send_run_guidance_v1__workspace_id__runs__run_id__guidance_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunGuidanceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunGuidanceResponse"];
                 };
             };
             /** @description Validation Error */
