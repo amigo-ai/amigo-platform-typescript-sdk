@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.98.0] - 2026-07-11
+
+### Features
+
+- add promoteSession + sync spec (#424)
+
 ## [Unreleased]
 
 ### Features
