@@ -21312,7 +21312,7 @@ export interface components {
              * @description Delivery status
              * @enum {string}
              */
-            status: "delivered" | "failed";
+            status: "delivered" | "queued_no_subscriber" | "deduplicated" | "failed" | "unknown";
         };
         /**
          * Service

@@ -32851,7 +32851,10 @@
             "description": "Delivery status",
             "enum": [
               "delivered",
-              "failed"
+              "queued_no_subscriber",
+              "deduplicated",
+              "failed",
+              "unknown"
             ],
             "title": "Status",
             "type": "string"
