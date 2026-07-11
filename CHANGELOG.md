@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.97.0] - 2026-07-11
+
+### Features
+
+- add forkSession + scoreSession resource methods (#418)
+
 ## [Unreleased]
 
 ### Features
