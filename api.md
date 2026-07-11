@@ -337,6 +337,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getIntelligence`
 - `forkSession`
 - `scoreSession`
+- `promoteSession`
 - `runs.list`
 - `runs.create`
 - `runs.get`

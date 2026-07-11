@@ -112,6 +112,21 @@ export class SimulationsResource extends WorkspaceScopedResource {
   }
 
   /**
+   * Promote a run-less (interactive playground) session into a coverage run so
+   * it can be forked/scored. Creates a run, binds the session to it, and writes
+   * the coverage session record. Idempotent: a session that already belongs to
+   * a run returns that run with `already_bound: true`. No request body —
+   * `session_id` travels in the path.
+   */
+  async promoteSession(sessionId: SimulationSessionId | string) {
+    return extractData(
+      await this.client.POST('/v1/{workspace_id}/simulations/sessions/{session_id}/promote', {
+        params: { path: { workspace_id: this.workspaceId, session_id: sessionId } },
+      }),
+    )
+  }
+
+  /**
    * Multi-session simulation runs — orchestrate a batch of scenarios against
    * a service to compute coverage and surface regressions. Use this when you
    * want to compare branch behavior or measure drift between versions.
