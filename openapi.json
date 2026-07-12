@@ -8131,7 +8131,8 @@
               "closed",
               "completed",
               "in-progress",
-              "failed"
+              "failed",
+              "paused"
             ],
             "title": "Status",
             "type": "string"
@@ -32173,6 +32174,49 @@
         "title": "Run",
         "type": "object"
       },
+      "RunAccessTokenRequest": {
+        "properties": {
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id"
+        ],
+        "title": "RunAccessTokenRequest",
+        "type": "object"
+      },
+      "RunAccessTokenResponse": {
+        "properties": {
+          "conference_sid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conference Sid"
+          },
+          "identity": {
+            "title": "Identity",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "identity"
+        ],
+        "title": "RunAccessTokenResponse",
+        "type": "object"
+      },
       "RunGuidanceRequest": {
         "description": "Operator guidance for a live run. ``operator_id`` is in the body because this\nrouter is not under ``/operators/{operator_id}`` \u2014 it is bound to the authenticated\ncaller by ``_enforce_operator_identity`` (no impersonation).",
         "properties": {
@@ -32434,6 +32478,58 @@
           }
         },
         "title": "RunSimulationCaseRequest",
+        "type": "object"
+      },
+      "RunSwitchModeRequest": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "operator_id": {
+            "format": "uuid",
+            "title": "Operator Id",
+            "type": "string"
+          },
+          "participant_call_sid": {
+            "maxLength": 64,
+            "title": "Participant Call Sid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operator_id",
+          "participant_call_sid",
+          "mode"
+        ],
+        "title": "RunSwitchModeRequest",
+        "type": "object"
+      },
+      "RunSwitchModeResponse": {
+        "properties": {
+          "mode": {
+            "enum": [
+              "listen",
+              "takeover"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "mode"
+        ],
+        "title": "RunSwitchModeResponse",
         "type": "object"
       },
       "RunTakeoverRequest": {
@@ -43427,7 +43523,8 @@
               "closed",
               "completed",
               "in-progress",
-              "failed"
+              "failed",
+              "paused"
             ],
             "title": "Status",
             "type": "string"
@@ -48797,7 +48894,8 @@
               "closed",
               "completed",
               "in-progress",
-              "failed"
+              "failed",
+              "paused"
             ],
             "title": "Status",
             "type": "string"
@@ -58975,7 +59073,8 @@
                     "closed",
                     "completed",
                     "in-progress",
-                    "failed"
+                    "failed",
+                    "paused"
                   ],
                   "type": "string"
                 },
@@ -72666,6 +72765,70 @@
         ]
       }
     },
+    "/v1/{workspace_id}/runs/{run_id}/access-token": {
+      "post": {
+        "description": "Generate the Twilio browser-audio credentials the console needs to attach the operator's WebRTC leg to a live run, addressed by ``run_id``. This is the media plane companion to ``/takeover`` (the control plane). Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel has no browser-audio leg.",
+        "operationId": "mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunAccessTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunAccessTokenResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Mint a browser-audio access token for an operator on a live run",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
     "/v1/{workspace_id}/runs/{run_id}/guidance": {
       "post": {
         "description": "Send text guidance to the agent handling a LIVE run, addressed by the channel-neutral ``run_id``. The agent incorporates it into its next response without the operator taking over. Requires ``admin`` (Operator:Update) and is bound to the caller's own operator identity (no impersonation). 404 if the run is not a live run in this workspace; 409 if its channel has no live guidance transport yet.",
@@ -72789,6 +72952,70 @@
           }
         },
         "summary": "Hand a taken-over run back to the agent",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/runs/{run_id}/switch-mode": {
+      "post": {
+        "description": "Toggle the operator between ``listen`` (monitor) and ``takeover`` (drive) on a run they have already joined, addressed by the channel-neutral ``run_id``. For voice this mutes/unmutes the operator's conference participant. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet.",
+        "operationId": "switch_run_mode_v1__workspace_id__runs__run_id__switch_mode_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunSwitchModeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunSwitchModeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Switch an operator between listen and takeover on a live run",
         "tags": [
           "Runs"
         ]
