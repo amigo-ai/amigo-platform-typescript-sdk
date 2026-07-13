@@ -7,7 +7,7 @@ const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const LINK_ID = 'lnk-001'
 const UPLOAD_ID = 'up-001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
-const UPLOAD_CONTENT = '%PDF-1.7\nintake upload'
+const UPLOAD_CONTENT = Uint8Array.from([0x00, 0xff, 0xfe, 0x89, 0x50, 0x44, 0x46])
 
 const client = new AmigoClient({
   apiKey: TEST_API_KEY,
@@ -18,7 +18,7 @@ const client = new AmigoClient({
     [`DELETE ${BASE}/intake/links/${LINK_ID}`]: () => new Response(null, { status: 204 }),
     [`GET ${BASE}/intake/links/${LINK_ID}/uploads`]: () => Response.json([{ id: UPLOAD_ID }]),
     [`GET ${BASE}/intake/links/${LINK_ID}/uploads/${UPLOAD_ID}/download`]: () =>
-      new Response(UPLOAD_CONTENT, {
+      new Response(new Blob([UPLOAD_CONTENT]), {
         headers: { 'content-type': 'application/octet-stream' },
       }),
   }),
@@ -34,7 +34,9 @@ describe('IntakeResource', () => {
     const download = await client.intake.links.downloadUpload(LINK_ID, UPLOAD_ID)
     expect(download).toBeInstanceOf(Blob)
     expect(download.type).toBe('application/octet-stream')
-    expect(await download.text()).toBe(UPLOAD_CONTENT)
+    expect(Array.from(new Uint8Array(await download.arrayBuffer()))).toEqual(
+      Array.from(UPLOAD_CONTENT),
+    )
     expect(await client.intake.links.delete(LINK_ID)).toBeUndefined()
   })
 
