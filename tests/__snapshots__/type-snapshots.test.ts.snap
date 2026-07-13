@@ -122,6 +122,7 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "get-agent-analytics",
   "get-agent-version",
   "get-analytics-dashboard",
+  "get-api-key-permission-catalog",
   "get-audit-summary",
   "get-auth-info",
   "get-billing-config",
