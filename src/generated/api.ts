@@ -5192,6 +5192,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one run (framework or conversation) by run_id
+         * @description Resolve a single run by its channel-neutral ``run_id`` and return the canonical ``Run`` — at any status (live, completed, failed, timed out). Federates the Delta ``world.runs`` MV (framework runs), Lakebase ``world.conversations`` (conversation runs), and the live-voice registry, matched by ``run_id`` and scoped to the workspace. Use the returned ``kind`` / ``channel`` / ``source_*`` fields to open the channel-appropriate detail (voice call, text conversation, framework trace). 404 if the run does not exist in this workspace.
+         */
+        get: operations["get_run_v1__workspace_id__runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/access-token": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mint a browser-audio access token for an operator on a live run
+         * @description Generate the Twilio browser-audio credentials the console needs to attach the operator's WebRTC leg to a live run, addressed by ``run_id``. This is the media plane companion to ``/takeover`` (the control plane). Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel has no browser-audio leg.
+         */
+        post: operations["mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/authored-turn": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Author the next turn on a non-voice run under takeover
+         * @description Stage an operator-authored reply for a NON-voice run (text/sms/email/web) the caller has taken over. The agent-engine send-gate substitutes it for the agent's next outbound (exactly-once), so the caller receives the operator's words while the agent stays suspended. Repeatable — each call stages the next turn. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 for voice (voice takeover drives the live audio leg — use the conference, not an authored turn).
+         */
+        post: operations["author_run_turn_v1__workspace_id__runs__run_id__authored_turn_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/runs/{run_id}/guidance": {
         parameters: {
             query?: never;
@@ -5226,6 +5286,26 @@ export interface paths {
          * @description Release the caller's operator from a run they took over — the agent resumes. Addressed by ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet.
          */
         post: operations["hand_back_run_v1__workspace_id__runs__run_id__handback_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/switch-mode": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Switch an operator between listen and takeover on a live run
+         * @description Toggle the operator between ``listen`` (monitor) and ``takeover`` (drive) on a run they have already joined, addressed by the channel-neutral ``run_id``. For voice this mutes/unmutes the operator's conference participant. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet.
+         */
+        post: operations["switch_run_mode_v1__workspace_id__runs__run_id__switch_mode_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -11105,7 +11185,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed" | "paused";
             /**
              * Turn Count
              * @default 0
@@ -21117,6 +21197,47 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** RunAccessTokenRequest */
+        RunAccessTokenRequest: {
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+        };
+        /** RunAccessTokenResponse */
+        RunAccessTokenResponse: {
+            /** Conference Sid */
+            conference_sid?: string | null;
+            /** Connect Params */
+            connect_params?: {
+                [key: string]: string;
+            };
+            /** Identity */
+            identity: string;
+            /** Token */
+            token: string;
+        };
+        /** RunAuthoredTurnRequest */
+        RunAuthoredTurnRequest: {
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+            /** Text */
+            text: string;
+        };
+        /** RunAuthoredTurnResponse */
+        RunAuthoredTurnResponse: {
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Staged */
+            staged: boolean;
+        };
         /**
          * RunGuidanceRequest
          * @description Operator guidance for a live run. ``operator_id`` is in the body because this
@@ -21223,6 +21344,34 @@ export interface components {
             service_id?: string | null;
             /** Tags */
             tags?: string[];
+        };
+        /** RunSwitchModeRequest */
+        RunSwitchModeRequest: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
+            /**
+             * Operator Id
+             * Format: uuid
+             */
+            operator_id: string;
+            /** Participant Call Sid */
+            participant_call_sid: string;
+        };
+        /** RunSwitchModeResponse */
+        RunSwitchModeResponse: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "listen" | "takeover";
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
         };
         /** RunTakeoverRequest */
         RunTakeoverRequest: {
@@ -26080,7 +26229,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed" | "paused";
             /**
              * Turn Count
              * @default 0
@@ -27908,7 +28057,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "closed" | "completed" | "in-progress" | "failed";
+            status: "active" | "closed" | "completed" | "in-progress" | "failed" | "paused";
             /**
              * Turn Count
              * @default 0
@@ -33852,7 +34001,7 @@ export interface operations {
                 /** @description Filter by channel */
                 channel_kind?: components["schemas"]["ChannelKind"] | null;
                 /** @description Filter by status */
-                status?: ("active" | "closed" | "completed" | "in-progress" | "failed") | null;
+                status?: ("active" | "closed" | "completed" | "in-progress" | "failed" | "paused") | null;
                 limit?: number;
                 offset?: number;
             };
@@ -41257,9 +41406,9 @@ export interface operations {
                 sort_by?: string[];
                 limit?: number;
                 continuation_token?: unknown;
-                status?: ("live" | "running" | "paused" | "completed" | "failed" | "timed_out") | null;
-                kind?: ("conversation" | "framework") | null;
-                channel?: ("voice" | "text" | "sms" | "email" | "web") | null;
+                status?: ("live" | "running" | "paused" | "completed" | "failed" | "timed_out")[];
+                kind?: ("conversation" | "framework")[];
+                channel?: ("voice" | "text" | "sms" | "email" | "web")[];
             };
             header?: never;
             path: {
@@ -41292,8 +41441,8 @@ export interface operations {
     runs_summary_v1__workspace_id__runs_summary_get: {
         parameters: {
             query?: {
-                kind?: ("conversation" | "framework") | null;
-                channel?: ("voice" | "text" | "sms" | "email" | "web") | null;
+                kind?: ("conversation" | "framework")[];
+                channel?: ("voice" | "text" | "sms" | "email" | "web")[];
             };
             header?: never;
             path: {
@@ -41310,6 +41459,110 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunsSummaryResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_v1__workspace_id__runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Run"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunAccessTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunAccessTokenResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    author_run_turn_v1__workspace_id__runs__run_id__authored_turn_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunAuthoredTurnRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunAuthoredTurnResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41382,6 +41635,42 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunHandbackResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    switch_run_mode_v1__workspace_id__runs__run_id__switch_mode_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RunSwitchModeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunSwitchModeResponse"];
                 };
             };
             /** @description Validation Error */
