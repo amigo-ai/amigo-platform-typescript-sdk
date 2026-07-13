@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.98.1] - 2026-07-13
+
+### Bug Fixes
+
+- return uploads as binary blobs (#431)
+
 ## [0.98.0] - 2026-07-11
 
 ### Features
