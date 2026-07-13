@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.101.0] - 2026-07-13
+
+### Features
+
+- RunsResource — SDK surface for the unified run backbone (#434)
+
 ## [0.100.0] - 2026-07-13
 
 ### Maintenance
