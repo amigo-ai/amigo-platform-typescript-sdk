@@ -4,6 +4,9 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 export type ListIntakeLinksParams = NonNullable<
   paths['/v1/{workspace_id}/intake/links']['get']['parameters']['query']
 >
+export type ListIntakeLinkUploadsParams = NonNullable<
+  paths['/v1/{workspace_id}/intake/links/{link_id}/uploads']['get']['parameters']['query']
+>
 
 /**
  * Intake — short-lived signed links the workspace shares with patients to
@@ -37,15 +40,18 @@ export class IntakeResource extends WorkspaceScopedResource {
       ),
 
     /** List uploads received against a link */
-    listUploads: async (linkId: string) =>
+    listUploads: async (linkId: string, params?: ListIntakeLinkUploadsParams) =>
       extractData(
         await this.client.GET('/v1/{workspace_id}/intake/links/{link_id}/uploads', {
-          params: { path: { workspace_id: this.workspaceId, link_id: linkId } },
+          params: {
+            path: { workspace_id: this.workspaceId, link_id: linkId },
+            query: params,
+          },
         }),
       ),
 
-    /** Get a download URL/payload for a single upload */
-    downloadUpload: async (linkId: string, uploadId: string) =>
+    /** Download the raw bytes for a single upload. */
+    downloadUpload: async (linkId: string, uploadId: string): Promise<Blob> =>
       extractData(
         await this.client.GET(
           '/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download',
@@ -57,6 +63,7 @@ export class IntakeResource extends WorkspaceScopedResource {
                 upload_id: uploadId,
               },
             },
+            parseAs: 'blob',
           },
         ),
       ),
