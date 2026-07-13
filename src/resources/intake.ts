@@ -51,7 +51,7 @@ export class IntakeResource extends WorkspaceScopedResource {
       ),
 
     /** Download the raw bytes for a single upload. */
-    downloadUpload: async (linkId: string, uploadId: string) =>
+    downloadUpload: async (linkId: string, uploadId: string): Promise<Blob> =>
       extractData(
         await this.client.GET(
           '/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download',
