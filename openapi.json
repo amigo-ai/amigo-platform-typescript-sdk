@@ -12032,6 +12032,91 @@
         "title": "DatasetRow",
         "type": "object"
       },
+      "DatasetUpdateRunResponse": {
+        "description": "Durable status for one dataset update action.",
+        "properties": {
+          "batch_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Batch Ids",
+            "type": "array"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "created_at": {
+            "title": "Created At",
+            "type": "string"
+          },
+          "dataset": {
+            "title": "Dataset",
+            "type": "string"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "materialize_run_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Materialize Run Id"
+          },
+          "run_id": {
+            "format": "uuid",
+            "title": "Run Id",
+            "type": "string"
+          },
+          "source_ids": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "title": "Source Ids",
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/components/schemas/_DatasetUpdateStatus"
+          },
+          "updated_at": {
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "dataset",
+          "status",
+          "source_ids",
+          "batch_ids",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "DatasetUpdateRunResponse",
+        "type": "object"
+      },
       "DecisionFactor": {
         "description": "A specific audio input that drove an agent decision.",
         "examples": [
@@ -28843,6 +28928,54 @@
         "title": "PerformanceSummaryResponse",
         "type": "object"
       },
+      "PermissionCatalogResponse": {
+        "description": "The authoritative role\u2192permission model for API-key creation.\n\nServes the server-side source of truth (``DEFAULT_ROLE_DEFINITIONS``) so\nclients (console, SDK) stop hand-copying the matrix and drifting out of\nsync \u2014 a drift previously shipped `Data:Query` as a viewer default and\nmade the default create flow 422. Human-facing labels/descriptions for\nindividual permissions stay client-side (pure presentation); this payload\nis authorization truth only.",
+        "properties": {
+          "permissions": {
+            "items": {
+              "$ref": "#/components/schemas/PermissionEntry"
+            },
+            "title": "Permissions",
+            "type": "array"
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/RoleEntry"
+            },
+            "title": "Roles",
+            "type": "array"
+          }
+        },
+        "required": [
+          "roles",
+          "permissions"
+        ],
+        "title": "PermissionCatalogResponse",
+        "type": "object"
+      },
+      "PermissionEntry": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "namespace": {
+            "title": "Namespace",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "namespace",
+          "action"
+        ],
+        "title": "PermissionEntry",
+        "type": "object"
+      },
       "PhoneE164": {
         "maxLength": 16,
         "minLength": 2,
@@ -31851,6 +31984,37 @@
         "title": "RiskSummary",
         "type": "object"
       },
+      "RoleEntry": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "permission_names": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Permission Names",
+            "type": "array"
+          },
+          "priority": {
+            "title": "Priority",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "priority",
+          "description",
+          "permission_names"
+        ],
+        "title": "RoleEntry",
+        "type": "object"
+      },
       "RoleGrantItem": {
         "properties": {
           "access": {
@@ -32643,6 +32807,27 @@
           "mode"
         ],
         "title": "RunTakeoverResponse",
+        "type": "object"
+      },
+      "RunTrajectoryResponse": {
+        "properties": {
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/TrajectoryStep"
+            },
+            "title": "Steps",
+            "type": "array"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "steps",
+          "truncated"
+        ],
+        "title": "RunTrajectoryResponse",
         "type": "object"
       },
       "RunsResponse": {
@@ -42520,6 +42705,134 @@
         "title": "TracesExportResponse",
         "type": "object"
       },
+      "TrajectoryStep": {
+        "description": "One structural step of a framework run's trajectory. Fields are best-effort\n(only those the step actually carries are present), all optional, and free ``str``\nfor the same read-model resilience the ``Run`` descriptive fields use.",
+        "properties": {
+          "actor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actor"
+          },
+          "decision_from_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision From State"
+          },
+          "decision_to_state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Decision To State"
+          },
+          "effective_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Effective At"
+          },
+          "kind": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kind"
+          },
+          "seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seq"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State"
+          },
+          "tool_input_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Input Summary"
+          },
+          "tool_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Name"
+          },
+          "tool_result_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Result Summary"
+          },
+          "tool_succeeded": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool Succeeded"
+          }
+        },
+        "title": "TrajectoryStep",
+        "type": "object"
+      },
       "TranscriptSegment": {
         "properties": {
           "confidence": {
@@ -48413,6 +48726,17 @@
         "maxLength": 63,
         "minLength": 2,
         "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+        "type": "string"
+      },
+      "_DatasetUpdateStatus": {
+        "enum": [
+          "checking_drive",
+          "preparing",
+          "publishing",
+          "completed",
+          "needs_review",
+          "failed"
+        ],
         "type": "string"
       },
       "_DayHours": {
@@ -55927,6 +56251,46 @@
           }
         },
         "summary": "Create an API key",
+        "tags": [
+          "API Keys"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/api-keys/permission-catalog": {
+      "get": {
+        "description": "Return the authoritative role\u2192permission model: each role's default permission set (what an API key of that role may carry) plus the full permission universe. Clients use this to build the create-key form instead of hard-coding the matrix. Requires `ApiKey.view` permission.",
+        "operationId": "get-api-key-permission-catalog",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionCatalogResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Missing or invalid API key."
+          },
+          "403": {
+            "description": "Insufficient permissions."
+          }
+        },
+        "summary": "Get the API-key role/permission catalog",
         "tags": [
           "API Keys"
         ]
@@ -64975,7 +65339,6 @@
     },
     "/v1/{workspace_id}/intake/batches/{batch_id}/process": {
       "post": {
-        "description": "Start processing a batch (idempotent + resumable). Dispatches only the\nstill-``received`` files, so re-running picks up any that weren't triggered:\n\n* **Snapshot/CSV \u2014 ordered:** CDC depends on the prior curated baseline, so\n  only the lowest-version file fires now; each verdict chains the next via the\n  status write-back.\n* **Documents \u2014 one batch run:** a single extract-job run processes every\n  received file (it pulls them from the processing-manifest). NOT one run-now\n  per file \u2014 that serialised on the request path and 504'd for large batches.\n\nThe batch rolls up to completed/failed (via the write-back) once every file\nreaches a terminal verdict. Allowed from ``ready`` or ``processing`` (re-kick\na partially-dispatched batch); a terminal batch is a 409.",
         "operationId": "process_intake_batch_v1__workspace_id__intake_batches__batch_id__process_post",
         "parameters": [
           {
@@ -65170,6 +65533,62 @@
           }
         },
         "summary": "List Intake Datasets",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/datasets/{dataset}/update": {
+      "post": {
+        "description": "Run the customer-facing dataset update flow.\n\nThis is the one-click orchestration path for the console: check mapped Drive\nfolders, prepare any newly landed files, and publish immediately when no\npreparation is needed. If preparation is async, the run remains durable and\nis advanced by file write-backs or by refresh.",
+        "operationId": "update_intake_dataset_v1__workspace_id__intake_datasets__dataset__update_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "dataset",
+            "required": true,
+            "schema": {
+              "maxLength": 63,
+              "minLength": 2,
+              "pattern": "^[a-z0-9][a-z0-9_-]*[a-z0-9]$",
+              "title": "Dataset",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUpdateRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Intake Dataset",
         "tags": [
           "Intake"
         ]
@@ -66279,6 +66698,59 @@
           }
         },
         "summary": "Sync Intake Source",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/intake/update-runs/{run_id}": {
+      "get": {
+        "operationId": "get_intake_update_run_v1__workspace_id__intake_update_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatasetUpdateRunResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Intake Update Run",
         "tags": [
           "Intake"
         ]
@@ -73226,6 +73698,60 @@
           }
         },
         "summary": "Take over a live run as operator",
+        "tags": [
+          "Runs"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/runs/{run_id}/trajectory": {
+      "get": {
+        "description": "Ordered structural steps (perception / decision / tool / completion) of a FRAMEWORK run, read from the durable Delta trace source by the run's correlation id. 404 if the run does not exist in this workspace; 409 if the run is a conversation run (use ``/conversations/{id}`` for per-turn detail).",
+        "operationId": "get_run_trajectory_v1__workspace_id__runs__run_id__trajectory_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunTrajectoryResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get a framework run's step-by-step trajectory",
         "tags": [
           "Runs"
         ]

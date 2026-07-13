@@ -1311,6 +1311,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/api-keys/permission-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the API-key role/permission catalog
+         * @description Return the authoritative role→permission model: each role's default permission set (what an API key of that role may carry) plus the full permission universe. Clients use this to build the create-key form instead of hard-coding the matrix. Requires `ApiKey.view` permission.
+         */
+        get: operations["get-api-key-permission-catalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/api-keys/{key_id}": {
         parameters: {
             query?: never;
@@ -3403,22 +3423,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * Process Intake Batch
-         * @description Start processing a batch (idempotent + resumable). Dispatches only the
-         *     still-``received`` files, so re-running picks up any that weren't triggered:
-         *
-         *     * **Snapshot/CSV — ordered:** CDC depends on the prior curated baseline, so
-         *       only the lowest-version file fires now; each verdict chains the next via the
-         *       status write-back.
-         *     * **Documents — one batch run:** a single extract-job run processes every
-         *       received file (it pulls them from the processing-manifest). NOT one run-now
-         *       per file — that serialised on the request path and 504'd for large batches.
-         *
-         *     The batch rolls up to completed/failed (via the write-back) once every file
-         *     reaches a terminal verdict. Allowed from ``ready`` or ``processing`` (re-kick
-         *     a partially-dispatched batch); a terminal batch is a 409.
-         */
+        /** Process Intake Batch */
         post: operations["process_intake_batch_v1__workspace_id__intake_batches__batch_id__process_post"];
         delete?: never;
         options?: never;
@@ -3460,6 +3465,31 @@ export interface paths {
         get: operations["list_intake_datasets_v1__workspace_id__intake_datasets_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/datasets/{dataset}/update": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update Intake Dataset
+         * @description Run the customer-facing dataset update flow.
+         *
+         *     This is the one-click orchestration path for the console: check mapped Drive
+         *     folders, prepare any newly landed files, and publish immediately when no
+         *     preparation is needed. If preparation is async, the run remains durable and
+         *     is advanced by file write-backs or by refresh.
+         */
+        post: operations["update_intake_dataset_v1__workspace_id__intake_datasets__dataset__update_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3719,6 +3749,23 @@ export interface paths {
         put?: never;
         /** Sync Intake Source */
         post: operations["sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/intake/update-runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Intake Update Run */
+        get: operations["get_intake_update_run_v1__workspace_id__intake_update_runs__run_id__get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5326,6 +5373,26 @@ export interface paths {
          * @description Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet. For voice, the response carries the conference/participant SIDs the console needs to attach browser audio.
          */
         post: operations["take_over_run_v1__workspace_id__runs__run_id__takeover_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/runs/{run_id}/trajectory": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a framework run's step-by-step trajectory
+         * @description Ordered structural steps (perception / decision / tool / completion) of a FRAMEWORK run, read from the durable Delta trace source by the run's correlation id. 404 if the run does not exist in this workspace; 409 if the run is a conversation run (use ``/conversations/{id}`` for per-turn detail).
+         */
+        get: operations["get_run_trajectory_v1__workspace_id__runs__run_id__trajectory_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -12977,6 +13044,34 @@ export interface components {
             schema_version: string;
         };
         /**
+         * DatasetUpdateRunResponse
+         * @description Durable status for one dataset update action.
+         */
+        DatasetUpdateRunResponse: {
+            /** Batch Ids */
+            batch_ids: string[];
+            /** Completed At */
+            completed_at?: string | null;
+            /** Created At */
+            created_at: string;
+            /** Dataset */
+            dataset: string;
+            /** Error */
+            error?: string | null;
+            /** Materialize Run Id */
+            materialize_run_id?: number | null;
+            /**
+             * Run Id
+             * Format: uuid
+             */
+            run_id: string;
+            /** Source Ids */
+            source_ids: string[];
+            status: components["schemas"]["_DatasetUpdateStatus"];
+            /** Updated At */
+            updated_at: string;
+        };
+        /**
          * DecisionFactor
          * @description A specific audio input that drove an agent decision.
          * @example {
@@ -19675,6 +19770,32 @@ export interface components {
              */
             workspace_id: string;
         };
+        /**
+         * PermissionCatalogResponse
+         * @description The authoritative role→permission model for API-key creation.
+         *
+         *     Serves the server-side source of truth (``DEFAULT_ROLE_DEFINITIONS``) so
+         *     clients (console, SDK) stop hand-copying the matrix and drifting out of
+         *     sync — a drift previously shipped `Data:Query` as a viewer default and
+         *     made the default create flow 422. Human-facing labels/descriptions for
+         *     individual permissions stay client-side (pure presentation); this payload
+         *     is authorization truth only.
+         */
+        PermissionCatalogResponse: {
+            /** Permissions */
+            permissions: components["schemas"]["PermissionEntry"][];
+            /** Roles */
+            roles: components["schemas"]["RoleEntry"][];
+        };
+        /** PermissionEntry */
+        PermissionEntry: {
+            /** Action */
+            action: string;
+            /** Name */
+            name: string;
+            /** Namespace */
+            namespace: string;
+        };
         PhoneE164: string;
         /** PhoneNumberCallVolume */
         PhoneNumberCallVolume: {
@@ -21083,6 +21204,17 @@ export interface components {
              */
             level?: "low" | "medium" | "high" | "critical";
         };
+        /** RoleEntry */
+        RoleEntry: {
+            /** Description */
+            description: string;
+            /** Name */
+            name: string;
+            /** Permission Names */
+            permission_names: string[];
+            /** Priority */
+            priority: number;
+        };
         /** RoleGrantItem */
         RoleGrantItem: {
             access: components["schemas"]["_Access"];
@@ -21400,6 +21532,13 @@ export interface components {
              * Format: uuid
              */
             run_id: string;
+        };
+        /** RunTrajectoryResponse */
+        RunTrajectoryResponse: {
+            /** Steps */
+            steps: components["schemas"]["TrajectoryStep"][];
+            /** Truncated */
+            truncated: boolean;
         };
         /** RunsResponse */
         RunsResponse: {
@@ -25797,6 +25936,36 @@ export interface components {
              */
             resourceSpans: components["schemas"]["ResourceSpans"][];
         };
+        /**
+         * TrajectoryStep
+         * @description One structural step of a framework run's trajectory. Fields are best-effort
+         *     (only those the step actually carries are present), all optional, and free ``str``
+         *     for the same read-model resilience the ``Run`` descriptive fields use.
+         */
+        TrajectoryStep: {
+            /** Actor */
+            actor?: string | null;
+            /** Decision From State */
+            decision_from_state?: string | null;
+            /** Decision To State */
+            decision_to_state?: string | null;
+            /** Effective At */
+            effective_at?: string | null;
+            /** Kind */
+            kind?: string | null;
+            /** Seq */
+            seq?: number | null;
+            /** State */
+            state?: string | null;
+            /** Tool Input Summary */
+            tool_input_summary?: string | null;
+            /** Tool Name */
+            tool_name?: string | null;
+            /** Tool Result Summary */
+            tool_result_summary?: string | null;
+            /** Tool Succeeded */
+            tool_succeeded?: boolean | null;
+        };
         /** TranscriptSegment */
         TranscriptSegment: {
             /** Confidence */
@@ -27816,6 +27985,8 @@ export interface components {
         /** @enum {string} */
         _Access: "read" | "write";
         _DatasetSlug: string;
+        /** @enum {string} */
+        _DatasetUpdateStatus: "checking_drive" | "preparing" | "publishing" | "completed" | "needs_review" | "failed";
         /**
          * _DayHours
          * @description Open-hours window for one weekday. Times in 24h ``HH:MM`` form,
@@ -32160,6 +32331,42 @@ export interface operations {
             };
             /** @description Invalid request body or role. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-api-key-permission-catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PermissionCatalogResponse"];
+                };
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -37411,6 +37618,38 @@ export interface operations {
             };
         };
     };
+    update_intake_dataset_v1__workspace_id__intake_datasets__dataset__update_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                dataset: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetUpdateRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_intake_files_v1__workspace_id__intake_files_get: {
         parameters: {
             query?: {
@@ -37967,6 +38206,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SourceSyncResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_intake_update_run_v1__workspace_id__intake_update_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DatasetUpdateRunResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41704,6 +41975,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunTakeoverResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_trajectory_v1__workspace_id__runs__run_id__trajectory_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunTrajectoryResponse"];
                 };
             };
             /** @description Validation Error */
