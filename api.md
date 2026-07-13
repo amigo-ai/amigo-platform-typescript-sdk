@@ -118,6 +118,18 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `harnessContext`
 
+### `runs`
+
+- `list`
+- `summary`
+- `get`
+- `trajectory`
+- `sendGuidance`
+- `takeOver`
+- `handBack`
+- `switchMode`
+- `accessToken`
+
 ### `agentDefinitions`
 
 - `list`
