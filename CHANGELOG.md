@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.102.0] - 2026-07-14
+
+### Maintenance
+
+- sync openapi + drop wrappers for removed platform endpoints (#437)
+
 ## [0.101.0] - 2026-07-13
 
 ### Features
