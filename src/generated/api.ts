@@ -34292,6 +34292,7 @@ export interface operations {
                 poll?: boolean;
             };
             header?: {
+                /** @description Stable UUID for replaying the same logical send or poll after an ambiguous failure. Reuse the same value only for that operation. Omission is backward-compatible but cannot provide client-controlled response-loss replay. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value. */
                 "Idempotency-Key"?: string | null;
             };
             path: {
@@ -34334,6 +34335,7 @@ export interface operations {
                 include_tool_calls?: boolean;
             };
             header?: {
+                /** @description Stable UUID for replaying the same logical streamed turn. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value. */
                 "Idempotency-Key"?: string | null;
             };
             path: {

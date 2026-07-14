@@ -59526,6 +59526,7 @@
             }
           },
           {
+            "description": "Stable UUID for replaying the same logical send or poll after an ambiguous failure. Reuse the same value only for that operation. Omission is backward-compatible but cannot provide client-controlled response-loss replay. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value.",
             "in": "header",
             "name": "Idempotency-Key",
             "required": false,
@@ -59539,6 +59540,7 @@
                   "type": "null"
                 }
               ],
+              "description": "Stable UUID for replaying the same logical send or poll after an ambiguous failure. Reuse the same value only for that operation. Omission is backward-compatible but cannot provide client-controlled response-loss replay. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value.",
               "title": "Idempotency-Key"
             }
           }
@@ -59624,6 +59626,7 @@
             }
           },
           {
+            "description": "Stable UUID for replaying the same logical streamed turn. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value.",
             "in": "header",
             "name": "Idempotency-Key",
             "required": false,
@@ -59637,6 +59640,7 @@
                   "type": "null"
                 }
               ],
+              "description": "Stable UUID for replaying the same logical streamed turn. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value.",
               "title": "Idempotency-Key"
             }
           }
