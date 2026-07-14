@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.103.0] - 2026-07-14
+
+### Features
+
+- add receipt-backed background delivery
+
+### Bug Fixes
+
+- preserve kickoff and compatibility contracts
+- migrate retired read helpers
+- unify retry-safe timeout handling
+
 ## [0.102.0] - 2026-07-14
 
 ### Maintenance
