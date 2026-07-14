@@ -729,6 +729,8 @@ export type MetricValueResponse = MetricValueAlias
 export type { FireTriggerRequest, ListTriggersParams } from './resources/triggers.js'
 
 export type {
+  AnalyticsDashboard,
+  AnalyticsKpi,
   EntitySurfaceHistoryParams,
   SurfaceChannelEffectivenessParams,
   SurfaceCompletionRatesParams,
@@ -794,20 +796,40 @@ export type {
 } from './resources/events.js'
 export { WorkspaceEventStreamError, isWorkspaceEventStreamError } from './resources/events.js'
 
-export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
+export {
+  createIdempotencyKey,
+  sessionConnectAuthProtocols,
+  textStreamAuthProtocols,
+} from './resources/conversations.js'
+
+export type {
+  ListRunsParams,
+  Run,
+  RunsResponse,
+  RunsSummaryResponse,
+  SummarizeRunsParams,
+} from './resources/runs.js'
 export type {
   ChannelKind,
   ConversationDetail,
+  ConversationListResponse,
+  ConversationSummary,
   ConversationTurn,
   ConversationTurnAvailableAction,
   ConversationTurnStateTransition,
+  CreateTurnOptions,
+  CreateTurnStreamOptions,
   CreateConversationRequest,
+  ListConversationsParams,
+  PollTurnOptions,
   SessionConnectUrlParams,
   SwitchChannelRequest,
   TextStreamAuthProtocols,
   TextStreamUrlParams,
   TurnDoneEvent,
   TurnErrorEvent,
+  TurnDelivery,
+  TurnDeliveryAckRequest,
   TurnMessageEvent,
   TurnRequest,
   TurnResponse,

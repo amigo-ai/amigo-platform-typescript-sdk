@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { computeDelay, resolveRetryOptions } from '../../src/core/retry.js'
+import { computeDelay, resolveRetryOptions, shouldRetry } from '../../src/core/retry.js'
 
 const originalCryptoDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'crypto')
 type GlobalWithCrypto = typeof globalThis & {
@@ -25,7 +25,7 @@ describe('retry utilities', () => {
       value: { getRandomValues },
     })
 
-    const delay = computeDelay(1, new Response(), resolveRetryOptions())
+    const delay = computeDelay(1, undefined, resolveRetryOptions())
 
     expect(getRandomValues).toHaveBeenCalledOnce()
     expect(delay).toBe(250)
@@ -53,6 +53,15 @@ describe('retry utilities', () => {
 
     const delay = computeDelay(0, response, resolveRetryOptions())
     expect(delay).toBe(7_000)
+  })
+
+  it('uses one retry gate for response-free transport failures', () => {
+    const options = resolveRetryOptions({ maxAttempts: 2 })
+
+    expect(shouldRetry({ method: 'POST', attempt: 0, options, retrySafe: true })).toBe(true)
+    expect(shouldRetry({ method: 'GET', attempt: 0, options })).toBe(true)
+    expect(shouldRetry({ method: 'POST', attempt: 0, options })).toBe(false)
+    expect(shouldRetry({ method: 'POST', attempt: 1, options, retrySafe: true })).toBe(false)
   })
 })
 

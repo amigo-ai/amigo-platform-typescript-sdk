@@ -91,7 +91,7 @@ const INTELLIGENCE_FIXTURE = {
 }
 
 function mockFetch(
-  routes: Record<string, () => Response | Promise<Response>>,
+  routes: Record<string, (request: Request) => Response | Promise<Response>>,
 ): typeof globalThis.fetch {
   return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
     let url: string
@@ -106,7 +106,10 @@ function mockFetch(
     const pathname = new URL(url).pathname
     for (const [pattern, handler] of Object.entries(routes)) {
       const [pMethod, ...pPathParts] = pattern.split(' ')
-      if (pMethod === method && pPathParts.join(' ') === pathname) return handler()
+      if (pMethod === method && pPathParts.join(' ') === pathname) {
+        const request = input instanceof Request ? input : new Request(url, init)
+        return handler(request)
+      }
     }
     return new Response(JSON.stringify({ detail: `No mock for ${method} ${pathname}` }), {
       status: 500,
@@ -194,6 +197,43 @@ describe('CallsResource', () => {
     const result = await client.calls.getIntelligence(CALL_ID)
     expect(result.call_id).toBe(CALL_ID)
     expect(result.quality_score).toBe(0.92)
+  })
+
+  it('routes the deprecated active-intelligence helper through live voice runs', async () => {
+    let requestUrl = ''
+    const activeClient = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/runs`]: (request) => {
+          requestUrl = request.url
+          return Response.json({
+            items: [
+              {
+                run_id: '10000000-0000-4000-8000-000000000001',
+                workspace_id: TEST_WORKSPACE_ID,
+                kind: 'conversation',
+                channel: 'voice',
+                status: 'running',
+                started_at: '2026-01-15T10:30:00Z',
+                source_call_sid: CALL_FIXTURE.call_sid,
+                takeover: { eligible: true, mode_options: ['listen', 'takeover'] },
+              },
+            ],
+            has_more: false,
+            continuation_token: null,
+          })
+        },
+      }),
+    })
+
+    const result = await activeClient.calls.getActiveIntelligence()
+
+    expect(result.items[0]?.source_call_sid).toBe(CALL_FIXTURE.call_sid)
+    const query = new URL(requestUrl).searchParams
+    expect(query.getAll('kind')).toEqual(['conversation'])
+    expect(query.getAll('channel')).toEqual(['voice'])
+    expect(query.getAll('status')).toEqual(['live'])
   })
 
   it('gets call benchmarks', async () => {

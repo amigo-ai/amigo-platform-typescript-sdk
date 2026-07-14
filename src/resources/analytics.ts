@@ -1,5 +1,8 @@
-import type { operations } from '../generated/api.js'
+import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
+
+export type AnalyticsDashboard = components['schemas']['AnalyticsDashboardResponse']
+export type AnalyticsKpi = components['schemas']['AnalyticsKpi']
 
 export type SurfaceCompletionRatesParams = NonNullable<
   operations['get-surface-completion-rates']['parameters']['query']
@@ -18,7 +21,7 @@ export type EntitySurfaceHistoryParams = NonNullable<
  * Analytics — aggregate metrics about calls, agents, quality, and usage.
  */
 export class AnalyticsResource extends WorkspaceScopedResource {
-  /** High-level dashboard summary — pass `days` (default: 7) for the lookback window */
+  /** Typed headline KPIs with period-over-period deltas; `days` defaults to 7. */
   async getDashboard(params?: { days?: number }) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/analytics/dashboard', {

@@ -1,14 +1,17 @@
 import { describe, it, expect } from 'vitest'
 import { AmigoClient } from '../../src/index.js'
+import type { AnalyticsDashboard } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
-const DASHBOARD_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  total_calls: 150,
-  avg_duration_seconds: 240,
-  sentiment_score: 0.78,
+const DASHBOARD_FIXTURE: AnalyticsDashboard = {
+  call_volume: { value: 150, delta_pct: 25 },
+  avg_quality: { value: 82.5, delta_pct: 2.5 },
+  avg_ttfb_ms: { value: 320, delta_pct: -8 },
+  escalation_rate: { value: 0.08, delta_pct: -20 },
+  tool_success_rate: { value: 0.95, delta_pct: 1.2 },
+  avg_duration_s: { value: 240, delta_pct: null },
   period_days: 7,
 }
 
@@ -173,13 +176,16 @@ const client = new AmigoClient({
 describe('AnalyticsResource', () => {
   it('gets the dashboard', async () => {
     const result = await client.analytics.getDashboard()
-    expect(result.total_calls).toBe(150)
+    expect(result.call_volume.value).toBe(150)
+    expect(result.call_volume.delta_pct).toBe(25)
+    expect(result.avg_ttfb_ms.delta_pct).toBe(-8)
+    expect(result.avg_duration_s.delta_pct).toBeNull()
     expect(result.period_days).toBe(7)
   })
 
   it('gets the dashboard with days param', async () => {
     const result = await client.analytics.getDashboard({ days: 30 })
-    expect(result.total_calls).toBe(150)
+    expect(result.avg_quality.value).toBe(82.5)
   })
 
   it('gets call analytics', async () => {

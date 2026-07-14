@@ -1,10 +1,20 @@
 import { ConfigurationError } from '../core/errors.js'
-import { type PlatformFetch } from '../core/openapi-client.js'
+import { INTERNAL_RETRY_SAFE_HEADER, type PlatformFetch } from '../core/openapi-client.js'
 import type { components } from '../generated/api.js'
-import { WorkspaceScopedResource, extractData } from './base.js'
+import {
+  WorkspaceScopedResource,
+  extractData,
+  resolveScopedPlatformClient,
+  untypedClient,
+} from './base.js'
+import { RunsResource, type ListRunsParams, type Run, type RunsResponse } from './runs.js'
 
 export type ChannelKind = components['schemas']['ChannelKind']
 export type ConversationDetail = components['schemas']['ConversationDetail']
+/** @deprecated Conversation history is represented by canonical {@link Run} objects. */
+export type ConversationSummary = Run
+/** @deprecated Use {@link RunsResponse}; conversation listing now uses `GET /runs`. */
+export type ConversationListResponse = RunsResponse
 export type ConversationTurn = components['schemas']['ConversationTurn']
 export type ConversationTurnAvailableAction =
   components['schemas']['ConversationTurnAvailableAction']
@@ -23,6 +33,26 @@ export type TurnThinkingEvent = components['schemas']['TurnThinkingEvent']
 export type TurnMessageEvent = components['schemas']['TurnMessageEvent']
 export type TurnDoneEvent = components['schemas']['TurnDoneEvent']
 export type TurnErrorEvent = components['schemas']['TurnErrorEvent']
+
+export type TurnDelivery = components['schemas']['TurnDelivery']
+export type TurnDeliveryAckRequest = components['schemas']['TurnDeliveryAckRequest']
+
+export interface CreateTurnOptions {
+  includeToolCalls?: boolean
+  poll?: boolean
+  idempotencyKey?: string
+}
+
+export interface PollTurnOptions {
+  includeToolCalls?: boolean
+  idempotencyKey?: string
+}
+
+export interface CreateTurnStreamOptions {
+  signal?: AbortSignal
+  includeToolCalls?: boolean
+  idempotencyKey?: string
+}
 
 /**
  * Hand-authored because the text-stream WebSocket endpoint is intentionally
@@ -97,6 +127,49 @@ export interface SessionConnectUrlParams {
 const MAX_AUTH_TOKEN_CHARS = 4096
 const TEXT_STREAM_AUTH_TOKEN_RE = /^[-A-Za-z0-9._+=/:]+$/
 const WEB_SOCKET_PROTOCOL_TOKEN_RE = /^[!#$%&'*+\-.^_`|~A-Za-z0-9]+$/
+const CANONICAL_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const NIL_UUID = '00000000-0000-0000-0000-000000000000'
+const deliveryProtocolV2ByClient = new WeakMap<PlatformFetch, Set<string>>()
+
+type RunStatusFilter = NonNullable<ListRunsParams['status']>[number]
+type RunChannelFilter = NonNullable<ListRunsParams['channel']>[number]
+
+/**
+ * @deprecated Use {@link ListRunsParams} with `kind: ['conversation']`.
+ *
+ * Legacy scalar `status`, `channel_kind`, and `offset` inputs remain accepted
+ * where the unified Runs contract has an exact equivalent.
+ */
+export interface ListConversationsParams extends Omit<
+  ListRunsParams,
+  'status' | 'channel' | 'kind'
+> {
+  status?: ListRunsParams['status'] | ConversationDetail['status']
+  channel?: ListRunsParams['channel']
+  /** @deprecated Use `channel`. */
+  channel_kind?: ChannelKind
+  /** @deprecated Use `continuationToken`. */
+  offset?: number
+}
+
+const LEGACY_CONVERSATION_STATUS_TO_RUN_STATUS: Record<
+  ConversationDetail['status'],
+  RunStatusFilter
+> = {
+  active: 'running',
+  'in-progress': 'running',
+  paused: 'paused',
+  closed: 'completed',
+  completed: 'completed',
+  failed: 'failed',
+}
+
+const LEGACY_CONVERSATION_CHANNEL_TO_RUN_CHANNEL: Partial<Record<ChannelKind, RunChannelFilter>> = {
+  voice: 'voice',
+  sms: 'sms',
+  email: 'email',
+  web: 'web',
+}
 
 /** Access text conversation APIs and text-stream URL helpers. */
 export class ConversationsResource extends WorkspaceScopedResource {
@@ -105,6 +178,44 @@ export class ConversationsResource extends WorkspaceScopedResource {
   constructor(client: PlatformFetch, workspaceId: string, agentBaseUrl?: string) {
     super(client, workspaceId)
     this.agentBaseUrl = agentBaseUrl
+  }
+
+  /**
+   * List conversation runs through the canonical `/runs` read surface.
+   *
+   * @deprecated Use `client.runs.list({ kind: ['conversation'], ... })` directly.
+   * The removed conversation-list endpoint returned legacy summaries with
+   * `total` and lifecycle fields. This compatibility shim returns the canonical
+   * cursor-paginated {@link RunsResponse} instead and never calls the retired
+   * endpoint.
+   */
+  async list(params?: ListConversationsParams): Promise<ConversationListResponse> {
+    const {
+      channel,
+      channel_kind: legacyChannel,
+      continuationToken,
+      offset,
+      status,
+      ...runParams
+    } = params ?? {}
+
+    if (channel !== undefined && legacyChannel !== undefined) {
+      throw new ConfigurationError('channel and channel_kind cannot be combined')
+    }
+    if (continuationToken !== undefined && offset !== undefined) {
+      throw new ConfigurationError('continuationToken and offset cannot be combined')
+    }
+
+    const normalizedChannel = normalizeConversationChannels(channel, legacyChannel)
+    const normalizedStatus = normalizeConversationStatuses(status)
+
+    return new RunsResource(this.client, this.workspaceId).list({
+      ...runParams,
+      continuationToken: continuationToken ?? offset,
+      kind: ['conversation'],
+      channel: normalizedChannel,
+      status: normalizedStatus,
+    })
   }
 
   async create(request: CreateConversationRequest): Promise<ConversationDetail> {
@@ -146,6 +257,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
         path: { workspace_id: this.workspaceId, conversation_id: conversationId },
       },
     })
+    deliveryProtocolSet(this.client).delete(deliveryProtocolKey(this.workspaceId, conversationId))
   }
 
   /**
@@ -182,11 +294,16 @@ export class ConversationsResource extends WorkspaceScopedResource {
    * background tool results that completed since the last turn. A poll must
    * NOT carry a `request.message` (the server rejects it 422); prefer
    * {@link pollTurn}.
+   *
+   * Every turn request carries a UUID `Idempotency-Key`, including an empty
+   * greeting kickoff. The SDK generates one by default; pass
+   * `options.idempotencyKey` when an application must retry an ambiguous
+   * network failure across method calls or process restarts.
    */
   async createTurn(
     conversationId: string,
     request: TurnRequest,
-    options?: { includeToolCalls?: boolean; poll?: boolean },
+    options?: CreateTurnOptions,
   ): Promise<TurnResponse> {
     if (options?.poll && request.message) {
       // The server rejects poll + message with 422; fail fast with a clear
@@ -196,36 +313,89 @@ export class ConversationsResource extends WorkspaceScopedResource {
     const query: { include_tool_calls?: boolean; poll?: boolean } = {}
     if (options?.includeToolCalls !== undefined) query.include_tool_calls = options.includeToolCalls
     if (options?.poll !== undefined) query.poll = options.poll
-    return extractData(
+    const idempotencyKey = resolveIdempotencyKey(options?.idempotencyKey)
+    const retrySafe =
+      options?.poll === true &&
+      supportsDeliveryProtocolV2(this.client, this.workspaceId, conversationId)
+    const response = extractData(
       await this.client.POST('/v1/{workspace_id}/conversations/{conversation_id}/turns', {
         params: {
           path: { workspace_id: this.workspaceId, conversation_id: conversationId },
           ...(Object.keys(query).length > 0 && { query }),
         },
         body: request,
-        headers: { Accept: 'application/json' },
+        headers: {
+          Accept: 'application/json',
+          'Idempotency-Key': idempotencyKey,
+          ...(retrySafe && { [INTERNAL_RETRY_SAFE_HEADER]: 'true' }),
+        },
       }),
     ) as TurnResponse
+    observeDeliveryProtocol(this.client, this.workspaceId, conversationId, response)
+    return response
   }
 
   /**
    * Poll a conversation for background tool results without sending a user
-   * message. Drains any background tool calls that completed since the last
-   * turn and returns the agent's report; when nothing is pending the response
-   * has empty `output` and `tool_calls` (the idle case) — treat that as "keep
-   * polling". Poll no more than once every ~5s per conversation.
+   * message. Protocol v2 claims a completed result and returns a `delivery`
+   * receipt; render or durably persist the response, then call
+   * {@link acknowledgeTurnDelivery}. Until acknowledgement, retrying the same
+   * logical poll with the same idempotency key replays the claim. An idle poll
+   * has no delivery and empty output; use a new key for the next logical poll.
+   * Poll no more than once every ~5s per conversation.
+   *
+   * The SDK automatically retries ambiguous poll failures only after the
+   * server has advertised `delivery_protocol_version: 2` on this client. On a
+   * fresh client, pass and retain `options.idempotencyKey` if the application
+   * needs to retry the first poll itself.
    *
    * @example
    * ```ts
    * const res = await client.conversations.pollTurn(convId, { includeToolCalls: true });
-   * if (res.output.length || res.tool_calls?.length) render(res); // else poll again later
+   * if (res.delivery) {
+   *   await renderDurably(res);
+   *   await client.conversations.acknowledgeTurnDelivery(convId, res.delivery);
+   * }
    * ```
    */
-  async pollTurn(
-    conversationId: string,
-    options?: { includeToolCalls?: boolean },
-  ): Promise<TurnResponse> {
-    return this.createTurn(conversationId, {}, { ...options, poll: true })
+  async pollTurn(conversationId: string, options?: PollTurnOptions): Promise<TurnResponse> {
+    const idempotencyKey = resolveIdempotencyKey(options?.idempotencyKey)
+    const response = await this.createTurn(
+      conversationId,
+      {},
+      {
+        ...options,
+        poll: true,
+        idempotencyKey,
+      },
+    )
+    validatePollResponse(response, idempotencyKey)
+    return response
+  }
+
+  /**
+   * Acknowledge a protocol-v2 background delivery after its output has been
+   * rendered or durably persisted. The acknowledgement is idempotent and the
+   * SDK safely retries transient failures with the same receipt.
+   */
+  async acknowledgeTurnDelivery(conversationId: string, delivery: TurnDelivery): Promise<void> {
+    const deliveryId = validateCanonicalUuid(delivery.delivery_id, 'delivery.delivery_id')
+    const requestId = validateCanonicalUuid(delivery.request_id, 'delivery.request_id')
+    const receipt = validateCanonicalUuid(delivery.receipt, 'delivery.receipt')
+    await untypedClient(this.client).POST<void>(
+      '/v1/{workspace_id}/conversations/{conversation_id}/turns/{delivery_id}/ack',
+      {
+        params: {
+          path: {
+            workspace_id: this.workspaceId,
+            conversation_id: conversationId,
+            delivery_id: deliveryId,
+          },
+        },
+        body: { request_id: requestId, receipt } satisfies TurnDeliveryAckRequest,
+        headers: { [INTERNAL_RETRY_SAFE_HEADER]: 'true' },
+      },
+    )
   }
 
   /**
@@ -253,7 +423,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
   async createTurnStream(
     conversationId: string,
     request: TurnRequest,
-    options?: { signal?: AbortSignal; includeToolCalls?: boolean },
+    options?: CreateTurnStreamOptions,
   ): Promise<ReadableStream<Uint8Array>> {
     const result = await this.client.POST(
       '/v1/{workspace_id}/conversations/{conversation_id}/turns/stream',
@@ -265,6 +435,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
           }),
         },
         body: request,
+        headers: { 'Idempotency-Key': resolveIdempotencyKey(options?.idempotencyKey) },
         parseAs: 'stream',
         signal: options?.signal,
       },
@@ -300,12 +471,17 @@ export class ConversationsResource extends WorkspaceScopedResource {
   async *streamTurn(
     conversationId: string,
     request: TurnRequest,
-    options?: { signal?: AbortSignal; includeToolCalls?: boolean },
+    options?: CreateTurnStreamOptions,
   ): AsyncGenerator<TurnStreamEvent> {
     const byteStream = await this.createTurnStream(conversationId, request, options)
     for await (const frame of parseSSEFrames(byteStream)) {
       const event = parseTurnStreamFrame(frame.event, frame.data)
-      if (event) yield event
+      if (event) {
+        if (event.event === 'done') {
+          observeDeliveryProtocol(this.client, this.workspaceId, conversationId, event)
+        }
+        yield event
+      }
     }
   }
 
@@ -344,6 +520,128 @@ export class ConversationsResource extends WorkspaceScopedResource {
       ...params,
     })
     return url.toString()
+  }
+}
+
+function normalizeConversationStatuses(
+  status: ListConversationsParams['status'],
+): RunStatusFilter[] | undefined {
+  if (status === undefined) return undefined
+  if (Array.isArray(status)) return status
+  return [LEGACY_CONVERSATION_STATUS_TO_RUN_STATUS[status]]
+}
+
+function normalizeConversationChannels(
+  channels: ListConversationsParams['channel'],
+  legacyChannel: ChannelKind | undefined,
+): RunChannelFilter[] | undefined {
+  if (channels !== undefined) return channels
+  if (legacyChannel === undefined) return undefined
+
+  const mapped = LEGACY_CONVERSATION_CHANNEL_TO_RUN_CHANNEL[legacyChannel]
+  if (mapped === undefined) {
+    throw new ConfigurationError(
+      `channel_kind "${legacyChannel}" is not available on the unified Runs contract`,
+    )
+  }
+  return [mapped]
+}
+
+export function createIdempotencyKey(): string {
+  const cryptoApi = globalThis.crypto
+  if (typeof cryptoApi?.randomUUID === 'function') {
+    return cryptoApi.randomUUID()
+  }
+  if (typeof cryptoApi?.getRandomValues !== 'function') {
+    throw new ConfigurationError('Web Crypto is required to generate an idempotency key')
+  }
+
+  const bytes = new Uint8Array(16)
+  cryptoApi.getRandomValues(bytes)
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x40
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, '0')).join('')
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`
+}
+
+function resolveIdempotencyKey(idempotencyKey: string | undefined): string {
+  return idempotencyKey === undefined
+    ? createIdempotencyKey()
+    : validateCanonicalUuid(idempotencyKey, 'idempotencyKey')
+}
+
+function validateCanonicalUuid(value: string, label: string): string {
+  const normalized = value.trim()
+  if (!CANONICAL_UUID_RE.test(normalized) || normalized.toLowerCase() === NIL_UUID) {
+    throw new ConfigurationError(`${label} must be a canonical non-zero UUID`)
+  }
+  return normalized.toLowerCase()
+}
+
+function validatePollResponse(response: TurnResponse, requestId: string): void {
+  const delivery = response.delivery
+  const renderableOutput =
+    response.output?.some(
+      (turn) => turn.role === 'agent' && typeof turn.text === 'string' && turn.text.trim() !== '',
+    ) === true
+
+  if (response.delivery_protocol_version !== 2) {
+    if (delivery != null) {
+      throw new ConfigurationError('poll response contains delivery metadata without protocol v2')
+    }
+    return
+  }
+  if (delivery == null) {
+    if (renderableOutput) {
+      throw new ConfigurationError('protocol-v2 poll output requires a delivery receipt')
+    }
+    return
+  }
+  validateCanonicalUuid(delivery.delivery_id, 'delivery.delivery_id')
+  const deliveryRequestId = validateCanonicalUuid(delivery.request_id, 'delivery.request_id')
+  validateCanonicalUuid(delivery.receipt, 'delivery.receipt')
+  if (deliveryRequestId !== requestId) {
+    throw new ConfigurationError('delivery.request_id does not match the poll idempotency key')
+  }
+  if (!renderableOutput) {
+    throw new ConfigurationError('protocol-v2 delivery requires renderable agent output')
+  }
+}
+
+function deliveryProtocolSet(client: PlatformFetch): Set<string> {
+  const { baseClient } = resolveScopedPlatformClient(client)
+  let protocols = deliveryProtocolV2ByClient.get(baseClient)
+  if (!protocols) {
+    protocols = new Set<string>()
+    deliveryProtocolV2ByClient.set(baseClient, protocols)
+  }
+  return protocols
+}
+
+function deliveryProtocolKey(workspaceId: string, conversationId: string): string {
+  return `${workspaceId}:${conversationId}`
+}
+
+function supportsDeliveryProtocolV2(
+  client: PlatformFetch,
+  workspaceId: string,
+  conversationId: string,
+): boolean {
+  return deliveryProtocolSet(client).has(deliveryProtocolKey(workspaceId, conversationId))
+}
+
+function observeDeliveryProtocol(
+  client: PlatformFetch,
+  workspaceId: string,
+  conversationId: string,
+  observation: Pick<TurnResponse | TurnDoneEvent, 'delivery_protocol_version'>,
+): void {
+  const protocols = deliveryProtocolSet(client)
+  const protocolKey = deliveryProtocolKey(workspaceId, conversationId)
+  if (observation.delivery_protocol_version === 2) {
+    protocols.add(protocolKey)
+  } else {
+    protocols.delete(protocolKey)
   }
 }
 

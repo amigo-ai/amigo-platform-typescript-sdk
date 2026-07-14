@@ -12,6 +12,7 @@ export interface RetryOptions {
 }
 
 const RETRYABLE_STATUS_CODES = new Set([408, 429, 500, 502, 503, 504])
+const RETRYABLE_TRANSPORT_METHODS = new Set(['GET', 'HEAD', 'OPTIONS'])
 // POST is only retried on 429 with a Retry-After header (idempotency concern)
 const POST_RETRYABLE_STATUS_CODES = new Set([429])
 let jitterCounter = 0
@@ -22,15 +23,23 @@ type CryptoLike = {
 export interface RetryContext {
   method: string
   attempt: number
-  response: Response
+  response?: Response
   options: Required<RetryOptions>
+  retrySafe?: boolean
 }
 
 export function shouldRetry(ctx: RetryContext): boolean {
   const { method, attempt, response, options } = ctx
-  if (attempt >= options.maxAttempts) return false
+  if (attempt + 1 >= options.maxAttempts) return false
+
+  if (!response) {
+    return ctx.retrySafe === true || RETRYABLE_TRANSPORT_METHODS.has(method)
+  }
 
   const status = response.status
+  if (ctx.retrySafe) {
+    return RETRYABLE_STATUS_CODES.has(status)
+  }
   if (method === 'GET' || method === 'HEAD') {
     return RETRYABLE_STATUS_CODES.has(status)
   }
@@ -42,10 +51,10 @@ export function shouldRetry(ctx: RetryContext): boolean {
 
 export function computeDelay(
   attempt: number,
-  response: Response,
+  response: Response | undefined,
   options: Required<RetryOptions>,
 ): number {
-  const retryAfterHeader = response.headers.get('Retry-After')
+  const retryAfterHeader = response?.headers.get('Retry-After')
   if (retryAfterHeader) {
     const seconds = parseRetryAfterHeader(retryAfterHeader)
     if (seconds !== undefined) return seconds * 1000

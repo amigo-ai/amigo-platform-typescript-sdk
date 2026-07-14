@@ -557,6 +557,29 @@ const results = await client.world.search({
 const syncStatus = await client.world.getSyncStatusBySink()
 ```
 
+### Unified runs
+
+Use `client.runs` for the workspace-wide run history and live operations view.
+The response is cursor-paginated and spans conversation and framework runs.
+
+```typescript
+const liveVoice = await client.runs.list({
+  kind: ['conversation'],
+  channel: ['voice'],
+  status: ['live'],
+})
+
+const conversationHistory = await client.runs.list({
+  kind: ['conversation'],
+  continuationToken: liveVoice.continuation_token,
+})
+```
+
+`conversations.list()` and `calls.getActiveIntelligence()` remain as deprecated
+routing shims for source compatibility, but both now return the canonical
+`RunsResponse`. They never call the retired read endpoints and do not expose the
+legacy conversation lifecycle or transient active-intelligence fields.
+
 ### Calls
 
 Calls are read-only — they are created by the voice pipeline.
@@ -598,6 +621,40 @@ const nextTurn = await client.conversations.createTurn(conversation.id, {
 
 console.log(nextTurn.output.map((message) => message.text))
 ```
+
+Synchronous turns can hand long-running tool work to the background. When
+`background_pending` is true, keep polling until a receipt-backed delivery is
+available. Render or persist it successfully before acknowledging it:
+
+```typescript
+import { createIdempotencyKey } from '@amigo-ai/platform-sdk'
+
+const initialTurnKey = createIdempotencyKey() // Persist until this request succeeds unambiguously.
+const pending = await client.conversations.createTurn(
+  conversation.id,
+  { message: 'Book the first available Tuesday appointment' },
+  { idempotencyKey: initialTurnKey },
+)
+
+if (pending.background_pending) {
+  const pollKey = createIdempotencyKey() // New per idle poll; reuse only when retrying this poll.
+  const completed = await client.conversations.pollTurn(conversation.id, {
+    idempotencyKey: pollKey,
+  })
+
+  if (completed.delivery) {
+    await persistAndRender(completed)
+    await client.conversations.acknowledgeTurnDelivery(conversation.id, completed.delivery)
+  }
+}
+```
+
+Use a new idempotency key for each logical message, empty greeting kickoff, or
+poll, but retain that key when retrying an ambiguous failure. The SDK
+automatically retries polls only after the server advertises durable delivery
+protocol v2. A delivery remains replayable until
+`acknowledgeTurnDelivery()` succeeds; idle polls have no `delivery` and should
+be repeated later with a new key.
 
 Move an active conversation to a different channel (e.g. hand off web chat to
 iMessage/SMS) with `switchChannel()`; close it with `close()` so the customer

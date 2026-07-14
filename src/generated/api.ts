@@ -2254,6 +2254,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/{delivery_id}/ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge a rendered background turn delivery */
+        post: operations["acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/dashboards": {
         parameters: {
             query?: never;
@@ -8638,6 +8655,54 @@ export interface components {
             workspace_id: string;
         };
         AlterAction: components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"];
+        /**
+         * AnalyticsDashboardResponse
+         * @description Composite dashboard — six headline KPIs, each with a delta, plus the period length.
+         *
+         *     Higher-is-better for ``call_volume``, ``avg_quality``, ``tool_success_rate``;
+         *     higher-is-worse for ``escalation_rate``, ``avg_ttfb_ms``, ``avg_duration_s``.
+         *     Consumers must color deltas by that per-KPI polarity, not by delta sign alone.
+         */
+        AnalyticsDashboardResponse: {
+            /** @description Average call duration in seconds */
+            avg_duration_s: components["schemas"]["AnalyticsKpi"];
+            /** @description Average quality score (0-100); higher is better */
+            avg_quality: components["schemas"]["AnalyticsKpi"];
+            /** @description Average audio time-to-first-byte in ms; lower is better */
+            avg_ttfb_ms: components["schemas"]["AnalyticsKpi"];
+            /** @description Total calls in the period */
+            call_volume: components["schemas"]["AnalyticsKpi"];
+            /** @description Fraction of calls escalated; lower is better */
+            escalation_rate: components["schemas"]["AnalyticsKpi"];
+            /**
+             * Period Days
+             * @description Length of the reporting period in days
+             */
+            period_days: number;
+            /** @description Fraction of tool calls that succeeded; higher is better */
+            tool_success_rate: components["schemas"]["AnalyticsKpi"];
+        };
+        /**
+         * AnalyticsKpi
+         * @description A single headline KPI with its period-over-period change.
+         *
+         *     ``value`` is left broad (int for counts, float for rates/scores/durations,
+         *     ``None`` when the metric has no data for the period). ``delta_pct`` is the
+         *     signed percent change vs the previous equal-length period, or ``None`` when
+         *     a prior-period comparison is unavailable.
+         */
+        AnalyticsKpi: {
+            /**
+             * Delta Pct
+             * @description Percent change vs the previous period, or None
+             */
+            delta_pct?: number | null;
+            /**
+             * Value
+             * @description Current-period value (None when no data)
+             */
+            value?: number | null;
+        };
         /**
          * AnnotationState
          * @description Injects a hardcoded inner thought (no LLM call).
@@ -24914,6 +24979,11 @@ export interface components {
              */
             conversation_id: string;
             /**
+             * Delivery Id
+             * @default null
+             */
+            delivery_id?: string | null;
+            /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
@@ -26339,13 +26409,59 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
+        /** TurnDelivery */
+        TurnDelivery: {
+            /**
+             * Delivery Id
+             * Format: uuid
+             * @description Stable identifier for this background delivery.
+             */
+            delivery_id: string;
+            /**
+             * Receipt
+             * Format: uuid
+             * @description Opaque receipt required to acknowledge this delivery.
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             * @description Stable poll request identifier bound to this claim.
+             */
+            request_id: string;
+        };
+        /** TurnDeliveryAckRequest */
+        TurnDeliveryAckRequest: {
+            /**
+             * Receipt
+             * Format: uuid
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+        };
         /** TurnDoneEvent */
         TurnDoneEvent: {
+            /**
+             * Background Pending
+             * @description True when the streamed response is only an acknowledgement and the final assistant answer must be collected with the durable background-delivery protocol.
+             * @default false
+             */
+            background_pending?: boolean;
             /**
              * Conversation Id
              * Format: uuid
              */
             conversation_id: string;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry receipt-backed polls only after observing version 2.
+             * @default null
+             */
+            delivery_protocol_version?: 2 | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -26513,19 +26629,27 @@ export interface components {
              *
              *     ``true``: a tool crossed the server's blocking window and was handed to a background
              *     task, so ``output`` is NOT the final answer — the definitive assistant answer is
-             *     produced later, out-of-band. It is **durable on the conversation**: drain it by
-             *     re-issuing ``POST …/turns`` with ``poll=true`` (a no-message drain-and-report), by
-             *     sending the next user turn, or by reading the conversation back
-             *     (``GET …/conversations/{id}``). This is the per-conversation delivery contract — see
+             *     produced later, out-of-band. Under delivery protocol v2, collect it by re-issuing
+             *     ``POST …/turns`` with ``poll=true`` (a no-message, receipt-backed claim), render or
+             *     durably persist the returned answer, then acknowledge its exact delivery receipt.
+             *     This is the per-conversation delivery contract — see
              *     the web-integration paved path. (The workspace observer bus,
              *     ``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``
              *     / ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many
              *     conversations, but is not the per-chat delivery path.) A client that treats a
-             *     ``background_pending=true`` turn as complete without draining will miss the final answer.
+             *     ``background_pending=true`` turn as complete without polling and acknowledging will
+             *     miss the final answer.
              * @default false
              */
             background_pending?: boolean;
             conversation: components["schemas"]["TurnConversationSnapshot"];
+            /** @description Receipt for a background result returned by ``poll=true``. Render the response successfully, then acknowledge this delivery. Null for ordinary turns and idle/pending polls. */
+            delivery?: components["schemas"]["TurnDelivery"] | null;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry polls only after observing version 2.
+             */
+            delivery_protocol_version?: 2 | null;
             input: components["schemas"]["ConversationTurn"];
             /** Output */
             output: components["schemas"]["ConversationTurn"][];
@@ -26536,7 +26660,7 @@ export interface components {
             tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
             /**
              * Turn Id
-             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
+             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the exchange the returned messages attach to. A background delivery keeps the originating exchange even when later user turns already exist. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
              */
             turn_id: string | null;
         };
@@ -31562,9 +31686,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["AnalyticsDashboardResponse"];
                 };
             };
             /** @description Validation Error */
@@ -34166,10 +34288,13 @@ export interface operations {
             query?: {
                 /** @description Include tool call details in response */
                 include_tool_calls?: boolean;
-                /** @description Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation — each poll loads session state. */
+                /** @description Poll for a background result without sending a user message. Protocol v2 claims at most one ready answer and returns an opaque delivery receipt; render or durably persist the answer, then acknowledge that receipt. Returns empty output when nothing is ready. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation. */
                 poll?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Stable UUID for replaying the same logical send or poll after an ambiguous failure. Reuse the same value only for that operation. Omission is backward-compatible but cannot provide client-controlled response-loss replay. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value. */
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34209,7 +34334,10 @@ export interface operations {
                 /** @description Include tool_call_started / tool_call_completed frames in the stream */
                 include_tool_calls?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Stable UUID for replaying the same logical streamed turn. Empty greeting kickoffs use one conversation-stable identity regardless of the supplied value. */
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34259,6 +34387,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+                delivery_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnDeliveryAckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
