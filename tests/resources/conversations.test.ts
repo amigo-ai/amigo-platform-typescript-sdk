@@ -751,6 +751,44 @@ describe('ConversationsResource', () => {
     expect(requestCount).toBe(1)
   })
 
+  it('forwards an explicit idempotency key on an empty greeting kickoff', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const kickoffKey = 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAA098'
+    let observedKey: string | null = null
+    let observedBody: unknown
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (request) => {
+          observedKey = request.headers.get('idempotency-key')
+          observedBody = await request.json()
+          return Response.json({
+            turn_id: null,
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 0,
+              updated_at: '2026-01-01T00:00:01Z',
+            },
+            input: { role: 'user', text: '', content: [] },
+            output: [],
+            tool_calls: [],
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: '' },
+      { idempotencyKey: kickoffKey },
+    )
+
+    expect(observedKey).toBe(kickoffKey.toLowerCase())
+    expect(observedBody).toEqual({ message: '' })
+  })
+
   it('does not retry an ambiguous poll before protocol v2 is observed', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const idempotencyKey = '00000000-0000-4000-8000-000000000091'

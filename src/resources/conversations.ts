@@ -295,9 +295,10 @@ export class ConversationsResource extends WorkspaceScopedResource {
    * NOT carry a `request.message` (the server rejects it 422); prefer
    * {@link pollTurn}.
    *
-   * Every message turn carries a UUID `Idempotency-Key`. The SDK generates
-   * one by default; pass `options.idempotencyKey` when an application must
-   * retry an ambiguous network failure across method calls or process restarts.
+   * Every turn request carries a UUID `Idempotency-Key`, including an empty
+   * greeting kickoff. The SDK generates one by default; pass
+   * `options.idempotencyKey` when an application must retry an ambiguous
+   * network failure across method calls or process restarts.
    */
   async createTurn(
     conversationId: string,

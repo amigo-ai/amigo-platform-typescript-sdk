@@ -649,11 +649,12 @@ if (pending.background_pending) {
 }
 ```
 
-Use a new idempotency key for each logical message or poll, but retain that key
-when retrying an ambiguous failure. The SDK automatically retries polls only
-after the server advertises durable delivery protocol v2. A delivery remains
-replayable until `acknowledgeTurnDelivery()` succeeds; idle polls have no
-`delivery` and should be repeated later with a new key.
+Use a new idempotency key for each logical message, empty greeting kickoff, or
+poll, but retain that key when retrying an ambiguous failure. The SDK
+automatically retries polls only after the server advertises durable delivery
+protocol v2. A delivery remains replayable until
+`acknowledgeTurnDelivery()` succeeds; idle polls have no `delivery` and should
+be repeated later with a new key.
 
 Move an active conversation to a different channel (e.g. hand off web chat to
 iMessage/SMS) with `switchChannel()`; close it with `close()` so the customer
