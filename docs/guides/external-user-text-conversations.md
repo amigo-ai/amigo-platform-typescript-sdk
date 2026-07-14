@@ -135,6 +135,25 @@ for (const message of firstTurn.output) {
 }
 ```
 
+When a synchronous response has `background_pending: true`, use the same
+receipt-backed delivery flow as a workspace client. Poll with a stable UUID,
+durably render the result, then acknowledge its delivery:
+
+```typescript
+const pollKey = createIdempotencyKey()
+const completed = await externalUser.conversations.pollTurn(conversation.id, {
+  idempotencyKey: pollKey,
+})
+
+if (completed.delivery) {
+  await persistAndRender(completed)
+  await externalUser.conversations.acknowledgeTurnDelivery(conversation.id, completed.delivery)
+}
+```
+
+Import `createIdempotencyKey` from `@amigo-ai/platform-sdk`. Use a new key for
+each logical poll and reuse it only to retry the same ambiguous request.
+
 For streaming responses, use the same external-user client:
 
 ```typescript

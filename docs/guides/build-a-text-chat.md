@@ -221,9 +221,35 @@ const response = await client.conversations.createTurn(conversationId, {
 // response.tool_calls — tool call details (when include_tool_calls=true)
 ```
 
+If `response.background_pending` is true, the final result is delivered by a
+receipt-backed poll. Do not treat filler output as the answer, and do not
+acknowledge a delivery until the UI has rendered it or your backend has stored
+it durably:
+
+```typescript
+import { createIdempotencyKey } from '@amigo-ai/platform-sdk'
+
+const pollKey = createIdempotencyKey()
+const completed = await client.conversations.pollTurn(conversationId, {
+  includeToolCalls: true,
+  idempotencyKey: pollKey,
+})
+
+if (completed.delivery) {
+  await renderOrPersist(completed)
+  await client.conversations.acknowledgeTurnDelivery(conversationId, completed.delivery)
+}
+```
+
+Create a new key for the next logical poll. Reuse `pollKey` only when retrying
+the same ambiguous request. After protocol v2 has been observed, the SDK safely
+retries transient poll and acknowledgement failures; receiptless legacy
+responses are never assumed retry-safe.
+
 ```bash
 curl -X POST "https://api.platform.amigo.ai/v1/$WS/conversations/$CONV/turns?include_tool_calls=true" \
   -H "Authorization: Bearer $TOKEN" \
+  -H "Idempotency-Key: $REQUEST_UUID" \
   -H "Content-Type: application/json" \
   -d '{"message": "What appointments are available?"}'
 ```

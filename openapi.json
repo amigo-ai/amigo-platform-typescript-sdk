@@ -40616,6 +40616,19 @@
             "title": "Conversation Id",
             "type": "string"
           },
+          "delivery_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Delivery Id"
+          },
           "event_type": {
             "const": "text.agent_message",
             "default": "text.agent_message",
@@ -43855,12 +43868,82 @@
         "title": "TurnConversationSnapshot",
         "type": "object"
       },
+      "TurnDelivery": {
+        "properties": {
+          "delivery_id": {
+            "description": "Stable identifier for this background delivery.",
+            "format": "uuid",
+            "title": "Delivery Id",
+            "type": "string"
+          },
+          "receipt": {
+            "description": "Opaque receipt required to acknowledge this delivery.",
+            "format": "uuid",
+            "title": "Receipt",
+            "type": "string"
+          },
+          "request_id": {
+            "description": "Stable poll request identifier bound to this claim.",
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "delivery_id",
+          "request_id",
+          "receipt"
+        ],
+        "title": "TurnDelivery",
+        "type": "object"
+      },
+      "TurnDeliveryAckRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "receipt": {
+            "format": "uuid",
+            "title": "Receipt",
+            "type": "string"
+          },
+          "request_id": {
+            "format": "uuid",
+            "title": "Request Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "request_id",
+          "receipt"
+        ],
+        "title": "TurnDeliveryAckRequest",
+        "type": "object"
+      },
       "TurnDoneEvent": {
         "properties": {
+          "background_pending": {
+            "default": false,
+            "description": "True when the streamed response is only an acknowledgement and the final assistant answer must be collected with the durable background-delivery protocol.",
+            "title": "Background Pending",
+            "type": "boolean"
+          },
           "conversation_id": {
             "format": "uuid",
             "title": "Conversation Id",
             "type": "string"
+          },
+          "delivery_protocol_version": {
+            "anyOf": [
+              {
+                "const": 2,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Version of the durable background-delivery protocol supported by the serving agent. Clients may retry receipt-backed polls only after observing version 2.",
+            "title": "Delivery Protocol Version"
           },
           "event": {
             "const": "done",
@@ -44189,12 +44272,36 @@
         "properties": {
           "background_pending": {
             "default": false,
-            "description": "Whether this turn's ``output`` is the final answer, or only an acknowledgement that\nwork is still running in the background.\n\n``false`` (default): ``output`` is the complete agent response for this turn.\n\n``true``: a tool crossed the server's blocking window and was handed to a background\ntask, so ``output`` is NOT the final answer \u2014 the definitive assistant answer is\nproduced later, out-of-band. It is **durable on the conversation**: drain it by\nre-issuing ``POST \u2026/turns`` with ``poll=true`` (a no-message drain-and-report), by\nsending the next user turn, or by reading the conversation back\n(``GET \u2026/conversations/{id}``). This is the per-conversation delivery contract \u2014 see\nthe web-integration paved path. (The workspace observer bus,\n``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``\n/ ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many\nconversations, but is not the per-chat delivery path.) A client that treats a\n``background_pending=true`` turn as complete without draining will miss the final answer.",
+            "description": "Whether this turn's ``output`` is the final answer, or only an acknowledgement that\nwork is still running in the background.\n\n``false`` (default): ``output`` is the complete agent response for this turn.\n\n``true``: a tool crossed the server's blocking window and was handed to a background\ntask, so ``output`` is NOT the final answer \u2014 the definitive assistant answer is\nproduced later, out-of-band. Under delivery protocol v2, collect it by re-issuing\n``POST \u2026/turns`` with ``poll=true`` (a no-message, receipt-backed claim), render or\ndurably persist the returned answer, then acknowledge its exact delivery receipt.\nThis is the per-conversation delivery contract \u2014 see\nthe web-integration paved path. (The workspace observer bus,\n``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``\n/ ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many\nconversations, but is not the per-chat delivery path.) A client that treats a\n``background_pending=true`` turn as complete without polling and acknowledging will\nmiss the final answer.",
             "title": "Background Pending",
             "type": "boolean"
           },
           "conversation": {
             "$ref": "#/components/schemas/TurnConversationSnapshot"
+          },
+          "delivery": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TurnDelivery"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Receipt for a background result returned by ``poll=true``. Render the response successfully, then acknowledge this delivery. Null for ordinary turns and idle/pending polls."
+          },
+          "delivery_protocol_version": {
+            "anyOf": [
+              {
+                "const": 2,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Version of the durable background-delivery protocol supported by the serving agent. Clients may retry polls only after observing version 2.",
+            "title": "Delivery Protocol Version"
           },
           "input": {
             "$ref": "#/components/schemas/ConversationTurn"
@@ -44224,7 +44331,7 @@
                 "type": "null"
               }
             ],
-            "description": "Identifier of the user exchange this turn created \u2014 or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).",
+            "description": "Identifier of the user exchange this turn created \u2014 or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the exchange the returned messages attach to. A background delivery keeps the originating exchange even when later user turns already exist. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).",
             "title": "Turn Id"
           }
         },
@@ -59333,15 +59440,32 @@
             }
           },
           {
-            "description": "Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation \u2014 each poll loads session state.",
+            "description": "Poll for a background result without sending a user message. Protocol v2 claims at most one ready answer and returns an opaque delivery receipt; render or durably persist the answer, then acknowledge that receipt. Returns empty output when nothing is ready. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation.",
             "in": "query",
             "name": "poll",
             "required": false,
             "schema": {
               "default": false,
-              "description": "Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation \u2014 each poll loads session state.",
+              "description": "Poll for a background result without sending a user message. Protocol v2 claims at most one ready answer and returns an opaque delivery receipt; render or durably persist the answer, then acknowledge that receipt. Returns empty output when nothing is ready. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation.",
               "title": "Poll",
               "type": "boolean"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
             }
           }
         ],
@@ -59424,6 +59548,23 @@
               "title": "Include Tool Calls",
               "type": "boolean"
             }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
           }
         ],
         "requestBody": {
@@ -59464,6 +59605,72 @@
           }
         },
         "summary": "Send a message and receive a streamed agent response",
+        "tags": [
+          "conversations"
+        ]
+      }
+    },
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/{delivery_id}/ack": {
+      "post": {
+        "operationId": "acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "conversation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Conversation Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "delivery_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Delivery Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TurnDeliveryAckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Acknowledge a rendered background turn delivery",
         "tags": [
           "conversations"
         ]

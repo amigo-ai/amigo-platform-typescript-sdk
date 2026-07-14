@@ -794,20 +794,29 @@ export type {
 } from './resources/events.js'
 export { WorkspaceEventStreamError, isWorkspaceEventStreamError } from './resources/events.js'
 
-export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resources/conversations.js'
+export {
+  createIdempotencyKey,
+  sessionConnectAuthProtocols,
+  textStreamAuthProtocols,
+} from './resources/conversations.js'
 export type {
   ChannelKind,
   ConversationDetail,
   ConversationTurn,
   ConversationTurnAvailableAction,
   ConversationTurnStateTransition,
+  CreateTurnOptions,
+  CreateTurnStreamOptions,
   CreateConversationRequest,
+  PollTurnOptions,
   SessionConnectUrlParams,
   SwitchChannelRequest,
   TextStreamAuthProtocols,
   TextStreamUrlParams,
   TurnDoneEvent,
   TurnErrorEvent,
+  TurnDelivery,
+  TurnDeliveryAckRequest,
   TurnMessageEvent,
   TurnRequest,
   TurnResponse,

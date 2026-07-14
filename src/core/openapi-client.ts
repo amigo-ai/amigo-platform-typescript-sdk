@@ -27,6 +27,8 @@ const createClient: typeof createClientImport =
 
 export type PlatformFetch = ReturnType<typeof createClient<paths>>
 
+export const INTERNAL_RETRY_SAFE_HEADER = 'x-amigo-sdk-retry-safe'
+
 export interface RequestHookContext {
   id: string
   request: Request
@@ -187,11 +189,16 @@ function createRetryingFetch(
   defaults: RequestControlOptions,
 ): typeof globalThis.fetch {
   return async (input, init) => {
-    const baseRequest = input instanceof Request ? input : new Request(input, init)
+    const requestWithControls = input instanceof Request ? input : new Request(input, init)
+    const retrySafe = requestWithControls.headers.get(INTERNAL_RETRY_SAFE_HEADER) === 'true'
+    const headers = new Headers(requestWithControls.headers)
+    headers.delete(INTERNAL_RETRY_SAFE_HEADER)
+    const baseRequest = new Request(requestWithControls, { headers })
     const method = baseRequest.method.toUpperCase()
     const retryOpts = resolveRetryOptions(defaults.retry, defaults.maxRetries)
     const timeoutMs = defaults.timeout
-    const isIdempotent = method === 'GET' || method === 'HEAD' || method === 'OPTIONS'
+    const canRetryAfterCommit =
+      retrySafe || method === 'GET' || method === 'HEAD' || method === 'OPTIONS'
 
     for (let attempt = 0; attempt < retryOpts.maxAttempts; attempt++) {
       let response: Response | undefined
@@ -218,9 +225,13 @@ function createRetryingFetch(
 
       if (error) {
         if (timedOut) {
+          if (retrySafe && attemptsRemain) {
+            await sleep(computeDelay(attempt, new Response(), retryOpts))
+            continue
+          }
           throw new RequestTimeoutError(`Request timed out after ${timeoutMs}ms`, timeoutMs, error)
         }
-        if (isIdempotent && attemptsRemain) {
+        if (canRetryAfterCommit && attemptsRemain) {
           await sleep(computeDelay(attempt, new Response(), retryOpts))
           continue
         }
@@ -230,7 +241,7 @@ function createRetryingFetch(
         )
       }
 
-      if (response && attemptsRemain && shouldRetry(ctx)) {
+      if (response && attemptsRemain && shouldRetry({ ...ctx, retrySafe })) {
         const delay = computeDelay(attempt, response, retryOpts)
         if (baseRequest.signal.aborted) return response
         await sleep(delay)

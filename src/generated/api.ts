@@ -2254,6 +2254,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/{delivery_id}/ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge a rendered background turn delivery */
+        post: operations["acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/dashboards": {
         parameters: {
             query?: never;
@@ -24914,6 +24931,11 @@ export interface components {
              */
             conversation_id: string;
             /**
+             * Delivery Id
+             * @default null
+             */
+            delivery_id?: string | null;
+            /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
              */
@@ -26339,13 +26361,59 @@ export interface components {
             /** Updated At */
             updated_at: string;
         };
+        /** TurnDelivery */
+        TurnDelivery: {
+            /**
+             * Delivery Id
+             * Format: uuid
+             * @description Stable identifier for this background delivery.
+             */
+            delivery_id: string;
+            /**
+             * Receipt
+             * Format: uuid
+             * @description Opaque receipt required to acknowledge this delivery.
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             * @description Stable poll request identifier bound to this claim.
+             */
+            request_id: string;
+        };
+        /** TurnDeliveryAckRequest */
+        TurnDeliveryAckRequest: {
+            /**
+             * Receipt
+             * Format: uuid
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
+        };
         /** TurnDoneEvent */
         TurnDoneEvent: {
+            /**
+             * Background Pending
+             * @description True when the streamed response is only an acknowledgement and the final assistant answer must be collected with the durable background-delivery protocol.
+             * @default false
+             */
+            background_pending?: boolean;
             /**
              * Conversation Id
              * Format: uuid
              */
             conversation_id: string;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry receipt-backed polls only after observing version 2.
+             * @default null
+             */
+            delivery_protocol_version?: 2 | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -26513,19 +26581,27 @@ export interface components {
              *
              *     ``true``: a tool crossed the server's blocking window and was handed to a background
              *     task, so ``output`` is NOT the final answer — the definitive assistant answer is
-             *     produced later, out-of-band. It is **durable on the conversation**: drain it by
-             *     re-issuing ``POST …/turns`` with ``poll=true`` (a no-message drain-and-report), by
-             *     sending the next user turn, or by reading the conversation back
-             *     (``GET …/conversations/{id}``). This is the per-conversation delivery contract — see
+             *     produced later, out-of-band. Under delivery protocol v2, collect it by re-issuing
+             *     ``POST …/turns`` with ``poll=true`` (a no-message, receipt-backed claim), render or
+             *     durably persist the returned answer, then acknowledge its exact delivery receipt.
+             *     This is the per-conversation delivery contract — see
              *     the web-integration paved path. (The workspace observer bus,
              *     ``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``
              *     / ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many
              *     conversations, but is not the per-chat delivery path.) A client that treats a
-             *     ``background_pending=true`` turn as complete without draining will miss the final answer.
+             *     ``background_pending=true`` turn as complete without polling and acknowledging will
+             *     miss the final answer.
              * @default false
              */
             background_pending?: boolean;
             conversation: components["schemas"]["TurnConversationSnapshot"];
+            /** @description Receipt for a background result returned by ``poll=true``. Render the response successfully, then acknowledge this delivery. Null for ordinary turns and idle/pending polls. */
+            delivery?: components["schemas"]["TurnDelivery"] | null;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry polls only after observing version 2.
+             */
+            delivery_protocol_version?: 2 | null;
             input: components["schemas"]["ConversationTurn"];
             /** Output */
             output: components["schemas"]["ConversationTurn"][];
@@ -26536,7 +26612,7 @@ export interface components {
             tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
             /**
              * Turn Id
-             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
+             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the exchange the returned messages attach to. A background delivery keeps the originating exchange even when later user turns already exist. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
              */
             turn_id: string | null;
         };
@@ -34166,10 +34242,12 @@ export interface operations {
             query?: {
                 /** @description Include tool call details in response */
                 include_tool_calls?: boolean;
-                /** @description Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation — each poll loads session state. */
+                /** @description Poll for a background result without sending a user message. Protocol v2 claims at most one ready answer and returns an opaque delivery receipt; render or durably persist the answer, then acknowledge that receipt. Returns empty output when nothing is ready. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation. */
                 poll?: boolean;
             };
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34209,7 +34287,9 @@ export interface operations {
                 /** @description Include tool_call_started / tool_call_completed frames in the stream */
                 include_tool_calls?: boolean;
             };
-            header?: never;
+            header?: {
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34259,6 +34339,41 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+                delivery_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnDeliveryAckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };

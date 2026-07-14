@@ -5,6 +5,7 @@ import {
   ConfigurationError,
   NotFoundError,
   ValidationError,
+  createIdempotencyKey,
   sessionConnectAuthProtocols,
   textStreamAuthProtocols,
 } from '../../src/index.js'
@@ -16,6 +17,7 @@ import type {
   CreateConversationRequest,
   SwitchChannelRequest,
   TurnConversationSnapshot,
+  TurnDelivery,
   TurnRequest,
   TurnResponse,
 } from '../../src/index.js'
@@ -577,6 +579,364 @@ describe('ConversationsResource', () => {
     expect(url.searchParams.get('poll')).toBe('true')
     expect(url.searchParams.has('include_tool_calls')).toBe(false)
     expect(requestBody).toEqual({})
+  })
+
+  it('sends a generated UUID idempotency key on message turns', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let idempotencyKey: string | null = null
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (request) => {
+          idempotencyKey = request.headers.get('idempotency-key')
+          return Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:01Z',
+            },
+            input: { role: 'user', text: 'Hello', content: [] },
+            output: [],
+            tool_calls: [],
+            delivery_protocol_version: 2,
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(conversationId, { message: 'Hello' })
+
+    expect(idempotencyKey).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+  })
+
+  it('exports canonical UUID idempotency keys for application-managed retries', () => {
+    expect(createIdempotencyKey()).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    )
+  })
+
+  it('forwards an explicit idempotency key and rejects malformed keys before sending', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const explicitKey = 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAA099'
+    let requestCount = 0
+    let observedKey: string | null = null
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (request) => {
+          requestCount++
+          observedKey = request.headers.get('idempotency-key')
+          return Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:01Z',
+            },
+            input: { role: 'user', text: 'Hello', content: [] },
+            output: [],
+            tool_calls: [],
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: 'Hello' },
+      { idempotencyKey: explicitKey },
+    )
+    await expect(
+      client.conversations.createTurn(
+        conversationId,
+        { message: 'Again' },
+        { idempotencyKey: 'not-a-uuid' },
+      ),
+    ).rejects.toBeInstanceOf(ConfigurationError)
+
+    expect(observedKey).toBe(explicitKey.toLowerCase())
+    expect(requestCount).toBe(1)
+  })
+
+  it('does not retry an ambiguous poll before protocol v2 is observed', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const idempotencyKey = '00000000-0000-4000-8000-000000000091'
+    let requestCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 3, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () => {
+          requestCount++
+          throw new Error('connection reset after request')
+        },
+      }),
+    })
+
+    await expect(client.conversations.pollTurn(conversationId, { idempotencyKey })).rejects.toThrow(
+      /connection reset after request/,
+    )
+    expect(requestCount).toBe(1)
+  })
+
+  it('retries protocol-v2 polls with the same key and returns a receipt-backed delivery', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const sendKey = '00000000-0000-4000-8000-000000000092'
+    const pollKey = 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAA093'
+    const normalizedPollKey = pollKey.toLowerCase()
+    const delivery: TurnDelivery = {
+      delivery_id: '00000000-0000-4000-8000-000000000094',
+      request_id: normalizedPollKey,
+      receipt: '00000000-0000-4000-8000-000000000095',
+    }
+    const observedPollKeys: string[] = []
+    let pollCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (request) => {
+          const url = new URL(request.url)
+          if (url.searchParams.get('poll') !== 'true') {
+            return Response.json({
+              turn_id: 'turn-001',
+              conversation: {
+                id: conversationId,
+                status: 'active',
+                turn_count: 1,
+                updated_at: '2026-01-01T00:00:01Z',
+              },
+              input: { role: 'user', text: 'Hello', content: [] },
+              output: [],
+              tool_calls: [],
+              background_pending: true,
+              delivery_protocol_version: 2,
+            } satisfies TurnResponse)
+          }
+          pollCount++
+          observedPollKeys.push(request.headers.get('idempotency-key') ?? '')
+          expect(request.headers.has('x-amigo-sdk-retry-safe')).toBe(false)
+          if (pollCount === 1) {
+            return Response.json({ detail: 'retry' }, { status: 503 })
+          }
+          return Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:02Z',
+            },
+            input: { role: 'user', text: '', content: [] },
+            output: [{ role: 'agent', text: 'Done', content: [] }],
+            tool_calls: [],
+            delivery_protocol_version: 2,
+            delivery,
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: 'Hello' },
+      { idempotencyKey: sendKey },
+    )
+    const response = await client.conversations.pollTurn(conversationId, {
+      idempotencyKey: pollKey,
+    })
+
+    expect(observedPollKeys).toEqual([normalizedPollKey, normalizedPollKey])
+    expect(response.delivery).toEqual(delivery)
+    expect(response.turn_id).toBe('turn-001')
+  })
+
+  it.each([
+    [
+      {
+        output: [{ role: 'agent', text: 'Done', content: [] }],
+        delivery_protocol_version: 2,
+      },
+      /requires a delivery receipt/,
+    ],
+    [
+      {
+        output: [{ role: 'agent', text: 'Done', content: [] }],
+        delivery_protocol_version: 2,
+        delivery: {
+          delivery_id: '00000000-0000-4000-8000-000000000094',
+          request_id: '00000000-0000-4000-8000-000000000099',
+          receipt: '00000000-0000-4000-8000-000000000095',
+        },
+      },
+      /does not match/,
+    ],
+    [
+      {
+        output: [],
+        delivery_protocol_version: 2,
+        delivery: {
+          delivery_id: '00000000-0000-4000-8000-000000000094',
+          request_id: '00000000-0000-4000-8000-000000000093',
+          receipt: '00000000-0000-4000-8000-000000000095',
+        },
+      },
+      /requires renderable agent output/,
+    ],
+  ])('rejects malformed protocol-v2 poll responses %#', async (extra, expected) => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const pollKey = '00000000-0000-4000-8000-000000000093'
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () =>
+          Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:02Z',
+            },
+            input: { role: 'user', text: '', content: [] },
+            tool_calls: [],
+            ...extra,
+          }),
+      }),
+    })
+
+    await expect(
+      client.conversations.pollTurn(conversationId, { idempotencyKey: pollKey }),
+    ).rejects.toThrow(expected)
+  })
+
+  it('revokes poll retries when a response no longer advertises protocol v2', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    let requestCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: (request) => {
+          requestCount++
+          if (requestCount === 1) {
+            return Response.json({
+              turn_id: 'turn-001',
+              conversation: {
+                id: conversationId,
+                status: 'active',
+                turn_count: 1,
+                updated_at: '2026-01-01T00:00:01Z',
+              },
+              input: { role: 'user', text: 'Hello', content: [] },
+              output: [],
+              tool_calls: [],
+              delivery_protocol_version: 2,
+            } satisfies TurnResponse)
+          }
+          if (requestCount === 2) {
+            return Response.json({
+              turn_id: 'turn-001',
+              conversation: {
+                id: conversationId,
+                status: 'active',
+                turn_count: 1,
+                updated_at: '2026-01-01T00:00:02Z',
+              },
+              input: { role: 'user', text: '', content: [] },
+              output: [],
+              tool_calls: [],
+              delivery_protocol_version: null,
+            } satisfies TurnResponse)
+          }
+          expect(new URL(request.url).searchParams.get('poll')).toBe('true')
+          return Response.json({ detail: 'claim may have committed' }, { status: 503 })
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: 'Hello' },
+      { idempotencyKey: '00000000-0000-4000-8000-000000000081' },
+    )
+    await client.conversations.pollTurn(conversationId, {
+      idempotencyKey: '00000000-0000-4000-8000-000000000082',
+    })
+    await expect(
+      client.conversations.pollTurn(conversationId, {
+        idempotencyKey: '00000000-0000-4000-8000-000000000083',
+      }),
+    ).rejects.toThrow(/claim may have committed/)
+
+    expect(requestCount).toBe(3)
+  })
+
+  it('acknowledges a rendered delivery and safely retries response loss', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const delivery: TurnDelivery = {
+      delivery_id: '00000000-0000-4000-8000-000000000071',
+      request_id: '00000000-0000-4000-8000-000000000072',
+      receipt: '00000000-0000-4000-8000-000000000073',
+    }
+    const requestBodies: unknown[] = []
+    let requestCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns/${delivery.delivery_id}/ack`]: async (
+          request,
+        ) => {
+          requestCount++
+          requestBodies.push(await request.json())
+          expect(request.headers.has('x-amigo-sdk-retry-safe')).toBe(false)
+          if (requestCount === 1) {
+            throw new Error('connection reset after acknowledgement committed')
+          }
+          return new Response(null, { status: 204 })
+        },
+      }),
+    })
+
+    await client.conversations.acknowledgeTurnDelivery(conversationId, delivery)
+
+    expect(requestCount).toBe(2)
+    expect(requestBodies).toEqual([
+      { request_id: delivery.request_id, receipt: delivery.receipt },
+      { request_id: delivery.request_id, receipt: delivery.receipt },
+    ])
+  })
+
+  it('rejects malformed delivery receipts before acknowledgement', async () => {
+    let requestCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async () => {
+        requestCount++
+        return new Response(null, { status: 204 })
+      },
+    })
+
+    await expect(
+      client.conversations.acknowledgeTurnDelivery('00000000-0000-4000-8000-000000000001', {
+        delivery_id: '00000000-0000-4000-8000-000000000071',
+        request_id: '00000000-0000-4000-8000-000000000072',
+        receipt: '00000000-0000-0000-0000-000000000000',
+      }),
+    ).rejects.toBeInstanceOf(ConfigurationError)
+    expect(requestCount).toBe(0)
   })
 
   it('createTurn rejects poll combined with a message (fail fast, no server round-trip)', async () => {
@@ -1163,6 +1523,86 @@ describe('ConversationsResource', () => {
 
     expect(requestUrl).toBeDefined()
     expect(new URL(requestUrl as string).searchParams.get('include_tool_calls')).toBe('true')
+  })
+
+  it('streamTurn forwards a stable idempotency key', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const idempotencyKey = '00000000-0000-4000-8000-000000000061'
+    let observedKey: string | null = null
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: (request) => {
+          observedKey = request.headers.get('idempotency-key')
+          return new Response(
+            sseStream([
+              'event: done\ndata: {"conversation_id":"x","status":"active","turn_count":1}\n\n',
+            ]),
+            { headers: { 'content-type': 'text/event-stream' } },
+          )
+        },
+      }),
+    })
+
+    for await (const event of client.conversations.streamTurn(
+      conversationId,
+      { message: 'hi' },
+      { idempotencyKey },
+    )) {
+      void event
+    }
+
+    expect(observedKey).toBe(idempotencyKey)
+  })
+
+  it('remembers protocol v2 from a stream done frame for retry-safe polling', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const pollKey = '00000000-0000-4000-8000-000000000062'
+    let pollCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns/stream`]: () =>
+          new Response(
+            sseStream([
+              `event: done\ndata: {"conversation_id":"${conversationId}","status":"active","turn_count":1,"background_pending":true,"delivery_protocol_version":2}\n\n`,
+            ]),
+            { headers: { 'content-type': 'text/event-stream' } },
+          ),
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: () => {
+          pollCount++
+          if (pollCount === 1) {
+            return Response.json({ detail: 'retry the same claim' }, { status: 503 })
+          }
+          return Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:02Z',
+            },
+            input: { role: 'user', text: '', content: [] },
+            output: [],
+            tool_calls: [],
+            background_pending: true,
+            delivery_protocol_version: 2,
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    for await (const event of client.conversations.streamTurn(conversationId, {
+      message: 'hi',
+    })) {
+      void event
+    }
+    await client.conversations.pollTurn(conversationId, { idempotencyKey: pollKey })
+
+    expect(pollCount).toBe(2)
   })
 
   it('streamTurn drops malformed and unknown frames silently', async () => {

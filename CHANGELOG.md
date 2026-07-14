@@ -41,6 +41,7 @@
 ### Features
 
 - `simulations.promoteSession(sessionId)` — typed wrapper for `POST /simulations/sessions/{id}/promote`. Promotes a run-less (interactive playground) session into a coverage run so it can be forked/scored; idempotent (`already_bound: true` when the session already belongs to a run). Regenerates types with the new `promote-simulation-session` operation + `PromoteSessionResponse` schema.
+- `conversations.pollTurn()` now supports durable protocol-v2 delivery receipts, stable idempotency keys, safe post-proof retries, and `acknowledgeTurnDelivery()` after successful rendering.
 
 ### Fixes
 

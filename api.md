@@ -51,8 +51,8 @@ Notes:
 - Request option types: `AmigoRequestOptions`, `ScopedRequestOptions`
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
-- Conversation helpers: `sessionConnectAuthProtocols`, `textStreamAuthProtocols`
-- Conversation types: `ChannelKind`, `ConversationDetail`, `ConversationTurn`, `ConversationTurnAvailableAction`, `ConversationTurnStateTransition`, `CreateConversationRequest`, `SessionConnectUrlParams`, `SwitchChannelRequest`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
+- Conversation helpers: `createIdempotencyKey`, `sessionConnectAuthProtocols`, `textStreamAuthProtocols`
+- Conversation types: `ChannelKind`, `ConversationDetail`, `ConversationTurn`, `ConversationTurnAvailableAction`, `ConversationTurnStateTransition`, `CreateTurnOptions`, `CreateTurnStreamOptions`, `CreateConversationRequest`, `PollTurnOptions`, `SessionConnectUrlParams`, `SwitchChannelRequest`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnDelivery`, `TurnDeliveryAckRequest`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
 - Voice provider constants: `STT_PROVIDERS`, `TTS_PROVIDERS`, `VOICE_SESSION_PROVIDERS`
 - Voice provider types: `AgentVoiceConfig`, `ServiceVoiceConfigInput`, `ServiceVoiceConfigOutput`, `SttProvider`, `TtsProvider`, `VoiceSessionProvider`, `VoiceSettingsRequest`, `VoiceSettingsResponse`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
@@ -283,6 +283,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `switchChannel`
 - `createTurn`
 - `pollTurn`
+- `acknowledgeTurnDelivery`
 - `createTurnStream`
 - `streamTurn`
 - `textStreamUrl`

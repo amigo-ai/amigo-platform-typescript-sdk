@@ -599,6 +599,38 @@ const nextTurn = await client.conversations.createTurn(conversation.id, {
 console.log(nextTurn.output.map((message) => message.text))
 ```
 
+Synchronous turns can hand long-running tool work to the background. When
+`background_pending` is true, keep polling until a receipt-backed delivery is
+available. Render or persist it successfully before acknowledging it:
+
+```typescript
+import { createIdempotencyKey } from '@amigo-ai/platform-sdk'
+
+const pending = await client.conversations.createTurn(
+  conversation.id,
+  { message: 'Book the first available Tuesday appointment' },
+  { idempotencyKey: createIdempotencyKey() },
+)
+
+if (pending.background_pending) {
+  const pollKey = createIdempotencyKey()
+  const completed = await client.conversations.pollTurn(conversation.id, {
+    idempotencyKey: pollKey,
+  })
+
+  if (completed.delivery) {
+    await persistAndRender(completed)
+    await client.conversations.acknowledgeTurnDelivery(conversation.id, completed.delivery)
+  }
+}
+```
+
+Use a new idempotency key for each logical message or poll, but retain that key
+when retrying an ambiguous failure. The SDK automatically retries polls only
+after the server advertises durable delivery protocol v2. A delivery remains
+replayable until `acknowledgeTurnDelivery()` succeeds; idle polls have no
+`delivery` and should be repeated later with a new key.
+
 Move an active conversation to a different channel (e.g. hand off web chat to
 iMessage/SMS) with `switchChannel()`; close it with `close()` so the customer
 can start fresh on the next inbound message:

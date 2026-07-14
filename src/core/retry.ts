@@ -24,6 +24,7 @@ export interface RetryContext {
   attempt: number
   response: Response
   options: Required<RetryOptions>
+  retrySafe?: boolean
 }
 
 export function shouldRetry(ctx: RetryContext): boolean {
@@ -31,6 +32,9 @@ export function shouldRetry(ctx: RetryContext): boolean {
   if (attempt >= options.maxAttempts) return false
 
   const status = response.status
+  if (ctx.retrySafe) {
+    return RETRYABLE_STATUS_CODES.has(status)
+  }
   if (method === 'GET' || method === 'HEAD') {
     return RETRYABLE_STATUS_CODES.has(status)
   }
