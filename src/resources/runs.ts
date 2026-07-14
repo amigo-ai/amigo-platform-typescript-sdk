@@ -1,5 +1,30 @@
-import type { components } from '../generated/api.js'
+import type { components, operations } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
+
+export type Run = components['schemas']['Run']
+export type RunsResponse = components['schemas']['RunsResponse']
+export type RunsSummaryResponse = components['schemas']['RunsSummaryResponse']
+
+type ListRunsQuery = NonNullable<
+  operations['list_runs_v1__workspace_id__runs_get']['parameters']['query']
+>
+type SummarizeRunsQuery = NonNullable<
+  operations['runs_summary_v1__workspace_id__runs_summary_get']['parameters']['query']
+>
+
+export interface ListRunsParams {
+  limit?: ListRunsQuery['limit']
+  continuationToken?: ListRunsQuery['continuation_token']
+  kind?: ListRunsQuery['kind']
+  channel?: ListRunsQuery['channel']
+  status?: ListRunsQuery['status']
+  sortBy?: ListRunsQuery['sort_by']
+}
+
+export interface SummarizeRunsParams {
+  kind?: SummarizeRunsQuery['kind']
+  channel?: SummarizeRunsQuery['channel']
+}
 
 /**
  * Unified runs — the channel-neutral run backbone.
@@ -12,9 +37,9 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * run-scoped operator verbs (guidance / takeover / handback / switch-mode /
  * access-token) addressed by the channel-neutral `run_id`.
  *
- * Distinct from {@link AgentRunsResource} (`/agent-runs`, framework-only) and the
- * conversation surface (`/conversations`, conversation-only): neither spans the
- * other, and only this resource speaks the unified `run_id`.
+ * Distinct from {@link AgentRunsResource} (`/agent-runs`, framework execution)
+ * and the conversation surface (`/conversations`, create/detail/turns): only
+ * this resource lists every run kind and speaks the unified `run_id`.
  */
 export class RunsResource extends WorkspaceScopedResource {
   /**
@@ -23,14 +48,7 @@ export class RunsResource extends WorkspaceScopedResource {
    * accepts the virtual `live` (running + paused). `continuationToken` is the
    * opaque cursor from a prior page — round-trip it verbatim.
    */
-  async list(params?: {
-    limit?: number
-    continuationToken?: unknown
-    kind?: ('conversation' | 'framework')[]
-    channel?: ('voice' | 'text' | 'sms' | 'email' | 'web')[]
-    status?: ('live' | 'running' | 'paused' | 'completed' | 'failed' | 'timed_out')[]
-    sortBy?: string[]
-  }) {
+  async list(params?: ListRunsParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/runs', {
         params: {
@@ -49,10 +67,7 @@ export class RunsResource extends WorkspaceScopedResource {
   }
 
   /** Aggregate run counts (total / live / by-status / by-kind). */
-  async summary(params?: {
-    kind?: ('conversation' | 'framework')[]
-    channel?: ('voice' | 'text' | 'sms' | 'email' | 'web')[]
-  }) {
+  async summary(params?: SummarizeRunsParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/runs/summary', {
         params: {

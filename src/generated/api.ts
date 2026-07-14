@@ -8656,6 +8656,54 @@ export interface components {
         };
         AlterAction: components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"];
         /**
+         * AnalyticsDashboardResponse
+         * @description Composite dashboard — six headline KPIs, each with a delta, plus the period length.
+         *
+         *     Higher-is-better for ``call_volume``, ``avg_quality``, ``tool_success_rate``;
+         *     higher-is-worse for ``escalation_rate``, ``avg_ttfb_ms``, ``avg_duration_s``.
+         *     Consumers must color deltas by that per-KPI polarity, not by delta sign alone.
+         */
+        AnalyticsDashboardResponse: {
+            /** @description Average call duration in seconds */
+            avg_duration_s: components["schemas"]["AnalyticsKpi"];
+            /** @description Average quality score (0-100); higher is better */
+            avg_quality: components["schemas"]["AnalyticsKpi"];
+            /** @description Average audio time-to-first-byte in ms; lower is better */
+            avg_ttfb_ms: components["schemas"]["AnalyticsKpi"];
+            /** @description Total calls in the period */
+            call_volume: components["schemas"]["AnalyticsKpi"];
+            /** @description Fraction of calls escalated; lower is better */
+            escalation_rate: components["schemas"]["AnalyticsKpi"];
+            /**
+             * Period Days
+             * @description Length of the reporting period in days
+             */
+            period_days: number;
+            /** @description Fraction of tool calls that succeeded; higher is better */
+            tool_success_rate: components["schemas"]["AnalyticsKpi"];
+        };
+        /**
+         * AnalyticsKpi
+         * @description A single headline KPI with its period-over-period change.
+         *
+         *     ``value`` is left broad (int for counts, float for rates/scores/durations,
+         *     ``None`` when the metric has no data for the period). ``delta_pct`` is the
+         *     signed percent change vs the previous equal-length period, or ``None`` when
+         *     a prior-period comparison is unavailable.
+         */
+        AnalyticsKpi: {
+            /**
+             * Delta Pct
+             * @description Percent change vs the previous period, or None
+             */
+            delta_pct?: number | null;
+            /**
+             * Value
+             * @description Current-period value (None when no data)
+             */
+            value?: number | null;
+        };
+        /**
          * AnnotationState
          * @description Injects a hardcoded inner thought (no LLM call).
          */
@@ -31638,9 +31686,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["AnalyticsDashboardResponse"];
                 };
             };
             /** @description Validation Error */

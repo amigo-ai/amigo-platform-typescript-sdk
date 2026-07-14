@@ -47,6 +47,11 @@
 
 - `intake.links.downloadUpload(linkId, uploadId)` now returns the endpoint's binary payload as a `Blob` instead of attempting JSON decoding. `intake.links.listUploads(linkId, params?)` also forwards `limit` and `offset` so consumers can page beyond the API's default 200 uploads.
 
+### Breaking Changes
+
+- Conversation and active-call listing now use the unified `/runs` contract. Deprecated `conversations.list()` and `calls.getActiveIntelligence()` shims remain, but return cursor-paginated `RunsResponse` objects instead of the removed legacy summary/intelligence shapes. Use `client.runs.list()` for new code.
+- `analytics.getDashboard()` now returns typed KPI objects (`{ value, delta_pct }`) for `call_volume`, quality, latency, escalation, tool success, and duration instead of the former untyped fixture shape.
+
 ## [0.97.0] - 2026-07-11
 
 ### Features

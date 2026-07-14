@@ -119,3 +119,21 @@ const scopedClient = client.withOptions({
 
 void scopedClient.GET('/v1/{workspace_id}/agents')
 void scopedClient.agents.withOptions({ timeout: 500 }).get('agent-123')
+
+client.conversations.list({ status: 'active' }).then((response) => {
+  void (response.items[0]?.run_id satisfies string | undefined)
+  void (response.continuation_token satisfies unknown)
+  // @ts-expect-error retired conversation summaries no longer expose lifecycle fields
+  void response.items[0]?.lifecycle
+})
+
+client.calls.getActiveIntelligence().then((response) => {
+  void (response.items[0]?.source_call_sid satisfies string | null | undefined)
+  void (response.has_more satisfies boolean)
+})
+
+// Retired GET routes must not remain callable through typed low-level helpers.
+// @ts-expect-error conversation history moved to GET /runs?kind=conversation
+void client.GET('/v1/{workspace_id}/conversations')
+// @ts-expect-error active voice calls moved to GET /runs?channel=voice&status=live
+void client.GET('/v1/{workspace_id}/calls/active/intelligence')

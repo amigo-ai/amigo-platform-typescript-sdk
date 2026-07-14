@@ -12,6 +12,7 @@ import {
 import type {
   ChannelKind,
   ConversationDetail,
+  ConversationListResponse,
   ConversationTurnAvailableAction,
   ConversationTurnStateTransition,
   CreateConversationRequest,
@@ -41,6 +42,67 @@ function mockFetch(
 }
 
 describe('ConversationsResource', () => {
+  it('routes legacy conversation listing through the unified Runs contract', async () => {
+    const apiResponse: ConversationListResponse = {
+      items: [
+        {
+          run_id: '10000000-0000-4000-8000-000000000001',
+          workspace_id: TEST_WORKSPACE_ID,
+          kind: 'conversation',
+          channel: 'web',
+          source_conversation_id: '00000000-0000-4000-8000-000000000001',
+          status: 'running',
+          started_at: '2026-01-01T00:00:00Z',
+          turn_count: 3,
+          takeover: { eligible: false, reason: 'channel not yet supported' },
+        },
+      ],
+      has_more: false,
+      continuation_token: null,
+    }
+    let requestUrl: string | null = null
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: mockFetch({
+        [`GET ${BASE}/runs`]: (request) => {
+          requestUrl = request.url
+          return Response.json(apiResponse)
+        },
+      }),
+    })
+
+    const result = await client.conversations.list({
+      status: 'active',
+      channel_kind: 'web',
+      offset: 20,
+    })
+
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]?.kind).toBe('conversation')
+    expect(result.items[0]?.source_conversation_id).toBe('00000000-0000-4000-8000-000000000001')
+    expect(requestUrl).not.toBeNull()
+    const query = new URL(requestUrl!).searchParams
+    expect(query.getAll('kind')).toEqual(['conversation'])
+    expect(query.getAll('status')).toEqual(['running'])
+    expect(query.getAll('channel')).toEqual(['web'])
+    expect(query.get('continuation_token')).toBe('20')
+  })
+
+  it('rejects legacy channels that the unified Runs contract cannot represent', async () => {
+    const fetchSpy = vi.fn<typeof globalThis.fetch>()
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: fetchSpy,
+    })
+
+    await expect(client.conversations.list({ channel_kind: 'whatsapp' })).rejects.toThrow(
+      ConfigurationError,
+    )
+    expect(fetchSpy).not.toHaveBeenCalled()
+  })
+
   it('creates a new conversation and forwards auth header', async () => {
     let requestBody: unknown
     let authorization: string | null = null

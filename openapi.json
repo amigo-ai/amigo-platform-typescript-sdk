@@ -1599,6 +1599,82 @@
           }
         ]
       },
+      "AnalyticsDashboardResponse": {
+        "description": "Composite dashboard \u2014 six headline KPIs, each with a delta, plus the period length.\n\nHigher-is-better for ``call_volume``, ``avg_quality``, ``tool_success_rate``;\nhigher-is-worse for ``escalation_rate``, ``avg_ttfb_ms``, ``avg_duration_s``.\nConsumers must color deltas by that per-KPI polarity, not by delta sign alone.",
+        "properties": {
+          "avg_duration_s": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Average call duration in seconds"
+          },
+          "avg_quality": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Average quality score (0-100); higher is better"
+          },
+          "avg_ttfb_ms": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Average audio time-to-first-byte in ms; lower is better"
+          },
+          "call_volume": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Total calls in the period"
+          },
+          "escalation_rate": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Fraction of calls escalated; lower is better"
+          },
+          "period_days": {
+            "description": "Length of the reporting period in days",
+            "title": "Period Days",
+            "type": "integer"
+          },
+          "tool_success_rate": {
+            "$ref": "#/components/schemas/AnalyticsKpi",
+            "description": "Fraction of tool calls that succeeded; higher is better"
+          }
+        },
+        "required": [
+          "call_volume",
+          "avg_quality",
+          "avg_ttfb_ms",
+          "escalation_rate",
+          "tool_success_rate",
+          "avg_duration_s",
+          "period_days"
+        ],
+        "title": "AnalyticsDashboardResponse",
+        "type": "object"
+      },
+      "AnalyticsKpi": {
+        "description": "A single headline KPI with its period-over-period change.\n\n``value`` is left broad (int for counts, float for rates/scores/durations,\n``None`` when the metric has no data for the period). ``delta_pct`` is the\nsigned percent change vs the previous equal-length period, or ``None`` when\na prior-period comparison is unavailable.",
+        "properties": {
+          "delta_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Percent change vs the previous period, or None",
+            "title": "Delta Pct"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Current-period value (None when no data)",
+            "title": "Value"
+          }
+        },
+        "title": "AnalyticsKpi",
+        "type": "object"
+      },
       "AnnotationState": {
         "description": "Injects a hardcoded inner thought (no LLM call).",
         "properties": {
@@ -54747,9 +54823,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Analytics-Dashboard",
-                  "type": "object"
+                  "$ref": "#/components/schemas/AnalyticsDashboardResponse"
                 }
               }
             },

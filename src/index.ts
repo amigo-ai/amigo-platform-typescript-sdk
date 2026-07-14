@@ -729,6 +729,8 @@ export type MetricValueResponse = MetricValueAlias
 export type { FireTriggerRequest, ListTriggersParams } from './resources/triggers.js'
 
 export type {
+  AnalyticsDashboard,
+  AnalyticsKpi,
   EntitySurfaceHistoryParams,
   SurfaceChannelEffectivenessParams,
   SurfaceCompletionRatesParams,
@@ -799,6 +801,14 @@ export {
   sessionConnectAuthProtocols,
   textStreamAuthProtocols,
 } from './resources/conversations.js'
+
+export type {
+  ListRunsParams,
+  Run,
+  RunsResponse,
+  RunsSummaryResponse,
+  SummarizeRunsParams,
+} from './resources/runs.js'
 export type {
   ChannelKind,
   ConversationDetail,

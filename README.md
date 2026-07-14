@@ -557,6 +557,29 @@ const results = await client.world.search({
 const syncStatus = await client.world.getSyncStatusBySink()
 ```
 
+### Unified runs
+
+Use `client.runs` for the workspace-wide run history and live operations view.
+The response is cursor-paginated and spans conversation and framework runs.
+
+```typescript
+const liveVoice = await client.runs.list({
+  kind: ['conversation'],
+  channel: ['voice'],
+  status: ['live'],
+})
+
+const conversationHistory = await client.runs.list({
+  kind: ['conversation'],
+  continuationToken: liveVoice.continuation_token,
+})
+```
+
+`conversations.list()` and `calls.getActiveIntelligence()` remain as deprecated
+routing shims for source compatibility, but both now return the canonical
+`RunsResponse`. They never call the retired read endpoints and do not expose the
+legacy conversation lifecycle or transient active-intelligence fields.
+
 ### Calls
 
 Calls are read-only — they are created by the voice pipeline.

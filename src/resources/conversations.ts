@@ -7,9 +7,14 @@ import {
   resolveScopedPlatformClient,
   untypedClient,
 } from './base.js'
+import { RunsResource, type ListRunsParams, type Run, type RunsResponse } from './runs.js'
 
 export type ChannelKind = components['schemas']['ChannelKind']
 export type ConversationDetail = components['schemas']['ConversationDetail']
+/** @deprecated Conversation history is represented by canonical {@link Run} objects. */
+export type ConversationSummary = Run
+/** @deprecated Use {@link RunsResponse}; conversation listing now uses `GET /runs`. */
+export type ConversationListResponse = RunsResponse
 export type ConversationTurn = components['schemas']['ConversationTurn']
 export type ConversationTurnAvailableAction =
   components['schemas']['ConversationTurnAvailableAction']
@@ -126,6 +131,46 @@ const CANONICAL_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9
 const NIL_UUID = '00000000-0000-0000-0000-000000000000'
 const deliveryProtocolV2ByClient = new WeakMap<PlatformFetch, Set<string>>()
 
+type RunStatusFilter = NonNullable<ListRunsParams['status']>[number]
+type RunChannelFilter = NonNullable<ListRunsParams['channel']>[number]
+
+/**
+ * @deprecated Use {@link ListRunsParams} with `kind: ['conversation']`.
+ *
+ * Legacy scalar `status`, `channel_kind`, and `offset` inputs remain accepted
+ * where the unified Runs contract has an exact equivalent.
+ */
+export interface ListConversationsParams extends Omit<
+  ListRunsParams,
+  'status' | 'channel' | 'kind'
+> {
+  status?: ListRunsParams['status'] | ConversationDetail['status']
+  channel?: ListRunsParams['channel']
+  /** @deprecated Use `channel`. */
+  channel_kind?: ChannelKind
+  /** @deprecated Use `continuationToken`. */
+  offset?: number
+}
+
+const LEGACY_CONVERSATION_STATUS_TO_RUN_STATUS: Record<
+  ConversationDetail['status'],
+  RunStatusFilter
+> = {
+  active: 'running',
+  'in-progress': 'running',
+  paused: 'paused',
+  closed: 'completed',
+  completed: 'completed',
+  failed: 'failed',
+}
+
+const LEGACY_CONVERSATION_CHANNEL_TO_RUN_CHANNEL: Partial<Record<ChannelKind, RunChannelFilter>> = {
+  voice: 'voice',
+  sms: 'sms',
+  email: 'email',
+  web: 'web',
+}
+
 /** Access text conversation APIs and text-stream URL helpers. */
 export class ConversationsResource extends WorkspaceScopedResource {
   private readonly agentBaseUrl: string | undefined
@@ -133,6 +178,44 @@ export class ConversationsResource extends WorkspaceScopedResource {
   constructor(client: PlatformFetch, workspaceId: string, agentBaseUrl?: string) {
     super(client, workspaceId)
     this.agentBaseUrl = agentBaseUrl
+  }
+
+  /**
+   * List conversation runs through the canonical `/runs` read surface.
+   *
+   * @deprecated Use `client.runs.list({ kind: ['conversation'], ... })` directly.
+   * The removed conversation-list endpoint returned legacy summaries with
+   * `total` and lifecycle fields. This compatibility shim returns the canonical
+   * cursor-paginated {@link RunsResponse} instead and never calls the retired
+   * endpoint.
+   */
+  async list(params?: ListConversationsParams): Promise<ConversationListResponse> {
+    const {
+      channel,
+      channel_kind: legacyChannel,
+      continuationToken,
+      offset,
+      status,
+      ...runParams
+    } = params ?? {}
+
+    if (channel !== undefined && legacyChannel !== undefined) {
+      throw new ConfigurationError('channel and channel_kind cannot be combined')
+    }
+    if (continuationToken !== undefined && offset !== undefined) {
+      throw new ConfigurationError('continuationToken and offset cannot be combined')
+    }
+
+    const normalizedChannel = normalizeConversationChannels(channel, legacyChannel)
+    const normalizedStatus = normalizeConversationStatuses(status)
+
+    return new RunsResource(this.client, this.workspaceId).list({
+      ...runParams,
+      continuationToken: continuationToken ?? offset,
+      kind: ['conversation'],
+      channel: normalizedChannel,
+      status: normalizedStatus,
+    })
   }
 
   async create(request: CreateConversationRequest): Promise<ConversationDetail> {
@@ -437,6 +520,30 @@ export class ConversationsResource extends WorkspaceScopedResource {
     })
     return url.toString()
   }
+}
+
+function normalizeConversationStatuses(
+  status: ListConversationsParams['status'],
+): RunStatusFilter[] | undefined {
+  if (status === undefined) return undefined
+  if (Array.isArray(status)) return status
+  return [LEGACY_CONVERSATION_STATUS_TO_RUN_STATUS[status]]
+}
+
+function normalizeConversationChannels(
+  channels: ListConversationsParams['channel'],
+  legacyChannel: ChannelKind | undefined,
+): RunChannelFilter[] | undefined {
+  if (channels !== undefined) return channels
+  if (legacyChannel === undefined) return undefined
+
+  const mapped = LEGACY_CONVERSATION_CHANNEL_TO_RUN_CHANNEL[legacyChannel]
+  if (mapped === undefined) {
+    throw new ConfigurationError(
+      `channel_kind "${legacyChannel}" is not available on the unified Runs contract`,
+    )
+  }
+  return [mapped]
 }
 
 export function createIdempotencyKey(): string {

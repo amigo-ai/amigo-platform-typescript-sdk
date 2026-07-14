@@ -1,6 +1,7 @@
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
+import { RunsResource, type RunsResponse } from './runs.js'
 
 export interface ListCallsParams extends ListParams {
   status?: string
@@ -59,6 +60,23 @@ export class CallsResource extends WorkspaceScopedResource {
         params: { path: { workspace_id: this.workspaceId, call_id: callId } },
       }),
     )
+  }
+
+  /**
+   * List live voice runs through the unified Runs contract.
+   *
+   * @deprecated Use `client.runs.list({ kind: ['conversation'], channel:
+   * ['voice'], status: ['live'] })`. The retired active-intelligence endpoint
+   * exposed transient intelligence fields that are not part of a canonical
+   * Run; this shim returns a cursor-paginated {@link RunsResponse} and never
+   * calls that endpoint.
+   */
+  async getActiveIntelligence(): Promise<RunsResponse> {
+    return new RunsResource(this.client, this.workspaceId).list({
+      kind: ['conversation'],
+      channel: ['voice'],
+      status: ['live'],
+    })
   }
 
   /** Get performance benchmarks for a time period */
