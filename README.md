@@ -606,14 +606,15 @@ available. Render or persist it successfully before acknowledging it:
 ```typescript
 import { createIdempotencyKey } from '@amigo-ai/platform-sdk'
 
+const initialTurnKey = createIdempotencyKey() // Persist until this request succeeds unambiguously.
 const pending = await client.conversations.createTurn(
   conversation.id,
   { message: 'Book the first available Tuesday appointment' },
-  { idempotencyKey: createIdempotencyKey() },
+  { idempotencyKey: initialTurnKey },
 )
 
 if (pending.background_pending) {
-  const pollKey = createIdempotencyKey()
+  const pollKey = createIdempotencyKey() // New per idle poll; reuse only when retrying this poll.
   const completed = await client.conversations.pollTurn(conversation.id, {
     idempotencyKey: pollKey,
   })

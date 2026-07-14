@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   AmigoClient,
   BadRequestError,
@@ -25,6 +25,7 @@ import type {
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
+const UUID_V4_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
 
 function mockFetch(
   routes: Record<string, (request: Request) => Response | Promise<Response>>,
@@ -609,13 +610,38 @@ describe('ConversationsResource', () => {
 
     await client.conversations.createTurn(conversationId, { message: 'Hello' })
 
-    expect(idempotencyKey).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/)
+    expect(idempotencyKey).toMatch(UUID_V4_RE)
   })
 
   it('exports canonical UUID idempotency keys for application-managed retries', () => {
-    expect(createIdempotencyKey()).toMatch(
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-    )
+    expect(createIdempotencyKey()).toMatch(UUID_V4_RE)
+  })
+
+  it('generates a canonical UUID v4 with the getRandomValues fallback', () => {
+    const originalCrypto = Object.getOwnPropertyDescriptor(globalThis, 'crypto')
+    const getRandomValues = vi.fn((bytes: Uint8Array) => {
+      bytes.forEach((_, index) => {
+        bytes[index] = index
+      })
+      return bytes
+    })
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: { getRandomValues },
+    })
+
+    try {
+      expect(createIdempotencyKey()).toBe('00010203-0405-4607-8809-0a0b0c0d0e0f')
+      expect(getRandomValues).toHaveBeenCalledOnce()
+      expect(getRandomValues.mock.calls[0]?.[0]).toBeInstanceOf(Uint8Array)
+      expect(getRandomValues.mock.calls[0]?.[0]).toHaveLength(16)
+    } finally {
+      if (originalCrypto) {
+        Object.defineProperty(globalThis, 'crypto', originalCrypto)
+      } else {
+        Reflect.deleteProperty(globalThis, 'crypto')
+      }
+    }
   })
 
   it('forwards an explicit idempotency key and rejects malformed keys before sending', async () => {
@@ -758,6 +784,82 @@ describe('ConversationsResource', () => {
     expect(response.turn_id).toBe('turn-001')
   })
 
+  it('retries a timed-out protocol-v2 poll through scoped retry controls', async () => {
+    const conversationId = '00000000-0000-4000-8000-000000000001'
+    const pollKey = 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAA096'
+    const normalizedPollKey = pollKey.toLowerCase()
+    const observedPollKeys: string[] = []
+    let pollCount = 0
+    const client = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      retry: { maxAttempts: 2, baseDelayMs: 0, maxDelayMs: 0 },
+      fetch: mockFetch({
+        [`POST ${BASE}/conversations/${conversationId}/turns`]: async (request) => {
+          const isPoll = new URL(request.url).searchParams.get('poll') === 'true'
+          if (!isPoll) {
+            return Response.json({
+              turn_id: 'turn-001',
+              conversation: {
+                id: conversationId,
+                status: 'active',
+                turn_count: 1,
+                updated_at: '2026-01-01T00:00:01Z',
+              },
+              input: { role: 'user', text: 'Hello', content: [] },
+              output: [],
+              tool_calls: [],
+              background_pending: true,
+              delivery_protocol_version: 2,
+            } satisfies TurnResponse)
+          }
+
+          pollCount++
+          observedPollKeys.push(request.headers.get('idempotency-key') ?? '')
+          expect(request.headers.has('x-amigo-sdk-retry-safe')).toBe(false)
+          if (pollCount === 1) {
+            return await new Promise<Response>((_, reject) => {
+              const rejectOnAbort = () => reject(request.signal.reason ?? new Error('aborted'))
+              if (request.signal.aborted) {
+                rejectOnAbort()
+              } else {
+                request.signal.addEventListener('abort', rejectOnAbort, { once: true })
+              }
+            })
+          }
+
+          return Response.json({
+            turn_id: 'turn-001',
+            conversation: {
+              id: conversationId,
+              status: 'active',
+              turn_count: 1,
+              updated_at: '2026-01-01T00:00:02Z',
+            },
+            input: { role: 'user', text: '', content: [] },
+            output: [],
+            tool_calls: [],
+            background_pending: true,
+            delivery_protocol_version: 2,
+          } satisfies TurnResponse)
+        },
+      }),
+    })
+
+    await client.conversations.createTurn(
+      conversationId,
+      { message: 'Hello' },
+      { idempotencyKey: '00000000-0000-4000-8000-000000000092' },
+    )
+    const response = await client.conversations
+      .withOptions({ timeout: 5 })
+      .pollTurn(conversationId, { idempotencyKey: pollKey })
+
+    expect(observedPollKeys).toEqual([normalizedPollKey, normalizedPollKey])
+    expect(response.delivery_protocol_version).toBe(2)
+    expect(pollCount).toBe(2)
+  })
+
   it.each([
     [
       {
@@ -869,9 +971,10 @@ describe('ConversationsResource', () => {
       { message: 'Hello' },
       { idempotencyKey: '00000000-0000-4000-8000-000000000081' },
     )
-    await client.conversations.pollTurn(conversationId, {
+    const downgradedPoll = await client.conversations.pollTurn(conversationId, {
       idempotencyKey: '00000000-0000-4000-8000-000000000082',
     })
+    expect(downgradedPoll).toMatchObject({ delivery_protocol_version: null, output: [] })
     await expect(
       client.conversations.pollTurn(conversationId, {
         idempotencyKey: '00000000-0000-4000-8000-000000000083',
@@ -881,7 +984,7 @@ describe('ConversationsResource', () => {
     expect(requestCount).toBe(3)
   })
 
-  it('acknowledges a rendered delivery and safely retries response loss', async () => {
+  it('acknowledges a rendered delivery, strips retry controls, and safely retries response loss', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const delivery: TurnDelivery = {
       delivery_id: '00000000-0000-4000-8000-000000000071',
@@ -1527,7 +1630,7 @@ describe('ConversationsResource', () => {
 
   it('streamTurn forwards a stable idempotency key', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const idempotencyKey = '00000000-0000-4000-8000-000000000061'
+    const idempotencyKey = 'AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAA061'
     let observedKey: string | null = null
     const client = new AmigoClient({
       apiKey: TEST_API_KEY,
@@ -1553,7 +1656,7 @@ describe('ConversationsResource', () => {
       void event
     }
 
-    expect(observedKey).toBe(idempotencyKey)
+    expect(observedKey).toBe(idempotencyKey.toLowerCase())
   })
 
   it('remembers protocol v2 from a stream done frame for retry-safe polling', async () => {

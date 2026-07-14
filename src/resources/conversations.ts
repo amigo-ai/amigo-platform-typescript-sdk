@@ -285,12 +285,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
         idempotencyKey,
       },
     )
-    try {
-      validatePollResponse(response, idempotencyKey)
-    } catch (error) {
-      deliveryProtocolSet(this.client).delete(deliveryProtocolKey(this.workspaceId, conversationId))
-      throw error
-    }
+    validatePollResponse(response, idempotencyKey)
     return response
   }
 
@@ -399,7 +394,7 @@ export class ConversationsResource extends WorkspaceScopedResource {
       const event = parseTurnStreamFrame(frame.event, frame.data)
       if (event) {
         if (event.event === 'done') {
-          observeStreamDeliveryProtocol(this.client, this.workspaceId, conversationId, event)
+          observeDeliveryProtocol(this.client, this.workspaceId, conversationId, event)
         }
         yield event
       }
@@ -531,26 +526,11 @@ function observeDeliveryProtocol(
   client: PlatformFetch,
   workspaceId: string,
   conversationId: string,
-  response: TurnResponse,
+  observation: Pick<TurnResponse | TurnDoneEvent, 'delivery_protocol_version'>,
 ): void {
   const protocols = deliveryProtocolSet(client)
   const protocolKey = deliveryProtocolKey(workspaceId, conversationId)
-  if (response.delivery_protocol_version === 2) {
-    protocols.add(protocolKey)
-  } else {
-    protocols.delete(protocolKey)
-  }
-}
-
-function observeStreamDeliveryProtocol(
-  client: PlatformFetch,
-  workspaceId: string,
-  conversationId: string,
-  event: TurnDoneEvent,
-): void {
-  const protocols = deliveryProtocolSet(client)
-  const protocolKey = deliveryProtocolKey(workspaceId, conversationId)
-  if (event.delivery_protocol_version === 2) {
+  if (observation.delivery_protocol_version === 2) {
     protocols.add(protocolKey)
   } else {
     protocols.delete(protocolKey)
