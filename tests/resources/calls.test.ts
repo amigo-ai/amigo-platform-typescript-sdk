@@ -132,11 +132,6 @@ const client = new AmigoClient({
 
     [`GET ${BASE}/calls/${CALL_ID}/intelligence`]: () => Response.json(INTELLIGENCE_FIXTURE),
 
-    [`GET ${BASE}/calls/active/intelligence`]: () =>
-      Response.json([
-        { call_id: CALL_ID, caller_sentiment: 'positive', current_topic: 'scheduling' },
-      ]),
-
     [`GET ${BASE}/calls/benchmarks`]: () =>
       Response.json({
         period_days: 30,
@@ -199,12 +194,6 @@ describe('CallsResource', () => {
     const result = await client.calls.getIntelligence(CALL_ID)
     expect(result.call_id).toBe(CALL_ID)
     expect(result.quality_score).toBe(0.92)
-  })
-
-  it('gets active call intelligence', async () => {
-    const result = await client.calls.getActiveIntelligence()
-    expect(Array.isArray(result)).toBe(true)
-    expect(result).toHaveLength(1)
   })
 
   it('gets call benchmarks', async () => {

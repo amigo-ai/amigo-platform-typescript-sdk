@@ -853,20 +853,6 @@ await client.triggers.resume(trigger.id)
 const runs = await client.triggers.listRuns(trigger.id)
 ```
 
-### Review Queue
-
-```typescript
-const stats = await client.reviewQueue.getStats()
-const dashboard = await client.reviewQueue.getDashboard()
-const { items } = await client.reviewQueue.list({ status: 'pending' })
-
-// Claim, approve, reject, correct
-await client.reviewQueue.claim('item-id')
-await client.reviewQueue.approve('item-id', { notes: 'Verified correct' })
-await client.reviewQueue.reject('item-id', { reason: 'Data mismatch' })
-await client.reviewQueue.batchApprove({ item_ids: ['id1', 'id2'] })
-```
-
 ### Compliance
 
 ```typescript

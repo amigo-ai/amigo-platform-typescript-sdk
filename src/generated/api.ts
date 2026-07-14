@@ -794,11 +794,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * List framework agent runs
-         * @description Paginated list of framework agent runs for the workspace, newest first, read from the durable ``world.agent_runs`` read model. Filter by ``framework`` / ``status``. ``continuation_token`` is an opaque page cursor.
-         */
-        get: operations["list_agent_runs_v1__workspace_id__agent_runs_get"];
+        get?: never;
         put?: never;
         /**
          * Dispatch a framework agent run
@@ -1709,26 +1705,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/calls/active/intelligence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Active calls with live intelligence
-         * @description Real-time active call list enriched with per-turn emotion, risk, and quality data from Valkey. Proxied from voice-agent.
-         */
-        get: operations["list-active-calls-intelligence"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/calls/benchmarks": {
         parameters: {
             query?: never;
@@ -2170,8 +2146,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all conversations (voice + text) */
-        get: operations["list_conversations_v1__workspace_id__conversations_get"];
+        get?: never;
         put?: never;
         /** Create or start a conversation (web inbound, or outbound on a channel) */
         post: operations["create_conversation_v1__workspace_id__conversations_post"];
@@ -8536,59 +8511,6 @@ export interface components {
             }[];
             usage?: components["schemas"]["Usage"];
         };
-        /** AgentRunListResponse */
-        AgentRunListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentRunSummary"][];
-        };
-        /**
-         * AgentRunSummary
-         * @description One row of the framework-runs LIST, projected from ``world.agent_runs``.
-         *
-         *     ``run_id`` is the framework run's external call_sid (a string identifier
-         *     stamped by agent-runner), NOT a Lakebase row UUID — kept ``str``. ``entity_id``
-         *     IS a world-model row reference, so it stays ``uuid.UUID`` per repo type rigor.
-         */
-        AgentRunSummary: {
-            /** Created At */
-            created_at: string;
-            /** Duration Ms */
-            duration_ms?: number | null;
-            /** Entity Id */
-            entity_id?: string | null;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /**
-             * Input Tokens
-             * @default 0
-             */
-            input_tokens?: number;
-            /** Origin Source */
-            origin_source?: string | null;
-            /**
-             * Output Tokens
-             * @default 0
-             */
-            output_tokens?: number;
-            /** Run Id */
-            run_id: string;
-            /** Started At */
-            started_at: string;
-            /** Status */
-            status?: string | null;
-            /**
-             * Step Count
-             * @default 0
-             */
-            step_count?: number;
-        };
         /** AgentTranscriptDeltaEvent */
         AgentTranscriptDeltaEvent: {
             /** Delta */
@@ -8769,11 +8691,8 @@ export interface components {
             slice_label: string;
             /** Stats Json */
             stats_json?: string | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
         };
         AnyValue: {
             [key: string]: unknown;
@@ -9702,7 +9621,7 @@ export interface components {
              */
             completion_reason?: ("completed" | "abandoned" | "escalated" | "transferred" | "timeout" | "error" | "voicemail" | "no_answer" | "caller_hangup" | "forwarded" | "terminal_state" | "warm_transfer_completed" | "no_inbound_audio" | "cancelled") | null;
             /** @description Conversation flow metrics */
-            conversation_summary?: components["schemas"]["src__routes__calls__ConversationSummary"] | null;
+            conversation_summary?: components["schemas"]["ConversationSummary"] | null;
             /**
              * Created At
              * @description When intelligence was computed
@@ -10545,11 +10464,8 @@ export interface components {
             t: number;
             /** Upper 95 */
             upper_95?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
             /** Ym */
             ym?: string | null;
         };
@@ -11267,15 +11183,6 @@ export interface components {
             updated_at: string;
             voice?: components["schemas"]["VoiceDetail"] | null;
         };
-        /** ConversationListResponse */
-        ConversationListResponse: {
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["src__routes__conversations__ConversationSummary"][];
-            /** Total */
-            total: number;
-        };
         /** ConversationStatusTransitionRequest */
         ConversationStatusTransitionRequest: {
             /**
@@ -11301,6 +11208,49 @@ export interface components {
              * @enum {string}
              */
             status: "completed" | "closed";
+        };
+        /**
+         * ConversationSummary
+         * @description Conversation flow metrics.
+         *
+         *     Free-form residual on the raw ``conversation_summary`` JSONB:
+         *     ``text_intelligence: dict`` (text-channel intelligence
+         *     sub-payload), and on the simulation path ``transcript_text:
+         *     str`` (PHI), ``tool_calls: list``, ``score``,
+         *     ``score_rationale``, ``terminal_reached``, ``states_visited``.
+         *     Not exposed via this typed shape.
+         */
+        ConversationSummary: {
+            /**
+             * Barge In Count
+             * @description Number of caller interruptions
+             * @default 0
+             */
+            barge_in_count?: number;
+            /**
+             * Loop Count
+             * @description Number of detected state loops
+             * @default 0
+             */
+            loop_count?: number;
+            /**
+             * States Visited Count
+             * @description Number of states visited (including repeats)
+             * @default 0
+             */
+            states_visited_count?: number;
+            /**
+             * Turn Count
+             * @description Total turn count for the call
+             * @default 0
+             */
+            turn_count?: number;
+            /**
+             * Unique States
+             * @description Number of distinct states visited
+             * @default 0
+             */
+            unique_states?: number;
         };
         /** ConversationThreadRequest */
         ConversationThreadRequest: {
@@ -13290,11 +13240,8 @@ export interface components {
             unmet_demand_score?: number | null;
             /** Updated At */
             updated_at?: string | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
         };
         /**
          * DocumentProcessingSpec
@@ -15802,11 +15749,8 @@ export interface components {
             t: number;
             /** Upper 95 */
             upper_95?: number | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
             /** Ym */
             ym?: string | null;
         };
@@ -17978,11 +17922,8 @@ export interface components {
             training_set_size?: number | null;
             /** Version */
             version?: string | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
         };
         NameString: string;
         /** NarrativeUpdatedEvent */
@@ -19728,11 +19669,8 @@ export interface components {
             umap_x: number;
             /** Umap Y */
             umap_y: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
             /** Y Hat Asthma 12Mo */
             y_hat_asthma_12mo?: number | null;
             /** Y Hat Chf 90D */
@@ -20035,11 +19973,8 @@ export interface components {
             signal_id: string;
             /** Updated At */
             updated_at?: string | null;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
+            /** Workspace Id */
+            workspace_id: string | "labs";
         };
         /**
          * PreloadSpec
@@ -28137,103 +28072,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /**
-         * ConversationSummary
-         * @description Conversation flow metrics.
-         *
-         *     Free-form residual on the raw ``conversation_summary`` JSONB:
-         *     ``text_intelligence: dict`` (text-channel intelligence
-         *     sub-payload), and on the simulation path ``transcript_text:
-         *     str`` (PHI), ``tool_calls: list``, ``score``,
-         *     ``score_rationale``, ``terminal_reached``, ``states_visited``.
-         *     Not exposed via this typed shape.
-         */
-        src__routes__calls__ConversationSummary: {
-            /**
-             * Barge In Count
-             * @description Number of caller interruptions
-             * @default 0
-             */
-            barge_in_count?: number;
-            /**
-             * Loop Count
-             * @description Number of detected state loops
-             * @default 0
-             */
-            loop_count?: number;
-            /**
-             * States Visited Count
-             * @description Number of states visited (including repeats)
-             * @default 0
-             */
-            states_visited_count?: number;
-            /**
-             * Turn Count
-             * @description Total turn count for the call
-             * @default 0
-             */
-            turn_count?: number;
-            /**
-             * Unique States
-             * @description Number of distinct states visited
-             * @default 0
-             */
-            unique_states?: number;
-        };
-        /** ConversationSummary */
-        src__routes__conversations__ConversationSummary: {
-            /** Call Sid */
-            call_sid?: string | null;
-            /** Caller Id */
-            caller_id?: string | null;
-            channel_kind: components["schemas"]["ChannelKind"];
-            /** Completion Reason */
-            completion_reason?: string | null;
-            /** Created At */
-            created_at: string;
-            /** Direction */
-            direction?: string | null;
-            /** Duration Seconds */
-            duration_seconds?: number | null;
-            /** Entity Id */
-            entity_id?: string | null;
-            /** Escalation Status */
-            escalation_status?: string | null;
-            /** Final State */
-            final_state?: string | null;
-            /** Has Recording */
-            has_recording?: boolean | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Lifecycle
-             * @enum {string}
-             */
-            lifecycle: "active" | "dormant" | "closed";
-            /** Phone Number */
-            phone_number?: string | null;
-            /** Quality Score */
-            quality_score?: number | null;
-            /** Service Id */
-            service_id?: string | null;
-            /** Source */
-            source?: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "closed" | "completed" | "in-progress" | "failed" | "paused";
-            /**
-             * Turn Count
-             * @default 0
-             */
-            turn_count?: number;
-            /** Updated At */
-            updated_at: string;
-        };
         /** ListResponse */
         src__routes__external_role_assignments__ListResponse: {
             /** Continuation Token */
@@ -30928,42 +30766,6 @@ export interface operations {
             };
         };
     };
-    list_agent_runs_v1__workspace_id__agent_runs_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: unknown;
-                framework?: ("claude-agent-sdk" | "openai-agents") | null;
-                status?: ("running" | "succeeded" | "failed" | "timed_out") | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRunListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     create_agent_run_v1__workspace_id__agent_runs_post: {
         parameters: {
             query?: never;
@@ -33101,37 +32903,6 @@ export interface operations {
             };
         };
     };
-    "list-active-calls-intelligence": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    }[];
-                };
-            };
-            /** @description Voice agent not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "get-call-benchmarks": {
         parameters: {
             query?: {
@@ -34187,44 +33958,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_conversations_v1__workspace_id__conversations_get: {
-        parameters: {
-            query?: {
-                /** @description Filter by channel */
-                channel_kind?: components["schemas"]["ChannelKind"] | null;
-                /** @description Filter by status */
-                status?: ("active" | "closed" | "completed" | "in-progress" | "failed" | "paused") | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConversationListResponse"];
-                };
             };
             /** @description Validation Error */
             422: {

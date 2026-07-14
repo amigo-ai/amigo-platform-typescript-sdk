@@ -61,15 +61,6 @@ export class CallsResource extends WorkspaceScopedResource {
     )
   }
 
-  /** Get active intelligence across all in-progress calls */
-  async getActiveIntelligence() {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/calls/active/intelligence', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
-  }
-
   /** Get performance benchmarks for a time period */
   async getBenchmarks(params?: { days?: number }) {
     return extractData(
