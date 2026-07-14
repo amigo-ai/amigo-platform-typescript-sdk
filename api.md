@@ -52,7 +52,7 @@ Notes:
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
 - Conversation helpers: `sessionConnectAuthProtocols`, `textStreamAuthProtocols`
-- Conversation types: `ChannelKind`, `ConversationDetail`, `ConversationListResponse`, `ConversationSummary`, `ConversationTurn`, `ConversationTurnAvailableAction`, `ConversationTurnStateTransition`, `CreateConversationRequest`, `ListConversationsParams`, `SessionConnectUrlParams`, `SwitchChannelRequest`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
+- Conversation types: `ChannelKind`, `ConversationDetail`, `ConversationTurn`, `ConversationTurnAvailableAction`, `ConversationTurnStateTransition`, `CreateConversationRequest`, `SessionConnectUrlParams`, `SwitchChannelRequest`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
 - Voice provider constants: `STT_PROVIDERS`, `TTS_PROVIDERS`, `VOICE_SESSION_PROVIDERS`
 - Voice provider types: `AgentVoiceConfig`, `ServiceVoiceConfigInput`, `ServiceVoiceConfigOutput`, `SttProvider`, `TtsProvider`, `VoiceSessionProvider`, `VoiceSettingsRequest`, `VoiceSettingsResponse`
 - Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
@@ -268,7 +268,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `get`
 - `getTimeline`
 - `getIntelligence`
-- `getActiveIntelligence`
 - `getBenchmarks`
 - `getPhoneVolume`
 - `getTraceAnalysis`
@@ -278,7 +277,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `conversations`
 
-- `list`
 - `create`
 - `get`
 - `close`

@@ -798,13 +798,10 @@ export { sessionConnectAuthProtocols, textStreamAuthProtocols } from './resource
 export type {
   ChannelKind,
   ConversationDetail,
-  ConversationListResponse,
-  ConversationSummary,
   ConversationTurn,
   ConversationTurnAvailableAction,
   ConversationTurnStateTransition,
   CreateConversationRequest,
-  ListConversationsParams,
   SessionConnectUrlParams,
   SwitchChannelRequest,
   TextStreamAuthProtocols,

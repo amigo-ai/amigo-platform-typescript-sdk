@@ -1256,123 +1256,6 @@
         "title": "AgentRunDetail",
         "type": "object"
       },
-      "AgentRunListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AgentRunSummary"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "AgentRunListResponse",
-        "type": "object"
-      },
-      "AgentRunSummary": {
-        "description": "One row of the framework-runs LIST, projected from ``world.agent_runs``.\n\n``run_id`` is the framework run's external call_sid (a string identifier\nstamped by agent-runner), NOT a Lakebase row UUID \u2014 kept ``str``. ``entity_id``\nIS a world-model row reference, so it stays ``uuid.UUID`` per repo type rigor.",
-        "properties": {
-          "created_at": {
-            "title": "Created At",
-            "type": "string"
-          },
-          "duration_ms": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Ms"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "input_tokens": {
-            "default": 0,
-            "title": "Input Tokens",
-            "type": "integer"
-          },
-          "origin_source": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Origin Source"
-          },
-          "output_tokens": {
-            "default": 0,
-            "title": "Output Tokens",
-            "type": "integer"
-          },
-          "run_id": {
-            "title": "Run Id",
-            "type": "string"
-          },
-          "started_at": {
-            "title": "Started At",
-            "type": "string"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          },
-          "step_count": {
-            "default": 0,
-            "title": "Step Count",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "run_id",
-          "framework",
-          "started_at",
-          "created_at"
-        ],
-        "title": "AgentRunSummary",
-        "type": "object"
-      },
       "AgentTranscriptDeltaEvent": {
         "properties": {
           "delta": {
@@ -1889,9 +1772,17 @@
             "title": "Stats Json"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           }
         },
         "required": [
@@ -4347,7 +4238,7 @@
           "conversation_summary": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/src__routes__calls__ConversationSummary"
+                "$ref": "#/components/schemas/ConversationSummary"
               },
               {
                 "type": "null"
@@ -6322,9 +6213,17 @@
             "title": "Upper 95"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           },
           "ym": {
             "anyOf": [
@@ -8176,32 +8075,6 @@
         "title": "ConversationDetail",
         "type": "object"
       },
-      "ConversationListResponse": {
-        "properties": {
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/src__routes__conversations__ConversationSummary"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "items",
-          "total",
-          "has_more"
-        ],
-        "title": "ConversationListResponse",
-        "type": "object"
-      },
       "ConversationStatusTransitionRequest": {
         "properties": {
           "reason": {
@@ -8248,6 +8121,43 @@
           "status"
         ],
         "title": "ConversationStatusTransitionResponse",
+        "type": "object"
+      },
+      "ConversationSummary": {
+        "description": "Conversation flow metrics.\n\nFree-form residual on the raw ``conversation_summary`` JSONB:\n``text_intelligence: dict`` (text-channel intelligence\nsub-payload), and on the simulation path ``transcript_text:\nstr`` (PHI), ``tool_calls: list``, ``score``,\n``score_rationale``, ``terminal_reached``, ``states_visited``.\nNot exposed via this typed shape.",
+        "properties": {
+          "barge_in_count": {
+            "default": 0,
+            "description": "Number of caller interruptions",
+            "title": "Barge In Count",
+            "type": "integer"
+          },
+          "loop_count": {
+            "default": 0,
+            "description": "Number of detected state loops",
+            "title": "Loop Count",
+            "type": "integer"
+          },
+          "states_visited_count": {
+            "default": 0,
+            "description": "Number of states visited (including repeats)",
+            "title": "States Visited Count",
+            "type": "integer"
+          },
+          "turn_count": {
+            "default": 0,
+            "description": "Total turn count for the call",
+            "title": "Turn Count",
+            "type": "integer"
+          },
+          "unique_states": {
+            "default": 0,
+            "description": "Number of distinct states visited",
+            "title": "Unique States",
+            "type": "integer"
+          }
+        },
+        "title": "ConversationSummary",
         "type": "object"
       },
       "ConversationThreadRequest": {
@@ -12737,9 +12647,17 @@
             "title": "Updated At"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           }
         },
         "required": [
@@ -19432,9 +19350,17 @@
             "title": "Upper 95"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           },
           "ym": {
             "anyOf": [
@@ -24241,9 +24167,17 @@
             "title": "Version"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           }
         },
         "required": [
@@ -28770,9 +28704,17 @@
             "type": "number"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           },
           "y_hat_asthma_12mo": {
             "anyOf": [
@@ -29501,9 +29443,17 @@
             "title": "Updated At"
           },
           "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "const": "labs",
+                "type": "string"
+              }
+            ],
+            "title": "Workspace Id"
           }
         },
         "required": [
@@ -49052,244 +49002,6 @@
         "title": "AuditEventResponse",
         "type": "object"
       },
-      "src__routes__calls__ConversationSummary": {
-        "description": "Conversation flow metrics.\n\nFree-form residual on the raw ``conversation_summary`` JSONB:\n``text_intelligence: dict`` (text-channel intelligence\nsub-payload), and on the simulation path ``transcript_text:\nstr`` (PHI), ``tool_calls: list``, ``score``,\n``score_rationale``, ``terminal_reached``, ``states_visited``.\nNot exposed via this typed shape.",
-        "properties": {
-          "barge_in_count": {
-            "default": 0,
-            "description": "Number of caller interruptions",
-            "title": "Barge In Count",
-            "type": "integer"
-          },
-          "loop_count": {
-            "default": 0,
-            "description": "Number of detected state loops",
-            "title": "Loop Count",
-            "type": "integer"
-          },
-          "states_visited_count": {
-            "default": 0,
-            "description": "Number of states visited (including repeats)",
-            "title": "States Visited Count",
-            "type": "integer"
-          },
-          "turn_count": {
-            "default": 0,
-            "description": "Total turn count for the call",
-            "title": "Turn Count",
-            "type": "integer"
-          },
-          "unique_states": {
-            "default": 0,
-            "description": "Number of distinct states visited",
-            "title": "Unique States",
-            "type": "integer"
-          }
-        },
-        "title": "ConversationSummary",
-        "type": "object"
-      },
-      "src__routes__conversations__ConversationSummary": {
-        "properties": {
-          "call_sid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Call Sid"
-          },
-          "caller_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Caller Id"
-          },
-          "channel_kind": {
-            "$ref": "#/components/schemas/ChannelKind"
-          },
-          "completion_reason": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Completion Reason"
-          },
-          "created_at": {
-            "title": "Created At",
-            "type": "string"
-          },
-          "direction": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Direction"
-          },
-          "duration_seconds": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Duration Seconds"
-          },
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "escalation_status": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Escalation Status"
-          },
-          "final_state": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Final State"
-          },
-          "has_recording": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Has Recording"
-          },
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "lifecycle": {
-            "enum": [
-              "active",
-              "dormant",
-              "closed"
-            ],
-            "title": "Lifecycle",
-            "type": "string"
-          },
-          "phone_number": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone Number"
-          },
-          "quality_score": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Quality Score"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Id"
-          },
-          "source": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "closed",
-              "completed",
-              "in-progress",
-              "failed",
-              "paused"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "turn_count": {
-            "default": 0,
-            "title": "Turn Count",
-            "type": "integer"
-          },
-          "updated_at": {
-            "title": "Updated At",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "channel_kind",
-          "status",
-          "lifecycle",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "ConversationSummary",
-        "type": "object"
-      },
       "src__routes__external_role_assignments__ListResponse": {
         "properties": {
           "continuation_token": {
@@ -53572,110 +53284,6 @@
       }
     },
     "/v1/{workspace_id}/agent-runs": {
-      "get": {
-        "description": "Paginated list of framework agent runs for the workspace, newest first, read from the durable ``world.agent_runs`` read model. Filter by ``framework`` / ``status``. ``continuation_token`` is an opaque page cursor.",
-        "operationId": "list_agent_runs_v1__workspace_id__agent_runs_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "title": "Continuation Token"
-            }
-          },
-          {
-            "in": "query",
-            "name": "framework",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "claude-agent-sdk",
-                    "openai-agents"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Framework"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "running",
-                    "succeeded",
-                    "failed",
-                    "timed_out"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentRunListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List framework agent runs",
-        "tags": [
-          "Agent Runs"
-        ]
-      },
       "post": {
         "description": "Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking \u2014 poll GET /agent-runs/{run_id} for the result.",
         "operationId": "create_agent_run_v1__workspace_id__agent_runs_post",
@@ -57862,48 +57470,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/calls/active/intelligence": {
-      "get": {
-        "description": "Real-time active call list enriched with per-turn emotion, risk, and quality data from Valkey. Proxied from voice-agent.",
-        "operationId": "list-active-calls-intelligence",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "additionalProperties": true,
-                    "type": "object"
-                  },
-                  "title": "Response List-Active-Calls-Intelligence",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "503": {
-            "description": "Voice agent not configured"
-          }
-        },
-        "summary": "Active calls with live intelligence",
-        "tags": [
-          "Calls"
-        ]
-      }
-    },
     "/v1/{workspace_id}/calls/benchmarks": {
       "get": {
         "description": "Aggregate quality benchmarks for the workspace. Used by call detail to show 'vs workspace average' and by call list for quality context.",
@@ -59438,114 +59004,6 @@
       }
     },
     "/v1/{workspace_id}/conversations": {
-      "get": {
-        "operationId": "list_conversations_v1__workspace_id__conversations_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Filter by channel",
-            "in": "query",
-            "name": "channel_kind",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ChannelKind"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by channel",
-              "title": "Channel Kind"
-            }
-          },
-          {
-            "description": "Filter by status",
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "active",
-                    "closed",
-                    "completed",
-                    "in-progress",
-                    "failed",
-                    "paused"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by status",
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "maximum": 100,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List all conversations (voice + text)",
-        "tags": [
-          "conversations"
-        ]
-      },
       "post": {
         "operationId": "create_conversation_v1__workspace_id__conversations_post",
         "parameters": [

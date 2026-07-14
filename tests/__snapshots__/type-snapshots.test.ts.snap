@@ -233,7 +233,6 @@ exports[`Generated type snapshots > keeps operation IDs stable 1`] = `
   "heal-surface-field",
   "invoke-function",
   "invoke-workspace-data-query",
-  "list-active-calls-intelligence",
   "list-active-escalations",
   "list-agent-versions",
   "list-agents",
