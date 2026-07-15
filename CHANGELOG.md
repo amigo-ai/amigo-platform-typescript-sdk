@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.102.1] - 2026-07-15
+
+### Improvements
+
+- Expose framework runtime labels (#438)
+
 ## [0.102.0] - 2026-07-14
 
 ### Maintenance
