@@ -1,6 +1,20 @@
 import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 
+/** Frameworks currently supported by the platform's framework-native runner. */
+export const AGENT_RUN_FRAMEWORKS = {
+  OPENAI_AGENTS: 'openai-agents',
+  CLAUDE_AGENT_SDK: 'claude-agent-sdk',
+} as const
+
+export type AgentRunFramework = (typeof AGENT_RUN_FRAMEWORKS)[keyof typeof AGENT_RUN_FRAMEWORKS]
+
+/** Human-readable labels for framework selectors and run summaries. */
+export const AGENT_RUN_FRAMEWORK_LABELS: Record<AgentRunFramework, string> = {
+  [AGENT_RUN_FRAMEWORKS.OPENAI_AGENTS]: 'OpenAI Agents SDK',
+  [AGENT_RUN_FRAMEWORKS.CLAUDE_AGENT_SDK]: 'Anthropic Claude Agent SDK',
+}
+
 /**
  * Framework agent runs — the RUN + CONTEXT edges of the framework-agnostic
  * world-model harness.
