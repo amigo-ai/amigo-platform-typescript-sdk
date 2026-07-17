@@ -29,7 +29,11 @@ export interface TestCallUrlParams {
    * captured by infrastructure access logs.
    */
   systemPrompt?: string
-  /** Full URL override for preview or custom agent-engine ingress. */
+  /**
+   * Absolute endpoint URL override for preview or custom agent-engine ingress.
+   * Its path is used verbatim; it must not contain a query or fragment because
+   * the SDK appends every supported test-call query parameter.
+   */
   testCallUrl?: string
 }
 
