@@ -442,6 +442,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `testCalls`
 
+- `withOptions`
 - `url`
 - `connect`
 
