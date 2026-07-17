@@ -33,7 +33,15 @@ export interface TestCallUrlParams {
   testCallUrl?: string
 }
 
-/** WebSocket constructor subprotocol tuple used for test-call authentication. */
+/**
+ * WebSocket constructor subprotocol tuple used for test-call authentication.
+ *
+ * Passing these two entries to the browser ``WebSocket`` constructor produces
+ * ``Sec-WebSocket-Protocol: auth, <token>``. The agent engine parses the first
+ * entry as the authentication scheme and the second as its bearer token; they
+ * must remain separate constructor protocols, matching the conversation and
+ * observer helpers.
+ */
 export type TestCallAuthProtocols = readonly ['auth', string]
 
 /** First metadata frame emitted after the voice session is allocated. */
