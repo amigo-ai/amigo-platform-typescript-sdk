@@ -68,6 +68,7 @@ import { ComplianceResource } from './resources/compliance.js'
 import { EventsResource } from './resources/events.js'
 import { FunctionsResource } from './resources/functions.js'
 import { ObserversResource } from './resources/observers.js'
+import { TestCallsResource } from './resources/test-calls.js'
 import { FhirResource } from './resources/fhir.js'
 import { InsightsResource } from './resources/insights.js'
 import { CommandCenterResource } from './resources/command-center.js'
@@ -230,6 +231,8 @@ export class AmigoClient {
    * {@link ObserversResource}.
    */
   readonly observers!: ObserversResource
+  /** Browser voice test calls over the agent-engine duplex PCM WebSocket. */
+  readonly testCalls!: TestCallsResource
   /** FHIR / EHR data interop — sync status, imports, resources, patient views */
   readonly fhir!: FhirResource
   /** Natural-language insights — schema, suggestions, SQL, chat sessions */
@@ -498,6 +501,7 @@ export class AmigoClient {
     mutable.events = new EventsResource(client, workspaceId)
     mutable.functions = new FunctionsResource(client, workspaceId)
     mutable.observers = new ObserversResource(client, workspaceId, agentBaseUrl)
+    mutable.testCalls = new TestCallsResource(client, workspaceId, agentBaseUrl)
     mutable.fhir = new FhirResource(client, workspaceId)
     mutable.insights = new InsightsResource(client, workspaceId)
     mutable.commandCenter = new CommandCenterResource(client, workspaceId)
@@ -829,6 +833,28 @@ export type {
   ObserverSSEEventType,
   ObserverSubscribeOptions,
 } from './resources/observers.js'
+
+// Browser voice test-call duplex audio stream
+export { TestCallsResource, testCallAuthProtocols } from './resources/test-calls.js'
+export type {
+  TestCallAuthProtocols,
+  TestCallCloseEvent,
+  TestCallConnectOptions,
+  TestCallControlMessage,
+  TestCallAgentTranscriptEvent,
+  TestCallEmotionEvent,
+  TestCallEvent,
+  TestCallHandle,
+  TestCallInterruptionEvent,
+  TestCallLatencyEvent,
+  TestCallProgressEvent,
+  TestCallReadyEvent,
+  TestCallSessionStartedEvent,
+  TestCallToolCallCompletedEvent,
+  TestCallToolCallStartedEvent,
+  TestCallUrlParams,
+  TestCallUserTranscriptEvent,
+} from './resources/test-calls.js'
 
 // Reconnecting WebSocket primitive (compose for custom realtime surfaces)
 export {
