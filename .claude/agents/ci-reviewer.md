@@ -3,7 +3,7 @@ name: ci-reviewer
 description: >
   Reviews GitHub workflows and build/release scripts for trigger scope, token
   safety, comment idempotency, and release sequencing.
-model: sonnet
+model: opus
 tools: Bash, Read, Grep, Glob
 ---
 

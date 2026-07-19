@@ -3,7 +3,7 @@ name: test-reviewer
 description: >
   Reviews SDK test changes for coverage quality, fixture realism, packaging
   verification, and regressions hidden by weak assertions.
-model: sonnet
+model: opus
 tools: Bash, Read, Grep, Glob
 ---
 
