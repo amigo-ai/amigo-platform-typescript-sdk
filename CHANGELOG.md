@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.103.0] - 2026-07-19
+
+### Maintenance
+
+- sync SDK to post-consolidation openapi (drop gpt_live/openai_realtime/turn_runtime) (#441)
+- move CI reviewers to Claude Fable 5 (#440)
+
 ## [0.102.1] - 2026-07-15
 
 ### Improvements
