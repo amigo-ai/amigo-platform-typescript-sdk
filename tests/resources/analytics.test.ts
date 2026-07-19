@@ -5,10 +5,12 @@ const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 
 const DASHBOARD_FIXTURE = {
-  workspace_id: TEST_WORKSPACE_ID,
-  total_calls: 150,
-  avg_duration_seconds: 240,
-  sentiment_score: 0.78,
+  call_volume: { value: 150, delta_pct: 12.5 },
+  avg_duration_s: { value: 240, delta_pct: -3.0 },
+  avg_quality: { value: 0.78, delta_pct: 1.2 },
+  avg_ttfb_ms: { value: 820, delta_pct: -5.0 },
+  escalation_rate: { value: 0.04, delta_pct: -1.0 },
+  tool_success_rate: { value: 0.96, delta_pct: 0.5 },
   period_days: 7,
 }
 
@@ -173,13 +175,13 @@ const client = new AmigoClient({
 describe('AnalyticsResource', () => {
   it('gets the dashboard', async () => {
     const result = await client.analytics.getDashboard()
-    expect(result.total_calls).toBe(150)
+    expect(result.call_volume.value).toBe(150)
     expect(result.period_days).toBe(7)
   })
 
   it('gets the dashboard with days param', async () => {
     const result = await client.analytics.getDashboard({ days: 30 })
-    expect(result.total_calls).toBe(150)
+    expect(result.call_volume.value).toBe(150)
   })
 
   it('gets call analytics', async () => {

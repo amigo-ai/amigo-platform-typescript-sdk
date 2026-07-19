@@ -3,7 +3,7 @@ import { STT_PROVIDERS, TTS_PROVIDERS, VOICE_SESSION_PROVIDERS } from '../../src
 
 describe('voice provider constants', () => {
   it('exposes supported voice session providers', () => {
-    expect(VOICE_SESSION_PROVIDERS).toEqual(['amigo', 'gpt_realtime', 'gpt_live'])
+    expect(VOICE_SESSION_PROVIDERS).toEqual(['amigo', 'gpt_realtime'])
   })
 
   it('exposes supported STT providers', () => {

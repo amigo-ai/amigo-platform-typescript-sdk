@@ -798,7 +798,7 @@ export interface paths {
         put?: never;
         /**
          * Dispatch a framework agent run
-         * @description Proxies to agent-runner, which executes the chosen framework UNMODIFIED (natural setup) against the platform MCP world-tools edge under the caller's own bearer. Non-blocking — poll GET /agent-runs/{run_id} for the result.
+         * @description Proxies to agent-runner, where the chosen SDK owns its autonomous loop inside a platform-controlled prompt/model/tool/auth/timeout envelope. Capabilities come from Platform MCP under the caller's bearer. Non-blocking — poll GET /agent-runs/{run_id} for the result.
          */
         post: operations["create_agent_run_v1__workspace_id__agent_runs_post"];
         delete?: never;
@@ -816,7 +816,7 @@ export interface paths {
         };
         /**
          * Fetch the neutral session-bootstrap context for a service
-         * @description The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and the REAL server-enforced write-floor — the byte-identical projection the hosted runner renders from, so a customer's own framework can bootstrap a session against the same world model. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).
+         * @description The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and an MCP write-policy summary. It shares the HarnessContext schema with the hosted harness but is not byte-identical to a hosted render: this REST path does not resolve the runner's engage-model preference. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).
          */
         get: operations["get_harness_context_v1__workspace_id__agent_runs_harness_context_get"];
         put?: never;
@@ -836,7 +836,7 @@ export interface paths {
         };
         /**
          * Get a framework agent run
-         * @description Run status, final text, token usage, and the adapter-normalized trajectory of the framework's native output.
+         * @description Run status, final text, token usage, and the runner-normalized trajectory of framework-native output.
          */
         get: operations["get_agent_run_v1__workspace_id__agent_runs__run_id__get"];
         put?: never;
@@ -1095,6 +1095,26 @@ export interface paths {
          * @description Emotion distribution and valence/arousal trends.
          */
         get: operations["get-emotion-trends"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/analytics/eval-quality": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Eval Quality Analytics
+         * @description Production-eval pass-rate and score trends (channel-agnostic — voice, text, SMS, email).
+         */
+        get: operations["get-eval-quality-analytics"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2545,6 +2565,42 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-identity-bindings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List External Identity Bindings */
+        get: operations["list-external-identity-bindings"];
+        /** Upsert External Identity Binding */
+        put: operations["upsert-external-identity-binding"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-identity-bindings/{binding_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get External Identity Binding */
+        get: operations["get-external-identity-binding"];
+        put?: never;
+        post?: never;
+        /** Delete External Identity Binding */
+        delete: operations["delete-external-identity-binding"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5516,6 +5572,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/services/{service_id}/conversation-starters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Get conversation starters
+         * @description Return structured pre-conversation starter chips for a service and optional entity. When service config includes conversation_starter_prompts and an entity_id is supplied, the endpoint reads entity context and generates starters before falling back to configured starters. Selecting a starter should create a conversation and send the starter value as the first user message. Requires `Service.view` permission.
+         */
+        post: operations["list-conversation-starters"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/services/{service_id}/text-turn": {
         parameters: {
             query?: never;
@@ -7845,6 +7921,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/world/migration/conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Bulk-import v1 conversation envelopes for migrated patients
+         * @description Writes one terminal world.conversations row per v1 conversation (real dates, provider='v1-migration'), giving the returning-user greeting and the real conversation list. Admin-only, idempotent + correctable per (workspace, v1 conversation id), memory-safe (no world events emitted → the memory extractor never re-derives from these). Transcript content (turns) is a separate follow-up. Batch size <= 500.
+         */
+        post: operations["bulk-import-migration-conversations"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/world/search": {
         parameters: {
             query?: never;
@@ -8503,7 +8599,7 @@ export interface components {
             text?: string;
             /**
              * Trajectory
-             * @description AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) — the adapter's normalize() over the framework's NATIVE output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.
+             * @description AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) — the runner normalizer's projection of framework-native output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.
              * @default []
              */
             trajectory?: {
@@ -8638,6 +8734,54 @@ export interface components {
             workspace_id: string;
         };
         AlterAction: components["schemas"]["AddColumnAction"] | components["schemas"]["DropColumnAction"] | components["schemas"]["RenameColumnAction"] | components["schemas"]["ChangeColumnTypeAction"] | components["schemas"]["SetColumnNullableAction"] | components["schemas"]["SetColumnDefaultAction"] | components["schemas"]["DropColumnDefaultAction"] | components["schemas"]["AddUniqueAction"] | components["schemas"]["DropConstraintAction"] | components["schemas"]["AddIndexAction"] | components["schemas"]["DropIndexAction"];
+        /**
+         * AnalyticsDashboardResponse
+         * @description Composite dashboard — six headline KPIs, each with a delta, plus the period length.
+         *
+         *     Higher-is-better for ``call_volume``, ``avg_quality``, ``tool_success_rate``;
+         *     higher-is-worse for ``escalation_rate``, ``avg_ttfb_ms``, ``avg_duration_s``.
+         *     Consumers must color deltas by that per-KPI polarity, not by delta sign alone.
+         */
+        AnalyticsDashboardResponse: {
+            /** @description Average call duration in seconds */
+            avg_duration_s: components["schemas"]["AnalyticsKpi"];
+            /** @description Average quality score (0-100); higher is better */
+            avg_quality: components["schemas"]["AnalyticsKpi"];
+            /** @description Average audio time-to-first-byte in ms; lower is better */
+            avg_ttfb_ms: components["schemas"]["AnalyticsKpi"];
+            /** @description Total calls in the period */
+            call_volume: components["schemas"]["AnalyticsKpi"];
+            /** @description Fraction of calls escalated; lower is better */
+            escalation_rate: components["schemas"]["AnalyticsKpi"];
+            /**
+             * Period Days
+             * @description Length of the reporting period in days
+             */
+            period_days: number;
+            /** @description Fraction of tool calls that succeeded; higher is better */
+            tool_success_rate: components["schemas"]["AnalyticsKpi"];
+        };
+        /**
+         * AnalyticsKpi
+         * @description A single headline KPI with its period-over-period change.
+         *
+         *     ``value`` is left broad (int for counts, float for rates/scores/durations,
+         *     ``None`` when the metric has no data for the period). ``delta_pct`` is the
+         *     signed percent change vs the previous equal-length period, or ``None`` when
+         *     a prior-period comparison is unavailable.
+         */
+        AnalyticsKpi: {
+            /**
+             * Delta Pct
+             * @description Percent change vs the previous period, or None
+             */
+            delta_pct?: number | null;
+            /**
+             * Value
+             * @description Current-period value (None when no data)
+             */
+            value?: number | null;
+        };
         /**
          * AnnotationState
          * @description Injects a hardcoded inner thought (no LLM call).
@@ -9062,6 +9206,20 @@ export interface components {
              * @description Workspace ID
              */
             workspace_id: string;
+        };
+        /** BindingUpsertRequest */
+        BindingUpsertRequest: {
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** External Subject Key */
+            external_subject_key: string;
+            /** Source */
+            source?: string | null;
         };
         /** Body_upload_intake_file_v1__workspace_id__intake_files_post */
         Body_upload_intake_file_v1__workspace_id__intake_files_post: {
@@ -11182,6 +11340,69 @@ export interface components {
             /** Updated At */
             updated_at: string;
             voice?: components["schemas"]["VoiceDetail"] | null;
+        };
+        /** ConversationStarter */
+        ConversationStarter: {
+            /** Label */
+            label: string;
+            /**
+             * Lane
+             * @default general
+             * @enum {string}
+             */
+            lane?: "data" | "goal" | "protocol" | "care" | "general";
+            /** Metadata */
+            metadata?: {
+                [key: string]: unknown;
+            };
+            /** Referenced Objects */
+            referenced_objects?: string[];
+            /**
+             * Source
+             * @default configured
+             * @enum {string}
+             */
+            source?: "recent_data" | "hypothesis" | "goal" | "protocol" | "care" | "generated" | "deterministic" | "configured";
+            /** Value */
+            value: string;
+        };
+        /** ConversationStartersRequest */
+        ConversationStartersRequest: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /**
+             * Generation Mode
+             * @default auto
+             * @enum {string}
+             */
+            generation_mode?: "auto" | "generate" | "configured";
+            /**
+             * Include Deterministic
+             * @default true
+             */
+            include_deterministic?: boolean;
+            /**
+             * Max Count
+             * @default 5
+             */
+            max_count?: number;
+        };
+        /** ConversationStartersResponse */
+        ConversationStartersResponse: {
+            /** Entity Id */
+            entity_id?: string | null;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
+            /** Starters */
+            starters: components["schemas"]["ConversationStarter"][];
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
         };
         /** ConversationStatusTransitionRequest */
         ConversationStatusTransitionRequest: {
@@ -14573,6 +14794,96 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * EvalQualityResponse
+         * @description Production-eval quality: overall pass-rate/score, per-eval-key breakdown, and a trend.
+         *
+         *     The channel-agnostic quality surface. Returns zeroed shapes (empty ``by_eval_key``
+         *     and ``trend``, null rates) when no verdicts exist for the workspace/window — the
+         *     console renders an empty-state rather than erroring, so this ships safely ahead of
+         *     the eager-eval trigger being enabled in production.
+         */
+        EvalQualityResponse: {
+            /**
+             * By Eval Key
+             * @description Per-eval-key aggregates, most-evaluated first
+             */
+            by_eval_key: components["schemas"]["EvalQualitySummary"][];
+            /** @description Workspace-wide aggregate for the period */
+            summary: components["schemas"]["EvalQualitySummary"];
+            /**
+             * Trend
+             * @description Time series of eval pass-rate/score per interval bucket
+             */
+            trend: components["schemas"]["EvalQualityTrendPoint"][];
+        };
+        /**
+         * EvalQualitySummary
+         * @description Aggregate production-eval verdict stats, overall or for one eval_key.
+         *
+         *     Sourced from ``call_eval_results`` (LLM-judge + assertion verdicts), which is
+         *     keyed by ``conversation_id`` and therefore CHANNEL-AGNOSTIC — voice, text,
+         *     SMS, email all contribute equally, unlike the voice-shaped call-quality score.
+         */
+        EvalQualitySummary: {
+            /**
+             * Avg Score
+             * @description Mean numeric judge score across scored verdicts
+             */
+            avg_score?: number | null;
+            /**
+             * Eval Key
+             * @description Eval key for a per-key row; null for the overall summary
+             */
+            eval_key?: string | null;
+            /**
+             * Judged
+             * @description Verdicts with a non-null pass/fail outcome (denominator for pass_rate)
+             */
+            judged: number;
+            /**
+             * Pass Rate
+             * @description Fraction of judged verdicts that passed (0.0-1.0)
+             */
+            pass_rate?: number | null;
+            /**
+             * Total Evals
+             * @description Total verdicts recorded (any status, incl. errored)
+             */
+            total_evals: number;
+        };
+        /**
+         * EvalQualityTrendPoint
+         * @description Single date-bucket data point in the eval-quality trend series.
+         */
+        EvalQualityTrendPoint: {
+            /**
+             * Avg Score
+             * @description Mean numeric judge score in this bucket
+             */
+            avg_score?: number | null;
+            /**
+             * Date
+             * Format: date
+             * @description Date bucket (granularity follows `interval`)
+             */
+            date: string;
+            /**
+             * Judged
+             * @description Verdicts with a non-null pass/fail outcome in this bucket
+             */
+            judged: number;
+            /**
+             * Pass Rate
+             * @description Fraction of judged verdicts that passed in this bucket
+             */
+            pass_rate?: number | null;
+            /**
+             * Total Evals
+             * @description Total verdicts in this bucket
+             */
+            total_evals: number;
+        };
+        /**
          * EvaluationResultView
          * @description One check as the console renders it, derived from a single eval result.
          *
@@ -14741,6 +15052,49 @@ export interface components {
              * @default 3
              */
             recommend_candidates?: number;
+        };
+        /** ExternalIdentityBindingItem */
+        ExternalIdentityBindingItem: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** External Subject Key */
+            external_subject_key: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Source */
+            source?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "revoked";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** ExternalIdentityBindingListResponse */
+        ExternalIdentityBindingListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalIdentityBindingItem"][];
         };
         /** ExternalIntegrationCredentialRequest */
         ExternalIntegrationCredentialRequest: {
@@ -16228,7 +16582,7 @@ export interface components {
         };
         /**
          * HarnessContext
-         * @description The neutral, retrievable session-bootstrap context for ANY framework.
+         * @description A framework-neutral, retrievable service bootstrap projection.
          */
         HarnessContext: {
             /**
@@ -16584,6 +16938,11 @@ export interface components {
              * @description source_id.
              */
             id: string;
+            /**
+             * Impersonate Subject
+             * @description DWD impersonation subject, if this source authenticates via domain-wide delegation.
+             */
+            impersonate_subject?: string | null;
             /** Source Type */
             source_type: string;
             /** Status */
@@ -17887,6 +18246,47 @@ export interface components {
         MetricSettingsResponse: {
             /** Definitions */
             definitions: components["schemas"]["MetricDefinition"][];
+        };
+        /** MigrationConversationItem */
+        MigrationConversationItem: {
+            /** @default web */
+            channel_kind?: components["schemas"]["ChannelKind"];
+            /**
+             * Ended At
+             * Format: date-time
+             */
+            ended_at: string;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /** Source Conversation Id */
+            source_conversation_id: string;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /**
+             * Turn Count
+             * @default 0
+             */
+            turn_count?: number;
+        };
+        /** MigrationConversationsBody */
+        MigrationConversationsBody: {
+            /** Conversations */
+            conversations: components["schemas"]["MigrationConversationItem"][];
+        };
+        /** MigrationConversationsResponse */
+        MigrationConversationsResponse: {
+            /** Created */
+            created: number;
+            /** Imported */
+            imported: number;
+            /** Updated */
+            updated: number;
         };
         /** ModelRegistryResponse */
         ModelRegistryResponse: {
@@ -20468,6 +20868,107 @@ export interface components {
              */
             territory_mean?: number;
         };
+        /**
+         * RealtimeCustomVoice
+         * @description Approved OpenAI custom voice reference.
+         */
+        RealtimeCustomVoice: {
+            /** Id */
+            id: string;
+        };
+        /**
+         * RealtimeSemanticVadConfig
+         * @description Semantic turn detection controls.
+         */
+        RealtimeSemanticVadConfig: {
+            /**
+             * Eagerness
+             * @default auto
+             * @enum {string}
+             */
+            eagerness?: "auto" | "low" | "medium" | "high";
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "semantic_vad";
+        };
+        /**
+         * RealtimeServerVadConfig
+         * @description Volume-based turn detection controls.
+         */
+        RealtimeServerVadConfig: {
+            /** Idle Timeout Ms */
+            idle_timeout_ms?: number | null;
+            /** Prefix Padding Ms */
+            prefix_padding_ms?: number | null;
+            /** Silence Duration Ms */
+            silence_duration_ms?: number | null;
+            /** Threshold */
+            threshold?: number | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "server_vad";
+        };
+        /**
+         * RealtimeSessionConfig
+         * @description Typed OpenAI Realtime session controls for a service.
+         */
+        RealtimeSessionConfig: {
+            /** Max Output Tokens */
+            max_output_tokens?: number | "inf" | null;
+            /** Model */
+            model?: ("gpt-realtime-1.5" | "gpt-realtime-2" | "gpt-realtime-2.1" | "gpt-realtime-2.1-mini") | null;
+            /**
+             * Noise Reduction
+             * @description Input noise reduction. Omit or set null to use the Platform default; set 'off' to disable it.
+             */
+            noise_reduction?: ("near_field" | "far_field" | "off") | null;
+            /** Reasoning Effort */
+            reasoning_effort?: ("low" | "medium" | "high") | null;
+            /** Speed */
+            speed?: number | null;
+            transcription?: components["schemas"]["RealtimeTranscriptionConfig"] | null;
+            truncation?: components["schemas"]["RealtimeTruncationConfig"] | null;
+            /** Turn Detection */
+            turn_detection?: (components["schemas"]["RealtimeServerVadConfig"] | components["schemas"]["RealtimeSemanticVadConfig"]) | null;
+            /** Voice */
+            voice?: ("alloy" | "ash" | "ballad" | "coral" | "echo" | "sage" | "shimmer" | "verse" | "marin" | "cedar") | components["schemas"]["RealtimeCustomVoice"] | null;
+        };
+        /**
+         * RealtimeTranscriptionConfig
+         * @description Asynchronous caller-audio transcription used for transcripts and observability.
+         */
+        RealtimeTranscriptionConfig: {
+            /** Language */
+            language?: string | null;
+            /**
+             * Model
+             * @default gpt-4o-transcribe
+             * @enum {string}
+             */
+            model?: "whisper-1" | "gpt-4o-mini-transcribe" | "gpt-4o-transcribe";
+            /** Prompt */
+            prompt?: string | null;
+        };
+        /**
+         * RealtimeTruncationConfig
+         * @description Conversation context truncation strategy.
+         */
+        RealtimeTruncationConfig: {
+            /** Post Instructions Tokens */
+            post_instructions_tokens?: number | null;
+            /** Retention Ratio */
+            retention_ratio?: number | null;
+            /**
+             * Type
+             * @default auto
+             * @enum {string}
+             */
+            type?: "auto" | "disabled" | "retention_ratio";
+        };
         /** RecommendRequest */
         RecommendRequest: {
             /**
@@ -20696,6 +21197,8 @@ export interface components {
             drive_id?: string | null;
             /** Folders */
             folders: components["schemas"]["DriveFolderMapping"][];
+            /** Impersonate Subject */
+            impersonate_subject?: string | null;
         };
         /**
          * RegisteredFunction
@@ -21188,7 +21691,7 @@ export interface components {
         };
         /**
          * Run
-         * @description The universal agent-run object.
+         * @description One item in the canonical unified Runs read model.
          *
          *     ``run_id`` is a dedicated UUID (not an overloaded ``call_sid`` / ``conversation_id``);
          *     the originating subsystem's ids are kept as ``source_*`` provenance fields so a
@@ -22010,8 +22513,15 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            realtime?: components["schemas"]["RealtimeSessionConfig"] | null;
+            /**
+             * Realtime Voice
+             * @deprecated
+             * @description Deprecated built-in OpenAI Realtime voice shortcut. Use realtime.voice instead; the two fields are mutually exclusive.
+             */
+            realtime_voice?: ("alloy" | "ash" | "ballad" | "coral" | "echo" | "sage" | "shimmer" | "verse" | "marin" | "cedar") | null;
             /** Session Provider */
-            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -22080,8 +22590,15 @@ export interface components {
             progress_interval_ms?: number | null;
             /** Progress Vocabulary */
             progress_vocabulary?: string[] | null;
+            realtime?: components["schemas"]["RealtimeSessionConfig"] | null;
+            /**
+             * Realtime Voice
+             * @deprecated
+             * @description Deprecated built-in OpenAI Realtime voice shortcut. Use realtime.voice instead; the two fields are mutually exclusive.
+             */
+            realtime_voice?: ("alloy" | "ash" | "ballad" | "coral" | "echo" | "sage" | "shimmer" | "verse" | "marin" | "cedar") | null;
             /** Session Provider */
-            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime") | null;
             /** Transition Deadline Ms */
             transition_deadline_ms?: number | null;
             /** Tts Config */
@@ -22357,12 +22874,20 @@ export interface components {
         };
         /** SimMetricPerfResponse */
         SimMetricPerfResponse: {
+            /**
+             * Checks
+             * @description Normalized per-check view of ``results`` (mirrors SimCaseAssertionResponse)
+             *     so the console renders each metric drill-down verdict without parsing raw shapes.
+             */
+            readonly checks: components["schemas"]["EvaluationResultView"][];
             /** Label */
             label: string;
             /** Metric Key */
             metric_key: string;
             /** Per Run */
             per_run?: components["schemas"]["SimMetricRunPointResponse"][];
+            /** Results */
+            results?: components["schemas"]["SimulationEvalResultResponse"][];
         };
         /**
          * SimMetricRunPointResponse
@@ -24750,9 +25275,10 @@ export interface components {
          *
          *     ``eligible`` = an operator may take this run over right now. ``mode_options`` = the
          *     takeover modes valid for the run's channel (voice exposes ``listen`` + ``takeover``;
-         *     other channels none yet). ``reason`` = a short, human-facing explanation when NOT
-         *     eligible (e.g. ``"run is not live"``, ``"channel not yet supported"``), so the
-         *     console can render an honest disabled-state tooltip rather than a bare greyed button.
+         *     enumerated asynchronous channels expose authored-turn ``takeover`` only).
+         *     ``reason`` = a short, human-facing explanation when NOT eligible (e.g.
+         *     ``"run is not live"``, ``"channel not yet supported"``), so the console can
+         *     render an honest disabled-state tooltip rather than a bare greyed button.
          *     Server-computed (see ``Run.takeover``) so eligibility rules live in one place and the
          *     console never re-derives them.
          */
@@ -24913,6 +25439,11 @@ export interface components {
              * Format: uuid
              */
             conversation_id: string;
+            /**
+             * Delivery Id
+             * @default null
+             */
+            delivery_id?: string | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -26342,10 +26873,22 @@ export interface components {
         /** TurnDoneEvent */
         TurnDoneEvent: {
             /**
+             * Background Pending
+             * @description True when the streamed response is only an acknowledgement and the final assistant answer must be collected with the durable background-delivery protocol.
+             * @default false
+             */
+            background_pending?: boolean;
+            /**
              * Conversation Id
              * Format: uuid
              */
             conversation_id: string;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry receipt-backed polls only after observing version 2.
+             * @default null
+             */
+            delivery_protocol_version?: 2 | null;
             /**
              * @description discriminator enum property added by openapi-typescript
              * @enum {string}
@@ -27260,12 +27803,6 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
-            /**
-             * Turn Runtime
-             * @default native
-             * @enum {string}
-             */
-            turn_runtime?: "native" | "openai-agents";
         };
         /**
          * VersionSet
@@ -27280,12 +27817,6 @@ export interface components {
             llm_model_preferences?: {
                 [key: string]: components["schemas"]["LLMConfig"];
             };
-            /**
-             * Turn Runtime
-             * @default native
-             * @enum {string}
-             */
-            turn_runtime?: "native" | "openai-agents";
         };
         /** VoiceConfig */
         VoiceConfig: {
@@ -27294,7 +27825,7 @@ export interface components {
                 [key: string]: components["schemas"]["LanguageProviderEntry"];
             } | null;
             /** Session Provider */
-            session_provider?: ("amigo" | "gpt_realtime" | "gpt_live") | null;
+            session_provider?: ("amigo" | "gpt_realtime") | null;
             /**
              * Similarity Boost
              * @default 0
@@ -27834,6 +28365,7 @@ export interface components {
          * WorldScope
          * @description The world slice — ids only (the leaf stays I/O-free). This is the
          *     read/subject scope, NOT the write bound (see ``write_floor``).
+         *     ``allow_create`` records context intent and is not an authorization grant.
          */
         WorldScope: {
             /**
@@ -27877,8 +28409,11 @@ export interface components {
         };
         /**
          * WriteFloor
-         * @description The REAL server-enforced write bound (audit G8) — advisory to render;
-         *     the MCP edge enforces it regardless of what a client does.
+         * @description A static summary of MCP write policy, advisory to the renderer.
+         *
+         *     The MCP edge resolves the caller's actual principal and enforces the
+         *     result. These fields do not grant write access; hosted runner credentials
+         *     are currently unanchored and cannot perform provider-only clinical writes.
          */
         WriteFloor: {
             /**
@@ -28072,6 +28607,8 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** @enum {string} */
+        src__routes__external_identity_bindings___SortField: "created_at" | "external_subject_key";
         /** ListResponse */
         src__routes__external_role_assignments__ListResponse: {
             /** Continuation Token */
@@ -31562,9 +32099,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["AnalyticsDashboardResponse"];
                 };
             };
             /** @description Validation Error */
@@ -31644,6 +32179,48 @@ export interface operations {
                     "application/json": {
                         [key: string]: unknown;
                     };
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limit exceeded */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-eval-quality-analytics": {
+        parameters: {
+            query?: {
+                days?: number;
+                interval?: "1h" | "1d" | "1w";
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EvalQualityResponse"];
                 };
             };
             /** @description Validation Error */
@@ -35266,6 +35843,166 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "list-external-identity-bindings": {
+        parameters: {
+            query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalIdentityBindingListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "upsert-external-identity-binding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BindingUpsertRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalIdentityBindingItem"];
+                };
+            };
+            /** @description entity_id not found in workspace */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description subject_key already bound to a different entity, or entity_id is a role-assigned principal */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-external-identity-binding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExternalIdentityBindingItem"];
+                };
+            };
+            /** @description Binding not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "delete-external-identity-binding": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                binding_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Binding not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
@@ -39426,6 +40163,9 @@ export interface operations {
                 service_id?: string | null;
                 run_id?: string | null;
                 session_id?: string | null;
+                date_from?: string | null;
+                date_to?: string | null;
+                latest_only?: boolean;
                 limit?: number;
                 offset?: number;
             };
@@ -42359,6 +43099,63 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description Missing or invalid API key. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "list-conversation-starters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                service_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConversationStartersRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversationStartersResponse"];
+                };
             };
             /** @description Missing or invalid API key. */
             401: {
@@ -48148,6 +48945,55 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "bulk-import-migration-conversations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MigrationConversationsBody"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MigrationConversationsResponse"];
+                };
+            };
+            /** @description Naive/future timestamps, bad window, or non-person entity_id. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Insufficient permissions. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
