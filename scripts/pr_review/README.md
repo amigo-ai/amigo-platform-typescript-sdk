@@ -33,8 +33,8 @@ uv run --python 3.12 --with 'anthropic[vertex]>=0.52.0' \
 | `GH_TOKEN`                  | `gh` CLI auth                       | `GITHUB_TOKEN` in CI |
 | `VERTEX_PROJECT`            | GCP project with Claude on Vertex   | `amigo-platform`     |
 | `VERTEX_REGION`             | Vertex region                       | `global`             |
-| `REVIEW_MODEL`              | specialist model ID                 | `claude-sonnet-4-6`  |
-| `REVIEW_ORCHESTRATOR_MODEL` | consolidator model ID               | `claude-opus-4-7`    |
+| `REVIEW_MODEL`              | specialist model ID                 | `claude-fable-5`    |
+| `REVIEW_ORCHESTRATOR_MODEL` | consolidator model ID               | `claude-fable-5`    |
 
 The workflow uses `google-github-actions/auth` to set up ADC in CI. Local runs
 need valid Google ADC as well.

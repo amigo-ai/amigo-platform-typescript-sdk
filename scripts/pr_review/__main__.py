@@ -36,10 +36,11 @@ AGENTS_DIR = REPO_ROOT / ".claude" / "agents"
 COMMENT_MARKER = "<!-- sdk-review:v1 -->"
 SPECIALIST_FAILURE_PREFIX = "⚠️ Specialist failed: "
 
-DEFAULT_SPECIALIST_MODEL = os.environ.get("REVIEW_MODEL", "claude-sonnet-4-6")
-# claude-opus-4-7 is served only via the Vertex "global" endpoint on this
-# project (regional endpoints 404) — keep DEFAULT_VERTEX_REGION at "global".
-DEFAULT_ORCHESTRATOR_MODEL = os.environ.get("REVIEW_ORCHESTRATOR_MODEL", "claude-opus-4-7")
+DEFAULT_SPECIALIST_MODEL = os.environ.get("REVIEW_MODEL", "claude-fable-5")
+# claude-fable-5 / claude-fable-5 are served only via the Vertex "global"
+# endpoint on this project (regional endpoints 404) — keep
+# DEFAULT_VERTEX_REGION at "global".
+DEFAULT_ORCHESTRATOR_MODEL = os.environ.get("REVIEW_ORCHESTRATOR_MODEL", "claude-fable-5")
 DEFAULT_VERTEX_PROJECT = os.environ.get("VERTEX_PROJECT", "amigo-platform")
 DEFAULT_VERTEX_REGION = os.environ.get("VERTEX_REGION", "global")
 

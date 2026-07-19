@@ -3,7 +3,7 @@ name: sdk-reviewer
 description: >
   Reviews SDK surface changes in src/, openapi.json, package metadata, README,
   and api.md for type safety, contract fidelity, and packaging correctness.
-model: sonnet
+model: opus
 tools: Bash, Read, Grep, Glob
 ---
 

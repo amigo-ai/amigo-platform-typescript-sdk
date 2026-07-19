@@ -14,8 +14,8 @@ name: PR Review (Claude on Vertex)
 #   vars.GCP_REVIEW_SA              SA email with Vertex access (required)
 #   vars.VERTEX_PROJECT             GCP project (default: amigo-platform)
 #   vars.VERTEX_REGION              Claude region on Vertex (default: global)
-#   vars.REVIEW_MODEL               specialist model (default: claude-sonnet-4-6)
-#   vars.REVIEW_ORCHESTRATOR_MODEL  consolidator (default: claude-opus-4-7)
+#   vars.REVIEW_MODEL               specialist model (default: claude-fable-5)
+#   vars.REVIEW_ORCHESTRATOR_MODEL  consolidator (default: claude-fable-5)
 #
 # Disable per-PR by including "[skip review]" in the PR title. Drafts are
 # skipped. The orchestrator replaces its prior comment on re-runs so PRs don't
@@ -58,9 +58,9 @@ jobs:
       PR_NUMBER: ${{ github.event.pull_request.number }}
       VERTEX_PROJECT: ${{ vars.VERTEX_PROJECT || 'amigo-platform' }}
       VERTEX_REGION: ${{ vars.VERTEX_REGION || 'global' }}
-      REVIEW_MODEL: ${{ vars.REVIEW_MODEL || 'claude-sonnet-4-6' }}
-      # claude-opus-4-7 requires the Vertex "global" endpoint (regional 404s).
-      REVIEW_ORCHESTRATOR_MODEL: ${{ vars.REVIEW_ORCHESTRATOR_MODEL || 'claude-opus-4-7' }}
+      REVIEW_MODEL: ${{ vars.REVIEW_MODEL || 'claude-fable-5' }}
+      # claude-fable-5 / claude-fable-5 require the Vertex "global" endpoint (regional 404s).
+      REVIEW_ORCHESTRATOR_MODEL: ${{ vars.REVIEW_ORCHESTRATOR_MODEL || 'claude-fable-5' }}
     steps:
       - name: Guard — skip if WIF provider not configured
         id: guard
