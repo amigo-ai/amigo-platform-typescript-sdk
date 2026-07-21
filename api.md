@@ -173,6 +173,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getEscalations`
 - `getEscalationsAutoPaging`
 - `getActiveEscalations`
+- `getActiveEscalationsAutoPaging`
 - `getEscalationStats`
 - `getPerformance`
 - `getAccessToken`
@@ -579,11 +580,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `useCases`
 
-- `list`
-- `listOwned`
-- `getOwnership`
-- `assignOwnership`
-- `releaseOwnership`
 - `getServiceBinding`
 - `bindToService`
 - `unbindFromService`

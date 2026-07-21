@@ -95,20 +95,20 @@ export function withResponse<T>(
 /**
  * Standard paginated list response shape.
  */
-export interface PaginatedList<T> {
+export interface PaginatedList<T, TContinuationToken = unknown> {
   items: T[]
   has_more: boolean
-  continuation_token: number | null
+  continuation_token?: TContinuationToken | null
 }
 
 /**
  * Standard query params for paginated list endpoints.
  */
-export interface ListParams {
+export interface ListParams<TContinuationToken = unknown> {
   /** Max items per page. Default varies by endpoint. */
   limit?: number
   /** Opaque token from previous response for next page. */
-  continuation_token?: number
+  continuation_token?: TContinuationToken
 }
 
 /**
@@ -120,16 +120,24 @@ export interface ListParams {
  *   console.log(agent)
  * }
  */
-export async function* paginate<T>(
-  fetcher: (continuationToken?: number) => Promise<PaginatedList<T>>,
+export async function* paginate<T, TContinuationToken = unknown>(
+  fetcher: (
+    continuationToken?: TContinuationToken,
+  ) => Promise<PaginatedList<T, TContinuationToken>>,
 ): AsyncGenerator<T> {
-  let token: number | undefined = undefined
+  let token: TContinuationToken | undefined = undefined
   while (true) {
     const page = await fetcher(token)
     for (const item of page.items) {
       yield item
     }
-    if (!page.has_more || page.continuation_token === null) break
+    if (
+      !page.has_more ||
+      page.continuation_token === null ||
+      page.continuation_token === undefined
+    ) {
+      break
+    }
     token = page.continuation_token
   }
 }
