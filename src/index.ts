@@ -262,7 +262,7 @@ export class AmigoClient {
   readonly workspaceDatabase!: WorkspaceDatabaseResource
   /** Workspace data queries — Lakebase-backed query tool registry */
   readonly workspaceDataQueries!: WorkspaceDataQueriesResource
-  /** Channel use cases and service bindings */
+  /** Service bindings for channel-manager-owned use cases */
   readonly useCases!: UseCasesResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
@@ -761,15 +761,7 @@ export type {
 } from './resources/workspace-data-queries.js'
 
 export { UseCasesResource } from './resources/use-cases.js'
-export type {
-  BindUseCaseServiceRequest,
-  ListUseCasesParams,
-  UseCase,
-  OwnedUseCasesResponse,
-  UseCaseListResponse,
-  UseCaseOwnership,
-  UseCaseServiceBinding,
-} from './resources/use-cases.js'
+export type { BindUseCaseServiceRequest, UseCaseServiceBinding } from './resources/use-cases.js'
 
 export type CallSummary = components['schemas']['CallSummary']
 export type CallDetail = components['schemas']['CallDetailResponse']

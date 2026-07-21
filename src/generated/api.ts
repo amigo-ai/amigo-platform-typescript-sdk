@@ -7377,74 +7377,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/use-cases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List channel use cases
-         * @description List use cases with optional filters by entity_name, channel, setup_id. Requires Channel.view permission.
-         */
-        get: operations["list-use-cases"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/use-cases/ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List use cases this workspace owns
-         * @description Return the ids of the channel-manager use cases this workspace owns. Requires Channel.view permission.
-         */
-        get: operations["list-owned-use-cases"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/use-cases/{use_case_id}/ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Check whether this workspace owns a use case
-         * @description Return the ownership record if the current workspace owns the use case, or 404 if it does not (no existence leak). Requires Channel.view permission.
-         */
-        get: operations["get-use-case-ownership"];
-        /**
-         * Assign ownership of a use case to this workspace
-         * @description Claim ownership of a channel-manager use case for the current workspace. Idempotent — re-assigning an already-owned use case returns 200. 404 if the use case does not exist in channel-manager. 409 if the use case is already owned by another workspace. Requires Channel.ManageOwnership permission (admin tier).
-         */
-        put: operations["assign-use-case-ownership"];
-        post?: never;
-        /**
-         * Release this workspace's ownership of a use case
-         * @description Release the current workspace's ownership of a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. 404 if this workspace does not own the use case. Requires Channel.ManageOwnership permission (admin tier).
-         */
-        delete: operations["release-use-case-ownership"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
         parameters: {
             query?: never;
@@ -7459,7 +7391,7 @@ export interface paths {
         get: operations["get-use-case-service-binding"];
         /**
          * Bind a use case to a platform service
-         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.
+         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.
          */
         put: operations["bind-use-case-to-service"];
         post?: never;
@@ -8264,6 +8196,15 @@ export interface components {
              */
             wait_seconds?: number | null;
         };
+        /** ActiveEscalationListResponse */
+        ActiveEscalationListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ActiveEscalationItem"][];
+        };
         /** ActiveSession */
         ActiveSession: {
             /** Call Sid */
@@ -8531,6 +8472,15 @@ export interface components {
              */
             role?: string;
         };
+        /** AgentListResponse */
+        AgentListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentResponse"][];
+        };
         /** AgentResponse */
         AgentResponse: {
             /**
@@ -8691,6 +8641,15 @@ export interface components {
             version: number;
             voice_config?: components["schemas"]["VoiceConfig"] | null;
         };
+        /** AgentVersionListResponse */
+        AgentVersionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentVersionResponse"][];
+        };
         /** AgentVersionResponse */
         AgentVersionResponse: {
             /**
@@ -8841,6 +8800,15 @@ export interface components {
         AnyValue: {
             [key: string]: unknown;
         };
+        /** ApiKeyListResponse */
+        ApiKeyListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ApiKeyResponse"][];
+        };
         /** ApiKeyResponse */
         ApiKeyResponse: {
             /**
@@ -8988,6 +8956,15 @@ export interface components {
             row_count: number;
             /** S3 Key */
             s3_key: string;
+        };
+        /** AuditLogListResponse */
+        AuditLogListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["src__routes__operators_models__AuditEventResponse"][];
         };
         /** AuditSummary */
         AuditSummary: {
@@ -11111,6 +11088,15 @@ export interface components {
             /** Url */
             url?: string | null;
         };
+        /** ContextGraphListResponse */
+        ContextGraphListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ContextGraphResponse"][];
+        };
         /** ContextGraphResponse */
         ContextGraphResponse: {
             /**
@@ -11198,6 +11184,15 @@ export interface components {
             updated_at?: string | null;
             /** Version */
             version: number;
+        };
+        /** ContextGraphVersionListResponse */
+        ContextGraphVersionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ContextGraphVersionResponse"][];
         };
         /** ContextGraphVersionResponse */
         ContextGraphVersionResponse: {
@@ -12625,6 +12620,15 @@ export interface components {
              */
             state?: string;
         };
+        /** CustomerInvoiceListResponse */
+        CustomerInvoiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["InvoiceItem"][];
+        };
         /** CustomerItem */
         CustomerItem: {
             /** @description Billing address */
@@ -12675,6 +12679,24 @@ export interface components {
              * @description When the customer was last updated (ISO-8601)
              */
             updated_at: string | null;
+        };
+        /** CustomerListResponse */
+        CustomerListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["CustomerItem"][];
+        };
+        /** CustomerUsageListResponse */
+        CustomerUsageListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["MeterValueItem"][];
         };
         /**
          * DailyCallStat
@@ -12791,6 +12813,15 @@ export interface components {
             dashboard_id: string;
             /** Results */
             results: components["schemas"]["PanelResultResponse"][];
+        };
+        /** DashboardListResponse */
+        DashboardListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DashboardDefinitionResponse"][];
         };
         /** DashboardResponse */
         DashboardResponse: {
@@ -13019,6 +13050,15 @@ export interface components {
             items: {
                 [key: string]: unknown;
             }[];
+        };
+        /** DataSourceListResponse */
+        DataSourceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DataSourceResponse"][];
         };
         /** DataSourceResponse */
         DataSourceResponse: {
@@ -14680,6 +14720,15 @@ export interface components {
              */
             requested?: number;
         };
+        /** EscalationEventListResponse */
+        EscalationEventListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["EscalationEventResponse"][];
+        };
         /** EscalationEventResponse */
         EscalationEventResponse: {
             /**
@@ -15146,6 +15195,15 @@ export interface components {
             client_secret: string;
             credential: components["schemas"]["ExternalIntegrationCredentialResponse"];
         };
+        /** ExternalIntegrationListResponse */
+        ExternalIntegrationListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalIntegrationResponse"][];
+        };
         /** ExternalIntegrationRequest */
         ExternalIntegrationRequest: {
             /** Description */
@@ -15346,6 +15404,15 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** ExternalWriteProposalListResponse */
+        ExternalWriteProposalListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalWriteProposal"][];
         };
         /**
          * FailureClass
@@ -18817,6 +18884,15 @@ export interface components {
              */
             operator_id: string;
         };
+        /** OperatorListResponse */
+        OperatorListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["OperatorResponse"][];
+        };
         /** OperatorModeChangedEvent */
         OperatorModeChangedEvent: {
             /** Call Sid */
@@ -19151,6 +19227,15 @@ export interface components {
             /** Synced At */
             synced_at?: string | null;
         };
+        /** OutboundLogListResponse */
+        OutboundLogListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["OutboundLogItem"][];
+        };
         /** OutboundSinkSummary */
         OutboundSinkSummary: {
             /**
@@ -19272,79 +19357,6 @@ export interface components {
             /** Rules */
             rules: components["schemas"]["OutreachRule"][];
         };
-        /** OwnedUseCasesResponse */
-        OwnedUseCasesResponse: {
-            /** Items */
-            items: string[];
-        };
-        /** OwnershipResponse */
-        OwnershipResponse: {
-            /**
-             * Use Case Id
-             * Format: uuid
-             */
-            use_case_id: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PaginatedResponse[ActiveEscalationItem] */
-        PaginatedResponse_ActiveEscalationItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ActiveEscalationItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AgentResponse] */
-        PaginatedResponse_AgentResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AgentVersionResponse] */
-        PaginatedResponse_AgentVersionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentVersionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ApiKeyResponse] */
-        PaginatedResponse_ApiKeyResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ApiKeyResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AuditEventResponse] */
-        PaginatedResponse_AuditEventResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["src__routes__operators_models__AuditEventResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[BatchRow] */
         PaginatedResponse_BatchRow_: {
             /** Continuation Token */
@@ -19356,61 +19368,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[ContextGraphResponse] */
-        PaginatedResponse_ContextGraphResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ContextGraphResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ContextGraphVersionResponse] */
-        PaginatedResponse_ContextGraphVersionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ContextGraphVersionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[CustomerItem] */
-        PaginatedResponse_CustomerItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["CustomerItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[DashboardDefinitionResponse] */
-        PaginatedResponse_DashboardDefinitionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["DashboardDefinitionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[DataSourceResponse] */
-        PaginatedResponse_DataSourceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["DataSourceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[DatasetRow] */
         PaginatedResponse_DatasetRow_: {
             /** Continuation Token */
@@ -19419,39 +19376,6 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["DatasetRow"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[EscalationEventResponse] */
-        PaginatedResponse_EscalationEventResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["EscalationEventResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ExternalIntegrationResponse] */
-        PaginatedResponse_ExternalIntegrationResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ExternalIntegrationResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ExternalWriteProposal] */
-        PaginatedResponse_ExternalWriteProposal_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ExternalWriteProposal"][];
             /** Total */
             total?: number | null;
         };
@@ -19477,17 +19401,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[InvoiceItem] */
-        PaginatedResponse_InvoiceItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["InvoiceItem"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[MaterializationRow] */
         PaginatedResponse_MaterializationRow_: {
             /** Continuation Token */
@@ -19496,149 +19409,6 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["MaterializationRow"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[MeterValueItem] */
-        PaginatedResponse_MeterValueItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["MeterValueItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[OperatorResponse] */
-        PaginatedResponse_OperatorResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["OperatorResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[OutboundLogItem] */
-        PaginatedResponse_OutboundLogItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["OutboundLogItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ProductionEvalDefinition] */
-        PaginatedResponse_ProductionEvalDefinition_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ProductionEvalDefinition"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SchedulingRuleSetResponse] */
-        PaginatedResponse_SchedulingRuleSetResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SchedulingRuleSetResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ServiceResponse] */
-        PaginatedResponse_ServiceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ServiceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SimulationCaseResponse] */
-        PaginatedResponse_SimulationCaseResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SimulationCaseResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SkillResponse] */
-        PaginatedResponse_SkillResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SkillResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SourceEventItem] */
-        PaginatedResponse_SourceEventItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SourceEventItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SurfaceResponse] */
-        PaginatedResponse_SurfaceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SurfaceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[TriggerResponse] */
-        PaginatedResponse_TriggerResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["TriggerResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[TriggerRunResponse] */
-        PaginatedResponse_TriggerRunResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["TriggerRunResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[WorkspaceResponse] */
-        PaginatedResponse_WorkspaceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["WorkspaceResponse"][];
             /** Total */
             total?: number | null;
         };
@@ -20543,6 +20313,15 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** ProductionEvalDefinitionListResponse */
+        ProductionEvalDefinitionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ProductionEvalDefinition"][];
+        };
         /**
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
@@ -20928,6 +20707,11 @@ export interface components {
             noise_reduction?: ("near_field" | "far_field" | "off") | null;
             /** Reasoning Effort */
             reasoning_effort?: ("low" | "medium" | "high") | null;
+            /**
+             * Required Tool On First Caller Turn
+             * @description Force one named function on the first caller-generated response, excluding the inbound greeting, then restore automatic tool choice. Runtime accepts this only for source_override='test' sessions and tools that the executor verifies are read-only or side-effect-free.
+             */
+            required_tool_on_first_caller_turn?: string | null;
             /** Speed */
             speed?: number | null;
             transcription?: components["schemas"]["RealtimeTranscriptionConfig"] | null;
@@ -21584,6 +21368,15 @@ export interface components {
              */
             total_items?: number;
         };
+        /** ReviewQueueListResponse */
+        ReviewQueueListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SurfaceResponse"][];
+        };
         /** ReviewSubmittedEvent */
         ReviewSubmittedEvent: {
             /**
@@ -22157,6 +21950,15 @@ export interface components {
              */
             role?: string;
         };
+        /** SchedulingRuleSetListResponse */
+        SchedulingRuleSetListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SchedulingRuleSetResponse"][];
+        };
         /**
          * SchedulingRuleSetResponse
          * @description Wire shape for a single rule set. ``params`` stays as ``dict``
@@ -22377,6 +22179,15 @@ export interface components {
              * @default true
              */
             warm_transfer?: boolean;
+        };
+        /** ServiceListResponse */
+        ServiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ServiceResponse"][];
         };
         /** ServiceResponse */
         ServiceResponse: {
@@ -23248,6 +23059,15 @@ export interface components {
             /** Patient Entity Id */
             patient_entity_id?: string | null;
         };
+        /** SimulationCaseListResponse */
+        SimulationCaseListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SimulationCaseResponse"][];
+        };
         /** SimulationCaseMetricEval */
         SimulationCaseMetricEval: {
             /** Expected */
@@ -23940,6 +23760,15 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** SkillListResponse */
+        SkillListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SkillResponse"][];
+        };
         /** SkillReferencesResponse */
         SkillReferencesResponse: {
             /** Context Graph References */
@@ -24075,6 +23904,15 @@ export interface components {
             source: string;
             /** Source System */
             source_system?: string | null;
+        };
+        /** SourceEventListResponse */
+        SourceEventListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SourceEventItem"][];
         };
         /** SourceFailureItem */
         SourceFailureItem: {
@@ -24823,6 +24661,15 @@ export interface components {
              * Format: uuid
              */
             surface_id: string;
+        };
+        /** SurfaceListResponse */
+        SurfaceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SurfaceResponse"][];
         };
         /** SurfaceOpenedEvent */
         SurfaceOpenedEvent: {
@@ -26518,6 +26365,15 @@ export interface components {
             /** Trigger Name */
             trigger_name: string;
         };
+        /** TriggerListResponse */
+        TriggerListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["TriggerResponse"][];
+        };
         /** TriggerResponse */
         TriggerResponse: {
             /**
@@ -26600,6 +26456,15 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** TriggerRunListResponse */
+        TriggerRunListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["TriggerRunResponse"][];
         };
         /** TriggerRunResponse */
         TriggerRunResponse: {
@@ -27678,48 +27543,6 @@ export interface components {
              */
             value: number;
         };
-        /** UseCaseListResponse */
-        UseCaseListResponse: {
-            /** Items */
-            items: components["schemas"]["UseCaseResponse"][];
-        };
-        /** UseCaseResponse */
-        UseCaseResponse: {
-            /** Accepts Cold Inbound */
-            accepts_cold_inbound?: boolean | null;
-            /** Channel */
-            channel: string;
-            /** Configuration Set Name */
-            configuration_set_name?: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Description */
-            description: string | null;
-            /** Email Type */
-            email_type?: string | null;
-            /** Entity Name */
-            entity_name: string;
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Sender Email Address */
-            sender_email_address?: string | null;
-            /** Setup Id */
-            setup_id: string;
-            /** Tier */
-            tier?: string | null;
-            /** Unsubscribable */
-            unsubscribable?: boolean | null;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
             /**
@@ -28266,6 +28089,24 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** WorkspaceInvoiceListResponse */
+        WorkspaceInvoiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["InvoiceItem"][];
+        };
+        /** WorkspaceListResponse */
+        WorkspaceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["WorkspaceResponse"][];
+        };
         /** WorkspaceMemberAddedEvent */
         WorkspaceMemberAddedEvent: {
             /**
@@ -28454,6 +28295,8 @@ export interface components {
         };
         /** @enum {string} */
         _Access: "read" | "write";
+        /** @enum {string} */
+        _AgentSortField: "name" | "created_at" | "updated_at";
         _DatasetSlug: string;
         /** @enum {string} */
         _DatasetUpdateStatus: "checking_drive" | "preparing" | "publishing" | "completed" | "needs_review" | "failed";
@@ -28474,6 +28317,8 @@ export interface components {
         _FileType: string;
         /** @enum {string} */
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
+        /** @enum {string} */
+        _SourceEventSortField: "ingested_at" | "event_type" | "confidence";
         _ToolMockKey: string;
         _ToolMockValue: string;
         _VolumePath: string;
@@ -28529,6 +28374,8 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** @constant */
+        src__routes__api_keys___SortField: "created_at";
         /** AuditEventResponse */
         src__routes__audit__AuditEventResponse: {
             /**
@@ -28608,7 +28455,11 @@ export interface components {
             workspace_id: string;
         };
         /** @enum {string} */
+        src__routes__context_graphs__context_graph_crud___SortField: "name" | "created_at" | "updated_at";
+        /** @enum {string} */
         src__routes__external_identity_bindings___SortField: "created_at" | "external_subject_key";
+        /** @enum {string} */
+        src__routes__external_integrations___SortField: "created_at" | "name" | "updated_at";
         /** ListResponse */
         src__routes__external_role_assignments__ListResponse: {
             /** Continuation Token */
@@ -28640,6 +28491,8 @@ export interface components {
         };
         /** @constant */
         src__routes__external_roles___SortField: "created_at";
+        /** @constant */
+        src__routes__external_write_proposals___SortField: "created_at";
         /**
          * Request
          * @description Add a new endpoint to a REST integration (V186 flat shape).
@@ -29047,6 +28900,8 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** @constant */
+        src__routes__production_evals___SortField: "created_at";
         /** CreateRequest */
         src__routes__role_grants__CreateRequest: {
             access: components["schemas"]["_Access"];
@@ -29074,6 +28929,12 @@ export interface components {
         src__routes__role_grants___SortField: "created_at";
         /** @constant */
         src__routes__runs___SortField: "started_at";
+        /** @enum {string} */
+        src__routes__scheduling_rule_sets___SortField: "agent_kind" | "rule_kind";
+        /** @enum {string} */
+        src__routes__services___SortField: "name" | "created_at" | "updated_at";
+        /** @enum {string} */
+        src__routes__skills___SortField: "name" | "created_at" | "updated_at" | "slug";
         /**
          * Request
          * @description Create body — the authored shape of a new workspace data query.
@@ -30107,11 +29968,11 @@ export interface operations {
     "list-billing-customers": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("active" | "archived") | null;
                 /** @description Search by name or slug */
                 search?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path?: never;
@@ -30125,7 +29986,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CustomerItem_"];
+                    "application/json": components["schemas"]["CustomerListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30350,13 +30211,13 @@ export interface operations {
     "list-customer-invoices": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("draft" | "sent" | "paid" | "void") | null;
                 /** @description Filter invoices with period_start on or after */
                 date_from?: string | null;
                 /** @description Filter invoices with period_end on or before */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -30372,7 +30233,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_InvoiceItem_"];
+                    "application/json": components["schemas"]["CustomerInvoiceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30491,14 +30352,14 @@ export interface operations {
     "get-customer-usage": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter meter values with period_start on or after */
                 date_from?: string | null;
                 /** @description Filter meter values with period_end on or before */
                 date_to?: string | null;
                 /** @description Filter by meter key */
                 meter_key?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -30514,7 +30375,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_MeterValueItem_"];
+                    "application/json": components["schemas"]["CustomerUsageListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30651,7 +30512,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path?: never;
@@ -30665,7 +30526,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WorkspaceResponse_"];
+                    "application/json": components["schemas"]["WorkspaceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -31407,10 +31268,10 @@ export interface operations {
     "list-agents": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -31426,7 +31287,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AgentResponse_"];
+                    "application/json": components["schemas"]["AgentListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -31691,9 +31552,8 @@ export interface operations {
     "list-agent-versions": {
         parameters: {
             query?: {
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -31710,7 +31570,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AgentVersionResponse_"];
+                    "application/json": components["schemas"]["AgentVersionListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -32624,9 +32484,10 @@ export interface operations {
     "list-api-keys": {
         parameters: {
             query?: {
-                mine_only?: boolean;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                mine_only?: boolean;
             };
             header?: never;
             path: {
@@ -32642,7 +32503,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ApiKeyResponse_"];
+                    "application/json": components["schemas"]["ApiKeyListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -33220,13 +33081,13 @@ export interface operations {
     "list-billing-invoices": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("draft" | "sent" | "paid" | "void") | null;
                 /** @description Filter invoices with period_start on or after this date */
                 date_from?: string | null;
                 /** @description Filter invoices with period_end on or before this date */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -33242,7 +33103,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_InvoiceItem_"];
+                    "application/json": components["schemas"]["WorkspaceInvoiceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -34093,10 +33954,10 @@ export interface operations {
     "list-context_graphs": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -34112,7 +33973,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ContextGraphResponse_"];
+                    "application/json": components["schemas"]["ContextGraphListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34377,9 +34238,8 @@ export interface operations {
     "list-context_graph-versions": {
         parameters: {
             query?: {
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -34396,7 +34256,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ContextGraphVersionResponse_"];
+                    "application/json": components["schemas"]["ContextGraphVersionListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34842,9 +34702,9 @@ export interface operations {
     list_dashboards_v1__workspace_id__dashboards_get: {
         parameters: {
             query?: {
-                page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
             };
             header?: never;
             path: {
@@ -34860,7 +34720,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DashboardDefinitionResponse_"];
+                    "application/json": components["schemas"]["DashboardListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -35078,13 +34938,14 @@ export interface operations {
     "list-data-sources": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 is_active?: boolean | null;
                 /** @description Filter by source type (repeatable) */
                 source_type?: string[] | null;
                 /** @description Search by name, ID, type, or sync status */
                 search?: string | null;
-                limit?: number;
-                continuation_token?: number;
+                q?: string | null;
             };
             header?: never;
             path: {
@@ -35100,7 +34961,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DataSourceResponse_"];
+                    "application/json": components["schemas"]["DataSourceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -36009,10 +35870,10 @@ export interface operations {
     "list-external-integrations": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -36028,7 +35889,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ExternalIntegrationResponse_"];
+                    "application/json": components["schemas"]["ExternalIntegrationListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -36609,9 +36470,10 @@ export interface operations {
     "list-external-write-proposals": {
         parameters: {
             query?: {
-                status?: ("proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded") | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                status?: ("proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded") | null;
             };
             header?: never;
             path: {
@@ -36627,7 +36489,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ExternalWriteProposal_"];
+                    "application/json": components["schemas"]["ExternalWriteProposalListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40366,7 +40228,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40382,7 +40244,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OperatorResponse_"];
+                    "application/json": components["schemas"]["OperatorListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40448,12 +40310,12 @@ export interface operations {
     "list-audit-log": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by operator entity UUID. */
                 operator_id?: string | null;
                 /** @description Filter by exact operator audit event type. */
                 action?: ("operator.registered" | "operator.status_changed" | "operator.profile_updated" | "operator.joined_call" | "operator.mode_changed" | "operator.mode_switched" | "operator.left_call" | "operator.access_token_generated" | "operator.guidance_sent" | "operator.wrap_up" | "operator.viewed_transcript") | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -40469,7 +40331,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AuditEventResponse_"];
+                    "application/json": components["schemas"]["AuditLogListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40548,7 +40410,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40564,7 +40426,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_EscalationEventResponse_"];
+                    "application/json": components["schemas"]["EscalationEventListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40582,7 +40444,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40598,7 +40460,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ActiveEscalationItem_"];
+                    "application/json": components["schemas"]["ActiveEscalationListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41192,10 +41054,9 @@ export interface operations {
     "list-outbound-log": {
         parameters: {
             query?: {
-                sort_by?: string | null;
-                status?: ("pending" | "synced" | "failed") | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                status?: ("pending" | "synced" | "failed") | null;
             };
             header?: never;
             path: {
@@ -41212,7 +41073,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OutboundLogItem_"];
+                    "application/json": components["schemas"]["OutboundLogListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41312,7 +41173,9 @@ export interface operations {
     "list-source-events": {
         parameters: {
             query?: {
-                sort_by?: string | null;
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by event type */
                 event_type?: string | null;
                 /** @description Filter by entity type */
@@ -41321,8 +41184,6 @@ export interface operations {
                 date_from?: string | null;
                 /** @description Filter events ingested on or before this time */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -41339,7 +41200,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SourceEventItem_"];
+                    "application/json": components["schemas"]["SourceEventListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41526,10 +41387,11 @@ export interface operations {
     "list-production-eval-definitions": {
         parameters: {
             query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 service_id?: string | null;
                 active?: boolean | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -41545,7 +41407,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ProductionEvalDefinition_"];
+                    "application/json": components["schemas"]["ProductionEvalDefinitionListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -42496,10 +42358,11 @@ export interface operations {
     "list-scheduling-rule-sets": {
         parameters: {
             query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 agent_kind?: ("tms" | "ketamine" | "general") | null;
                 is_active?: boolean | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -42515,7 +42378,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SchedulingRuleSetResponse_"];
+                    "application/json": components["schemas"]["SchedulingRuleSetListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -42850,11 +42713,11 @@ export interface operations {
     "list-services": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
-                is_active?: boolean | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
+                is_active?: boolean | null;
             };
             header?: never;
             path: {
@@ -42870,7 +42733,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ServiceResponse_"];
+                    "application/json": components["schemas"]["ServiceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -44505,10 +44368,10 @@ export interface operations {
     "list-simulation-cases": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 service_id?: string | null;
                 tags?: string[] | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -44524,7 +44387,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SimulationCaseResponse_"];
+                    "application/json": components["schemas"]["SimulationCaseListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -45831,11 +45694,11 @@ export interface operations {
     "list-skills": {
         parameters: {
             query?: {
+                sort_by?: string[];
                 enabled?: boolean | null;
                 search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -45851,7 +45714,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SkillResponse_"];
+                    "application/json": components["schemas"]["SkillListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -46261,14 +46124,14 @@ export interface operations {
     "list-surfaces": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by entity ID */
                 entity_id?: string | null;
                 /** @description Filter by status */
                 status?: string | null;
                 /** @description Filter by channel */
                 channel?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -46284,7 +46147,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SurfaceResponse_"];
+                    "application/json": components["schemas"]["SurfaceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -46349,7 +46212,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -46365,7 +46228,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SurfaceResponse_"];
+                    "application/json": components["schemas"]["ReviewQueueListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47096,9 +46959,9 @@ export interface operations {
     "list-triggers": {
         parameters: {
             query?: {
-                is_active?: boolean | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                is_active?: boolean | null;
             };
             header?: never;
             path: {
@@ -47114,7 +46977,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TriggerResponse_"];
+                    "application/json": components["schemas"]["TriggerListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47453,7 +47316,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -47470,7 +47333,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TriggerRunResponse_"];
+                    "application/json": components["schemas"]["TriggerRunListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47488,227 +47351,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "list-use-cases": {
-        parameters: {
-            query?: {
-                entity_name?: string | null;
-                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email" | "sms" | "imessage") | null;
-                setup_id?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UseCaseListResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "list-owned-use-cases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnedUseCasesResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnershipResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "assign-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnershipResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case is owned by another workspace. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "release-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case is bound to a service; unbind it first. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };

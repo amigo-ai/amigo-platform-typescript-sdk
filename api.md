@@ -579,11 +579,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `useCases`
 
-- `list`
-- `listOwned`
-- `getOwnership`
-- `assignOwnership`
-- `releaseOwnership`
 - `getServiceBinding`
 - `bindToService`
 - `unbindFromService`
