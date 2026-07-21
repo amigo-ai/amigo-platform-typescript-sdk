@@ -173,6 +173,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getEscalations`
 - `getEscalationsAutoPaging`
 - `getActiveEscalations`
+- `getActiveEscalationsAutoPaging`
 - `getEscalationStats`
 - `getPerformance`
 - `getAccessToken`

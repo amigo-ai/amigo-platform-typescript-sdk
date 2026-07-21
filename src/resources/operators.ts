@@ -4,9 +4,19 @@ import { WorkspaceScopedResource, extractData } from './base.js'
 export type EscalationStatsParams = NonNullable<
   operations['escalation-stats']['parameters']['query']
 >
+export type ListOperatorsParams = NonNullable<operations['list-operators']['parameters']['query']>
+export type ListEscalationsParams = NonNullable<
+  operations['list-escalations']['parameters']['query']
+>
+export type ListActiveEscalationsParams = NonNullable<
+  operations['list-active-escalations']['parameters']['query']
+>
+export type ListOperatorAuditLogParams = NonNullable<
+  operations['list-audit-log']['parameters']['query']
+>
 
 export class OperatorsResource extends WorkspaceScopedResource {
-  async list(params?: { status?: string; limit?: number; offset?: number }) {
+  async list(params?: ListOperatorsParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/operators', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -14,12 +24,8 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  listAutoPaging(params?: { status?: string; limit?: number; offset?: number }) {
-    return this.iterateOffsetPaginatedList(
-      (pageParams) => this.list(pageParams),
-      (page) => page.items,
-      params,
-    )
+  listAutoPaging(params?: ListOperatorsParams) {
+    return this.iteratePaginatedList((pageParams) => this.list(pageParams), params)
   }
 
   async create(body: components['schemas']['CreateOperatorRequest']) {
@@ -65,7 +71,7 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  async getEscalations(params?: { status?: string; limit?: number; offset?: number }) {
+  async getEscalations(params?: ListEscalationsParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/operators/escalations', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -73,20 +79,20 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  getEscalationsAutoPaging(params?: { status?: string; limit?: number; offset?: number }) {
-    return this.iterateOffsetPaginatedList(
-      (pageParams) => this.getEscalations(pageParams),
-      (page) => page.items,
-      params,
+  getEscalationsAutoPaging(params?: ListEscalationsParams) {
+    return this.iteratePaginatedList((pageParams) => this.getEscalations(pageParams), params)
+  }
+
+  async getActiveEscalations(params?: ListActiveEscalationsParams) {
+    return extractData(
+      await this.client.GET('/v1/{workspace_id}/operators/escalations/active', {
+        params: { path: { workspace_id: this.workspaceId }, query: params },
+      }),
     )
   }
 
-  async getActiveEscalations() {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/operators/escalations/active', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
+  getActiveEscalationsAutoPaging(params?: ListActiveEscalationsParams) {
+    return this.iteratePaginatedList((pageParams) => this.getActiveEscalations(pageParams), params)
   }
 
   async getEscalationStats(params?: EscalationStatsParams) {
@@ -182,7 +188,7 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  async getAuditLog(params?: { limit?: number; offset?: number }) {
+  async getAuditLog(params?: ListOperatorAuditLogParams) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/operators/audit-log', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -190,11 +196,7 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  getAuditLogAutoPaging(params?: { limit?: number; offset?: number }) {
-    return this.iterateOffsetPaginatedList(
-      (pageParams) => this.getAuditLog(pageParams),
-      (page) => page.items,
-      params,
-    )
+  getAuditLogAutoPaging(params?: ListOperatorAuditLogParams) {
+    return this.iteratePaginatedList((pageParams) => this.getAuditLog(pageParams), params)
   }
 }
