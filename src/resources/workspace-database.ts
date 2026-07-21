@@ -98,7 +98,7 @@ export class WorkspaceDatabaseResource extends WorkspaceScopedResource {
 
   // -- Query tool CRUD ------------------------------------------------------
 
-  async listQueryTools(params?: ListParams) {
+  async listQueryTools(params?: ListParams<number>) {
     return extractData(
       await this.get<QueryToolList>('/v1/{workspace_id}/query-tools', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
@@ -106,7 +106,7 @@ export class WorkspaceDatabaseResource extends WorkspaceScopedResource {
     )
   }
 
-  listQueryToolsAutoPaging(params?: ListParams) {
+  listQueryToolsAutoPaging(params?: ListParams<number>) {
     return this.iteratePaginatedList((pageParams) => this.listQueryTools(pageParams), params)
   }
 

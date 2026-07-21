@@ -2,7 +2,7 @@ import type { components } from '../generated/api.js'
 import { WorkspaceScopedResource, extractData } from './base.js'
 import type { ListParams } from '../core/utils.js'
 
-export interface ListCallsParams extends ListParams {
+export interface ListCallsParams extends ListParams<number> {
   status?: string
   agent_id?: string
   start_date?: string
@@ -89,7 +89,7 @@ export class CallsResource extends WorkspaceScopedResource {
   }
 
   /** List trace analyses across calls (workspace-scoped feed) */
-  async listTraces(params?: ListParams) {
+  async listTraces(params?: ListParams<number>) {
     return extractData(
       await this.client.GET('/v1/{workspace_id}/calls/traces', {
         params: { path: { workspace_id: this.workspaceId }, query: params },
