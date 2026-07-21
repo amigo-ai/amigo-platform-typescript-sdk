@@ -4,6 +4,7 @@ import { AmigoClient } from '../../src/index.js'
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
+const continuationQueries = new Map<string, URLSearchParams[]>()
 
 const continuationPaths = new Set([
   `${BASE}/agents`,
@@ -25,6 +26,7 @@ const continuationPaths = new Set([
   `${BASE}/triggers/trigger-001/runs`,
   '/v1/workspaces',
 ])
+const numericContinuationPaths = new Set([`${BASE}/calls`])
 
 const offsetEventPaths = new Set([
   `${BASE}/audit`,
@@ -41,10 +43,15 @@ function mockFetch(): typeof globalThis.fetch {
 
     if (continuationPaths.has(pathname)) {
       const token = url.searchParams.get('continuation_token')
+      const nextToken = numericContinuationPaths.has(pathname) ? '1' : 'opaque-next-page'
+      const queries = continuationQueries.get(pathname) ?? []
+      queries.push(new URLSearchParams(url.searchParams))
+      continuationQueries.set(pathname, queries)
       return Response.json({
         items: [{ token: token ?? 'first', path: pathname }],
-        has_more: token !== '1',
-        continuation_token: token === '1' ? null : 1,
+        has_more: token !== nextToken,
+        continuation_token:
+          token === nextToken ? null : numericContinuationPaths.has(pathname) ? 1 : nextToken,
       })
     }
 
@@ -91,6 +98,7 @@ describe('resource auto-pagination helpers', () => {
   })
 
   it('iterates continuation-token list helpers', async () => {
+    continuationQueries.clear()
     const counts = await Promise.all([
       countItems(client.actions.listAutoPaging({ limit: 1 })),
       countItems(client.agents.listAutoPaging({ limit: 1 })),
@@ -114,6 +122,18 @@ describe('resource auto-pagination helpers', () => {
     ])
 
     expect(counts).toEqual(new Array(counts.length).fill(2))
+    for (const path of continuationPaths) {
+      const queries = continuationQueries.get(path) ?? []
+      const nextPageQueries = queries.filter((query) => query.has('continuation_token'))
+      expect(queries.length).toBeGreaterThanOrEqual(2)
+      expect(nextPageQueries).toHaveLength(queries.length / 2)
+      for (const query of nextPageQueries) {
+        expect(query.get('continuation_token')).toBe(
+          numericContinuationPaths.has(path) ? '1' : 'opaque-next-page',
+        )
+      }
+      expect(queries.every((query) => !query.has('offset'))).toBe(true)
+    }
   })
 
   it('iterates offset-based list helpers', async () => {

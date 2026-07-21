@@ -37,6 +37,7 @@ void client.operators.list({ offset: 1 })
 client.calls.list().then((page) => {
   void (page.continuation_token satisfies number | null | undefined)
 })
+void client.calls.list({ continuation_token: 0 })
 
 // @ts-expect-error Call pagination uses a numeric offset cursor.
 void client.calls.list({ continuation_token: 'opaque-token' })
