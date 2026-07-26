@@ -94,7 +94,7 @@ jobs:
 
       - name: Checkout code with release push token
         if: steps.push_credentials.outputs.has_release_push_token == 'true'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           # Full history/tags let the publish handoff verify the release tag SHA.
@@ -103,7 +103,7 @@ jobs:
 
       - name: Checkout code with GitHub token
         if: steps.push_credentials.outputs.has_release_push_token != 'true'
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           # Full history/tags let the publish handoff verify the release tag SHA.
@@ -111,7 +111,7 @@ jobs:
           token: ${{ github.token }}
 
       - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: '24'
           cache: 'npm'
