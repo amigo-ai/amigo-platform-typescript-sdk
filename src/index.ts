@@ -84,7 +84,6 @@ import { SurfacesResource } from './resources/surfaces.js'
 import { SessionsResource } from './resources/sessions.js'
 import { WorkspaceDatabaseResource } from './resources/workspace-database.js'
 import { WorkspaceDataQueriesResource } from './resources/workspace-data-queries.js'
-import { UseCasesResource } from './resources/use-cases.js'
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
@@ -262,8 +261,6 @@ export class AmigoClient {
   readonly workspaceDatabase!: WorkspaceDatabaseResource
   /** Workspace data queries — Lakebase-backed query tool registry */
   readonly workspaceDataQueries!: WorkspaceDataQueriesResource
-  /** Channel use cases and service bindings */
-  readonly useCases!: UseCasesResource
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
@@ -514,7 +511,6 @@ export class AmigoClient {
     mutable.sessions = new SessionsResource(client, workspaceId)
     mutable.workspaceDatabase = new WorkspaceDatabaseResource(client, workspaceId)
     mutable.workspaceDataQueries = new WorkspaceDataQueriesResource(client, workspaceId)
-    mutable.useCases = new UseCasesResource(client, workspaceId)
   }
 
   private async resolveApiRequest<
@@ -759,17 +755,6 @@ export type {
   WorkspaceDataQueryListItem,
   WorkspaceDataQueryListResponse,
 } from './resources/workspace-data-queries.js'
-
-export { UseCasesResource } from './resources/use-cases.js'
-export type {
-  BindUseCaseServiceRequest,
-  ListUseCasesParams,
-  UseCase,
-  OwnedUseCasesResponse,
-  UseCaseListResponse,
-  UseCaseOwnership,
-  UseCaseServiceBinding,
-} from './resources/use-cases.js'
 
 export type CallSummary = components['schemas']['CallSummary']
 export type CallDetail = components['schemas']['CallDetailResponse']

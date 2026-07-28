@@ -92,8 +92,10 @@ describe('resource surface smoke tests', () => {
     await client.audit.getSummary({ date_from: '2026-01-01', date_to: '2026-01-31' })
     await client.audit.getPhiAccess({ limit: 5 })
     await client.audit.createExport(EMPTY_BODY)
-    await client.audit.listExports()
+    await client.audit.getExport('statement-001')
     await client.audit.getEntityAccessLog('entity-001', { limit: 5 })
+    await client.audit.listMyAuditEvents({ limit: 5 })
+    await client.audit.listPlatformAuditEvents({ limit: 5 })
 
     await client.compliance.getDashboard()
     await client.compliance.getHipaa({ report_period_days: 30 })

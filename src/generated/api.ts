@@ -1,3 +1,6 @@
+type JsonValue = boolean | number | string | JsonValue[] | {
+    [key: string]: JsonValue;
+} | null;
 export interface paths {
     "/s/f/{surface_id}": {
         parameters: {
@@ -258,6 +261,56 @@ export interface paths {
         };
         /** Get Link Info */
         get: operations["get-intake-link-info"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/audit-log/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List My Audit Events
+         * @description List the authenticated caller's own audit events across every workspace.
+         *
+         *     Any authenticated caller may read their OWN trail — deliberately no
+         *     ``Audit.view`` gate. ``actor_entity_id`` is server-set to the caller's entity
+         *     and is NEVER accepted from the client, so the ``workspace_id=None`` query can
+         *     only ever return the caller's own events (safe cross-workspace).
+         */
+        get: operations["list-my-audit-events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/audit-log/platform": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Platform Audit Events
+         * @description Cross-workspace + null-workspace audit read — platform administrators only.
+         *
+         *     The surface for cross-workspace and null-workspace events (login /
+         *     token-theft events carry no workspace). Gated strictly on the global
+         *     ``platform:admin`` scope carried by an identity JWT; every other caller —
+         *     including a workspace owner/admin — is rejected with 403.
+         */
+        get: operations["list-audit-events-platform"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1442,10 +1495,12 @@ export interface paths {
         put?: never;
         /**
          * Create Audit Export
-         * @description Export audit events to the UC Volume as NDJSON.
+         * @description Submit an async audit-events export.
          *
-         *     Returns a platform-api proxy download path (UC Volumes have no presigned
-         *     URLs — ``download_audit_export`` streams the bytes).
+         *     Runs the filtered query on the SQL warehouse with results staged to
+         *     presigned CSV EXTERNAL_LINKS, and returns a Databricks ``statement_id``.
+         *     Poll ``GET /export/{statement_id}`` for the download links. Nothing is
+         *     materialized in platform-api, so the export scales to large date windows.
          *
          *     Permissions: admin, owner
          */
@@ -1456,7 +1511,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/audit/exports": {
+    "/v1/{workspace_id}/audit/export/{statement_id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -1464,40 +1519,18 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * List Audit Exports
-         * @description List past audit exports with platform-api proxy download paths.
+         * Get Audit Export
+         * @description Poll a submitted audit export and return presigned CSV download links.
          *
-         *     Permissions: admin, owner
+         *     ``status`` is ``pending`` until the statement finishes, then ``ready`` with
+         *     ``chunks`` carrying short-lived presigned URLs the client downloads
+         *     directly from object storage. The links expire quickly (~15 min) — re-poll
+         *     to refresh. The workspace scope was fixed into the statement at submit
+         *     time; ``statement_id`` is an unguessable, short-lived capability.
+         *
+         *     Permissions: admin, owner (``Audit.export`` — same gate as create).
          */
-        get: operations["list-audit-exports"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/audit/exports/download/{filename}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download Audit Export
-         * @description Proxy-download an audit export artifact (NDJSON) from the UC Volume.
-         *
-         *     ``filename`` must be a bare export filename (``{export_id}.ndjson``);
-         *     path separators and traversal sequences are rejected with 422. The volume
-         *     key is reconstructed server-side as ``exports/{workspace_id}/{filename}``,
-         *     so a caller can never reach outside its own workspace prefix. The bytes
-         *     are streamed volume→client without buffering the artifact in memory.
-         *
-         *     Permissions: admin, owner (``Audit.export`` — same gate as create/list).
-         */
-        get: operations["download-audit-export"];
+        get: operations["get-audit-export"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1982,7 +2015,7 @@ export interface paths {
          *     Lists all API key credentials with role, status, and activity dates.
          *     Download, review, and upload signed attestation for SOC2 compliance.
          *
-         *     Permissions: admin, owner.
+         *     Permissions: admin, owner (``Audit.view``).
          */
         get: operations["get-access-review"];
         put?: never;
@@ -2006,7 +2039,7 @@ export interface paths {
          *
          *     Aggregates compliance signals into a single dashboard view.
          *
-         *     Permissions: admin, owner.
+         *     Permissions: admin, owner (``Audit.view``).
          */
         get: operations["get-compliance-dashboard"];
         put?: never;
@@ -2032,7 +2065,7 @@ export interface paths {
          *     and API key summary for the specified period. Identity-specific
          *     fields (MFA, SSO, lockout) return null pending integration.
          *
-         *     Permissions: admin, owner.
+         *     Permissions: admin, owner (``Audit.view``).
          */
         get: operations["get-hipaa-report"];
         put?: never;
@@ -2268,6 +2301,23 @@ export interface paths {
          * @description Streaming variant of `POST /turns`. Always returns `text/event-stream` regardless of the `Accept` header — no JSON fallback. Each frame is a `TurnStreamEvent` discriminated by the `event` field (token, tool_call_started, tool_call_completed, thinking, message, done, error). Use this endpoint for new integrations; the `Accept`-sniffing variant remains for backward compatibility.
          */
         post: operations["create_turn_stream_v1__workspace_id__conversations__conversation_id__turns_stream_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/conversations/{conversation_id}/turns/{delivery_id}/ack": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Acknowledge a rendered background turn delivery */
+        post: operations["acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2570,6 +2620,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/external-auth-claim-mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Claim Mappings */
+        get: operations["list-external-auth-claim-mappings"];
+        put?: never;
+        /** Create Claim Mapping */
+        post: operations["create-external-auth-claim-mapping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-auth-claim-mappings/resolve-preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve Preview Claim Mappings
+         * @description Dry-run the SAME resolver the per-turn path uses — read-only, never writes.
+         *
+         *     Returns the mapped internal roles (id + name), the effective unioned active role
+         *     grants, and the count of unmapped input atoms. Requires ``Workspace.view``.
+         */
+        post: operations["resolve-preview-external-auth-claim-mappings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-auth-claim-mappings/{mapping_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Claim Mapping */
+        get: operations["get-external-auth-claim-mapping"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/external-auth-claim-mappings/{mapping_id}/supersede": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Supersede Claim Mapping
+         * @description Supersede an active mapping (immutable history) — flip active → superseded.
+         *
+         *     POST verb (not DELETE): the row persists and the superseded item is returned so
+         *     the caller sees the final state. 404 if there is no active row for the id.
+         */
+        post: operations["supersede-external-auth-claim-mapping"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/external-identity-bindings": {
         parameters: {
             query?: never;
@@ -2835,6 +2966,26 @@ export interface paths {
         put?: never;
         /** Reject External Write Proposal */
         post: operations["reject-external-write-proposal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/fhir/build-bundle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build a FHIR Patient Bundle from user records
+         * @description Expand a flat list of user records (external_id / email / name) into a FHIR collection Bundle, ready to POST to /fhir/import under its `bundle` field. Pure transformation — does NOT import; no entities or events are created. Every Patient gets an MR identifier (external_id when present, else a deterministic derived id — never the raw email) so a later import resolves a stable canonical_id and re-imports stay idempotent at the entity level; external_id also becomes the resource id when spec-valid.
+         */
+        post: operations["fhir-build-user-bundle"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5083,7 +5234,7 @@ export interface paths {
          *
          *     **Pagination**: peek-ahead — ``has_more`` is true when more rows exist; use ``next_offset`` to fetch the next page.
          *
-         *     **Auth**: admin or owner role required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.
+         *     **Auth**: `Audit:View` permission required. Reads are audit-logged (``prompt_logs.queried``); responses can include PHI from prompt history.
          */
         get: operations["list-prompt-logs"];
         put?: never;
@@ -6091,6 +6242,30 @@ export interface paths {
          *     Permissions: admin, owner (``Workspace.update``).
          */
         put: operations["update-retention-policy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/settings/topic-modeling": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get conversation topic analytics exposure
+         * @description Return the durable desired state for customer topic analytics.
+         */
+        get: operations["get-topic-modeling-settings"];
+        /**
+         * Enable or disable conversation topic analytics exposure
+         * @description Set desired exposure and schedule idempotent Databricks reconciliation.
+         */
+        put: operations["update-topic-modeling-settings"];
         post?: never;
         delete?: never;
         options?: never;
@@ -7260,7 +7435,7 @@ export interface paths {
         put?: never;
         /**
          * Export gen_ai.* + voice.* traces as OTLP/JSON
-         * @description Export the workspace's durable trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans: ``gen_ai.*`` tool-call spans and the per-call voice-isolation ``voice.*`` infra spans (allocate / media-attach / reap). Read-only; admin/owner role required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call + infra metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
+         * @description Export the workspace's durable trace spans over a time window as OpenTelemetry Protocol (OTLP/HTTP JSON) spans: ``gen_ai.*`` tool-call spans and the per-call voice-isolation ``voice.*`` infra spans (allocate / media-attach / reap). Read-only; `Audit:View` permission required; dark behind ``OTEL_TRACE_EXPORT_ENABLED`` (404 when off). Paginated PULL API — extract ``.resourceSpans`` before forwarding to an OTLP collector. Attributes are an allowlist of tool-call + infra metadata; the raw tool-result ``error`` text is NOT exported (PHI-safe by construction).
          */
         post: operations["export_traces_v1__workspace_id__traces_export_post"];
         delete?: never;
@@ -7377,74 +7552,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/use-cases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List channel use cases
-         * @description List use cases with optional filters by entity_name, channel, setup_id. Requires Channel.view permission.
-         */
-        get: operations["list-use-cases"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/use-cases/ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List use cases this workspace owns
-         * @description Return the ids of the channel-manager use cases this workspace owns. Requires Channel.view permission.
-         */
-        get: operations["list-owned-use-cases"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/use-cases/{use_case_id}/ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Check whether this workspace owns a use case
-         * @description Return the ownership record if the current workspace owns the use case, or 404 if it does not (no existence leak). Requires Channel.view permission.
-         */
-        get: operations["get-use-case-ownership"];
-        /**
-         * Assign ownership of a use case to this workspace
-         * @description Claim ownership of a channel-manager use case for the current workspace. Idempotent — re-assigning an already-owned use case returns 200. 404 if the use case does not exist in channel-manager. 409 if the use case is already owned by another workspace. Requires Channel.ManageOwnership permission (admin tier).
-         */
-        put: operations["assign-use-case-ownership"];
-        post?: never;
-        /**
-         * Release this workspace's ownership of a use case
-         * @description Release the current workspace's ownership of a use case. Refuses (409) while any service still binds the use case — call DELETE `/use-cases/{id}/service-binding` first. 404 if this workspace does not own the use case. Requires Channel.ManageOwnership permission (admin tier).
-         */
-        delete: operations["release-use-case-ownership"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
         parameters: {
             query?: never;
@@ -7459,7 +7566,7 @@ export interface paths {
         get: operations["get-use-case-service-binding"];
         /**
          * Bind a use case to a platform service
-         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or belongs to another workspace. Requires Channel.create permission.
+         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.
          */
         put: operations["bind-use-case-to-service"];
         post?: never;
@@ -8264,6 +8371,15 @@ export interface components {
              */
             wait_seconds?: number | null;
         };
+        /** ActiveEscalationListResponse */
+        ActiveEscalationListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ActiveEscalationItem"][];
+        };
         /** ActiveSession */
         ActiveSession: {
             /** Call Sid */
@@ -8531,6 +8647,15 @@ export interface components {
              */
             role?: string;
         };
+        /** AgentListResponse */
+        AgentListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentResponse"][];
+        };
         /** AgentResponse */
         AgentResponse: {
             /**
@@ -8691,6 +8816,15 @@ export interface components {
             version: number;
             voice_config?: components["schemas"]["VoiceConfig"] | null;
         };
+        /** AgentVersionListResponse */
+        AgentVersionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["AgentVersionResponse"][];
+        };
         /** AgentVersionResponse */
         AgentVersionResponse: {
             /**
@@ -8841,6 +8975,15 @@ export interface components {
         AnyValue: {
             [key: string]: unknown;
         };
+        /** ApiKeyListResponse */
+        ApiKeyListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ApiKeyResponse"][];
+        };
         /** ApiKeyResponse */
         ApiKeyResponse: {
             /**
@@ -8932,21 +9075,24 @@ export interface components {
             /** Total */
             total: number;
         };
-        /** AuditExportListItem */
-        AuditExportListItem: {
-            /** Download Url */
-            download_url?: string | null;
-            /** Key */
-            key: string;
-            /** Last Modified */
-            last_modified?: string | null;
-            /** Size */
-            size: number;
-        };
-        /** AuditExportListResponse */
-        AuditExportListResponse: {
-            /** Exports */
-            exports: components["schemas"]["AuditExportListItem"][];
+        /** AuditExportChunk */
+        AuditExportChunk: {
+            /** Byte Count */
+            byte_count: number;
+            /** Chunk Index */
+            chunk_index: number;
+            /**
+             * Expiration
+             * @description ISO-8601 expiry of the presigned link.
+             */
+            expiration?: string | null;
+            /**
+             * External Link
+             * @description Short-lived presigned URL — download directly, do not proxy.
+             */
+            external_link: string;
+            /** Row Count */
+            row_count: number;
         };
         /** AuditExportRequest */
         AuditExportRequest: {
@@ -8976,18 +9122,50 @@ export interface components {
              */
             service?: string | null;
         };
-        /** AuditExportResponse */
-        AuditExportResponse: {
-            /** Created At */
-            created_at: string;
-            /** Download Url */
-            download_url: string;
-            /** Export Id */
-            export_id: string;
-            /** Row Count */
-            row_count: number;
-            /** S3 Key */
-            s3_key: string;
+        /** AuditExportResultResponse */
+        AuditExportResultResponse: {
+            /** Chunks */
+            chunks?: components["schemas"]["AuditExportChunk"][];
+            /**
+             * Result Format
+             * @description Result file format (CSV).
+             */
+            result_format?: string | null;
+            /** Statement Id */
+            statement_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "ready";
+            /**
+             * Total Row Count
+             * @default 0
+             */
+            total_row_count?: number;
+        };
+        /** AuditExportSubmitResponse */
+        AuditExportSubmitResponse: {
+            /**
+             * Statement Id
+             * @description Databricks statement handle — poll GET /export/{statement_id} for links.
+             */
+            statement_id: string;
+            /**
+             * Status
+             * @description pending: still running. ready: links available immediately.
+             * @enum {string}
+             */
+            status: "pending" | "ready";
+        };
+        /** AuditLogListResponse */
+        AuditLogListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["src__routes__operators_models__AuditEventResponse"][];
         };
         /** AuditSummary */
         AuditSummary: {
@@ -9126,7 +9304,11 @@ export interface components {
          *     timeout for large batches). Authenticated by the same short-lived
          *     workspace-scoped token as the status write-back. ``document_processing`` is
          *     dataset-wide (the contract); ``file_type`` is per-file (V265 multi-type).
-         *     Filenames are deliberately absent — PHI stays on the Lakebase row.
+         *
+         *     Source provenance mirrors the single-file path (resolve_source_identity, PHI
+         *     gate): source_file_id/source_url (opaque ids) always populate; source_folder_path
+         *     + filename (operator-named free text) populate ONLY for contains_phi=false
+         *     datasets — otherwise they stay None, so PHI never leaves the Lakebase row.
          */
         BatchProcessingManifest: {
             /** Document Processing */
@@ -10568,6 +10750,51 @@ export interface components {
              */
             message: string;
         };
+        /** ClaimMappingItem */
+        ClaimMappingItem: {
+            /** Changed By */
+            changed_by?: string | null;
+            /** Claim Key */
+            claim_key: string;
+            /** Claim Namespace */
+            claim_namespace: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * External Role Id
+             * Format: uuid
+             */
+            external_role_id: string;
+            /** External Value */
+            external_value: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "superseded";
+        };
+        /**
+         * ClientArtifact
+         * @description A versioned JSON payload that a client can render as a product component.
+         */
+        ClientArtifact: {
+            payload: components["schemas"]["ClientArtifactPayload"];
+            /** Schema Version */
+            schema_version: string;
+            /** Type */
+            type: string;
+        };
+        ClientArtifactPayload: {
+            [key: string]: components["schemas"]["JsonValue"];
+        } | components["schemas"]["JsonValue"][];
         /**
          * ClientConfigResponse
          * @description Client-safe configuration values.
@@ -10579,6 +10806,33 @@ export interface components {
         ClientConfigResponse: {
             /** Google Maps Api Key */
             google_maps_api_key?: string | null;
+        };
+        /**
+         * ClientOutputConfig
+         * @description External-user-safe projection contract for a direct integration endpoint.
+         *
+         *     The endpoint's existing ``response_template`` performs the projection. With no
+         *     template, the parsed upstream JSON body is emitted unchanged.
+         */
+        ClientOutputConfig: {
+            /**
+             * External User Enabled
+             * @default false
+             */
+            external_user_enabled?: boolean;
+            /** Json Schema */
+            json_schema: {
+                [key: string]: unknown;
+            };
+            /**
+             * Max Bytes
+             * @default 262144
+             */
+            max_bytes?: number;
+            /** Schema Version */
+            schema_version: string;
+            /** Type */
+            type: string;
         };
         /**
          * ClinicOpenHoursParams
@@ -11111,6 +11365,15 @@ export interface components {
             /** Url */
             url?: string | null;
         };
+        /** ContextGraphListResponse */
+        ContextGraphListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ContextGraphResponse"][];
+        };
         /** ContextGraphResponse */
         ContextGraphResponse: {
             /**
@@ -11198,6 +11461,15 @@ export interface components {
             updated_at?: string | null;
             /** Version */
             version: number;
+        };
+        /** ContextGraphVersionListResponse */
+        ContextGraphVersionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ContextGraphVersionResponse"][];
         };
         /** ContextGraphVersionResponse */
         ContextGraphVersionResponse: {
@@ -11552,6 +11824,12 @@ export interface components {
         };
         /** ConversationTurn */
         ConversationTurn: {
+            /**
+             * Artifacts
+             * @description Validated client-safe outputs produced during this agent turn.
+             * @default []
+             */
+            artifacts?: components["schemas"]["ClientArtifact"][];
             /**
              * Available Actions
              * @description Action choices available in the turn's resolved context-graph state. Empty when actions cannot be resolved or the resolved state is not an action state.
@@ -12625,6 +12903,15 @@ export interface components {
              */
             state?: string;
         };
+        /** CustomerInvoiceListResponse */
+        CustomerInvoiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["InvoiceItem"][];
+        };
         /** CustomerItem */
         CustomerItem: {
             /** @description Billing address */
@@ -12675,6 +12962,24 @@ export interface components {
              * @description When the customer was last updated (ISO-8601)
              */
             updated_at: string | null;
+        };
+        /** CustomerListResponse */
+        CustomerListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["CustomerItem"][];
+        };
+        /** CustomerUsageListResponse */
+        CustomerUsageListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["MeterValueItem"][];
         };
         /**
          * DailyCallStat
@@ -12791,6 +13096,15 @@ export interface components {
             dashboard_id: string;
             /** Results */
             results: components["schemas"]["PanelResultResponse"][];
+        };
+        /** DashboardListResponse */
+        DashboardListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DashboardDefinitionResponse"][];
         };
         /** DashboardResponse */
         DashboardResponse: {
@@ -13019,6 +13333,15 @@ export interface components {
             items: {
                 [key: string]: unknown;
             }[];
+        };
+        /** DataSourceListResponse */
+        DataSourceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["DataSourceResponse"][];
         };
         /** DataSourceResponse */
         DataSourceResponse: {
@@ -13494,6 +13817,11 @@ export interface components {
          *     which can be renamed/moved). One folder maps to exactly one dataset.
          */
         DriveFolderMapping: {
+            /**
+             * Contains Phi
+             * @default true
+             */
+            contains_phi?: boolean;
             /** Dataset */
             dataset: string;
             /** Folder Id */
@@ -13544,6 +13872,13 @@ export interface components {
              * @enum {string}
              */
             status: "evaluated" | "skipped_over_cap";
+        };
+        /** EffectiveGrant */
+        EffectiveGrant: {
+            access: components["schemas"]["_Access"];
+            /** Resource Key */
+            resource_key: string;
+            resource_type: components["schemas"]["_ResourceType"];
         };
         /** EgressIpsResponse */
         EgressIpsResponse: {
@@ -13816,6 +14151,8 @@ export interface components {
              * @enum {string}
              */
             body_format?: "json" | "form";
+            /** @description Opt-in typed artifact contract for external-user conversation delivery. */
+            client_output?: components["schemas"]["ClientOutputConfig"] | null;
             /**
              * Description
              * @description LLM-facing description.
@@ -14680,6 +15017,15 @@ export interface components {
              */
             requested?: number;
         };
+        /** EscalationEventListResponse */
+        EscalationEventListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["EscalationEventResponse"][];
+        };
         /** EscalationEventResponse */
         EscalationEventResponse: {
             /**
@@ -15053,6 +15399,23 @@ export interface components {
              */
             recommend_candidates?: number;
         };
+        /**
+         * ExternalAuthClaim
+         * @description One normalized customer assertion: the exact tuple ``(namespace, key, value)``.
+         *
+         *     ``value`` is preserved byte-for-byte (bounded length only) — Amigo does not
+         *     lowercase, alias, or rewrite it. ``namespace`` and ``key`` are bounded canonical
+         *     identifiers. Arrays, objects, numbers, booleans, and null are rejected for every
+         *     field (v1 values are non-empty strings).
+         */
+        ExternalAuthClaim: {
+            /** Key */
+            key: string;
+            /** Namespace */
+            namespace: string;
+            /** Value */
+            value: string;
+        };
         /** ExternalIdentityBindingItem */
         ExternalIdentityBindingItem: {
             /**
@@ -15145,6 +15508,15 @@ export interface components {
             /** Client Secret */
             client_secret: string;
             credential: components["schemas"]["ExternalIntegrationCredentialResponse"];
+        };
+        /** ExternalIntegrationListResponse */
+        ExternalIntegrationListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalIntegrationResponse"][];
         };
         /** ExternalIntegrationRequest */
         ExternalIntegrationRequest: {
@@ -15347,6 +15719,15 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** ExternalWriteProposalListResponse */
+        ExternalWriteProposalListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ExternalWriteProposal"][];
+        };
         /**
          * FailureClass
          * @description Why a tool result is a failure — produced by the executor at RUN time.
@@ -15455,6 +15836,33 @@ export interface components {
             start?: string | null;
             /** Status */
             status?: string | null;
+        };
+        /**
+         * FhirBuildBundleRequest
+         * @description Request body for ``POST /fhir/build-bundle``.
+         *
+         *     Bundle building is a pure transformation, so this carries only the user
+         *     rows — provenance/dedup options (``source``, ``dedup``, …) belong to the
+         *     downstream ``POST /fhir/import`` call, not to bundle construction.
+         */
+        FhirBuildBundleRequest: {
+            /** Users */
+            users: components["schemas"]["FhirPatientUser"][];
+        };
+        /**
+         * FhirBundleResponse
+         * @description Response for ``POST /fhir/build-bundle`` — the built FHIR Bundle.
+         *
+         *     ``bundle`` is the exact value ``POST /fhir/import`` expects nested under its
+         *     ``bundle`` field; ``patient_count`` echoes how many Patients were built.
+         */
+        FhirBundleResponse: {
+            /** Bundle */
+            bundle: {
+                [key: string]: unknown;
+            };
+            /** Patient Count */
+            patient_count: number;
         };
         /** FhirImportRequest */
         FhirImportRequest: {
@@ -15661,6 +16069,38 @@ export interface components {
             patients: components["schemas"]["FhirPatientView"][];
             /** Total */
             total: number;
+        };
+        /**
+         * FhirPatientUser
+         * @description One caller-friendly user row for ``POST /fhir/build-bundle``.
+         *
+         *     A flat identity shape (email / name / external id) that the server expands
+         *     into a FHIR Patient resource, so integrators onboarding users don't have to
+         *     hand-author FHIR. ``external_id`` becomes the Patient MR identifier (and,
+         *     when spec-valid, the FHIR resource id) — the anchor a later import uses for
+         *     the entity's canonical id / source-system binding (e.g. the FAM user UUID).
+         *     Supply either ``name`` (full) or ``first_name`` / ``last_name``.
+         */
+        FhirPatientUser: {
+            /**
+             * Email
+             * @description Validated email; becomes an email telecom on the Patient.
+             */
+            email?: string | null;
+            /**
+             * External Id
+             * @description Stable source-system id (e.g. FAM user UUID). Becomes the Patient MR identifier and, when it satisfies the FHIR id grammar, the resource id. Capped at 64 to match the FHIR Resource.id length.
+             */
+            external_id?: string | null;
+            /** First Name */
+            first_name?: string | null;
+            /** Last Name */
+            last_name?: string | null;
+            /**
+             * Name
+             * @description Full name; used when first_name/last_name are not supplied.
+             */
+            name?: string | null;
         };
         /** FhirPatientView */
         FhirPatientView: {
@@ -15990,14 +16430,22 @@ export interface components {
             file_id: string;
             /** File Type */
             file_type: string;
+            /** Filename */
+            filename?: string | null;
             /** Ingested At */
             ingested_at: string;
             /** Sha256 */
             sha256: string;
             /** Size Bytes */
             size_bytes: number;
+            /** Source File Id */
+            source_file_id?: string | null;
+            /** Source Folder Path */
+            source_folder_path?: string | null;
             /** Source Path */
             source_path: string;
+            /** Source Url */
+            source_url?: string | null;
             /** Version */
             version: number;
         };
@@ -17371,6 +17819,7 @@ export interface components {
              */
             participant_call_sid: string;
         };
+        JsonValue: JsonValue;
         /**
          * KetamineBlockOverlapParams
          * @description How many days after a ketamine session to block follow-up
@@ -17744,6 +18193,16 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** MappedRole */
+        MappedRole: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
         };
         /**
          * MaterializationRow
@@ -18817,6 +19276,15 @@ export interface components {
              */
             operator_id: string;
         };
+        /** OperatorListResponse */
+        OperatorListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["OperatorResponse"][];
+        };
         /** OperatorModeChangedEvent */
         OperatorModeChangedEvent: {
             /** Call Sid */
@@ -19151,6 +19619,15 @@ export interface components {
             /** Synced At */
             synced_at?: string | null;
         };
+        /** OutboundLogListResponse */
+        OutboundLogListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["OutboundLogItem"][];
+        };
         /** OutboundSinkSummary */
         OutboundSinkSummary: {
             /**
@@ -19272,79 +19749,6 @@ export interface components {
             /** Rules */
             rules: components["schemas"]["OutreachRule"][];
         };
-        /** OwnedUseCasesResponse */
-        OwnedUseCasesResponse: {
-            /** Items */
-            items: string[];
-        };
-        /** OwnershipResponse */
-        OwnershipResponse: {
-            /**
-             * Use Case Id
-             * Format: uuid
-             */
-            use_case_id: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PaginatedResponse[ActiveEscalationItem] */
-        PaginatedResponse_ActiveEscalationItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ActiveEscalationItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AgentResponse] */
-        PaginatedResponse_AgentResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AgentVersionResponse] */
-        PaginatedResponse_AgentVersionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentVersionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ApiKeyResponse] */
-        PaginatedResponse_ApiKeyResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ApiKeyResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[AuditEventResponse] */
-        PaginatedResponse_AuditEventResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["src__routes__operators_models__AuditEventResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[BatchRow] */
         PaginatedResponse_BatchRow_: {
             /** Continuation Token */
@@ -19356,61 +19760,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[ContextGraphResponse] */
-        PaginatedResponse_ContextGraphResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ContextGraphResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ContextGraphVersionResponse] */
-        PaginatedResponse_ContextGraphVersionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ContextGraphVersionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[CustomerItem] */
-        PaginatedResponse_CustomerItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["CustomerItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[DashboardDefinitionResponse] */
-        PaginatedResponse_DashboardDefinitionResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["DashboardDefinitionResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[DataSourceResponse] */
-        PaginatedResponse_DataSourceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["DataSourceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[DatasetRow] */
         PaginatedResponse_DatasetRow_: {
             /** Continuation Token */
@@ -19419,39 +19768,6 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["DatasetRow"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[EscalationEventResponse] */
-        PaginatedResponse_EscalationEventResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["EscalationEventResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ExternalIntegrationResponse] */
-        PaginatedResponse_ExternalIntegrationResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ExternalIntegrationResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ExternalWriteProposal] */
-        PaginatedResponse_ExternalWriteProposal_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ExternalWriteProposal"][];
             /** Total */
             total?: number | null;
         };
@@ -19477,17 +19793,6 @@ export interface components {
             /** Total */
             total?: number | null;
         };
-        /** PaginatedResponse[InvoiceItem] */
-        PaginatedResponse_InvoiceItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["InvoiceItem"][];
-            /** Total */
-            total?: number | null;
-        };
         /** PaginatedResponse[MaterializationRow] */
         PaginatedResponse_MaterializationRow_: {
             /** Continuation Token */
@@ -19496,149 +19801,6 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["MaterializationRow"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[MeterValueItem] */
-        PaginatedResponse_MeterValueItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["MeterValueItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[OperatorResponse] */
-        PaginatedResponse_OperatorResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["OperatorResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[OutboundLogItem] */
-        PaginatedResponse_OutboundLogItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["OutboundLogItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ProductionEvalDefinition] */
-        PaginatedResponse_ProductionEvalDefinition_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ProductionEvalDefinition"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SchedulingRuleSetResponse] */
-        PaginatedResponse_SchedulingRuleSetResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SchedulingRuleSetResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[ServiceResponse] */
-        PaginatedResponse_ServiceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["ServiceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SimulationCaseResponse] */
-        PaginatedResponse_SimulationCaseResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SimulationCaseResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SkillResponse] */
-        PaginatedResponse_SkillResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SkillResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SourceEventItem] */
-        PaginatedResponse_SourceEventItem_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SourceEventItem"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[SurfaceResponse] */
-        PaginatedResponse_SurfaceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["SurfaceResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[TriggerResponse] */
-        PaginatedResponse_TriggerResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["TriggerResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[TriggerRunResponse] */
-        PaginatedResponse_TriggerRunResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["TriggerRunResponse"][];
-            /** Total */
-            total?: number | null;
-        };
-        /** PaginatedResponse[WorkspaceResponse] */
-        PaginatedResponse_WorkspaceResponse_: {
-            /** Continuation Token */
-            continuation_token?: number | null;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["WorkspaceResponse"][];
             /** Total */
             total?: number | null;
         };
@@ -20543,6 +20705,15 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** ProductionEvalDefinitionListResponse */
+        ProductionEvalDefinitionListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ProductionEvalDefinition"][];
+        };
         /**
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
@@ -20928,6 +21099,11 @@ export interface components {
             noise_reduction?: ("near_field" | "far_field" | "off") | null;
             /** Reasoning Effort */
             reasoning_effort?: ("low" | "medium" | "high") | null;
+            /**
+             * Required Tool On First Caller Turn
+             * @description Force one named function on the first caller-generated response, excluding the inbound greeting, then restore automatic tool choice. Runtime accepts this only for source_override='test' sessions and tools that the executor verifies are read-only or side-effect-free.
+             */
+            required_tool_on_first_caller_turn?: string | null;
             /** Speed */
             speed?: number | null;
             transcription?: components["schemas"]["RealtimeTranscriptionConfig"] | null;
@@ -21187,7 +21363,7 @@ export interface components {
          *
          *     The credential is not part of the wire contract — the server derives the
          *     SA-key SSM path deterministically from the generated ``source_id`` (the
-         *     ``/data-sources/`` convention) and the operator uploads the key there
+         *     ``/intake-sources/`` convention) and the operator uploads the key there
          *     out-of-band. ``drive_id`` is optional (resolved at sync if omitted).
          */
         RegisterSourceRequest: {
@@ -21345,6 +21521,23 @@ export interface components {
              */
             op: "rename_column";
             to: components["schemas"]["IdentifierString"];
+        };
+        /** ResolvePreviewRequest */
+        ResolvePreviewRequest: {
+            /**
+             * Auth Claims
+             * @default []
+             */
+            auth_claims?: components["schemas"]["ExternalAuthClaim"][];
+        };
+        /** ResolvePreviewResponse */
+        ResolvePreviewResponse: {
+            /** Grants */
+            grants: components["schemas"]["EffectiveGrant"][];
+            /** Roles */
+            roles: components["schemas"]["MappedRole"][];
+            /** Unmapped Claim Count */
+            unmapped_claim_count: number;
         };
         /**
          * ResolveTemplateRequest
@@ -21584,6 +21777,15 @@ export interface components {
              */
             total_items?: number;
         };
+        /** ReviewQueueListResponse */
+        ReviewQueueListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SurfaceResponse"][];
+        };
         /** ReviewSubmittedEvent */
         ReviewSubmittedEvent: {
             /**
@@ -21683,6 +21885,52 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "superseded";
+        };
+        /**
+         * RoleGrantKeysBinding
+         * @description Declares a SQL-tool parameter as *server-bound* to a turn's resolved authorization.
+         *
+         *     Family-agnostic — consumed by BOTH platform functions (``fn_*``,
+         *     ``platform.function_parameters``) and workspace data queries (``wsq_*``,
+         *     ``platform.workspace_data_query_parameters``). A parameter carrying this binding
+         *     is NOT caller-supplied: at execution the platform discards any caller value,
+         *     projects the resource keys the turn's :class:`ExternalAuthorizationBlock` holds
+         *     for ``(resource_type, access)`` via :meth:`ExternalAuthorizationBlock.resource_keys`,
+         *     encodes them, and injects the result into the ``:name`` SQL bind — the model /
+         *     caller never sees or supplies it.
+         *
+         *     This is a THIRD parameter state, distinct from required (``default is None``) and
+         *     defaulted (``default is not None``): the caller-required check must exempt it and
+         *     the executor must always inject. The literal sets are pinned to v1; widening one is
+         *     a paired migration + model change (the ``binding_*`` columns added to both param
+         *     tables in V328). ``extra="forbid"`` so an author can't smuggle an unrecognized field.
+         *
+         *     Lives here, next to ``ExternalAuthorizationBlock.resource_keys`` (its runtime
+         *     counterpart), so the two SQL-tool families share one definition and can't drift.
+         */
+        RoleGrantKeysBinding: {
+            /**
+             * Access
+             * @default read
+             * @constant
+             */
+            access?: "read";
+            /**
+             * Encoding
+             * @default csv
+             * @constant
+             */
+            encoding?: "csv";
+            /**
+             * Resource Type
+             * @constant
+             */
+            resource_type: "kb_scope";
+            /**
+             * Source
+             * @constant
+             */
+            source: "role_grant_resource_keys";
         };
         /** RotateApiKeyRequest */
         RotateApiKeyRequest: {
@@ -22157,6 +22405,15 @@ export interface components {
              */
             role?: string;
         };
+        /** SchedulingRuleSetListResponse */
+        SchedulingRuleSetListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SchedulingRuleSetResponse"][];
+        };
         /**
          * SchedulingRuleSetResponse
          * @description Wire shape for a single rule set. ``params`` stays as ``dict``
@@ -22377,6 +22634,15 @@ export interface components {
              * @default true
              */
             warm_transfer?: boolean;
+        };
+        /** ServiceListResponse */
+        ServiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ServiceResponse"][];
         };
         /** ServiceResponse */
         ServiceResponse: {
@@ -23248,6 +23514,15 @@ export interface components {
             /** Patient Entity Id */
             patient_entity_id?: string | null;
         };
+        /** SimulationCaseListResponse */
+        SimulationCaseListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SimulationCaseResponse"][];
+        };
         /** SimulationCaseMetricEval */
         SimulationCaseMetricEval: {
             /** Expected */
@@ -23940,6 +24215,15 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** SkillListResponse */
+        SkillListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SkillResponse"][];
+        };
         /** SkillReferencesResponse */
         SkillReferencesResponse: {
             /** Context Graph References */
@@ -24075,6 +24359,15 @@ export interface components {
             source: string;
             /** Source System */
             source_system?: string | null;
+        };
+        /** SourceEventListResponse */
+        SourceEventListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SourceEventItem"][];
         };
         /** SourceFailureItem */
         SourceFailureItem: {
@@ -24518,6 +24811,7 @@ export interface components {
          *     the stored default.
          */
         StoredParameter: {
+            authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -24823,6 +25117,15 @@ export interface components {
              * Format: uuid
              */
             surface_id: string;
+        };
+        /** SurfaceListResponse */
+        SurfaceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["SurfaceResponse"][];
         };
         /** SurfaceOpenedEvent */
         SurfaceOpenedEvent: {
@@ -26132,6 +26435,28 @@ export interface components {
              */
             write_tool_names?: string[];
         };
+        /** TopicModelingSettingsRequest */
+        TopicModelingSettingsRequest: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** TopicModelingSettingsResponse */
+        TopicModelingSettingsResponse: {
+            /** Enabled */
+            enabled: boolean;
+        };
+        /** TopicModelingSettingsUpdateResponse */
+        TopicModelingSettingsUpdateResponse: {
+            /** Enabled */
+            enabled: boolean;
+            /**
+             * Reconciliation Status
+             * @constant
+             */
+            reconciliation_status: "pending";
+            /** Run Id */
+            run_id: number;
+        };
         /**
          * TraceAnalysisListItem
          * @description Compact summary of a trace analysis row for list views.
@@ -26518,6 +26843,15 @@ export interface components {
             /** Trigger Name */
             trigger_name: string;
         };
+        /** TriggerListResponse */
+        TriggerListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["TriggerResponse"][];
+        };
         /** TriggerResponse */
         TriggerResponse: {
             /**
@@ -26600,6 +26934,15 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /** TriggerRunListResponse */
+        TriggerRunListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["TriggerRunResponse"][];
         };
         /** TriggerRunResponse */
         TriggerRunResponse: {
@@ -26849,6 +27192,22 @@ export interface components {
             /** User Transcript */
             user_transcript?: string | null;
         };
+        /** TurnArtifactEvent */
+        TurnArtifactEvent: {
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            event: "artifact";
+            /** Payload */
+            payload: {
+                [key: string]: unknown;
+            } | unknown[];
+            /** Schema Version */
+            schema_version: string;
+            /** Type */
+            type: string;
+        };
         /** TurnConversationSnapshot */
         TurnConversationSnapshot: {
             context_graph_state?: components["schemas"]["ContextGraphState-Output"] | null;
@@ -26869,6 +27228,40 @@ export interface components {
             turn_count?: number;
             /** Updated At */
             updated_at: string;
+        };
+        /** TurnDelivery */
+        TurnDelivery: {
+            /**
+             * Delivery Id
+             * Format: uuid
+             * @description Stable identifier for this background delivery.
+             */
+            delivery_id: string;
+            /**
+             * Receipt
+             * Format: uuid
+             * @description Opaque receipt required to acknowledge this delivery.
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             * @description Stable poll request identifier bound to this claim.
+             */
+            request_id: string;
+        };
+        /** TurnDeliveryAckRequest */
+        TurnDeliveryAckRequest: {
+            /**
+             * Receipt
+             * Format: uuid
+             */
+            receipt: string;
+            /**
+             * Request Id
+             * Format: uuid
+             */
+            request_id: string;
         };
         /** TurnDoneEvent */
         TurnDoneEvent: {
@@ -27048,6 +27441,11 @@ export interface components {
         /** TurnResponse */
         TurnResponse: {
             /**
+             * Artifacts
+             * @default []
+             */
+            artifacts?: components["schemas"]["ClientArtifact"][];
+            /**
              * Background Pending
              * @description Whether this turn's ``output`` is the final answer, or only an acknowledgement that
              *     work is still running in the background.
@@ -27056,19 +27454,27 @@ export interface components {
              *
              *     ``true``: a tool crossed the server's blocking window and was handed to a background
              *     task, so ``output`` is NOT the final answer — the definitive assistant answer is
-             *     produced later, out-of-band. It is **durable on the conversation**: drain it by
-             *     re-issuing ``POST …/turns`` with ``poll=true`` (a no-message drain-and-report), by
-             *     sending the next user turn, or by reading the conversation back
-             *     (``GET …/conversations/{id}``). This is the per-conversation delivery contract — see
+             *     produced later, out-of-band. Under delivery protocol v2, collect it by re-issuing
+             *     ``POST …/turns`` with ``poll=true`` (a no-message, receipt-backed claim), render or
+             *     durably persist the returned answer, then acknowledge its exact delivery receipt.
+             *     This is the per-conversation delivery contract — see
              *     the web-integration paved path. (The workspace observer bus,
              *     ``GET /v1/{workspace_id}/events/stream``, mirrors this activity as ``text.agent_message``
              *     / ``text.tool_started`` / ``text.background_result`` for *dashboards* watching many
              *     conversations, but is not the per-chat delivery path.) A client that treats a
-             *     ``background_pending=true`` turn as complete without draining will miss the final answer.
+             *     ``background_pending=true`` turn as complete without polling and acknowledging will
+             *     miss the final answer.
              * @default false
              */
             background_pending?: boolean;
             conversation: components["schemas"]["TurnConversationSnapshot"];
+            /** @description Receipt for a background result returned by ``poll=true``. Render the response successfully, then acknowledge this delivery. Null for ordinary turns and idle/pending polls. */
+            delivery?: components["schemas"]["TurnDelivery"] | null;
+            /**
+             * Delivery Protocol Version
+             * @description Version of the durable background-delivery protocol supported by the serving agent. Clients may retry polls only after observing version 2.
+             */
+            delivery_protocol_version?: 2 | null;
             input: components["schemas"]["ConversationTurn"];
             /** Output */
             output: components["schemas"]["ConversationTurn"][];
@@ -27079,11 +27485,11 @@ export interface components {
             tool_calls?: components["schemas"]["ConversationToolCallDetail"][];
             /**
              * Turn Id
-             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the latest exchange the returned messages attach to. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
+             * @description Identifier of the user exchange this turn created — or, for ``poll=true`` and greeting-kickoff turns (empty ``message``), the exchange the returned messages attach to. A background delivery keeps the originating exchange even when later user turns already exist. Deterministic: matches the ``turn_id`` on this conversation's history turns, so it can anchor durable per-turn artifacts (e.g. feedback) across page reloads. Null only when the conversation has no user exchange yet (a poll or kickoff before the first user message).
              */
             turn_id: string | null;
         };
-        TurnStreamEvent: components["schemas"]["TurnTokenEvent"] | components["schemas"]["TurnToolCallStartedEvent"] | components["schemas"]["TurnToolCallCompletedEvent"] | components["schemas"]["TurnThinkingEvent"] | components["schemas"]["TurnMessageEvent"] | components["schemas"]["TurnDoneEvent"] | components["schemas"]["TurnErrorEvent"];
+        TurnStreamEvent: components["schemas"]["TurnTokenEvent"] | components["schemas"]["TurnArtifactEvent"] | components["schemas"]["TurnToolCallStartedEvent"] | components["schemas"]["TurnToolCallCompletedEvent"] | components["schemas"]["TurnThinkingEvent"] | components["schemas"]["TurnMessageEvent"] | components["schemas"]["TurnDoneEvent"] | components["schemas"]["TurnErrorEvent"];
         /** TurnThinkingEvent */
         TurnThinkingEvent: {
             /**
@@ -27678,48 +28084,6 @@ export interface components {
              */
             value: number;
         };
-        /** UseCaseListResponse */
-        UseCaseListResponse: {
-            /** Items */
-            items: components["schemas"]["UseCaseResponse"][];
-        };
-        /** UseCaseResponse */
-        UseCaseResponse: {
-            /** Accepts Cold Inbound */
-            accepts_cold_inbound?: boolean | null;
-            /** Channel */
-            channel: string;
-            /** Configuration Set Name */
-            configuration_set_name?: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            /** Description */
-            description: string | null;
-            /** Email Type */
-            email_type?: string | null;
-            /** Entity Name */
-            entity_name: string;
-            /** Id */
-            id: string;
-            /** Name */
-            name: string;
-            /** Sender Email Address */
-            sender_email_address?: string | null;
-            /** Setup Id */
-            setup_id: string;
-            /** Tier */
-            tier?: string | null;
-            /** Unsubscribable */
-            unsubscribable?: boolean | null;
-            /**
-             * Updated At
-             * Format: date-time
-             */
-            updated_at: string;
-        };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
             /**
@@ -28266,6 +28630,24 @@ export interface components {
             /** Role */
             role: string;
         };
+        /** WorkspaceInvoiceListResponse */
+        WorkspaceInvoiceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["InvoiceItem"][];
+        };
+        /** WorkspaceListResponse */
+        WorkspaceListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["WorkspaceResponse"][];
+        };
         /** WorkspaceMemberAddedEvent */
         WorkspaceMemberAddedEvent: {
             /**
@@ -28454,6 +28836,8 @@ export interface components {
         };
         /** @enum {string} */
         _Access: "read" | "write";
+        /** @enum {string} */
+        _AgentSortField: "name" | "created_at" | "updated_at";
         _DatasetSlug: string;
         /** @enum {string} */
         _DatasetUpdateStatus: "checking_drive" | "preparing" | "publishing" | "completed" | "needs_review" | "failed";
@@ -28474,6 +28858,8 @@ export interface components {
         _FileType: string;
         /** @enum {string} */
         _ResourceType: "integration_endpoint" | "skill" | "kb_scope";
+        /** @enum {string} */
+        _SourceEventSortField: "ingested_at" | "event_type" | "confidence";
         _ToolMockKey: string;
         _ToolMockValue: string;
         _VolumePath: string;
@@ -28493,6 +28879,7 @@ export interface components {
          *     empty strings.
          */
         platform_lib__platform_functions__models__Parameter: {
+            authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -28529,6 +28916,8 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** @constant */
+        src__routes__api_keys___SortField: "created_at";
         /** AuditEventResponse */
         src__routes__audit__AuditEventResponse: {
             /**
@@ -28602,13 +28991,41 @@ export interface components {
             user_agent?: string | null;
             /**
              * Workspace Id
-             * Format: uuid
-             * @description Workspace that owns this audit event
+             * @description Workspace that owns this event; null for pre-workspace events (e.g. login)
              */
-            workspace_id: string;
+            workspace_id?: string | null;
         };
         /** @enum {string} */
+        src__routes__context_graphs__context_graph_crud___SortField: "name" | "created_at" | "updated_at";
+        /** CreateRequest */
+        src__routes__external_auth_claim_mappings__CreateRequest: {
+            /** Claim Key */
+            claim_key: string;
+            /** Claim Namespace */
+            claim_namespace: string;
+            /**
+             * External Role Id
+             * Format: uuid
+             */
+            external_role_id: string;
+            /** External Value */
+            external_value: string;
+        };
+        /** ListResponse */
+        src__routes__external_auth_claim_mappings__ListResponse: {
+            /** Continuation Token */
+            continuation_token?: unknown;
+            /** Has More */
+            has_more: boolean;
+            /** Items */
+            items: components["schemas"]["ClaimMappingItem"][];
+        };
+        /** @constant */
+        src__routes__external_auth_claim_mappings___SortField: "created_at";
+        /** @enum {string} */
         src__routes__external_identity_bindings___SortField: "created_at" | "external_subject_key";
+        /** @enum {string} */
+        src__routes__external_integrations___SortField: "created_at" | "name" | "updated_at";
         /** ListResponse */
         src__routes__external_role_assignments__ListResponse: {
             /** Continuation Token */
@@ -28640,6 +29057,8 @@ export interface components {
         };
         /** @constant */
         src__routes__external_roles___SortField: "created_at";
+        /** @constant */
+        src__routes__external_write_proposals___SortField: "created_at";
         /**
          * Request
          * @description Add a new endpoint to a REST integration (V186 flat shape).
@@ -28652,6 +29071,8 @@ export interface components {
              * @enum {string}
              */
             body_format?: "json" | "form";
+            /** @description Optional external-user-safe output contract. Uses response_template as its projection. */
+            client_output?: components["schemas"]["ClientOutputConfig"] | null;
             /**
              * Description
              * @description LLM-facing description shown in the tool definition.
@@ -28852,6 +29273,13 @@ export interface components {
          * @description Full breadcrumb returned by the test handler.
          */
         src__routes__integrations__test_endpoint__Response: {
+            /** @description Client artifact preview after JSON Schema and size validation. */
+            artifact?: components["schemas"]["ClientArtifact"] | null;
+            /**
+             * Artifact Error
+             * @description Safe validation summary when client output is enabled but cannot be emitted.
+             */
+            artifact_error?: string | null;
             /**
              * Duration Ms
              * @description Request duration in milliseconds.
@@ -28900,6 +29328,11 @@ export interface components {
              * @enum {string}
              */
             body_format?: "json" | "form";
+            /**
+             * Client Output
+             * @description Client output contract; pass `null` to disable external artifact delivery.
+             */
+            client_output?: components["schemas"]["ClientOutputConfig"] | null;
             /** Description */
             description?: string;
             /** Headers */
@@ -29047,6 +29480,8 @@ export interface components {
              */
             workspace_id: string;
         };
+        /** @constant */
+        src__routes__production_evals___SortField: "created_at";
         /** CreateRequest */
         src__routes__role_grants__CreateRequest: {
             access: components["schemas"]["_Access"];
@@ -29074,6 +29509,12 @@ export interface components {
         src__routes__role_grants___SortField: "created_at";
         /** @constant */
         src__routes__runs___SortField: "started_at";
+        /** @enum {string} */
+        src__routes__scheduling_rule_sets___SortField: "agent_kind" | "rule_kind";
+        /** @enum {string} */
+        src__routes__services___SortField: "name" | "created_at" | "updated_at";
+        /** @enum {string} */
+        src__routes__skills___SortField: "name" | "created_at" | "updated_at" | "slug";
         /**
          * Request
          * @description Create body — the authored shape of a new workspace data query.
@@ -29103,6 +29544,7 @@ export interface components {
          * @description Strict write-side validator for one declared parameter.
          */
         src__routes__workspace_data_queries__create_workspace_data_query__Request__Parameter: {
+            authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -29204,6 +29646,7 @@ export interface components {
          * @description Strict write-side validator for one declared parameter.
          */
         src__routes__workspace_data_queries__update_workspace_data_query__Request__Parameter: {
+            authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -30077,6 +30520,128 @@ export interface operations {
             };
         };
     };
+    "list-my-audit-events": {
+        parameters: {
+            query?: {
+                /** @description Filter by action type */
+                action?: string | null;
+                /** @description Filter by resource type */
+                resource_type?: string | null;
+                /** @description Start of date range */
+                date_from?: string | null;
+                /** @description End of date range */
+                date_to?: string | null;
+                /** @description Page size */
+                limit?: number;
+                /** @description Page offset */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventsListResponse"];
+                };
+            };
+            /** @description Credential has no associated actor entity */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "list-audit-events-platform": {
+        parameters: {
+            query?: {
+                /** @description Filter by workspace; omit for all workspaces */
+                workspace_id?: string | null;
+                /** @description Filter by service name */
+                service?: string | null;
+                /** @description Filter by action type */
+                action?: string | null;
+                /** @description Filter by actor entity */
+                actor_entity_id?: string | null;
+                /** @description Filter by resource type */
+                resource_type?: string | null;
+                /** @description Filter by specific resource */
+                resource_id?: string | null;
+                /** @description Only PHI access events */
+                phi_only?: boolean;
+                /** @description Start of date range */
+                date_from?: string | null;
+                /** @description End of date range */
+                date_to?: string | null;
+                /** @description Page size */
+                limit?: number;
+                /** @description Page offset */
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventsListResponse"];
+                };
+            };
+            /** @description platform:admin scope required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     "get-auth-info": {
         parameters: {
             query?: never;
@@ -30107,11 +30672,11 @@ export interface operations {
     "list-billing-customers": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("active" | "archived") | null;
                 /** @description Search by name or slug */
                 search?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path?: never;
@@ -30125,7 +30690,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_CustomerItem_"];
+                    "application/json": components["schemas"]["CustomerListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30350,13 +30915,13 @@ export interface operations {
     "list-customer-invoices": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("draft" | "sent" | "paid" | "void") | null;
                 /** @description Filter invoices with period_start on or after */
                 date_from?: string | null;
                 /** @description Filter invoices with period_end on or before */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -30372,7 +30937,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_InvoiceItem_"];
+                    "application/json": components["schemas"]["CustomerInvoiceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30491,14 +31056,14 @@ export interface operations {
     "get-customer-usage": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter meter values with period_start on or after */
                 date_from?: string | null;
                 /** @description Filter meter values with period_end on or before */
                 date_to?: string | null;
                 /** @description Filter by meter key */
                 meter_key?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -30514,7 +31079,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_MeterValueItem_"];
+                    "application/json": components["schemas"]["CustomerUsageListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -30651,7 +31216,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path?: never;
@@ -30665,7 +31230,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_WorkspaceResponse_"];
+                    "application/json": components["schemas"]["WorkspaceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -31407,10 +31972,10 @@ export interface operations {
     "list-agents": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -31426,7 +31991,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AgentResponse_"];
+                    "application/json": components["schemas"]["AgentListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -31691,9 +32256,8 @@ export interface operations {
     "list-agent-versions": {
         parameters: {
             query?: {
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -31710,7 +32274,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AgentVersionResponse_"];
+                    "application/json": components["schemas"]["AgentVersionListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -32624,9 +33188,10 @@ export interface operations {
     "list-api-keys": {
         parameters: {
             query?: {
-                mine_only?: boolean;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                mine_only?: boolean;
             };
             header?: never;
             path: {
@@ -32642,7 +33207,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ApiKeyResponse_"];
+                    "application/json": components["schemas"]["ApiKeyListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -32667,6 +33232,13 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Canonical API key role configuration unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -32710,6 +33282,13 @@ export interface operations {
             };
             /** @description Invalid request body or role. */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Canonical API key role configuration unavailable. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -32996,7 +33575,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditExportResponse"];
+                    "application/json": components["schemas"]["AuditExportSubmitResponse"];
                 };
             };
             /** @description Validation Error */
@@ -33017,15 +33596,13 @@ export interface operations {
             };
         };
     };
-    "list-audit-exports": {
+    "get-audit-export": {
         parameters: {
-            query?: {
-                /** @description Max exports to return */
-                limit?: number;
-            };
+            query?: never;
             header?: never;
             path: {
                 workspace_id: string;
+                statement_id: string;
             };
             cookie?: never;
         };
@@ -33037,57 +33614,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuditExportListResponse"];
+                    "application/json": components["schemas"]["AuditExportResultResponse"];
                 };
             };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "download-audit-export": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                filename: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description The export artifact, streamed as NDJSON. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                    "application/x-ndjson": unknown;
-                };
-            };
-            /** @description Audit export not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid export filename */
+            /** @description Invalid statement_id */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -33220,13 +33750,13 @@ export interface operations {
     "list-billing-invoices": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 status?: ("draft" | "sent" | "paid" | "void") | null;
                 /** @description Filter invoices with period_start on or after this date */
                 date_from?: string | null;
                 /** @description Filter invoices with period_end on or before this date */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -33242,7 +33772,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_InvoiceItem_"];
+                    "application/json": components["schemas"]["WorkspaceInvoiceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -34093,10 +34623,10 @@ export interface operations {
     "list-context_graphs": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -34112,7 +34642,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ContextGraphResponse_"];
+                    "application/json": components["schemas"]["ContextGraphListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34377,9 +34907,8 @@ export interface operations {
     "list-context_graph-versions": {
         parameters: {
             query?: {
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -34396,7 +34925,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ContextGraphVersionResponse_"];
+                    "application/json": components["schemas"]["ContextGraphVersionListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -34743,10 +35272,13 @@ export interface operations {
             query?: {
                 /** @description Include tool call details in response */
                 include_tool_calls?: boolean;
-                /** @description Poll for background results without sending a user message. Drains any background tool calls that completed since the last turn and reports them; returns empty output when nothing is pending. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation — each poll loads session state. */
+                /** @description Poll for a background result without sending a user message. Protocol v2 claims at most one ready answer and returns an opaque delivery receipt; render or durably persist the answer, then acknowledge that receipt. Returns empty output when nothing is ready. Must NOT be combined with a request-body ``message`` (422) or SSE streaming (422). Poll no more than once every ~5s per conversation. */
                 poll?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Stable UUID for replaying the same logical send or poll after an ambiguous failure. Reuse the same value only for that operation. Omission is backward-compatible but cannot provide client-controlled response-loss replay. */
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34786,7 +35318,10 @@ export interface operations {
                 /** @description Include tool_call_started / tool_call_completed frames in the stream */
                 include_tool_calls?: boolean;
             };
-            header?: never;
+            header?: {
+                /** @description Stable UUID for replaying the same logical streamed user-input turn. */
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 conversation_id: string;
@@ -34839,12 +35374,47 @@ export interface operations {
             };
         };
     };
+    acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                conversation_id: string;
+                delivery_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TurnDeliveryAckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_dashboards_v1__workspace_id__dashboards_get: {
         parameters: {
             query?: {
-                page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                page_context?: ("home" | "patients" | "calls" | "data" | "analytics" | "pipeline" | "operators" | "surfaces" | "compliance" | "custom") | null;
             };
             header?: never;
             path: {
@@ -34860,7 +35430,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DashboardDefinitionResponse_"];
+                    "application/json": components["schemas"]["DashboardListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -35078,13 +35648,14 @@ export interface operations {
     "list-data-sources": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 is_active?: boolean | null;
                 /** @description Filter by source type (repeatable) */
                 source_type?: string[] | null;
                 /** @description Search by name, ID, type, or sync status */
                 search?: string | null;
-                limit?: number;
-                continuation_token?: number;
+                q?: string | null;
             };
             header?: never;
             path: {
@@ -35100,7 +35671,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_DataSourceResponse_"];
+                    "application/json": components["schemas"]["DataSourceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -35846,6 +36417,197 @@ export interface operations {
             };
         };
     };
+    "list-external-auth-claim-mappings": {
+        parameters: {
+            query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
+                status?: ("active" | "superseded") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["src__routes__external_auth_claim_mappings__ListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-external-auth-claim-mapping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__external_auth_claim_mappings__CreateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimMappingItem"];
+                };
+            };
+            /** @description An active mapping for this claim tuple already exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "resolve-preview-external-auth-claim-mappings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolvePreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResolvePreviewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "get-external-auth-claim-mapping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                mapping_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimMappingItem"];
+                };
+            };
+            /** @description External auth claim mapping not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "supersede-external-auth-claim-mapping": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                mapping_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClaimMappingItem"];
+                };
+            };
+            /** @description Active external auth claim mapping not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "list-external-identity-bindings": {
         parameters: {
             query?: {
@@ -36009,10 +36771,10 @@ export interface operations {
     "list-external-integrations": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
             };
             header?: never;
             path: {
@@ -36028,7 +36790,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ExternalIntegrationResponse_"];
+                    "application/json": components["schemas"]["ExternalIntegrationListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -36609,9 +37371,10 @@ export interface operations {
     "list-external-write-proposals": {
         parameters: {
             query?: {
-                status?: ("proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded") | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                status?: ("proposed" | "approved" | "rejected" | "pushing" | "pushed" | "failed" | "superseded") | null;
             };
             header?: never;
             path: {
@@ -36627,7 +37390,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ExternalWriteProposal_"];
+                    "application/json": components["schemas"]["ExternalWriteProposalListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -36738,6 +37501,39 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "fhir-build-user-bundle": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FhirBuildBundleRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FhirBundleResponse"];
+                };
+            };
+            /** @description Invalid user list. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -40366,7 +41162,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40382,7 +41178,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OperatorResponse_"];
+                    "application/json": components["schemas"]["OperatorListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40448,12 +41244,12 @@ export interface operations {
     "list-audit-log": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by operator entity UUID. */
                 operator_id?: string | null;
                 /** @description Filter by exact operator audit event type. */
                 action?: ("operator.registered" | "operator.status_changed" | "operator.profile_updated" | "operator.joined_call" | "operator.mode_changed" | "operator.mode_switched" | "operator.left_call" | "operator.access_token_generated" | "operator.guidance_sent" | "operator.wrap_up" | "operator.viewed_transcript") | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -40469,7 +41265,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_AuditEventResponse_"];
+                    "application/json": components["schemas"]["AuditLogListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40548,7 +41344,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40564,7 +41360,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_EscalationEventResponse_"];
+                    "application/json": components["schemas"]["EscalationEventListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -40582,7 +41378,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -40598,7 +41394,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ActiveEscalationItem_"];
+                    "application/json": components["schemas"]["ActiveEscalationListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41192,10 +41988,9 @@ export interface operations {
     "list-outbound-log": {
         parameters: {
             query?: {
-                sort_by?: string | null;
-                status?: ("pending" | "synced" | "failed") | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                status?: ("pending" | "synced" | "failed") | null;
             };
             header?: never;
             path: {
@@ -41212,7 +42007,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_OutboundLogItem_"];
+                    "application/json": components["schemas"]["OutboundLogListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41312,7 +42107,9 @@ export interface operations {
     "list-source-events": {
         parameters: {
             query?: {
-                sort_by?: string | null;
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by event type */
                 event_type?: string | null;
                 /** @description Filter by entity type */
@@ -41321,8 +42118,6 @@ export interface operations {
                 date_from?: string | null;
                 /** @description Filter events ingested on or before this time */
                 date_to?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -41339,7 +42134,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SourceEventItem_"];
+                    "application/json": components["schemas"]["SourceEventListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -41526,10 +42321,11 @@ export interface operations {
     "list-production-eval-definitions": {
         parameters: {
             query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 service_id?: string | null;
                 active?: boolean | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -41545,7 +42341,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ProductionEvalDefinition_"];
+                    "application/json": components["schemas"]["ProductionEvalDefinitionListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -42496,10 +43292,11 @@ export interface operations {
     "list-scheduling-rule-sets": {
         parameters: {
             query?: {
+                sort_by?: string[];
+                limit?: number;
+                continuation_token?: unknown;
                 agent_kind?: ("tms" | "ketamine" | "general") | null;
                 is_active?: boolean | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -42515,7 +43312,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SchedulingRuleSetResponse_"];
+                    "application/json": components["schemas"]["SchedulingRuleSetListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -42850,11 +43647,11 @@ export interface operations {
     "list-services": {
         parameters: {
             query?: {
-                search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
-                is_active?: boolean | null;
+                sort_by?: string[];
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                search?: components["schemas"]["SearchString"] | null;
+                is_active?: boolean | null;
             };
             header?: never;
             path: {
@@ -42870,7 +43667,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_ServiceResponse_"];
+                    "application/json": components["schemas"]["ServiceListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -44286,6 +45083,63 @@ export interface operations {
             };
         };
     };
+    "get-topic-modeling-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicModelingSettingsResponse"];
+                };
+            };
+        };
+    };
+    "update-topic-modeling-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TopicModelingSettingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TopicModelingSettingsUpdateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     "get-voice-settings": {
         parameters: {
             query?: never;
@@ -44505,10 +45359,10 @@ export interface operations {
     "list-simulation-cases": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 service_id?: string | null;
                 tags?: string[] | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -44524,7 +45378,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SimulationCaseResponse_"];
+                    "application/json": components["schemas"]["SimulationCaseListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -45831,11 +46685,11 @@ export interface operations {
     "list-skills": {
         parameters: {
             query?: {
+                sort_by?: string[];
                 enabled?: boolean | null;
                 search?: components["schemas"]["SearchString"] | null;
-                sort_by?: string | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -45851,7 +46705,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SkillResponse_"];
+                    "application/json": components["schemas"]["SkillListResponse"];
                 };
             };
             /** @description Missing or invalid API key. */
@@ -46261,14 +47115,14 @@ export interface operations {
     "list-surfaces": {
         parameters: {
             query?: {
+                limit?: number;
+                continuation_token?: unknown;
                 /** @description Filter by entity ID */
                 entity_id?: string | null;
                 /** @description Filter by status */
                 status?: string | null;
                 /** @description Filter by channel */
                 channel?: string | null;
-                limit?: number;
-                continuation_token?: number;
             };
             header?: never;
             path: {
@@ -46284,7 +47138,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SurfaceResponse_"];
+                    "application/json": components["schemas"]["SurfaceListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -46349,7 +47203,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -46365,7 +47219,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_SurfaceResponse_"];
+                    "application/json": components["schemas"]["ReviewQueueListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47096,9 +47950,9 @@ export interface operations {
     "list-triggers": {
         parameters: {
             query?: {
-                is_active?: boolean | null;
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
+                is_active?: boolean | null;
             };
             header?: never;
             path: {
@@ -47114,7 +47968,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TriggerResponse_"];
+                    "application/json": components["schemas"]["TriggerListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47453,7 +48307,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
-                continuation_token?: number;
+                continuation_token?: unknown;
             };
             header?: never;
             path: {
@@ -47470,7 +48324,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PaginatedResponse_TriggerRunResponse_"];
+                    "application/json": components["schemas"]["TriggerRunListResponse"];
                 };
             };
             /** @description Validation Error */
@@ -47488,227 +48342,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "list-use-cases": {
-        parameters: {
-            query?: {
-                entity_name?: string | null;
-                channel?: ("outbound_voice" | "inbound_voice" | "ringless_voicemail" | "email" | "sms" | "imessage") | null;
-                setup_id?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UseCaseListResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "list-owned-use-cases": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnedUseCasesResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnershipResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "assign-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OwnershipResponse"];
-                };
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case is owned by another workspace. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "release-use-case-ownership": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                use_case_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Use case is bound to a service; unbind it first. */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };

@@ -14,6 +14,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import openapiTS, { astToString } from 'openapi-typescript'
+import ts from 'typescript'
 import {
   REPO_ROOT,
   assertWithinRoots,
@@ -144,7 +145,44 @@ const specSource = resolveSpecSource()
 console.log(`Generating types from: ${specSource}`)
 
 const input = patchOpenApiDocument(await loadSpec(specSource))
-const ast = await openapiTS(input, { defaultNonNullable: false })
+
+// Recursive "arbitrary JSON" schemas (a union whose array/object members
+// `$ref` the schema itself) are emitted by openapi-typescript as a member that
+// references itself through an indexed-access type —
+// `components["schemas"]["JsonValue"]`. TypeScript resolves indexed-access
+// types eagerly, so a member whose own definition references itself this way
+// fails to compile with `TS2502: 'JsonValue' is referenced directly or
+// indirectly in its own type annotation`. Named type aliases are resolved
+// lazily, so we break the cycle at the codegen layer (NOT by hand-patching the
+// generated file, which the next sync would clobber): for each such schema we
+// (a) `inject` a standalone recursive alias and (b) point the schema's emitted
+// type at that alias via the `transform` hook. External
+// `components["schemas"]["JsonValue"]` references resolve to the now cycle-free
+// member and stay valid. Because this lives in the generate step, every run
+// (local, CI `gen-types` verify, sdk-sync) reproduces it byte-for-byte.
+const RECURSIVE_JSON_SCHEMAS = ['JsonValue']
+const injectedRecursiveJsonSchemas = RECURSIVE_JSON_SCHEMAS.filter(
+  (name) => input.components?.schemas?.[name],
+)
+const recursiveJsonAliases = injectedRecursiveJsonSchemas
+  .map(
+    (name) =>
+      `type ${name} = boolean | number | string | ${name}[] | { [key: string]: ${name} } | null;`,
+  )
+  .join('\n')
+
+const ast = await openapiTS(input, {
+  defaultNonNullable: false,
+  ...(recursiveJsonAliases && { inject: recursiveJsonAliases }),
+  transform(_schemaObject, options) {
+    for (const name of injectedRecursiveJsonSchemas) {
+      if (options.path === `#/components/schemas/${name}`) {
+        return ts.factory.createTypeReferenceNode(ts.factory.createIdentifier(name), undefined)
+      }
+    }
+    return undefined
+  },
+})
 const code = astToString(ast)
 
 const outDir = path.dirname(OUT_FILE)
