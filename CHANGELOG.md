@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.104.0] - 2026-07-28
+
+### Bug Fixes
+
+- unbreak SDK type sync (JsonValue codegen, retire use-cases, reconcile audit + external-integrations) (#443)
+
 ## [0.103.0] - 2026-07-19
 
 ### Maintenance
