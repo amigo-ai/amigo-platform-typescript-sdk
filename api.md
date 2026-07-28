@@ -411,7 +411,9 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getPhiAccess`
 - `getPhiAccessAutoPaging`
 - `createExport`
-- `listExports`
+- `getExport`
+- `listMyAuditEvents`
+- `listPlatformAuditEvents`
 - `getEntityAccessLog`
 - `getEntityAccessLogAutoPaging`
 
@@ -576,16 +578,5 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `update`
 - `delete`
 - `invoke`
-
-### `useCases`
-
-- `list`
-- `listOwned`
-- `getOwnership`
-- `assignOwnership`
-- `releaseOwnership`
-- `getServiceBinding`
-- `bindToService`
-- `unbindFromService`
 
 ### `api`
