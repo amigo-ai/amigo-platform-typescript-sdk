@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.105.0] - 2026-08-04
+
+### Improvements
+
+- fix!: unbreak SDK type sync — retire the billing resource (#444)
+
 ## [0.104.0] - 2026-07-28
 
 ### Bug Fixes
