@@ -812,15 +812,6 @@ const { data: rates } = await client.GET(
 
 Public token routes (`/s/{token}/spec`, `/s/{token}/submit`, etc.) require no API key -- use `openapi-fetch` with the SDK's `paths` type for full type safety on unauthenticated endpoints.
 
-### Billing
-
-```typescript
-const dashboard = await client.billing.getDashboard()
-const usage = await client.billing.getUsage()
-const { items: invoices } = await client.billing.listInvoices()
-const pdf = await client.billing.getInvoicePdf('invoice-id')
-```
-
 ### Operators
 
 ```typescript

@@ -387,16 +387,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `environments.get`
 - `environments.update`
 
-### `billing`
-
-- `getDashboard`
-- `getUsage`
-- `getUsageTrends`
-- `listInvoices`
-- `listInvoicesAutoPaging`
-- `getInvoice`
-- `getInvoicePdf`
-
 ### `recordings`
 
 - `getUrls`

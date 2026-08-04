@@ -51,7 +51,6 @@ src/
     api-keys.ts         -- API key management
     tokens.ts           -- Exchange API key for identity-issued JWT (POST /token)
     audit.ts            -- Audit log queries
-    billing.ts          -- Dashboard, usage, invoices
     calls.ts            -- Call list, detail, intelligence, trace analysis
     context-graphs.ts   -- Context graph (HSM) CRUD and versioning
     data-sources.ts     -- Connected data source management

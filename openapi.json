@@ -2108,35 +2108,6 @@
         "title": "ArchiveWorkspaceRequest",
         "type": "object"
       },
-      "AttachWorkspaceRequest": {
-        "properties": {
-          "billable": {
-            "default": true,
-            "title": "Billable",
-            "type": "boolean"
-          },
-          "environment": {
-            "default": "production",
-            "enum": [
-              "production",
-              "staging",
-              "development"
-            ],
-            "title": "Environment",
-            "type": "string"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id"
-        ],
-        "title": "AttachWorkspaceRequest",
-        "type": "object"
-      },
       "AuditEventsListResponse": {
         "properties": {
           "events": {
@@ -2736,97 +2707,6 @@
         "title": "BatchRow",
         "type": "object"
       },
-      "BillingDashboardResponse": {
-        "properties": {
-          "current_period_total": {
-            "description": "Total billing for the current period",
-            "title": "Current Period Total",
-            "type": "number"
-          },
-          "delta_pct": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Percentage change from previous period",
-            "title": "Delta Pct"
-          },
-          "invoice_status_summary": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "description": "Invoice counts by status",
-            "title": "Invoice Status Summary",
-            "type": "object"
-          },
-          "period_end": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Current period end date (ISO-8601)",
-            "title": "Period End"
-          },
-          "period_start": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Current period start date (ISO-8601)",
-            "title": "Period Start"
-          },
-          "previous_period_total": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Total billing for the previous period",
-            "title": "Previous Period Total"
-          },
-          "top_meters": {
-            "description": "Top meters by value",
-            "items": {
-              "$ref": "#/components/schemas/MeterSummary"
-            },
-            "title": "Top Meters",
-            "type": "array"
-          },
-          "workspace_id": {
-            "description": "Workspace ID",
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "current_period_total",
-          "previous_period_total",
-          "delta_pct",
-          "top_meters",
-          "invoice_status_summary",
-          "period_start",
-          "period_end"
-        ],
-        "title": "BillingDashboardResponse",
-        "type": "object"
-      },
       "BindingUpsertRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2847,6 +2727,11 @@
             "title": "Entity Id",
             "type": "string"
           },
+          "external_integration_id": {
+            "format": "uuid",
+            "title": "External Integration Id",
+            "type": "string"
+          },
           "external_subject_key": {
             "maxLength": 512,
             "minLength": 1,
@@ -2863,10 +2748,12 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
             "title": "Source"
           }
         },
         "required": [
+          "external_integration_id",
           "external_subject_key",
           "entity_id"
         ],
@@ -9623,64 +9510,6 @@
         "title": "CreateConversationRequest",
         "type": "object"
       },
-      "CreateCustomerRequest": {
-        "properties": {
-          "address": {
-            "additionalProperties": true,
-            "title": "Address",
-            "type": "object"
-          },
-          "billing_contact": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billing Contact"
-          },
-          "billing_email": {
-            "format": "email",
-            "title": "Billing Email",
-            "type": "string"
-          },
-          "mercury_memo": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mercury Memo"
-          },
-          "name": {
-            "maxLength": 256,
-            "minLength": 1,
-            "title": "Name",
-            "type": "string"
-          },
-          "slug": {
-            "maxLength": 63,
-            "minLength": 2,
-            "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
-            "title": "Slug",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "slug",
-          "billing_email"
-        ],
-        "title": "CreateCustomerRequest",
-        "type": "object"
-      },
       "CreateDashboardRequest": {
         "properties": {
           "description": {
@@ -9806,6 +9635,7 @@
               "smart_fhir",
               "customer_intake",
               "lakebase_schema",
+              "snowflake",
               "crm"
             ],
             "title": "Source Type",
@@ -11379,226 +11209,6 @@
         "title": "CustomTokenExchangeAuthRequest",
         "type": "object"
       },
-      "CustomerAddress": {
-        "description": "Customer billing address.",
-        "properties": {
-          "city": {
-            "default": "",
-            "description": "City",
-            "title": "City",
-            "type": "string"
-          },
-          "country": {
-            "default": "US",
-            "description": "ISO 3166-1 alpha-2 country code",
-            "title": "Country",
-            "type": "string"
-          },
-          "line1": {
-            "default": "",
-            "description": "Street address line 1",
-            "title": "Line1",
-            "type": "string"
-          },
-          "line2": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Street address line 2",
-            "title": "Line2"
-          },
-          "postal_code": {
-            "default": "",
-            "description": "Postal or ZIP code",
-            "title": "Postal Code",
-            "type": "string"
-          },
-          "state": {
-            "default": "",
-            "description": "State or province",
-            "title": "State",
-            "type": "string"
-          }
-        },
-        "title": "CustomerAddress",
-        "type": "object"
-      },
-      "CustomerInvoiceListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/InvoiceItem"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "CustomerInvoiceListResponse",
-        "type": "object"
-      },
-      "CustomerItem": {
-        "properties": {
-          "address": {
-            "$ref": "#/components/schemas/CustomerAddress",
-            "description": "Billing address"
-          },
-          "billing_contact": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Billing contact name",
-            "title": "Billing Contact"
-          },
-          "billing_email": {
-            "description": "Primary billing email",
-            "title": "Billing Email",
-            "type": "string"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the customer was created (ISO-8601)",
-            "title": "Created At"
-          },
-          "id": {
-            "description": "Customer ID",
-            "title": "Id",
-            "type": "string"
-          },
-          "mercury_memo": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Mercury bank memo reference",
-            "title": "Mercury Memo"
-          },
-          "name": {
-            "description": "Customer name",
-            "title": "Name",
-            "type": "string"
-          },
-          "slug": {
-            "description": "URL-safe identifier",
-            "title": "Slug",
-            "type": "string"
-          },
-          "status": {
-            "description": "Customer status",
-            "enum": [
-              "active",
-              "archived"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the customer was last updated (ISO-8601)",
-            "title": "Updated At"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "slug",
-          "billing_email",
-          "billing_contact",
-          "mercury_memo",
-          "address",
-          "status",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "CustomerItem",
-        "type": "object"
-      },
-      "CustomerListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/CustomerItem"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "CustomerListResponse",
-        "type": "object"
-      },
-      "CustomerUsageListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/MeterValueItem"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "CustomerUsageListResponse",
-        "type": "object"
-      },
       "DailyCallStat": {
         "description": "Per-day call volume and duration.",
         "properties": {
@@ -12349,6 +11959,7 @@
               "smart_fhir",
               "customer_intake",
               "lakebase_schema",
+              "snowflake",
               "crm"
             ],
             "title": "Source Type",
@@ -13208,6 +12819,23 @@
       "DescriptionString": {
         "maxLength": 2000,
         "type": "string"
+      },
+      "DesignAgentSessionResponse": {
+        "properties": {
+          "status": {
+            "enum": [
+              "stored",
+              "dropped"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "DesignAgentSessionResponse",
+        "type": "object"
       },
       "DestroySessionResponse": {
         "properties": {
@@ -17347,8 +16975,9 @@
             "title": "Entity Id",
             "type": "string"
           },
-          "external_subject_key": {
-            "title": "External Subject Key",
+          "external_integration_id": {
+            "format": "uuid",
+            "title": "External Integration Id",
             "type": "string"
           },
           "id": {
@@ -17365,6 +16994,7 @@
                 "type": "null"
               }
             ],
+            "deprecated": true,
             "title": "Source"
           },
           "status": {
@@ -17375,6 +17005,11 @@
             "title": "Status",
             "type": "string"
           },
+          "subject_type": {
+            "const": "user",
+            "title": "Subject Type",
+            "type": "string"
+          },
           "updated_at": {
             "format": "date-time",
             "title": "Updated At",
@@ -17383,7 +17018,8 @@
         },
         "required": [
           "id",
-          "external_subject_key",
+          "external_integration_id",
+          "subject_type",
           "entity_id",
           "status",
           "created_at",
@@ -17414,6 +17050,92 @@
           "has_more"
         ],
         "title": "ExternalIdentityBindingListResponse",
+        "type": "object"
+      },
+      "ExternalIdentityBindingUpsertResponse": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "display_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Display Name"
+          },
+          "entity_id": {
+            "format": "uuid",
+            "title": "Entity Id",
+            "type": "string"
+          },
+          "external_integration_id": {
+            "format": "uuid",
+            "title": "External Integration Id",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "deprecated": true,
+            "title": "Source"
+          },
+          "status": {
+            "enum": [
+              "active",
+              "revoked"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "subject_type": {
+            "const": "user",
+            "title": "Subject Type",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "upsert_outcome": {
+            "enum": [
+              "created",
+              "materialized",
+              "unchanged"
+            ],
+            "title": "Upsert Outcome",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "external_integration_id",
+          "subject_type",
+          "entity_id",
+          "status",
+          "created_at",
+          "updated_at",
+          "upsert_outcome"
+        ],
+        "title": "ExternalIdentityBindingUpsertResponse",
         "type": "object"
       },
       "ExternalIntegrationCredentialRequest": {
@@ -22299,40 +22021,6 @@
         "title": "IntakeFieldType",
         "type": "string"
       },
-      "IntakeFileResponse": {
-        "properties": {
-          "id": {
-            "format": "uuid",
-            "title": "Id",
-            "type": "string"
-          },
-          "scan_status": {
-            "title": "Scan Status",
-            "type": "string"
-          },
-          "sha256": {
-            "title": "Sha256",
-            "type": "string"
-          },
-          "size_bytes": {
-            "title": "Size Bytes",
-            "type": "integer"
-          },
-          "volume_path": {
-            "title": "Volume Path",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "volume_path",
-          "sha256",
-          "size_bytes",
-          "scan_status"
-        ],
-        "title": "IntakeFileResponse",
-        "type": "object"
-      },
       "IntakeFileRow": {
         "description": "A file in the Files list (intake-ui-mvp-design.md \u00a75.1).",
         "properties": {
@@ -22576,9 +22264,16 @@
             "type": "string"
           },
           "credential_ssm_param_path": {
-            "description": "Where the SA key must be uploaded (derived; the secret itself is never returned).",
-            "title": "Credential Ssm Param Path",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "LEGACY: the SSM path a per-workspace SA key was uploaded to, for sources\nregistered before the unified intake service account. ``None`` for every source\nregistered since \u2014 those authenticate keyless, with no secret to provision.",
+            "title": "Credential Ssm Param Path"
           },
           "display_name": {
             "title": "Display Name",
@@ -22634,7 +22329,6 @@
           "source_type",
           "display_name",
           "folders",
-          "credential_ssm_param_path",
           "status",
           "created_ts"
         ],
@@ -23092,197 +22786,6 @@
           "items"
         ],
         "title": "InternalSkillsListResponse",
-        "type": "object"
-      },
-      "InvoiceItem": {
-        "properties": {
-          "adjustments": {
-            "description": "Adjustment amount",
-            "title": "Adjustments",
-            "type": "string"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the invoice was created (ISO-8601)",
-            "title": "Created At"
-          },
-          "customer_id": {
-            "description": "Customer ID",
-            "title": "Customer Id",
-            "type": "string"
-          },
-          "id": {
-            "description": "Invoice ID",
-            "title": "Id",
-            "type": "string"
-          },
-          "invoice_number": {
-            "description": "Human-readable invoice number",
-            "title": "Invoice Number",
-            "type": "string"
-          },
-          "line_items": {
-            "description": "Itemized charges",
-            "items": {
-              "$ref": "#/components/schemas/InvoiceLineItem"
-            },
-            "title": "Line Items",
-            "type": "array"
-          },
-          "paid_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the invoice was paid (ISO-8601)",
-            "title": "Paid At"
-          },
-          "pdf_s3_key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "S3 key for the PDF",
-            "title": "Pdf S3 Key"
-          },
-          "period_end": {
-            "description": "Billing period end (ISO-8601)",
-            "title": "Period End",
-            "type": "string"
-          },
-          "period_start": {
-            "description": "Billing period start (ISO-8601)",
-            "title": "Period Start",
-            "type": "string"
-          },
-          "sent_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the invoice was sent (ISO-8601)",
-            "title": "Sent At"
-          },
-          "status": {
-            "description": "Invoice status",
-            "enum": [
-              "draft",
-              "sent",
-              "paid",
-              "void"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "subtotal": {
-            "description": "Subtotal before adjustments",
-            "title": "Subtotal",
-            "type": "string"
-          },
-          "total": {
-            "description": "Invoice total",
-            "title": "Total",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "When the invoice was last updated (ISO-8601)",
-            "title": "Updated At"
-          }
-        },
-        "required": [
-          "id",
-          "customer_id",
-          "invoice_number",
-          "period_start",
-          "period_end",
-          "subtotal",
-          "adjustments",
-          "total",
-          "status",
-          "line_items",
-          "pdf_s3_key",
-          "sent_at",
-          "paid_at",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "InvoiceItem",
-        "type": "object"
-      },
-      "InvoiceLineItem": {
-        "description": "A single line item on an invoice.\n\n``metering_source`` defaults to ``\"production\"`` for backward\ncompatibility with invoices generated before the metering_source\ndimension was introduced \u2014 those invoices were production-only by\ndefinition. New invoices always carry an explicit value.",
-        "properties": {
-          "description": {
-            "default": "",
-            "description": "Line item description",
-            "title": "Description",
-            "type": "string"
-          },
-          "meter_key": {
-            "description": "Meter identifier",
-            "title": "Meter Key",
-            "type": "string"
-          },
-          "metering_source": {
-            "default": "production",
-            "description": "Traffic class",
-            "enum": [
-              "production",
-              "simulation"
-            ],
-            "title": "Metering Source",
-            "type": "string"
-          },
-          "quantity": {
-            "description": "Usage quantity",
-            "title": "Quantity",
-            "type": "string"
-          },
-          "total": {
-            "description": "Line item total",
-            "title": "Total",
-            "type": "string"
-          },
-          "unit_price": {
-            "description": "Price per unit",
-            "title": "Unit Price",
-            "type": "string"
-          }
-        },
-        "required": [
-          "meter_key",
-          "quantity",
-          "unit_price",
-          "total"
-        ],
-        "title": "InvoiceLineItem",
         "type": "object"
       },
       "InvokeRequest": {
@@ -24461,141 +23964,6 @@
           "total"
         ],
         "title": "MergedEntitiesResponse",
-        "type": "object"
-      },
-      "MeterBreakdown": {
-        "description": "Breakdown of a meter value by sub-category.",
-        "properties": {
-          "categories": {
-            "additionalProperties": {
-              "type": "number"
-            },
-            "description": "Sub-category values",
-            "title": "Categories",
-            "type": "object"
-          }
-        },
-        "title": "MeterBreakdown",
-        "type": "object"
-      },
-      "MeterSummary": {
-        "properties": {
-          "display_name": {
-            "description": "Human-readable meter name",
-            "title": "Display Name",
-            "type": "string"
-          },
-          "meter_key": {
-            "description": "Unique meter identifier (e.g. voice_minutes)",
-            "title": "Meter Key",
-            "type": "string"
-          },
-          "metering_source": {
-            "default": "production",
-            "description": "Traffic class \u2014 production or simulation, billed separately",
-            "enum": [
-              "production",
-              "simulation"
-            ],
-            "title": "Metering Source",
-            "type": "string"
-          },
-          "unit": {
-            "description": "Unit of measurement (e.g. minutes, calls)",
-            "title": "Unit",
-            "type": "string"
-          },
-          "value": {
-            "description": "Metered value for the period",
-            "title": "Value",
-            "type": "number"
-          }
-        },
-        "required": [
-          "meter_key",
-          "display_name",
-          "value",
-          "unit"
-        ],
-        "title": "MeterSummary",
-        "type": "object"
-      },
-      "MeterValueItem": {
-        "properties": {
-          "breakdown": {
-            "$ref": "#/components/schemas/MeterBreakdown",
-            "description": "Sub-category breakdown"
-          },
-          "customer_id": {
-            "description": "Customer ID",
-            "title": "Customer Id",
-            "type": "string"
-          },
-          "id": {
-            "description": "Meter value record ID",
-            "title": "Id",
-            "type": "string"
-          },
-          "meter_key": {
-            "description": "Meter identifier",
-            "title": "Meter Key",
-            "type": "string"
-          },
-          "metering_source": {
-            "default": "production",
-            "description": "Traffic class",
-            "enum": [
-              "production",
-              "simulation"
-            ],
-            "title": "Metering Source",
-            "type": "string"
-          },
-          "period_end": {
-            "description": "Period end (ISO-8601)",
-            "title": "Period End",
-            "type": "string"
-          },
-          "period_start": {
-            "description": "Period start (ISO-8601)",
-            "title": "Period Start",
-            "type": "string"
-          },
-          "unit": {
-            "description": "Unit of measurement",
-            "title": "Unit",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Last updated (ISO-8601)",
-            "title": "Updated At"
-          },
-          "value": {
-            "description": "Metered value",
-            "title": "Value",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "customer_id",
-          "meter_key",
-          "period_start",
-          "period_end",
-          "value",
-          "unit",
-          "breakdown",
-          "updated_at"
-        ],
-        "title": "MeterValueItem",
         "type": "object"
       },
       "MeteringEmitRequest": {
@@ -31626,7 +30994,7 @@
         "type": "object"
       },
       "RegisterSourceRequest": {
-        "description": "Register a Google Shared Drive intake source (design \u00a73).\n\nThe credential is not part of the wire contract \u2014 the server derives the\nSA-key SSM path deterministically from the generated ``source_id`` (the\n``/intake-sources/`` convention) and the operator uploads the key there\nout-of-band. ``drive_id`` is optional (resolved at sync if omitted).",
+        "description": "Register a Google Shared Drive intake source (design \u00a73).\n\nThe credential is not part of the wire contract and nothing needs provisioning:\nthe source authenticates as the unified platform-infra intake service account,\nimpersonated from the pod's workload identity. Grant access Drive-side \u2014 share\nthe folder with that SA's email, or set ``impersonate_subject`` for the DWD\nmodel. ``drive_id`` is optional (resolved at sync if omitted).",
         "properties": {
           "display_name": {
             "maxLength": 200,
@@ -38673,6 +38041,7 @@
               "smart_fhir",
               "customer_intake",
               "lakebase_schema",
+              "snowflake",
               "crm"
             ],
             "title": "Source Type",
@@ -38815,6 +38184,7 @@
               "smart_fhir",
               "customer_intake",
               "lakebase_schema",
+              "snowflake",
               "crm"
             ],
             "title": "Source Type",
@@ -38903,6 +38273,7 @@
               "smart_fhir",
               "customer_intake",
               "lakebase_schema",
+              "snowflake",
               "crm"
             ],
             "title": "Source Type",
@@ -39543,6 +38914,19 @@
                 "type": "null"
               }
             ]
+          },
+          "authorization_binding_test_value": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.",
+            "title": "Authorization Binding Test Value"
           },
           "default": {
             "anyOf": [
@@ -45720,125 +45104,6 @@
         "title": "UpdateAgentRequest",
         "type": "object"
       },
-      "UpdateConfigRequest": {
-        "properties": {
-          "billing_cycle": {
-            "anyOf": [
-              {
-                "enum": [
-                  "monthly",
-                  "quarterly",
-                  "annual"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billing Cycle"
-          },
-          "billing_day": {
-            "anyOf": [
-              {
-                "maximum": 28.0,
-                "minimum": 1.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billing Day"
-          },
-          "currency": {
-            "anyOf": [
-              {
-                "maxLength": 3,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Currency"
-          },
-          "effective_from": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Effective From"
-          },
-          "effective_to": {
-            "anyOf": [
-              {
-                "format": "date",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Effective To"
-          },
-          "minimum_charge": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "pattern": "^(?!^[-+.]*$)[+-]?0*\\d*\\.?\\d*$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Minimum Charge"
-          },
-          "price_rules": {
-            "anyOf": [
-              {
-                "items": {
-                  "additionalProperties": true,
-                  "type": "object"
-                },
-                "maxItems": 100,
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Price Rules"
-          },
-          "strategy": {
-            "anyOf": [
-              {
-                "enum": [
-                  "usage",
-                  "outcome",
-                  "custom"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Strategy"
-          }
-        },
-        "title": "UpdateConfigRequest",
-        "type": "object"
-      },
       "UpdateContextGraphRequest": {
         "properties": {
           "description": {
@@ -45863,88 +45128,6 @@
           }
         },
         "title": "UpdateContextGraphRequest",
-        "type": "object"
-      },
-      "UpdateCustomerRequest": {
-        "properties": {
-          "address": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address"
-          },
-          "billing_contact": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billing Contact"
-          },
-          "billing_email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Billing Email"
-          },
-          "mercury_memo": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mercury Memo"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "minLength": 1,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "status": {
-            "anyOf": [
-              {
-                "enum": [
-                  "active",
-                  "archived"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Status"
-          }
-        },
-        "title": "UpdateCustomerRequest",
         "type": "object"
       },
       "UpdateDashboardRequest": {
@@ -47666,54 +46849,6 @@
         "title": "UsageSummaryResponse",
         "type": "object"
       },
-      "UsageTrendPoint": {
-        "properties": {
-          "meter_key": {
-            "description": "Meter identifier",
-            "title": "Meter Key",
-            "type": "string"
-          },
-          "metering_source": {
-            "default": "production",
-            "description": "Traffic class",
-            "enum": [
-              "production",
-              "simulation"
-            ],
-            "title": "Metering Source",
-            "type": "string"
-          },
-          "period_end": {
-            "description": "Period end date (ISO-8601)",
-            "title": "Period End",
-            "type": "string"
-          },
-          "period_start": {
-            "description": "Period start date (ISO-8601)",
-            "title": "Period Start",
-            "type": "string"
-          },
-          "unit": {
-            "description": "Unit of measurement",
-            "title": "Unit",
-            "type": "string"
-          },
-          "value": {
-            "description": "Metered value for this period",
-            "title": "Value",
-            "type": "number"
-          }
-        },
-        "required": [
-          "period_start",
-          "period_end",
-          "meter_key",
-          "value",
-          "unit"
-        ],
-        "title": "UsageTrendPoint",
-        "type": "object"
-      },
       "UserTranscriptEvent": {
         "properties": {
           "eot_confidence": {
@@ -49228,30 +48363,6 @@
         "title": "WorkspaceInvitationSentEvent",
         "type": "object"
       },
-      "WorkspaceInvoiceListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/InvoiceItem"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "WorkspaceInvoiceListResponse",
-        "type": "object"
-      },
       "WorkspaceListResponse": {
         "properties": {
           "continuation_token": {
@@ -49943,6 +49054,19 @@
                 "type": "null"
               }
             ]
+          },
+          "authorization_binding_test_value": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical CSV resource keys used only by trusted function-test or playground execution when no live authorization block exists.",
+            "title": "Authorization Binding Test Value"
           },
           "default": {
             "anyOf": [
@@ -51255,6 +50379,19 @@
               }
             ]
           },
+          "authorization_binding_test_value": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.",
+            "title": "Authorization Binding Test Value"
+          },
           "default": {
             "anyOf": [
               {
@@ -51523,6 +50660,19 @@
                 "type": "null"
               }
             ]
+          },
+          "authorization_binding_test_value": {
+            "anyOf": [
+              {
+                "maxLength": 2048,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.",
+            "title": "Authorization Binding Test Value"
           },
           "default": {
             "anyOf": [
@@ -51891,6 +51041,11 @@
     "securitySchemes": {
       "BearerAuth": {
         "description": "API key issued via `POST /v1/{workspace_id}/api-keys`. Pass the returned `api_key` value as a Bearer token.",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "DesignAgentCollectorToken": {
+        "description": "Write-only shared token for the design-agent session collector. This is not a platform API key and grants no read access.",
         "scheme": "bearer",
         "type": "http"
       }
@@ -53183,106 +52338,72 @@
         ]
       }
     },
-    "/v1/billing/customers": {
-      "get": {
-        "description": "Paginated customer list with optional status filter and search.",
-        "operationId": "list-billing-customers",
+    "/v1/design-agent/session": {
+      "post": {
+        "description": "Durably capture one full design-hq session transcript.\n\nThe raw ``.jsonl`` body is written to the UC Volume synchronously and then\na single manifest row is emitted fail-closed; a 201 is returned ONLY after\nboth are durable. A failure in either the Volume write or the manifest emit\nsurfaces as a 5xx so the client re-uploads (at-least-once - a re-upload\nappends a second raw blob + manifest row for the same session, deduped, if\never, downstream). Requests outside a design-hq checkout return 201\n``dropped`` without any Volume write or emit.",
+        "operationId": "collect-design-agent-session",
         "parameters": [
           {
             "in": "query",
-            "name": "limit",
-            "required": false,
+            "name": "session_id",
+            "required": true,
             "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
+              "maxLength": 256,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9._-]+$",
+              "title": "Session Id",
+              "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "continuation_token",
-            "required": false,
+            "name": "cwd",
+            "required": true,
             "schema": {
-              "title": "Continuation Token"
+              "maxLength": 4096,
+              "minLength": 1,
+              "title": "Cwd",
+              "type": "string"
             }
           },
           {
             "in": "query",
-            "name": "status",
+            "name": "reason",
+            "required": true,
+            "schema": {
+              "maxLength": 256,
+              "minLength": 1,
+              "title": "Reason",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Optional, unverified user identity reported by the client.",
+            "in": "query",
+            "name": "user",
             "required": false,
             "schema": {
               "anyOf": [
                 {
-                  "enum": [
-                    "active",
-                    "archived"
-                  ],
+                  "maxLength": 320,
+                  "minLength": 1,
                   "type": "string"
                 },
                 {
                   "type": "null"
                 }
               ],
-              "title": "Status"
-            }
-          },
-          {
-            "description": "Search by name or slug",
-            "in": "query",
-            "name": "search",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 200,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Search by name or slug",
-              "title": "Search"
+              "description": "Optional, unverified user identity reported by the client.",
+              "title": "User"
             }
           }
         ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Customers",
-        "tags": [
-          "Billing"
-        ]
-      },
-      "post": {
-        "description": "Create a billing customer.",
-        "operationId": "create-billing-customer",
         "requestBody": {
           "content": {
-            "application/json": {
+            "application/x-ndjson": {
               "schema": {
-                "$ref": "#/components/schemas/CreateCustomerRequest"
+                "format": "binary",
+                "type": "string"
               }
             }
           },
@@ -53293,9 +52414,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Create-Billing-Customer",
-                  "type": "object"
+                  "$ref": "#/components/schemas/DesignAgentSessionResponse"
                 }
               }
             },
@@ -53312,771 +52431,14 @@
             "description": "Validation Error"
           }
         },
-        "summary": "Create Customer",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}": {
-      "get": {
-        "description": "Get customer detail with workspace mappings.",
-        "operationId": "get-billing-customer",
-        "parameters": [
+        "security": [
           {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
+            "DesignAgentCollectorToken": []
           }
         ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Billing-Customer",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Customer",
+        "summary": "Collect Session",
         "tags": [
-          "Billing"
-        ]
-      },
-      "put": {
-        "description": "Update a billing customer.",
-        "operationId": "update-billing-customer",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCustomerRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update-Billing-Customer",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Update Customer",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/config": {
-      "get": {
-        "description": "Get billing configuration for a customer.",
-        "operationId": "get-billing-config",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Billing-Config",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Config",
-        "tags": [
-          "Billing"
-        ]
-      },
-      "put": {
-        "description": "Update billing config and price rules.",
-        "operationId": "update-billing-config",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateConfigRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Update-Billing-Config",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Update Config",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/generate-invoice": {
-      "post": {
-        "description": "Generate invoice for the most recently closed billing period.\n\nReads meter_values (populated by Databricks SDP pipeline), applies\nprice rules, computes line items, creates invoice. Idempotent.",
-        "operationId": "generate-billing-invoice",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Generate-Billing-Invoice",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Generate Invoice",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/invoices": {
-      "get": {
-        "description": "Paginated invoice list for a customer with status and date filters.",
-        "operationId": "list-customer-invoices",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "title": "Continuation Token"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "draft",
-                    "sent",
-                    "paid",
-                    "void"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "description": "Filter invoices with period_start on or after",
-            "in": "query",
-            "name": "date_from",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter invoices with period_start on or after",
-              "title": "Date From"
-            }
-          },
-          {
-            "description": "Filter invoices with period_end on or before",
-            "in": "query",
-            "name": "date_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter invoices with period_end on or before",
-              "title": "Date To"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerInvoiceListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Customer Invoices",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/paid": {
-      "post": {
-        "description": "Mark invoice as paid.",
-        "operationId": "mark-billing-invoice-paid",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "invoice_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Invoice Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Mark-Billing-Invoice-Paid",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Mark Paid",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/send": {
-      "post": {
-        "description": "Mark invoice as sent.",
-        "operationId": "send-billing-invoice",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "invoice_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Invoice Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Send-Billing-Invoice",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Send Invoice",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/void": {
-      "post": {
-        "description": "Void an invoice.",
-        "operationId": "void-billing-invoice",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "invoice_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Invoice Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Void-Billing-Invoice",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Void Invoice",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/usage": {
-      "get": {
-        "description": "Paginated meter values for a customer with date range and meter filter.",
-        "operationId": "get-customer-usage",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "title": "Continuation Token"
-            }
-          },
-          {
-            "description": "Filter meter values with period_start on or after",
-            "in": "query",
-            "name": "date_from",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter meter values with period_start on or after",
-              "title": "Date From"
-            }
-          },
-          {
-            "description": "Filter meter values with period_end on or before",
-            "in": "query",
-            "name": "date_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter meter values with period_end on or before",
-              "title": "Date To"
-            }
-          },
-          {
-            "description": "Filter by meter key",
-            "in": "query",
-            "name": "meter_key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 64,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by meter key",
-              "title": "Meter Key"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CustomerUsageListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Customer Usage",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/workspaces": {
-      "post": {
-        "description": "Attach a workspace to a billing customer.",
-        "operationId": "attach-billing-workspace",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AttachWorkspaceRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Attach-Billing-Workspace",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Attach Workspace",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/billing/customers/{customer_id}/workspaces/{workspace_id}": {
-      "delete": {
-        "description": "Detach a workspace from a billing customer.",
-        "operationId": "detach-billing-workspace",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "customer_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Customer Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Detach Workspace",
-        "tags": [
-          "Billing"
+          "Design Agent"
         ]
       }
     },
@@ -58526,423 +56888,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/billing/dashboard": {
-      "get": {
-        "description": "Composite billing dashboard \u2014 KPIs, period comparison, top meters, invoice summary.\n\nAll computation is server-side. Frontend is a pure renderer.",
-        "operationId": "get-billing-dashboard",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BillingDashboardResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Get Billing Dashboard",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/billing/invoices": {
-      "get": {
-        "description": "Paginated invoice list for this workspace's billing customer.\n\nSupports status filter and date range.",
-        "operationId": "list-billing-invoices",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "title": "Continuation Token"
-            }
-          },
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "draft",
-                    "sent",
-                    "paid",
-                    "void"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "description": "Filter invoices with period_start on or after this date",
-            "in": "query",
-            "name": "date_from",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter invoices with period_start on or after this date",
-              "title": "Date From"
-            }
-          },
-          {
-            "description": "Filter invoices with period_end on or before this date",
-            "in": "query",
-            "name": "date_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter invoices with period_end on or before this date",
-              "title": "Date To"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/WorkspaceInvoiceListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Workspace Invoices",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/billing/invoices/{invoice_id}": {
-      "get": {
-        "description": "Get invoice detail \u2014 scoped to workspace's billing customer.",
-        "operationId": "get-billing-invoice",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "invoice_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Invoice Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Billing-Invoice",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Workspace Invoice",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/billing/invoices/{invoice_id}/pdf": {
-      "get": {
-        "description": "Get presigned S3 URL for invoice PDF download \u2014 scoped to workspace's billing customer.",
-        "operationId": "get-billing-invoice-pdf",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "invoice_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Invoice Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Billing-Invoice-Pdf",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Invoice Pdf",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/billing/usage": {
-      "get": {
-        "description": "Aggregated billing summary \u2014 meters grouped by key, period range, totals.\n\nAll computation is server-side. Frontend is a pure renderer.",
-        "operationId": "get-billing-usage",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get-Billing-Usage",
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Get Workspace Usage",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/billing/usage/trends": {
-      "get": {
-        "description": "Usage time-series per meter for trend charts.\n\nReturns one entry per (period, meter_key) within the date range.\nDefault: last 30 days. Use date_from/date_to for custom ranges.",
-        "operationId": "get-billing-usage-trends",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "days",
-            "required": false,
-            "schema": {
-              "default": 30,
-              "maximum": 365,
-              "minimum": 1,
-              "title": "Days",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "date_from",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Date From"
-            }
-          },
-          {
-            "in": "query",
-            "name": "date_to",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "date",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Date To"
-            }
-          },
-          {
-            "in": "query",
-            "name": "meter_key",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 64,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Meter Key"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/UsageTrendPoint"
-                  },
-                  "title": "Response Get-Billing-Usage-Trends",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Workspace Usage Trends",
-        "tags": [
-          "Billing"
-        ]
-      }
-    },
     "/v1/{workspace_id}/brief": {
       "get": {
         "description": "Return the latest workspace-level Self-Image brief (null shape if none).",
@@ -63174,6 +61119,7 @@
             "required": false,
             "schema": {
               "default": [],
+              "deprecated": true,
               "items": {
                 "type": "string"
               },
@@ -63199,6 +61145,23 @@
             "required": false,
             "schema": {
               "title": "Continuation Token"
+            }
+          },
+          {
+            "in": "query",
+            "name": "external_integration_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "External Integration Id"
             }
           }
         ],
@@ -63258,17 +61221,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ExternalIdentityBindingItem"
+                  "$ref": "#/components/schemas/ExternalIdentityBindingUpsertResponse"
                 }
               }
             },
             "description": "Successful Response"
           },
           "404": {
-            "description": "entity_id not found in workspace"
+            "description": "entity_id or active external integration not found in workspace"
           },
           "409": {
-            "description": "subject_key already bound to a different entity, or entity_id is a role-assigned principal"
+            "description": "consumer subject already bound to another entity, or entity_id is a principal"
           },
           "422": {
             "content": {
@@ -63279,6 +61242,12 @@
               }
             },
             "description": "Validation Error"
+          },
+          "502": {
+            "description": "Identity rejected the binding request"
+          },
+          "503": {
+            "description": "Identity service unavailable"
           }
         },
         "summary": "Upsert External Identity Binding",
@@ -63328,6 +61297,12 @@
               }
             },
             "description": "Validation Error"
+          },
+          "502": {
+            "description": "Identity rejected the clear request"
+          },
+          "503": {
+            "description": "Identity service unavailable"
           }
         },
         "summary": "Delete External Identity Binding",
@@ -67680,110 +65655,6 @@
           }
         },
         "summary": "Upload Intake File",
-        "tags": [
-          "Intake"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/intake/files/external": {
-      "post": {
-        "operationId": "receive_intake_file_v1__workspace_id__intake_files_external_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-sha256",
-            "required": true,
-            "schema": {
-              "maxLength": 64,
-              "title": "X-Amigo-Intake-Sha256",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-timestamp",
-            "required": true,
-            "schema": {
-              "maxLength": 20,
-              "title": "X-Amigo-Intake-Timestamp",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-signature",
-            "required": true,
-            "schema": {
-              "maxLength": 512,
-              "title": "X-Amigo-Intake-Signature",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-customer-slug",
-            "required": true,
-            "schema": {
-              "maxLength": 63,
-              "title": "X-Amigo-Intake-Customer-Slug",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-filename",
-            "required": true,
-            "schema": {
-              "maxLength": 256,
-              "title": "X-Amigo-Intake-Filename",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-amigo-intake-content-type",
-            "required": false,
-            "schema": {
-              "default": "application/octet-stream",
-              "maxLength": 128,
-              "title": "X-Amigo-Intake-Content-Type",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IntakeFileResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Receive Intake File",
         "tags": [
           "Intake"
         ]
@@ -76888,7 +74759,7 @@
     },
     "/v1/{workspace_id}/services/{service_id}/voice-turn": {
       "post": {
-        "description": "Run one WhatsApp-style voice-note turn against the service's agent.\n\nAccepts OGG Opus audio (or any format Deepgram's prerecorded endpoint\naccepts). Server keys the conversation on ``(workspace, service,\nphone_number)`` and returns the agent's spoken reply as OGG Opus.",
+        "description": "Run one WhatsApp-style voice-note turn against the service's agent.\n\nAccepts OGG Opus audio (or any format Deepgram's prerecorded endpoint\naccepts). Server keys the conversation on ``(workspace, service,\nphone_number)`` and returns the agent's spoken reply as OGG Opus \u2014 or WAV\nPCM16 when the ``Accept`` header prefers ``audio/wav``.",
         "operationId": "voice-turn",
         "parameters": [
           {
@@ -76910,6 +74781,22 @@
               "title": "Service Id",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "accept",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Accept"
+            }
           }
         ],
         "requestBody": {
@@ -76928,9 +74815,10 @@
               "application/json": {
                 "schema": {}
               },
-              "audio/ogg": {}
+              "audio/ogg": {},
+              "audio/wav": {}
             },
-            "description": "OGG Opus agent reply"
+            "description": "Agent spoken reply \u2014 OGG Opus by default, WAV PCM16 (16 kHz mono) when the request's Accept header prefers audio/wav"
           },
           "204": {
             "description": "Agent elected silence"
@@ -78080,7 +75968,7 @@
     },
     "/v1/{workspace_id}/settings/topic-modeling": {
       "get": {
-        "description": "Return the durable desired state for customer topic analytics.",
+        "description": "Return topic-analytics exposure for the credential's own workspace.\n\nRequires ``TopicModeling:Manage``.",
         "operationId": "get-topic-modeling-settings",
         "parameters": [
           {
@@ -78112,7 +76000,7 @@
         ]
       },
       "put": {
-        "description": "Set desired exposure and schedule idempotent Databricks reconciliation.",
+        "description": "Set exposure for the credential's own workspace and schedule reconciliation.\n\nRequires ``TopicModeling:Manage``.",
         "operationId": "update-topic-modeling-settings",
         "parameters": [
           {
