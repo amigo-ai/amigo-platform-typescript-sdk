@@ -339,79 +339,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/billing/customers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Customers
-         * @description Paginated customer list with optional status filter and search.
-         */
-        get: operations["list-billing-customers"];
-        put?: never;
-        /**
-         * Create Customer
-         * @description Create a billing customer.
-         */
-        post: operations["create-billing-customer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Customer
-         * @description Get customer detail with workspace mappings.
-         */
-        get: operations["get-billing-customer"];
-        /**
-         * Update Customer
-         * @description Update a billing customer.
-         */
-        put: operations["update-billing-customer"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Config
-         * @description Get billing configuration for a customer.
-         */
-        get: operations["get-billing-config"];
-        /**
-         * Update Config
-         * @description Update billing config and price rules.
-         */
-        put: operations["update-billing-config"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/generate-invoice": {
+    "/v1/design-agent/session": {
         parameters: {
             query?: never;
             header?: never;
@@ -421,154 +349,19 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Generate Invoice
-         * @description Generate invoice for the most recently closed billing period.
+         * Collect Session
+         * @description Durably capture one full design-hq session transcript.
          *
-         *     Reads meter_values (populated by Databricks SDP pipeline), applies
-         *     price rules, computes line items, creates invoice. Idempotent.
+         *     The raw ``.jsonl`` body is written to the UC Volume synchronously and then
+         *     a single manifest row is emitted fail-closed; a 201 is returned ONLY after
+         *     both are durable. A failure in either the Volume write or the manifest emit
+         *     surfaces as a 5xx so the client re-uploads (at-least-once - a re-upload
+         *     appends a second raw blob + manifest row for the same session, deduped, if
+         *     ever, downstream). Requests outside a design-hq checkout return 201
+         *     ``dropped`` without any Volume write or emit.
          */
-        post: operations["generate-billing-invoice"];
+        post: operations["collect-design-agent-session"];
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/invoices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Customer Invoices
-         * @description Paginated invoice list for a customer with status and date filters.
-         */
-        get: operations["list-customer-invoices"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/paid": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Mark Paid
-         * @description Mark invoice as paid.
-         */
-        post: operations["mark-billing-invoice-paid"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/send": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Send Invoice
-         * @description Mark invoice as sent.
-         */
-        post: operations["send-billing-invoice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/invoices/{invoice_id}/void": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Void Invoice
-         * @description Void an invoice.
-         */
-        post: operations["void-billing-invoice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/usage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Customer Usage
-         * @description Paginated meter values for a customer with date range and meter filter.
-         */
-        get: operations["get-customer-usage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/workspaces": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Attach Workspace
-         * @description Attach a workspace to a billing customer.
-         */
-        post: operations["attach-billing-workspace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/billing/customers/{customer_id}/workspaces/{workspace_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /**
-         * Detach Workspace
-         * @description Detach a workspace from a billing customer.
-         */
-        delete: operations["detach-billing-workspace"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1577,135 +1370,6 @@ export interface paths {
          *     Permissions: admin, owner (``Audit.view``)
          */
         get: operations["get-audit-summary"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Billing Dashboard
-         * @description Composite billing dashboard — KPIs, period comparison, top meters, invoice summary.
-         *
-         *     All computation is server-side. Frontend is a pure renderer.
-         */
-        get: operations["get-billing-dashboard"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/invoices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Workspace Invoices
-         * @description Paginated invoice list for this workspace's billing customer.
-         *
-         *     Supports status filter and date range.
-         */
-        get: operations["list-billing-invoices"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/invoices/{invoice_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Workspace Invoice
-         * @description Get invoice detail — scoped to workspace's billing customer.
-         */
-        get: operations["get-billing-invoice"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/invoices/{invoice_id}/pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Invoice Pdf
-         * @description Get presigned S3 URL for invoice PDF download — scoped to workspace's billing customer.
-         */
-        get: operations["get-billing-invoice-pdf"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/usage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Workspace Usage
-         * @description Aggregated billing summary — meters grouped by key, period range, totals.
-         *
-         *     All computation is server-side. Frontend is a pure renderer.
-         */
-        get: operations["get-billing-usage"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/billing/usage/trends": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Workspace Usage Trends
-         * @description Usage time-series per meter for trend charts.
-         *
-         *     Returns one entry per (period, meter_key) within the date range.
-         *     Default: last 30 days. Use date_from/date_to for custom ranges.
-         */
-        get: operations["get-billing-usage-trends"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3690,23 +3354,6 @@ export interface paths {
         put?: never;
         /** Upload Intake File */
         post: operations["upload_intake_file_v1__workspace_id__intake_files_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/intake/files/external": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Receive Intake File */
-        post: operations["receive_intake_file_v1__workspace_id__intake_files_external_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5842,7 +5489,8 @@ export interface paths {
          *
          *     Accepts OGG Opus audio (or any format Deepgram's prerecorded endpoint
          *     accepts). Server keys the conversation on ``(workspace, service,
-         *     phone_number)`` and returns the agent's spoken reply as OGG Opus.
+         *     phone_number)`` and returns the agent's spoken reply as OGG Opus — or WAV
+         *     PCM16 when the ``Accept`` header prefers ``audio/wav``.
          */
         post: operations["voice-turn"];
         delete?: never;
@@ -6258,12 +5906,16 @@ export interface paths {
         };
         /**
          * Get conversation topic analytics exposure
-         * @description Return the durable desired state for customer topic analytics.
+         * @description Return topic-analytics exposure for the credential's own workspace.
+         *
+         *     Requires ``TopicModeling:Manage``.
          */
         get: operations["get-topic-modeling-settings"];
         /**
          * Enable or disable conversation topic analytics exposure
-         * @description Set desired exposure and schedule idempotent Databricks reconciliation.
+         * @description Set exposure for the credential's own workspace and schedule reconciliation.
+         *
+         *     Requires ``TopicModeling:Manage``.
          */
         put: operations["update-topic-modeling-settings"];
         post?: never;
@@ -9043,25 +8695,6 @@ export interface components {
         ArchiveWorkspaceRequest: {
             slug: components["schemas"]["SlugString"];
         };
-        /** AttachWorkspaceRequest */
-        AttachWorkspaceRequest: {
-            /**
-             * Billable
-             * @default true
-             */
-            billable?: boolean;
-            /**
-             * Environment
-             * @default production
-             * @enum {string}
-             */
-            environment?: "production" | "staging" | "development";
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** AuditEventsListResponse */
         AuditEventsListResponse: {
             /** Events */
@@ -9343,52 +8976,6 @@ export interface components {
              */
             status: string;
         };
-        /** BillingDashboardResponse */
-        BillingDashboardResponse: {
-            /**
-             * Current Period Total
-             * @description Total billing for the current period
-             */
-            current_period_total: number;
-            /**
-             * Delta Pct
-             * @description Percentage change from previous period
-             */
-            delta_pct: number | null;
-            /**
-             * Invoice Status Summary
-             * @description Invoice counts by status
-             */
-            invoice_status_summary: {
-                [key: string]: number;
-            };
-            /**
-             * Period End
-             * @description Current period end date (ISO-8601)
-             */
-            period_end: string | null;
-            /**
-             * Period Start
-             * @description Current period start date (ISO-8601)
-             */
-            period_start: string | null;
-            /**
-             * Previous Period Total
-             * @description Total billing for the previous period
-             */
-            previous_period_total: number | null;
-            /**
-             * Top Meters
-             * @description Top meters by value
-             */
-            top_meters: components["schemas"]["MeterSummary"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             * @description Workspace ID
-             */
-            workspace_id: string;
-        };
         /** BindingUpsertRequest */
         BindingUpsertRequest: {
             /** Display Name */
@@ -9398,9 +8985,17 @@ export interface components {
              * Format: uuid
              */
             entity_id: string;
+            /**
+             * External Integration Id
+             * Format: uuid
+             */
+            external_integration_id: string;
             /** External Subject Key */
             external_subject_key: string;
-            /** Source */
+            /**
+             * Source
+             * @deprecated
+             */
             source?: string | null;
         };
         /** Body_upload_intake_file_v1__workspace_id__intake_files_post */
@@ -12109,26 +11704,6 @@ export interface components {
              */
             use_case_id?: string | null;
         };
-        /** CreateCustomerRequest */
-        CreateCustomerRequest: {
-            /** Address */
-            address?: {
-                [key: string]: unknown;
-            };
-            /** Billing Contact */
-            billing_contact?: string | null;
-            /**
-             * Billing Email
-             * Format: email
-             */
-            billing_email: string;
-            /** Mercury Memo */
-            mercury_memo?: string | null;
-            /** Name */
-            name: string;
-            /** Slug */
-            slug: string;
-        };
         /** CreateDashboardRequest */
         CreateDashboardRequest: {
             description?: components["schemas"]["DescriptionString"] | null;
@@ -12169,7 +11744,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -12863,125 +12438,6 @@ export interface components {
             type: "custom_token_exchange";
         };
         /**
-         * CustomerAddress
-         * @description Customer billing address.
-         */
-        CustomerAddress: {
-            /**
-             * City
-             * @description City
-             * @default
-             */
-            city?: string;
-            /**
-             * Country
-             * @description ISO 3166-1 alpha-2 country code
-             * @default US
-             */
-            country?: string;
-            /**
-             * Line1
-             * @description Street address line 1
-             * @default
-             */
-            line1?: string;
-            /**
-             * Line2
-             * @description Street address line 2
-             */
-            line2?: string | null;
-            /**
-             * Postal Code
-             * @description Postal or ZIP code
-             * @default
-             */
-            postal_code?: string;
-            /**
-             * State
-             * @description State or province
-             * @default
-             */
-            state?: string;
-        };
-        /** CustomerInvoiceListResponse */
-        CustomerInvoiceListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["InvoiceItem"][];
-        };
-        /** CustomerItem */
-        CustomerItem: {
-            /** @description Billing address */
-            address: components["schemas"]["CustomerAddress"];
-            /**
-             * Billing Contact
-             * @description Billing contact name
-             */
-            billing_contact: string | null;
-            /**
-             * Billing Email
-             * @description Primary billing email
-             */
-            billing_email: string;
-            /**
-             * Created At
-             * @description When the customer was created (ISO-8601)
-             */
-            created_at: string | null;
-            /**
-             * Id
-             * @description Customer ID
-             */
-            id: string;
-            /**
-             * Mercury Memo
-             * @description Mercury bank memo reference
-             */
-            mercury_memo: string | null;
-            /**
-             * Name
-             * @description Customer name
-             */
-            name: string;
-            /**
-             * Slug
-             * @description URL-safe identifier
-             */
-            slug: string;
-            /**
-             * Status
-             * @description Customer status
-             * @enum {string}
-             */
-            status: "active" | "archived";
-            /**
-             * Updated At
-             * @description When the customer was last updated (ISO-8601)
-             */
-            updated_at: string | null;
-        };
-        /** CustomerListResponse */
-        CustomerListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["CustomerItem"][];
-        };
-        /** CustomerUsageListResponse */
-        CustomerUsageListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["MeterValueItem"][];
-        };
-        /**
          * DailyCallStat
          * @description Per-day call volume and duration.
          */
@@ -13388,7 +12844,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
             /** Sync Schedule */
             sync_schedule: string | null;
             /**
@@ -13737,6 +13193,14 @@ export interface components {
             url?: string | null;
         };
         DescriptionString: string;
+        /** DesignAgentSessionResponse */
+        DesignAgentSessionResponse: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "stored" | "dropped";
+        };
         /** DestroySessionResponse */
         DestroySessionResponse: {
             /**
@@ -15430,20 +14894,31 @@ export interface components {
              * Format: uuid
              */
             entity_id: string;
-            /** External Subject Key */
-            external_subject_key: string;
+            /**
+             * External Integration Id
+             * Format: uuid
+             */
+            external_integration_id: string;
             /**
              * Id
              * Format: uuid
              */
             id: string;
-            /** Source */
+            /**
+             * Source
+             * @deprecated
+             */
             source?: string | null;
             /**
              * Status
              * @enum {string}
              */
             status: "active" | "revoked";
+            /**
+             * Subject Type
+             * @constant
+             */
+            subject_type: "user";
             /**
              * Updated At
              * Format: date-time
@@ -15458,6 +14933,56 @@ export interface components {
             has_more: boolean;
             /** Items */
             items: components["schemas"]["ExternalIdentityBindingItem"][];
+        };
+        /** ExternalIdentityBindingUpsertResponse */
+        ExternalIdentityBindingUpsertResponse: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Display Name */
+            display_name?: string | null;
+            /**
+             * Entity Id
+             * Format: uuid
+             */
+            entity_id: string;
+            /**
+             * External Integration Id
+             * Format: uuid
+             */
+            external_integration_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Source
+             * @deprecated
+             */
+            source?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "revoked";
+            /**
+             * Subject Type
+             * @constant
+             */
+            subject_type: "user";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /**
+             * Upsert Outcome
+             * @enum {string}
+             */
+            upsert_outcome: "created" | "materialized" | "unchanged";
         };
         /** ExternalIntegrationCredentialRequest */
         ExternalIntegrationCredentialRequest: {
@@ -17230,22 +16755,6 @@ export interface components {
          * @enum {string}
          */
         IntakeFieldType: "str" | "int" | "float" | "bool" | "date" | "datetime";
-        /** IntakeFileResponse */
-        IntakeFileResponse: {
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Scan Status */
-            scan_status: string;
-            /** Sha256 */
-            sha256: string;
-            /** Size Bytes */
-            size_bytes: number;
-            /** Volume Path */
-            volume_path: string;
-        };
         /**
          * IntakeFileRow
          * @description A file in the Files list (intake-ui-mvp-design.md §5.1).
@@ -17371,9 +16880,11 @@ export interface components {
             created_ts: string;
             /**
              * Credential Ssm Param Path
-             * @description Where the SA key must be uploaded (derived; the secret itself is never returned).
+             * @description LEGACY: the SSM path a per-workspace SA key was uploaded to, for sources
+             *     registered before the unified intake service account. ``None`` for every source
+             *     registered since — those authenticate keyless, with no secret to provision.
              */
-            credential_ssm_param_path: string;
+            credential_ssm_param_path?: string | null;
             /** Display Name */
             display_name: string;
             /** Drive Id */
@@ -17625,129 +17136,6 @@ export interface components {
         InternalSkillsListResponse: {
             /** Items */
             items: components["schemas"]["InternalSkillResponse"][];
-        };
-        /** InvoiceItem */
-        InvoiceItem: {
-            /**
-             * Adjustments
-             * @description Adjustment amount
-             */
-            adjustments: string;
-            /**
-             * Created At
-             * @description When the invoice was created (ISO-8601)
-             */
-            created_at: string | null;
-            /**
-             * Customer Id
-             * @description Customer ID
-             */
-            customer_id: string;
-            /**
-             * Id
-             * @description Invoice ID
-             */
-            id: string;
-            /**
-             * Invoice Number
-             * @description Human-readable invoice number
-             */
-            invoice_number: string;
-            /**
-             * Line Items
-             * @description Itemized charges
-             */
-            line_items: components["schemas"]["InvoiceLineItem"][];
-            /**
-             * Paid At
-             * @description When the invoice was paid (ISO-8601)
-             */
-            paid_at: string | null;
-            /**
-             * Pdf S3 Key
-             * @description S3 key for the PDF
-             */
-            pdf_s3_key: string | null;
-            /**
-             * Period End
-             * @description Billing period end (ISO-8601)
-             */
-            period_end: string;
-            /**
-             * Period Start
-             * @description Billing period start (ISO-8601)
-             */
-            period_start: string;
-            /**
-             * Sent At
-             * @description When the invoice was sent (ISO-8601)
-             */
-            sent_at: string | null;
-            /**
-             * Status
-             * @description Invoice status
-             * @enum {string}
-             */
-            status: "draft" | "sent" | "paid" | "void";
-            /**
-             * Subtotal
-             * @description Subtotal before adjustments
-             */
-            subtotal: string;
-            /**
-             * Total
-             * @description Invoice total
-             */
-            total: string;
-            /**
-             * Updated At
-             * @description When the invoice was last updated (ISO-8601)
-             */
-            updated_at: string | null;
-        };
-        /**
-         * InvoiceLineItem
-         * @description A single line item on an invoice.
-         *
-         *     ``metering_source`` defaults to ``"production"`` for backward
-         *     compatibility with invoices generated before the metering_source
-         *     dimension was introduced — those invoices were production-only by
-         *     definition. New invoices always carry an explicit value.
-         */
-        InvoiceLineItem: {
-            /**
-             * Description
-             * @description Line item description
-             * @default
-             */
-            description?: string;
-            /**
-             * Meter Key
-             * @description Meter identifier
-             */
-            meter_key: string;
-            /**
-             * Metering Source
-             * @description Traffic class
-             * @default production
-             * @enum {string}
-             */
-            metering_source?: "production" | "simulation";
-            /**
-             * Quantity
-             * @description Usage quantity
-             */
-            quantity: string;
-            /**
-             * Total
-             * @description Line item total
-             */
-            total: string;
-            /**
-             * Unit Price
-             * @description Price per unit
-             */
-            unit_price: string;
         };
         /**
          * InvokeRequest
@@ -18267,101 +17655,6 @@ export interface components {
             linked_entities: components["schemas"]["EntityResponse"][];
             /** Total */
             total: number;
-        };
-        /**
-         * MeterBreakdown
-         * @description Breakdown of a meter value by sub-category.
-         */
-        MeterBreakdown: {
-            /**
-             * Categories
-             * @description Sub-category values
-             */
-            categories?: {
-                [key: string]: number;
-            };
-        };
-        /** MeterSummary */
-        MeterSummary: {
-            /**
-             * Display Name
-             * @description Human-readable meter name
-             */
-            display_name: string;
-            /**
-             * Meter Key
-             * @description Unique meter identifier (e.g. voice_minutes)
-             */
-            meter_key: string;
-            /**
-             * Metering Source
-             * @description Traffic class — production or simulation, billed separately
-             * @default production
-             * @enum {string}
-             */
-            metering_source?: "production" | "simulation";
-            /**
-             * Unit
-             * @description Unit of measurement (e.g. minutes, calls)
-             */
-            unit: string;
-            /**
-             * Value
-             * @description Metered value for the period
-             */
-            value: number;
-        };
-        /** MeterValueItem */
-        MeterValueItem: {
-            /** @description Sub-category breakdown */
-            breakdown: components["schemas"]["MeterBreakdown"];
-            /**
-             * Customer Id
-             * @description Customer ID
-             */
-            customer_id: string;
-            /**
-             * Id
-             * @description Meter value record ID
-             */
-            id: string;
-            /**
-             * Meter Key
-             * @description Meter identifier
-             */
-            meter_key: string;
-            /**
-             * Metering Source
-             * @description Traffic class
-             * @default production
-             * @enum {string}
-             */
-            metering_source?: "production" | "simulation";
-            /**
-             * Period End
-             * @description Period end (ISO-8601)
-             */
-            period_end: string;
-            /**
-             * Period Start
-             * @description Period start (ISO-8601)
-             */
-            period_start: string;
-            /**
-             * Unit
-             * @description Unit of measurement
-             */
-            unit: string;
-            /**
-             * Updated At
-             * @description Last updated (ISO-8601)
-             */
-            updated_at: string | null;
-            /**
-             * Value
-             * @description Metered value
-             */
-            value: string;
         };
         /** MeteringEmitRequest */
         MeteringEmitRequest: {
@@ -21361,10 +20654,11 @@ export interface components {
          * RegisterSourceRequest
          * @description Register a Google Shared Drive intake source (design §3).
          *
-         *     The credential is not part of the wire contract — the server derives the
-         *     SA-key SSM path deterministically from the generated ``source_id`` (the
-         *     ``/intake-sources/`` convention) and the operator uploads the key there
-         *     out-of-band. ``drive_id`` is optional (resolved at sync if omitted).
+         *     The credential is not part of the wire contract and nothing needs provisioning:
+         *     the source authenticates as the unified platform-infra intake service account,
+         *     impersonated from the pod's workload identity. Grant access Drive-side — share
+         *     the folder with that SA's email, or set ``impersonate_subject`` for the DWD
+         *     model. ``drive_id`` is optional (resolved at sync if omitted).
          */
         RegisterSourceRequest: {
             /** Display Name */
@@ -24424,7 +23718,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -24484,7 +23778,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -24523,7 +23817,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "crm";
+            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
             /** Status */
             status: string;
             /**
@@ -24812,6 +24106,11 @@ export interface components {
          */
         StoredParameter: {
             authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
+            /**
+             * Authorization Binding Test Value
+             * @description Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.
+             */
+            authorization_binding_test_value?: string | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -27564,48 +26863,10 @@ export interface components {
             description?: components["schemas"]["DescriptionString"] | null;
             name?: components["schemas"]["NameString"] | null;
         };
-        /** UpdateConfigRequest */
-        UpdateConfigRequest: {
-            /** Billing Cycle */
-            billing_cycle?: ("monthly" | "quarterly" | "annual") | null;
-            /** Billing Day */
-            billing_day?: number | null;
-            /** Currency */
-            currency?: string | null;
-            /** Effective From */
-            effective_from?: string | null;
-            /** Effective To */
-            effective_to?: string | null;
-            /** Minimum Charge */
-            minimum_charge?: number | string | null;
-            /** Price Rules */
-            price_rules?: {
-                [key: string]: unknown;
-            }[] | null;
-            /** Strategy */
-            strategy?: ("usage" | "outcome" | "custom") | null;
-        };
         /** UpdateContextGraphRequest */
         UpdateContextGraphRequest: {
             description?: components["schemas"]["DescriptionString"] | null;
             name?: components["schemas"]["NameString"] | null;
-        };
-        /** UpdateCustomerRequest */
-        UpdateCustomerRequest: {
-            /** Address */
-            address?: {
-                [key: string]: unknown;
-            } | null;
-            /** Billing Contact */
-            billing_contact?: string | null;
-            /** Billing Email */
-            billing_email?: string | null;
-            /** Mercury Memo */
-            mercury_memo?: string | null;
-            /** Name */
-            name?: string | null;
-            /** Status */
-            status?: ("active" | "archived") | null;
         };
         /** UpdateDashboardRequest */
         UpdateDashboardRequest: {
@@ -28048,41 +27309,6 @@ export interface components {
              * @description Workspace identifier
              */
             workspace_id: string;
-        };
-        /** UsageTrendPoint */
-        UsageTrendPoint: {
-            /**
-             * Meter Key
-             * @description Meter identifier
-             */
-            meter_key: string;
-            /**
-             * Metering Source
-             * @description Traffic class
-             * @default production
-             * @enum {string}
-             */
-            metering_source?: "production" | "simulation";
-            /**
-             * Period End
-             * @description Period end date (ISO-8601)
-             */
-            period_end: string;
-            /**
-             * Period Start
-             * @description Period start date (ISO-8601)
-             */
-            period_start: string;
-            /**
-             * Unit
-             * @description Unit of measurement
-             */
-            unit: string;
-            /**
-             * Value
-             * @description Metered value for this period
-             */
-            value: number;
         };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
@@ -28630,15 +27856,6 @@ export interface components {
             /** Role */
             role: string;
         };
-        /** WorkspaceInvoiceListResponse */
-        WorkspaceInvoiceListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["InvoiceItem"][];
-        };
         /** WorkspaceListResponse */
         WorkspaceListResponse: {
             /** Continuation Token */
@@ -28880,6 +28097,11 @@ export interface components {
          */
         platform_lib__platform_functions__models__Parameter: {
             authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
+            /**
+             * Authorization Binding Test Value
+             * @description Canonical CSV resource keys used only by trusted function-test or playground execution when no live authorization block exists.
+             */
+            authorization_binding_test_value?: string | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -29545,6 +28767,11 @@ export interface components {
          */
         src__routes__workspace_data_queries__create_workspace_data_query__Request__Parameter: {
             authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
+            /**
+             * Authorization Binding Test Value
+             * @description Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.
+             */
+            authorization_binding_test_value?: string | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -29647,6 +28874,11 @@ export interface components {
          */
         src__routes__workspace_data_queries__update_workspace_data_query__Request__Parameter: {
             authorization_binding?: components["schemas"]["RoleGrantKeysBinding"] | null;
+            /**
+             * Authorization Binding Test Value
+             * @description Canonical CSV resource keys used only by trusted playground execution when no live authorization block exists.
+             */
+            authorization_binding_test_value?: string | null;
             /** Default */
             default?: string | number | boolean | null;
             /** Description */
@@ -30669,51 +29901,22 @@ export interface operations {
             };
         };
     };
-    "list-billing-customers": {
+    "collect-design-agent-session": {
         parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: unknown;
-                status?: ("active" | "archived") | null;
-                /** @description Search by name or slug */
-                search?: string | null;
+            query: {
+                session_id: string;
+                cwd: string;
+                reason: string;
+                /** @description Optional, unverified user identity reported by the client. */
+                user?: string | null;
             };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-billing-customer": {
-        parameters: {
-            query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["CreateCustomerRequest"];
+                "application/x-ndjson": string;
             };
         };
         responses: {
@@ -30723,431 +29926,8 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
+                    "application/json": components["schemas"]["DesignAgentSessionResponse"];
                 };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-billing-customer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "update-billing-customer": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateCustomerRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-billing-config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "update-billing-config": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UpdateConfigRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "generate-billing-invoice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "list-customer-invoices": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: unknown;
-                status?: ("draft" | "sent" | "paid" | "void") | null;
-                /** @description Filter invoices with period_start on or after */
-                date_from?: string | null;
-                /** @description Filter invoices with period_end on or before */
-                date_to?: string | null;
-            };
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerInvoiceListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "mark-billing-invoice-paid": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-                invoice_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "send-billing-invoice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-                invoice_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "void-billing-invoice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-                invoice_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-customer-usage": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: unknown;
-                /** @description Filter meter values with period_start on or after */
-                date_from?: string | null;
-                /** @description Filter meter values with period_end on or before */
-                date_to?: string | null;
-                /** @description Filter by meter key */
-                meter_key?: string | null;
-            };
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CustomerUsageListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "attach-billing-workspace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AttachWorkspaceRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "detach-billing-workspace": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                customer_id: string;
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
             /** @description Validation Error */
             422: {
@@ -33722,195 +32502,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "get-billing-dashboard": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BillingDashboardResponse"];
-                };
-            };
-        };
-    };
-    "list-billing-invoices": {
-        parameters: {
-            query?: {
-                limit?: number;
-                continuation_token?: unknown;
-                status?: ("draft" | "sent" | "paid" | "void") | null;
-                /** @description Filter invoices with period_start on or after this date */
-                date_from?: string | null;
-                /** @description Filter invoices with period_end on or before this date */
-                date_to?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceInvoiceListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-billing-invoice": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                invoice_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-billing-invoice-pdf": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                invoice_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "get-billing-usage": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        [key: string]: unknown;
-                    };
-                };
-            };
-        };
-    };
-    "get-billing-usage-trends": {
-        parameters: {
-            query?: {
-                days?: number;
-                date_from?: string | null;
-                date_to?: string | null;
-                meter_key?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UsageTrendPoint"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
@@ -36614,6 +35205,7 @@ export interface operations {
                 sort_by?: string[];
                 limit?: number;
                 continuation_token?: unknown;
+                external_integration_id?: string | null;
             };
             header?: never;
             path: {
@@ -36664,17 +35256,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExternalIdentityBindingItem"];
+                    "application/json": components["schemas"]["ExternalIdentityBindingUpsertResponse"];
                 };
             };
-            /** @description entity_id not found in workspace */
+            /** @description entity_id or active external integration not found in workspace */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description subject_key already bound to a different entity, or entity_id is a role-assigned principal */
+            /** @description consumer subject already bound to another entity, or entity_id is a principal */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -36689,6 +35281,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Identity rejected the binding request */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Identity service unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -36765,6 +35371,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+            /** @description Identity rejected the clear request */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Identity service unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -38976,44 +37596,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["IntakeFileRow"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    receive_intake_file_v1__workspace_id__intake_files_external_post: {
-        parameters: {
-            query?: never;
-            header: {
-                "x-amigo-intake-sha256": string;
-                "x-amigo-intake-timestamp": string;
-                "x-amigo-intake-signature": string;
-                "x-amigo-intake-customer-slug": string;
-                "x-amigo-intake-filename": string;
-                "x-amigo-intake-content-type"?: string;
-            };
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntakeFileResponse"];
                 };
             };
             /** @description Validation Error */
@@ -44199,7 +42781,9 @@ export interface operations {
     "voice-turn": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                accept?: string | null;
+            };
             path: {
                 workspace_id: string;
                 service_id: string;
@@ -44212,7 +42796,7 @@ export interface operations {
             };
         };
         responses: {
-            /** @description OGG Opus agent reply */
+            /** @description Agent spoken reply — OGG Opus by default, WAV PCM16 (16 kHz mono) when the request's Accept header prefers audio/wav */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -44220,6 +42804,7 @@ export interface operations {
                 content: {
                     "application/json": unknown;
                     "audio/ogg": unknown;
+                    "audio/wav": unknown;
                 };
             };
             /** @description Agent elected silence */
