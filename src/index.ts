@@ -74,7 +74,6 @@ import { SensoriumResource } from './resources/sensorium.js'
 import { DataQueryResource } from './resources/data-query.js'
 import { BriefsResource } from './resources/briefs.js'
 import { DesktopSessionsResource } from './resources/desktop-sessions.js'
-import { IntakeResource } from './resources/intake.js'
 import { NetworkResource } from './resources/network.js'
 import { PipelineResource } from './resources/pipeline.js'
 import { TasksResource } from './resources/tasks.js'
@@ -241,8 +240,6 @@ export class AmigoClient {
   readonly briefs!: BriefsResource
   /** Remote-controlled desktop sessions for driving GUI-only third-party apps */
   readonly desktopSessions!: DesktopSessionsResource
-  /** Patient intake — signed upload links + uploads */
-  readonly intake!: IntakeResource
   /** Workspace network metadata (egress IP allowlist) */
   readonly network!: NetworkResource
   /** Data ingestion pipeline observability (sources, throughput, review backlog) */
@@ -499,7 +496,6 @@ export class AmigoClient {
     mutable.dataQuery = new DataQueryResource(client, workspaceId)
     mutable.briefs = new BriefsResource(client, workspaceId)
     mutable.desktopSessions = new DesktopSessionsResource(client, workspaceId)
-    mutable.intake = new IntakeResource(client, workspaceId)
     mutable.network = new NetworkResource(client, workspaceId)
     mutable.pipeline = new PipelineResource(client, workspaceId)
     mutable.tasks = new TasksResource(client, workspaceId)

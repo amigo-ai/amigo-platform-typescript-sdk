@@ -384,8 +384,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `gapScanner.scan`
 - `metrics.get`
 - `metrics.update`
-- `environments.get`
-- `environments.update`
 
 ### `recordings`
 
@@ -486,14 +484,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `sendAction`
 - `getScreenshot`
 - `getStatus`
-
-### `intake`
-
-- `links.list`
-- `links.create`
-- `links.delete`
-- `links.listUploads`
-- `links.downloadUpload`
 
 ### `network`
 
