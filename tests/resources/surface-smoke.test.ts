@@ -133,7 +133,6 @@ describe('resource surface smoke tests', () => {
     await client.world.listDuplicates({ entity_type: 'patient' })
     await client.world.search({ q: 'Jane Doe', entity_type: 'patient', limit: 5 })
     await client.world.getTimeline('entity-001', { limit: 5 })
-    await client.world.getSyncStatusBySink()
     await client.world.getStats()
     await client.world.getSourceBreakdown()
 

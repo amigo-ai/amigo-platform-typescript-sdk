@@ -249,7 +249,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getProvenance`
 - `getLineage`
 - `getMerged`
-- `getConnectors`
 - `getConnectorEntities`
 - `getConnectorResources`
 - `listEntityTypes`
@@ -257,7 +256,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `search`
 - `getTimeline`
 - `getTimelineAutoPaging`
-- `getSyncStatusBySink`
 - `getStats`
 - `getSourceBreakdown`
 

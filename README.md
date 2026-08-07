@@ -552,9 +552,6 @@ const results = await client.world.search({
   entity_type: 'patient',
   limit: 5,
 })
-
-// View sync status from connectors
-const syncStatus = await client.world.getSyncStatusBySink()
 ```
 
 ### Calls
