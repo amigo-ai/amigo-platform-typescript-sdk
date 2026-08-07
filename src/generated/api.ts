@@ -235,40 +235,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/upload/{link_token}/files": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Receive Upload */
-        post: operations["upload-intake-file-via-link"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/upload/{link_token}/info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Link Info */
-        get: operations["get-intake-link-info"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/audit-log/me": {
         parameters: {
             query?: never;
@@ -350,15 +316,15 @@ export interface paths {
         put?: never;
         /**
          * Collect Session
-         * @description Durably capture one full design-hq session transcript.
+         * @description Durably capture one full session transcript.
          *
          *     The raw ``.jsonl`` body is written to the UC Volume synchronously and then
          *     a single manifest row is emitted fail-closed; a 201 is returned ONLY after
          *     both are durable. A failure in either the Volume write or the manifest emit
          *     surfaces as a 5xx so the client re-uploads (at-least-once - a re-upload
          *     appends a second raw blob + manifest row for the same session, deduped, if
-         *     ever, downstream). Requests outside a design-hq checkout return 201
-         *     ``dropped`` without any Volume write or emit.
+         *     ever, downstream). Which sessions reach here is the client's decision (it
+         *     gates on the design skill being loaded); every authorized upload is stored.
          */
         post: operations["collect-design-agent-session"];
         delete?: never;
@@ -3390,88 +3356,13 @@ export interface paths {
          * Write Back Intake File Status
          * @description Advance a file's status from the async CDC/extraction job (P4).
          *
-         *     The job authenticates with the workspace's API key (Bearer) — the same
-         *     Databricks→platform-api path launch_dpc uses — so RLS scopes the update to
+         *     The job authenticates with the workspace's API key (Bearer) over the
+         *     standard Databricks→platform-api path — so RLS scopes the update to
          *     that workspace. Moves the row to its terminal verdict and records the
          *     curated/cdc paths. For a batch-sourced file, advances its batch (chain the
          *     next snapshot version + roll up) once the verdict is terminal.
          */
         post: operations["write_back_intake_file_status_v1__workspace_id__intake_files__file_id__status_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/intake/links": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List upload links */
-        get: operations["list-intake-links"];
-        put?: never;
-        /**
-         * Generate upload link
-         * @description Create a shareable upload link for a customer.
-         */
-        post: operations["create-intake-link"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/intake/links/{link_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Revoke upload link */
-        delete: operations["revoke-intake-link"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/intake/links/{link_id}/uploads": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List uploads for a link */
-        get: operations["list-intake-link-uploads"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/intake/links/{link_id}/uploads/{upload_id}/download": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Download an uploaded file
-         * @description Proxy the raw file bytes from the UC Volume back to the caller.
-         */
-        get: operations["download-intake-upload"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -5611,36 +5502,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/environments": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get environment overrides
-         * @description Get per-environment config overrides.
-         *
-         *     Returns empty environments when not configured.
-         *
-         *     Permissions: authenticated (any role).
-         */
-        get: operations["get-environment-settings"];
-        /**
-         * Update environment overrides
-         * @description Update per-environment config overrides.
-         *
-         *     Permissions: admin, owner.
-         */
-        put: operations["update-environment-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/form-templates": {
         parameters: {
             query?: never;
@@ -7232,26 +7093,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/world/connectors": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Connected data sources overview
-         * @description All active data sources with entity counts by type, sync status, and health. Powers the EHR/FHIR connector cards in the frontend. Each item includes connector_type (charmhealth, fhir_store) and a breakdown of entities by type (patient, practitioner, etc.).
-         */
-        get: operations["connector-overview"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/world/connectors/{data_source_id}/entities": {
         parameters: {
             query?: never;
@@ -7732,26 +7573,6 @@ export interface paths {
          * @description Breakdown of entity counts by source system (e.g. charmhealth, gcp_fhir, voice_agent). Powers the EHR/FHIR view in the frontend. Filter by entity_type (e.g. person, place) for focused views.
          */
         get: operations["source-breakdown"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/world/sync/by-sink": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Outbound sync status per data source
-         * @description Multi-sink outbound sync progress. Shows total/synced/failed/pending counts per data source for workspaces with multiple outbound sinks.
-         */
-        get: operations["outbound-sync-by-sink"];
         put?: never;
         post?: never;
         delete?: never;
@@ -10849,55 +10670,6 @@ export interface components {
             /** Name */
             name: string;
         };
-        /** ConnectorOverviewItem */
-        ConnectorOverviewItem: {
-            /** Connector Type */
-            connector_type: string;
-            /**
-             * Data Source Id
-             * Format: uuid
-             */
-            data_source_id: string;
-            /** Display Name */
-            display_name?: string | null;
-            /** Entities By Type */
-            entities_by_type?: {
-                [key: string]: number;
-            };
-            /** Entity Count */
-            entity_count: number;
-            /**
-             * Health Status
-             * @default unknown
-             * @enum {string}
-             */
-            health_status?: "unknown" | "healthy" | "degraded";
-            /**
-             * Is Active
-             * @default true
-             */
-            is_active?: boolean;
-            /** Last Sync At */
-            last_sync_at?: string | null;
-            /**
-             * Last Sync Event Count
-             * @default 0
-             */
-            last_sync_event_count?: number;
-            /** Last Sync Status */
-            last_sync_status?: ("success" | "error") | null;
-            /** Name */
-            name: string;
-            /** Source Type */
-            source_type: string;
-        };
-        /** ConnectorOverviewResponse */
-        ConnectorOverviewResponse: {
-            /** Connectors */
-            connectors: components["schemas"]["ConnectorOverviewItem"][];
-            /** Total Entities */
-            total_entities: number;
-        };
         /**
          * ConnectorResourcesResponse
          * @description FHIR resources from a specific connected data source.
@@ -11744,7 +11516,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
+            source_type: "ehr" | "fhir_store" | "snowflake";
             /** Sync Schedule */
             sync_schedule?: string | null;
             /**
@@ -11753,21 +11525,6 @@ export interface components {
              * @enum {string}
              */
             sync_strategy?: "manual" | "scheduled" | "webhook" | "continuous";
-        };
-        /** CreateLinkRequest */
-        CreateLinkRequest: {
-            customer_slug: components["schemas"]["SlugString"];
-            display_name?: components["schemas"]["DescriptionString"] | null;
-            /**
-             * Expires In Hours
-             * @default 168
-             */
-            expires_in_hours?: number;
-            /**
-             * Max Uploads
-             * @default 100
-             */
-            max_uploads?: number;
         };
         /** CreateOperatorRequest */
         CreateOperatorRequest: {
@@ -11902,15 +11659,9 @@ export interface components {
              * @default true
              */
             active?: boolean;
-            /** Assertion Kind */
-            assertion_kind?: string | null;
             /** Eval Key */
             eval_key: string;
-            /**
-             * Eval Type
-             * @enum {string}
-             */
-            eval_type: "assertion" | "metric";
+            eval_type: components["schemas"]["ProductionEvalType"];
             /** Expected */
             expected?: unknown;
             /** Metric Key */
@@ -12284,18 +12035,11 @@ export interface components {
          *     region's CD pipeline serves its own ingress host), and a workspace
          *     cannot migrate between regions. The handler derives it from
          *     ``app.env.aws_region``.
-         *
-         *     ``environment`` has no default: it is a load-bearing routing field
-         *     (staging vs production downstream), and ``PATCH .../convert_environment``
-         *     is the supported migration path. Callers must commit to a value.
          */
         CreateWorkspaceRequest: {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
-            /**
-             * Environment
-             * @enum {string}
-             */
-            environment: "production" | "staging" | "development";
+            /** Environment */
+            environment?: ("production" | "staging" | "development") | null;
             name: components["schemas"]["StrippedNonemptyString"];
             slug: components["schemas"]["SlugString"];
         };
@@ -12844,7 +12588,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
+            source_type: "ehr" | "fhir_store" | "snowflake";
             /** Sync Schedule */
             sync_schedule: string | null;
             /**
@@ -13197,9 +12941,9 @@ export interface components {
         DesignAgentSessionResponse: {
             /**
              * Status
-             * @enum {string}
+             * @constant
              */
-            status: "stored" | "dropped";
+            status: "stored";
         };
         /** DestroySessionResponse */
         DestroySessionResponse: {
@@ -13871,6 +13615,8 @@ export interface components {
             ingested_at?: string | null;
             /** Key */
             key: string;
+            /** Overlay Status */
+            overlay_status?: string | null;
             /** Source */
             source: string;
             /** Source System */
@@ -14428,36 +14174,6 @@ export interface components {
             target: string;
             /** Warnings */
             warnings: string[];
-        };
-        /**
-         * EnvironmentOverrides
-         * @description Per-environment config overrides merged at runtime.
-         */
-        EnvironmentOverrides: {
-            /** Data Source Id */
-            data_source_id?: string | null;
-            /** Data Source Overrides */
-            data_source_overrides?: {
-                [key: string]: unknown;
-            };
-            /** Tool Overrides */
-            tool_overrides?: {
-                [key: string]: unknown;
-            };
-        };
-        /** EnvironmentSettingsRequest */
-        EnvironmentSettingsRequest: {
-            /** Environments */
-            environments: {
-                [key: string]: components["schemas"]["EnvironmentOverrides"];
-            };
-        };
-        /** EnvironmentSettingsResponse */
-        EnvironmentSettingsResponse: {
-            /** Environments */
-            environments?: {
-                [key: string]: components["schemas"]["EnvironmentOverrides"];
-            };
         };
         /** EscalationDailyStats */
         EscalationDailyStats: {
@@ -16826,48 +16542,6 @@ export interface components {
              */
             version?: number | null;
         };
-        /** IntakeLinkResponse */
-        IntakeLinkResponse: {
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-            customer_slug: components["schemas"]["SlugString"];
-            display_name: components["schemas"]["DescriptionString"] | null;
-            /**
-             * Expires At
-             * Format: date-time
-             */
-            expires_at: string;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Last Upload At */
-            last_upload_at: string | null;
-            /** Link Token */
-            link_token: string;
-            /** Max Uploads */
-            max_uploads: number;
-            /** Revoked At */
-            revoked_at: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "expired" | "revoked" | "exhausted";
-            /** Upload Count */
-            upload_count: number;
-            /** Upload Url */
-            upload_url: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /**
          * IntakeSourceRow
          * @description A registered intake source (Sources list).
@@ -16906,32 +16580,6 @@ export interface components {
             source_type: string;
             /** Status */
             status: string;
-        };
-        /** IntakeUploadResponse */
-        IntakeUploadResponse: {
-            /** Content Type */
-            content_type: string;
-            customer_slug: components["schemas"]["SlugString"];
-            filename: components["schemas"]["NameString"];
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /**
-             * Received At
-             * Format: date-time
-             */
-            received_at: string;
-            /**
-             * Scan Status
-             * @enum {string}
-             */
-            scan_status: "skipped" | "pending" | "clean" | "infected";
-            /** Sha256 */
-            sha256: string;
-            /** Size Bytes */
-            size_bytes: number;
         };
         /** IntegrationApprovalGrantedEvent */
         IntegrationApprovalGrantedEvent: {
@@ -17456,46 +17104,6 @@ export interface components {
         Limits: {
             /** Max Size Mb */
             max_size_mb?: number | null;
-        };
-        /**
-         * LinkErrorResponse
-         * @description Error envelope returned for token / link validation failures.
-         */
-        LinkErrorResponse: {
-            /**
-             * Error Code
-             * @description Machine-readable error code.
-             * @enum {string}
-             */
-            error_code: "invalid_token" | "link_not_found" | "link_expired" | "link_exhausted";
-            /**
-             * Message
-             * @description Human-readable error message.
-             */
-            message: string;
-        };
-        /**
-         * LinkInfoResponse
-         * @description Public metadata for an intake upload link, returned to the forms app.
-         */
-        LinkInfoResponse: {
-            /**
-             * Allowed Content Types
-             * @description Allowed Content-Type values for uploads, sorted lexicographically.
-             */
-            allowed_content_types?: string[];
-            /**
-             * Customer Slug
-             * @description Stable URL-safe customer identifier.
-             */
-            customer_slug: string;
-            /** @description Human-readable display name (falls back to customer slug). */
-            display_name: components["schemas"]["DescriptionString"];
-            /**
-             * Max Upload Bytes
-             * @description Maximum allowed upload size in bytes.
-             */
-            max_upload_bytes: number;
         };
         /** ListSimulationSuiteRunsResponse */
         ListSimulationSuiteRunsResponse: {
@@ -18966,11 +18574,6 @@ export interface components {
              */
             total?: number;
         };
-        /** OutboundSyncBySinkResponse */
-        OutboundSyncBySinkResponse: {
-            /** Sinks */
-            sinks: components["schemas"]["SinkSyncStatus"][];
-        };
         /**
          * OutreachRule
          * @description A single outreach rule — defines WHEN, WHAT, and HOW to reach a patient.
@@ -20007,6 +19610,11 @@ export interface components {
             /** Items */
             items: components["schemas"]["ProductionEvalDefinition"][];
         };
+        /**
+         * ProductionEvalType
+         * @enum {string}
+         */
+        ProductionEvalType: "metric";
         /**
          * ProgressHint
          * @description How the agent narrates waiting on a tool.
@@ -23475,26 +23083,6 @@ export interface components {
             /** Turn Index */
             turn_index: number;
         };
-        /** SinkSyncStatus */
-        SinkSyncStatus: {
-            /**
-             * Data Source Id
-             * Format: uuid
-             */
-            data_source_id: string;
-            /** Failed */
-            failed: number;
-            /** Name */
-            name: string;
-            /** Pending */
-            pending: number;
-            /** Source Type */
-            source_type: string;
-            /** Synced */
-            synced: number;
-            /** Total */
-            total: number;
-        };
         /** SkillContextGraphReference */
         SkillContextGraphReference: {
             /**
@@ -23718,7 +23306,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
+            source_type: "ehr" | "fhir_store" | "snowflake";
         };
         /** SourceOverviewResponse */
         SourceOverviewResponse: {
@@ -23778,7 +23366,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
+            source_type: "ehr" | "fhir_store" | "snowflake";
         };
         /** SourceStatus */
         SourceStatus: {
@@ -23817,7 +23405,7 @@ export interface components {
              * Source Type
              * @enum {string}
              */
-            source_type: "rest_api" | "webhook" | "file_drop" | "fhir_store" | "ehr" | "database" | "custom" | "smart_fhir" | "customer_intake" | "lakebase_schema" | "snowflake" | "crm";
+            source_type: "ehr" | "fhir_store" | "snowflake";
             /** Status */
             status: string;
             /**
@@ -25520,10 +25108,11 @@ export interface components {
             progress?: components["schemas"]["ProgressHint"] | null;
             /**
              * Result Persistence
+             * @description How this tool call's arguments and result are retained. 'ephemeral' is fail-closed: Platform API authoring must be enabled for the workspace, and Agent Engine honors it only on the inline text/simulation path — voice, background, and external-realtime sessions reject an ephemeral graph at init rather than journal it.
              * @default accumulate
              * @enum {string}
              */
-            result_persistence?: "accumulate" | "override";
+            result_persistence?: "accumulate" | "override" | "ephemeral";
             /** Tool Id */
             tool_id: string;
         };
@@ -26387,7 +25976,7 @@ export interface components {
          *     not silently create never-matching triggers.
          * @enum {string}
          */
-        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.intelligence" | "call.outcome" | "channel.email.bounced" | "channel.email.clicked" | "channel.email.complained" | "channel.email.delayed" | "channel.email.delivered" | "channel.email.opened" | "channel.email.received" | "channel.email.rejected" | "channel.message.received" | "channel.voice.voicemail_status" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "intake.file.received" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
+        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.intelligence" | "call.outcome" | "channel.email.bounced" | "channel.email.clicked" | "channel.email.complained" | "channel.email.delayed" | "channel.email.delivered" | "channel.email.opened" | "channel.email.received" | "channel.email.rejected" | "channel.message.received" | "channel.voice.voicemail_status" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
         /** Turn */
         Turn: {
             /** Agent Action */
@@ -27144,55 +26733,6 @@ export interface components {
             /** Region */
             region?: ("us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1") | null;
         };
-        /**
-         * UploadDuplicateInfo
-         * @description Pointer to an existing upload row when content-hash dedup fires.
-         */
-        UploadDuplicateInfo: {
-            /**
-             * Id
-             * @description UUID of the existing upload row.
-             */
-            id: string;
-            /**
-             * Received At
-             * @description ISO-8601 timestamp the original upload was received.
-             */
-            received_at: string;
-        };
-        /**
-         * UploadFileResponse
-         * @description Receipt for a successful upload via an intake link.
-         */
-        UploadFileResponse: {
-            /** @description Set when this upload's content hash matched a prior upload; otherwise null. */
-            duplicate_of?: components["schemas"]["UploadDuplicateInfo"] | null;
-            /**
-             * Filename
-             * @description Stored filename.
-             */
-            filename: string;
-            /**
-             * Id
-             * @description UUID of the newly created upload row.
-             */
-            id: string;
-            /**
-             * Scan Status
-             * @description Virus-scan status (e.g. ``clean``, ``skipped``).
-             */
-            scan_status: string;
-            /**
-             * Sha256
-             * @description SHA-256 of the uploaded bytes (lowercase hex).
-             */
-            sha256: string;
-            /**
-             * Size Bytes
-             * @description Stored size in bytes.
-             */
-            size_bytes: number;
-        };
         /** UpsertRequest */
         UpsertRequest: {
             /** Display Name */
@@ -27909,7 +27449,7 @@ export interface components {
              */
             created_at: string;
             /** Environment */
-            environment: string;
+            environment?: string | null;
             /**
              * Id
              * Format: uuid
@@ -29608,131 +29148,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "upload-intake-file-via-link": {
-        parameters: {
-            query?: never;
-            header: {
-                "x-amigo-intake-filename": string;
-                "x-amigo-intake-content-type": string;
-            };
-            path: {
-                link_token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description File uploaded successfully */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UploadFileResponse"];
-                };
-            };
-            /** @description Link not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Link expired */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description File too large */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Invalid filename or content type */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited or upload limit reached */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-intake-link-info": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                link_token: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Link metadata */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LinkInfoResponse"];
-                };
-            };
-            /** @description Invalid token */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LinkErrorResponse"];
-                };
-            };
-            /** @description Link not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LinkErrorResponse"];
-                };
-            };
-            /** @description Link expired or exhausted */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LinkErrorResponse"];
-                };
             };
             /** @description Validation Error */
             422: {
@@ -37677,188 +37092,6 @@ export interface operations {
             };
         };
     };
-    "list-intake-links": {
-        parameters: {
-            query?: {
-                include_expired?: boolean;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntakeLinkResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "create-intake-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateLinkRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntakeLinkResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "revoke-intake-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                link_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "list-intake-link-uploads": {
-        parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                link_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["IntakeUploadResponse"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "download-intake-upload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                link_id: string;
-                upload_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description File bytes with Content-Disposition: attachment */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/octet-stream": string;
-                };
-            };
-            /** @description Link, upload, or file not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description UC Volume storage backend unavailable */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     list_intake_materializations_v1__workspace_id__intake_materializations_get: {
         parameters: {
             query?: {
@@ -43062,82 +42295,6 @@ export interface operations {
             };
         };
     };
-    "get-environment-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvironmentSettingsResponse"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "update-environment-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["EnvironmentSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvironmentSettingsResponse"];
-                };
-            };
-            /** @description Workspace not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Rate limited */
-            429: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "list-form-templates": {
         parameters: {
             query?: {
@@ -47089,28 +46246,6 @@ export interface operations {
             };
         };
     };
-    "connector-overview": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConnectorOverviewResponse"];
-                };
-            };
-        };
-    };
     "connector-entities": {
         parameters: {
             query?: {
@@ -47666,7 +46801,10 @@ export interface operations {
     "put-entity-enrichment": {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Stable UUID so a retry after an ambiguous failure re-emits the same logical event (deduped downstream) instead of a duplicate. Used only on the synchronous-overlay write path; auto-generated when omitted. */
+                "Idempotency-Key"?: string | null;
+            };
             path: {
                 workspace_id: string;
                 entity_id: string;
@@ -48296,28 +47434,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "outbound-sync-by-sink": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OutboundSyncBySinkResponse"];
                 };
             };
         };

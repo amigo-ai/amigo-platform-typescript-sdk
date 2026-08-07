@@ -104,15 +104,6 @@ export class WorldResource extends WorkspaceScopedResource {
 
   // ---- Connectors ----
 
-  /** Get connected data sources overview with entity counts and sync status */
-  async getConnectors() {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/world/connectors', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
-    )
-  }
-
   /** List entities from a specific connector / data source */
   async getConnectorEntities(
     dataSourceId: string,
@@ -225,17 +216,6 @@ export class WorldResource extends WorkspaceScopedResource {
       (pageParams) => this.getTimeline(entityId, pageParams),
       (page) => page.events,
       params,
-    )
-  }
-
-  // ---- Sync ----
-
-  /** Get sync status grouped by sink (Lakebase, Delta, etc.) */
-  async getSyncStatusBySink() {
-    return extractData(
-      await this.client.GET('/v1/{workspace_id}/world/sync/by-sink', {
-        params: { path: { workspace_id: this.workspaceId } },
-      }),
     )
   }
 
