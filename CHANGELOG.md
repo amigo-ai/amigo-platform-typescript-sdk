@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.106.0] - 2026-08-07
+
+### Improvements
+
+- fix!: sync SDK types to platform main (290a81fc) (#446)
+- Update CODEOWNERS (#447)
+
+### Bug Fixes
+
+- drop SDK wrappers for retired intake-link and environment-settings endpoints (#445)
+
 ## [0.105.0] - 2026-08-04
 
 ### Improvements
