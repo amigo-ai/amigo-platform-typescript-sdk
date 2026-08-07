@@ -126,20 +126,4 @@ export class SettingsResource extends WorkspaceScopedResource {
         }),
       ),
   }
-
-  readonly environments = {
-    get: async () =>
-      extractData(
-        await this.client.GET('/v1/{workspace_id}/settings/environments', {
-          params: { path: { workspace_id: this.workspaceId } },
-        }),
-      ),
-    update: async (body: components['schemas']['EnvironmentSettingsRequest']) =>
-      extractData(
-        await this.client.PUT('/v1/{workspace_id}/settings/environments', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-  }
 }
