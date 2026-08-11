@@ -353,6 +353,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/metric-store/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Metric Store
+         * @description Trigger an on-demand canonical Metric Store refresh.
+         */
+        post: operations["refresh_metric_store_v1_metric_store_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/metric-store/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Metric Store Run
+         * @description Read the Databricks status for a Metric Store setup or refresh run.
+         */
+        get: operations["get_metric_store_run_v1_metric_store_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/metric-store/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Setup Metric Store
+         * @description Trigger the fixed Metric Store setup job through the platform control plane.
+         */
+        post: operations["setup_metric_store_v1_metric_store_setup_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/workspaces": {
         parameters: {
             query?: never;
@@ -411,46 +471,6 @@ export interface paths {
          * @description Archive a workspace and remove it from active access flows while preserving underlying data. Requires owner access and slug confirmation.
          */
         post: operations["archive-workspace"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/workspaces/{workspace_id}/convert-environment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Convert workspace environment
-         * @description Convert workspace between staging and production. Requires slug confirmation.
-         */
-        post: operations["convert-workspace-environment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/workspaces/{workspace_id}/environment-check": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Pre-check environment conversion
-         * @description Returns compliance warnings for converting between staging and production. Does not mutate.
-         */
-        get: operations["check-environment-conversion"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1948,6 +1968,72 @@ export interface paths {
         put?: never;
         /** Acknowledge a rendered background turn delivery */
         post: operations["acknowledge_turn_delivery_v1__workspace_id__conversations__conversation_id__turns__delivery_id__ack_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/cost-to-serve/infrastructure": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get apportioned infrastructure cost by component for a closed month
+         * @description Infrastructure cost to serve this workspace for a closed month.
+         *
+         *     **This is what Amigo pays Databricks to serve this workspace — not an amount owed
+         *     and not a contracted price.** Databricks compute and storage are pooled, so these
+         *     are usage-weighted **shares**
+         *     rather than metered quantities — a weaker claim than the LLM inference endpoint,
+         *     whose figures are this workspace's own tokens priced directly. Kept separate so
+         *     neither number inherits the other's caveats.
+         *
+         *     Sourced from the monthly cost-allocation ledger, which reconciles 100% of the
+         *     Databricks bill to zero residual. Available once the month's close job has run
+         *     (T+3). Components with no spend are omitted (no ``$0.00`` rows), and account-level
+         *     overhead is never attributed to a workspace.
+         *
+         *     Permissions: **Amigo staff only** (``require_amigo_admin``). Not available to
+         *     customer admins — this is Amigo's cost structure, not the customer's bill.
+         */
+        get: operations["get-infrastructure-cost"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/cost-to-serve/llm-inference": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get LLM inference cost by model for a closed month
+         * @description LLM inference cost to serve this workspace in a closed month, by model.
+         *
+         *     **This is what Amigo pays LLM vendors to serve this workspace — not an amount owed
+         *     and not a contracted price.** Direct spend: the workspace's own tokens, priced per
+         *     call against vendor rates. Available once the month's close job has run.
+         *
+         *     ``cost_usd`` is null for a model with no rate card entry. That usage is real, so it
+         *     is reported with its token counts and excluded from ``total_cost_usd``, and
+         *     ``has_unpriced_usage`` flags that the total understates actual spend.
+         *
+         *     Permissions: **Amigo staff only** (``require_amigo_admin``). Not available to
+         *     customer admins — this is Amigo's cost structure, not the customer's bill.
+         */
+        get: operations["get-llm-inference-cost"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4050,6 +4136,69 @@ export interface paths {
          * @description Emit one metering event for the calling workspace.
          */
         post: operations["emit-metering-event"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metric-store/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Metric Store Legacy
+         * @deprecated
+         * @description Deprecated workspace-shaped alias for the environment-level refresh route.
+         */
+        post: operations["refresh_metric_store_v1__workspace_id__metric_store_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metric-store/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Metric Store Run Legacy
+         * @deprecated
+         * @description Deprecated workspace-shaped alias for the environment-level run route.
+         */
+        get: operations["get_metric_store_run_v1__workspace_id__metric_store_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/metric-store/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Setup Metric Store Legacy
+         * @deprecated
+         * @description Deprecated workspace-shaped alias for the environment-level setup route.
+         */
+        post: operations["setup_metric_store_v1__workspace_id__metric_store_setup_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -10132,32 +10281,6 @@ export interface components {
          * @enum {string}
          */
         ChannelType: "email" | "web" | "sms";
-        /**
-         * ChannelVoicemailStatusEvent
-         * @description Ringless voicemail status callback projected from VoiceDrop. ``status``
-         *     mirrors the channel.voicedrop_ringless_voicemails enum: delivered,
-         *     skipped, failed, or not_delivered (pending is the row's initial state and
-         *     is never emitted as an event).
-         */
-        ChannelVoicemailStatusEvent: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.voicemail_status";
-            /** Recipient Phone Number */
-            recipient_phone_number: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "delivered" | "skipped" | "failed" | "not_delivered";
-            /**
-             * Voicemail Id
-             * Format: uuid
-             */
-            voicemail_id: string;
-        };
         /** ChatRequest */
         ChatRequest: {
             /**
@@ -10546,6 +10669,24 @@ export interface components {
             retention_days: number | null;
             /** Total Credentials */
             total_credentials: number;
+        };
+        /** Component */
+        Component: {
+            /**
+             * Allocation
+             * @description How the cost was determined: 'shared' (this workspace's usage-weighted share of a pooled resource) or 'direct' (spend tagged to it outright)
+             */
+            allocation: string;
+            /**
+             * Component
+             * @description Infrastructure component: jobs_pipelines, model_serving, warehouse, lakebase, storage_egress, or other
+             */
+            component: string;
+            /**
+             * Cost Usd
+             * @description Cost in USD for this component
+             */
+            cost_usd: number;
         };
         /** CompoundEmotionEvent */
         CompoundEmotionEvent: {
@@ -11272,15 +11413,6 @@ export interface components {
              * @description Destination context-graph state after the turn's state transition.
              */
             to: string;
-        };
-        /** ConvertEnvironmentRequest */
-        ConvertEnvironmentRequest: {
-            confirm_slug: components["schemas"]["SlugString"];
-            /**
-             * Target
-             * @enum {string}
-             */
-            target: "production" | "staging";
         };
         /**
          * Counterfactual
@@ -12029,17 +12161,9 @@ export interface components {
         /**
          * CreateWorkspaceRequest
          * @description Request body for ``POST /v1/me/workspaces``.
-         *
-         *     ``region`` is intentionally not exposed here — the workspace is created
-         *     in the region of the platform-api pod that handles the request (each
-         *     region's CD pipeline serves its own ingress host), and a workspace
-         *     cannot migrate between regions. The handler derives it from
-         *     ``app.env.aws_region``.
          */
         CreateWorkspaceRequest: {
             backend_org_id?: components["schemas"]["StrippedNonemptyString"] | null;
-            /** Environment */
-            environment?: ("production" | "staging" | "development") | null;
             name: components["schemas"]["StrippedNonemptyString"];
             slug: components["schemas"]["SlugString"];
         };
@@ -14165,15 +14289,6 @@ export interface components {
             has_projection: boolean;
             /** Last Updated */
             last_updated: string | null;
-        };
-        /** EnvironmentCheckResponse */
-        EnvironmentCheckResponse: {
-            /** Current */
-            current: string;
-            /** Target */
-            target: string;
-            /** Warnings */
-            warnings: string[];
         };
         /** EscalationDailyStats */
         EscalationDailyStats: {
@@ -16428,6 +16543,31 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * InfrastructureCostResponse
+         * @description Per-component infrastructure cost for one close month.
+         */
+        InfrastructureCostResponse: {
+            /**
+             * Close Month
+             * Format: date
+             * @description First day of the closed month this breakdown covers
+             */
+            close_month: string;
+            /** Components */
+            components: components["schemas"]["Component"][];
+            /**
+             * Currency
+             * @description Currency of every amount in this response
+             * @default USD
+             */
+            currency?: string;
+            /**
+             * Total Cost Usd
+             * @description Amigo's cost to serve this workspace, not an amount owed. Sum of all components for the month
+             */
+            total_cost_usd: number;
+        };
         /** InjectRequest */
         InjectRequest: {
             /**
@@ -16552,13 +16692,6 @@ export interface components {
              * @description ISO-8601 timestamp.
              */
             created_ts: string;
-            /**
-             * Credential Ssm Param Path
-             * @description LEGACY: the SSM path a per-workspace SA key was uploaded to, for sources
-             *     registered before the unified intake service account. ``None`` for every source
-             *     registered since — those authenticate keyless, with no secret to provision.
-             */
-            credential_ssm_param_path?: string | null;
             /** Display Name */
             display_name: string;
             /** Drive Id */
@@ -17121,6 +17254,36 @@ export interface components {
             suites: components["schemas"]["SimulationSuiteResponse"][];
         };
         /**
+         * LlmInferenceCostResponse
+         * @description Per-model LLM inference cost for one close month.
+         */
+        LlmInferenceCostResponse: {
+            /**
+             * Close Month
+             * Format: date
+             * @description First day of the closed month this breakdown covers
+             */
+            close_month: string;
+            /**
+             * Currency
+             * @description Currency of every amount in this response
+             * @default USD
+             */
+            currency?: string;
+            /**
+             * Has Unpriced Usage
+             * @description True when some usage could not be priced, so total_cost_usd understates actual spend
+             */
+            has_unpriced_usage: boolean;
+            /** Models */
+            models: components["schemas"]["Model"][];
+            /**
+             * Total Cost Usd
+             * @description Amigo's cost to serve this workspace, not an amount owed. Sum of priced models; excludes any model where is_priced is false
+             */
+            total_cost_usd: number;
+        };
+        /**
          * LookupResponse
          * @description Autocompletion results for a surface lookup field.
          */
@@ -17607,6 +17770,22 @@ export interface components {
             /** Definitions */
             definitions: components["schemas"]["MetricDefinition"][];
         };
+        /** MetricStoreRunResponse */
+        MetricStoreRunResponse: {
+            /** Run Id */
+            run_id: number;
+        };
+        /** MetricStoreRunStatusResponse */
+        MetricStoreRunStatusResponse: {
+            /** Life Cycle State */
+            life_cycle_state?: string | null;
+            /** Result State */
+            result_state?: string | null;
+            /** Run Id */
+            run_id: number;
+            /** State Message */
+            state_message?: string | null;
+        };
         /** MigrationConversationItem */
         MigrationConversationItem: {
             /** @default web */
@@ -17647,6 +17826,30 @@ export interface components {
             imported: number;
             /** Updated */
             updated: number;
+        };
+        /** Model */
+        Model: {
+            /** Cached Tokens */
+            cached_tokens: number;
+            /**
+             * Cost Usd
+             * @description Token cost in USD, priced per call against the tiered rate card. null when this model has no rate card entry — usage is real but not yet priceable, which is why it is reported rather than omitted or shown as 0.
+             */
+            cost_usd: number | null;
+            /** Input Tokens */
+            input_tokens: number;
+            /**
+             * Is Priced
+             * @description False when the model has no rate card entry for this month
+             */
+            is_priced: boolean;
+            /**
+             * Model
+             * @description Model identifier, e.g. claude-sonnet-4-6
+             */
+            model: string;
+            /** Output Tokens */
+            output_tokens: number;
         };
         /** ModelRegistryResponse */
         ModelRegistryResponse: {
@@ -21485,7 +21688,7 @@ export interface components {
              * Channel
              * @enum {string}
              */
-            channel: "inbound_voice" | "outbound_voice" | "ringless_voicemail" | "email" | "sms" | "imessage";
+            channel: "inbound_voice" | "outbound_voice" | "email" | "sms" | "imessage";
             /**
              * Created At
              * Format: date-time
@@ -25976,7 +26179,7 @@ export interface components {
          *     not silently create never-matching triggers.
          * @enum {string}
          */
-        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.intelligence" | "call.outcome" | "channel.email.bounced" | "channel.email.clicked" | "channel.email.complained" | "channel.email.delayed" | "channel.email.delivered" | "channel.email.opened" | "channel.email.received" | "channel.email.rejected" | "channel.message.received" | "channel.voice.voicemail_status" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
+        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.intelligence" | "call.outcome" | "channel.email.bounced" | "channel.email.clicked" | "channel.email.complained" | "channel.email.delayed" | "channel.email.delivered" | "channel.email.opened" | "channel.email.received" | "channel.email.rejected" | "channel.message.received" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
         /** Turn */
         Turn: {
             /** Agent Action */
@@ -26727,8 +26930,6 @@ export interface components {
         UpdateWorkspaceRequest: {
             /** Connector Type */
             connector_type?: ("epic" | "cerner" | "allscripts" | "fhir_store" | "athenahealth" | "charmhealth" | "eclinicalworks" | "meditab") | null;
-            /** Environment */
-            environment?: ("production" | "staging" | "development") | null;
             name?: components["schemas"]["StrippedNonemptyString"] | null;
             /** Region */
             region?: ("us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1") | null;
@@ -27448,8 +27649,6 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
-            /** Environment */
-            environment?: string | null;
             /**
              * Id
              * Format: uuid
@@ -27469,7 +27668,7 @@ export interface components {
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextToolStartedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"] | components["schemas"]["ChannelVoicemailStatusEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextToolStartedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -29407,6 +29606,77 @@ export interface operations {
             };
         };
     };
+    refresh_metric_store_v1_metric_store_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunResponse"];
+                };
+            };
+        };
+    };
+    get_metric_store_run_v1_metric_store_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setup_metric_store_v1_metric_store_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunResponse"];
+                };
+            };
+        };
+    };
     "list-workspaces": {
         parameters: {
             query?: {
@@ -29541,7 +29811,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Invalid request body, or region provided (immutable). */
+            /** @description Invalid request body. */
             422: {
                 headers: {
                     [name: string]: unknown;
@@ -29601,107 +29871,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    "convert-workspace-environment": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConvertEnvironmentRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Workspace not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Workspace slug confirmation did not match. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "check-environment-conversion": {
-        parameters: {
-            query?: {
-                target?: "production" | "staging";
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["EnvironmentCheckResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };
@@ -33412,6 +33581,102 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    "get-infrastructure-cost": {
+        parameters: {
+            query: {
+                /** @description Any date within the closed month to report, e.g. 2026-07-01 */
+                close_month: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InfrastructureCostResponse"];
+                };
+            };
+            /** @description Requires an Amigo administrator identity */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-llm-inference-cost": {
+        parameters: {
+            query: {
+                /** @description Any date within the closed month to report, e.g. 2026-07-01 */
+                close_month: string;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LlmInferenceCostResponse"];
+                };
+            };
+            /** @description Requires an Amigo administrator identity */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Rate limited */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -38751,6 +39016,100 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MeteringEmitResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    refresh_metric_store_v1__workspace_id__metric_store_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_metric_store_run_v1__workspace_id__metric_store_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                run_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunStatusResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    setup_metric_store_v1__workspace_id__metric_store_setup_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MetricStoreRunResponse"];
                 };
             };
             /** @description Validation Error */
