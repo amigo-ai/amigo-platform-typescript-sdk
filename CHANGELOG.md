@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.107.0] - 2026-08-11
+
+### Improvements
+
+- fix!: sync SDK types to platform main (b765cecc) (#448)
+
 ## [0.106.0] - 2026-08-07
 
 ### Improvements
