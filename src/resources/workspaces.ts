@@ -68,31 +68,6 @@ export class WorkspacesResource extends WorkspaceScopedResource {
     )
   }
 
-  /** Pre-check environment conversion warnings */
-  async checkEnvironment(target?: 'production' | 'staging', id?: WorkspaceId | string) {
-    return extractData(
-      await this.client.GET('/v1/workspaces/{workspace_id}/environment-check', {
-        params: {
-          path: { workspace_id: id ?? this.workspaceId },
-          query: target ? { target } : undefined,
-        },
-      }),
-    )
-  }
-
-  /** Convert workspace between staging and production */
-  async convertEnvironment(
-    body: components['schemas']['ConvertEnvironmentRequest'],
-    id?: WorkspaceId | string,
-  ) {
-    return extractData(
-      await this.client.POST('/v1/workspaces/{workspace_id}/convert-environment', {
-        params: { path: { workspace_id: id ?? this.workspaceId } },
-        body,
-      }),
-    )
-  }
-
   /**
    * Workspace-allowlisted phone numbers that can place test calls into voice
    * agents. The list is read-mostly; writes overwrite the entire allowlist.

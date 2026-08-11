@@ -9,7 +9,6 @@ const WORKSPACE_FIXTURE: components['schemas']['WorkspaceResponse'] = {
   id: TEST_WORKSPACE_ID,
   name: 'Acme Health',
   slug: 'acme-health',
-  environment: 'staging',
   backend_org_id: null,
   region: 'us-east-1',
   connector_type: null,
@@ -79,7 +78,6 @@ describe('MeResource', () => {
     const requestBody: components['schemas']['CreateWorkspaceRequest'] = {
       slug: 'acme-health',
       name: 'Acme Health',
-      environment: 'staging',
       backend_org_id: null,
     }
 
