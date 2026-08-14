@@ -36,8 +36,6 @@ Thank you for your interest in contributing to the Amigo Platform SDK! This guid
 
 When upgrading `openapi-fetch`, keep the direct `openapi-typescript-helpers` dependency aligned with the range declared by `openapi-fetch`. The SDK's published declarations import both packages directly, and `npm run test:tarball` enforces the range coupling.
 
-`npm run test:reviewer` uses Python's standard `unittest` runner. Use the repository CI Python version when changing `scripts/pr_review/`; the workflow currently runs the reviewer tests on Python 3.12.
-
 ## Testing
 
 This project uses **Vitest** as the testing framework.
