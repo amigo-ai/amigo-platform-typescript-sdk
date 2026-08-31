@@ -11,6 +11,6 @@ describe('voice provider constants', () => {
   })
 
   it('exposes supported TTS providers', () => {
-    expect(TTS_PROVIDERS).toEqual(['cartesia', 'elevenlabs', 'groq'])
+    expect(TTS_PROVIDERS).toEqual(['cartesia', 'elevenlabs'])
   })
 })

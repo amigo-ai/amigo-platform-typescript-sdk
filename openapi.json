@@ -39,53 +39,6 @@
         "title": "AccessReviewResponse",
         "type": "object"
       },
-      "AccessTokenRequest": {
-        "description": "Request to generate a Twilio AccessToken for browser-based audio.",
-        "properties": {
-          "call_sid": {
-            "maxLength": 64,
-            "minLength": 1,
-            "title": "Call Sid",
-            "type": "string"
-          }
-        },
-        "required": [
-          "call_sid"
-        ],
-        "title": "AccessTokenRequest",
-        "type": "object"
-      },
-      "AccessTokenResponse": {
-        "properties": {
-          "conference_sid": {
-            "title": "Conference Sid",
-            "type": "string"
-          },
-          "connect_params": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "default": {},
-            "title": "Connect Params",
-            "type": "object"
-          },
-          "identity": {
-            "title": "Identity",
-            "type": "string"
-          },
-          "token": {
-            "title": "Token",
-            "type": "string"
-          }
-        },
-        "required": [
-          "token",
-          "identity",
-          "conference_sid"
-        ],
-        "title": "AccessTokenResponse",
-        "type": "object"
-      },
       "Action": {
         "description": "A single action the agent can take within a state.",
         "properties": {
@@ -938,199 +891,6 @@
         "title": "AgentAnalyticsResponse",
         "type": "object"
       },
-      "AgentDefinitionDetail": {
-        "properties": {
-          "definition_id": {
-            "format": "uuid",
-            "title": "Definition Id",
-            "type": "string"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "archived"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "versions": {
-            "items": {
-              "$ref": "#/components/schemas/AgentDefinitionVersionMeta"
-            },
-            "title": "Versions",
-            "type": "array"
-          }
-        },
-        "required": [
-          "definition_id",
-          "name",
-          "framework",
-          "status",
-          "versions"
-        ],
-        "title": "AgentDefinitionDetail",
-        "type": "object"
-      },
-      "AgentDefinitionListResponse": {
-        "properties": {
-          "continuation_token": {
-            "title": "Continuation Token"
-          },
-          "has_more": {
-            "title": "Has More",
-            "type": "boolean"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AgentDefinitionSummary"
-            },
-            "title": "Items",
-            "type": "array"
-          }
-        },
-        "required": [
-          "items",
-          "has_more"
-        ],
-        "title": "AgentDefinitionListResponse",
-        "type": "object"
-      },
-      "AgentDefinitionSummary": {
-        "properties": {
-          "definition_id": {
-            "format": "uuid",
-            "title": "Definition Id",
-            "type": "string"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "active",
-              "archived"
-            ],
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "definition_id",
-          "name",
-          "framework",
-          "status"
-        ],
-        "title": "AgentDefinitionSummary",
-        "type": "object"
-      },
-      "AgentDefinitionVersionDetail": {
-        "properties": {
-          "agent_count": {
-            "title": "Agent Count",
-            "type": "integer"
-          },
-          "body": {
-            "additionalProperties": true,
-            "title": "Body",
-            "type": "object"
-          },
-          "body_sha256": {
-            "title": "Body Sha256",
-            "type": "string"
-          },
-          "definition_id": {
-            "format": "uuid",
-            "title": "Definition Id",
-            "type": "string"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "has_write_tools": {
-            "title": "Has Write Tools",
-            "type": "boolean"
-          },
-          "validator_rev": {
-            "title": "Validator Rev",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "version",
-          "body_sha256",
-          "validator_rev",
-          "has_write_tools",
-          "agent_count",
-          "definition_id",
-          "framework",
-          "body"
-        ],
-        "title": "AgentDefinitionVersionDetail",
-        "type": "object"
-      },
-      "AgentDefinitionVersionMeta": {
-        "properties": {
-          "agent_count": {
-            "title": "Agent Count",
-            "type": "integer"
-          },
-          "body_sha256": {
-            "title": "Body Sha256",
-            "type": "string"
-          },
-          "has_write_tools": {
-            "title": "Has Write Tools",
-            "type": "boolean"
-          },
-          "validator_rev": {
-            "title": "Validator Rev",
-            "type": "string"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "version",
-          "body_sha256",
-          "validator_rev",
-          "has_write_tools",
-          "agent_count"
-        ],
-        "title": "AgentDefinitionVersionMeta",
-        "type": "object"
-      },
       "AgentIdentity": {
         "description": "Who the agent IS \u2014 platform-authored only; ``None`` for native runs\n(a customer's own definition carries its own identity). Named\n``AgentIdentity`` (not ``Identity``) to avoid colliding with the existing\n``config.models.Identity`` OpenAPI schema (a same-name collision would\nforce-rename that shipped schema \u2014 a breaking spec change).",
         "properties": {
@@ -1237,71 +997,6 @@
           "updated_at"
         ],
         "title": "AgentResponse",
-        "type": "object"
-      },
-      "AgentRunDetail": {
-        "properties": {
-          "duration_ms": {
-            "default": 0.0,
-            "minimum": 0.0,
-            "title": "Duration Ms",
-            "type": "number"
-          },
-          "error": {
-            "default": "",
-            "description": "Failure detail for failed/timed_out runs. Empty otherwise.",
-            "title": "Error",
-            "type": "string"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "run_id": {
-            "format": "uuid",
-            "title": "Run Id",
-            "type": "string"
-          },
-          "status": {
-            "enum": [
-              "running",
-              "succeeded",
-              "failed",
-              "timed_out"
-            ],
-            "title": "Status",
-            "type": "string"
-          },
-          "text": {
-            "default": "",
-            "description": "Final agent text. Empty while the run is still running or on failure.",
-            "title": "Text",
-            "type": "string"
-          },
-          "trajectory": {
-            "default": [],
-            "description": "AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) \u2014 the runner normalizer's projection of framework-native output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.",
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Trajectory",
-            "type": "array"
-          },
-          "usage": {
-            "$ref": "#/components/schemas/Usage"
-          }
-        },
-        "required": [
-          "run_id",
-          "status",
-          "framework"
-        ],
-        "title": "AgentRunDetail",
         "type": "object"
       },
       "AgentTranscriptDeltaEvent": {
@@ -1775,170 +1470,6 @@
           "next_state"
         ],
         "title": "AnnotationState",
-        "type": "object"
-      },
-      "AnomalyAlertResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/AnomalyAlertRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "AnomalyAlertResponse",
-        "type": "object"
-      },
-      "AnomalyAlertRow": {
-        "properties": {
-          "actions_json": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Actions Json"
-          },
-          "alert_id": {
-            "title": "Alert Id",
-            "type": "string"
-          },
-          "decomposition_json": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Decomposition Json"
-          },
-          "detected_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Detected At"
-          },
-          "mechanism": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Mechanism"
-          },
-          "narrative": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Narrative"
-          },
-          "priority_score": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Priority Score"
-          },
-          "projection_json": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Projection Json"
-          },
-          "severity": {
-            "anyOf": [
-              {
-                "enum": [
-                  "high",
-                  "medium",
-                  "low"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Severity"
-          },
-          "slice_label": {
-            "title": "Slice Label",
-            "type": "string"
-          },
-          "stats_json": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Stats Json"
-          },
-          "workspace_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "const": "labs",
-                "type": "string"
-              }
-            ],
-            "title": "Workspace Id"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "alert_id",
-          "slice_label"
-        ],
-        "title": "AnomalyAlertRow",
         "type": "object"
       },
       "AnyValue": {
@@ -3080,63 +2611,6 @@
           "branding"
         ],
         "title": "BrandingSettingsResponse",
-        "type": "object"
-      },
-      "BridgePlanRequest": {
-        "properties": {
-          "objective": {
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Objective",
-            "type": "string"
-          },
-          "service_id": {
-            "format": "uuid",
-            "title": "Service Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "service_id",
-          "objective"
-        ],
-        "title": "BridgePlanRequest",
-        "type": "object"
-      },
-      "BridgePlanResponse": {
-        "properties": {
-          "available_states": {
-            "items": {
-              "maxLength": 128,
-              "type": "string"
-            },
-            "maxItems": 200,
-            "title": "Available States",
-            "type": "array"
-          },
-          "available_tools": {
-            "items": {
-              "maxLength": 128,
-              "type": "string"
-            },
-            "maxItems": 200,
-            "title": "Available Tools",
-            "type": "array"
-          },
-          "rationale": {
-            "maxLength": 1000,
-            "title": "Rationale",
-            "type": "string"
-          },
-          "target_spec": {
-            "$ref": "#/components/schemas/TargetSpec"
-          }
-        },
-        "required": [
-          "target_spec",
-          "rationale"
-        ],
-        "title": "BridgePlanResponse",
         "type": "object"
       },
       "BridgeRequest": {
@@ -5639,384 +5113,6 @@
         "title": "ChangeColumnTypeAction",
         "type": "object"
       },
-      "ChannelEmailBouncedEvent": {
-        "properties": {
-          "bounce_subtype": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Bounce Subtype"
-          },
-          "bounce_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "default": null,
-            "title": "Bounce Type"
-          },
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_bounced",
-            "default": "channel.email_bounced",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address",
-          "from_address"
-        ],
-        "title": "ChannelEmailBouncedEvent",
-        "type": "object"
-      },
-      "ChannelEmailClickedEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_clicked",
-            "default": "channel.email_clicked",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address"
-        ],
-        "title": "ChannelEmailClickedEvent",
-        "type": "object"
-      },
-      "ChannelEmailComplainedEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_complained",
-            "default": "channel.email_complained",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address",
-          "from_address"
-        ],
-        "title": "ChannelEmailComplainedEvent",
-        "type": "object"
-      },
-      "ChannelEmailDelayedEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_delayed",
-            "default": "channel.email_delayed",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address",
-          "from_address"
-        ],
-        "title": "ChannelEmailDelayedEvent",
-        "type": "object"
-      },
-      "ChannelEmailDeliveredEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_delivered",
-            "default": "channel.email_delivered",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address",
-          "from_address"
-        ],
-        "title": "ChannelEmailDeliveredEvent",
-        "type": "object"
-      },
-      "ChannelEmailOpenedEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_opened",
-            "default": "channel.email_opened",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address"
-        ],
-        "title": "ChannelEmailOpenedEvent",
-        "type": "object"
-      },
-      "ChannelEmailReceivedEvent": {
-        "description": "Inbound email persisted to channel.inbound_emails as a reply to one of\nour outbound sends. ``in_reply_to_email_id`` is the outbound row this\ninbound threads against.",
-        "properties": {
-          "event_type": {
-            "const": "channel.email_received",
-            "default": "channel.email_received",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string",
-            "x-phi": true
-          },
-          "in_reply_to_email_id": {
-            "title": "In Reply To Email Id",
-            "type": "string"
-          },
-          "inbound_email_id": {
-            "title": "Inbound Email Id",
-            "type": "string"
-          },
-          "subject": {
-            "title": "Subject",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "inbound_email_id",
-          "in_reply_to_email_id",
-          "from_address",
-          "to_address",
-          "subject"
-        ],
-        "title": "ChannelEmailReceivedEvent",
-        "type": "object"
-      },
-      "ChannelEmailRejectedEvent": {
-        "properties": {
-          "email_id": {
-            "title": "Email Id",
-            "type": "string"
-          },
-          "event_type": {
-            "const": "channel.email_rejected",
-            "default": "channel.email_rejected",
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "title": "From Address",
-            "type": "string"
-          },
-          "to_address": {
-            "title": "To Address",
-            "type": "string",
-            "x-phi": true
-          }
-        },
-        "required": [
-          "email_id",
-          "to_address",
-          "from_address"
-        ],
-        "title": "ChannelEmailRejectedEvent",
-        "type": "object"
-      },
-      "ChannelEventRequest": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ChannelKind"
-          },
-          "data": {
-            "additionalProperties": true,
-            "title": "Data",
-            "type": "object"
-          },
-          "email_id": {
-            "anyOf": [
-              {
-                "maxLength": 256,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email Id"
-          },
-          "event_type": {
-            "maxLength": 64,
-            "title": "Event Type",
-            "type": "string"
-          },
-          "from_address": {
-            "anyOf": [
-              {
-                "maxLength": 320,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "From Address"
-          },
-          "occurred_at": {
-            "format": "date-time",
-            "title": "Occurred At",
-            "type": "string"
-          },
-          "phone_number": {
-            "anyOf": [
-              {
-                "maxLength": 20,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone Number"
-          },
-          "to_address": {
-            "anyOf": [
-              {
-                "maxLength": 320,
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "To Address"
-          },
-          "use_case_id": {
-            "format": "uuid",
-            "title": "Use Case Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "channel",
-          "event_type",
-          "use_case_id",
-          "occurred_at"
-        ],
-        "title": "ChannelEventRequest",
-        "type": "object"
-      },
-      "ChannelEventResponse": {
-        "properties": {
-          "event_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Event Id"
-          },
-          "status": {
-            "enum": [
-              "accepted",
-              "skipped"
-            ],
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
-        ],
-        "title": "ChannelEventResponse",
-        "type": "object"
-      },
       "ChannelKind": {
         "description": "HSM execution channel type.\n\nDetermines how the HSM engine communicates with end users.\nEach kind maps to one or more providers.",
         "enum": [
@@ -6854,35 +5950,6 @@
         "title": "Column",
         "type": "object"
       },
-      "ColumnInfo": {
-        "properties": {
-          "column_name": {
-            "title": "Column Name",
-            "type": "string"
-          },
-          "comment": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Comment"
-          },
-          "data_type": {
-            "title": "Data Type",
-            "type": "string"
-          }
-        },
-        "required": [
-          "column_name",
-          "data_type"
-        ],
-        "title": "ColumnInfo",
-        "type": "object"
-      },
       "ColumnType": {
         "enum": [
           "text",
@@ -6898,33 +5965,6 @@
           "bytea"
         ],
         "type": "string"
-      },
-      "ColumnsResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/ColumnInfo"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "ColumnsResponse",
-        "type": "object"
       },
       "CommandCenterAlert": {
         "properties": {
@@ -8292,148 +7332,6 @@
         "title": "ConversationDetail",
         "type": "object"
       },
-      "ConversationStarter": {
-        "properties": {
-          "label": {
-            "maxLength": 160,
-            "minLength": 1,
-            "title": "Label",
-            "type": "string"
-          },
-          "lane": {
-            "default": "general",
-            "enum": [
-              "data",
-              "goal",
-              "protocol",
-              "care",
-              "general"
-            ],
-            "title": "Lane",
-            "type": "string"
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "title": "Metadata",
-            "type": "object"
-          },
-          "referenced_objects": {
-            "items": {
-              "type": "string"
-            },
-            "maxItems": 50,
-            "title": "Referenced Objects",
-            "type": "array"
-          },
-          "source": {
-            "default": "configured",
-            "enum": [
-              "recent_data",
-              "hypothesis",
-              "goal",
-              "protocol",
-              "care",
-              "generated",
-              "deterministic",
-              "configured"
-            ],
-            "title": "Source",
-            "type": "string"
-          },
-          "value": {
-            "maxLength": 1000,
-            "minLength": 1,
-            "title": "Value",
-            "type": "string"
-          }
-        },
-        "required": [
-          "label",
-          "value"
-        ],
-        "title": "ConversationStarter",
-        "type": "object"
-      },
-      "ConversationStartersRequest": {
-        "properties": {
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "generation_mode": {
-            "default": "auto",
-            "enum": [
-              "auto",
-              "generate",
-              "configured"
-            ],
-            "title": "Generation Mode",
-            "type": "string"
-          },
-          "include_deterministic": {
-            "default": true,
-            "title": "Include Deterministic",
-            "type": "boolean"
-          },
-          "max_count": {
-            "default": 5,
-            "maximum": 10.0,
-            "minimum": 1.0,
-            "title": "Max Count",
-            "type": "integer"
-          }
-        },
-        "title": "ConversationStartersRequest",
-        "type": "object"
-      },
-      "ConversationStartersResponse": {
-        "properties": {
-          "entity_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Entity Id"
-          },
-          "service_id": {
-            "format": "uuid",
-            "title": "Service Id",
-            "type": "string"
-          },
-          "starters": {
-            "items": {
-              "$ref": "#/components/schemas/ConversationStarter"
-            },
-            "title": "Starters",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "service_id",
-          "starters"
-        ],
-        "title": "ConversationStartersResponse",
-        "type": "object"
-      },
       "ConversationStatusTransitionRequest": {
         "properties": {
           "reason": {
@@ -8942,95 +7840,6 @@
         "title": "CreateAgentRequest",
         "type": "object"
       },
-      "CreateAgentRunRequest": {
-        "properties": {
-          "framework": {
-            "anyOf": [
-              {
-                "enum": [
-                  "claude-agent-sdk",
-                  "openai-agents"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Framework a PLATFORM run executes on. For a native run the framework comes from the definition.",
-            "title": "Framework"
-          },
-          "message": {
-            "description": "User message the framework agent is invoked with.",
-            "maxLength": 8000,
-            "minLength": 1,
-            "title": "Message",
-            "type": "string"
-          },
-          "native": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/NativeRunRef"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Run a native (bring-your-own) agent definition instead of a platform service."
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Platform-authored run: the service whose pinned config the agent runs.",
-            "title": "Service Id"
-          },
-          "timeout_s": {
-            "default": 120,
-            "description": "Server-side wall-clock budget for the run, in seconds (max 300).",
-            "exclusiveMinimum": 0.0,
-            "maximum": 300.0,
-            "title": "Timeout S",
-            "type": "integer"
-          },
-          "version_set": {
-            "$ref": "#/components/schemas/NameString",
-            "default": "release",
-            "description": "Named version set on the service whose pinned config the run uses (platform runs)."
-          }
-        },
-        "required": [
-          "message"
-        ],
-        "title": "CreateAgentRunRequest",
-        "type": "object"
-      },
-      "CreateAgentRunResponse": {
-        "properties": {
-          "run_id": {
-            "format": "uuid",
-            "title": "Run Id",
-            "type": "string"
-          },
-          "status": {
-            "const": "running",
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "run_id",
-          "status"
-        ],
-        "title": "CreateAgentRunResponse",
-        "type": "object"
-      },
       "CreateAgentVersionRequest": {
         "properties": {
           "background": {
@@ -9513,7 +8322,7 @@
       "CreateOperatorRequest": {
         "properties": {
           "connection_method": {
-            "default": "browser",
+            "default": "phone",
             "enum": [
               "browser",
               "phone"
@@ -10333,7 +9142,7 @@
             "type": "integer"
           },
           "model": {
-            "default": "claude-sonnet-4-6",
+            "default": "claude-sonnet-5",
             "maxLength": 128,
             "minLength": 1,
             "title": "Model",
@@ -10396,18 +9205,12 @@
           "thinking_effort": {
             "anyOf": [
               {
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/ThinkingEffort"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Thinking Effort"
+            ]
           },
           "timeout_s": {
             "default": 60.0,
@@ -12586,20 +11389,6 @@
         "maxLength": 2000,
         "type": "string"
       },
-      "DesignAgentSessionResponse": {
-        "properties": {
-          "status": {
-            "const": "stored",
-            "title": "Status",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status"
-        ],
-        "title": "DesignAgentSessionResponse",
-        "type": "object"
-      },
       "DestroySessionResponse": {
         "properties": {
           "status": {
@@ -12613,182 +11402,6 @@
           "status"
         ],
         "title": "DestroySessionResponse",
-        "type": "object"
-      },
-      "DistrictMetricsResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/DistrictMetricsRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "DistrictMetricsResponse",
-        "type": "object"
-      },
-      "DistrictMetricsRow": {
-        "properties": {
-          "access_narrative": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Access Narrative"
-          },
-          "anomaly_narrative": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Anomaly Narrative"
-          },
-          "capacity_gap_pct": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Capacity Gap Pct"
-          },
-          "cohort_size": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Cohort Size"
-          },
-          "district_name": {
-            "title": "District Name",
-            "type": "string"
-          },
-          "is_anomaly": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Anomaly"
-          },
-          "pcp_per_1k": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Pcp Per 1K"
-          },
-          "residual": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Residual"
-          },
-          "t2d_incidence_per_1k": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "T2D Incidence Per 1K"
-          },
-          "t2d_predicted_per_1k": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "T2D Predicted Per 1K"
-          },
-          "unmet_demand_score": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Unmet Demand Score"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "workspace_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "const": "labs",
-                "type": "string"
-              }
-            ],
-            "title": "Workspace Id"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "district_name"
-        ],
-        "title": "DistrictMetricsRow",
         "type": "object"
       },
       "DocumentProcessingSpec": {
@@ -15475,18 +14088,6 @@
             "title": "By Event Type",
             "type": "object"
           },
-          "event_type_window_days": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Window applied to by_event_type counts when an entity_type filter is supplied.",
-            "title": "Event Type Window Days"
-          },
           "sync_failed": {
             "title": "Sync Failed",
             "type": "integer"
@@ -17594,93 +16195,6 @@
         ],
         "title": "FailureClass",
         "type": "string"
-      },
-      "FeatureDef": {
-        "properties": {
-          "kind": {
-            "title": "Kind",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          }
-        },
-        "required": [
-          "name",
-          "kind"
-        ],
-        "title": "FeatureDef",
-        "type": "object"
-      },
-      "FeatureDistributionResponse": {
-        "properties": {
-          "bins": {
-            "items": {
-              "$ref": "#/components/schemas/HistogramBin"
-            },
-            "title": "Bins",
-            "type": "array"
-          },
-          "feature": {
-            "title": "Feature",
-            "type": "string"
-          },
-          "kind": {
-            "title": "Kind",
-            "type": "string"
-          },
-          "n_total": {
-            "title": "N Total",
-            "type": "integer"
-          },
-          "n_y1": {
-            "title": "N Y1",
-            "type": "integer"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "feature",
-          "kind",
-          "bins",
-          "n_total",
-          "n_y1"
-        ],
-        "title": "FeatureDistributionResponse",
-        "type": "object"
-      },
-      "FeaturesResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/FeatureDef"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "FeaturesResponse",
-        "type": "object"
       },
       "FhirAppointmentListResponse": {
         "properties": {
@@ -19798,40 +18312,6 @@
         "title": "FireTriggerRequest",
         "type": "object"
       },
-      "FlagProviderHealthResponse": {
-        "description": "Whether feature-flag flips are actually runtime-controllable.\n\nSurfaces ``FeatureFlagClient.doctor()`` so operators can detect the\nsilently-inert state where flag flips, per-workspace ramps, kill switches,\nand rollbacks resolve to code/env defaults instead of taking effect.",
-        "properties": {
-          "env_enabled": {
-            "title": "Env Enabled",
-            "type": "boolean"
-          },
-          "provider_ready": {
-            "title": "Provider Ready",
-            "type": "boolean"
-          },
-          "provider_registered": {
-            "title": "Provider Registered",
-            "type": "boolean"
-          },
-          "reason": {
-            "title": "Reason",
-            "type": "string"
-          },
-          "runtime_controllable": {
-            "title": "Runtime Controllable",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "provider_registered",
-          "provider_ready",
-          "env_enabled",
-          "runtime_controllable",
-          "reason"
-        ],
-        "title": "FlagProviderHealthResponse",
-        "type": "object"
-      },
       "FleetStatusResponse": {
         "description": "Live Agones fleet capacity (workspace-global).\n\n``headroom`` = remaining isolated-unit slots (``max_replicas - allocated``);\n``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.\nThe counts span the whole fleet (one fleet serves every workspace) \u2014 this is NOT\nper-workspace. ``fleet``/``namespace`` echo which fleet was read (voice per-call\nfleet, or the tool-runner background-tool fleet via ``?fleet=tool-runner``).",
         "properties": {
@@ -20719,19 +19199,14 @@
             ],
             "title": "Forwarded At"
           },
-          "should_disconnect": {
-            "title": "Should Disconnect",
-            "type": "boolean"
-          },
           "warm_transfer": {
-            "default": true,
             "title": "Warm Transfer",
             "type": "boolean"
           }
         },
         "required": [
           "forward_to",
-          "should_disconnect"
+          "warm_transfer"
         ],
         "title": "ForwardingDetails",
         "type": "object"
@@ -21437,34 +19912,6 @@
           "compliance_status"
         ],
         "title": "HipaaReportResponse",
-        "type": "object"
-      },
-      "HistogramBin": {
-        "properties": {
-          "x_hi": {
-            "title": "X Hi",
-            "type": "number"
-          },
-          "x_lo": {
-            "title": "X Lo",
-            "type": "number"
-          },
-          "y0": {
-            "title": "Y0",
-            "type": "integer"
-          },
-          "y1": {
-            "title": "Y1",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "x_lo",
-          "x_hi",
-          "y0",
-          "y1"
-        ],
-        "title": "HistogramBin",
         "type": "object"
       },
       "HumanSegment": {
@@ -22221,7 +20668,7 @@
             "type": "integer"
           },
           "model": {
-            "default": "claude-sonnet-4-6",
+            "default": "claude-sonnet-5",
             "title": "Model",
             "type": "string"
           },
@@ -22272,18 +20719,12 @@
           "thinking_effort": {
             "anyOf": [
               {
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/ThinkingEffort"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Thinking Effort"
+            ]
           },
           "timeout_s": {
             "default": 60.0,
@@ -22589,112 +21030,8 @@
       },
       "LLMExperienceControls": {
         "additionalProperties": false,
-        "description": "First-class chat experience controls for consumer-facing agents.\n\n``params`` remains available as a provider-specific escape hatch. These\nfields cover the OpenAI Chat Completions controls that most directly shape\nresponse tone, feel, determinism, latency, and structured output behavior.\nToken budgets are intentionally excluded so version sets do not reintroduce\naccidental response truncation.",
+        "description": "Typed model-tuning controls for a version set's LLM preference.\n\n``params`` remains available as a provider-specific escape hatch. These three\nfields are the ones deployments actually use; the surface was trimmed from\nnineteen in V370 after a production census found the other sixteen had never\nbeen set to a non-null value by anyone. Token budgets are intentionally\nexcluded so version sets do not reintroduce accidental response truncation.",
         "properties": {
-          "frequency_penalty": {
-            "anyOf": [
-              {
-                "maximum": 2.0,
-                "minimum": -2.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Frequency Penalty"
-          },
-          "logit_bias": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "maximum": 100.0,
-                  "minimum": -100.0,
-                  "type": "number"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logit Bias"
-          },
-          "logprobs": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Logprobs"
-          },
-          "metadata": {
-            "anyOf": [
-              {
-                "additionalProperties": {
-                  "type": "string"
-                },
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Metadata"
-          },
-          "parallel_tool_calls": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Parallel Tool Calls"
-          },
-          "presence_penalty": {
-            "anyOf": [
-              {
-                "maximum": 2.0,
-                "minimum": -2.0,
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Presence Penalty"
-          },
-          "prompt_cache_key": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prompt Cache Key"
-          },
-          "prompt_cache_retention": {
-            "anyOf": [
-              {
-                "enum": [
-                  "in-memory",
-                  "24h"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Prompt Cache Retention"
-          },
           "reasoning_effort": {
             "anyOf": [
               {
@@ -22714,79 +21051,6 @@
             ],
             "title": "Reasoning Effort"
           },
-          "response_format": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Response Format"
-          },
-          "safety_identifier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Safety Identifier"
-          },
-          "seed": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Seed"
-          },
-          "service_tier": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Service Tier"
-          },
-          "stop": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Stop"
-          },
-          "store": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Store"
-          },
           "temperature": {
             "anyOf": [
               {
@@ -22800,19 +21064,6 @@
             ],
             "title": "Temperature"
           },
-          "top_logprobs": {
-            "anyOf": [
-              {
-                "maximum": 20.0,
-                "minimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Top Logprobs"
-          },
           "top_p": {
             "anyOf": [
               {
@@ -22825,22 +21076,6 @@
               }
             ],
             "title": "Top P"
-          },
-          "verbosity": {
-            "anyOf": [
-              {
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ],
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Verbosity"
           }
         },
         "title": "LLMExperienceControls",
@@ -22858,8 +21093,7 @@
           "provider": {
             "enum": [
               "cartesia",
-              "elevenlabs",
-              "groq"
+              "elevenlabs"
             ],
             "title": "Provider",
             "type": "string"
@@ -24422,7 +22656,7 @@
             "type": "boolean"
           },
           "model": {
-            "description": "Model identifier, e.g. claude-sonnet-4-6",
+            "description": "Model identifier, e.g. claude-sonnet-5",
             "title": "Model",
             "type": "string"
           },
@@ -24645,52 +22879,6 @@
           "event_count"
         ],
         "title": "NarrativeUpdatedEvent",
-        "type": "object"
-      },
-      "NativeRunRef": {
-        "description": "Run a customer-authored NATIVE agent definition (inc-10): a REGISTERED\ndefinition by id (``version`` omitted = latest), or an INLINE body for\ndev/playground iteration. The definition's own ``framework`` selects the\nruntime \u2014 no top-level ``framework`` needed.",
-        "properties": {
-          "definition_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Registered definition to run. Omit `version` for the latest.",
-            "title": "Definition Id"
-          },
-          "inline": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Inline definition document (dev/playground). Validated by the platform clamp schema.",
-            "title": "Inline"
-          },
-          "version": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Pinned definition version; omit for latest.",
-            "title": "Version"
-          }
-        },
-        "title": "NativeRunRef",
         "type": "object"
       },
       "NavTimingEvent": {
@@ -28574,138 +26762,6 @@
         "title": "PlaybackTimeline",
         "type": "object"
       },
-      "PositiveSignalResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "$ref": "#/components/schemas/PositiveSignalRow"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "PositiveSignalResponse",
-        "type": "object"
-      },
-      "PositiveSignalRow": {
-        "properties": {
-          "baseline": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Baseline"
-          },
-          "delta_unit": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Delta Unit"
-          },
-          "delta_value": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Delta Value"
-          },
-          "headline": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Headline"
-          },
-          "metric_label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Metric Label"
-          },
-          "narrative": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Narrative"
-          },
-          "signal_id": {
-            "title": "Signal Id",
-            "type": "string"
-          },
-          "updated_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Updated At"
-          },
-          "workspace_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "const": "labs",
-                "type": "string"
-              }
-            ],
-            "title": "Workspace Id"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "signal_id"
-        ],
-        "title": "PositiveSignalRow",
-        "type": "object"
-      },
       "PreloadSpec": {
         "description": "A tool call executed deterministically by the engine on state entry.\n\nUnlike LLM-driven tool calls, preloads run before any LLM turn \u2014\nthe results appear in the interaction log so the engage LLM sees\nthem as pre-loaded context.  All preloads in a state execute in\nparallel.  Param values support ``{caller_mrn}`` and ``{entity_id}``\ntemplate variables resolved from the session's caller context.",
         "properties": {
@@ -29548,7 +27604,7 @@
           "websocket",
           "ses",
           "sendblue",
-          "infobip"
+          "meta"
         ],
         "title": "ProviderType",
         "type": "string"
@@ -29563,58 +27619,6 @@
           "workspace"
         ],
         "title": "ProvisionResponse",
-        "type": "object"
-      },
-      "PurgeEntityResponse": {
-        "properties": {
-          "delta_events_note": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Delta Events Note"
-          },
-          "display_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Display Name"
-          },
-          "edges_deleted": {
-            "title": "Edges Deleted",
-            "type": "integer"
-          },
-          "entity_deleted": {
-            "title": "Entity Deleted",
-            "type": "boolean"
-          },
-          "entity_id": {
-            "format": "uuid",
-            "title": "Entity Id",
-            "type": "string"
-          },
-          "events_deleted": {
-            "title": "Events Deleted",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "entity_id",
-          "display_name",
-          "events_deleted",
-          "edges_deleted",
-          "entity_deleted"
-        ],
-        "title": "PurgeEntityResponse",
         "type": "object"
       },
       "QualityBreakdown": {
@@ -30311,119 +28315,8 @@
         "title": "RecommendResponse",
         "type": "object"
       },
-      "RecordingMetadataResponse": {
-        "description": "Call recording metadata.",
-        "properties": {
-          "call_end_iso": {
-            "description": "Call end time as ISO-8601 string",
-            "title": "Call End Iso",
-            "type": "string"
-          },
-          "call_sid": {
-            "description": "Twilio call SID",
-            "title": "Call Sid",
-            "type": "string"
-          },
-          "call_start_iso": {
-            "description": "Call start time as ISO-8601 string",
-            "title": "Call Start Iso",
-            "type": "string"
-          },
-          "direction": {
-            "description": "Call direction",
-            "enum": [
-              "inbound",
-              "outbound"
-            ],
-            "title": "Direction",
-            "type": "string"
-          },
-          "duration_seconds": {
-            "description": "Total call duration in seconds",
-            "title": "Duration Seconds",
-            "type": "number"
-          },
-          "inbound_format": {
-            "description": "Audio format for the inbound (caller) channel",
-            "title": "Inbound Format",
-            "type": "string"
-          },
-          "inbound_sample_rate": {
-            "description": "Sample rate in Hz for the inbound channel",
-            "title": "Inbound Sample Rate",
-            "type": "integer"
-          },
-          "inbound_size_bytes": {
-            "description": "Inbound audio file size in bytes",
-            "title": "Inbound Size Bytes",
-            "type": "integer"
-          },
-          "media_start_epoch_ms": {
-            "description": "Media stream start time as Unix epoch milliseconds",
-            "title": "Media Start Epoch Ms",
-            "type": "number"
-          },
-          "outbound_format": {
-            "description": "Audio format for the outbound (agent) channel",
-            "title": "Outbound Format",
-            "type": "string"
-          },
-          "outbound_sample_rate": {
-            "description": "Sample rate in Hz for the outbound channel",
-            "title": "Outbound Sample Rate",
-            "type": "integer"
-          },
-          "outbound_size_bytes": {
-            "description": "Outbound audio file size in bytes",
-            "title": "Outbound Size Bytes",
-            "type": "integer"
-          },
-          "service_id": {
-            "anyOf": [
-              {
-                "format": "uuid",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Service (agent) that handled the call",
-            "title": "Service Id"
-          },
-          "tts_provider": {
-            "description": "Text-to-speech provider used for the call",
-            "title": "Tts Provider",
-            "type": "string"
-          },
-          "workspace_id": {
-            "description": "Workspace that owns this recording",
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "call_sid",
-          "workspace_id",
-          "direction",
-          "duration_seconds",
-          "inbound_format",
-          "inbound_sample_rate",
-          "outbound_format",
-          "outbound_sample_rate",
-          "tts_provider",
-          "call_start_iso",
-          "call_end_iso",
-          "inbound_size_bytes",
-          "outbound_size_bytes",
-          "media_start_epoch_ms"
-        ],
-        "title": "RecordingMetadataResponse",
-        "type": "object"
-      },
       "RecordingUrlsResponse": {
-        "description": "Download paths for call recording playback.",
+        "description": "Presigned S3 URLs for a call recording's WAV objects.",
         "properties": {
           "call_sid": {
             "description": "Twilio call SID",
@@ -30431,122 +28324,28 @@
             "type": "string"
           },
           "inbound_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Download URL for inbound (caller) audio",
-            "title": "Inbound Url"
-          },
-          "metadata_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Download URL for recording metadata JSON",
-            "title": "Metadata Url"
+            "description": "Presigned URL for the inbound (caller) WAV",
+            "title": "Inbound Url",
+            "type": "string"
           },
           "outbound_url": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Download URL for outbound (agent) audio",
-            "title": "Outbound Url"
+            "description": "Presigned URL for the outbound (agent) WAV",
+            "title": "Outbound Url",
+            "type": "string"
           },
-          "status": {
-            "const": "available",
-            "default": "available",
-            "description": "Recording availability status",
-            "title": "Status",
+          "stereo_url": {
+            "description": "Presigned URL for the merged stereo (caller left / agent right) WAV",
+            "title": "Stereo Url",
             "type": "string"
           }
         },
         "required": [
-          "call_sid"
+          "call_sid",
+          "inbound_url",
+          "outbound_url",
+          "stereo_url"
         ],
         "title": "RecordingUrlsResponse",
-        "type": "object"
-      },
-      "RegisterAgentDefinitionRequest": {
-        "properties": {
-          "body": {
-            "additionalProperties": true,
-            "description": "The framework-native definition document (its 'framework' field selects the shape). Validated by the platform clamp schema \u2014 a non-whitelisted field is rejected.",
-            "title": "Body",
-            "type": "object"
-          },
-          "name": {
-            "$ref": "#/components/schemas/SlugString",
-            "description": "Stable slug identifying this definition within the workspace."
-          }
-        },
-        "required": [
-          "name",
-          "body"
-        ],
-        "title": "RegisterAgentDefinitionRequest",
-        "type": "object"
-      },
-      "RegisterAgentDefinitionResponse": {
-        "properties": {
-          "agent_count": {
-            "title": "Agent Count",
-            "type": "integer"
-          },
-          "body_sha256": {
-            "title": "Body Sha256",
-            "type": "string"
-          },
-          "created": {
-            "description": "False when an identical body was already registered (idempotent push).",
-            "title": "Created",
-            "type": "boolean"
-          },
-          "definition_id": {
-            "format": "uuid",
-            "title": "Definition Id",
-            "type": "string"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "has_write_tools": {
-            "title": "Has Write Tools",
-            "type": "boolean"
-          },
-          "version": {
-            "title": "Version",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "definition_id",
-          "version",
-          "created",
-          "framework",
-          "has_write_tools",
-          "agent_count",
-          "body_sha256"
-        ],
-        "title": "RegisterAgentDefinitionResponse",
         "type": "object"
       },
       "RegisterSchemaRequest": {
@@ -32046,56 +29845,6 @@
         "title": "Run",
         "type": "object"
       },
-      "RunAccessTokenRequest": {
-        "properties": {
-          "operator_id": {
-            "format": "uuid",
-            "title": "Operator Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "operator_id"
-        ],
-        "title": "RunAccessTokenRequest",
-        "type": "object"
-      },
-      "RunAccessTokenResponse": {
-        "properties": {
-          "conference_sid": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Conference Sid"
-          },
-          "connect_params": {
-            "additionalProperties": {
-              "type": "string"
-            },
-            "title": "Connect Params",
-            "type": "object"
-          },
-          "identity": {
-            "title": "Identity",
-            "type": "string"
-          },
-          "token": {
-            "title": "Token",
-            "type": "string"
-          }
-        },
-        "required": [
-          "token",
-          "identity"
-        ],
-        "title": "RunAccessTokenResponse",
-        "type": "object"
-      },
       "RunAuthoredTurnRequest": {
         "properties": {
           "operator_id": {
@@ -32707,34 +30456,6 @@
         "title": "SafetySummary",
         "type": "object"
       },
-      "SampleResponse": {
-        "properties": {
-          "count": {
-            "title": "Count",
-            "type": "integer"
-          },
-          "items": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "title": "Items",
-            "type": "array"
-          },
-          "workspace_id": {
-            "format": "uuid",
-            "title": "Workspace Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "workspace_id",
-          "count",
-          "items"
-        ],
-        "title": "SampleResponse",
-        "type": "object"
-      },
       "SaveFieldResponse": {
         "description": "Acknowledgement returned when a field is auto-saved.",
         "properties": {
@@ -33257,7 +30978,8 @@
               "outbound_voice",
               "email",
               "sms",
-              "imessage"
+              "imessage",
+              "whatsapp"
             ],
             "title": "Channel",
             "type": "string"
@@ -33300,24 +31022,26 @@
         "type": "object"
       },
       "ServiceForwardingConfig": {
-        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nRead by the LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM\ndoesn't pass an explicit ``phone_number`` and no EHR location is configured).\n\nPer-service forwarding is a binary presence \u2014 set means tier 3 resolves\nto it, None means tier 3 has no static target. (The legacy per-phone\nforwarding shape, with its own ``enabled`` flag, was removed alongside\nthe legacy Twilio phone path.)",
+        "description": "Per-service call-forwarding destination + transfer mechanism.\n\nPresence of this block is the whole gate for the ``forward_call`` tool:\nNone means the agent cannot transfer at all. When present, ``forward_to``\npicks the destination mode, and the tool schema follows it \u2014 a static\nservice gets an argument-less tool, a dynamic one gets a required\n``phone_number``. Nothing cascades: a service is one mode or the other.",
         "properties": {
           "forward_to": {
-            "$ref": "#/components/schemas/PhoneE164"
-          },
-          "should_disconnect": {
-            "default": true,
-            "title": "Should Disconnect",
-            "type": "boolean"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PhoneE164"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "warm_transfer": {
-            "default": true,
             "title": "Warm Transfer",
             "type": "boolean"
           }
         },
         "required": [
-          "forward_to"
+          "forward_to",
+          "warm_transfer"
         ],
         "title": "ServiceForwardingConfig",
         "type": "object"
@@ -33611,11 +31335,6 @@
             ],
             "title": "Filler Vocabulary"
           },
-          "forward_call_enabled": {
-            "default": false,
-            "title": "Forward Call Enabled",
-            "type": "boolean"
-          },
           "forwarding": {
             "anyOf": [
               {
@@ -33814,8 +31533,7 @@
               {
                 "enum": [
                   "cartesia",
-                  "elevenlabs",
-                  "groq"
+                  "elevenlabs"
                 ],
                 "type": "string"
               },
@@ -33927,11 +31645,6 @@
             ],
             "title": "Filler Vocabulary"
           },
-          "forward_call_enabled": {
-            "default": false,
-            "title": "Forward Call Enabled",
-            "type": "boolean"
-          },
           "forwarding": {
             "anyOf": [
               {
@@ -34130,8 +31843,7 @@
               {
                 "enum": [
                   "cartesia",
-                  "elevenlabs",
-                  "groq"
+                  "elevenlabs"
                 ],
                 "type": "string"
               },
@@ -36073,6 +33785,31 @@
         "title": "SimulationPerformanceResponse",
         "type": "object"
       },
+      "SimulationProxyErrorResponse": {
+        "description": "Error envelope for simulation routes that proxy agent-engine.\n\n``detail`` is a string for forwarded runtime/configuration errors and a\nstructured list for FastAPI request validation failures. Both share HTTP\n422, so the published contract must admit both shapes.",
+        "properties": {
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "required": [
+          "detail"
+        ],
+        "title": "SimulationProxyErrorResponse",
+        "type": "object"
+      },
       "SimulationRunResponse": {
         "description": "Full run payload \u2014 used by GET /runs/{run_id} for replay flows.",
         "properties": {
@@ -36292,64 +34029,6 @@
           "checks"
         ],
         "title": "SimulationRunResponse",
-        "type": "object"
-      },
-      "SimulationRunSummaryResponse": {
-        "description": "Aggregate counts across a workspace's simulation runs, for the Runs page\nsummary strip.\n\nA cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` \u2014 honest\ntotals the 50-row list view cannot derive client-side. ``by_status`` carries\nthe full breakdown (incl. any status beyond the three named convenience\nfields) so a new lifecycle state surfaces without a schema change.",
-        "properties": {
-          "by_status": {
-            "additionalProperties": {
-              "type": "integer"
-            },
-            "title": "By Status",
-            "type": "object"
-          },
-          "completed": {
-            "title": "Completed",
-            "type": "integer"
-          },
-          "failed": {
-            "title": "Failed",
-            "type": "integer"
-          },
-          "last_created_at": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Last Created At"
-          },
-          "running": {
-            "title": "Running",
-            "type": "integer"
-          },
-          "total": {
-            "title": "Total",
-            "type": "integer"
-          },
-          "total_sessions": {
-            "title": "Total Sessions",
-            "type": "integer"
-          },
-          "total_turns": {
-            "title": "Total Turns",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "total",
-          "running",
-          "completed",
-          "failed",
-          "by_status",
-          "total_sessions",
-          "total_turns"
-        ],
-        "title": "SimulationRunSummaryResponse",
         "type": "object"
       },
       "SimulationSessionResponse": {
@@ -37231,18 +34910,12 @@
           "thinking_effort": {
             "anyOf": [
               {
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/ThinkingEffort"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Thinking Effort"
+            ]
           },
           "timeout_s": {
             "title": "Timeout S",
@@ -40778,50 +38451,13 @@
         "title": "TextToolStartedEvent",
         "type": "object"
       },
-      "TextTurnRequest": {
-        "description": "Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.",
-        "properties": {
-          "agent_phone": {
-            "maxLength": 16,
-            "pattern": "^\\+[1-9]\\d{1,14}$",
-            "title": "Agent Phone",
-            "type": "string"
-          },
-          "phone_number": {
-            "maxLength": 16,
-            "pattern": "^\\+[1-9]\\d{1,14}$",
-            "title": "Phone Number",
-            "type": "string"
-          },
-          "text": {
-            "maxLength": 8192,
-            "minLength": 1,
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "phone_number",
-          "agent_phone",
-          "text"
+      "ThinkingEffort": {
+        "enum": [
+          "low",
+          "medium",
+          "high"
         ],
-        "title": "TextTurnRequest",
-        "type": "object"
-      },
-      "TextTurnResponse": {
-        "description": "Response body \u2014 the agent's text reply.\n\nReturned only on 200; 204 indicates the engine elected silence.",
-        "properties": {
-          "text": {
-            "maxLength": 8192,
-            "title": "Text",
-            "type": "string"
-          }
-        },
-        "required": [
-          "text"
-        ],
-        "title": "TextTurnResponse",
-        "type": "object"
+        "type": "string"
       },
       "ThroughputBucket": {
         "properties": {
@@ -42110,56 +39746,6 @@
         "title": "Tools",
         "type": "object"
       },
-      "TopicModelingSettingsRequest": {
-        "properties": {
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled"
-        ],
-        "title": "TopicModelingSettingsRequest",
-        "type": "object"
-      },
-      "TopicModelingSettingsResponse": {
-        "properties": {
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "enabled"
-        ],
-        "title": "TopicModelingSettingsResponse",
-        "type": "object"
-      },
-      "TopicModelingSettingsUpdateResponse": {
-        "properties": {
-          "enabled": {
-            "title": "Enabled",
-            "type": "boolean"
-          },
-          "reconciliation_status": {
-            "const": "pending",
-            "title": "Reconciliation Status",
-            "type": "string"
-          },
-          "run_id": {
-            "title": "Run Id",
-            "type": "integer"
-          }
-        },
-        "required": [
-          "enabled",
-          "reconciliation_status",
-          "run_id"
-        ],
-        "title": "TopicModelingSettingsUpdateResponse",
-        "type": "object"
-      },
       "TraceAnalysisListItem": {
         "description": "Compact summary of a trace analysis row for list views.",
         "properties": {
@@ -42794,8 +40380,15 @@
       "TranscriptSegment": {
         "properties": {
           "confidence": {
-            "title": "Confidence",
-            "type": "number"
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Confidence"
           },
           "escalation_id": {
             "anyOf": [
@@ -43395,16 +40988,9 @@
           "appointment.cancelled",
           "appointment.confirmed",
           "booking.requested",
+          "call.ended",
           "call.intelligence",
           "call.outcome",
-          "channel.email.bounced",
-          "channel.email.clicked",
-          "channel.email.complained",
-          "channel.email.delayed",
-          "channel.email.delivered",
-          "channel.email.opened",
-          "channel.email.received",
-          "channel.email.rejected",
           "channel.message.received",
           "conversation.channel_switched",
           "conversation.started",
@@ -44186,11 +41772,6 @@
             "minimum": -1.0,
             "title": "Degradation Threshold",
             "type": "integer"
-          },
-          "greeting_shield_s": {
-            "default": 0.0,
-            "title": "Greeting Shield S",
-            "type": "number"
           },
           "safety_response": {
             "default": "stay_empathize",
@@ -45751,18 +43332,12 @@
           "thinking_effort": {
             "anyOf": [
               {
-                "enum": [
-                  "low",
-                  "medium",
-                  "high"
-                ],
-                "type": "string"
+                "$ref": "#/components/schemas/ThinkingEffort"
               },
               {
                 "type": "null"
               }
-            ],
-            "title": "Thinking Effort"
+            ]
           },
           "timeout_s": {
             "anyOf": [
@@ -46064,6 +43639,31 @@
             ],
             "title": "Connector Type"
           },
+          "delta_sharing_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Sharing Enabled"
+          },
+          "delta_sharing_identifier": {
+            "maxLength": 512,
+            "minLength": 1,
+            "title": "Delta Sharing Identifier",
+            "type": "string"
+          },
+          "delta_sharing_mode": {
+            "enum": [
+              "open",
+              "databricks"
+            ],
+            "title": "Delta Sharing Mode",
+            "type": "string"
+          },
           "name": {
             "anyOf": [
               {
@@ -46090,6 +43690,17 @@
               }
             ],
             "title": "Region"
+          },
+          "topic_modeling_enabled": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topic Modeling Enabled"
           }
         },
         "title": "UpdateWorkspaceRequest",
@@ -46183,34 +43794,6 @@
           "version_set"
         ],
         "title": "UpsertVersionSetRequest",
-        "type": "object"
-      },
-      "Usage": {
-        "properties": {
-          "cache_creation_tokens": {
-            "default": 0,
-            "description": "Cache-WRITE input tokens (Anthropic cache_creation_input_tokens; 0 on providers without it).",
-            "title": "Cache Creation Tokens",
-            "type": "integer"
-          },
-          "cached_tokens": {
-            "default": 0,
-            "description": "Cache-READ input tokens (billed at the provider's cache-hit rate).",
-            "title": "Cached Tokens",
-            "type": "integer"
-          },
-          "input_tokens": {
-            "default": 0,
-            "title": "Input Tokens",
-            "type": "integer"
-          },
-          "output_tokens": {
-            "default": 0,
-            "title": "Output Tokens",
-            "type": "integer"
-          }
-        },
-        "title": "Usage",
         "type": "object"
       },
       "UsageBucket": {
@@ -46393,39 +43976,6 @@
         "title": "UserTranscriptEvent",
         "type": "object"
       },
-      "ValidateAgentDefinitionResponse": {
-        "properties": {
-          "agent_count": {
-            "title": "Agent Count",
-            "type": "integer"
-          },
-          "framework": {
-            "enum": [
-              "claude-agent-sdk",
-              "openai-agents"
-            ],
-            "title": "Framework",
-            "type": "string"
-          },
-          "has_write_tools": {
-            "title": "Has Write Tools",
-            "type": "boolean"
-          },
-          "valid": {
-            "const": true,
-            "title": "Valid",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "valid",
-          "framework",
-          "has_write_tools",
-          "agent_count"
-        ],
-        "title": "ValidateAgentDefinitionResponse",
-        "type": "object"
-      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -46602,8 +44152,7 @@
               {
                 "enum": [
                   "cartesia",
-                  "elevenlabs",
-                  "groq"
+                  "elevenlabs"
                 ],
                 "type": "string"
               },
@@ -47376,8 +44925,7 @@
               {
                 "enum": [
                   "cartesia",
-                  "elevenlabs",
-                  "groq"
+                  "elevenlabs"
                 ],
                 "type": "string"
               },
@@ -47523,8 +45071,7 @@
               {
                 "enum": [
                   "cartesia",
-                  "elevenlabs",
-                  "groq"
+                  "elevenlabs"
                 ],
                 "type": "string"
               },
@@ -47930,6 +45477,29 @@
             "title": "Created At",
             "type": "string"
           },
+          "delta_sharing_enabled": {
+            "title": "Delta Sharing Enabled",
+            "type": "boolean"
+          },
+          "delta_sharing_identifier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delta Sharing Identifier"
+          },
+          "delta_sharing_mode": {
+            "enum": [
+              "open",
+              "databricks"
+            ],
+            "title": "Delta Sharing Mode",
+            "type": "string"
+          },
           "id": {
             "format": "uuid",
             "title": "Id",
@@ -47959,6 +45529,10 @@
             "title": "Slug",
             "type": "string"
           },
+          "topic_modeling_enabled": {
+            "title": "Topic Modeling Enabled",
+            "type": "boolean"
+          },
           "updated_at": {
             "format": "date-time",
             "title": "Updated At",
@@ -47972,6 +45546,10 @@
           "backend_org_id",
           "region",
           "connector_type",
+          "topic_modeling_enabled",
+          "delta_sharing_enabled",
+          "delta_sharing_mode",
+          "delta_sharing_identifier",
           "provisioned_at",
           "created_at",
           "updated_at"
@@ -47985,14 +45563,6 @@
             "call.ended": "#/components/schemas/CallEndedEvent",
             "call.escalated": "#/components/schemas/CallEscalatedEvent",
             "call.started": "#/components/schemas/CallStartedEvent",
-            "channel.email_bounced": "#/components/schemas/ChannelEmailBouncedEvent",
-            "channel.email_clicked": "#/components/schemas/ChannelEmailClickedEvent",
-            "channel.email_complained": "#/components/schemas/ChannelEmailComplainedEvent",
-            "channel.email_delayed": "#/components/schemas/ChannelEmailDelayedEvent",
-            "channel.email_delivered": "#/components/schemas/ChannelEmailDeliveredEvent",
-            "channel.email_opened": "#/components/schemas/ChannelEmailOpenedEvent",
-            "channel.email_received": "#/components/schemas/ChannelEmailReceivedEvent",
-            "channel.email_rejected": "#/components/schemas/ChannelEmailRejectedEvent",
             "encounter.updated": "#/components/schemas/EncounterUpdatedEvent",
             "integration.approval_granted": "#/components/schemas/IntegrationApprovalGrantedEvent",
             "integration.approval_rejected": "#/components/schemas/IntegrationApprovalRejectedEvent",
@@ -48157,30 +45727,6 @@
           },
           {
             "$ref": "#/components/schemas/WorkspaceInvitationAcceptedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailDeliveredEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailBouncedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailComplainedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailRejectedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailDelayedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailOpenedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailClickedEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ChannelEmailReceivedEvent"
           }
         ]
       },
@@ -50493,11 +48039,6 @@
         "description": "API key issued via `POST /v1/{workspace_id}/api-keys`. Pass the returned `api_key` value as a Bearer token.",
         "scheme": "bearer",
         "type": "http"
-      },
-      "DesignAgentCollectorToken": {
-        "description": "Write-only shared token for the design-agent session collector. This is not a platform API key and grants no read access.",
-        "scheme": "bearer",
-        "type": "http"
       }
     }
   },
@@ -51644,110 +49185,6 @@
         ]
       }
     },
-    "/v1/design-agent/session": {
-      "post": {
-        "description": "Durably capture one full session transcript.\n\nThe raw ``.jsonl`` body is written to the UC Volume synchronously and then\na single manifest row is emitted fail-closed; a 201 is returned ONLY after\nboth are durable. A failure in either the Volume write or the manifest emit\nsurfaces as a 5xx so the client re-uploads (at-least-once - a re-upload\nappends a second raw blob + manifest row for the same session, deduped, if\never, downstream). Which sessions reach here is the client's decision (it\ngates on the design skill being loaded); every authorized upload is stored.",
-        "operationId": "collect-design-agent-session",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "session_id",
-            "required": true,
-            "schema": {
-              "maxLength": 256,
-              "minLength": 1,
-              "pattern": "^[A-Za-z0-9._-]+$",
-              "title": "Session Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "cwd",
-            "required": true,
-            "schema": {
-              "maxLength": 4096,
-              "minLength": 1,
-              "title": "Cwd",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "reason",
-            "required": true,
-            "schema": {
-              "maxLength": 256,
-              "minLength": 1,
-              "title": "Reason",
-              "type": "string"
-            }
-          },
-          {
-            "description": "Optional, unverified user identity reported by the client.",
-            "in": "query",
-            "name": "user",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 320,
-                  "minLength": 1,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Optional, unverified user identity reported by the client.",
-              "title": "User"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/x-ndjson": {
-              "schema": {
-                "format": "binary",
-                "type": "string"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DesignAgentSessionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "DesignAgentCollectorToken": []
-          }
-        ],
-        "summary": "Collect Session",
-        "tags": [
-          "Design Agent"
-        ]
-      }
-    },
     "/v1/me/workspaces": {
       "post": {
         "description": "Create a new workspace and attach the authenticated caller as the owner.",
@@ -52028,6 +49465,9 @@
           },
           "422": {
             "description": "Invalid request body."
+          },
+          "503": {
+            "description": "Revocation could not be queued; retry the request."
           }
         },
         "summary": "Update a workspace",
@@ -52307,420 +49747,9 @@
         ]
       }
     },
-    "/v1/{workspace_id}/agent-definitions": {
-      "get": {
-        "operationId": "list_agent_definitions_v1__workspace_id__agent_definitions_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "framework",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "claude-agent-sdk",
-                    "openai-agents"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Framework"
-            }
-          },
-          {
-            "in": "query",
-            "name": "include_archived",
-            "required": false,
-            "schema": {
-              "default": false,
-              "title": "Include Archived",
-              "type": "boolean"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "exclusiveMinimum": 0,
-              "maximum": 200,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "continuation_token",
-            "required": false,
-            "schema": {
-              "title": "Continuation Token"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentDefinitionListResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Agent Definitions",
-        "tags": [
-          "Agent Definitions"
-        ]
-      },
-      "post": {
-        "operationId": "register_agent_definition_v1__workspace_id__agent_definitions_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterAgentDefinitionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RegisterAgentDefinitionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Register Agent Definition",
-        "tags": [
-          "Agent Definitions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/agent-definitions/validate": {
-      "post": {
-        "description": "Dry-run clamp validation \u2014 nothing is stored. 422 with the offending\npaths on failure (the same shape push returns).",
-        "operationId": "validate_agent_definition_v1__workspace_id__agent_definitions_validate_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RegisterAgentDefinitionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ValidateAgentDefinitionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Validate Agent Definition",
-        "tags": [
-          "Agent Definitions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/agent-definitions/{definition_id}": {
-      "delete": {
-        "operationId": "archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "definition_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Definition Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Archive Agent Definition",
-        "tags": [
-          "Agent Definitions"
-        ]
-      },
-      "get": {
-        "operationId": "get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "definition_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Definition Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentDefinitionDetail"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Agent Definition",
-        "tags": [
-          "Agent Definitions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/agent-definitions/{definition_id}/versions/{version}": {
-      "get": {
-        "operationId": "get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "definition_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Definition Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "version",
-            "required": true,
-            "schema": {
-              "title": "Version",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentDefinitionVersionDetail"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Agent Definition Version",
-        "tags": [
-          "Agent Definitions"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/agent-runs": {
-      "post": {
-        "description": "Proxies to agent-runner, where the chosen SDK owns its autonomous loop inside a platform-controlled prompt/model/tool/auth/timeout envelope. Capabilities come from Platform MCP under the caller's bearer. Non-blocking \u2014 poll GET /agent-runs/{run_id} for the result.",
-        "operationId": "create_agent_run_v1__workspace_id__agent_runs_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAgentRunRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "202": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAgentRunResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Dispatch a framework agent run",
-        "tags": [
-          "Agent Runs"
-        ]
-      }
-    },
     "/v1/{workspace_id}/agent-runs/harness-context": {
       "get": {
-        "description": "The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and an MCP write-policy summary. It shares the HarnessContext schema with the hosted harness but is not byte-identical to a hosted render: this REST path does not resolve the runner's engage-model preference. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).",
+        "description": "The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and an MCP write-policy summary. It shares the HarnessContext schema with the hosted harness but is not byte-identical to a hosted render. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).",
         "operationId": "get_harness_context_v1__workspace_id__agent_runs_harness_context_get",
         "parameters": [
           {
@@ -52778,60 +49807,6 @@
           }
         },
         "summary": "Fetch the neutral session-bootstrap context for a service",
-        "tags": [
-          "Agent Runs"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/agent-runs/{run_id}": {
-      "get": {
-        "description": "Run status, final text, token usage, and the runner-normalized trajectory of framework-native output.",
-        "operationId": "get_agent_run_v1__workspace_id__agent_runs__run_id__get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "run_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Run Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AgentRunDetail"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get a framework agent run",
         "tags": [
           "Agent Runs"
         ]
@@ -61866,59 +58841,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/external-write-proposals/{proposal_id}": {
-      "get": {
-        "operationId": "get-external-write-proposal",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "proposal_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Proposal Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ExternalWriteProposal"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get External Write Proposal",
-        "tags": [
-          "Review Queue"
-        ]
-      }
-    },
     "/v1/{workspace_id}/external-write-proposals/{proposal_id}/approve": {
       "post": {
         "operationId": "approve-external-write-proposal",
@@ -62134,121 +59056,6 @@
           }
         },
         "summary": "Import FHIR Bundle",
-        "tags": [
-          "FHIR"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/fhir/import-stream": {
-      "post": {
-        "description": "Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST pre-resolve any bundle-internal urn:uuid: references. Unsupported resource types are skipped and reported; omitted resources are not deleted.",
-        "operationId": "fhir-import-stream",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "source",
-            "required": false,
-            "schema": {
-              "default": "fhir_import",
-              "maxLength": 128,
-              "title": "Source",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "source_system",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "maxLength": 128,
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Source System"
-            }
-          },
-          {
-            "in": "query",
-            "name": "data_source_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Data Source Id"
-            }
-          },
-          {
-            "description": "Skip identical re-uploads via content-hash dedup",
-            "in": "query",
-            "name": "dedup",
-            "required": false,
-            "schema": {
-              "default": true,
-              "description": "Skip identical re-uploads via content-hash dedup",
-              "title": "Dedup",
-              "type": "boolean"
-            }
-          },
-          {
-            "description": "Use 'error' to report unsupported resources, or 'skip' to skip them without errors.",
-            "in": "query",
-            "name": "unsupported_resource_policy",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/FhirUnsupportedResourcePolicy",
-              "default": "error",
-              "description": "Use 'error' to report unsupported resources, or 'skip' to skip them without errors."
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FhirImportResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "description": "Stream exceeded line cap."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Import FHIR resources via NDJSON streaming",
         "tags": [
           "FHIR"
         ]
@@ -66681,94 +63488,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/m42/anomaly-alerts": {
-      "get": {
-        "description": "Emerging health anomalies with inline causal decomposition, recommended actions, and unacted projection. Hand-seeded demo data.",
-        "operationId": "list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "severity",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "enum": [
-                    "high",
-                    "medium",
-                    "low"
-                  ],
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Severity"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AnomalyAlertResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Anomaly Alerts",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
     "/v1/{workspace_id}/m42/catalog": {
       "get": {
         "description": "Per-table layer + description + row count for the Catalog page.",
@@ -66798,128 +63517,6 @@
           }
         },
         "summary": "List Catalog",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/catalog/{table}/columns": {
-      "get": {
-        "description": "Column metadata (name, type, comment) for one allowlisted m42 table.",
-        "operationId": "describe_table_v1__workspace_id__m42_catalog__table__columns_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "table",
-            "required": true,
-            "schema": {
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "Table",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ColumnsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Describe Table",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/catalog/{table}/sample": {
-      "get": {
-        "description": "Up to ``limit`` raw rows from one allowlisted m42 table for preview.",
-        "operationId": "sample_table_v1__workspace_id__m42_catalog__table__sample_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "table",
-            "required": true,
-            "schema": {
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "Table",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 5,
-              "maximum": 50,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SampleResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Sample Table",
         "tags": [
           "M42"
         ]
@@ -67072,174 +63669,6 @@
           }
         },
         "summary": "List Cluster Summary",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/district-metrics": {
-      "get": {
-        "description": "Per-district t2d observed vs predicted incidence, capacity gap, and unmet-demand score. Hand-seeded demo data.",
-        "operationId": "list_district_metrics_v1__workspace_id__m42_district_metrics_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 500,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DistrictMetricsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List District Metrics",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/features": {
-      "get": {
-        "description": "Allowlist of feature columns (continuous or binary) for the Explore UI.",
-        "operationId": "list_features_v1__workspace_id__m42_features_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FeaturesResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "List Features",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/features/distribution": {
-      "get": {
-        "description": "Histogram bins for one allowlisted feature, stratified by ``y_t2d_1yr`` outcome. Continuous features get ``bins`` buckets; binary features collapse to 2.",
-        "operationId": "feature_distribution_v1__workspace_id__m42_features_distribution_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "feature",
-            "required": true,
-            "schema": {
-              "maxLength": 64,
-              "minLength": 1,
-              "title": "Feature",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "bins",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "maximum": 40,
-              "minimum": 2,
-              "title": "Bins",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FeatureDistributionResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Feature Distribution",
         "tags": [
           "M42"
         ]
@@ -67809,73 +64238,6 @@
           }
         },
         "summary": "Get Patient Note",
-        "tags": [
-          "M42"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/m42/positive-signals": {
-      "get": {
-        "description": "Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.",
-        "operationId": "list_positive_signals_v1__workspace_id__m42_positive_signals_get",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 50,
-              "maximum": 200,
-              "minimum": 1,
-              "title": "Limit",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "offset",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "minimum": 0,
-              "title": "Offset",
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PositiveSignalResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "List Positive Signals",
         "tags": [
           "M42"
         ]
@@ -69602,76 +65964,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/operators/{operator_id}/access-token": {
-      "post": {
-        "description": "Generate a Twilio AccessToken with VoiceGrant for browser-based operator audio.",
-        "operationId": "operator-access-token",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "operator_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Operator Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccessTokenRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccessTokenResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Operator or active call not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Browser audio not configured or voice agent unavailable."
-          }
-        },
-        "summary": "Generate browser audio access token",
-        "tags": [
-          "Operators"
-        ]
-      }
-    },
     "/v1/{workspace_id}/operators/{operator_id}/briefing": {
       "post": {
         "description": "Structured briefing for an operator about to join a call. Template-rendered from call intelligence and entity context.",
@@ -71156,57 +67448,6 @@
           "Evaluations"
         ]
       },
-      "get": {
-        "operationId": "get-production-eval-definition",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "definition_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Definition Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProductionEvalDefinition"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Production Eval Definition",
-        "tags": [
-          "Evaluations"
-        ]
-      },
       "patch": {
         "operationId": "update-production-eval-definition",
         "parameters": [
@@ -71637,138 +67878,10 @@
         ]
       }
     },
-    "/v1/{workspace_id}/recordings/{call_sid}/download/{filename}": {
+    "/v1/{workspace_id}/recordings/{call_sid}": {
       "get": {
-        "description": "Proxy download a recording file (inbound audio, outbound audio, or metadata) from UC Volume.",
-        "operationId": "download-recording-file",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "call_sid",
-            "required": true,
-            "schema": {
-              "title": "Call Sid",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "filename",
-            "required": true,
-            "schema": {
-              "title": "Filename",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "400": {
-            "description": "Invalid filename"
-          },
-          "404": {
-            "description": "Recording file not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Call recording not configured"
-          }
-        },
-        "summary": "Download recording file",
-        "tags": [
-          "Recordings"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/recordings/{call_sid}/metadata": {
-      "get": {
-        "description": "Fetch metadata for a call recording including duration, audio formats, sample rates, and file sizes.",
-        "operationId": "get-recording-metadata",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "call_sid",
-            "required": true,
-            "schema": {
-              "title": "Call Sid",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RecordingMetadataResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "404": {
-            "description": "Recording not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          },
-          "503": {
-            "description": "Call recording not configured"
-          }
-        },
-        "summary": "Get recording metadata",
-        "tags": [
-          "Recordings"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/recordings/{call_sid}/urls": {
-      "get": {
-        "description": "Generate download paths for call recording playback. Returns separate paths for inbound (caller) and outbound (agent) audio channels, plus the recording metadata file.",
-        "operationId": "get-recording-urls",
+        "description": "Presigned S3 URLs for the inbound (caller) and outbound (agent) recording WAVs.",
+        "operationId": "get-recording",
         "parameters": [
           {
             "in": "path",
@@ -71801,9 +67914,6 @@
             },
             "description": "Successful Response"
           },
-          "404": {
-            "description": "Recording not found"
-          },
           "422": {
             "content": {
               "application/json": {
@@ -71813,12 +67923,9 @@
               }
             },
             "description": "Validation Error"
-          },
-          "503": {
-            "description": "Call recording not configured"
           }
         },
-        "summary": "Get recording download paths",
+        "summary": "Get call recording",
         "tags": [
           "Recordings"
         ]
@@ -72346,70 +68453,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/runs/{run_id}/access-token": {
-      "post": {
-        "description": "Generate the Twilio browser-audio credentials the console needs to attach the operator's WebRTC leg to a live run, addressed by ``run_id``. This is the media plane companion to ``/takeover`` (the control plane). Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel has no browser-audio leg.",
-        "operationId": "mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "run_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Run Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RunAccessTokenRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RunAccessTokenResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Mint a browser-audio access token for an operator on a live run",
-        "tags": [
-          "Runs"
-        ]
-      }
-    },
     "/v1/{workspace_id}/runs/{run_id}/authored-turn": {
       "post": {
         "description": "Stage an operator-authored reply for a NON-voice run (text/sms/email/web) the caller has taken over. The agent-engine send-gate substitutes it for the agent's next outbound (exactly-once), so the caller receives the operator's words while the agent stays suspended. Repeatable \u2014 each call stages the next turn. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 for voice (voice takeover drives the live audio leg \u2014 use the conference, not an authored turn).",
@@ -72668,7 +68711,7 @@
     },
     "/v1/{workspace_id}/runs/{run_id}/takeover": {
       "post": {
-        "description": "Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet. For voice, the response carries the conference/participant SIDs the console needs to attach browser audio.",
+        "description": "Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet, or if the operator has no phone number configured. For voice, Twilio dials the operator's phone and the response carries the resulting conference/participant SIDs.",
         "operationId": "take_over_run_v1__workspace_id__runs__run_id__takeover_post",
         "parameters": [
           {
@@ -73603,149 +69646,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/services/{service_id}/conversation-starters": {
-      "post": {
-        "description": "Return structured pre-conversation starter chips for a service and optional entity. When service config includes conversation_starter_prompts and an entity_id is supplied, the endpoint reads entity context and generates starters before falling back to configured starters. Selecting a starter should create a conversation and send the starter value as the first user message. Requires `Service.view` permission.",
-        "operationId": "list-conversation-starters",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "service_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Service Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConversationStartersRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationStartersResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "401": {
-            "description": "Missing or invalid API key."
-          },
-          "403": {
-            "description": "Insufficient permissions."
-          },
-          "404": {
-            "description": "Not found."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get conversation starters",
-        "tags": [
-          "Services"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/services/{service_id}/text-turn": {
-      "post": {
-        "description": "Run one WhatsApp-style text turn against the service's agent.",
-        "operationId": "text-turn",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "service_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Service Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TextTurnRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TextTurnResponse"
-                }
-              }
-            },
-            "description": "Agent text reply"
-          },
-          "204": {
-            "description": "Agent elected silence"
-          },
-          "409": {
-            "description": "Concurrent text turn in progress for this speaker"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Text Turn",
-        "tags": [
-          "Services"
-        ]
-      }
-    },
     "/v1/{workspace_id}/services/{service_id}/tools/resolve": {
       "get": {
         "description": "List all tools available for a service's HSM with metadata.",
@@ -74509,60 +70409,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/settings/form-templates/{template_id}": {
-      "get": {
-        "description": "Get a single form template by ID.",
-        "operationId": "get-form-template",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "template_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Template Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/FormTemplate-Output"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Form Template",
-        "tags": [
-          "Form Templates"
-        ]
-      }
-    },
     "/v1/{workspace_id}/settings/form-templates/{template_id}/resolve": {
       "post": {
         "description": "Resolve a form template with prefill values from entity state.\n\nReturns a hydrated SurfaceSpec ready to be passed to create_surface.\nFields with matching data in entity state get prefill_value set.\nFor returning patient templates, completed optional fields are stripped.",
@@ -75090,92 +70936,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/settings/topic-modeling": {
-      "get": {
-        "description": "Return topic-analytics exposure for the credential's own workspace.\n\nRequires ``TopicModeling:Manage``.",
-        "operationId": "get-topic-modeling-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TopicModelingSettingsResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "summary": "Get conversation topic analytics exposure",
-        "tags": [
-          "Settings"
-        ]
-      },
-      "put": {
-        "description": "Set exposure for the credential's own workspace and schedule reconciliation.\n\nRequires ``TopicModeling:Manage``.",
-        "operationId": "update-topic-modeling-settings",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TopicModelingSettingsRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TopicModelingSettingsUpdateResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Enable or disable conversation topic analytics exposure",
-        "tags": [
-          "Settings"
-        ]
-      }
-    },
     "/v1/{workspace_id}/settings/voice": {
       "get": {
         "description": "Get the voice experience settings for a workspace.\n\nReturns voice identity, domain vocabulary, and post-call intelligence\nconfiguration. These settings shape how the AI agent sounds and what\ndomain-specific terms it recognizes accurately.\n\n#### Permissions\n* Requires authenticated API key (any role).",
@@ -75421,60 +71181,6 @@
           }
         },
         "summary": "Simulation Bridge",
-        "tags": [
-          "Simulations"
-        ]
-      }
-    },
-    "/v1/{workspace_id}/simulations/bridge/plan": {
-      "post": {
-        "description": "Infer a TargetSpec from an NL objective \u2014 preview before running /bridge.\n\nUX: user types \"test scheduling failures in 20 different ways\", we return\na structured target_spec + rationale. The frontend shows both, lets the\nuser edit (add/remove states, tighten pathways), then POSTs the final\nspec to /bridge. Same LLM, same Vertex cost structure as /bridge, but\nno run is created \u2014 pure inference.",
-        "operationId": "simulation-bridge-plan",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BridgePlanRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BridgePlanResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Simulation Bridge Plan",
         "tags": [
           "Simulations"
         ]
@@ -76120,67 +71826,6 @@
         ]
       }
     },
-    "/v1/{workspace_id}/simulations/runs/summary": {
-      "get": {
-        "description": "Aggregate run counts (total + by status) for the Runs summary strip.\n\nRegistered *before* ``/runs/{run_id}`` so the static ``summary`` path\nsegment is matched here rather than parsed as a run UUID (which would 422).",
-        "operationId": "get-simulation-runs-summary",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "workspace_id",
-            "required": true,
-            "schema": {
-              "format": "uuid",
-              "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "service_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "format": "uuid",
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Service Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SimulationRunSummaryResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Get Simulation Runs Summary",
-        "tags": [
-          "Simulations"
-        ]
-      }
-    },
     "/v1/{workspace_id}/simulations/runs/{run_id}": {
       "get": {
         "description": "Fetch a single run including objective / bridge_request / scenarios.\n\nUse the bridge_request payload to re-POST /bridge and replay the run.",
@@ -76355,15 +72000,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Create Simulation Session",
@@ -76813,15 +72478,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Create Test Conversation",
@@ -76866,15 +72551,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Simulation Recommend",
@@ -76920,15 +72625,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Test Conversation Step",
@@ -77022,15 +72747,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Simulation Observe",
@@ -77087,15 +72832,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Simulation Fork",
@@ -77139,15 +72904,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Simulation Intelligence",
@@ -77322,15 +73107,35 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Simulation session or configuration not found"
+          },
           "422": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
                 }
               }
             },
-            "description": "Validation Error"
+            "description": "Request validation or simulation configuration error"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimulationProxyErrorResponse"
+                }
+              }
+            },
+            "description": "Voice agent not reachable"
           }
         },
         "summary": "Simulation Step",
@@ -80028,7 +75833,7 @@
     },
     "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
       "delete": {
-        "description": "Release a use case from its bound service in this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
+        "description": "Release a use case from its bound service in this workspace. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.",
         "operationId": "unbind-use-case-from-service",
         "parameters": [
           {
@@ -80137,7 +75942,7 @@
         ]
       },
       "put": {
-        "description": "Bind this use case to a platform service in the current workspace. PUT semantics \u2014 rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.",
+        "description": "Bind this use case to a platform service in the current workspace. PUT semantics \u2014 rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair, or if this use case is bound in another workspace. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.",
         "operationId": "bind-use-case-to-service",
         "parameters": [
           {
@@ -80189,16 +75994,10 @@
             "description": "Use case or service not found."
           },
           "409": {
-            "description": "Service already has a different use case bound for this channel."
+            "description": "Service already has a different use case bound for this channel, or the use case is bound in another workspace."
           },
           "422": {
             "description": "Unsupported use case channel."
-          },
-          "502": {
-            "description": "Channel manager unavailable."
-          },
-          "504": {
-            "description": "Channel manager timed out."
           }
         },
         "summary": "Bind a use case to a platform service",
@@ -81180,7 +76979,7 @@
     },
     "/v1/{workspace_id}/world/entities/{entity_id}/enrichment": {
       "get": {
-        "description": "Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.",
+        "description": "Current winners per (entity, key) from world.enrichment_synced (Synced-Table-populated view of SDP's enrichment_current_v3). Each row carries value, value_type, confidence, source, effective_at.",
         "operationId": "list-entity-enrichment",
         "parameters": [
           {
@@ -81892,24 +77691,6 @@
               "title": "Workspace Id",
               "type": "string"
             }
-          },
-          {
-            "description": "Filter by entity type",
-            "in": "query",
-            "name": "entity_type",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by entity type",
-              "title": "Entity Type"
-            }
           }
         ],
         "responses": {
@@ -81925,16 +77706,6 @@
           },
           "401": {
             "description": "Missing or invalid API key."
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "summary": "Entity stats with sync breakdown",

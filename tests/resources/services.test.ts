@@ -56,7 +56,7 @@ const client = new AmigoClient({
         ...SERVICE_FIXTURE,
         name: 'Updated Service',
         is_active: false,
-        voice_config: { session_provider: 'gpt_realtime', tts_provider: 'groq' },
+        voice_config: { session_provider: 'gpt_realtime', tts_provider: 'elevenlabs' },
       })
     },
 
@@ -114,7 +114,7 @@ describe('ServicesResource', () => {
 
   it('updates a service', async () => {
     const sessionProvider = 'gpt_realtime' satisfies VoiceSessionProvider
-    const ttsProvider = 'groq' satisfies TtsProvider
+    const ttsProvider = 'elevenlabs' satisfies TtsProvider
     const body = {
       name: 'Updated Service',
       is_active: false,

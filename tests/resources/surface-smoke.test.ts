@@ -84,9 +84,7 @@ describe('resource surface smoke tests', () => {
     await client.dataSources.getStatus('ds-001')
     await client.dataSources.getSyncHistory('ds-001')
 
-    await client.recordings.getUrls('call-001')
-    await client.recordings.getMetadata('call-001')
-    await client.recordings.download('call-001', 'audio.wav')
+    await client.recordings.get('call-001')
 
     await client.audit.list({ limit: 5 })
     await client.audit.getSummary({ date_from: '2026-01-01', date_to: '2026-01-31' })

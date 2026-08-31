@@ -112,8 +112,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `agentRuns`
 
-- `create`
-- `get`
 - `harnessContext`
 
 ### `runs`
@@ -126,17 +124,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `takeOver`
 - `handBack`
 - `switchMode`
-- `accessToken`
-
-### `agentDefinitions`
-
-- `list`
-- `listAutoPaging`
-- `register`
-- `validate`
-- `get`
-- `getVersion`
-- `archive`
 
 ### `skills`
 
@@ -173,7 +160,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getActiveEscalations`
 - `getEscalationStats`
 - `getPerformance`
-- `getAccessToken`
 - `joinCall`
 - `leaveCall`
 - `switchMode`
@@ -349,7 +335,6 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `runs.get`
 - `runs.complete`
 - `runs.createSession`
-- `bridge.plan`
 - `bridge.run`
 - `services.getGraph`
 - `services.deleteGraph`
@@ -383,9 +368,7 @@ All workspace-scoped resources also expose `withOptions(options)`.
 
 ### `recordings`
 
-- `getUrls`
-- `getMetadata`
-- `download`
+- `get`
 
 ### `audit`
 

@@ -9,12 +9,13 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * (claude-agent-sdk / openai-agents, from the Delta `world.runs` MV), federated
  * behind one `Run` contract. This resource is the SDK surface for that backbone:
  * list + summary + single-run detail + framework trajectory (reads), plus the
- * run-scoped operator verbs (guidance / takeover / handback / switch-mode /
- * access-token) addressed by the channel-neutral `run_id`.
+ * run-scoped operator verbs (guidance / takeover / handback / switch-mode)
+ * addressed by the channel-neutral `run_id`.
  *
- * Distinct from {@link AgentRunsResource} (`/agent-runs`, framework-only) and the
- * conversation surface (`/conversations`, conversation-only): neither spans the
- * other, and only this resource speaks the unified `run_id`.
+ * Distinct from the agent-runs CONTEXT edge (`/agent-runs/harness-context`,
+ * framework-only) and the conversation surface (`/conversations`,
+ * conversation-only): neither spans the other, and only this resource speaks
+ * the unified `run_id`.
  */
 export class RunsResource extends WorkspaceScopedResource {
   /**
@@ -119,16 +120,6 @@ export class RunsResource extends WorkspaceScopedResource {
   async switchMode(runId: string, body: components['schemas']['RunSwitchModeRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/runs/{run_id}/switch-mode', {
-        params: { path: { workspace_id: this.workspaceId, run_id: runId } },
-        body,
-      }),
-    )
-  }
-
-  /** Mint a run-scoped browser access token (voice takeover audio leg). */
-  async accessToken(runId: string, body: components['schemas']['RunAccessTokenRequest']) {
-    return extractData(
-      await this.client.POST('/v1/{workspace_id}/runs/{run_id}/access-token', {
         params: { path: { workspace_id: this.workspaceId, run_id: runId } },
         body,
       }),

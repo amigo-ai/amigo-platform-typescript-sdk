@@ -305,34 +305,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/design-agent/session": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Collect Session
-         * @description Durably capture one full session transcript.
-         *
-         *     The raw ``.jsonl`` body is written to the UC Volume synchronously and then
-         *     a single manifest row is emitted fail-closed; a 201 is returned ONLY after
-         *     both are durable. A failure in either the Volume write or the manifest emit
-         *     surfaces as a 5xx so the client re-uploads (at-least-once - a re-upload
-         *     appends a second raw blob + manifest row for the same session, deduped, if
-         *     ever, downstream). Which sessions reach here is the client's decision (it
-         *     gates on the design skill being loaded); every authorized upload is stored.
-         */
-        post: operations["collect-design-agent-session"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/me/workspaces": {
         parameters: {
             query?: never;
@@ -545,100 +517,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/agent-definitions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Agent Definitions */
-        get: operations["list_agent_definitions_v1__workspace_id__agent_definitions_get"];
-        put?: never;
-        /** Register Agent Definition */
-        post: operations["register_agent_definition_v1__workspace_id__agent_definitions_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/agent-definitions/validate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Validate Agent Definition
-         * @description Dry-run clamp validation — nothing is stored. 422 with the offending
-         *     paths on failure (the same shape push returns).
-         */
-        post: operations["validate_agent_definition_v1__workspace_id__agent_definitions_validate_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/agent-definitions/{definition_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Agent Definition */
-        get: operations["get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get"];
-        put?: never;
-        post?: never;
-        /** Archive Agent Definition */
-        delete: operations["archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/agent-definitions/{definition_id}/versions/{version}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Agent Definition Version */
-        get: operations["get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/agent-runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Dispatch a framework agent run
-         * @description Proxies to agent-runner, where the chosen SDK owns its autonomous loop inside a platform-controlled prompt/model/tool/auth/timeout envelope. Capabilities come from Platform MCP under the caller's bearer. Non-blocking — poll GET /agent-runs/{run_id} for the result.
-         */
-        post: operations["create_agent_run_v1__workspace_id__agent_runs_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/agent-runs/harness-context": {
         parameters: {
             query?: never;
@@ -648,29 +526,9 @@ export interface paths {
         };
         /**
          * Fetch the neutral session-bootstrap context for a service
-         * @description The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and an MCP write-policy summary. It shares the HarnessContext schema with the hosted harness but is not byte-identical to a hosted render: this REST path does not resolve the runner's engage-model preference. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).
+         * @description The retrievable CONTEXT edge of the world-model harness: identity + reference instructions, world scope, tool descriptors, guardrails, and an MCP write-policy summary. It shares the HarnessContext schema with the hosted harness but is not byte-identical to a hosted render. PHI-free (the API-run projection carries no scoped entities or rendered caller prose).
          */
         get: operations["get_harness_context_v1__workspace_id__agent_runs_harness_context_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/agent-runs/{run_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get a framework agent run
-         * @description Run status, final text, token usage, and the runner-normalized trajectory of framework-native output.
-         */
-        get: operations["get_agent_run_v1__workspace_id__agent_runs__run_id__get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2637,23 +2495,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/external-write-proposals/{proposal_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get External Write Proposal */
-        get: operations["get-external-write-proposal"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/external-write-proposals/{proposal_id}/approve": {
         parameters: {
             query?: never;
@@ -2722,26 +2563,6 @@ export interface paths {
          * @description Import a FHIR Bundle. Decomposes supported resources into upserted world events and creates patient entities. Unsupported resource types are skipped and reported; omitted resources are not deleted.
          */
         post: operations["fhir-import"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/fhir/import-stream": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Import FHIR resources via NDJSON streaming
-         * @description Stream FHIR resources as NDJSON (one resource per line). Bypasses the buffered-body size cap on /fhir/import. Callers MUST pre-resolve any bundle-internal urn:uuid: references. Unsupported resource types are skipped and reported; omitted resources are not deleted.
-         */
-        post: operations["fhir-import-stream"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3762,26 +3583,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/m42/anomaly-alerts": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Anomaly Alerts
-         * @description Emerging health anomalies with inline causal decomposition, recommended actions, and unacted projection. Hand-seeded demo data.
-         */
-        get: operations["list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/m42/catalog": {
         parameters: {
             query?: never;
@@ -3794,46 +3595,6 @@ export interface paths {
          * @description Per-table layer + description + row count for the Catalog page.
          */
         get: operations["list_catalog_v1__workspace_id__m42_catalog_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/catalog/{table}/columns": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Describe Table
-         * @description Column metadata (name, type, comment) for one allowlisted m42 table.
-         */
-        get: operations["describe_table_v1__workspace_id__m42_catalog__table__columns_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/catalog/{table}/sample": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Sample Table
-         * @description Up to ``limit`` raw rows from one allowlisted m42 table for preview.
-         */
-        get: operations["sample_table_v1__workspace_id__m42_catalog__table__sample_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -3874,66 +3635,6 @@ export interface paths {
          * @description Per-cluster cohort stats — size, mean age/BMI/HbA1c, prediabetes / T2D %, predicted-risk mean. Powers the Patient Profile cluster strip.
          */
         get: operations["list_cluster_summary_v1__workspace_id__m42_clusters_summary_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/district-metrics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List District Metrics
-         * @description Per-district t2d observed vs predicted incidence, capacity gap, and unmet-demand score. Hand-seeded demo data.
-         */
-        get: operations["list_district_metrics_v1__workspace_id__m42_district_metrics_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/features": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Features
-         * @description Allowlist of feature columns (continuous or binary) for the Explore UI.
-         */
-        get: operations["list_features_v1__workspace_id__m42_features_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/features/distribution": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Feature Distribution
-         * @description Histogram bins for one allowlisted feature, stratified by ``y_t2d_1yr`` outcome. Continuous features get ``bins`` buckets; binary features collapse to 2.
-         */
-        get: operations["feature_distribution_v1__workspace_id__m42_features_distribution_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4074,26 +3775,6 @@ export interface paths {
          * @description Patient's synthetic clinical note + LLM-extracted structured fields. NLP sample is 500 patients — returns 404 outside that set.
          */
         get: operations["get_patient_note_v1__workspace_id__m42_patients__patient_id__note_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/m42/positive-signals": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * List Positive Signals
-         * @description Small set of positive-trend headline metrics for the Sensorium hero strip. Hand-seeded demo data.
-         */
-        get: operations["list_positive_signals_v1__workspace_id__m42_positive_signals_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4527,26 +4208,6 @@ export interface paths {
         patch: operations["update-operator"];
         trace?: never;
     };
-    "/v1/{workspace_id}/operators/{operator_id}/access-token": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Generate browser audio access token
-         * @description Generate a Twilio AccessToken with VoiceGrant for browser-based operator audio.
-         */
-        post: operations["operator-access-token"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/operators/{operator_id}/briefing": {
         parameters: {
             query?: never;
@@ -4892,8 +4553,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get Production Eval Definition */
-        get: operations["get-production-eval-definition"];
+        get?: never;
         put?: never;
         post?: never;
         /** Delete Production Eval Definition */
@@ -4969,7 +4629,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/recordings/{call_sid}/download/{filename}": {
+    "/v1/{workspace_id}/recordings/{call_sid}": {
         parameters: {
             query?: never;
             header?: never;
@@ -4977,50 +4637,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Download recording file
-         * @description Proxy download a recording file (inbound audio, outbound audio, or metadata) from UC Volume.
+         * Get call recording
+         * @description Presigned S3 URLs for the inbound (caller) and outbound (agent) recording WAVs.
          */
-        get: operations["download-recording-file"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/recordings/{call_sid}/metadata": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get recording metadata
-         * @description Fetch metadata for a call recording including duration, audio formats, sample rates, and file sizes.
-         */
-        get: operations["get-recording-metadata"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/recordings/{call_sid}/urls": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get recording download paths
-         * @description Generate download paths for call recording playback. Returns separate paths for inbound (caller) and outbound (agent) audio channels, plus the recording metadata file.
-         */
-        get: operations["get-recording-urls"];
+        get: operations["get-recording"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5128,26 +4748,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/runs/{run_id}/access-token": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Mint a browser-audio access token for an operator on a live run
-         * @description Generate the Twilio browser-audio credentials the console needs to attach the operator's WebRTC leg to a live run, addressed by ``run_id``. This is the media plane companion to ``/takeover`` (the control plane). Requires ``admin`` (Operator:Update), bound to the caller's own operator identity. 404 if the run is not live in this workspace; 409 if its channel has no browser-audio leg.
-         */
-        post: operations["mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/runs/{run_id}/authored-turn": {
         parameters: {
             query?: never;
@@ -5239,7 +4839,7 @@ export interface paths {
         put?: never;
         /**
          * Take over a live run as operator
-         * @description Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet. For voice, the response carries the conference/participant SIDs the console needs to attach browser audio.
+         * @description Register the caller's operator identity on a LIVE run and (in ``takeover`` mode) suspend the agent so the human drives; ``listen`` mode monitors without driving. Addressed by the channel-neutral ``run_id``. Requires ``admin`` (Operator:Update), bound to the caller's own operator identity (no impersonation). 404 if the run is not live in this workspace; 409 if its channel does not support live takeover yet, or if the operator has no phone number configured. For voice, Twilio dials the operator's phone and the response carries the resulting conference/participant SIDs.
          */
         post: operations["take_over_run_v1__workspace_id__runs__run_id__takeover_post"];
         delete?: never;
@@ -5405,46 +5005,6 @@ export interface paths {
          * @description Delete a service. Requires `Service.delete` permission.
          */
         delete: operations["delete-service"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/services/{service_id}/conversation-starters": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Get conversation starters
-         * @description Return structured pre-conversation starter chips for a service and optional entity. When service config includes conversation_starter_prompts and an entity_id is supplied, the endpoint reads entity context and generates starters before falling back to configured starters. Selecting a starter should create a conversation and send the starter value as the first user message. Requires `Service.view` permission.
-         */
-        post: operations["list-conversation-starters"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/services/{service_id}/text-turn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Text Turn
-         * @description Run one WhatsApp-style text turn against the service's agent.
-         */
-        post: operations["text-turn"];
-        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -5675,26 +5235,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/form-templates/{template_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Form Template
-         * @description Get a single form template by ID.
-         */
-        get: operations["get-form-template"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/form-templates/{template_id}/resolve": {
         parameters: {
             query?: never;
@@ -5907,34 +5447,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/settings/topic-modeling": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get conversation topic analytics exposure
-         * @description Return topic-analytics exposure for the credential's own workspace.
-         *
-         *     Requires ``TopicModeling:Manage``.
-         */
-        get: operations["get-topic-modeling-settings"];
-        /**
-         * Enable or disable conversation topic analytics exposure
-         * @description Set exposure for the credential's own workspace and schedule reconciliation.
-         *
-         *     Requires ``TopicModeling:Manage``.
-         */
-        put: operations["update-topic-modeling-settings"];
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/settings/voice": {
         parameters: {
             query?: never;
@@ -6053,32 +5565,6 @@ export interface paths {
          *     observability.
          */
         post: operations["simulation-bridge"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/simulations/bridge/plan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Simulation Bridge Plan
-         * @description Infer a TargetSpec from an NL objective — preview before running /bridge.
-         *
-         *     UX: user types "test scheduling failures in 20 different ways", we return
-         *     a structured target_spec + rationale. The frontend shows both, lets the
-         *     user edit (add/remove states, tighten pathways), then POSTs the final
-         *     spec to /bridge. Same LLM, same Vertex cost structure as /bridge, but
-         *     no run is created — pure inference.
-         */
-        post: operations["simulation-bridge-plan"];
         delete?: never;
         options?: never;
         head?: never;
@@ -6214,29 +5700,6 @@ export interface paths {
          * @description Create a simulation coverage run with an optional Lakebase branch.
          */
         post: operations["create-simulation-run"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/simulations/runs/summary": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Simulation Runs Summary
-         * @description Aggregate run counts (total + by status) for the Runs summary strip.
-         *
-         *     Registered *before* ``/runs/{run_id}`` so the static ``summary`` path
-         *     segment is matched here rather than parsed as a run UUID (which would 422).
-         */
-        get: operations["get-simulation-runs-summary"];
-        put?: never;
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -7228,13 +6691,13 @@ export interface paths {
         get: operations["get-use-case-service-binding"];
         /**
          * Bind a use case to a platform service
-         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.
+         * @description Bind this use case to a platform service in the current workspace. PUT semantics — rebinding to a different service replaces the prior binding. Inbound webhook events for the use case will resolve to this workspace; outbound dispatch from the service will route through this use case for its channel. 409 if a different use case already binds the same (service, channel) pair, or if this use case is bound in another workspace. 404 if the service or use case is missing or the service belongs to another workspace. Requires Channel.create permission.
          */
         put: operations["bind-use-case-to-service"];
         post?: never;
         /**
          * Unbind a use case from its platform service
-         * @description Release a use case from its bound service in this workspace. Soft-delete on the binding row. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.
+         * @description Release a use case from its bound service in this workspace. 404 if the use case is not currently bound (covers both 'never bound' and 'already unbound'). Requires Channel.delete permission.
          */
         delete: operations["unbind-use-case-from-service"];
         options?: never;
@@ -7439,7 +6902,7 @@ export interface paths {
         };
         /**
          * List current enrichment values for an entity
-         * @description Current winners per (entity, key) from world.entity_enrichment_out_synced (Synced-Table-populated view of SDP's entity_enrichment_out). Each row carries value, value_type, confidence, source, effective_at.
+         * @description Current winners per (entity, key) from world.enrichment_synced (Synced-Table-populated view of SDP's enrichment_current_v3). Each row carries value, value_type, confidence, source, effective_at.
          */
         get: operations["list-entity-enrichment"];
         put?: never;
@@ -7751,30 +7214,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /**
-         * AccessTokenRequest
-         * @description Request to generate a Twilio AccessToken for browser-based audio.
-         */
-        AccessTokenRequest: {
-            /** Call Sid */
-            call_sid: string;
-        };
-        /** AccessTokenResponse */
-        AccessTokenResponse: {
-            /** Conference Sid */
-            conference_sid: string;
-            /**
-             * Connect Params
-             * @default {}
-             */
-            connect_params?: {
-                [key: string]: string;
-            };
-            /** Identity */
-            identity: string;
-            /** Token */
-            token: string;
         };
         /**
          * Action
@@ -8138,97 +7577,6 @@ export interface components {
             /** Period */
             period?: string | null;
         };
-        /** AgentDefinitionDetail */
-        AgentDefinitionDetail: {
-            /**
-             * Definition Id
-             * Format: uuid
-             */
-            definition_id: string;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /** Name */
-            name: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "archived";
-            /** Versions */
-            versions: components["schemas"]["AgentDefinitionVersionMeta"][];
-        };
-        /** AgentDefinitionListResponse */
-        AgentDefinitionListResponse: {
-            /** Continuation Token */
-            continuation_token?: unknown;
-            /** Has More */
-            has_more: boolean;
-            /** Items */
-            items: components["schemas"]["AgentDefinitionSummary"][];
-        };
-        /** AgentDefinitionSummary */
-        AgentDefinitionSummary: {
-            /**
-             * Definition Id
-             * Format: uuid
-             */
-            definition_id: string;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /** Name */
-            name: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "active" | "archived";
-        };
-        /** AgentDefinitionVersionDetail */
-        AgentDefinitionVersionDetail: {
-            /** Agent Count */
-            agent_count: number;
-            /** Body */
-            body: {
-                [key: string]: unknown;
-            };
-            /** Body Sha256 */
-            body_sha256: string;
-            /**
-             * Definition Id
-             * Format: uuid
-             */
-            definition_id: string;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /** Has Write Tools */
-            has_write_tools: boolean;
-            /** Validator Rev */
-            validator_rev: string;
-            /** Version */
-            version: number;
-        };
-        /** AgentDefinitionVersionMeta */
-        AgentDefinitionVersionMeta: {
-            /** Agent Count */
-            agent_count: number;
-            /** Body Sha256 */
-            body_sha256: string;
-            /** Has Write Tools */
-            has_write_tools: boolean;
-            /** Validator Rev */
-            validator_rev: string;
-            /** Version */
-            version: number;
-        };
         /**
          * AgentIdentity
          * @description Who the agent IS — platform-authored only; ``None`` for native runs
@@ -8309,50 +7657,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** AgentRunDetail */
-        AgentRunDetail: {
-            /**
-             * Duration Ms
-             * @default 0
-             */
-            duration_ms?: number;
-            /**
-             * Error
-             * @description Failure detail for failed/timed_out runs. Empty otherwise.
-             * @default
-             */
-            error?: string;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /**
-             * Run Id
-             * Format: uuid
-             */
-            run_id: string;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "running" | "succeeded" | "failed" | "timed_out";
-            /**
-             * Text
-             * @description Final agent text. Empty while the run is still running or on failure.
-             * @default
-             */
-            text?: string;
-            /**
-             * Trajectory
-             * @description AgentEffect-shaped step dicts (kind, seq, content, tool_name, ...) — the runner normalizer's projection of framework-native output. Untyped passthrough in v1: the AgentEffect projection is a server-private shape still converging across frameworks; typing it here now would freeze a premature wire contract. A typed discriminated union lands in a follow-up.
-             * @default []
-             */
-            trajectory?: {
-                [key: string]: unknown;
-            }[];
-            usage?: components["schemas"]["Usage"];
         };
         /** AgentTranscriptDeltaEvent */
         AgentTranscriptDeltaEvent: {
@@ -8554,45 +7858,6 @@ export interface components {
              * @enum {string}
              */
             type: "annotation";
-        };
-        /** AnomalyAlertResponse */
-        AnomalyAlertResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["AnomalyAlertRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** AnomalyAlertRow */
-        AnomalyAlertRow: {
-            /** Actions Json */
-            actions_json?: string | null;
-            /** Alert Id */
-            alert_id: string;
-            /** Decomposition Json */
-            decomposition_json?: string | null;
-            /** Detected At */
-            detected_at?: string | null;
-            /** Mechanism */
-            mechanism?: string | null;
-            /** Narrative */
-            narrative?: string | null;
-            /** Priority Score */
-            priority_score?: number | null;
-            /** Projection Json */
-            projection_json?: string | null;
-            /** Severity */
-            severity?: ("high" | "medium" | "low") | null;
-            /** Slice Label */
-            slice_label: string;
-            /** Stats Json */
-            stats_json?: string | null;
-            /** Workspace Id */
-            workspace_id: string | "labs";
         };
         AnyValue: {
             [key: string]: unknown;
@@ -9078,26 +8343,6 @@ export interface components {
         /** BrandingSettingsResponse */
         BrandingSettingsResponse: {
             branding: components["schemas"]["BrandingConfig"];
-        };
-        /** BridgePlanRequest */
-        BridgePlanRequest: {
-            /** Objective */
-            objective: string;
-            /**
-             * Service Id
-             * Format: uuid
-             */
-            service_id: string;
-        };
-        /** BridgePlanResponse */
-        BridgePlanResponse: {
-            /** Available States */
-            available_states?: string[];
-            /** Available Tools */
-            available_tools?: string[];
-            /** Rationale */
-            rationale: string;
-            target_spec: components["schemas"]["TargetSpec"];
         };
         /** BridgeRequest */
         BridgeRequest: {
@@ -10070,171 +9315,6 @@ export interface components {
              */
             op: "change_column_type";
         };
-        /** ChannelEmailBouncedEvent */
-        ChannelEmailBouncedEvent: {
-            /**
-             * Bounce Subtype
-             * @default null
-             */
-            bounce_subtype?: string | null;
-            /**
-             * Bounce Type
-             * @default null
-             */
-            bounce_type?: string | null;
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_bounced";
-            /** From Address */
-            from_address: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailClickedEvent */
-        ChannelEmailClickedEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_clicked";
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailComplainedEvent */
-        ChannelEmailComplainedEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_complained";
-            /** From Address */
-            from_address: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailDelayedEvent */
-        ChannelEmailDelayedEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_delayed";
-            /** From Address */
-            from_address: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailDeliveredEvent */
-        ChannelEmailDeliveredEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_delivered";
-            /** From Address */
-            from_address: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailOpenedEvent */
-        ChannelEmailOpenedEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_opened";
-            /** To Address */
-            to_address: string;
-        };
-        /**
-         * ChannelEmailReceivedEvent
-         * @description Inbound email persisted to channel.inbound_emails as a reply to one of
-         *     our outbound sends. ``in_reply_to_email_id`` is the outbound row this
-         *     inbound threads against.
-         */
-        ChannelEmailReceivedEvent: {
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_received";
-            /** From Address */
-            from_address: string;
-            /** In Reply To Email Id */
-            in_reply_to_email_id: string;
-            /** Inbound Email Id */
-            inbound_email_id: string;
-            /** Subject */
-            subject: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEmailRejectedEvent */
-        ChannelEmailRejectedEvent: {
-            /** Email Id */
-            email_id: string;
-            /**
-             * @description discriminator enum property added by openapi-typescript
-             * @enum {string}
-             */
-            event_type: "channel.email_rejected";
-            /** From Address */
-            from_address: string;
-            /** To Address */
-            to_address: string;
-        };
-        /** ChannelEventRequest */
-        ChannelEventRequest: {
-            channel: components["schemas"]["ChannelKind"];
-            /** Data */
-            data?: {
-                [key: string]: unknown;
-            };
-            /** Email Id */
-            email_id?: string | null;
-            /** Event Type */
-            event_type: string;
-            /** From Address */
-            from_address?: string | null;
-            /**
-             * Occurred At
-             * Format: date-time
-             */
-            occurred_at: string;
-            /** Phone Number */
-            phone_number?: string | null;
-            /** To Address */
-            to_address?: string | null;
-            /**
-             * Use Case Id
-             * Format: uuid
-             */
-            use_case_id: string;
-        };
-        /** ChannelEventResponse */
-        ChannelEventResponse: {
-            /** Event Id */
-            event_id?: string | null;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "accepted" | "skipped";
-        };
         /**
          * ChannelKind
          * @description HSM execution channel type.
@@ -10545,29 +9625,8 @@ export interface components {
             /** Name */
             name: string;
         };
-        /** ColumnInfo */
-        ColumnInfo: {
-            /** Column Name */
-            column_name: string;
-            /** Comment */
-            comment?: string | null;
-            /** Data Type */
-            data_type: string;
-        };
         /** @enum {string} */
         ColumnType: "text" | "int" | "bigint" | "numeric" | "boolean" | "uuid" | "timestamptz" | "date" | "time" | "jsonb" | "bytea";
-        /** ColumnsResponse */
-        ColumnsResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["ColumnInfo"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** CommandCenterAlert */
         CommandCenterAlert: {
             /** Code */
@@ -11121,69 +10180,6 @@ export interface components {
             updated_at: string;
             voice?: components["schemas"]["VoiceDetail"] | null;
         };
-        /** ConversationStarter */
-        ConversationStarter: {
-            /** Label */
-            label: string;
-            /**
-             * Lane
-             * @default general
-             * @enum {string}
-             */
-            lane?: "data" | "goal" | "protocol" | "care" | "general";
-            /** Metadata */
-            metadata?: {
-                [key: string]: unknown;
-            };
-            /** Referenced Objects */
-            referenced_objects?: string[];
-            /**
-             * Source
-             * @default configured
-             * @enum {string}
-             */
-            source?: "recent_data" | "hypothesis" | "goal" | "protocol" | "care" | "generated" | "deterministic" | "configured";
-            /** Value */
-            value: string;
-        };
-        /** ConversationStartersRequest */
-        ConversationStartersRequest: {
-            /** Entity Id */
-            entity_id?: string | null;
-            /**
-             * Generation Mode
-             * @default auto
-             * @enum {string}
-             */
-            generation_mode?: "auto" | "generate" | "configured";
-            /**
-             * Include Deterministic
-             * @default true
-             */
-            include_deterministic?: boolean;
-            /**
-             * Max Count
-             * @default 5
-             */
-            max_count?: number;
-        };
-        /** ConversationStartersResponse */
-        ConversationStartersResponse: {
-            /** Entity Id */
-            entity_id?: string | null;
-            /**
-             * Service Id
-             * Format: uuid
-             */
-            service_id: string;
-            /** Starters */
-            starters: components["schemas"]["ConversationStarter"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** ConversationStatusTransitionRequest */
         ConversationStatusTransitionRequest: {
             /**
@@ -11446,50 +10442,6 @@ export interface components {
             description?: components["schemas"]["DescriptionString"];
             name: components["schemas"]["NameString"];
         };
-        /** CreateAgentRunRequest */
-        CreateAgentRunRequest: {
-            /**
-             * Framework
-             * @description Framework a PLATFORM run executes on. For a native run the framework comes from the definition.
-             */
-            framework?: ("claude-agent-sdk" | "openai-agents") | null;
-            /**
-             * Message
-             * @description User message the framework agent is invoked with.
-             */
-            message: string;
-            /** @description Run a native (bring-your-own) agent definition instead of a platform service. */
-            native?: components["schemas"]["NativeRunRef"] | null;
-            /**
-             * Service Id
-             * @description Platform-authored run: the service whose pinned config the agent runs.
-             */
-            service_id?: string | null;
-            /**
-             * Timeout S
-             * @description Server-side wall-clock budget for the run, in seconds (max 300).
-             * @default 120
-             */
-            timeout_s?: number;
-            /**
-             * @description Named version set on the service whose pinned config the run uses (platform runs).
-             * @default release
-             */
-            version_set?: components["schemas"]["NameString"];
-        };
-        /** CreateAgentRunResponse */
-        CreateAgentRunResponse: {
-            /**
-             * Run Id
-             * Format: uuid
-             */
-            run_id: string;
-            /**
-             * Status
-             * @constant
-             */
-            status: "running";
-        };
         /** CreateAgentVersionRequest */
         CreateAgentVersionRequest: {
             /** @default  */
@@ -11662,7 +10614,7 @@ export interface components {
         CreateOperatorRequest: {
             /**
              * Connection Method
-             * @default browser
+             * @default phone
              * @enum {string}
              */
             connection_method?: "browser" | "phone";
@@ -12014,7 +10966,7 @@ export interface components {
             max_tokens?: number;
             /**
              * Model
-             * @default claude-sonnet-4-6
+             * @default claude-sonnet-5
              */
             model?: string;
             name: components["schemas"]["NameString"];
@@ -12032,8 +10984,7 @@ export interface components {
              * @description Anthropic sampling temperature (0-1). Ignored on models that reject sampling params (Opus 4.7+/Fable, which 400 otherwise). Set at most one of temperature/top_p -- Claude 4+ rejects both; the runtime keeps temperature and drops top_p.
              */
             temperature?: number | null;
-            /** Thinking Effort */
-            thinking_effort?: ("low" | "medium" | "high") | null;
+            thinking_effort?: components["schemas"]["ThinkingEffort"] | null;
             /**
              * Timeout S
              * @default 60
@@ -13061,14 +12012,6 @@ export interface components {
             url?: string | null;
         };
         DescriptionString: string;
-        /** DesignAgentSessionResponse */
-        DesignAgentSessionResponse: {
-            /**
-             * Status
-             * @constant
-             */
-            status: "stored";
-        };
         /** DestroySessionResponse */
         DestroySessionResponse: {
             /**
@@ -13077,47 +12020,6 @@ export interface components {
              * @constant
              */
             status: "destroyed";
-        };
-        /** DistrictMetricsResponse */
-        DistrictMetricsResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["DistrictMetricsRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** DistrictMetricsRow */
-        DistrictMetricsRow: {
-            /** Access Narrative */
-            access_narrative?: string | null;
-            /** Anomaly Narrative */
-            anomaly_narrative?: string | null;
-            /** Capacity Gap Pct */
-            capacity_gap_pct?: number | null;
-            /** Cohort Size */
-            cohort_size?: number | null;
-            /** District Name */
-            district_name: string;
-            /** Is Anomaly */
-            is_anomaly?: boolean | null;
-            /** Pcp Per 1K */
-            pcp_per_1k?: number | null;
-            /** Residual */
-            residual?: number | null;
-            /** T2D Incidence Per 1K */
-            t2d_incidence_per_1k?: number | null;
-            /** T2D Predicted Per 1K */
-            t2d_predicted_per_1k?: number | null;
-            /** Unmet Demand Score */
-            unmet_demand_score?: number | null;
-            /** Updated At */
-            updated_at?: string | null;
-            /** Workspace Id */
-            workspace_id: string | "labs";
         };
         /**
          * DocumentProcessingSpec
@@ -14239,11 +13141,6 @@ export interface components {
             by_event_type?: {
                 [key: string]: number;
             };
-            /**
-             * Event Type Window Days
-             * @description Window applied to by_event_type counts when an entity_type filter is supplied.
-             */
-            event_type_window_days?: number | null;
             /** Sync Failed */
             sync_failed: number;
             /** Sync Pending */
@@ -15101,43 +13998,6 @@ export interface components {
          * @enum {string}
          */
         FailureClass: "timeout" | "input_rejected" | "rounds_exhausted" | "generic";
-        /** FeatureDef */
-        FeatureDef: {
-            /** Kind */
-            kind: string;
-            /** Name */
-            name: string;
-        };
-        /** FeatureDistributionResponse */
-        FeatureDistributionResponse: {
-            /** Bins */
-            bins: components["schemas"]["HistogramBin"][];
-            /** Feature */
-            feature: string;
-            /** Kind */
-            kind: string;
-            /** N Total */
-            n_total: number;
-            /** N Y1 */
-            n_y1: number;
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** FeaturesResponse */
-        FeaturesResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["FeatureDef"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /** FhirAppointmentListResponse */
         FhirAppointmentListResponse: {
             /** Appointments */
@@ -15816,26 +14676,6 @@ export interface components {
             } | null;
         };
         /**
-         * FlagProviderHealthResponse
-         * @description Whether feature-flag flips are actually runtime-controllable.
-         *
-         *     Surfaces ``FeatureFlagClient.doctor()`` so operators can detect the
-         *     silently-inert state where flag flips, per-workspace ramps, kill switches,
-         *     and rollbacks resolve to code/env defaults instead of taking effect.
-         */
-        FlagProviderHealthResponse: {
-            /** Env Enabled */
-            env_enabled: boolean;
-            /** Provider Ready */
-            provider_ready: boolean;
-            /** Provider Registered */
-            provider_registered: boolean;
-            /** Reason */
-            reason: string;
-            /** Runtime Controllable */
-            runtime_controllable: boolean;
-        };
-        /**
          * FleetStatusResponse
          * @description Live Agones fleet capacity (workspace-global).
          *
@@ -16167,13 +15007,8 @@ export interface components {
             forward_to: string;
             /** Forwarded At */
             forwarded_at?: string | null;
-            /** Should Disconnect */
-            should_disconnect: boolean;
-            /**
-             * Warm Transfer
-             * @default true
-             */
-            warm_transfer?: boolean;
+            /** Warm Transfer */
+            warm_transfer: boolean;
         };
         /**
          * FunctionExample
@@ -16478,17 +15313,6 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
-        };
-        /** HistogramBin */
-        HistogramBin: {
-            /** X Hi */
-            x_hi: number;
-            /** X Lo */
-            x_lo: number;
-            /** Y0 */
-            y0: number;
-            /** Y1 */
-            y1: number;
         };
         /** HumanSegment */
         HumanSegment: {
@@ -16870,7 +15694,7 @@ export interface components {
             max_tokens?: number;
             /**
              * Model
-             * @default claude-sonnet-4-6
+             * @default claude-sonnet-5
              */
             model?: string;
             /** Name */
@@ -16893,8 +15717,7 @@ export interface components {
             system_prompt?: string;
             /** Temperature */
             temperature?: number | null;
-            /** Thinking Effort */
-            thinking_effort?: ("low" | "medium" | "high") | null;
+            thinking_effort?: components["schemas"]["ThinkingEffort"] | null;
             /**
              * Timeout S
              * @default 60
@@ -17053,59 +15876,21 @@ export interface components {
         };
         /**
          * LLMExperienceControls
-         * @description First-class chat experience controls for consumer-facing agents.
+         * @description Typed model-tuning controls for a version set's LLM preference.
          *
-         *     ``params`` remains available as a provider-specific escape hatch. These
-         *     fields cover the OpenAI Chat Completions controls that most directly shape
-         *     response tone, feel, determinism, latency, and structured output behavior.
-         *     Token budgets are intentionally excluded so version sets do not reintroduce
-         *     accidental response truncation.
+         *     ``params`` remains available as a provider-specific escape hatch. These three
+         *     fields are the ones deployments actually use; the surface was trimmed from
+         *     nineteen in V370 after a production census found the other sixteen had never
+         *     been set to a non-null value by anyone. Token budgets are intentionally
+         *     excluded so version sets do not reintroduce accidental response truncation.
          */
         LLMExperienceControls: {
-            /** Frequency Penalty */
-            frequency_penalty?: number | null;
-            /** Logit Bias */
-            logit_bias?: {
-                [key: string]: number;
-            } | null;
-            /** Logprobs */
-            logprobs?: boolean | null;
-            /** Metadata */
-            metadata?: {
-                [key: string]: string;
-            } | null;
-            /** Parallel Tool Calls */
-            parallel_tool_calls?: boolean | null;
-            /** Presence Penalty */
-            presence_penalty?: number | null;
-            /** Prompt Cache Key */
-            prompt_cache_key?: string | null;
-            /** Prompt Cache Retention */
-            prompt_cache_retention?: ("in-memory" | "24h") | null;
             /** Reasoning Effort */
             reasoning_effort?: ("none" | "minimal" | "low" | "medium" | "high" | "xhigh") | null;
-            /** Response Format */
-            response_format?: {
-                [key: string]: unknown;
-            } | null;
-            /** Safety Identifier */
-            safety_identifier?: string | null;
-            /** Seed */
-            seed?: number | null;
-            /** Service Tier */
-            service_tier?: string | null;
-            /** Stop */
-            stop?: string | string[] | null;
-            /** Store */
-            store?: boolean | null;
             /** Temperature */
             temperature?: number | null;
-            /** Top Logprobs */
-            top_logprobs?: number | null;
             /** Top P */
             top_p?: number | null;
-            /** Verbosity */
-            verbosity?: ("low" | "medium" | "high") | null;
         };
         /**
          * LanguageProviderEntry
@@ -17120,7 +15905,7 @@ export interface components {
              * Provider
              * @enum {string}
              */
-            provider: "cartesia" | "elevenlabs" | "groq";
+            provider: "cartesia" | "elevenlabs";
         };
         /** LastPollInfo */
         LastPollInfo: {
@@ -17845,7 +16630,7 @@ export interface components {
             is_priced: boolean;
             /**
              * Model
-             * @description Model identifier, e.g. claude-sonnet-4-6
+             * @description Model identifier, e.g. claude-sonnet-5
              */
             model: string;
             /** Output Tokens */
@@ -17914,32 +16699,6 @@ export interface components {
             target_entity_type: string;
             /** Version */
             version: string;
-        };
-        /**
-         * NativeRunRef
-         * @description Run a customer-authored NATIVE agent definition (inc-10): a REGISTERED
-         *     definition by id (``version`` omitted = latest), or an INLINE body for
-         *     dev/playground iteration. The definition's own ``framework`` selects the
-         *     runtime — no top-level ``framework`` needed.
-         */
-        NativeRunRef: {
-            /**
-             * Definition Id
-             * @description Registered definition to run. Omit `version` for the latest.
-             */
-            definition_id?: string | null;
-            /**
-             * Inline
-             * @description Inline definition document (dev/playground). Validated by the platform clamp schema.
-             */
-            inline?: {
-                [key: string]: unknown;
-            } | null;
-            /**
-             * Version
-             * @description Pinned definition version; omit for latest.
-             */
-            version?: number | null;
         };
         /** NavTimingEvent */
         NavTimingEvent: {
@@ -19604,39 +18363,6 @@ export interface components {
             /** Turns */
             turns: components["schemas"]["TurnTimeline"][];
         };
-        /** PositiveSignalResponse */
-        PositiveSignalResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: components["schemas"]["PositiveSignalRow"][];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
-        /** PositiveSignalRow */
-        PositiveSignalRow: {
-            /** Baseline */
-            baseline?: number | null;
-            /** Delta Unit */
-            delta_unit?: string | null;
-            /** Delta Value */
-            delta_value?: number | null;
-            /** Headline */
-            headline?: string | null;
-            /** Metric Label */
-            metric_label?: string | null;
-            /** Narrative */
-            narrative?: string | null;
-            /** Signal Id */
-            signal_id: string;
-            /** Updated At */
-            updated_at?: string | null;
-            /** Workspace Id */
-            workspace_id: string | "labs";
-        };
         /**
          * PreloadSpec
          * @description A tool call executed deterministically by the engine on state entry.
@@ -19974,28 +18700,10 @@ export interface components {
          *     Multiple providers may serve the same ChannelKind.
          * @enum {string}
          */
-        ProviderType: "twilio" | "websocket" | "ses" | "sendblue" | "infobip";
+        ProviderType: "twilio" | "websocket" | "ses" | "sendblue" | "meta";
         /** ProvisionResponse */
         ProvisionResponse: {
             workspace: components["schemas"]["WorkspaceResponse"];
-        };
-        /** PurgeEntityResponse */
-        PurgeEntityResponse: {
-            /** Delta Events Note */
-            delta_events_note?: string | null;
-            /** Display Name */
-            display_name: string | null;
-            /** Edges Deleted */
-            edges_deleted: number;
-            /** Entity Deleted */
-            entity_deleted: boolean;
-            /**
-             * Entity Id
-             * Format: uuid
-             */
-            entity_id: string;
-            /** Events Deleted */
-            events_deleted: number;
         };
         /**
          * QualityBreakdown
@@ -20268,91 +18976,8 @@ export interface components {
             suggestions: string[];
         };
         /**
-         * RecordingMetadataResponse
-         * @description Call recording metadata.
-         */
-        RecordingMetadataResponse: {
-            /**
-             * Call End Iso
-             * @description Call end time as ISO-8601 string
-             */
-            call_end_iso: string;
-            /**
-             * Call Sid
-             * @description Twilio call SID
-             */
-            call_sid: string;
-            /**
-             * Call Start Iso
-             * @description Call start time as ISO-8601 string
-             */
-            call_start_iso: string;
-            /**
-             * Direction
-             * @description Call direction
-             * @enum {string}
-             */
-            direction: "inbound" | "outbound";
-            /**
-             * Duration Seconds
-             * @description Total call duration in seconds
-             */
-            duration_seconds: number;
-            /**
-             * Inbound Format
-             * @description Audio format for the inbound (caller) channel
-             */
-            inbound_format: string;
-            /**
-             * Inbound Sample Rate
-             * @description Sample rate in Hz for the inbound channel
-             */
-            inbound_sample_rate: number;
-            /**
-             * Inbound Size Bytes
-             * @description Inbound audio file size in bytes
-             */
-            inbound_size_bytes: number;
-            /**
-             * Media Start Epoch Ms
-             * @description Media stream start time as Unix epoch milliseconds
-             */
-            media_start_epoch_ms: number;
-            /**
-             * Outbound Format
-             * @description Audio format for the outbound (agent) channel
-             */
-            outbound_format: string;
-            /**
-             * Outbound Sample Rate
-             * @description Sample rate in Hz for the outbound channel
-             */
-            outbound_sample_rate: number;
-            /**
-             * Outbound Size Bytes
-             * @description Outbound audio file size in bytes
-             */
-            outbound_size_bytes: number;
-            /**
-             * Service Id
-             * @description Service (agent) that handled the call
-             */
-            service_id?: string | null;
-            /**
-             * Tts Provider
-             * @description Text-to-speech provider used for the call
-             */
-            tts_provider: string;
-            /**
-             * Workspace Id
-             * Format: uuid
-             * @description Workspace that owns this recording
-             */
-            workspace_id: string;
-        };
-        /**
          * RecordingUrlsResponse
-         * @description Download paths for call recording playback.
+         * @description Presigned S3 URLs for a call recording's WAV objects.
          */
         RecordingUrlsResponse: {
             /**
@@ -20362,64 +18987,19 @@ export interface components {
             call_sid: string;
             /**
              * Inbound Url
-             * @description Download URL for inbound (caller) audio
+             * @description Presigned URL for the inbound (caller) WAV
              */
-            inbound_url?: string | null;
-            /**
-             * Metadata Url
-             * @description Download URL for recording metadata JSON
-             */
-            metadata_url?: string | null;
+            inbound_url: string;
             /**
              * Outbound Url
-             * @description Download URL for outbound (agent) audio
+             * @description Presigned URL for the outbound (agent) WAV
              */
-            outbound_url?: string | null;
+            outbound_url: string;
             /**
-             * Status
-             * @description Recording availability status
-             * @default available
-             * @constant
+             * Stereo Url
+             * @description Presigned URL for the merged stereo (caller left / agent right) WAV
              */
-            status?: "available";
-        };
-        /** RegisterAgentDefinitionRequest */
-        RegisterAgentDefinitionRequest: {
-            /**
-             * Body
-             * @description The framework-native definition document (its 'framework' field selects the shape). Validated by the platform clamp schema — a non-whitelisted field is rejected.
-             */
-            body: {
-                [key: string]: unknown;
-            };
-            /** @description Stable slug identifying this definition within the workspace. */
-            name: components["schemas"]["SlugString"];
-        };
-        /** RegisterAgentDefinitionResponse */
-        RegisterAgentDefinitionResponse: {
-            /** Agent Count */
-            agent_count: number;
-            /** Body Sha256 */
-            body_sha256: string;
-            /**
-             * Created
-             * @description False when an identical body was already registered (idempotent push).
-             */
-            created: boolean;
-            /**
-             * Definition Id
-             * Format: uuid
-             */
-            definition_id: string;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /** Has Write Tools */
-            has_write_tools: boolean;
-            /** Version */
-            version: number;
+            stereo_url: string;
         };
         /**
          * RegisterSchemaRequest
@@ -21117,27 +19697,6 @@ export interface components {
              */
             workspace_id: string;
         };
-        /** RunAccessTokenRequest */
-        RunAccessTokenRequest: {
-            /**
-             * Operator Id
-             * Format: uuid
-             */
-            operator_id: string;
-        };
-        /** RunAccessTokenResponse */
-        RunAccessTokenResponse: {
-            /** Conference Sid */
-            conference_sid?: string | null;
-            /** Connect Params */
-            connect_params?: {
-                [key: string]: string;
-            };
-            /** Identity */
-            identity: string;
-            /** Token */
-            token: string;
-        };
         /** RunAuthoredTurnRequest */
         RunAuthoredTurnRequest: {
             /**
@@ -21439,20 +19998,6 @@ export interface components {
              */
             match_count?: number;
         };
-        /** SampleResponse */
-        SampleResponse: {
-            /** Count */
-            count: number;
-            /** Items */
-            items: {
-                [key: string]: unknown;
-            }[];
-            /**
-             * Workspace Id
-             * Format: uuid
-             */
-            workspace_id: string;
-        };
         /**
          * SaveFieldResponse
          * @description Acknowledgement returned when a field is auto-saved.
@@ -21688,7 +20233,7 @@ export interface components {
              * Channel
              * @enum {string}
              */
-            channel: "inbound_voice" | "outbound_voice" | "email" | "sms" | "imessage";
+            channel: "inbound_voice" | "outbound_voice" | "email" | "sms" | "imessage" | "whatsapp";
             /**
              * Created At
              * Format: date-time
@@ -21719,26 +20264,16 @@ export interface components {
          * ServiceForwardingConfig
          * @description Per-service call-forwarding destination + transfer mechanism.
          *
-         *     Read by the LLM-driven ``forward_call`` tool (tier 3 fallback when the LLM
-         *     doesn't pass an explicit ``phone_number`` and no EHR location is configured).
-         *
-         *     Per-service forwarding is a binary presence — set means tier 3 resolves
-         *     to it, None means tier 3 has no static target. (The legacy per-phone
-         *     forwarding shape, with its own ``enabled`` flag, was removed alongside
-         *     the legacy Twilio phone path.)
+         *     Presence of this block is the whole gate for the ``forward_call`` tool:
+         *     None means the agent cannot transfer at all. When present, ``forward_to``
+         *     picks the destination mode, and the tool schema follows it — a static
+         *     service gets an argument-less tool, a dynamic one gets a required
+         *     ``phone_number``. Nothing cascades: a service is one mode or the other.
          */
         ServiceForwardingConfig: {
-            forward_to: components["schemas"]["PhoneE164"];
-            /**
-             * Should Disconnect
-             * @default true
-             */
-            should_disconnect?: boolean;
-            /**
-             * Warm Transfer
-             * @default true
-             */
-            warm_transfer?: boolean;
+            forward_to: components["schemas"]["PhoneE164"] | null;
+            /** Warm Transfer */
+            warm_transfer: boolean;
         };
         /** ServiceListResponse */
         ServiceListResponse: {
@@ -21860,11 +20395,6 @@ export interface components {
             filler_style?: "backchannel" | "phrase" | "silent";
             /** Filler Vocabulary */
             filler_vocabulary?: string[] | null;
-            /**
-             * Forward Call Enabled
-             * @default false
-             */
-            forward_call_enabled?: boolean;
             forwarding?: components["schemas"]["ServiceForwardingConfig"] | null;
             /** Language Providers */
             language_providers?: {
@@ -21902,7 +20432,7 @@ export interface components {
             /** Tts Model */
             tts_model?: ("sonic-turbo" | "sonic-3") | null;
             /** Tts Provider */
-            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
+            tts_provider?: ("cartesia" | "elevenlabs") | null;
         };
         /**
          * ServiceVoiceConfig
@@ -21937,11 +20467,6 @@ export interface components {
             filler_style?: "backchannel" | "phrase" | "silent";
             /** Filler Vocabulary */
             filler_vocabulary?: string[] | null;
-            /**
-             * Forward Call Enabled
-             * @default false
-             */
-            forward_call_enabled?: boolean;
             forwarding?: components["schemas"]["ServiceForwardingConfig"] | null;
             /** Language Providers */
             language_providers?: {
@@ -21979,7 +20504,7 @@ export interface components {
             /** Tts Model */
             tts_model?: ("sonic-turbo" | "sonic-3") | null;
             /** Tts Provider */
-            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
+            tts_provider?: ("cartesia" | "elevenlabs") | null;
         };
         /** SessionEndEvent */
         SessionEndEvent: {
@@ -22815,6 +21340,20 @@ export interface components {
             overview: components["schemas"]["SimPerformanceOverviewResponse"];
         };
         /**
+         * SimulationProxyErrorResponse
+         * @description Error envelope for simulation routes that proxy agent-engine.
+         *
+         *     ``detail`` is a string for forwarded runtime/configuration errors and a
+         *     structured list for FastAPI request validation failures. Both share HTTP
+         *     422, so the published contract must admit both shapes.
+         */
+        SimulationProxyErrorResponse: {
+            /** Detail */
+            detail: string | {
+                [key: string]: unknown;
+            }[];
+        };
+        /**
          * SimulationRunResponse
          * @description Full run payload — used by GET /runs/{run_id} for replay flows.
          */
@@ -22912,36 +21451,6 @@ export interface components {
              * @default 0
              */
             total_turns?: number;
-        };
-        /**
-         * SimulationRunSummaryResponse
-         * @description Aggregate counts across a workspace's simulation runs, for the Runs page
-         *     summary strip.
-         *
-         *     A cheap ``GROUP BY status`` over ``world.simulation_coverage_runs`` — honest
-         *     totals the 50-row list view cannot derive client-side. ``by_status`` carries
-         *     the full breakdown (incl. any status beyond the three named convenience
-         *     fields) so a new lifecycle state surfaces without a schema change.
-         */
-        SimulationRunSummaryResponse: {
-            /** By Status */
-            by_status: {
-                [key: string]: number;
-            };
-            /** Completed */
-            completed: number;
-            /** Failed */
-            failed: number;
-            /** Last Created At */
-            last_created_at?: string | null;
-            /** Running */
-            running: number;
-            /** Total */
-            total: number;
-            /** Total Sessions */
-            total_sessions: number;
-            /** Total Turns */
-            total_turns: number;
         };
         /** SimulationSessionResponse */
         SimulationSessionResponse: {
@@ -23377,8 +21886,7 @@ export interface components {
             system_prompt: string;
             /** Temperature */
             temperature: number | null;
-            /** Thinking Effort */
-            thinking_effort: ("low" | "medium" | "high") | null;
+            thinking_effort: components["schemas"]["ThinkingEffort"] | null;
             /** Timeout S */
             timeout_s: number;
             /** Top P */
@@ -24963,28 +23471,8 @@ export interface components {
             /** Tool Name */
             tool_name: string;
         };
-        /**
-         * TextTurnRequest
-         * @description Request body for ``POST /v1/{ws}/services/{service_id}/text-turn``.
-         */
-        TextTurnRequest: {
-            /** Agent Phone */
-            agent_phone: string;
-            /** Phone Number */
-            phone_number: string;
-            /** Text */
-            text: string;
-        };
-        /**
-         * TextTurnResponse
-         * @description Response body — the agent's text reply.
-         *
-         *     Returned only on 200; 204 indicates the engine elected silence.
-         */
-        TextTurnResponse: {
-            /** Text */
-            text: string;
-        };
+        /** @enum {string} */
+        ThinkingEffort: "low" | "medium" | "high";
         /** ThroughputBucket */
         ThroughputBucket: {
             /** Bucket */
@@ -25526,28 +24014,6 @@ export interface components {
              */
             write_tool_names?: string[];
         };
-        /** TopicModelingSettingsRequest */
-        TopicModelingSettingsRequest: {
-            /** Enabled */
-            enabled: boolean;
-        };
-        /** TopicModelingSettingsResponse */
-        TopicModelingSettingsResponse: {
-            /** Enabled */
-            enabled: boolean;
-        };
-        /** TopicModelingSettingsUpdateResponse */
-        TopicModelingSettingsUpdateResponse: {
-            /** Enabled */
-            enabled: boolean;
-            /**
-             * Reconciliation Status
-             * @constant
-             */
-            reconciliation_status: "pending";
-            /** Run Id */
-            run_id: number;
-        };
         /**
          * TraceAnalysisListItem
          * @description Compact summary of a trace analysis row for list views.
@@ -25851,7 +24317,7 @@ export interface components {
         /** TranscriptSegment */
         TranscriptSegment: {
             /** Confidence */
-            confidence: number;
+            confidence: number | null;
             /** Escalation Id */
             escalation_id: string | null;
             /** Speaker Role */
@@ -26179,7 +24645,7 @@ export interface components {
          *     not silently create never-matching triggers.
          * @enum {string}
          */
-        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.intelligence" | "call.outcome" | "channel.email.bounced" | "channel.email.clicked" | "channel.email.complained" | "channel.email.delayed" | "channel.email.delivered" | "channel.email.opened" | "channel.email.received" | "channel.email.rejected" | "channel.message.received" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
+        TriggerableEvent: "amigo.trigger.cron" | "appointment.booked" | "appointment.cancelled" | "appointment.confirmed" | "booking.requested" | "call.ended" | "call.intelligence" | "call.outcome" | "channel.message.received" | "conversation.channel_switched" | "conversation.started" | "conversation.turn_recorded" | "coverage.created" | "entity.enriched" | "entity.resolved" | "medication.refill_requested" | "outbound.initiated" | "outbound.scheduled" | "patient.created" | "patient.updated" | "relationship.established" | "review.approve" | "review.correct" | "review.reject" | "surface.created" | "surface.submitted" | "ticket.created" | "triage.completed" | "trigger.completed" | "trigger.failed" | "trigger.fired";
         /** Turn */
         Turn: {
             /** Agent Action */
@@ -26478,11 +24944,6 @@ export interface components {
              * @default -1
              */
             degradation_threshold?: number;
-            /**
-             * Greeting Shield S
-             * @default 0
-             */
-            greeting_shield_s?: number;
             /**
              * Safety Response
              * @default stay_empathize
@@ -26867,8 +25328,7 @@ export interface components {
              * @description Anthropic sampling temperature (0-1); see CreateSkillRequest. null/absent leaves it unchanged.
              */
             temperature?: number | null;
-            /** Thinking Effort */
-            thinking_effort?: ("low" | "medium" | "high") | null;
+            thinking_effort?: components["schemas"]["ThinkingEffort"] | null;
             /** Timeout S */
             timeout_s?: number | null;
             /**
@@ -26930,9 +25390,20 @@ export interface components {
         UpdateWorkspaceRequest: {
             /** Connector Type */
             connector_type?: ("epic" | "cerner" | "allscripts" | "fhir_store" | "athenahealth" | "charmhealth" | "eclinicalworks" | "meditab") | null;
+            /** Delta Sharing Enabled */
+            delta_sharing_enabled?: boolean | null;
+            /** Delta Sharing Identifier */
+            delta_sharing_identifier?: string;
+            /**
+             * Delta Sharing Mode
+             * @enum {string}
+             */
+            delta_sharing_mode?: "open" | "databricks";
             name?: components["schemas"]["StrippedNonemptyString"] | null;
             /** Region */
             region?: ("us-east-1" | "ap-southeast-2" | "eu-central-1" | "ca-central-1") | null;
+            /** Topic Modeling Enabled */
+            topic_modeling_enabled?: boolean | null;
         };
         /** UpsertRequest */
         UpsertRequest: {
@@ -26965,31 +25436,6 @@ export interface components {
         /** UpsertVersionSetRequest */
         UpsertVersionSetRequest: {
             version_set: components["schemas"]["VersionSet-Input"];
-        };
-        /** Usage */
-        Usage: {
-            /**
-             * Cache Creation Tokens
-             * @description Cache-WRITE input tokens (Anthropic cache_creation_input_tokens; 0 on providers without it).
-             * @default 0
-             */
-            cache_creation_tokens?: number;
-            /**
-             * Cached Tokens
-             * @description Cache-READ input tokens (billed at the provider's cache-hit rate).
-             * @default 0
-             */
-            cached_tokens?: number;
-            /**
-             * Input Tokens
-             * @default 0
-             */
-            input_tokens?: number;
-            /**
-             * Output Tokens
-             * @default 0
-             */
-            output_tokens?: number;
         };
         /** UsageBucket */
         UsageBucket: {
@@ -27091,23 +25537,6 @@ export interface components {
              */
             type: "user_transcript";
         };
-        /** ValidateAgentDefinitionResponse */
-        ValidateAgentDefinitionResponse: {
-            /** Agent Count */
-            agent_count: number;
-            /**
-             * Framework
-             * @enum {string}
-             */
-            framework: "claude-agent-sdk" | "openai-agents";
-            /** Has Write Tools */
-            has_write_tools: boolean;
-            /**
-             * Valid
-             * @constant
-             */
-            valid: true;
-        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -27177,7 +25606,7 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             /** Tts Provider */
-            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
+            tts_provider?: ("cartesia" | "elevenlabs") | null;
             /** Voice Id */
             voice_id: string;
         };
@@ -27419,7 +25848,7 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             /** Tts Provider */
-            tts_provider?: ("cartesia" | "elevenlabs" | "groq") | null;
+            tts_provider?: ("cartesia" | "elevenlabs") | null;
             /** Voice Id */
             voice_id?: string | null;
             /** Volume */
@@ -27457,7 +25886,7 @@ export interface components {
                 [key: string]: unknown;
             } | null;
             /** Tts Provider */
-            tts_provider: ("cartesia" | "elevenlabs" | "groq") | null;
+            tts_provider: ("cartesia" | "elevenlabs") | null;
             /** Voice Id */
             voice_id: string | null;
             /** Volume */
@@ -27649,6 +26078,15 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            /** Delta Sharing Enabled */
+            delta_sharing_enabled: boolean;
+            /** Delta Sharing Identifier */
+            delta_sharing_identifier: string | null;
+            /**
+             * Delta Sharing Mode
+             * @enum {string}
+             */
+            delta_sharing_mode: "open" | "databricks";
             /**
              * Id
              * Format: uuid
@@ -27662,13 +26100,15 @@ export interface components {
             region: string;
             /** Slug */
             slug: string;
+            /** Topic Modeling Enabled */
+            topic_modeling_enabled: boolean;
             /**
              * Updated At
              * Format: date-time
              */
             updated_at: string;
         };
-        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextToolStartedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"] | components["schemas"]["ChannelEmailDeliveredEvent"] | components["schemas"]["ChannelEmailBouncedEvent"] | components["schemas"]["ChannelEmailComplainedEvent"] | components["schemas"]["ChannelEmailRejectedEvent"] | components["schemas"]["ChannelEmailDelayedEvent"] | components["schemas"]["ChannelEmailOpenedEvent"] | components["schemas"]["ChannelEmailClickedEvent"] | components["schemas"]["ChannelEmailReceivedEvent"];
+        WorkspaceSSEEvent: components["schemas"]["CallStartedEvent"] | components["schemas"]["CallEndedEvent"] | components["schemas"]["CallEscalatedEvent"] | components["schemas"]["EncounterUpdatedEvent"] | components["schemas"]["NarrativeUpdatedEvent"] | components["schemas"]["ReviewSubmittedEvent"] | components["schemas"]["SimulationTurnStoredEvent"] | components["schemas"]["SurfaceCreatedEvent"] | components["schemas"]["SurfaceDeliveredEvent"] | components["schemas"]["SurfaceUpdatedEvent"] | components["schemas"]["SurfaceArchivedEvent"] | components["schemas"]["SurfaceReshapedEvent"] | components["schemas"]["SurfaceSubmittedEvent"] | components["schemas"]["SurfaceFieldSavedEvent"] | components["schemas"]["SurfaceOpenedEvent"] | components["schemas"]["SurfacePendingReviewEvent"] | components["schemas"]["SurfaceReviewApprovedEvent"] | components["schemas"]["SurfaceReviewRejectedEvent"] | components["schemas"]["IntegrationApprovalGrantedEvent"] | components["schemas"]["IntegrationApprovalRejectedEvent"] | components["schemas"]["TextStartedEvent"] | components["schemas"]["TextCompletedEvent"] | components["schemas"]["TextToolStartedEvent"] | components["schemas"]["TextBackgroundResultEvent"] | components["schemas"]["TextAgentMessageEvent"] | components["schemas"]["TriggerFiredEvent"] | components["schemas"]["TriggerCompletedEvent"] | components["schemas"]["TriggerFailedEvent"] | components["schemas"]["PipelineSyncCompletedEvent"] | components["schemas"]["PipelineErrorEvent"] | components["schemas"]["OperatorRegisteredEvent"] | components["schemas"]["OperatorStatusChangedEvent"] | components["schemas"]["OperatorProfileUpdatedEvent"] | components["schemas"]["OperatorJoinedCallEvent"] | components["schemas"]["OperatorLeftCallEvent"] | components["schemas"]["OperatorModeChangedEvent"] | components["schemas"]["OperatorWrapUpEvent"] | components["schemas"]["WorkspaceMemberAddedEvent"] | components["schemas"]["WorkspaceMemberRoleUpdatedEvent"] | components["schemas"]["WorkspaceInvitationSentEvent"] | components["schemas"]["WorkspaceInvitationAcceptedEvent"];
         /** WorldDashboardResponse */
         WorldDashboardResponse: {
             /** Avg Confidence */
@@ -29515,45 +27955,6 @@ export interface operations {
             };
         };
     };
-    "collect-design-agent-session": {
-        parameters: {
-            query: {
-                session_id: string;
-                cwd: string;
-                reason: string;
-                /** @description Optional, unverified user identity reported by the client. */
-                user?: string | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/x-ndjson": string;
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DesignAgentSessionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "create-my-workspace": {
         parameters: {
             query?: never;
@@ -29818,6 +28219,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Revocation could not be queued; retry the request. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     "archive-workspace": {
@@ -30031,242 +28439,6 @@ export interface operations {
             };
         };
     };
-    list_agent_definitions_v1__workspace_id__agent_definitions_get: {
-        parameters: {
-            query?: {
-                framework?: ("claude-agent-sdk" | "openai-agents") | null;
-                include_archived?: boolean;
-                limit?: number;
-                continuation_token?: unknown;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentDefinitionListResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    register_agent_definition_v1__workspace_id__agent_definitions_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterAgentDefinitionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegisterAgentDefinitionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    validate_agent_definition_v1__workspace_id__agent_definitions_validate_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterAgentDefinitionRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ValidateAgentDefinitionResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_agent_definition_v1__workspace_id__agent_definitions__definition_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                definition_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentDefinitionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    archive_agent_definition_v1__workspace_id__agent_definitions__definition_id__delete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                definition_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_agent_definition_version_v1__workspace_id__agent_definitions__definition_id__versions__version__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                definition_id: string;
-                version: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentDefinitionVersionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    create_agent_run_v1__workspace_id__agent_runs_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["CreateAgentRunRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CreateAgentRunResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     get_harness_context_v1__workspace_id__agent_runs_harness_context_get: {
         parameters: {
             query: {
@@ -30288,38 +28460,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HarnessContext"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_agent_run_v1__workspace_id__agent_runs__run_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                run_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AgentRunDetail"];
                 };
             };
             /** @description Validation Error */
@@ -35704,38 +33844,6 @@ export interface operations {
             };
         };
     };
-    "get-external-write-proposal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                proposal_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ExternalWriteProposal"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "approve-external-write-proposal": {
         parameters: {
             query?: never;
@@ -35862,52 +33970,6 @@ export interface operations {
                 };
             };
             /** @description Invalid bundle format. */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "fhir-import-stream": {
-        parameters: {
-            query?: {
-                source?: string;
-                source_system?: string | null;
-                data_source_id?: string | null;
-                /** @description Skip identical re-uploads via content-hash dedup */
-                dedup?: boolean;
-                /** @description Use 'error' to report unsupported resources, or 'skip' to skip them without errors. */
-                unsupported_resource_policy?: components["schemas"]["FhirUnsupportedResourcePolicy"];
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FhirImportResponse"];
-                };
-            };
-            /** @description Stream exceeded line cap. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -38401,41 +36463,6 @@ export interface operations {
             };
         };
     };
-    list_anomaly_alerts_v1__workspace_id__m42_anomaly_alerts_get: {
-        parameters: {
-            query?: {
-                severity?: ("high" | "medium" | "low") | null;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AnomalyAlertResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     list_catalog_v1__workspace_id__m42_catalog_get: {
         parameters: {
             query?: never;
@@ -38454,72 +36481,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["M42CatalogResponse"];
-                };
-            };
-        };
-    };
-    describe_table_v1__workspace_id__m42_catalog__table__columns_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                table: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ColumnsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    sample_table_v1__workspace_id__m42_catalog__table__sample_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-                table: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SampleResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -38580,96 +36541,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ClusterSummaryResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_district_metrics_v1__workspace_id__m42_district_metrics_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DistrictMetricsResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_features_v1__workspace_id__m42_features_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeaturesResponse"];
-                };
-            };
-        };
-    };
-    feature_distribution_v1__workspace_id__m42_features_distribution_get: {
-        parameters: {
-            query: {
-                feature: string;
-                bins?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FeatureDistributionResponse"];
                 };
             };
             /** @description Validation Error */
@@ -38912,40 +36783,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PatientNoteResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_positive_signals_v1__workspace_id__m42_positive_signals_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PositiveSignalResponse"];
                 };
             };
             /** @description Validation Error */
@@ -39751,56 +37588,6 @@ export interface operations {
             };
         };
     };
-    "operator-access-token": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                operator_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["AccessTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AccessTokenResponse"];
-                };
-            };
-            /** @description Operator or active call not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Browser audio not configured or voice agent unavailable. */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "create-operator-briefing": {
         parameters: {
             query?: never;
@@ -40564,38 +38351,6 @@ export interface operations {
             };
         };
     };
-    "get-production-eval-definition": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                definition_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ProductionEvalDefinition"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "delete-production-eval-definition": {
         parameters: {
             query?: never;
@@ -40811,107 +38566,7 @@ export interface operations {
             };
         };
     };
-    "download-recording-file": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                call_sid: string;
-                filename: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Invalid filename */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Recording file not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Call recording not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-recording-metadata": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                call_sid: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecordingMetadataResponse"];
-                };
-            };
-            /** @description Recording not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Call recording not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    "get-recording-urls": {
+    "get-recording": {
         parameters: {
             query?: never;
             header?: never;
@@ -40932,13 +38587,6 @@ export interface operations {
                     "application/json": components["schemas"]["RecordingUrlsResponse"];
                 };
             };
-            /** @description Recording not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -40947,13 +38595,6 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
-            };
-            /** @description Call recording not configured */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
             };
         };
     };
@@ -41202,42 +38843,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Run"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    mint_run_access_token_v1__workspace_id__runs__run_id__access_token_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                run_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RunAccessTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RunAccessTokenResponse"];
                 };
             };
             /** @description Validation Error */
@@ -42103,113 +39708,6 @@ export interface operations {
             };
         };
     };
-    "list-conversation-starters": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                service_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ConversationStartersRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ConversationStartersResponse"];
-                };
-            };
-            /** @description Missing or invalid API key. */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Insufficient permissions. */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Not found. */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "text-turn": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                service_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TextTurnRequest"];
-            };
-        };
-        responses: {
-            /** @description Agent text reply */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TextTurnResponse"];
-                };
-            };
-            /** @description Agent elected silence */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Concurrent text turn in progress for this speaker */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "resolve-service-tools": {
         parameters: {
             query?: never;
@@ -42723,38 +40221,6 @@ export interface operations {
             };
         };
     };
-    "get-form-template": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-                template_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FormTemplate-Output"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "resolve-form-template": {
         parameters: {
             query?: never;
@@ -43184,63 +40650,6 @@ export interface operations {
             };
         };
     };
-    "get-topic-modeling-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicModelingSettingsResponse"];
-                };
-            };
-        };
-    };
-    "update-topic-modeling-settings": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TopicModelingSettingsRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TopicModelingSettingsUpdateResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "get-voice-settings": {
         parameters: {
             query?: never;
@@ -43409,41 +40818,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BridgeResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    "simulation-bridge-plan": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BridgePlanRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BridgePlanResponse"];
                 };
             };
             /** @description Validation Error */
@@ -43827,39 +41201,6 @@ export interface operations {
             };
         };
     };
-    "get-simulation-runs-summary": {
-        parameters: {
-            query?: {
-                service_id?: string | null;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SimulationRunSummaryResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     "get-simulation-run": {
         parameters: {
             query?: never;
@@ -43953,13 +41294,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationSessionResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44171,13 +41530,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationSessionResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44206,13 +41583,31 @@ export interface operations {
                     "application/json": components["schemas"]["RecommendResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44241,13 +41636,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationStepResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44273,13 +41686,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationSnapshotResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44343,13 +41774,31 @@ export interface operations {
                     };
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44375,13 +41824,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationIntelligenceResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -44481,13 +41948,31 @@ export interface operations {
                     "application/json": components["schemas"]["SimulationStepResponse"];
                 };
             };
-            /** @description Validation Error */
+            /** @description Simulation session or configuration not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Request validation or simulation configuration error */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
+                };
+            };
+            /** @description Voice agent not reachable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SimulationProxyErrorResponse"];
                 };
             };
         };
@@ -46531,7 +44016,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Service already has a different use case bound for this channel. */
+            /** @description Service already has a different use case bound for this channel, or the use case is bound in another workspace. */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -46540,20 +44025,6 @@ export interface operations {
             };
             /** @description Unsupported use case channel. */
             422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager unavailable. */
-            502: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Channel manager timed out. */
-            504: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -47566,10 +45037,7 @@ export interface operations {
     };
     "entity-stats": {
         parameters: {
-            query?: {
-                /** @description Filter by entity type */
-                entity_type?: string | null;
-            };
+            query?: never;
             header?: never;
             path: {
                 workspace_id: string;
@@ -47593,15 +45061,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
             };
         };
     };

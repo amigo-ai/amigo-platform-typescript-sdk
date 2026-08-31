@@ -43,7 +43,6 @@ import { AgentRunsResource } from './resources/agent-runs.js'
 export { AGENT_RUN_FRAMEWORKS, AGENT_RUN_FRAMEWORK_LABELS } from './resources/agent-runs.js'
 export type { AgentRunFramework } from './resources/agent-runs.js'
 import { RunsResource } from './resources/runs.js'
-import { AgentDefinitionsResource } from './resources/agent-definitions.js'
 import { SkillsResource } from './resources/skills.js'
 import { ActionsResource } from './resources/actions.js'
 import { OperatorsResource } from './resources/operators.js'
@@ -196,7 +195,6 @@ export class AmigoClient {
   readonly agents!: AgentsResource
   readonly agentRuns!: AgentRunsResource
   readonly runs!: RunsResource
-  readonly agentDefinitions!: AgentDefinitionsResource
   /** @deprecated Use `actions` instead */
   readonly skills!: SkillsResource
   readonly actions!: ActionsResource
@@ -465,7 +463,6 @@ export class AmigoClient {
     mutable.agents = new AgentsResource(client, workspaceId)
     mutable.agentRuns = new AgentRunsResource(client, workspaceId)
     mutable.runs = new RunsResource(client, workspaceId)
-    mutable.agentDefinitions = new AgentDefinitionsResource(client, workspaceId)
     mutable.skills = new SkillsResource(client, workspaceId)
     mutable.actions = new ActionsResource(client, workspaceId)
     mutable.operators = new OperatorsResource(client, workspaceId)
