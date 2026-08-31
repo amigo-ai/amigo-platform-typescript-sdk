@@ -45,7 +45,7 @@ export const STT_PROVIDERS = sttProviders satisfies ExhaustiveProviderList<
   typeof sttProviders
 >
 
-const ttsProviders = ['cartesia', 'elevenlabs', 'groq'] as const satisfies readonly TtsProvider[]
+const ttsProviders = ['cartesia', 'elevenlabs'] as const satisfies readonly TtsProvider[]
 export const TTS_PROVIDERS = ttsProviders satisfies ExhaustiveProviderList<
   TtsProvider,
   typeof ttsProviders

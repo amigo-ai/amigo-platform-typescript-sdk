@@ -858,8 +858,7 @@ await client.audit.createExport({ start_date: '2026-01-01', end_date: '2026-03-3
 ### Recordings
 
 ```typescript
-const urls = await client.recordings.getUrls('call-sid')
-const metadata = await client.recordings.getMetadata('call-sid')
+const urls = await client.recordings.get('call-sid')
 ```
 
 ### Functions (UC Functions)

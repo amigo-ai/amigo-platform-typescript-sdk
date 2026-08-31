@@ -117,7 +117,6 @@ const client = new AmigoClient({
     [`POST ${BASE}/simulations/runs/${RUN_ID}/complete`]: () => Response.json({ ok: true }),
     [`POST ${BASE}/simulations/runs/${RUN_ID}/sessions`]: () => Response.json(SESSION_FIXTURE),
 
-    [`POST ${BASE}/simulations/bridge/plan`]: () => Response.json({ candidates: [] }),
     [`POST ${BASE}/simulations/bridge`]: () => Response.json({ run_id: RUN_ID }),
 
     [`GET ${BASE}/simulations/services/${SERVICE_ID}/graph`]: () => Response.json({ nodes: [] }),
@@ -222,12 +221,7 @@ describe('SimulationsResource', () => {
   })
 
   describe('bridge', () => {
-    it('plans and runs a bridge', async () => {
-      expect(
-        await client.simulations.bridge.plan(
-          {} as Parameters<typeof client.simulations.bridge.plan>[0],
-        ),
-      ).toMatchObject({ candidates: [] })
+    it('runs a bridge', async () => {
       expect(
         await client.simulations.bridge.run(
           {} as Parameters<typeof client.simulations.bridge.run>[0],

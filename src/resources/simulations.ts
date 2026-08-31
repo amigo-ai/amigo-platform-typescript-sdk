@@ -179,19 +179,9 @@ export class SimulationsResource extends WorkspaceScopedResource {
 
   /**
    * Bridge — convert recorded production calls into simulation scenarios so
-   * they can be replayed against a candidate version. ``plan`` returns a
-   * preview of which calls would be selected; ``run`` executes the plan.
+   * they can be replayed against a candidate version.
    */
   readonly bridge = {
-    /** Plan a bridge run — returns the candidate scenarios without executing */
-    plan: async (body: components['schemas']['BridgePlanRequest']) =>
-      extractData(
-        await this.client.POST('/v1/{workspace_id}/simulations/bridge/plan', {
-          params: { path: { workspace_id: this.workspaceId } },
-          body,
-        }),
-      ),
-
     /** Execute a bridge run and return the resulting run handle */
     run: async (body: components['schemas']['BridgeRequest']) =>
       extractData(

@@ -111,15 +111,6 @@ export class OperatorsResource extends WorkspaceScopedResource {
     )
   }
 
-  async getAccessToken(operatorId: string, body: components['schemas']['AccessTokenRequest']) {
-    return extractData(
-      await this.client.POST('/v1/{workspace_id}/operators/{operator_id}/access-token', {
-        params: { path: { workspace_id: this.workspaceId, operator_id: operatorId } },
-        body,
-      }),
-    )
-  }
-
   async joinCall(operatorId: string, body: components['schemas']['JoinCallRequest']) {
     return extractData(
       await this.client.POST('/v1/{workspace_id}/operators/{operator_id}/join-call', {

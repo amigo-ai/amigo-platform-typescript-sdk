@@ -93,14 +93,6 @@ const client = new AmigoClient({
     [`POST ${BASE}/operators/${OPERATOR_ID}/leave-call`]: () =>
       Response.json({ operator_id: OPERATOR_ID, call_sid: CALL_SID, status: 'disconnected' }),
 
-    [`POST ${BASE}/operators/${OPERATOR_ID}/access-token`]: () =>
-      Response.json({
-        token: 'eyJhbGciOiJSUzI1NiJ9.test',
-        identity: OPERATOR_ID,
-        conference_sid: 'CF1234567890abcdef1234567890abcdef',
-        connect_params: {},
-      }),
-
     [`GET ${BASE}/operators/escalations`]: () =>
       Response.json({ items: [], has_more: false, continuation_token: null }),
 
@@ -152,14 +144,6 @@ describe('OperatorsResource', () => {
     const result = await client.operators.joinCall(OPERATOR_ID, { call_sid: CALL_SID } as never)
     expect(result.mode).toBe('listen')
     expect(result.participant_call_sid).toBe('CA0987654321abcdef1234567890abcdef')
-  })
-
-  it('gets an access token', async () => {
-    const result = await client.operators.getAccessToken(OPERATOR_ID, {
-      scope: 'operator',
-    } as never)
-    expect(result.token).toContain('eyJ')
-    expect(result.identity).toBe(OPERATOR_ID)
   })
 
   it('lists escalations', async () => {
