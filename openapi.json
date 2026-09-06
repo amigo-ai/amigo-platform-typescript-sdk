@@ -18313,7 +18313,7 @@
         "type": "object"
       },
       "FleetStatusResponse": {
-        "description": "Live Agones fleet capacity (workspace-global).\n\n``headroom`` = remaining isolated-unit slots (``max_replicas - allocated``);\n``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.\nThe counts span the whole fleet (one fleet serves every workspace) \u2014 this is NOT\nper-workspace. ``fleet``/``namespace`` echo which fleet was read (voice per-call\nfleet, or the tool-runner background-tool fleet via ``?fleet=tool-runner``).",
+        "description": "Live Agones fleet capacity (workspace-global).\n\n``headroom`` = remaining isolated-unit slots (``max_replicas - allocated``);\n``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.\nThe counts span the whole fleet (one fleet serves every workspace) \u2014 this is NOT\nper-workspace. ``fleet``/``namespace`` echo which fleet was read.",
         "properties": {
           "allocated": {
             "title": "Allocated",
@@ -69995,7 +69995,7 @@
     },
     "/v1/{workspace_id}/sessions/fleet-status": {
       "get": {
-        "description": "Live Agones fleet capacity: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. `fleet=voice` (default) reads the per-call voice fleet; `fleet=tool-runner` reads the isolated background-tool fleet. Workspace-GLOBAL \u2014 one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.",
+        "description": "Live Agones fleet capacity for the per-call voice fleet: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. Workspace-GLOBAL \u2014 one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.",
         "operationId": "get_fleet_status_v1__workspace_id__sessions_fleet_status_get",
         "parameters": [
           {
@@ -70005,20 +70005,6 @@
             "schema": {
               "format": "uuid",
               "title": "Workspace Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "fleet",
-            "required": false,
-            "schema": {
-              "default": "voice",
-              "enum": [
-                "voice",
-                "tool-runner"
-              ],
-              "title": "Fleet",
               "type": "string"
             }
           }
@@ -70033,16 +70019,6 @@
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "summary": "Agones fleet capacity status",
