@@ -5128,7 +5128,7 @@ export interface paths {
         };
         /**
          * Agones fleet capacity status
-         * @description Live Agones fleet capacity: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. `fleet=voice` (default) reads the per-call voice fleet; `fleet=tool-runner` reads the isolated background-tool fleet. Workspace-GLOBAL — one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.
+         * @description Live Agones fleet capacity for the per-call voice fleet: Ready/Allocated/total GameServers plus headroom against the maxReplicas ceiling. Workspace-GLOBAL — one fleet serves every workspace, so the path workspace_id is only the auth anchor, never a data filter. Operator-only.
          */
         get: operations["get_fleet_status_v1__workspace_id__sessions_fleet_status_get"];
         put?: never;
@@ -14682,8 +14682,7 @@ export interface components {
          *     ``headroom`` = remaining isolated-unit slots (``max_replicas - allocated``);
          *     ``max_replicas``/``headroom`` are null when the ceiling isn't configured upstream.
          *     The counts span the whole fleet (one fleet serves every workspace) — this is NOT
-         *     per-workspace. ``fleet``/``namespace`` echo which fleet was read (voice per-call
-         *     fleet, or the tool-runner background-tool fleet via ``?fleet=tool-runner``).
+         *     per-workspace. ``fleet``/``namespace`` echo which fleet was read.
          */
         FleetStatusResponse: {
             /** Allocated */
@@ -39946,9 +39945,7 @@ export interface operations {
     };
     get_fleet_status_v1__workspace_id__sessions_fleet_status_get: {
         parameters: {
-            query?: {
-                fleet?: "voice" | "tool-runner";
-            };
+            query?: never;
             header?: never;
             path: {
                 workspace_id: string;
@@ -39964,15 +39961,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FleetStatusResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
