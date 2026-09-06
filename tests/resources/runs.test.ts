@@ -37,24 +37,56 @@ const client = new AmigoClient({
     [`GET ${BASE}/runs`]: () =>
       Response.json({
         items: [
-          { run_id: RUN_ID, workspace_id: TEST_WORKSPACE_ID, kind: 'framework', status: 'completed', framework: 'claude-agent-sdk', started_at: '2026-07-01T12:00:00Z' },
+          {
+            run_id: RUN_ID,
+            workspace_id: TEST_WORKSPACE_ID,
+            kind: 'framework',
+            status: 'completed',
+            framework: 'claude-agent-sdk',
+            started_at: '2026-07-01T12:00:00Z',
+          },
         ],
         has_more: true,
         continuation_token: 50,
       }),
     [`GET ${BASE}/runs/summary`]: () =>
       Response.json({
-        total: 10, live: 3, running: 2, paused: 1, completed: 5, failed: 1, timed_out: 1,
-        by_status: { completed: 5 }, by_kind: { conversation: 7, framework: 3 },
+        total: 10,
+        live: 3,
+        running: 2,
+        paused: 1,
+        completed: 5,
+        failed: 1,
+        timed_out: 1,
+        by_status: { completed: 5 },
+        by_kind: { conversation: 7, framework: 3 },
       }),
     [`GET ${BASE}/runs/${RUN_ID}`]: () =>
-      Response.json({ run_id: RUN_ID, workspace_id: TEST_WORKSPACE_ID, kind: 'framework', status: 'completed', framework: 'claude-agent-sdk', started_at: '2026-07-01T12:00:00Z' }),
+      Response.json({
+        run_id: RUN_ID,
+        workspace_id: TEST_WORKSPACE_ID,
+        kind: 'framework',
+        status: 'completed',
+        framework: 'claude-agent-sdk',
+        started_at: '2026-07-01T12:00:00Z',
+      }),
     [`GET ${BASE}/runs/${RUN_ID}/trajectory`]: () =>
-      Response.json({ steps: [{ seq: 0, kind: 'perception' }, { seq: 1, kind: 'tool', tool_name: 'lookup' }], truncated: false }),
+      Response.json({
+        steps: [
+          { seq: 0, kind: 'perception' },
+          { seq: 1, kind: 'tool', tool_name: 'lookup' },
+        ],
+        truncated: false,
+      }),
     [`POST ${BASE}/runs/${RUN_ID}/guidance`]: () =>
       Response.json({ status: 'delivered', run_id: RUN_ID }),
     [`POST ${BASE}/runs/${RUN_ID}/takeover`]: () =>
-      Response.json({ run_id: RUN_ID, mode: 'takeover', participant_call_sid: 'CA1', conference_sid: 'CF1' }),
+      Response.json({
+        run_id: RUN_ID,
+        mode: 'takeover',
+        participant_call_sid: 'CA1',
+        conference_sid: 'CF1',
+      }),
   }),
 })
 
