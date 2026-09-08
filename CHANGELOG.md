@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.108.0] - 2026-09-08
+
+### Improvements
+
+- fix!: sync SDK types to platform main (f04e5c7b7) (#450)
+
+### Bug Fixes
+
+- match fleet status to the supported voice-only contract (#451)
+
+### Maintenance
+
+- remove the automated PR reviewer (#449)
+
 ## [0.107.0] - 2026-08-11
 
 ### Improvements
