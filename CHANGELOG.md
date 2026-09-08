@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.108.1] - 2026-09-08
+
+### Security
+
+- refresh secure tooling and public contributor setup (#455)
+
+### Maintenance
+
+- recover tagged releases through trusted publishing (#453)
+
 ## [0.108.0] - 2026-09-08
 
 ### Improvements
