@@ -7,6 +7,7 @@
  */
 
 import { AmigoError, AuthenticationError, NetworkError, RateLimitError } from './errors.js'
+import { trimTrailingSlashes } from './url.js'
 
 // --- Types ---
 
@@ -407,7 +408,7 @@ async function resolveWorkspaceFromMulti(
 }
 
 export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Promise<AuthResult> {
-  const baseUrl = (options.identityBaseUrl ?? DEFAULT_IDENTITY_URL).replace(/\/+$/, '')
+  const baseUrl = trimTrailingSlashes(options.identityBaseUrl ?? DEFAULT_IDENTITY_URL)
   const fetchFn = options.fetch ?? globalThis.fetch
 
   const issuance = await requestDeviceCode(
@@ -518,7 +519,7 @@ export class TokenManager {
 
   constructor(config: TokenManagerConfig = {}) {
     this._storage = config.storage ?? new FileTokenStorage()
-    this._baseUrl = (config.identityBaseUrl ?? DEFAULT_IDENTITY_URL).replace(/\/+$/, '')
+    this._baseUrl = trimTrailingSlashes(config.identityBaseUrl ?? DEFAULT_IDENTITY_URL)
     this._fetch = config.fetch ?? globalThis.fetch
   }
 

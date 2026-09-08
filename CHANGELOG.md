@@ -673,14 +673,14 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [amigo-ai/platform#2535](https://github.com/amigo-ai/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
 
-| Event | Before (0.32.0) | After (0.33.0) |
-| --- | --- | --- |
-| `ToolCallStartedEvent` | `tool_input?: Record<string, unknown> \| null` | `input?: Record<string, unknown> \| null` |
-| `ToolCallStartedEvent` | `call_id?: string \| null` | `call_id: string` (now required + bounded) |
-| `ToolCallStartedEvent` | `tool_name: string` | `tool_name: string` (max 256) |
-| `ToolCallCompletedEvent` | `error?: string \| null` | `error_message?: string \| null` |
-| `ToolCallCompletedEvent` | `call_id?: string \| null` | `call_id: string` (now required + bounded) |
-| `ToolCallCompletedEvent` | `tool_name: string` | `tool_name: string` (max 256) |
+| Event                    | Before (0.32.0)                                | After (0.33.0)                             |
+| ------------------------ | ---------------------------------------------- | ------------------------------------------ |
+| `ToolCallStartedEvent`   | `tool_input?: Record<string, unknown> \| null` | `input?: Record<string, unknown> \| null`  |
+| `ToolCallStartedEvent`   | `call_id?: string \| null`                     | `call_id: string` (now required + bounded) |
+| `ToolCallStartedEvent`   | `tool_name: string`                            | `tool_name: string` (max 256)              |
+| `ToolCallCompletedEvent` | `error?: string \| null`                       | `error_message?: string \| null`           |
+| `ToolCallCompletedEvent` | `call_id?: string \| null`                     | `call_id: string` (now required + bounded) |
+| `ToolCallCompletedEvent` | `tool_name: string`                            | `tool_name: string` (max 256)              |
 
 New optional metadata fields on both events: `parent_call_id`, `integration_name`, `endpoint_name`, `protocol`. These are additive — existing readers ignore them.
 
