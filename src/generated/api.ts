@@ -3319,6 +3319,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/intake/sources/{source_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Delete Intake Source
+         * @description Remove a source registration without deleting upstream files or imported data.
+         */
+        delete: operations["delete_intake_source_v1__workspace_id__intake_sources__source_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/intake/sources/{source_id}/sync": {
         parameters: {
             query?: never;
@@ -26187,7 +26207,7 @@ export interface components {
             service_id: string | null;
             /**
              * Service Name
-             * @description Unattributed for a null service ID; otherwise null because facts do not retain service names.
+             * @description Service name at the latest metadata refresh; null if unavailable. Unattributed for a null service ID.
              */
             service_name: string | null;
             /** Uncached Input Tokens */
@@ -36386,6 +36406,64 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    delete_intake_source_v1__workspace_id__intake_sources__source_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+                source_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Write permission required */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Source not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Source operation in progress */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Coordination unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
