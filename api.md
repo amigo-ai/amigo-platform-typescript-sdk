@@ -223,6 +223,10 @@ All workspace-scoped resources also expose `withOptions(options)`.
 - `getSyncHistory`
 - `triggerSync`
 
+### `intake`
+
+- `deleteSource`
+
 ### `world`
 
 - `listEntities`

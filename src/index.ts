@@ -51,6 +51,7 @@ import { TriggersResource } from './resources/triggers.js'
 import { ServicesResource } from './resources/services.js'
 import { ContextGraphsResource } from './resources/context-graphs.js'
 import { DataSourcesResource } from './resources/data-sources.js'
+import { IntakeResource } from './resources/intake.js'
 import { WorldResource } from './resources/world.js'
 import { CallsResource } from './resources/calls.js'
 import { ConversationsResource } from './resources/conversations.js'
@@ -204,6 +205,7 @@ export class AmigoClient {
   readonly services!: ServicesResource
   readonly contextGraphs!: ContextGraphsResource
   readonly dataSources!: DataSourcesResource
+  readonly intake!: IntakeResource
   readonly world!: WorldResource
   readonly calls!: CallsResource
   readonly conversations!: ConversationsResource
@@ -471,6 +473,7 @@ export class AmigoClient {
     mutable.services = new ServicesResource(client, workspaceId)
     mutable.contextGraphs = new ContextGraphsResource(client, workspaceId)
     mutable.dataSources = new DataSourcesResource(client, workspaceId)
+    mutable.intake = new IntakeResource(client, workspaceId)
     mutable.world = new WorldResource(client, workspaceId)
     mutable.calls = new CallsResource(client, workspaceId)
     mutable.conversations = new ConversationsResource(client, workspaceId, agentBaseUrl)

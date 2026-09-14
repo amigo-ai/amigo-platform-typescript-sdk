@@ -62316,6 +62316,65 @@
         ]
       }
     },
+    "/v1/{workspace_id}/intake/sources/{source_id}": {
+      "delete": {
+        "description": "Remove a source registration without deleting upstream files or imported data.",
+        "operationId": "delete_intake_source_v1__workspace_id__intake_sources__source_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "workspace_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Workspace Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "source_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Source Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Write permission required"
+          },
+          "404": {
+            "description": "Source not found"
+          },
+          "409": {
+            "description": "Source operation in progress"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "Coordination unavailable"
+          }
+        },
+        "summary": "Delete Intake Source",
+        "tags": [
+          "Intake"
+        ]
+      }
+    },
     "/v1/{workspace_id}/intake/sources/{source_id}/sync": {
       "post": {
         "operationId": "sync_intake_source_v1__workspace_id__intake_sources__source_id__sync_post",
