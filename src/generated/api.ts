@@ -1832,7 +1832,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/cost-to-serve/infrastructure": {
+    "/v1/{workspace_id}/cost": {
         parameters: {
             query?: never;
             header?: never;
@@ -1840,56 +1840,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Get apportioned infrastructure cost by component for a closed month
-         * @description Infrastructure cost to serve this workspace for a closed month.
-         *
-         *     **This is what Amigo pays Databricks to serve this workspace — not an amount owed
-         *     and not a contracted price.** Databricks compute and storage are pooled, so these
-         *     are usage-weighted **shares**
-         *     rather than metered quantities — a weaker claim than the LLM inference endpoint,
-         *     whose figures are this workspace's own tokens priced directly. Kept separate so
-         *     neither number inherits the other's caveats.
-         *
-         *     Sourced from the monthly cost-allocation ledger, which reconciles 100% of the
-         *     Databricks bill to zero residual. Available once the month's close job has run
-         *     (T+3). Components with no spend are omitted (no ``$0.00`` rows), and account-level
-         *     overhead is never attributed to a workspace.
-         *
-         *     Permissions: **Amigo staff only** (``require_amigo_admin``). Not available to
-         *     customer admins — this is Amigo's cost structure, not the customer's bill.
+         * Get workspace LLM cost
+         * @description Return Amigo-admin-only LLM cost for an inclusive date range from one complete published calculation. Omit `group_by` for workspace totals and service costs; use `group_by=model` to include each model's pricing status and applied rate records. The optional `service_id` filter is applied before aggregation.
          */
-        get: operations["get-infrastructure-cost"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/v1/{workspace_id}/cost-to-serve/llm-inference": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get LLM inference cost by model for a closed month
-         * @description LLM inference cost to serve this workspace in a closed month, by model.
-         *
-         *     **This is what Amigo pays LLM vendors to serve this workspace — not an amount owed
-         *     and not a contracted price.** Direct spend: the workspace's own tokens, priced per
-         *     call against vendor rates. Available once the month's close job has run.
-         *
-         *     ``cost_usd`` is null for a model with no rate card entry. That usage is real, so it
-         *     is reported with its token counts and excluded from ``total_cost_usd``, and
-         *     ``has_unpriced_usage`` flags that the total understates actual spend.
-         *
-         *     Permissions: **Amigo staff only** (``require_amigo_admin``). Not available to
-         *     customer admins — this is Amigo's cost structure, not the customer's bill.
-         */
-        get: operations["get-llm-inference-cost"];
+        get: operations["get-workspace-cost"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6677,6 +6631,86 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/v1/{workspace_id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get workspace LLM usage
+         * @description Return customer-visible LLM usage for an inclusive date range from one complete published calculation. Omit `group_by` for totals, daily usage, attribution, and service breakdowns; use `group_by=model` or `group_by=class` for those breakdowns. The optional `service_id` filter is applied before aggregation.
+         */
+        get: operations["get-workspace-usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/usage-cost/excluded": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get workspace usage excluded from production-classified totals
+         * @description Return simulation, playground, customer-test, Amigo-internal, and unresolved usage excluded from the customer's production-classified totals. The optional `service_id` filter is applied before aggregation.
+         */
+        get: operations["get-workspace-usage-cost-excluded"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/usage-cost/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get workspace usage and cost by model
+         * @description Return customer-visible production-classified LLM usage and calculated model-provider cost grouped by model. The optional `service_id` filter is applied before aggregation. Rates and money are decimal strings.
+         */
+        get: operations["get-workspace-usage-cost-models"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/usage-cost/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get workspace usage and cost overview
+         * @description Return customer-visible production-classified LLM usage and calculated model-provider cost for an inclusive UTC date range. The optional `service_id` filter is applied before aggregation. Unsupported v0 provenance and attribution fields remain null and successful responses report `data_status=partial`.
+         */
+        get: operations["get-workspace-usage-cost-overview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/v1/{workspace_id}/use-cases/{use_case_id}/service-binding": {
         parameters: {
             query?: never;
@@ -7912,6 +7946,69 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * AppliedRate
+         * @description Rate record applied to this model during the requested period.
+         */
+        AppliedRate: {
+            /**
+             * Cached Input Per Million
+             * @description USD per million cached input tokens; null if no cached rate applied.
+             */
+            cached_input_per_million: string | null;
+            /**
+             * Cached Rate Effective From
+             * @description Inclusive first usage date for the cached-input rate; null if no cached rate applied.
+             */
+            cached_rate_effective_from: string | null;
+            /**
+             * Cached Rate Effective To
+             * @description Exclusive end usage date for the cached-input rate; null if unbounded or no cached rate applied.
+             */
+            cached_rate_effective_to: string | null;
+            /**
+             * Input Per Million
+             * @description USD per million uncached input tokens, as a decimal string.
+             */
+            input_per_million: string;
+            /**
+             * Input Rate Effective From
+             * Format: date
+             * @description Inclusive first usage date for the input rate.
+             */
+            input_rate_effective_from: string;
+            /**
+             * Input Rate Effective To
+             * @description Exclusive end usage date for the input rate; null means no end date.
+             */
+            input_rate_effective_to: string | null;
+            /**
+             * Max Input Tokens
+             * @description Inclusive upper bound on per-request context input tokens; null means unbounded.
+             */
+            max_input_tokens: number | null;
+            /**
+             * Min Input Tokens
+             * @description Inclusive lower bound on per-request context input tokens for the input-rate band.
+             */
+            min_input_tokens: number;
+            /**
+             * Output Per Million
+             * @description USD per million output tokens, as a decimal string.
+             */
+            output_per_million: string;
+            /**
+             * Output Rate Effective From
+             * Format: date
+             * @description Inclusive first usage date for the output rate.
+             */
+            output_rate_effective_from: string;
+            /**
+             * Output Rate Effective To
+             * @description Exclusive end usage date for the output rate; null means no end date.
+             */
+            output_rate_effective_to: string | null;
         };
         /** ArchiveResponse */
         ArchiveResponse: {
@@ -9401,6 +9498,24 @@ export interface components {
             status: "active" | "superseded";
         };
         /**
+         * ClassUsage
+         * @description Usage attributed to one usage class.
+         */
+        ClassUsage: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /** Conversation Count */
+            conversation_count: number;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Request Count */
+            request_count: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /** Usage Class */
+            usage_class: string;
+        };
+        /**
          * ClientArtifact
          * @description A versioned JSON payload that a client can render as a product component.
          */
@@ -9728,24 +9843,6 @@ export interface components {
             retention_days: number | null;
             /** Total Credentials */
             total_credentials: number;
-        };
-        /** Component */
-        Component: {
-            /**
-             * Allocation
-             * @description How the cost was determined: 'shared' (this workspace's usage-weighted share of a pooled resource) or 'direct' (spend tagged to it outright)
-             */
-            allocation: string;
-            /**
-             * Component
-             * @description Infrastructure component: jobs_pipelines, model_serving, warehouse, lakebase, storage_egress, or other
-             */
-            component: string;
-            /**
-             * Cost Usd
-             * @description Cost in USD for this component
-             */
-            cost_usd: number;
         };
         /** CompoundEmotionEvent */
         CompoundEmotionEvent: {
@@ -10087,6 +10184,24 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * ContextKeySpec
+         * @description One key a conversation may supply as start-time context for a service.
+         *
+         *     The value is validated against ``type`` at conversation start; a tool can then
+         *     bind the key to one of its parameters (injected, hidden from the model).
+         */
+        ContextKeySpec: {
+            description: components["schemas"]["DescriptionString"];
+            key: components["schemas"]["SlugString"];
+            /** Required */
+            required: boolean;
+            /**
+             * Type
+             * @enum {string}
+             */
+            type: "string" | "number";
+        };
+        /**
          * ConversationApprovalRequest
          * @description An external user's decision on a parked, approval-gated write in their own conversation.
          */
@@ -10252,6 +10367,10 @@ export interface components {
         /** ConversationThreadRequest */
         ConversationThreadRequest: {
             channel_kind: components["schemas"]["ChannelKind"];
+            /** Context */
+            context?: {
+                [key: string]: string | number;
+            };
             /** Entity Id */
             entity_id?: string | null;
             provider: components["schemas"]["ProviderType"];
@@ -10411,6 +10530,81 @@ export interface components {
             to: string;
         };
         /**
+         * CostModelsResponse
+         * @description Cost grouped by model, returned for `group_by=model`.
+         */
+        CostModelsResponse: {
+            /**
+             * Calculation Run Id
+             * Format: uuid
+             * @description Immutable published calculation run selected for the entire range.
+             */
+            calculation_run_id: string;
+            /** Models */
+            models: components["schemas"]["ModelCost"][];
+            /** @description Inclusive requested date range. */
+            period: components["schemas"]["Period"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace whose usage or cost is reported.
+             */
+            workspace_id: string;
+        };
+        /**
+         * CostOverviewResponse
+         * @description Cost overview returned when `group_by` is omitted.
+         */
+        CostOverviewResponse: {
+            /**
+             * Calculation Run Id
+             * Format: uuid
+             * @description Immutable published calculation run selected for the entire range.
+             */
+            calculation_run_id: string;
+            /** @description Inclusive requested date range. */
+            period: components["schemas"]["Period"];
+            /**
+             * Services
+             * @description Services ordered by descending calculated cost.
+             */
+            services: components["schemas"]["ServiceCost"][];
+            totals: components["schemas"]["CostTotals"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace whose usage or cost is reported.
+             */
+            workspace_id: string;
+        };
+        CostResponse: components["schemas"]["CostOverviewResponse"] | components["schemas"]["CostModelsResponse"];
+        /**
+         * CostTotals
+         * @description Workspace cost totals for the requested period.
+         */
+        CostTotals: {
+            /**
+             * Calculated Cost Usd
+             * @description Priced subtotal rounded to cents; excludes unpriced usage. Zero for no usage, null if none can be priced.
+             */
+            calculated_cost_usd: string | null;
+            /**
+             * Cost Per Conversation Usd
+             * @description Priced linked cost divided by distinct priced linked conversations; cents, or null without a denominator.
+             */
+            cost_per_conversation_usd: string | null;
+            /**
+             * Has Unpriced Usage
+             * @description Whether any usage in the period could not be priced.
+             */
+            has_unpriced_usage: boolean;
+            /**
+             * Unpriced Tokens
+             * @description Tokens excluded from calculated cost because no rate applied.
+             */
+            unpriced_tokens: number;
+        };
+        /**
          * Counterfactual
          * @description An alternative action that would have meaningfully changed the call outcome.
          */
@@ -10537,6 +10731,13 @@ export interface components {
         CreateConversationRequest: {
             /** @default web */
             channel?: components["schemas"]["ChannelKind"];
+            /**
+             * Context
+             * @description Start-time context (key-value pairs) for the conversation. Validated against the owning service's accepted_context schema: unknown keys, missing required keys, or type mismatches are rejected with 422. Tools may bind individual keys to their parameters.
+             */
+            context?: {
+                [key: string]: number | string;
+            };
             /** Entity Id */
             entity_id?: string | null;
             /**
@@ -10649,6 +10850,13 @@ export interface components {
          */
         CreateOutboundCallRequest: {
             /**
+             * Context
+             * @description Start-time key-value context; validated against the service's accepted_context and injected into bound tool params.
+             */
+            context?: {
+                [key: string]: string | number;
+            };
+            /**
              * Derived From Call Sid
              * @description Prior call_sid if this is a callback from a previous call.
              */
@@ -10683,11 +10891,6 @@ export interface components {
             phone_to: components["schemas"]["PhoneE164"];
             /** @description Why the call is being made (e.g. appointment_reminder, follow_up, lab_results). */
             reason: components["schemas"]["NameString"];
-            /**
-             * Service Id
-             * @description Service ID for the voice agent to use.
-             */
-            service_id?: string | null;
             /**
              * System Prompt
              * @description Optional system prompt override for this call.
@@ -10789,6 +10992,8 @@ export interface components {
         };
         /** CreateServiceRequest */
         CreateServiceRequest: {
+            /** Accepted Context */
+            accepted_context?: components["schemas"]["ContextKeySpec"][];
             /**
              * Agent Id
              * Format: uuid
@@ -11292,6 +11497,23 @@ export interface components {
              * @description ISO-8601 date (YYYY-MM-DD)
              */
             date: string;
+        };
+        /**
+         * DailyUsage
+         * @description Token usage for one calendar date.
+         */
+        DailyUsage: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Usage Date
+             * Format: date
+             */
+            usage_date: string;
         };
         /** DashboardDefinitionResponse */
         DashboardDefinitionResponse: {
@@ -15366,31 +15588,6 @@ export interface components {
             /** Name */
             name: string;
         };
-        /**
-         * InfrastructureCostResponse
-         * @description Per-component infrastructure cost for one close month.
-         */
-        InfrastructureCostResponse: {
-            /**
-             * Close Month
-             * Format: date
-             * @description First day of the closed month this breakdown covers
-             */
-            close_month: string;
-            /** Components */
-            components: components["schemas"]["Component"][];
-            /**
-             * Currency
-             * @description Currency of every amount in this response
-             * @default USD
-             */
-            currency?: string;
-            /**
-             * Total Cost Usd
-             * @description Amigo's cost to serve this workspace, not an amount owed. Sum of all components for the month
-             */
-            total_cost_usd: number;
-        };
         /** InjectRequest */
         InjectRequest: {
             /**
@@ -16038,36 +16235,6 @@ export interface components {
             suites: components["schemas"]["SimulationSuiteResponse"][];
         };
         /**
-         * LlmInferenceCostResponse
-         * @description Per-model LLM inference cost for one close month.
-         */
-        LlmInferenceCostResponse: {
-            /**
-             * Close Month
-             * Format: date
-             * @description First day of the closed month this breakdown covers
-             */
-            close_month: string;
-            /**
-             * Currency
-             * @description Currency of every amount in this response
-             * @default USD
-             */
-            currency?: string;
-            /**
-             * Has Unpriced Usage
-             * @description True when some usage could not be priced, so total_cost_usd understates actual spend
-             */
-            has_unpriced_usage: boolean;
-            /** Models */
-            models: components["schemas"]["Model"][];
-            /**
-             * Total Cost Usd
-             * @description Amigo's cost to serve this workspace, not an amount owed. Sum of priced models; excludes any model where is_priced is false
-             */
-            total_cost_usd: number;
-        };
-        /**
          * LookupResponse
          * @description Autocompletion results for a surface lookup field.
          */
@@ -16611,29 +16778,39 @@ export interface components {
             /** Updated */
             updated: number;
         };
-        /** Model */
-        Model: {
-            /** Cached Tokens */
-            cached_tokens: number;
+        /**
+         * ModelCost
+         * @description Cost and pricing status for one model.
+         */
+        ModelCost: {
             /**
-             * Cost Usd
-             * @description Token cost in USD, priced per call against the tiered rate card. null when this model has no rate card entry — usage is real but not yet priceable, which is why it is reported rather than omitted or shown as 0.
+             * Applied Rates
+             * @description Effective-date and context-band rates used for this model.
              */
-            cost_usd: number | null;
-            /** Input Tokens */
-            input_tokens: number;
+            applied_rates: components["schemas"]["AppliedRate"][];
+            /**
+             * Calculated Cost Usd
+             * @description Model priced subtotal rounded to cents; can be partial when is_priced is false. Null if none is priced.
+             */
+            calculated_cost_usd: string | null;
+            /**
+             * Cost Share
+             * @description Model priced subtotal / all model priced subtotals in the selected scope, after any service filter.
+             *     Includes partial subtotals; null when this model has no priced cost or the denominator is zero.
+             */
+            cost_share: number | null;
             /**
              * Is Priced
-             * @description False when the model has no rate card entry for this month
+             * @description Whether every contributing usage row for this model is priced; false can coexist with a priced subtotal.
              */
             is_priced: boolean;
+            /** Model Id */
+            model_id: string;
             /**
-             * Model
-             * @description Model identifier, e.g. claude-sonnet-5
+             * Unpriced Reason
+             * @description One reason contributing usage could not be priced; null when all usage is priced.
              */
-            model: string;
-            /** Output Tokens */
-            output_tokens: number;
+            unpriced_reason: string | null;
         };
         /** ModelRegistryResponse */
         ModelRegistryResponse: {
@@ -16671,6 +16848,29 @@ export interface components {
             version?: string | null;
             /** Workspace Id */
             workspace_id: string | "labs";
+        };
+        /**
+         * ModelUsage
+         * @description Usage attributed to one model and provider.
+         */
+        ModelUsage: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /**
+             * Calls Per Conversation
+             * @description This model's linked requests / its distinct linked conversations in the selected scope; null if none.
+             */
+            calls_per_conversation: number | null;
+            /** Model Id */
+            model_id: string;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Provider */
+            provider: string | null;
+            /** Request Count */
+            request_count: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
         };
         NameString: string;
         /** NarrativeUpdatedEvent */
@@ -18126,6 +18326,22 @@ export interface components {
              * Format: uuid
              */
             workspace_id: string;
+        };
+        /**
+         * Period
+         * @description Inclusive calendar-date range covered by the report.
+         */
+        Period: {
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
         };
         /**
          * PermissionCatalogResponse
@@ -20166,6 +20382,8 @@ export interface components {
          * @description A service links an agent + context graph + version sets.
          */
         Service: {
+            /** Accepted Context */
+            accepted_context?: components["schemas"]["ContextKeySpec"][];
             /**
              * Agent Id
              * Format: uuid
@@ -20260,6 +20478,28 @@ export interface components {
             workspace_id: string;
         };
         /**
+         * ServiceCost
+         * @description Cost attributed to one service.
+         */
+        ServiceCost: {
+            /**
+             * Calculated Cost Usd
+             * @description This service's priced subtotal rounded to cents; excludes unpriced usage, null if none can be priced.
+             */
+            calculated_cost_usd: string | null;
+            /**
+             * Cost Share
+             * @description Service priced subtotal / total priced cost in the selected scope, after any service filter.
+             *     Null when the service has no priced cost or the denominator is zero or unavailable.
+             */
+            cost_share: number | null;
+            /**
+             * Service Id
+             * @description Service identifier, or null for cost that could not be attributed.
+             */
+            service_id: string | null;
+        };
+        /**
          * ServiceForwardingConfig
          * @description Per-service call-forwarding destination + transfer mechanism.
          *
@@ -20285,6 +20525,8 @@ export interface components {
         };
         /** ServiceResponse */
         ServiceResponse: {
+            /** Accepted Context */
+            accepted_context?: components["schemas"]["ContextKeySpec"][];
             /**
              * Agent Id
              * Format: uuid
@@ -20360,6 +20602,27 @@ export interface components {
             key: string;
             /** Value */
             value?: string | null;
+        };
+        /**
+         * ServiceUsage
+         * @description Usage attributed to one service.
+         */
+        ServiceUsage: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /** Conversation Count */
+            conversation_count: number;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Request Count */
+            request_count: number;
+            /**
+             * Service Id
+             * @description Service identifier, or null for usage that could not be attributed.
+             */
+            service_id: string | null;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
         };
         /**
          * ServiceVoiceConfig
@@ -23766,6 +24029,8 @@ export interface components {
             audio_filler_triggered_after?: number | null;
             /** Audio Fillers */
             audio_fillers?: string[] | null;
+            /** Context Bindings */
+            context_bindings?: string[];
             /**
              * Delivery
              * @default interrupt
@@ -25211,6 +25476,8 @@ export interface components {
         };
         /** UpdateServiceRequest */
         UpdateServiceRequest: {
+            /** Accepted Context */
+            accepted_context?: components["schemas"]["ContextKeySpec"][] | null;
             /** Agent Id */
             agent_id?: string | null;
             /** Channel Type */
@@ -25436,6 +25703,22 @@ export interface components {
         UpsertVersionSetRequest: {
             version_set: components["schemas"]["VersionSet-Input"];
         };
+        /**
+         * UsageAttribution
+         * @description Coverage of conversation and service attribution.
+         */
+        UsageAttribution: {
+            /**
+             * Conversation Attribution Rate
+             * @description Linked requests divided by all requests; null when there are no requests.
+             */
+            conversation_attribution_rate: number | null;
+            /**
+             * Service Attribution Rate
+             * @description Service-attributed input tokens divided by all input tokens; null when there are none.
+             */
+            service_attribution_rate: number | null;
+        };
         /** UsageBucket */
         UsageBucket: {
             /**
@@ -25465,6 +25748,508 @@ export interface components {
              */
             total_duration_seconds?: number | null;
         };
+        /**
+         * UsageClassesResponse
+         * @description Usage grouped by usage class, returned for `group_by=class`.
+         */
+        UsageClassesResponse: {
+            /**
+             * Calculation Run Id
+             * Format: uuid
+             * @description Immutable published calculation run selected for the entire range.
+             */
+            calculation_run_id: string;
+            /**
+             * Classes
+             * @description All recorded usage classes, including production and non-production, after any service filter.
+             */
+            classes: components["schemas"]["ClassUsage"][];
+            /** @description Inclusive requested date range. */
+            period: components["schemas"]["Period"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace whose usage or cost is reported.
+             */
+            workspace_id: string;
+        };
+        /**
+         * UsageCostAppliedRate
+         * @description Rate record applied to this model during the requested period.
+         */
+        UsageCostAppliedRate: {
+            /**
+             * Cached Input Per Million
+             * @description USD per million cached input tokens; null if no cached rate applied.
+             */
+            cached_input_per_million: string | null;
+            /**
+             * Effective From
+             * Format: date-time
+             * @description Inclusive input-rate start date, represented as midnight UTC.
+             */
+            effective_from: string;
+            /**
+             * Effective To
+             * @description Exclusive input-rate end date at midnight UTC; null means no end date.
+             */
+            effective_to: string | null;
+            /**
+             * Input Per Million
+             * @description USD per million uncached input tokens, as a decimal string.
+             */
+            input_per_million: string;
+            /**
+             * Output Per Million
+             * @description USD per million output tokens, as a decimal string.
+             */
+            output_per_million: string;
+            /**
+             * Rate Card Version
+             * @description Null in V0 because the published facts do not retain a reproducible rate-card identifier.
+             */
+            rate_card_version: string | null;
+        };
+        /**
+         * UsageCostAttribution
+         * @description Known coverage and limitations of usage attribution.
+         */
+        UsageCostAttribution: {
+            /**
+             * Conversation Attribution Rate
+             * @description Linked-token share; null because the published facts do not retain linked-token totals.
+             */
+            conversation_attribution_rate: number | null;
+            /**
+             * May Include Amigo Operated Usage
+             * @description Whether production-classified totals may include usage operated by Amigo.
+             */
+            may_include_amigo_operated_usage: boolean;
+            /**
+             * Service Attribution Rate
+             * @description Service-attributed input and output tokens / all tokens in the selected scope; null with no tokens.
+             */
+            service_attribution_rate: number | null;
+        };
+        /**
+         * UsageCostDaily
+         * @description Uncached input-token usage for one UTC date.
+         */
+        UsageCostDaily: {
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Usage Date
+             * Format: date
+             */
+            usage_date: string;
+        };
+        /** UsageCostError */
+        UsageCostError: {
+            /**
+             * Code
+             * @enum {string}
+             */
+            code: "invalid_usage_period" | "workspace_usage_forbidden" | "workspace_not_found" | "usage_data_unavailable";
+            /** Message */
+            message: string;
+        };
+        /**
+         * UsageCostErrorResponse
+         * @description Stable error envelope for the customer usage-cost contract.
+         */
+        UsageCostErrorResponse: {
+            error: components["schemas"]["UsageCostError"];
+        };
+        /**
+         * UsageCostExcludedClass
+         * @description Usage totals and exclusion reason for one non-production class.
+         */
+        UsageCostExcludedClass: {
+            /**
+             * Cached Input Tokens
+             * @description Cached input tokens in this class; null when the source cannot supply the count.
+             */
+            cached_input_tokens: number | null;
+            /**
+             * Conversation Count
+             * @description Distinct linked conversations in this excluded class; zero when none are linked.
+             */
+            conversation_count: number;
+            /**
+             * Exclusion Reason
+             * @enum {string}
+             */
+            exclusion_reason: "simulation" | "playground" | "customer_test" | "amigo_internal" | "operator_attribution_unavailable";
+            /** Output Tokens */
+            output_tokens: number;
+            /**
+             * Request Count
+             * @description Provider requests in this class; null when the source cannot supply a request count.
+             */
+            request_count: number | null;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Usage Class
+             * @enum {string}
+             */
+            usage_class: "simulation" | "playground_test" | "customer_test" | "amigo_internal" | "unknown";
+        };
+        /**
+         * UsageCostExcludedResponse
+         * @description Usage explicitly excluded from production-classified totals.
+         */
+        UsageCostExcludedResponse: {
+            /** Classes */
+            classes: components["schemas"]["UsageCostExcludedClass"][];
+            period: components["schemas"]["Period"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /**
+         * UsageCostLatestClose
+         * @description Latest compatible completed monthly close, when available.
+         */
+        UsageCostLatestClose: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number | null;
+            /**
+             * Calculated At
+             * Format: date-time
+             */
+            calculated_at: string;
+            /** Calculated Cost Usd */
+            calculated_cost_usd: string | null;
+            /** Calculation Run Id */
+            calculation_run_id: string;
+            /**
+             * Close Month
+             * Format: date
+             */
+            close_month: string;
+            /** Has Unpriced Usage */
+            has_unpriced_usage: boolean;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Rate Card Version */
+            rate_card_version: string | null;
+            /**
+             * Status
+             * @constant
+             */
+            status: "complete";
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /** Unpriced Tokens */
+            unpriced_tokens: number;
+        };
+        /**
+         * UsageCostModel
+         * @description Production-classified usage and calculated cost for one model.
+         */
+        UsageCostModel: {
+            /** Applied Rates */
+            applied_rates: components["schemas"]["UsageCostAppliedRate"][];
+            /**
+             * Cache Rate
+             * @description Cached input tokens / total input tokens; null when there are no input tokens.
+             */
+            cache_rate: number | null;
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /**
+             * Calculated Cost Usd
+             * @description Model cost rounded to cents; null if any contributing usage is unpriced, including partially priced models.
+             */
+            calculated_cost_usd: string | null;
+            /**
+             * Calls Per Conversation
+             * @description This model's linked provider requests / its distinct linked conversations; null if none are linked.
+             */
+            calls_per_conversation: number | null;
+            /**
+             * Cost Share
+             * @description Model cost / fully priced model costs in the selected scope, after any service filter.
+             *     Partially priced models are excluded from both sides; null if unpriced or the denominator is zero.
+             */
+            cost_share: number | null;
+            /**
+             * Is Priced
+             * @description Whether every contributing usage row for this model is priced.
+             */
+            is_priced: boolean;
+            /** Model Id */
+            model_id: string;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Provider */
+            provider: string | null;
+            /** Request Count */
+            request_count: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Unpriced Reason
+             * @description One reason contributing usage could not be priced; null when all usage is priced.
+             */
+            unpriced_reason: string | null;
+        };
+        /**
+         * UsageCostModelsResponse
+         * @description Customer usage and calculated model-provider cost grouped by model.
+         */
+        UsageCostModelsResponse: {
+            /**
+             * Conversation Count
+             * @description Distinct linked conversations in the selected scope; conversations shared by models are counted once.
+             */
+            conversation_count: number;
+            /**
+             * Currency
+             * @constant
+             */
+            currency: "USD";
+            /** Models */
+            models: components["schemas"]["UsageCostModel"][];
+            period: components["schemas"]["Period"];
+            /** Service Id */
+            service_id: string | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /**
+         * UsageCostOverviewResponse
+         * @description Customer usage and calculated model-provider cost overview.
+         */
+        UsageCostOverviewResponse: {
+            attribution: components["schemas"]["UsageCostAttribution"] | null;
+            /**
+             * Attribution Status
+             * @constant
+             */
+            attribution_status: "best_effort";
+            /**
+             * Calculation Run Id
+             * @description Opaque published-calculation identifier; null when no complete calculation covers the period.
+             */
+            calculation_run_id: string | null;
+            /**
+             * Currency
+             * @constant
+             */
+            currency: "USD";
+            /**
+             * Daily
+             * @description Ascending UTC dates, zero-filled across the requested period; null when no complete calculation is available.
+             */
+            daily: components["schemas"]["UsageCostDaily"][] | null;
+            /**
+             * Data As Of
+             * @description Source-event freshness; null because the published facts do not retain it.
+             */
+            data_as_of: string | null;
+            /**
+             * Data Status
+             * @description V0 returns partial for a published calculation, or failed when no complete calculation covers the period.
+             * @enum {string}
+             */
+            data_status: "complete" | "partial" | "delayed" | "failed";
+            /** @description Null in V0 because no monthly close uses the same production-classification policy. */
+            latest_close: components["schemas"]["UsageCostLatestClose"] | null;
+            period: components["schemas"]["UsageCostPeriod"];
+            /**
+             * Rate Card Version
+             * @description Reproducible rate-card identifier; null because the published facts do not retain it.
+             */
+            rate_card_version: string | null;
+            /**
+             * Service Id
+             * @description Service identifier; null for unattributed usage.
+             */
+            service_id: string | null;
+            /** Services */
+            services: components["schemas"]["UsageCostService"][] | null;
+            totals: components["schemas"]["UsageCostOverviewTotals"] | null;
+            /**
+             * Workspace Id
+             * Format: uuid
+             */
+            workspace_id: string;
+        };
+        /**
+         * UsageCostOverviewTotals
+         * @description Production-classified usage and calculated cost totals.
+         */
+        UsageCostOverviewTotals: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /**
+             * Calculated Cost Usd
+             * @description Priced subtotal rounded to cents; excludes unpriced usage. Zero for no usage, null if none can be priced.
+             */
+            calculated_cost_usd: string | null;
+            /**
+             * Conversation Count
+             * @description Distinct linked conversations in the selected scope, not the sum of per-model counts.
+             */
+            conversation_count: number;
+            /**
+             * Cost Per Conversation Usd
+             * @description Priced linked cost / distinct priced linked conversations; cents, or null without a denominator.
+             */
+            cost_per_conversation_usd: string | null;
+            /**
+             * Has Unpriced Usage
+             * @description Whether any selected usage is omitted from the priced subtotal.
+             */
+            has_unpriced_usage: boolean;
+            /** Output Tokens */
+            output_tokens: number;
+            /**
+             * Request Count
+             * @description Provider requests in the selected scope, including requests without a linked conversation.
+             */
+            request_count: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Unpriced Tokens
+             * @description Input and output tokens belonging to usage that could not be priced.
+             */
+            unpriced_tokens: number;
+        };
+        /**
+         * UsageCostPeriod
+         * @description Inclusive UTC calendar-date range covered by the report.
+         */
+        UsageCostPeriod: {
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+            /**
+             * Timezone
+             * @constant
+             */
+            timezone: "UTC";
+        };
+        /**
+         * UsageCostService
+         * @description Production-classified usage and calculated cost for one service.
+         */
+        UsageCostService: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /**
+             * Calculated Cost Usd
+             * @description Service priced subtotal rounded to cents; excludes unpriced usage, null if none can be priced.
+             */
+            calculated_cost_usd: string | null;
+            /** Conversation Count */
+            conversation_count: number;
+            /**
+             * Cost Per Conversation Usd
+             * @description Service priced linked cost / its distinct priced linked conversations; cents, or null without a denominator.
+             */
+            cost_per_conversation_usd: string | null;
+            /**
+             * Cost Share
+             * @description Service priced subtotal / workspace-wide priced subtotal, even when service_id filters the response.
+             *     Null if this service has no priced cost or the workspace denominator is zero or unavailable.
+             */
+            cost_share: number | null;
+            /**
+             * Has Unpriced Usage
+             * @description Whether any usage for this service is omitted from its priced subtotal.
+             */
+            has_unpriced_usage: boolean;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Request Count */
+            request_count: number;
+            /**
+             * Service Id
+             * @description Service identifier; null for unattributed usage.
+             */
+            service_id: string | null;
+            /**
+             * Service Name
+             * @description Unattributed for a null service ID; otherwise null because facts do not retain service names.
+             */
+            service_name: string | null;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /** Unpriced Tokens */
+            unpriced_tokens: number;
+        };
+        /**
+         * UsageModelsResponse
+         * @description Usage grouped by model, returned for `group_by=model`.
+         */
+        UsageModelsResponse: {
+            /**
+             * Calculation Run Id
+             * Format: uuid
+             * @description Immutable published calculation run selected for the entire range.
+             */
+            calculation_run_id: string;
+            /** Models */
+            models: components["schemas"]["ModelUsage"][];
+            /** @description Inclusive requested date range. */
+            period: components["schemas"]["Period"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace whose usage or cost is reported.
+             */
+            workspace_id: string;
+        };
+        /**
+         * UsageOverviewResponse
+         * @description Usage overview returned when `group_by` is omitted.
+         */
+        UsageOverviewResponse: {
+            attribution: components["schemas"]["UsageAttribution"];
+            /**
+             * Calculation Run Id
+             * Format: uuid
+             * @description Immutable published calculation run selected for the entire range.
+             */
+            calculation_run_id: string;
+            /**
+             * Daily
+             * @description Daily usage ordered from oldest to newest.
+             */
+            daily: components["schemas"]["DailyUsage"][];
+            /** @description Inclusive requested date range. */
+            period: components["schemas"]["Period"];
+            /**
+             * Services
+             * @description Services ordered by descending input-token usage.
+             */
+            services: components["schemas"]["ServiceUsage"][];
+            totals: components["schemas"]["UsageTotals"];
+            /**
+             * Workspace Id
+             * Format: uuid
+             * @description Workspace whose usage or cost is reported.
+             */
+            workspace_id: string;
+        };
+        UsageResponse: components["schemas"]["UsageOverviewResponse"] | components["schemas"]["UsageModelsResponse"] | components["schemas"]["UsageClassesResponse"];
         /** UsageSummaryResponse */
         UsageSummaryResponse: {
             /**
@@ -25495,6 +26280,32 @@ export interface components {
              * @description Workspace identifier
              */
             workspace_id: string;
+        };
+        /**
+         * UsageTotals
+         * @description Workspace totals for the requested period.
+         */
+        UsageTotals: {
+            /** Cached Input Tokens */
+            cached_input_tokens: number;
+            /** Conversation Count */
+            conversation_count: number;
+            /**
+             * Has Unpriced Usage
+             * @description Whether any usage in the period could not be priced.
+             */
+            has_unpriced_usage: boolean;
+            /** Output Tokens */
+            output_tokens: number;
+            /** Request Count */
+            request_count: number;
+            /** Uncached Input Tokens */
+            uncached_input_tokens: number;
+            /**
+             * Unpriced Tokens
+             * @description Tokens excluded from calculated cost because no rate applied.
+             */
+            unpriced_tokens: number;
         };
         /** UserTranscriptEvent */
         UserTranscriptEvent: {
@@ -31723,11 +32534,17 @@ export interface operations {
             };
         };
     };
-    "get-infrastructure-cost": {
+    "get-workspace-cost": {
         parameters: {
             query: {
-                /** @description Any date within the closed month to report, e.g. 2026-07-01 */
-                close_month: string;
+                /** @description First usage date to include. */
+                start_date: string;
+                /** @description Last usage date to include. It cannot be in the future. */
+                end_date: string;
+                /** @description Limit the report to usage attributed to this service. */
+                service_id?: string | null;
+                /** @description Return model costs and applied rates instead of the overview. */
+                group_by?: "model" | null;
             };
             header?: never;
             path: {
@@ -31743,75 +32560,53 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["InfrastructureCostResponse"];
+                    "application/json": components["schemas"]["CostResponse"];
                 };
             };
-            /** @description Requires an Amigo administrator identity */
+            /** @description Missing or invalid authentication credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Caller cannot access this workspace or is not an Amigo administrator. */
             403: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description Validation Error */
+            /** @description Workspace not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace is archived. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query validation failed: dates must be valid, `end_date` cannot be in the future, `start_date` must not follow `end_date`, and `group_by` must be supported. */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+                content?: never;
             };
-            /** @description Rate limited */
+            /** @description Read rate limit exceeded. */
             429: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-        };
-    };
-    "get-llm-inference-cost": {
-        parameters: {
-            query: {
-                /** @description Any date within the closed month to report, e.g. 2026-07-01 */
-                close_month: string;
-            };
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["LlmInferenceCostResponse"];
-                };
-            };
-            /** @description Requires an Amigo administrator identity */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-            /** @description Rate limited */
-            429: {
+            /** @description The service or billing data is unavailable, or no complete calculation covers the period. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -43916,6 +44711,365 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    "get-workspace-usage": {
+        parameters: {
+            query: {
+                /** @description First usage date to include. */
+                start_date: string;
+                /** @description Last usage date to include. It cannot be in the future. */
+                end_date: string;
+                /** @description Limit the report to usage attributed to this service. */
+                service_id?: string | null;
+                /** @description Return model or usage-class breakdowns instead of the overview. */
+                group_by?: ("model" | "class") | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageResponse"];
+                };
+            };
+            /** @description Missing or invalid authentication credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Caller cannot access this workspace or lacks Data.view permission. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace not found. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Workspace is archived. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query validation failed: dates must be valid, `end_date` cannot be in the future, `start_date` must not follow `end_date`, and `group_by` must be supported. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Read rate limit exceeded. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The service or billing data is unavailable, or no complete calculation covers the period. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    "get-workspace-usage-cost-excluded": {
+        parameters: {
+            query: {
+                /** @description First usage date to include. */
+                start_date: string;
+                /** @description Last usage date to include. It cannot be in the future. */
+                end_date: string;
+                /** @description Limit the report to usage attributed to this service. */
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostExcludedResponse"];
+                };
+            };
+            /** @description Invalid usage period. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Missing or invalid authentication credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Caller cannot view this workspace's usage. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace is archived. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query validation failed because `service_id` is not a valid UUID. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Read rate limit exceeded. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usage data is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+        };
+    };
+    "get-workspace-usage-cost-models": {
+        parameters: {
+            query: {
+                /** @description First usage date to include. */
+                start_date: string;
+                /** @description Last usage date to include. It cannot be in the future. */
+                end_date: string;
+                /** @description Limit the report to usage attributed to this service. */
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostModelsResponse"];
+                };
+            };
+            /** @description Invalid usage period. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Missing or invalid authentication credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Caller cannot view this workspace's usage. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace is archived. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query validation failed because `service_id` is not a valid UUID. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Read rate limit exceeded. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usage data is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+        };
+    };
+    "get-workspace-usage-cost-overview": {
+        parameters: {
+            query: {
+                /** @description First usage date to include. */
+                start_date: string;
+                /** @description Last usage date to include. It cannot be in the future. */
+                end_date: string;
+                /** @description Limit the report to usage attributed to this service. */
+                service_id?: string | null;
+            };
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostOverviewResponse"];
+                };
+            };
+            /** @description Invalid usage period. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Missing or invalid authentication credentials. */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Caller cannot view this workspace's usage. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace does not exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
+            };
+            /** @description Workspace is archived. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Query validation failed because `service_id` is not a valid UUID. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Read rate limit exceeded. */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Usage data is unavailable. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsageCostErrorResponse"];
+                };
             };
         };
     };
