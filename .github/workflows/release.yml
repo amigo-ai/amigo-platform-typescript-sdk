@@ -20,8 +20,10 @@ on:
 
 # Release operators:
 # - Prefer npm trusted publishing for the Publish workflow. Configure the
-#   package on npm with this repository and `publish.yml` as the trusted
-#   publisher, then remove long-lived npm automation tokens.
+#   package on npm with `concurrence-hq/amigo-platform-typescript-sdk` and
+#   `publish.yml` (no environment) as the trusted publisher, then remove
+#   long-lived npm automation tokens. `package.json` `repository.url` must
+#   name the same repo or npm rejects the provenance statement.
 # - Configure `RELEASE_PUSH_TOKEN` only when the target branch is protected and
 #   the default `GITHUB_TOKEN` cannot push the version commit and tag.
 

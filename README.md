@@ -22,7 +22,7 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/@amigo-ai/platform-sdk"><img src="https://img.shields.io/npm/v/@amigo-ai/platform-sdk.svg" alt="npm version" /></a>
-  <a href="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml"><img src="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
+  <a href="https://github.com/concurrence-hq/amigo-platform-typescript-sdk/actions/workflows/test.yml"><img src="https://github.com/concurrence-hq/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 

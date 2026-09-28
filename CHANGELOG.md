@@ -621,7 +621,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.channels.sesSetup` — workspace-scoped CRUD over the channel-manager-backed SES setup proxy (`/v1/{workspace_id}/channels/ses-setup`). Methods: `create`, `list` + `listAutoPaging`, `get`, `verify`, `delete`. Workspace is injected at client construction time, not the call site. Closes the "no SDK surface for SES tenant onboarding" gap (amigo-ai/platform#2561). Types: `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupListResponse`, `DnsRecord`.
+- `client.channels.sesSetup` — workspace-scoped CRUD over the channel-manager-backed SES setup proxy (`/v1/{workspace_id}/channels/ses-setup`). Methods: `create`, `list` + `listAutoPaging`, `get`, `verify`, `delete`. Workspace is injected at client construction time, not the call site. Closes the "no SDK surface for SES tenant onboarding" gap (concurrence-hq/platform#2561). Types: `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupListResponse`, `DnsRecord`.
 
 ## [0.41.0] - 2026-05-05
 
@@ -649,7 +649,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.functions(ws).listRegistered()` — list every V109-registered platform function in the workspace (latest version per name). Closes the "name-driven only" gap on the developer-console Functions Studio (amigo-ai/platform#2585).
+- `client.functions(ws).listRegistered()` — list every V109-registered platform function in the workspace (latest version per name). Closes the "name-driven only" gap on the developer-console Functions Studio (concurrence-hq/platform#2585).
 
 ### Maintenance
 
@@ -665,7 +665,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.functions(ws).deploy/listVersions/getVersion/invoke/testV2/promote/rollback` — typed surface over the V109 SQL-first platform-functions routes (amigo-ai/platform#2552, #2562, #2567).
+- `client.functions(ws).deploy/listVersions/getVersion/invoke/testV2/promote/rollback` — typed surface over the V109 SQL-first platform-functions routes (concurrence-hq/platform#2552, #2562, #2567).
 
 ### Maintenance
 
@@ -681,7 +681,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### ⚠️ Type-level breaking changes
 
-The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [amigo-ai/platform#2535](https://github.com/amigo-ai/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
+The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [concurrence-hq/platform#2535](https://github.com/concurrence-hq/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
 
 | Event                    | Before (0.32.0)                                | After (0.33.0)                             |
 | ------------------------ | ---------------------------------------------- | ------------------------------------------ |
@@ -720,7 +720,7 @@ git ls-files '*.ts' '*.tsx' | xargs sed -i.bak -E \
 find . -name '*.ts.bak' -o -name '*.tsx.bak' | xargs rm
 ```
 
-For developer-console specifically, this rename was applied in [amigo-ai/developer-console#864](https://github.com/amigo-ai/developer-console/pull/864) — drop the local `ObserverEventEnvelope<T, Extra>` shim and consume the SDK type directly.
+For developer-console specifically, this rename was applied in [concurrence-hq/developer-console#864](https://github.com/concurrence-hq/developer-console/pull/864) — drop the local `ObserverEventEnvelope<T, Extra>` shim and consume the SDK type directly.
 
 ### Features
 
