@@ -114,7 +114,7 @@ The codegen script uses this repository's committed `openapi.json` by default. A
 
 ## Breaking Changes
 
-Response field removal, rename, or type change breaks this SDK and all consumers (developer-console). Coordinate with `amigo-ai/platform` (spec change) and `amigo-ai/developer-console` (UI updates) before releasing a version with breaking type changes.
+Response field removal, rename, or type change breaks this SDK and all consumers (developer-console). Coordinate with `concurrence-hq/platform` (spec change) and `concurrence-hq/developer-console` (UI updates) before releasing a version with breaking type changes.
 
 ## Cross-Repo Contract
 
