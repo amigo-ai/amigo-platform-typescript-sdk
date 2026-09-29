@@ -6,7 +6,7 @@
  * and the app receives a workspace-scoped JWT.
  */
 
-import { AmigoError, AuthenticationError, NetworkError, RateLimitError } from './errors.js'
+import { ConcurrenceError, AuthenticationError, NetworkError, RateLimitError } from './errors.js'
 import { trimTrailingSlashes } from './url.js'
 
 // --- Types ---
@@ -108,13 +108,13 @@ export interface TokenStorage {
 
 // --- Errors ---
 
-export class DeviceCodeExpiredError extends AmigoError {
+export class DeviceCodeExpiredError extends ConcurrenceError {
   constructor(message = 'Device code expired. Please restart the login flow.') {
     super(message, { errorCode: 'device_code_expired' })
   }
 }
 
-export class DeviceCodeDeniedError extends AmigoError {
+export class DeviceCodeDeniedError extends ConcurrenceError {
   constructor(message = 'Authorization request was denied.') {
     super(message, { errorCode: 'device_code_denied' })
   }
@@ -126,7 +126,7 @@ export class RefreshTokenExpiredError extends AuthenticationError {
   }
 }
 
-export class LoginCancelledError extends AmigoError {
+export class LoginCancelledError extends ConcurrenceError {
   constructor() {
     super('Login cancelled', { errorCode: 'login_cancelled' })
   }
@@ -179,7 +179,7 @@ async function requestDeviceCode(
   }
   if (!res.ok) {
     const err = (await res.json().catch(() => ({}))) as Record<string, string>
-    throw new AmigoError(err.error_description ?? `Identity error (${res.status})`, {
+    throw new ConcurrenceError(err.error_description ?? `Identity error (${res.status})`, {
       statusCode: res.status,
       errorCode: err.error,
     })
@@ -215,13 +215,13 @@ async function pollDeviceCode(
     const err = (await res.json().catch(() => ({ error: 'unknown' }))) as Record<string, string>
     if (err.error === 'authorization_pending') return { type: 'pending' }
     if (err.error === 'slow_down') return { type: 'slow_down' }
-    throw new AmigoError(err.error_description ?? err.error ?? `Identity error (400)`, {
+    throw new ConcurrenceError(err.error_description ?? err.error ?? `Identity error (400)`, {
       statusCode: 400,
       errorCode: err.error,
     })
   }
 
-  throw new AmigoError(`Identity error (${res.status})`, { statusCode: res.status })
+  throw new ConcurrenceError(`Identity error (${res.status})`, { statusCode: res.status })
 }
 
 async function doRefreshToken(
@@ -240,7 +240,7 @@ async function doRefreshToken(
 
   if (!res.ok) {
     const err = (await res.json().catch(() => ({}))) as Record<string, string>
-    throw new AmigoError(err.error_description ?? `Identity error (${res.status})`, {
+    throw new ConcurrenceError(err.error_description ?? `Identity error (${res.status})`, {
       statusCode: res.status,
       errorCode: err.error,
     })
@@ -285,7 +285,7 @@ function toAuthResult(token: IdentityTokenResponse, workspaceIdOverride?: string
   const claims = decodeJwtPayload(token.access_token)
   const workspaceId = workspaceIdOverride ?? (claims?.workspace_id as string) ?? ''
   if (!workspaceId) {
-    throw new AmigoError('Token does not contain a workspace_id claim', {
+    throw new ConcurrenceError('Token does not contain a workspace_id claim', {
       errorCode: 'missing_workspace',
     })
   }
@@ -323,7 +323,9 @@ async function fetchWorkspaces(
       }))
     }
     if (res.status !== 404) {
-      throw new AmigoError(`Failed to fetch workspaces (${res.status})`, { statusCode: res.status })
+      throw new ConcurrenceError(`Failed to fetch workspaces (${res.status})`, {
+        statusCode: res.status,
+      })
     }
   }
   return []
@@ -337,7 +339,7 @@ async function pickWorkspace(
   // than one workspace. With `workspaceId` pinned (now required) identity
   // returns a scoped token directly and this is never hit.
   if (!options.onWorkspaceRequired) {
-    throw new AmigoError(
+    throw new ConcurrenceError(
       `Identity returned multiple workspaces despite workspaceId being set. Supply 'onWorkspaceRequired' as a legacy fallback, or report a server-side issue.`,
       { errorCode: 'workspace_selection_required' },
     )
@@ -352,13 +354,15 @@ async function resolveWorkspaceFromBootstrap(
   fetchFn: typeof globalThis.fetch,
 ): Promise<AuthResult> {
   if (!token.refresh_token) {
-    throw new AmigoError('Bootstrap token missing refresh_token', { errorCode: 'server_error' })
+    throw new ConcurrenceError('Bootstrap token missing refresh_token', {
+      errorCode: 'server_error',
+    })
   }
 
   const workspaces = await fetchWorkspaces(baseUrl, token.access_token, fetchFn)
 
   if (workspaces.length === 0) {
-    throw new AmigoError(
+    throw new ConcurrenceError(
       'No workspace memberships found. Create a workspace or request an invitation.',
       { errorCode: 'no_workspaces' },
     )
@@ -393,7 +397,7 @@ async function resolveWorkspaceFromMulti(
   fetchFn: typeof globalThis.fetch,
 ): Promise<AuthResult> {
   if (!multi.refresh_token) {
-    throw new AmigoError('Multi-workspace response missing refresh_token', {
+    throw new ConcurrenceError('Multi-workspace response missing refresh_token', {
       errorCode: 'server_error',
     })
   }
@@ -484,11 +488,11 @@ export async function loginWithDeviceCode(options: DeviceCodeLoginOptions): Prom
       // multi_workspace (HTTP 300) — workspace list included in response
       return await resolveWorkspaceFromMulti(baseUrl, result.data, options, fetchFn)
     } catch (err) {
-      if (err instanceof AmigoError && err.errorCode === 'expired_token') {
+      if (err instanceof ConcurrenceError && err.errorCode === 'expired_token') {
         options.onStatus?.('expired')
         throw new DeviceCodeExpiredError()
       }
-      if (err instanceof AmigoError && err.errorCode === 'access_denied') {
+      if (err instanceof ConcurrenceError && err.errorCode === 'access_denied') {
         options.onStatus?.('denied')
         throw new DeviceCodeDeniedError()
       }
@@ -596,7 +600,7 @@ export class TokenManager {
       return refreshed
     } catch (err) {
       if (
-        err instanceof AmigoError &&
+        err instanceof ConcurrenceError &&
         (err.statusCode === 401 || err.errorCode === 'invalid_grant')
       ) {
         await this.clear()

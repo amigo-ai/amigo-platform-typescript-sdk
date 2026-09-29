@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  AmigoError,
+  ConcurrenceError,
   BadRequestError,
   AuthenticationError,
   PermissionError,
@@ -12,7 +12,7 @@ import {
   ConfigurationError,
   NetworkError,
   RequestTimeoutError,
-  isAmigoError,
+  isConcurrenceError,
   isNotFoundError,
   isRateLimitError,
   isAuthenticationError,
@@ -29,17 +29,17 @@ import {
 } from '../../src/core/errors.js'
 
 describe('Error hierarchy', () => {
-  it('all SDK errors extend AmigoError', () => {
-    expect(new BadRequestError('bad')).toBeInstanceOf(AmigoError)
-    expect(new AuthenticationError('auth')).toBeInstanceOf(AmigoError)
-    expect(new PermissionError('perm')).toBeInstanceOf(AmigoError)
-    expect(new NotFoundError('nf')).toBeInstanceOf(AmigoError)
-    expect(new ConflictError('conflict')).toBeInstanceOf(AmigoError)
-    expect(new ValidationError('val')).toBeInstanceOf(AmigoError)
-    expect(new RateLimitError('rate')).toBeInstanceOf(AmigoError)
-    expect(new ServerError('server')).toBeInstanceOf(AmigoError)
-    expect(new ConfigurationError('config')).toBeInstanceOf(AmigoError)
-    expect(new RequestTimeoutError('timeout', 1000)).toBeInstanceOf(AmigoError)
+  it('all SDK errors extend ConcurrenceError', () => {
+    expect(new BadRequestError('bad')).toBeInstanceOf(ConcurrenceError)
+    expect(new AuthenticationError('auth')).toBeInstanceOf(ConcurrenceError)
+    expect(new PermissionError('perm')).toBeInstanceOf(ConcurrenceError)
+    expect(new NotFoundError('nf')).toBeInstanceOf(ConcurrenceError)
+    expect(new ConflictError('conflict')).toBeInstanceOf(ConcurrenceError)
+    expect(new ValidationError('val')).toBeInstanceOf(ConcurrenceError)
+    expect(new RateLimitError('rate')).toBeInstanceOf(ConcurrenceError)
+    expect(new ServerError('server')).toBeInstanceOf(ConcurrenceError)
+    expect(new ConfigurationError('config')).toBeInstanceOf(ConcurrenceError)
+    expect(new RequestTimeoutError('timeout', 1000)).toBeInstanceOf(ConcurrenceError)
   })
 
   it('sets correct status codes', () => {
@@ -70,10 +70,10 @@ describe('Error hierarchy', () => {
 })
 
 describe('Type guards', () => {
-  it('isAmigoError', () => {
-    expect(isAmigoError(new NotFoundError('x'))).toBe(true)
-    expect(isAmigoError(new Error('x'))).toBe(false)
-    expect(isAmigoError('string')).toBe(false)
+  it('isConcurrenceError', () => {
+    expect(isConcurrenceError(new NotFoundError('x'))).toBe(true)
+    expect(isConcurrenceError(new Error('x'))).toBe(false)
+    expect(isConcurrenceError('string')).toBe(false)
   })
 
   it('isNotFoundError', () => {
@@ -97,15 +97,19 @@ describe('Type guards', () => {
   })
 })
 
-describe('ConfigurationError from AmigoClient', () => {
+describe('ConfigurationError from ConcurrenceClient', () => {
   it('throws on missing apiKey', async () => {
-    const { AmigoClient } = await import('../../src/index.js')
-    expect(() => new AmigoClient({ apiKey: '', workspaceId: 'ws-001' })).toThrow(ConfigurationError)
+    const { ConcurrenceClient } = await import('../../src/index.js')
+    expect(() => new ConcurrenceClient({ apiKey: '', workspaceId: 'ws-001' })).toThrow(
+      ConfigurationError,
+    )
   })
 
   it('throws on missing workspaceId', async () => {
-    const { AmigoClient } = await import('../../src/index.js')
-    expect(() => new AmigoClient({ apiKey: 'key', workspaceId: '' })).toThrow(ConfigurationError)
+    const { ConcurrenceClient } = await import('../../src/index.js')
+    expect(() => new ConcurrenceClient({ apiKey: 'key', workspaceId: '' })).toThrow(
+      ConfigurationError,
+    )
   })
 })
 
@@ -309,7 +313,7 @@ describe('createApiError', () => {
 })
 
 describe('Body type guards', () => {
-  it('isHttpException — false on non-AmigoError', () => {
+  it('isHttpException — false on non-ConcurrenceError', () => {
     expect(isHttpException(new Error('x'))).toBe(false)
     expect(isHttpException(null)).toBe(false)
     expect(isHttpException({ errorBody: { detail: 'x' } })).toBe(false)

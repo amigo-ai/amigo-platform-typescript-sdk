@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -45,12 +45,12 @@ describe('withOptions propagation into nested sub-resources', () => {
   it('analytics.surfaces.* uses the scoped client AND hits the right URL', async () => {
     const a = spyFetch()
     const b = spyFetch()
-    const ca = new AmigoClient({
+    const ca = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: a.fetch,
     })
-    const cb = new AmigoClient({
+    const cb = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: b.fetch,
@@ -69,12 +69,12 @@ describe('withOptions propagation into nested sub-resources', () => {
   it('simulations.runs.list uses the scoped client AND hits the right URL', async () => {
     const a = spyFetch()
     const b = spyFetch()
-    const ca = new AmigoClient({
+    const ca = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: a.fetch,
     })
-    const cb = new AmigoClient({
+    const cb = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: b.fetch,
@@ -90,7 +90,11 @@ describe('withOptions propagation into nested sub-resources', () => {
 
   it('class-level methods also propagate (calibration)', async () => {
     const { fetch, last } = spyFetch()
-    const client = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: TEST_WORKSPACE_ID, fetch })
+    const client = new ConcurrenceClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch,
+    })
 
     await client.simulations.withOptions({ headers: { 'x-trace': 'class' } }).createSession({
       service_id: 'svc-1',

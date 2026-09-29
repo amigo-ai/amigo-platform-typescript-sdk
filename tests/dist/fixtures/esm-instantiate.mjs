@@ -1,6 +1,6 @@
 import * as sdk from '../../../dist/index.mjs'
 
-const client = new sdk.AmigoClient({
+const client = new sdk.ConcurrenceClient({
   apiKey: 'test-api-key',
   workspaceId: 'ws_123',
 })

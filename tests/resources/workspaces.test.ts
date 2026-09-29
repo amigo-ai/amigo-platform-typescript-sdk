@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -38,7 +38,7 @@ function mockFetch(
   }
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -100,7 +100,7 @@ describe('WorkspacesResource', () => {
 
   describe('testCallerNumbers', () => {
     const TCN_FIXTURE = { allowlist: ['+15551234567'] }
-    const tcnClient = new AmigoClient({
+    const tcnClient = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({

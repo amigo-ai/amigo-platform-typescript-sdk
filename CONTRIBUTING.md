@@ -98,7 +98,7 @@ src/
 ├── core/           # Auth, errors, retry, rate-limit, webhooks, branded types
 ├── generated/      # Auto-generated OpenAPI types (DO NOT EDIT)
 ├── resources/      # API resource classes (one per domain)
-└── index.ts        # AmigoClient entry point, public exports
+└── index.ts        # ConcurrenceClient entry point, public exports
 
 tests/
 ├── core/           # Core utility tests

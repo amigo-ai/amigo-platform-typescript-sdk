@@ -523,7 +523,7 @@ describe('toAuthResult edge cases', () => {
         ]),
         identityBaseUrl: 'https://id.test',
       }),
-      // Assert the specific failure, not just "some AmigoError", so a
+      // Assert the specific failure, not just "some ConcurrenceError", so a
       // regression to a different throw (e.g. TypeError) is caught.
     ).rejects.toThrow(/multiple workspaces/i)
   })

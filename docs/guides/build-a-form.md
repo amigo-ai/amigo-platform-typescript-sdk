@@ -48,10 +48,10 @@ Surfaces can also expire (configurable, default 7 days) or be archived.
 First, find or create the patient entity the form is for, then create the surface with your field definitions.
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 import type { components } from '@concurrence-hq/platform-sdk'
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: process.env.AMIGO_API_KEY!,
   workspaceId: process.env.AMIGO_WORKSPACE_ID!,
 })

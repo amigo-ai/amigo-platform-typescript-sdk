@@ -13,6 +13,22 @@
   and replace `'@amigo-ai/platform-sdk'` with `'@concurrence-hq/platform-sdk'` in
   imports. No API changes.
 
+### Added
+
+- Concurrence-branded primary names: `ConcurrenceClient`, `ConcurrenceClientConfig`,
+  `ConcurrenceConfig`, `ConcurrenceError`, `isConcurrenceError`,
+  `ConcurrenceErrorWithBody`, `ConcurrenceResponse`, and `ConcurrenceRequestOptions`.
+
+### Deprecated
+
+- `AmigoClient`, `AmigoClientConfig`, `AmigoConfig`, `AmigoError`, `isAmigoError`,
+  `AmigoErrorWithBody`, `AmigoResponse`, and `AmigoRequestOptions` remain exported
+  as `@deprecated` aliases of the matching `Concurrence*` names. They are the same
+  runtime references, so `new AmigoClient(...)` and `instanceof AmigoError` keep
+  working unchanged. The one observable difference: an error thrown as the base
+  class itself (not a subclass such as `NotFoundError`) now reports
+  `name === 'ConcurrenceError'`, because `name` comes from the class name.
+
 ## [0.108.1] - 2026-09-08
 
 ### Security

@@ -1,7 +1,7 @@
 import * as sdk from '../../../dist/index.mjs'
 
-if (typeof sdk.AmigoClient !== 'function') {
-  throw new Error('AmigoClient export missing')
+if (typeof sdk.ConcurrenceClient !== 'function') {
+  throw new Error('ConcurrenceClient export missing')
 }
 
 if (typeof sdk.parseWebhookEvent !== 'function') {

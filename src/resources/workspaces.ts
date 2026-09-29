@@ -73,7 +73,7 @@ export class WorkspacesResource extends WorkspaceScopedResource {
    * agents. The list is read-mostly; writes overwrite the entire allowlist.
    *
    * Always operates on the bound workspace. Use `client.withOptions(...)` or
-   * construct a second `AmigoClient` if you need to act on a different
+   * construct a second `ConcurrenceClient` if you need to act on a different
    * workspace.
    */
   readonly testCallerNumbers = {

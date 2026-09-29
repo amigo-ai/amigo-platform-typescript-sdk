@@ -6,7 +6,7 @@ Repo-local reference for the public TypeScript SDK surface. This document comple
 
 ## Client
 
-### `AmigoClient`
+### `ConcurrenceClient`
 
 Configuration fields:
 
@@ -41,21 +41,22 @@ Notes:
 
 - Workspace-scoped paths receive the configured `workspaceId` automatically, and the configured value wins if `workspace_id` is provided manually.
 - `client.withOptions(options)` and `client.<resource>.withOptions(options)` layer headers, timeout, and retry overrides onto the normal resource surface.
-- Low-level helpers return `AmigoResponse<T>` with `data`, `response`, `requestId`, and `rateLimit`.
+- Low-level helpers return `ConcurrenceResponse<T>` with `data`, `response`, `requestId`, and `rateLimit`.
 - Object responses from resource methods include `_request_id` and `lastResponse` metadata.
+- `AmigoClient`, `AmigoClientConfig`, `AmigoConfig`, `AmigoError`, `isAmigoError`, `AmigoErrorWithBody`, `AmigoResponse`, and `AmigoRequestOptions` are deprecated aliases of the matching `Concurrence*` exports (same runtime references), kept from the `@amigo-ai/platform-sdk` package name.
 
 ## Core exports
 
-- Errors: `AmigoError`, `BadRequestError`, `AuthenticationError`, `PermissionError`, `NotFoundError`, `ConflictError`, `ValidationError`, `RateLimitError`, `ServerError`, `ServiceUnavailableError`, `NetworkError`, `RequestTimeoutError`, `ParseError`, `ConfigurationError`
-- Error guards: `isAmigoError`, `isNotFoundError`, `isRateLimitError`, `isAuthenticationError`, `isRequestTimeoutError`, `isPermissionError`, `isConflictError`, `isValidationError`, `isServerError`, `isNetworkError`, `isHttpException`, `isHttpValidationError`, `isUnparseableErrorBody`
-- Request option types: `AmigoRequestOptions`, `ScopedRequestOptions`
+- Errors: `ConcurrenceError`, `AmigoError`, `BadRequestError`, `AuthenticationError`, `PermissionError`, `NotFoundError`, `ConflictError`, `ValidationError`, `RateLimitError`, `ServerError`, `ServiceUnavailableError`, `NetworkError`, `RequestTimeoutError`, `ParseError`, `ConfigurationError`
+- Error guards: `isConcurrenceError`, `isAmigoError`, `isNotFoundError`, `isRateLimitError`, `isAuthenticationError`, `isRequestTimeoutError`, `isPermissionError`, `isConflictError`, `isValidationError`, `isServerError`, `isNetworkError`, `isHttpException`, `isHttpValidationError`, `isUnparseableErrorBody`
+- Request option types: `ConcurrenceRequestOptions`, `AmigoRequestOptions`, `ScopedRequestOptions`
 - Webhooks: `verifyWebhookSignature`, `parseWebhookEvent`, `WebhookVerificationError`
 - Pagination and response helpers: `paginate`, `buildLastResponse`, `extractRequestId`
 - Conversation helpers: `sessionConnectAuthProtocols`, `textStreamAuthProtocols`
 - Conversation types: `ChannelKind`, `ConversationDetail`, `ConversationTurn`, `ConversationTurnAvailableAction`, `ConversationTurnStateTransition`, `CreateConversationRequest`, `SessionConnectUrlParams`, `SwitchChannelRequest`, `TextStreamAuthProtocols` (WebSocket constructor subprotocol tuple), `TextStreamUrlParams`, `TurnDoneEvent`, `TurnErrorEvent`, `TurnMessageEvent`, `TurnRequest`, `TurnResponse`, `TurnConversationSnapshot`, `TurnStreamEvent`, `TurnThinkingEvent`, `TurnTokenEvent`, `TurnToolCallCompletedEvent`, `TurnToolCallStartedEvent`
 - Voice provider constants: `STT_PROVIDERS`, `TTS_PROVIDERS`, `VOICE_SESSION_PROVIDERS`
 - Voice provider types: `AgentVoiceConfig`, `ServiceVoiceConfigInput`, `ServiceVoiceConfigOutput`, `SttProvider`, `TtsProvider`, `VoiceSessionProvider`, `VoiceSettingsRequest`, `VoiceSettingsResponse`
-- Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
+- Response and hook types: `PaginatedList`, `ListParams`, `LastResponseInfo`, `ResponseMetadata`, `WithResponseMetadata`, `ConcurrenceResponse`, `AmigoResponse`, `RetryOptions`, `RateLimitInfo`, `ClientHooks`, `RequestHookContext`, `ResponseHookContext`, `ErrorHookContext`
 - Generated OpenAPI types: `paths`, `components`, `operations`
 - Generated API types are produced with `npm run gen-types` from the committed `openapi.json` snapshot.
 - The generated OpenAPI types may include spec-only endpoints that do not yet have resource wrappers; use the low-level `GET`/`POST`/`PUT`/`PATCH`/`DELETE` helpers for those operations until a dedicated resource is added. Current spec-only groups include `/use-cases`, `/cost-to-serve`, and `/metric-store`.

@@ -17,12 +17,15 @@ export interface ResponseMetadata {
   lastResponse: LastResponseInfo
 }
 
-export interface AmigoResponse<T> {
+export interface ConcurrenceResponse<T> {
   data: WithResponseMetadata<T>
   response: Response
   requestId: string | null
   rateLimit: RateLimitInfo
 }
+
+/** @deprecated Use {@link ConcurrenceResponse}. */
+export type AmigoResponse<T> = ConcurrenceResponse<T>
 
 export type WithResponseMetadata<T> = T extends object ? T & ResponseMetadata : T
 
@@ -80,7 +83,7 @@ export function extractData<T>(
 export function withResponse<T>(
   result: OpenApiResult<T> & { response: Response },
   options: ExtractDataOptions = {},
-): AmigoResponse<T> {
+): ConcurrenceResponse<T> {
   const data = extractData(result, options)
   const lastResponse = buildLastResponse(result.response)
 

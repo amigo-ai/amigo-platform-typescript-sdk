@@ -1,18 +1,18 @@
 import { describe, expect, it, vi, expectTypeOf } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import type { components } from '../../src/generated/api.js'
 import { TEST_API_KEY, fixtures } from '../test-helpers.js'
 
-describe('AmigoClient.defineRoute()', () => {
+describe('ConcurrenceClient.defineRoute()', () => {
   it('binds a GET route literal and dispatches with workspace auto-injection', async () => {
     const mockFetch = vi.fn(async (input: string | URL | Request, init?: RequestInit) => {
       const request = input instanceof Request ? input : new Request(input, init)
-      // workspace_id is auto-injected from the AmigoClient config
+      // workspace_id is auto-injected from the ConcurrenceClient config
       expect(request.url).toBe('https://api.example.com/v1/ws-001/agents?limit=5')
       return Response.json(fixtures.paginatedList([fixtures.agent()]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -36,7 +36,7 @@ describe('AmigoClient.defineRoute()', () => {
       })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -60,7 +60,7 @@ describe('AmigoClient.defineRoute()', () => {
       return Response.json(fixtures.agent(), { status: 201 })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -78,7 +78,7 @@ describe('AmigoClient.defineRoute()', () => {
   it('routes work after being passed across modules / functions', async () => {
     const mockFetch = vi.fn(async () => Response.json(fixtures.paginatedList([fixtures.agent()])))
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -98,9 +98,9 @@ describe('AmigoClient.defineRoute()', () => {
 
 // --- Type-level assertions ---
 
-describe('AmigoClient.defineRoute() — type inference', () => {
+describe('ConcurrenceClient.defineRoute() — type inference', () => {
   it('GET return type carries the path operation data shape', () => {
-    const client = new AmigoClient({ apiKey: 'k', workspaceId: 'ws' })
+    const client = new ConcurrenceClient({ apiKey: 'k', workspaceId: 'ws' })
 
     const getCall = client.defineRoute('GET', '/v1/{workspace_id}/calls/{call_id}')
     expectTypeOf(getCall).toBeFunction()
@@ -119,7 +119,7 @@ describe('AmigoClient.defineRoute() — type inference', () => {
   })
 
   it('POST return type carries the response schema shape', () => {
-    const client = new AmigoClient({ apiKey: 'k', workspaceId: 'ws' })
+    const client = new ConcurrenceClient({ apiKey: 'k', workspaceId: 'ws' })
 
     const createAgent = client.defineRoute('POST', '/v1/{workspace_id}/agents')
     expectTypeOf(createAgent).toBeFunction()
@@ -135,20 +135,20 @@ describe('AmigoClient.defineRoute() — type inference', () => {
   })
 
   it('rejects non-literal path strings at compile time', () => {
-    const client = new AmigoClient({ apiKey: 'k', workspaceId: 'ws' })
+    const client = new ConcurrenceClient({ apiKey: 'k', workspaceId: 'ws' })
     const path: string = '/v1/{workspace_id}/agents'
     // @ts-expect-error — a `string` (non-literal) is not assignable to PathForMethod<'get'>
     client.defineRoute('GET', path)
   })
 
   it('rejects unknown HTTP methods at compile time', () => {
-    const client = new AmigoClient({ apiKey: 'k', workspaceId: 'ws' })
+    const client = new ConcurrenceClient({ apiKey: 'k', workspaceId: 'ws' })
     // @ts-expect-error — TRACE is not in the public method union for defineRoute
     client.defineRoute('TRACE', '/v1/{workspace_id}/agents')
   })
 
   it('rejects path/method mismatches at compile time', () => {
-    const client = new AmigoClient({ apiKey: 'k', workspaceId: 'ws' })
+    const client = new ConcurrenceClient({ apiKey: 'k', workspaceId: 'ws' })
     // @ts-expect-error — calls list endpoint has no DELETE method
     client.defineRoute('DELETE', '/v1/{workspace_id}/calls')
   })

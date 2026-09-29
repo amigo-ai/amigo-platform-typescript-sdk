@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -41,7 +41,7 @@ const entityFixture = {
   updated_at: '2026-01-01T00:00:00Z',
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -84,7 +84,7 @@ describe('WorldResource', () => {
       display_name: 'John Smith',
     }
 
-    const pagedClient = new AmigoClient({
+    const pagedClient = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request, init?: RequestInit) => {

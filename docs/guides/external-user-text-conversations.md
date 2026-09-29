@@ -34,12 +34,12 @@ Run this from an admin/owner backend or setup job. Save the returned
 secret again.
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
 const workspaceId = process.env.AMIGO_WORKSPACE_ID!
 const serviceId = process.env.AMIGO_SERVICE_ID!
 
-const admin = new AmigoClient({
+const admin = new ConcurrenceClient({
   apiKey: process.env.AMIGO_API_KEY!,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL,
@@ -72,12 +72,12 @@ roles.
 Use the external integration credential from your customer backend:
 
 ```typescript
-import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 const workspaceId = process.env.AMIGO_WORKSPACE_ID!
 const serviceId = process.env.AMIGO_SERVICE_ID!
 
-const backend = new AmigoClient({
+const backend = new ConcurrenceClient({
   apiKey: process.env.AMIGO_API_KEY!,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL,
@@ -116,7 +116,7 @@ the subject already has a materialized world entity UUID.
 Use the child `external_user` access token with a separate SDK client:
 
 ```typescript
-const externalUser = new AmigoClient({
+const externalUser = new ConcurrenceClient({
   apiKey: externalSession.access_token,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL,
@@ -188,7 +188,7 @@ tokenState.accessToken = refreshed.access_token
 tokenState.refreshToken = refreshed.refresh_token
 tokenState.accessTokenExpiresAt = Date.now() + refreshed.expires_in * 1000
 
-const refreshedExternalUser = new AmigoClient({
+const refreshedExternalUser = new ConcurrenceClient({
   apiKey: tokenState.accessToken,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL,

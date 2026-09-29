@@ -2,7 +2,7 @@
  * Base class for workspace-scoped resources.
  *
  * Uses the openapi-fetch client (with auth + error + retry middleware)
- * injected from AmigoClient. Resources call typed HTTP methods that
+ * injected from ConcurrenceClient. Resources call typed HTTP methods that
  * flow through the middleware chain automatically.
  */
 

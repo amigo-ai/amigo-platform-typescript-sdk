@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { components } from '../../src/generated/api.js'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -85,7 +85,7 @@ describe('MeResource', () => {
       backend_org_id: null,
     }
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: recordingFetch(() => Response.json(WORKSPACE_FIXTURE, { status: 201 }), captured),
@@ -112,7 +112,7 @@ describe('MeResource', () => {
     // BOTH ``client.workspaces`` and ``client.me`` so a future contributor
     // can't accidentally re-add the legacy name on either resource and
     // bypass this guard.
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async () => new Response(null, { status: 500 }),

@@ -5,9 +5,9 @@
  *
  * @example
  * ```typescript
- * import { AmigoClient } from '@concurrence-hq/platform-sdk'
+ * import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
  *
- * const client = new AmigoClient({
+ * const client = new ConcurrenceClient({
  *   apiKey: 'your-api-key',
  *   workspaceId: 'your-workspace-id',
  * })
@@ -30,7 +30,7 @@ import {
 } from './core/openapi-client.js'
 import {
   mergeRequestOptions,
-  type AmigoRequestOptions,
+  type ConcurrenceRequestOptions,
   type InitParam,
   type OperationFor,
   type ScopedRequestOptions,
@@ -86,7 +86,7 @@ import { WorkspaceDataQueriesResource } from './resources/workspace-data-queries
 import { resolveScopedPlatformClient, scopePlatformClient } from './resources/base.js'
 import type { components, paths } from './generated/api.js'
 import type { MetricValue as MetricValueAlias } from './resources/metrics.js'
-import { withResponse, type AmigoResponse } from './core/utils.js'
+import { withResponse, type ConcurrenceResponse } from './core/utils.js'
 
 export const DEFAULT_BASE_URL = 'https://api.platform.amigo.ai'
 
@@ -121,7 +121,7 @@ type OperationResponse<
     : never
   : never
 
-export interface AmigoClientConfig {
+export interface ConcurrenceClientConfig {
   /** API key created via POST /v1/{workspace_id}/api-keys */
   apiKey: string
 
@@ -133,7 +133,7 @@ export interface AmigoClientConfig {
    *
    * For BFF proxy patterns (e.g., Next.js), point this at your proxy:
    * ```ts
-   * new AmigoClient({ baseUrl: '/api/platform', ... })
+   * new ConcurrenceClient({ baseUrl: '/api/platform', ... })
    * ```
    */
   baseUrl?: string
@@ -176,7 +176,7 @@ export interface AmigoClientConfig {
    * engine share the same origin).
    *
    * ```ts
-   * new AmigoClient({
+   * new ConcurrenceClient({
    *   baseUrl: '/api/platform',  // BFF proxy for REST
    *   agentBaseUrl: 'wss://api.platform.amigo.ai',  // direct for WS
    *   ...
@@ -186,7 +186,7 @@ export interface AmigoClientConfig {
   agentBaseUrl?: string
 }
 
-export class AmigoClient {
+export class ConcurrenceClient {
   readonly workspaceId!: string
   readonly baseUrl!: string
   readonly agentBaseUrl!: string | undefined
@@ -259,7 +259,7 @@ export class AmigoClient {
   /** @internal — exposed for path-level type inference in GET/POST/PUT/etc. */
   readonly api!: PlatformFetch
 
-  constructor(config: AmigoClientConfig) {
+  constructor(config: ConcurrenceClientConfig) {
     if (!config.apiKey || typeof config.apiKey !== 'string') {
       throw new ConfigurationError('apiKey is required and must be a non-empty string')
     }
@@ -280,11 +280,11 @@ export class AmigoClient {
       fetch: config.fetch,
     })
 
-    AmigoClient.hydrate(this, client, config.workspaceId, baseUrl, config.agentBaseUrl)
+    ConcurrenceClient.hydrate(this, client, config.workspaceId, baseUrl, config.agentBaseUrl)
   }
 
-  withOptions(options: ScopedRequestOptions): AmigoClient {
-    return AmigoClient.fromPlatformClient(
+  withOptions(options: ScopedRequestOptions): ConcurrenceClient {
+    return ConcurrenceClient.fromPlatformClient(
       scopePlatformClient(this.api, options),
       this.workspaceId,
       this.baseUrl,
@@ -294,65 +294,65 @@ export class AmigoClient {
 
   async GET<Path extends PathForMethod<'get'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'get'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'get'>>> {
-    return withResponse(await this.resolveApiRequest(path, 'GET', init)) as AmigoResponse<
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'get'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'get'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'GET', init)) as ConcurrenceResponse<
       OperationResponse<Path, 'get'>
     >
   }
 
   async POST<Path extends PathForMethod<'post'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'post'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'post'>>> {
-    return withResponse(await this.resolveApiRequest(path, 'POST', init)) as AmigoResponse<
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'post'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'post'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'POST', init)) as ConcurrenceResponse<
       OperationResponse<Path, 'post'>
     >
   }
 
   async PUT<Path extends PathForMethod<'put'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'put'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'put'>>> {
-    return withResponse(await this.resolveApiRequest(path, 'PUT', init)) as AmigoResponse<
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'put'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'put'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'PUT', init)) as ConcurrenceResponse<
       OperationResponse<Path, 'put'>
     >
   }
 
   async PATCH<Path extends PathForMethod<'patch'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'patch'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'patch'>>> {
-    return withResponse(await this.resolveApiRequest(path, 'PATCH', init)) as AmigoResponse<
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'patch'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'patch'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'PATCH', init)) as ConcurrenceResponse<
       OperationResponse<Path, 'patch'>
     >
   }
 
   async DELETE<Path extends PathForMethod<'delete'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'delete'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'delete'>>> {
-    return withResponse(await this.resolveApiRequest(path, 'DELETE', init)) as AmigoResponse<
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'delete'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'delete'>>> {
+    return withResponse(await this.resolveApiRequest(path, 'DELETE', init)) as ConcurrenceResponse<
       OperationResponse<Path, 'delete'>
     >
   }
 
   async HEAD<Path extends PathForMethod<'head'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'head'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'head'>>> {
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'head'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'head'>>> {
     return withResponse(await this.resolveApiRequest(path, 'HEAD', init), {
       allowEmptyBody: true,
-    }) as AmigoResponse<OperationResponse<Path, 'head'>>
+    }) as ConcurrenceResponse<OperationResponse<Path, 'head'>>
   }
 
   async OPTIONS<Path extends PathForMethod<'options'>>(
     path: Path,
-    ...[init]: InitParam<AmigoRequestOptions<OperationFor<Path, 'options'>>>
-  ): Promise<AmigoResponse<OperationResponse<Path, 'options'>>> {
+    ...[init]: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'options'>>>
+  ): Promise<ConcurrenceResponse<OperationResponse<Path, 'options'>>> {
     return withResponse(await this.resolveApiRequest(path, 'OPTIONS', init), {
       allowEmptyBody: true,
-    }) as AmigoResponse<OperationResponse<Path, 'options'>>
+    }) as ConcurrenceResponse<OperationResponse<Path, 'options'>>
   }
 
   /**
@@ -379,51 +379,51 @@ export class AmigoClient {
     method: 'GET',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'get'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'get'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'get'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'get'>>>
   defineRoute<Path extends PathForMethod<'post'>>(
     method: 'POST',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'post'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'post'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'post'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'post'>>>
   defineRoute<Path extends PathForMethod<'put'>>(
     method: 'PUT',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'put'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'put'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'put'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'put'>>>
   defineRoute<Path extends PathForMethod<'patch'>>(
     method: 'PATCH',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'patch'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'patch'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'patch'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'patch'>>>
   defineRoute<Path extends PathForMethod<'delete'>>(
     method: 'DELETE',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'delete'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'delete'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'delete'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'delete'>>>
   defineRoute<Path extends PathForMethod<'head'>>(
     method: 'HEAD',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'head'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'head'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'head'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'head'>>>
   defineRoute<Path extends PathForMethod<'options'>>(
     method: 'OPTIONS',
     path: Path,
   ): (
-    ...args: InitParam<AmigoRequestOptions<OperationFor<Path, 'options'>>>
-  ) => Promise<AmigoResponse<OperationResponse<Path, 'options'>>>
+    ...args: InitParam<ConcurrenceRequestOptions<OperationFor<Path, 'options'>>>
+  ) => Promise<ConcurrenceResponse<OperationResponse<Path, 'options'>>>
   defineRoute(
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS',
     path: string,
-  ): (init?: AmigoRequestOptions<unknown>) => Promise<AmigoResponse<unknown>> {
-    type AnyDispatcher = (p: string, i?: unknown) => Promise<AmigoResponse<unknown>>
+  ): (init?: ConcurrenceRequestOptions<unknown>) => Promise<ConcurrenceResponse<unknown>> {
+    type AnyDispatcher = (p: string, i?: unknown) => Promise<ConcurrenceResponse<unknown>>
     const dispatcher = this[method] as unknown as AnyDispatcher
-    return (init?: AmigoRequestOptions<unknown>) => dispatcher.call(this, path, init)
+    return (init?: ConcurrenceRequestOptions<unknown>) => dispatcher.call(this, path, init)
   }
 
   private static fromPlatformClient(
@@ -431,20 +431,20 @@ export class AmigoClient {
     workspaceId: string,
     baseUrl: string,
     agentBaseUrl?: string,
-  ): AmigoClient {
-    const instance = Object.create(AmigoClient.prototype) as AmigoClient
-    AmigoClient.hydrate(instance, client, workspaceId, baseUrl, agentBaseUrl)
+  ): ConcurrenceClient {
+    const instance = Object.create(ConcurrenceClient.prototype) as ConcurrenceClient
+    ConcurrenceClient.hydrate(instance, client, workspaceId, baseUrl, agentBaseUrl)
     return instance
   }
 
   private static hydrate(
-    target: AmigoClient,
+    target: ConcurrenceClient,
     client: PlatformFetch,
     workspaceId: string,
     baseUrl: string,
     agentBaseUrl?: string,
   ): void {
-    const mutable = target as Mutable<AmigoClient>
+    const mutable = target as Mutable<ConcurrenceClient>
 
     mutable.workspaceId = workspaceId
     mutable.baseUrl = baseUrl
@@ -511,13 +511,13 @@ export class AmigoClient {
   >(
     path: Path,
     method: Method,
-    init: AmigoRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
+    init: ConcurrenceRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
   ): Promise<{ data?: unknown; error?: unknown; response: Response }> {
     const { baseClient, options } = resolveScopedPlatformClient(this.api)
     const mergedInit = mergeRequestOptions(options, withWorkspaceId(path, init, this.workspaceId))
     const requestInit = applyPlatformRequestOptions(
       baseClient,
-      mergedInit as AmigoRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
+      mergedInit as ConcurrenceRequestOptions<OperationFor<Path, Lowercase<Method>>> | undefined,
     )
 
     switch (method) {
@@ -539,11 +539,26 @@ export class AmigoClient {
   }
 }
 
+// --- Deprecated Amigo* aliases (kept for the @amigo-ai/platform-sdk rename) ---
+
+/**
+ * @deprecated Use {@link ConcurrenceClient}. This is the same class, so
+ * `new AmigoClient(...)` still works and `instanceof` checks match either name.
+ */
+export const AmigoClient = ConcurrenceClient
+/** @deprecated Use {@link ConcurrenceClient}. */
+export type AmigoClient = ConcurrenceClient
+/** @deprecated Use {@link ConcurrenceClientConfig}. */
+export type AmigoClientConfig = ConcurrenceClientConfig
+
 // --- Public exports ---
 
-export type { AmigoClientConfig as AmigoConfig }
+export type { ConcurrenceClientConfig as ConcurrenceConfig }
+/** @deprecated Use {@link ConcurrenceConfig}. */
+export type AmigoConfig = ConcurrenceClientConfig
 
 export {
+  ConcurrenceError,
   AmigoError,
   BadRequestError,
   AuthenticationError,
@@ -558,6 +573,7 @@ export {
   RequestTimeoutError,
   ParseError,
   ConfigurationError,
+  isConcurrenceError,
   isAmigoError,
   isNotFoundError,
   isRateLimitError,
@@ -579,6 +595,7 @@ export type {
   HttpExceptionBody,
   HttpValidationErrorBody,
   UnparseableErrorBody,
+  ConcurrenceErrorWithBody,
   AmigoErrorWithBody,
 } from './core/errors.js'
 
@@ -630,9 +647,14 @@ export type {
   LastResponseInfo,
   ResponseMetadata,
   WithResponseMetadata,
+  ConcurrenceResponse,
   AmigoResponse,
 } from './core/utils.js'
-export type { AmigoRequestOptions, ScopedRequestOptions } from './core/request-options.js'
+export type {
+  ConcurrenceRequestOptions,
+  AmigoRequestOptions,
+  ScopedRequestOptions,
+} from './core/request-options.js'
 export type { RetryOptions } from './core/retry.js'
 
 export { parseRateLimitHeaders } from './core/rate-limit.js'

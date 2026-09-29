@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { mockFetch } from '../helpers/mock-fetch.js'
 
 const TEST_API_KEY = 'test-api-key'
@@ -18,7 +18,7 @@ const FLEET_STATUS_FIXTURE = {
   by_state: { Ready: 3, Allocated: 5 },
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -58,7 +58,7 @@ describe('SessionsResource.getFleetStatus fleet param', () => {
     requestUrls.push(request.url)
     return Response.json(FLEET_STATUS_FIXTURE)
   }
-  const fleetClient = new AmigoClient({
+  const fleetClient = new ConcurrenceClient({
     apiKey: TEST_API_KEY,
     workspaceId: TEST_WORKSPACE_ID,
     fetch: capturingFetch,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -52,7 +52,7 @@ function mockFetch(
 describe('ExternalIntegrationsResource', () => {
   it('manages external integrations and credentials', async () => {
     const bodies: Record<string, unknown> = {}
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({

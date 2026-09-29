@@ -2,12 +2,12 @@ import * as sdk from '../../../dist/index.mjs'
 
 const error = new sdk.AuthenticationError('bad credentials')
 
-if (!(error instanceof sdk.AmigoError)) {
-  throw new Error('AuthenticationError does not extend AmigoError')
+if (!(error instanceof sdk.ConcurrenceError)) {
+  throw new Error('AuthenticationError does not extend ConcurrenceError')
 }
 
-if (!sdk.isAmigoError(error)) {
-  throw new Error('isAmigoError rejected AuthenticationError')
+if (!sdk.isConcurrenceError(error)) {
+  throw new Error('isConcurrenceError rejected AuthenticationError')
 }
 
 console.log('ESM errors: OK')

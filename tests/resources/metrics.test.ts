@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
-  AmigoClient,
+  ConcurrenceClient,
   type BooleanMetricValue,
   type CategoricalMetricValue,
   type MetricCatalogResponse,
@@ -164,7 +164,7 @@ function expectExhaustiveMetricValue(value: MetricValue): string | number | bool
   }
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({

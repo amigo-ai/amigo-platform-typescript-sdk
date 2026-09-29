@@ -26,7 +26,7 @@ Copy [`.env.example`](./.env.example) into your local environment or export the 
 
 ## Examples
 
-- [examples/auth/exchange-api-key.ts](./auth/exchange-api-key.ts): exchange a long-lived API key for a short-lived identity-issued JWT, then use it with `AmigoClient`
+- [examples/auth/exchange-api-key.ts](./auth/exchange-api-key.ts): exchange a long-lived API key for a short-lived identity-issued JWT, then use it with `ConcurrenceClient`
 - [examples/auth/external-user-session.ts](./auth/external-user-session.ts): exchange external-integration client credentials, mint an external-user session, send turns, refresh, and continue the conversation
 - [examples/basic/list-agents.ts](./basic/list-agents.ts): list agents with the public client
 - [examples/analytics/dashboard.ts](./analytics/dashboard.ts): read dashboard and call analytics

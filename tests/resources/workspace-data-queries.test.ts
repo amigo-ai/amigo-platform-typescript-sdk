@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import { mockFetch } from '../helpers/mock-fetch.js'
 
@@ -27,7 +27,7 @@ const QUERY_FIXTURE = {
   deployed_by: '00000000-0000-0000-0000-000000000001',
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -50,7 +50,7 @@ const BASE = `/v1/${TEST_WORKSPACE_ID}`
 describe('PromptLogsResource', () => {
   it('list passes query params through to /v1/{ws}/prompt-logs', async () => {
     let capturedUrl: URL | null = null
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch((url, _method) => {
@@ -78,7 +78,7 @@ describe('PromptLogsResource', () => {
   })
 
   it('list returns the typed PromptLogListResponse shape', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch(() =>
@@ -110,7 +110,7 @@ describe('PromptLogsResource', () => {
   })
 
   it('passes latest model ids through as opaque strings', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch(() =>
@@ -150,7 +150,7 @@ describe('PromptLogsResource', () => {
       },
     ]
     const observedOffsets: string[] = []
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch((url) => {
@@ -172,7 +172,7 @@ describe('PromptLogsResource', () => {
 
   it('listAutoPaging guards against a non-advancing next_offset', async () => {
     let calls = 0
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch(() => {

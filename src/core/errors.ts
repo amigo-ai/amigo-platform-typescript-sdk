@@ -1,6 +1,6 @@
 /**
  * Error hierarchy for the Amigo Platform SDK.
- * All errors extend AmigoError which can be caught with a single catch.
+ * All errors extend ConcurrenceError which can be caught with a single catch.
  */
 
 import type { components } from '../generated/api.js'
@@ -93,7 +93,7 @@ function sanitizeErrorContext(obj: unknown): unknown {
 }
 
 /** Base class for all Amigo Platform SDK errors */
-export class AmigoError<TBody extends PlatformErrorBody = PlatformErrorBody> extends Error {
+export class ConcurrenceError<TBody extends PlatformErrorBody = PlatformErrorBody> extends Error {
   readonly statusCode?: number
   readonly errorCode?: string
   readonly requestId?: string
@@ -146,50 +146,59 @@ export class AmigoError<TBody extends PlatformErrorBody = PlatformErrorBody> ext
   }
 }
 
+/**
+ * @deprecated Use {@link ConcurrenceError}. This is the same class (not a
+ * subclass), so `instanceof AmigoError` still matches every SDK error.
+ */
+export const AmigoError = ConcurrenceError
+/** @deprecated Use {@link ConcurrenceError}. */
+export type AmigoError<TBody extends PlatformErrorBody = PlatformErrorBody> =
+  ConcurrenceError<TBody>
+
 /** 400 Bad Request */
-export class BadRequestError extends AmigoError {
+export class BadRequestError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 400 })
   }
 }
 
 /** 401 Unauthorized — invalid or missing API key */
-export class AuthenticationError extends AmigoError {
+export class AuthenticationError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 401 })
   }
 }
 
 /** 403 Forbidden — insufficient permissions */
-export class PermissionError extends AmigoError {
+export class PermissionError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 403 })
   }
 }
 
 /** 404 Not Found */
-export class NotFoundError extends AmigoError {
+export class NotFoundError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 404 })
   }
 }
 
 /** 409 Conflict — duplicate slug or resource version conflict */
-export class ConflictError extends AmigoError {
+export class ConflictError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 409 })
   }
 }
 
 /** 422 Unprocessable Entity — validation failure */
-export class ValidationError extends AmigoError {
+export class ValidationError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: 422 })
   }
 }
 
 /** 429 Too Many Requests */
-export class RateLimitError extends AmigoError {
+export class RateLimitError extends ConcurrenceError {
   readonly retryAfter?: number
 
   constructor(message: string, ctx: ErrorContext & { retryAfter?: number } = {}) {
@@ -199,7 +208,7 @@ export class RateLimitError extends AmigoError {
 }
 
 /** 5xx Server Error */
-export class ServerError extends AmigoError {
+export class ServerError extends ConcurrenceError {
   constructor(message: string, ctx: ErrorContext = {}) {
     super(message, { ...ctx, statusCode: ctx.statusCode ?? 500 })
   }
@@ -213,7 +222,7 @@ export class ServiceUnavailableError extends ServerError {
 }
 
 /** Network or fetch failure (no HTTP status available) */
-export class NetworkError extends AmigoError {
+export class NetworkError extends ConcurrenceError {
   constructor(message: string, cause?: unknown) {
     super(message)
     if (cause !== undefined) {
@@ -233,7 +242,7 @@ export class RequestTimeoutError extends NetworkError {
 }
 
 /** Failed to parse response body */
-export class ParseError extends AmigoError {
+export class ParseError extends ConcurrenceError {
   readonly body?: string
 
   constructor(message: string, body?: string) {
@@ -243,7 +252,7 @@ export class ParseError extends AmigoError {
 }
 
 /** SDK misconfiguration */
-export class ConfigurationError extends AmigoError {
+export class ConfigurationError extends ConcurrenceError {
   constructor(message: string) {
     super(message)
   }
@@ -331,7 +340,7 @@ function safeStringify(value: unknown): string {
   }
 }
 
-export async function createApiError(response: Response): Promise<AmigoError> {
+export async function createApiError(response: Response): Promise<ConcurrenceError> {
   const { body, rawBody } = await readErrorBody(response)
   const flat = body as LegacyFlatBody
 
@@ -396,9 +405,12 @@ function parseRetryAfter(response: Response): number | undefined {
 
 // --- Type guards ---
 
-export function isAmigoError(err: unknown): err is AmigoError {
-  return err instanceof AmigoError
+export function isConcurrenceError(err: unknown): err is ConcurrenceError {
+  return err instanceof ConcurrenceError
 }
+
+/** @deprecated Use {@link isConcurrenceError}. Same function, kept for the `@amigo-ai/platform-sdk` rename. */
+export const isAmigoError: (err: unknown) => err is ConcurrenceError = isConcurrenceError
 
 export function isNotFoundError(err: unknown): err is NotFoundError {
   return err instanceof NotFoundError
@@ -439,13 +451,16 @@ export function isNetworkError(err: unknown): err is NetworkError {
 // --- Body type guards ---
 
 /**
- * Narrowed AmigoError where `errorBody` is guaranteed non-undefined.
+ * Narrowed ConcurrenceError where `errorBody` is guaranteed non-undefined.
  * Used as the return-type for body type guards so consumers don't need to
  * re-assert `errorBody !== undefined` after the guard.
  */
-export type AmigoErrorWithBody<TBody extends PlatformErrorBody> = AmigoError<TBody> & {
+export type ConcurrenceErrorWithBody<TBody extends PlatformErrorBody> = ConcurrenceError<TBody> & {
   readonly errorBody: TBody
 }
+
+/** @deprecated Use {@link ConcurrenceErrorWithBody}. */
+export type AmigoErrorWithBody<TBody extends PlatformErrorBody> = ConcurrenceErrorWithBody<TBody>
 
 /**
  * True when `err.errorBody` is the FastAPI 422 validation-error shape (an
@@ -462,8 +477,8 @@ export type AmigoErrorWithBody<TBody extends PlatformErrorBody> = AmigoError<TBo
  */
 export function isHttpValidationError(
   err: unknown,
-): err is AmigoErrorWithBody<HttpValidationErrorBody> {
-  if (!(err instanceof AmigoError)) return false
+): err is ConcurrenceErrorWithBody<HttpValidationErrorBody> {
+  if (!(err instanceof ConcurrenceError)) return false
   const body = err.errorBody as { detail?: unknown } | undefined
   return Array.isArray(body?.detail)
 }
@@ -473,8 +488,8 @@ export function isHttpValidationError(
  * (`{ detail: string | object | array }`, possibly with `error_code` /
  * `request_id`). This is the most common error body across platform-api.
  */
-export function isHttpException(err: unknown): err is AmigoErrorWithBody<HttpExceptionBody> {
-  if (!(err instanceof AmigoError)) return false
+export function isHttpException(err: unknown): err is ConcurrenceErrorWithBody<HttpExceptionBody> {
+  if (!(err instanceof ConcurrenceError)) return false
   const body = err.errorBody
   if (!body) return false
   if (Array.isArray((body as { detail?: unknown }).detail)) {
@@ -491,8 +506,8 @@ export function isHttpException(err: unknown): err is AmigoErrorWithBody<HttpExc
  */
 export function isUnparseableErrorBody(
   err: unknown,
-): err is AmigoErrorWithBody<UnparseableErrorBody> {
-  if (!(err instanceof AmigoError)) return false
+): err is ConcurrenceErrorWithBody<UnparseableErrorBody> {
+  if (!(err instanceof ConcurrenceError)) return false
   const body = err.errorBody as { raw_body?: unknown } | undefined
   return typeof body?.raw_body === 'string'
 }

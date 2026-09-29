@@ -47,7 +47,7 @@ export interface ExternalUserSessionTokenRequest {
   scope?: string
   /**
    * Parent external-integration access token. When omitted, the SDK uses the
-   * bearer token configured on this AmigoClient instance.
+   * bearer token configured on this ConcurrenceClient instance.
    */
   parentAccessToken?: string
 }

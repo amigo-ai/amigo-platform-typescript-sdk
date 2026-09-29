@@ -40,8 +40,14 @@ Typed from the committed `openapi.json` snapshot, validated on active LTS Node r
 >
 > ```diff
 > - import { AmigoClient } from '@amigo-ai/platform-sdk'
-> + import { AmigoClient } from '@concurrence-hq/platform-sdk'
+> + import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 > ```
+>
+> The `Amigo*` names (`AmigoClient`, `AmigoClientConfig`, `AmigoConfig`,
+> `AmigoError`, `isAmigoError`, `AmigoErrorWithBody`, `AmigoResponse`,
+> `AmigoRequestOptions`) are still exported as deprecated aliases of their
+> `Concurrence*` equivalents, so changing only the package name is enough to
+> upgrade. `instanceof AmigoError` keeps matching every error the SDK throws.
 
 ## Platform context
 
@@ -77,9 +83,9 @@ npm install @concurrence-hq/platform-sdk
 ## Quick start
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: 'your-api-key',
   workspaceId: 'your-workspace-id',
 })
@@ -105,7 +111,7 @@ console.log(stats.total_calls, stats.avg_duration_seconds)
 
 ### API key (server-to-server)
 
-Pass `apiKey` and `workspaceId` to `AmigoClient`. Best for backend services and scripts.
+Pass `apiKey` and `workspaceId` to `ConcurrenceClient`. Best for backend services and scripts.
 
 ### Device code flow (CLI and desktop apps)
 
@@ -136,7 +142,10 @@ const tokens = new TokenManager({ storage: new FileTokenStorage() })
 await tokens.store(result)
 
 // Use the token
-const client = new AmigoClient({ apiKey: result.accessToken, workspaceId: result.workspaceId })
+const client = new ConcurrenceClient({
+  apiKey: result.accessToken,
+  workspaceId: result.workspaceId,
+})
 ```
 
 See [`examples/auth/device-code-login.ts`](./examples/auth/device-code-login.ts) for a complete working example.
@@ -158,7 +167,7 @@ as the `api_key` form field, so the configured client key is never sent over
 the wire on the exchange call.
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
 const apiKey = process.env.AMIGO_API_KEY
 const workspaceId = process.env.AMIGO_WORKSPACE_ID
@@ -166,7 +175,7 @@ if (!apiKey || !workspaceId) {
   throw new Error('AMIGO_API_KEY and AMIGO_WORKSPACE_ID must be set')
 }
 
-const client = new AmigoClient({ apiKey, workspaceId })
+const client = new ConcurrenceClient({ apiKey, workspaceId })
 
 const { access_token, expires_in, scope } = await client.tokens.exchangeApiKey({
   apiKey,
@@ -178,7 +187,7 @@ const { access_token, expires_in, scope } = await client.tokens.exchangeApiKey({
 console.log(`Got JWT, expires in ${expires_in}s with scope "${scope}"`)
 
 // Use the JWT in a second client. JWTs are passed as `apiKey` — Bearer auth.
-const scopedClient = new AmigoClient({ apiKey: access_token, workspaceId })
+const scopedClient = new ConcurrenceClient({ apiKey: access_token, workspaceId })
 
 const { items: agents } = await scopedClient.agents.list({ limit: 5 })
 console.log(agents.map((agent) => agent.name))
@@ -205,9 +214,9 @@ Create a parent external-integration credential from an admin/owner backend.
 The plaintext `client_secret` is returned only once, from create or rotate:
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
-const admin = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
+const admin = new ConcurrenceClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
 
 const integration = await admin.externalIntegrations.create({
   name: 'customer-portal',
@@ -239,7 +248,7 @@ At runtime, the backend sequence is:
 ```typescript
 import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
-const backend = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
+const backend = new ConcurrenceClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
 
 const parent = await backend.tokens.exchangeClientCredentials({
   clientId: process.env.AMIGO_EXTERNAL_INTEGRATION_CLIENT_ID!,
@@ -257,7 +266,7 @@ const session = await backend.tokens.createExternalUserSession({
   ttlSeconds: 1800,
 })
 
-const externalUser = new AmigoClient({
+const externalUser = new ConcurrenceClient({
   apiKey: session.access_token,
   workspaceId,
 })
@@ -298,7 +307,7 @@ credential.
 ### Retry options
 
 ```typescript
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: 'your-key',
   workspaceId: 'your-workspace-id',
   retry: {
@@ -419,7 +428,7 @@ console.log(data.items)
 Use hooks for logging, tracing, and metrics without wrapping `fetch` yourself:
 
 ```typescript
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: 'your-api-key',
   workspaceId: 'your-workspace-id',
   hooks: {
@@ -938,7 +947,7 @@ const event = await parseWebhookEvent(rawBody, signature, secret)
 For frontend apps that use a Backend-for-Frontend proxy:
 
 ```typescript
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: 'bff-proxy',
   workspaceId: 'ws-id',
   baseUrl: '/api/platform',
@@ -951,7 +960,7 @@ const client = new AmigoClient({
 The SDK now exposes first-class async auto-pagination helpers on collection resources:
 
 ```typescript
-import { AmigoClient } from '@concurrence-hq/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
 for await (const agent of client.agents.listAutoPaging({ limit: 100 })) {
   console.log(agent.name)
@@ -966,12 +975,12 @@ For custom pagination flows, the lower-level `paginate(...)` utility remains ava
 
 ## Error handling
 
-All SDK errors extend `AmigoError`. Use type guards for specific handling:
+All SDK errors extend `ConcurrenceError`. Use type guards for specific handling:
 
 ```typescript
 import {
-  AmigoClient,
-  AmigoError,
+  ConcurrenceClient,
+  ConcurrenceError,
   isNotFoundError,
   isRateLimitError,
   isAuthenticationError,
@@ -986,7 +995,7 @@ try {
     console.log('Rate limited, retry after:', err.retryAfter, 'seconds')
   } else if (isAuthenticationError(err)) {
     console.log('Invalid API key')
-  } else if (err instanceof AmigoError) {
+  } else if (err instanceof ConcurrenceError) {
     console.log('API error:', err.message, err.errorCode, err.requestId)
   }
 }
@@ -1013,7 +1022,7 @@ Webhook verification errors are separate from API transport errors and throw `We
 ## CommonJS (CJS) usage
 
 ```javascript
-const { AmigoClient } = require('@concurrence-hq/platform-sdk')
+const { ConcurrenceClient } = require('@concurrence-hq/platform-sdk')
 ```
 
 ## License

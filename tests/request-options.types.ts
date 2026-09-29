@@ -1,5 +1,5 @@
 import type { MethodResponse } from 'openapi-fetch'
-import { AmigoClient } from '../src/index.js'
+import { ConcurrenceClient } from '../src/index.js'
 
 // Compile-only assertions for the SDK's low-level request helper types.
 
@@ -10,7 +10,7 @@ type TypeEqual<Left, Right> =
 type Assert<Condition extends true> = Condition
 type SdkPayload<Data> = Omit<Data, '_request_id' | 'lastResponse'>
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: 'test-key',
   workspaceId: 'ws-001',
 })

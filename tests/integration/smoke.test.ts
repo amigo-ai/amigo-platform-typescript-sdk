@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeAll } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const API_KEY = process.env.AMIGO_TEST_API_KEY
 const WORKSPACE_ID = process.env.AMIGO_TEST_WORKSPACE_ID
 const BASE_URL = process.env.AMIGO_TEST_BASE_URL ?? 'https://api-staging.platform.amigo.ai'
 
 describe.skipIf(!API_KEY || !WORKSPACE_ID)('Integration: smoke', () => {
-  // Lazy init — AmigoClient constructor throws without valid credentials,
+  // Lazy init — ConcurrenceClient constructor throws without valid credentials,
   // so we must not construct it when the suite is skipped.
-  let client: AmigoClient
+  let client: ConcurrenceClient
 
   beforeAll(() => {
-    client = new AmigoClient({
+    client = new ConcurrenceClient({
       apiKey: API_KEY!,
       workspaceId: WORKSPACE_ID!,
       baseUrl: BASE_URL,
