@@ -1,4 +1,4 @@
-import type { SttProvider, TtsProvider, VoiceSessionProvider } from '@amigo-ai/platform-sdk'
+import type { SttProvider, TtsProvider, VoiceSessionProvider } from '@concurrence-hq/platform-sdk'
 
 export const defaultVoiceRuntime = 'amigo' satisfies VoiceSessionProvider
 export const defaultSttProvider = 'deepgram' satisfies SttProvider

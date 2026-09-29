@@ -1,5 +1,5 @@
 import { describe, it, expect, expectTypeOf } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type {
   CreateIntegrationRequest,
@@ -84,7 +84,7 @@ function mockFetch(
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({

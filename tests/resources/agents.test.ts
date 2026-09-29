@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 import type { components } from '../../src/generated/api.js'
 import type { TtsProvider, VoiceSessionProvider } from '../../src/index.js'
@@ -50,7 +50,7 @@ const AGENT_VERSION_FIXTURE = {
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -97,7 +97,7 @@ describe('AgentsResource', () => {
   })
 
   it('auto-pages agents', async () => {
-    const pagedClient = new AmigoClient({
+    const pagedClient = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request, init?: RequestInit) => {

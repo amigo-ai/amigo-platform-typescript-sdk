@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient, isWorkspaceEventStreamError } from '../../src/index.js'
+import { ConcurrenceClient, isWorkspaceEventStreamError } from '../../src/index.js'
 import type { WorkspaceEventStreamError, WorkspaceSSEEvent } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -66,7 +66,7 @@ describe('EventsResource', () => {
       'id: 1700000000003\nevent: call.ended\ndata: {"call_sid":"CA-1","duration_seconds":42}\n\n',
     ])
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -109,7 +109,7 @@ describe('EventsResource', () => {
   it('reconnects with Last-Event-ID after a server drop', async () => {
     const requests: Request[] = []
     let attempt = 0
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -163,7 +163,7 @@ describe('EventsResource', () => {
 
   it('seeds Last-Event-ID from the lastEventId option on first connect', async () => {
     let firstRequest: Request | undefined
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -195,7 +195,7 @@ describe('EventsResource', () => {
       'retry: 3000\n\n',
       'id: 1700000000001\nevent: call.started\ndata: {"call_sid":"CA-1","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -233,7 +233,7 @@ describe('EventsResource', () => {
       'retry: 3000\n\n',
       'id: 1\nevent: call.started\ndata: {"call_sid":"CA-1","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -268,7 +268,7 @@ describe('EventsResource', () => {
       // Comment line + valid frame.
       ': heartbeat 1700000000\nid: 1700000000001\nevent: call.started\ndata: {"call_sid":"CA-OK","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -299,7 +299,7 @@ describe('EventsResource', () => {
       '00001\nevent: call.start',
       'ed\ndata: {"call_sid":"CA-CHUNK","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -322,7 +322,7 @@ describe('EventsResource', () => {
 
   it('401 response triggers onError exactly once and stops reconnecting', async () => {
     let calls = 0
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -358,7 +358,7 @@ describe('EventsResource', () => {
 
   it('attaches the Bearer token via the SDK auth middleware', async () => {
     let observedAuth: string | null = null
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -389,7 +389,7 @@ describe('EventsResource', () => {
       'retry: 3000\n\n',
       'id: 0\nevent: error\ndata: {"code":"too_many_streams","message":"cap reached","max_streams":50}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -418,7 +418,7 @@ describe('EventsResource', () => {
 
   it('treats stream_unavailable as recoverable (transport-error path)', async () => {
     let calls = 0
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -459,7 +459,7 @@ describe('EventsResource', () => {
       'id: 0\nevent: stream.opened\ndata: {"code":"ok","connection_id":"abc","max_streams_per_workspace":50}\n\n',
       'id: 1\nevent: call.started\ndata: {"call_sid":"CA-x","direction":"inbound","service_id":"00000000-0000-4000-8000-000000000001"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -493,7 +493,7 @@ describe('EventsResource', () => {
   it('does not reconnect after the caller aborts during the first connection', async () => {
     let calls = 0
     const { stream, close } = pendingStream(['retry: 3000\n\n'])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({

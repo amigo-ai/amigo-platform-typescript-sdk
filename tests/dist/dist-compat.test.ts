@@ -34,7 +34,7 @@ describe('Distribution compatibility', () => {
       expect(runFixture('cjs-exports.cjs').trim()).toBe('CJS exports: OK')
     })
 
-    test('AmigoClient can be instantiated', () => {
+    test('ConcurrenceClient can be instantiated', () => {
       expect(runFixture('cjs-instantiate.cjs').trim()).toBe('CJS instantiation: OK')
     })
 
@@ -48,7 +48,7 @@ describe('Distribution compatibility', () => {
       expect(runFixture('esm-exports.mjs').trim()).toBe('ESM exports: OK')
     })
 
-    test('AmigoClient can be instantiated', () => {
+    test('ConcurrenceClient can be instantiated', () => {
       expect(runFixture('esm-instantiate.mjs').trim()).toBe('ESM instantiation: OK')
     })
 

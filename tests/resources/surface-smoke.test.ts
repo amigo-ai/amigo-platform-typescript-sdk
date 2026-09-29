@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { TEST_API_KEY, TEST_WORKSPACE_ID } from '../test-helpers.js'
 
 const EMPTY_BODY = {} as never
@@ -21,7 +21,7 @@ function createClientWithRecorder() {
     })
   })
 
-  const client = new AmigoClient({
+  const client = new ConcurrenceClient({
     apiKey: TEST_API_KEY,
     workspaceId: TEST_WORKSPACE_ID,
     fetch: fetchImpl as typeof fetch,

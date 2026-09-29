@@ -9,7 +9,7 @@
  *     npx tsx examples/auth/external-user-session.ts
  */
 
-import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 function requireEnv(name: string): string {
   const value = process.env[name]
@@ -29,7 +29,7 @@ async function main() {
   const serviceId = requireEnv('AMIGO_SERVICE_ID')
   const baseUrl = process.env.AMIGO_BASE_URL
 
-  const backendClient = new AmigoClient({
+  const backendClient = new ConcurrenceClient({
     apiKey: requireEnv('AMIGO_API_KEY'),
     workspaceId,
     baseUrl,
@@ -50,7 +50,7 @@ async function main() {
     ttlSeconds: 1800,
   })
 
-  const externalClient = new AmigoClient({
+  const externalClient = new ConcurrenceClient({
     apiKey: externalSession.access_token,
     workspaceId,
     baseUrl,
@@ -73,7 +73,7 @@ async function main() {
     workspaceId,
   })
 
-  const refreshedExternalClient = new AmigoClient({
+  const refreshedExternalClient = new ConcurrenceClient({
     apiKey: refreshed.access_token,
     workspaceId,
     baseUrl,

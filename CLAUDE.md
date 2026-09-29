@@ -1,6 +1,6 @@
-# @amigo-ai/platform-sdk
+# @concurrence-hq/platform-sdk
 
-Official TypeScript SDK for the Amigo Platform API (`@amigo-ai/platform-sdk` on npm).
+Official TypeScript SDK for the Amigo Platform API (`@concurrence-hq/platform-sdk` on npm).
 
 ## Key Commands
 
@@ -29,15 +29,15 @@ src/generated/api.ts  (auto-generated -- DO NOT EDIT)
 src/resources/*.ts  (typed resource classes using openapi-fetch client)
        |
        v
-src/index.ts  (AmigoClient -- entry point, injects client into all resources)
+src/index.ts  (ConcurrenceClient -- entry point, injects client into all resources)
 ```
 
 ```
 src/
-  index.ts              -- AmigoClient class, config validation, public re-exports
+  index.ts              -- ConcurrenceClient class, config validation, public re-exports
   core/
     auth.ts             -- API key auth middleware
-    errors.ts           -- Error hierarchy (AmigoError base), error factory, error middleware
+    errors.ts           -- Error hierarchy (ConcurrenceError base), error factory, error middleware
     retry.ts            -- Exponential backoff with jitter, Retry-After header support
     openapi-client.ts   -- Creates openapi-fetch Client with auth + error + retry middleware
     utils.ts            -- Response helpers
@@ -88,7 +88,11 @@ scripts/
 
 ### Error Hierarchy
 
-`AmigoError` is the base class. Subclasses map to HTTP status codes (e.g., `AuthenticationError` for 401, `NotFoundError` for 404, `RateLimitError` for 429). `createApiError()` maps response status to the right error class. `createErrorMiddleware()` plugs into openapi-fetch middleware.
+`ConcurrenceError` is the base class. Subclasses map to HTTP status codes (e.g., `AuthenticationError` for 401, `NotFoundError` for 404, `RateLimitError` for 429). `createApiError()` maps response status to the right error class. `createErrorMiddleware()` plugs into openapi-fetch middleware.
+
+### Deprecated `Amigo*` aliases
+
+The package was renamed from `@amigo-ai/platform-sdk`. `AmigoClient`, `AmigoClientConfig`, `AmigoConfig`, `AmigoError`, `isAmigoError`, `AmigoErrorWithBody`, `AmigoResponse`, and `AmigoRequestOptions` stay exported as `@deprecated` aliases that point at the same `Concurrence*` value or type (never a subclass), so `instanceof AmigoError` keeps matching SDK errors. Use the `Concurrence*` names in new code, docs, and examples; `tests/core/deprecated-aliases.test.ts` guards the aliases.
 
 ### Retry with Jitter
 
@@ -114,7 +118,7 @@ The codegen script uses this repository's committed `openapi.json` by default. A
 
 ## Breaking Changes
 
-Response field removal, rename, or type change breaks this SDK and all consumers (developer-console). Coordinate with `amigo-ai/platform` (spec change) and `amigo-ai/developer-console` (UI updates) before releasing a version with breaking type changes.
+Response field removal, rename, or type change breaks this SDK and all consumers (developer-console). Coordinate with `concurrence-hq/platform` (spec change) and `concurrence-hq/developer-console` (UI updates) before releasing a version with breaking type changes.
 
 ## Cross-Repo Contract
 

@@ -42,10 +42,10 @@ try {
     fixtureDir: path.join(tempRoot, 'esm-fixture'),
     entryFile: 'index.mjs',
     source: [
-      "import * as sdk from '@amigo-ai/platform-sdk'",
-      "import { AmigoClient, parseRateLimitHeaders } from '@amigo-ai/platform-sdk'",
+      "import * as sdk from '@concurrence-hq/platform-sdk'",
+      "import { ConcurrenceClient, parseRateLimitHeaders } from '@concurrence-hq/platform-sdk'",
       '',
-      "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
+      "const client = new ConcurrenceClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       '',
       "if (!client.agents || typeof parseRateLimitHeaders !== 'function') {",
       "  throw new Error('ESM smoke test failed')",
@@ -66,10 +66,10 @@ try {
     packageJson: { type: 'commonjs' },
     entryFile: 'index.cjs',
     source: [
-      "const sdk = require('@amigo-ai/platform-sdk')",
-      'const { AmigoClient, parseRateLimitHeaders } = sdk',
+      "const sdk = require('@concurrence-hq/platform-sdk')",
+      'const { ConcurrenceClient, parseRateLimitHeaders } = sdk',
       '',
-      "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
+      "const client = new ConcurrenceClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       '',
       "if (!client.agents || typeof parseRateLimitHeaders !== 'function') {",
       "  throw new Error('CJS smoke test failed')",
@@ -89,14 +89,23 @@ try {
     fixtureDir: path.join(tempRoot, 'esm-types-fixture'),
     packageJson: { type: 'module' },
     source: [
-      "import { AmigoClient, parseRateLimitHeaders, type paths } from '@amigo-ai/platform-sdk'",
+      "import { ConcurrenceClient, parseRateLimitHeaders, type paths } from '@concurrence-hq/platform-sdk'",
+      "import { AmigoClient, AmigoError, type AmigoClientConfig } from '@concurrence-hq/platform-sdk'",
       '',
-      "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
+      "const client = new ConcurrenceClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       "const path: keyof paths = '/v1/{workspace_id}/agents'",
       'parseRateLimitHeaders(new Headers())',
       '',
+      '// Deprecated Amigo* aliases must stay usable as both values and types.',
+      "const legacyConfig: AmigoClientConfig = { apiKey: 'test-key', workspaceId: 'ws-001' }",
+      'const legacy: AmigoClient = new AmigoClient(legacyConfig)',
+      'const current: ConcurrenceClient = legacy',
+      "const legacyError: AmigoError = new AmigoError('boom')",
+      '',
       'void client',
       'void path',
+      'void current',
+      'void legacyError',
       '',
     ].join('\n'),
   })
@@ -106,9 +115,9 @@ try {
     fixtureDir: path.join(tempRoot, 'cjs-types-fixture'),
     packageJson: { type: 'commonjs' },
     source: [
-      "import sdk = require('@amigo-ai/platform-sdk')",
+      "import sdk = require('@concurrence-hq/platform-sdk')",
       '',
-      "const client = new sdk.AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
+      "const client = new sdk.ConcurrenceClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       'const parseRateLimitHeaders: typeof sdk.parseRateLimitHeaders = sdk.parseRateLimitHeaders',
       'parseRateLimitHeaders(new Headers())',
       '',
@@ -295,7 +304,7 @@ function runTypeFixture({ packageDir, fixtureDir, packageJson, source }) {
 }
 
 function setupFixturePackage({ packageDir, fixtureDir, packageJson }) {
-  const sdkDir = path.join(fixtureDir, 'node_modules/@amigo-ai/platform-sdk')
+  const sdkDir = path.join(fixtureDir, 'node_modules/@concurrence-hq/platform-sdk')
   const nodeModulesDir = path.join(fixtureDir, 'node_modules')
 
   fs.mkdirSync(path.dirname(sdkDir), { recursive: true })

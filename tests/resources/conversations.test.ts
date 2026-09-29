@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  AmigoClient,
+  ConcurrenceClient,
   BadRequestError,
   ConfigurationError,
   NotFoundError,
@@ -55,7 +55,7 @@ describe('ConversationsResource', () => {
       service_id: 'svc-00000000-0000-0000-0000-000000000001',
       entity_id: 'ent-00000000-0000-0000-0000-000000000001',
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -115,7 +115,7 @@ describe('ConversationsResource', () => {
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:01:00Z',
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -158,7 +158,7 @@ describe('ConversationsResource', () => {
         created_at: '2026-01-01T00:00:00Z',
         updated_at: '2026-01-01T00:01:00Z',
       }
-      const client = new AmigoClient({
+      const client = new ConcurrenceClient({
         apiKey: TEST_API_KEY,
         workspaceId: TEST_WORKSPACE_ID,
         fetch: mockFetch({
@@ -186,7 +186,7 @@ describe('ConversationsResource', () => {
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:01:00Z',
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -220,7 +220,7 @@ describe('ConversationsResource', () => {
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:01:00Z',
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -240,7 +240,7 @@ describe('ConversationsResource', () => {
   it('closes a conversation', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     let deleteCalled = false
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -281,7 +281,7 @@ describe('ConversationsResource', () => {
       created_at: '2026-01-01T00:00:00Z',
       updated_at: '2026-01-01T00:05:00Z',
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -310,7 +310,7 @@ describe('ConversationsResource', () => {
 
   it('routes switchChannel failures through the central error pipeline', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -355,7 +355,7 @@ describe('ConversationsResource', () => {
       ],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -399,7 +399,7 @@ describe('ConversationsResource', () => {
       output: [],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -439,7 +439,7 @@ describe('ConversationsResource', () => {
       ],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -484,7 +484,7 @@ describe('ConversationsResource', () => {
       output: [],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -519,7 +519,7 @@ describe('ConversationsResource', () => {
       output: [],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -558,7 +558,7 @@ describe('ConversationsResource', () => {
       output: [],
       tool_calls: [],
     }
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -582,7 +582,7 @@ describe('ConversationsResource', () => {
   it('createTurn rejects poll combined with a message (fail fast, no server round-trip)', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     let called = false
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -600,7 +600,7 @@ describe('ConversationsResource', () => {
   })
 
   it('routes GET failures through the central error pipeline', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -613,7 +613,7 @@ describe('ConversationsResource', () => {
   })
 
   it('routes POST failures through the central error pipeline', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -628,7 +628,7 @@ describe('ConversationsResource', () => {
   })
 
   it('routes DELETE failures through the central error pipeline', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -642,7 +642,7 @@ describe('ConversationsResource', () => {
 
   it('routes createTurn failures through the central error pipeline', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -657,7 +657,7 @@ describe('ConversationsResource', () => {
   })
 
   it('builds a text-stream URL from the client baseUrl', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -689,7 +689,7 @@ describe('ConversationsResource', () => {
   })
 
   it('maps non-TLS REST base URLs to ws text-stream URLs', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'http://localhost:8000',
@@ -703,7 +703,7 @@ describe('ConversationsResource', () => {
   })
 
   it('supports preview/custom text-stream URL overrides', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -729,7 +729,7 @@ describe('ConversationsResource', () => {
   it('applies scoped request options while preserving text-stream URL derivation', async () => {
     let scopedHeader: string | null = null
     const conversationId = '00000000-0000-4000-8000-000000000001'
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -762,7 +762,7 @@ describe('ConversationsResource', () => {
   })
 
   it('supports token query auth fallback for non-subprotocol-safe keys', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -782,7 +782,7 @@ describe('ConversationsResource', () => {
   })
 
   it('includes tool_events=true when toolEvents is enabled', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -800,7 +800,7 @@ describe('ConversationsResource', () => {
   })
 
   it('omits tool_events when toolEvents is false or undefined', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -816,7 +816,7 @@ describe('ConversationsResource', () => {
   })
 
   it('places tool_events before token in query parameter order', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -841,7 +841,7 @@ describe('ConversationsResource', () => {
   })
 
   it('rejects caller-supplied query parameters on text-stream URL overrides', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -857,7 +857,7 @@ describe('ConversationsResource', () => {
   })
 
   it('rejects non-WebSocket text-stream URL overrides', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -872,7 +872,7 @@ describe('ConversationsResource', () => {
   })
 
   it('fails clearly when deriving a text-stream URL from a relative baseUrl', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -884,7 +884,7 @@ describe('ConversationsResource', () => {
   })
 
   it('fails clearly when a text-stream URL override is malformed', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -899,7 +899,7 @@ describe('ConversationsResource', () => {
   })
 
   it('fails clearly when deriving a text-stream URL from a non-http baseUrl', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'http+unix://socket/api',
@@ -911,7 +911,7 @@ describe('ConversationsResource', () => {
   })
 
   it('fails clearly when deriving a text-stream URL from a path-prefixed baseUrl', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com/v1/platform',
@@ -932,7 +932,7 @@ describe('ConversationsResource', () => {
   })
 
   it('rejects invalid text-stream token query values before building URLs', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -950,7 +950,7 @@ describe('ConversationsResource', () => {
   })
 
   it('builds a session-connect URL from the client baseUrl', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -977,7 +977,7 @@ describe('ConversationsResource', () => {
   })
 
   it('maps non-TLS REST base URLs to ws session-connect URLs', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'http://localhost:8000',
@@ -993,7 +993,7 @@ describe('ConversationsResource', () => {
   })
 
   it('emits tool_events=false only when explicitly disabled', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -1011,7 +1011,7 @@ describe('ConversationsResource', () => {
   })
 
   it('supports preview/custom session-connect URL overrides', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -1032,7 +1032,7 @@ describe('ConversationsResource', () => {
   })
 
   it('rejects session-connect URL overrides with query strings or fragments', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: 'https://api.example.com',
@@ -1048,7 +1048,7 @@ describe('ConversationsResource', () => {
   })
 
   it('rejects relative baseUrl when no session-connect URL override is provided', () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: '/api/platform',
@@ -1091,7 +1091,7 @@ describe('ConversationsResource', () => {
       'event: message\ndata: {"role":"agent","text":"Hello world"}\n\n',
       'event: done\ndata: {"conversation_id":"00000000-0000-4000-8000-000000000001","status":"active","turn_count":2}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -1132,7 +1132,7 @@ describe('ConversationsResource', () => {
   it('streamTurn forwards include_tool_calls=true on the stream URL', async () => {
     const conversationId = '00000000-0000-4000-8000-000000000001'
     let requestUrl: string | undefined
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -1177,7 +1177,7 @@ describe('ConversationsResource', () => {
       // Comment line is ignored, valid frame after.
       ': keep-alive\nevent: token\ndata: {"text":"ok"}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -1206,7 +1206,7 @@ describe('ConversationsResource', () => {
     const stream = sseStream([
       'event: error\ndata: {"code":"upstream_error","message":"agent unreachable","status_code":503,"retryable":true}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -1250,7 +1250,7 @@ describe('ConversationsResource', () => {
     // wire the fields are simply absent and pass through the parser.
     const conversationId = '00000000-0000-4000-8000-000000000001'
     const stream = sseStream(['event: error\ndata: {"message":"legacy"}\n\n'])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -1298,7 +1298,7 @@ describe('ConversationsResource', () => {
       'event: done\nda',
       'ta: {"conversation_id":"x","status":"active","turn_count":1}\n\n',
     ])
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({

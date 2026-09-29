@@ -13,7 +13,7 @@ import { createApiError, ConfigurationError, NetworkError, RequestTimeoutError }
 import { parseRateLimitHeaders } from './rate-limit.js'
 import {
   stripRequestControls,
-  type AmigoRequestOptions,
+  type ConcurrenceRequestOptions,
   type RequestControlOptions,
 } from './request-options.js'
 import { shouldRetry, computeDelay, resolveRetryOptions, type RetryOptions } from './retry.js'
@@ -87,7 +87,7 @@ export function createPlatformClient(config: ClientConfig): PlatformFetch {
 
   platformClientContext.set(client, { transport, defaults, baseUrl: config.baseUrl })
 
-  // Error middleware — convert HTTP errors to typed AmigoError subclasses
+  // Error middleware — convert HTTP errors to typed ConcurrenceError subclasses
   const errorMiddleware: Middleware = {
     async onResponse({ response }) {
       if (!response.ok) {
@@ -134,8 +134,8 @@ export function createPlatformClient(config: ClientConfig): PlatformFetch {
 
 export function applyPlatformRequestOptions<Operation>(
   client: PlatformFetch,
-  init: AmigoRequestOptions<Operation> | undefined,
-): AmigoRequestOptions<Operation> | undefined {
+  init: ConcurrenceRequestOptions<Operation> | undefined,
+): ConcurrenceRequestOptions<Operation> | undefined {
   if (!init) {
     return undefined
   }
@@ -144,7 +144,7 @@ export function applyPlatformRequestOptions<Operation>(
   const stripped = stripRequestControls(init)
 
   if (!context) {
-    return stripped as AmigoRequestOptions<Operation> | undefined
+    return stripped as ConcurrenceRequestOptions<Operation> | undefined
   }
 
   const overrideFetch = stripped?.fetch
@@ -155,7 +155,7 @@ export function applyPlatformRequestOptions<Operation>(
     init.retry !== undefined
 
   if (!hasControlOverride) {
-    return stripped as AmigoRequestOptions<Operation> | undefined
+    return stripped as ConcurrenceRequestOptions<Operation> | undefined
   }
 
   const transport = toRequestTransport(
@@ -170,7 +170,7 @@ export function applyPlatformRequestOptions<Operation>(
   return {
     ...stripped,
     fetch,
-  } as AmigoRequestOptions<Operation>
+  } as ConcurrenceRequestOptions<Operation>
 }
 
 /** @internal */

@@ -49,7 +49,7 @@ type RequiredKeysOf<T extends object> = Exclude<
 export type InitParam<Init extends object> =
   RequiredKeysOf<Init> extends never ? [init?: Init] : [init: Init]
 
-export type AmigoRequestOptions<Operation = unknown> = Omit<
+export type ConcurrenceRequestOptions<Operation = unknown> = Omit<
   RewriteParams<FetchOptions<Operation>>,
   'timeout' | 'maxRetries' | 'retry'
 > & {
@@ -57,6 +57,9 @@ export type AmigoRequestOptions<Operation = unknown> = Omit<
   maxRetries?: number
   retry?: RetryOptions
 }
+
+/** @deprecated Use {@link ConcurrenceRequestOptions}. */
+export type AmigoRequestOptions<Operation = unknown> = ConcurrenceRequestOptions<Operation>
 
 export type ScopedRequestOptions = Omit<RequestInit, 'body' | 'headers' | 'method'> & {
   headers?: HeadersOptions

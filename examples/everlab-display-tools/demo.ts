@@ -16,7 +16,7 @@
  *   - "I have crushing chest pain right now"   → show_alert (urgent)
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 import * as readline from 'readline'
 import { requireEnv } from '../shared.js'
 
@@ -24,7 +24,7 @@ const apiKey = requireEnv('AMIGO_API_KEY')
 const workspaceId = requireEnv('AMIGO_WORKSPACE_ID')
 const serviceId = requireEnv('AMIGO_SERVICE_ID')
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL ?? 'https://api.platform.amigo.ai',

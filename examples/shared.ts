@@ -1,4 +1,4 @@
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
 export function requireEnv(name: string): string {
   const value = process.env[name]
@@ -8,8 +8,8 @@ export function requireEnv(name: string): string {
   return value
 }
 
-export function createClient(): AmigoClient {
-  return new AmigoClient({
+export function createClient(): ConcurrenceClient {
+  return new ConcurrenceClient({
     apiKey: requireEnv('AMIGO_API_KEY'),
     workspaceId: requireEnv('AMIGO_WORKSPACE_ID'),
     baseUrl: process.env.AMIGO_BASE_URL,

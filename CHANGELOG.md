@@ -1,5 +1,34 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- The package is now published as `@concurrence-hq/platform-sdk` (the npm
+  `concurrence-hq` org) from
+  [`concurrence-hq/concurrence-platform-typescript-sdk`](https://github.com/concurrence-hq/concurrence-platform-typescript-sdk).
+  `@amigo-ai/platform-sdk` (last version `0.108.1`) is deprecated and receives no
+  further releases; existing installs keep working at their pinned versions. To
+  migrate, run `npm uninstall @amigo-ai/platform-sdk && npm i @concurrence-hq/platform-sdk`
+  and replace `'@amigo-ai/platform-sdk'` with `'@concurrence-hq/platform-sdk'` in
+  imports. No API changes.
+
+### Added
+
+- Concurrence-branded primary names: `ConcurrenceClient`, `ConcurrenceClientConfig`,
+  `ConcurrenceConfig`, `ConcurrenceError`, `isConcurrenceError`,
+  `ConcurrenceErrorWithBody`, `ConcurrenceResponse`, and `ConcurrenceRequestOptions`.
+
+### Deprecated
+
+- `AmigoClient`, `AmigoClientConfig`, `AmigoConfig`, `AmigoError`, `isAmigoError`,
+  `AmigoErrorWithBody`, `AmigoResponse`, and `AmigoRequestOptions` remain exported
+  as `@deprecated` aliases of the matching `Concurrence*` names. They are the same
+  runtime references, so `new AmigoClient(...)` and `instanceof AmigoError` keep
+  working unchanged. The one observable difference: an error thrown as the base
+  class itself (not a subclass such as `NotFoundError`) now reports
+  `name === 'ConcurrenceError'`, because `name` comes from the class name.
+
 ## [0.108.1] - 2026-09-08
 
 ### Security
@@ -621,7 +650,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.channels.sesSetup` — workspace-scoped CRUD over the channel-manager-backed SES setup proxy (`/v1/{workspace_id}/channels/ses-setup`). Methods: `create`, `list` + `listAutoPaging`, `get`, `verify`, `delete`. Workspace is injected at client construction time, not the call site. Closes the "no SDK surface for SES tenant onboarding" gap (amigo-ai/platform#2561). Types: `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupListResponse`, `DnsRecord`.
+- `client.channels.sesSetup` — workspace-scoped CRUD over the channel-manager-backed SES setup proxy (`/v1/{workspace_id}/channels/ses-setup`). Methods: `create`, `list` + `listAutoPaging`, `get`, `verify`, `delete`. Workspace is injected at client construction time, not the call site. Closes the "no SDK surface for SES tenant onboarding" gap (concurrence-hq/platform#2561). Types: `CreateSesSetupRequest`, `SesSetupDetail`, `SesSetupListItem`, `SesSetupListResponse`, `DnsRecord`.
 
 ## [0.41.0] - 2026-05-05
 
@@ -649,7 +678,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.functions(ws).listRegistered()` — list every V109-registered platform function in the workspace (latest version per name). Closes the "name-driven only" gap on the developer-console Functions Studio (amigo-ai/platform#2585).
+- `client.functions(ws).listRegistered()` — list every V109-registered platform function in the workspace (latest version per name). Closes the "name-driven only" gap on the developer-console Functions Studio (concurrence-hq/platform#2585).
 
 ### Maintenance
 
@@ -665,7 +694,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### Features
 
-- `client.functions(ws).deploy/listVersions/getVersion/invoke/testV2/promote/rollback` — typed surface over the V109 SQL-first platform-functions routes (amigo-ai/platform#2552, #2562, #2567).
+- `client.functions(ws).deploy/listVersions/getVersion/invoke/testV2/promote/rollback` — typed surface over the V109 SQL-first platform-functions routes (concurrence-hq/platform#2552, #2562, #2567).
 
 ### Maintenance
 
@@ -681,7 +710,7 @@ entry in a feature PR. The notes below describe the changes awaiting the next re
 
 ### ⚠️ Type-level breaking changes
 
-The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [amigo-ai/platform#2535](https://github.com/amigo-ai/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
+The `ObserverSSEEvent.ToolCallStartedEvent` and `ObserverSSEEvent.ToolCallCompletedEvent` shapes were tightened to match what agent-engine actually emits on the wire (closes the drift documented in [concurrence-hq/platform#2535](https://github.com/concurrence-hq/platform/pull/2535)). The wire format never carried the old field names, so this is **type-only breaking** — runtime traffic is unchanged. But TypeScript consumers who read the renamed fields will see compile errors after upgrading.
 
 | Event                    | Before (0.32.0)                                | After (0.33.0)                             |
 | ------------------------ | ---------------------------------------------- | ------------------------------------------ |
@@ -720,7 +749,7 @@ git ls-files '*.ts' '*.tsx' | xargs sed -i.bak -E \
 find . -name '*.ts.bak' -o -name '*.tsx.bak' | xargs rm
 ```
 
-For developer-console specifically, this rename was applied in [amigo-ai/developer-console#864](https://github.com/amigo-ai/developer-console/pull/864) — drop the local `ObserverEventEnvelope<T, Extra>` shim and consume the SDK type directly.
+For developer-console specifically, this rename was applied in [concurrence-hq/developer-console#864](https://github.com/concurrence-hq/developer-console/pull/864) — drop the local `ObserverEventEnvelope<T, Extra>` shim and consume the SDK type directly.
 
 ### Features
 
@@ -776,7 +805,7 @@ For developer-console specifically, this rename was applied in [amigo-ai/develop
 
 ### ⚠️ Breaking changes (type-level): call-intelligence response shapes
 
-**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at _runtime_ (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at _compile_ time: code that references the removed names will fail type-checking against `@amigo-ai/platform-sdk@^0.28.0`.
+**SDK consumers using `tsc` as a compatibility gate must read this section** — the field removals below are non-breaking at _runtime_ (the producer never populated these fields; consumers always got `None`/`0`/`[]`) but they ARE breaking at _compile_ time: code that references the removed names will fail type-checking against `@concurrence-hq/platform-sdk@^0.28.0`.
 
 Picked up from platform-api PR 3b of the call-intelligence typed-cols program (commit `831f0e8ff`, "V091 Pydantic response alignment to producer keys"). The historical Pydantic shapes declared fields the producer never actually emitted — they were silently dropped by `extra="ignore"` and SDK consumers always saw `None` / `0` / `[]` for these fields. The renames + drops align the response shape to producer truth.
 

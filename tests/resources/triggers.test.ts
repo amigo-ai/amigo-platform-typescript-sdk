@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import { NotFoundError } from '../../src/core/errors.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
@@ -67,7 +67,7 @@ function mockFetch(
 
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -164,7 +164,7 @@ describe('TriggersResource', () => {
 
   it('forwards the is_active filter when listing triggers', async () => {
     let capturedUrl = ''
-    const capturing = new AmigoClient({
+    const capturing = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request): Promise<Response> => {
@@ -184,7 +184,7 @@ describe('TriggersResource', () => {
 
   it('fires a trigger with a per-fire input override body', async () => {
     let capturedBody: unknown
-    const capturing = new AmigoClient({
+    const capturing = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
@@ -206,7 +206,7 @@ describe('TriggersResource', () => {
 
   it('fires a trigger without a body when no input override is given', async () => {
     let capturedBody: unknown
-    const capturing = new AmigoClient({
+    const capturing = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {

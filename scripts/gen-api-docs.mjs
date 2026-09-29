@@ -59,8 +59,8 @@ const resourceClassMap = new Map(
   }),
 )
 
-const clientConfigFields = collectInterfaceFields(indexSource, 'AmigoClientConfig')
-const clientClass = getClass(indexSource, 'AmigoClient')
+const clientConfigFields = collectInterfaceFields(indexSource, 'ConcurrenceClientConfig')
+const clientClass = getClass(indexSource, 'ConcurrenceClient')
 const clientFields = collectPublicClassFields(clientClass)
 const clientMethods = collectPublicMethodNames(clientClass).filter(
   (name) => name === 'withOptions' || name === name.toUpperCase(),
@@ -129,7 +129,7 @@ const markdown = await prettier.format(
     '',
     '## Client',
     '',
-    '### `AmigoClient`',
+    '### `ConcurrenceClient`',
     '',
     'Configuration fields:',
     ...clientConfigFields.map(
@@ -149,8 +149,9 @@ const markdown = await prettier.format(
     'Notes:',
     '- Workspace-scoped paths receive the configured `workspaceId` automatically, and the configured value wins if `workspace_id` is provided manually.',
     '- `client.withOptions(options)` and `client.<resource>.withOptions(options)` layer headers, timeout, and retry overrides onto the normal resource surface.',
-    '- Low-level helpers return `AmigoResponse<T>` with `data`, `response`, `requestId`, and `rateLimit`.',
+    '- Low-level helpers return `ConcurrenceResponse<T>` with `data`, `response`, `requestId`, and `rateLimit`.',
     '- Object responses from resource methods include `_request_id` and `lastResponse` metadata.',
+    '- `AmigoClient`, `AmigoClientConfig`, `AmigoConfig`, `AmigoError`, `isAmigoError`, `AmigoErrorWithBody`, `AmigoResponse`, and `AmigoRequestOptions` are deprecated aliases of the matching `Concurrence*` exports (same runtime references), kept from the `@amigo-ai/platform-sdk` package name.',
     '',
     '## Core exports',
     '',

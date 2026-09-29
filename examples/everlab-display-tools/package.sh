@@ -25,7 +25,7 @@ cat > "$OUT/package.json" << 'PKGJSON'
     "demo": "tsx demo.ts"
   },
   "dependencies": {
-    "@amigo-ai/platform-sdk": "latest",
+    "@concurrence-hq/platform-sdk": "latest",
     "ws": "^8.18.0"
   },
   "devDependencies": {
@@ -101,7 +101,7 @@ cat > "$OUT/demo.ts" << 'DEMO'
  *   AMIGO_API_KEY=<key> AMIGO_WORKSPACE_ID=<ws> AMIGO_SERVICE_ID=<svc> npm run demo
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 import * as readline from 'readline'
 
 function requireEnv(name: string): string {
@@ -114,7 +114,7 @@ const apiKey = requireEnv('AMIGO_API_KEY')
 const workspaceId = requireEnv('AMIGO_WORKSPACE_ID')
 const serviceId = requireEnv('AMIGO_SERVICE_ID')
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey,
   workspaceId,
   baseUrl: process.env.AMIGO_BASE_URL ?? 'https://api.platform.amigo.ai',

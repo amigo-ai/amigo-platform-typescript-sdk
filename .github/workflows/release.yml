@@ -19,9 +19,21 @@ on:
         type: boolean
 
 # Release operators:
-# - Prefer npm trusted publishing for the Publish workflow. Configure the
-#   package on npm with this repository and `publish.yml` as the trusted
-#   publisher, then remove long-lived npm automation tokens.
+# - Prefer npm trusted publishing for the Publish workflow. On npmjs.com, open
+#   https://www.npmjs.com/package/@concurrence-hq/platform-sdk/access and add a
+#   GitHub Actions trusted publisher with organization `concurrence-hq`,
+#   repository `concurrence-platform-typescript-sdk`, workflow filename
+#   `publish.yml`, and no environment, and tick `npm publish` under Allowed
+#   actions (entries created after 2026-09-03 default to stage-only, which
+#   fails with E403 OIDC permission denied). Then remove long-lived npm
+#   automation tokens. `package.json` `repository.url` must name the same repo
+#   or npm rejects the provenance statement.
+# - npm only allows a trusted publisher on a package that already exists, so
+#   the first `@concurrence-hq/platform-sdk` version must be published by the
+#   `NPM_TOKEN` fallback in publish.yml or once by hand from its release tag.
+# - The npm scope is the `concurrence-hq` npm org. The package was previously
+#   published as `@amigo-ai/platform-sdk` (last version 0.108.1); that name is
+#   deprecated and these workflows never publish to it.
 # - Configure `RELEASE_PUSH_TOKEN` only when the target branch is protected and
 #   the default `GITHUB_TOKEN` cannot push the version commit and tag.
 
@@ -170,31 +182,31 @@ jobs:
           VIEW_FOUND=false
           for attempt in 1 2; do
             : > "$VIEW_LOG"
-            if npm view "@amigo-ai/platform-sdk@${NEW_VERSION}" version --json >"$VIEW_LOG" 2>&1; then
+            if npm view "@concurrence-hq/platform-sdk@${NEW_VERSION}" version --json >"$VIEW_LOG" 2>&1; then
               VIEW_FOUND=true
               break
             fi
             if grep -Eq 'E404|"code"[[:space:]]*:[[:space:]]*"E404"|404 Not Found' "$VIEW_LOG"; then
               break
             fi
-            echo "npm view failed for @amigo-ai/platform-sdk@${NEW_VERSION}; retrying once."
+            echo "npm view failed for @concurrence-hq/platform-sdk@${NEW_VERSION}; retrying once."
             sleep 10
           done
 
           if [ "$VIEW_FOUND" = "true" ]; then
-            echo "::error::@amigo-ai/platform-sdk@${NEW_VERSION} already exists on npm."
+            echo "::error::@concurrence-hq/platform-sdk@${NEW_VERSION} already exists on npm."
             exit 1
           fi
 
           if grep -Eq 'E404|"code"[[:space:]]*:[[:space:]]*"E404"|404 Not Found' "$VIEW_LOG"; then
-            echo "@amigo-ai/platform-sdk@${NEW_VERSION} is not published yet."
+            echo "@concurrence-hq/platform-sdk@${NEW_VERSION} is not published yet."
           else
-            echo "::error::Unable to verify npm publication state for @amigo-ai/platform-sdk@${NEW_VERSION}."
+            echo "::error::Unable to verify npm publication state for @concurrence-hq/platform-sdk@${NEW_VERSION}."
             cat "$VIEW_LOG"
             {
               echo "## npm publication check failed"
               echo ""
-              echo "Could not verify whether @amigo-ai/platform-sdk@${NEW_VERSION} already exists. Release was stopped before creating git metadata."
+              echo "Could not verify whether @concurrence-hq/platform-sdk@${NEW_VERSION} already exists. Release was stopped before creating git metadata."
               echo "Re-run this workflow after the npm registry recovers; this guard runs before release metadata is created."
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
@@ -390,21 +402,21 @@ jobs:
           NPM_VIEW_STDERR=$(mktemp)
           trap 'rm -f "$NPM_VIEW_STDERR"' EXIT
           for attempt in $(seq 1 6); do
-            if npm view "@amigo-ai/platform-sdk@${RELEASE_VERSION}" version --json --registry https://registry.npmjs.org --no-update-notifier >/dev/null 2>"$NPM_VIEW_STDERR"; then
+            if npm view "@concurrence-hq/platform-sdk@${RELEASE_VERSION}" version --json --registry https://registry.npmjs.org --no-update-notifier >/dev/null 2>"$NPM_VIEW_STDERR"; then
               echo "publish_visible_without_run=true" >> "$GITHUB_OUTPUT"
-              echo "::warning title=Publish visibility mismatch::GitHub Release ${RELEASE_TAG} was created and @amigo-ai/platform-sdk@${RELEASE_VERSION} is already visible on npm, but publish.yml was not visible after publish-run polling and npm confirmation."
+              echo "::warning title=Publish visibility mismatch::GitHub Release ${RELEASE_TAG} was created and @concurrence-hq/platform-sdk@${RELEASE_VERSION} is already visible on npm, but publish.yml was not visible after publish-run polling and npm confirmation."
               {
                 echo "## Publish workflow visibility warning"
                 echo ""
-                echo "GitHub Release ${RELEASE_TAG} was created and @amigo-ai/platform-sdk@${RELEASE_VERSION} is already visible on npm, but publish.yml was not visible after publish-run polling and npm confirmation. The release workflow is failing intentionally so the mismatch issue remains visible."
+                echo "GitHub Release ${RELEASE_TAG} was created and @concurrence-hq/platform-sdk@${RELEASE_VERSION} is already visible on npm, but publish.yml was not visible after publish-run polling and npm confirmation. The release workflow is failing intentionally so the mismatch issue remains visible."
               } >> "$GITHUB_STEP_SUMMARY"
               exit 1
             fi
             NPM_VIEW_ERROR=$(cat "$NPM_VIEW_STDERR")
             if printf '%s\n' "$NPM_VIEW_ERROR" | grep -Eq 'E404|No match found|404 Not Found'; then
-              echo "npm package @amigo-ai/platform-sdk@${RELEASE_VERSION} is not visible yet (attempt ${attempt}/6)."
+              echo "npm package @concurrence-hq/platform-sdk@${RELEASE_VERSION} is not visible yet (attempt ${attempt}/6)."
             else
-              echo "::warning title=npm view failed::npm view failed unexpectedly for @amigo-ai/platform-sdk@${RELEASE_VERSION} (attempt ${attempt}/6)."
+              echo "::warning title=npm view failed::npm view failed unexpectedly for @concurrence-hq/platform-sdk@${RELEASE_VERSION} (attempt ${attempt}/6)."
               printf '%s\n' "$NPM_VIEW_ERROR"
             fi
             if [ "$attempt" != "6" ]; then
@@ -452,7 +464,7 @@ jobs:
           1. Inspect workflow run ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
           2. Verify whether GitHub Release \`${RELEASE_TAG}\` exists.
           3. If the release is missing, create it from tag \`${RELEASE_TAG}\` with the intended release notes.
-          4. Verify whether \`@amigo-ai/platform-sdk@${RELEASE_VERSION}\` published to npm.
+          4. Verify whether \`@concurrence-hq/platform-sdk@${RELEASE_VERSION}\` published to npm.
           5. If npm publish did not run, dispatch \`publish.yml\` from tag \`${RELEASE_TAG}\` with \`expected_version=${RELEASE_VERSION}\`.
 
           Context:
@@ -504,7 +516,7 @@ jobs:
           title="Publish visibility mismatch for ${RELEASE_TAG}"
           body=$(cat <<EOF
           ${marker}
-          GitHub Release \`${RELEASE_TAG}\` exists and \`@amigo-ai/platform-sdk@${RELEASE_VERSION}\` is visible on npm, but release.yml could not find the matching release-triggered publish.yml run. The release workflow failed intentionally to keep this audit visible.
+          GitHub Release \`${RELEASE_TAG}\` exists and \`@concurrence-hq/platform-sdk@${RELEASE_VERSION}\` is visible on npm, but release.yml could not find the matching release-triggered publish.yml run. The release workflow failed intentionally to keep this audit visible.
 
           Audit required:
           1. Verify that publish.yml has a release-event run for \`${RELEASE_TAG}\`.
@@ -513,7 +525,7 @@ jobs:
 
           Context:
           - tag: \`${RELEASE_TAG}\`
-          - package: \`@amigo-ai/platform-sdk@${RELEASE_VERSION}\`
+          - package: \`@concurrence-hq/platform-sdk@${RELEASE_VERSION}\`
           - release workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EOF
           )

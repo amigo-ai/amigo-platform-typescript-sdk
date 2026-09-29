@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'configured-api-key'
 const EXCHANGE_API_KEY = 'exchange-api-key'
@@ -80,7 +80,7 @@ function createCapturedRequest(): CapturedTokenRequest {
 describe('TokensResource', () => {
   it('exchanges an API key for a JWT through POST /token', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,
@@ -108,7 +108,7 @@ describe('TokensResource', () => {
 
   it('preserves scoped request headers on token exchange', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: recordingFetch(captured),
@@ -123,7 +123,7 @@ describe('TokensResource', () => {
 
   it('exchanges client credentials without forwarding configured Authorization', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,
@@ -148,7 +148,7 @@ describe('TokensResource', () => {
 
   it('mints an external-user session with parent bearer auth and workspace binding', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,
@@ -185,7 +185,7 @@ describe('TokensResource', () => {
 
   it('uses the configured bearer token when no parentAccessToken override is provided', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: 'configured-parent-jwt',
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,
@@ -203,7 +203,7 @@ describe('TokensResource', () => {
 
   it('rotates refresh tokens through POST /token without configured Authorization', async () => {
     const captured = createCapturedRequest()
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       baseUrl: BASE_URL,

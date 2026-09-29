@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -30,7 +30,7 @@ function mockFetch(
   }
 }
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: TEST_API_KEY,
   workspaceId: TEST_WORKSPACE_ID,
   fetch: mockFetch({
@@ -100,7 +100,7 @@ describe('RunsResource', () => {
 
   it('list() serializes multi-value filters into repeated query params', async () => {
     let capturedUrl = ''
-    const capturing = new AmigoClient({
+    const capturing = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: async (input: string | URL | Request): Promise<Response> => {

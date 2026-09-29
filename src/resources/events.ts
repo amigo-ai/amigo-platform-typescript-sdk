@@ -435,7 +435,7 @@ async function runOneConnection(args: RunOneConnectionArgs): Promise<StreamOutco
   } catch (err) {
     if (args.signal.aborted) return { kind: 'aborted' }
     const error = err instanceof Error ? err : new Error(String(err))
-    // 4xx (including 401 / 403) are surfaced as thrown AmigoErrors by the
+    // 4xx (including 401 / 403) are surfaced as thrown ConcurrenceErrors by the
     // SDK error middleware. Distinguish those from transport failures.
     const status = readStatus(error)
     if (status === 401 || status === 403) {

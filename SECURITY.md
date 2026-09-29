@@ -21,7 +21,7 @@ Please include:
 
 ## Scope
 
-This policy covers the `@amigo-ai/platform-sdk` npm package. For vulnerabilities in the Amigo Platform API itself, please contact [security@amigo.ai](mailto:security@amigo.ai) directly.
+This policy covers the `@concurrence-hq/platform-sdk` npm package. For vulnerabilities in the Amigo Platform API itself, please contact [security@amigo.ai](mailto:security@amigo.ai) directly.
 
 ## Disclosure
 

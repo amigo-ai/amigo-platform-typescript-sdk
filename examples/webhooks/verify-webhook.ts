@@ -2,7 +2,7 @@ import {
   WebhookVerificationError,
   parseWebhookEvent,
   type WebhookEvent,
-} from '@amigo-ai/platform-sdk'
+} from '@concurrence-hq/platform-sdk'
 import { requireEnv } from '../shared.js'
 
 type CallCompletedData = {

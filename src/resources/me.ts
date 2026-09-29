@@ -21,7 +21,7 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  * extends ``WorkspaceScopedResource`` to inherit ``withOptions`` /
  * iteration helpers / scoped-client wiring. The bound
  * ``workspaceId`` is unused for the routes here — typically a
- * placeholder like ``"_account"`` from the AmigoClient construction.
+ * placeholder like ``"_account"`` from the ConcurrenceClient construction.
  *
  * **No workspace context is injected into the HTTP request.** The
  * shared ``PlatformFetch`` middleware does not auto-prefix paths or

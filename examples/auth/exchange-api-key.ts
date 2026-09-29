@@ -12,7 +12,7 @@
  * example a browser, a BFF proxy, or a background worker).
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
 
 async function main() {
   const apiKey = process.env.AMIGO_API_KEY
@@ -22,7 +22,7 @@ async function main() {
     throw new Error('AMIGO_API_KEY and AMIGO_WORKSPACE_ID must be set')
   }
 
-  const client = new AmigoClient({
+  const client = new ConcurrenceClient({
     apiKey,
     workspaceId,
     baseUrl: process.env.AMIGO_BASE_URL,
@@ -42,7 +42,7 @@ async function main() {
 
   // Use the JWT with a second client. JWTs are passed as `apiKey` — the SDK
   // sends them as Bearer tokens just like raw API keys.
-  const scopedClient = new AmigoClient({
+  const scopedClient = new ConcurrenceClient({
     apiKey: tokenResponse.access_token,
     workspaceId,
     // Reuse the same base URL so the JWT (minted against `baseUrl`) is

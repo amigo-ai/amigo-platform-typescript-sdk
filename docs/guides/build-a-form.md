@@ -48,10 +48,10 @@ Surfaces can also expire (configurable, default 7 days) or be archived.
 First, find or create the patient entity the form is for, then create the surface with your field definitions.
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
-import type { components } from '@amigo-ai/platform-sdk'
+import { ConcurrenceClient } from '@concurrence-hq/platform-sdk'
+import type { components } from '@concurrence-hq/platform-sdk'
 
-const client = new AmigoClient({
+const client = new ConcurrenceClient({
   apiKey: process.env.AMIGO_API_KEY!,
   workspaceId: process.env.AMIGO_WORKSPACE_ID!,
 })
@@ -230,7 +230,7 @@ If you are building your own form renderer instead of using the hosted forms app
 
 ```typescript
 import createClient from 'openapi-fetch'
-import type { paths } from '@amigo-ai/platform-sdk'
+import type { paths } from '@concurrence-hq/platform-sdk'
 
 // Create an unauthenticated client for public token routes
 const publicApi = createClient<paths>({

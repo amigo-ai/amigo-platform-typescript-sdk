@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 import {
   BadRequestError,
   ConflictError,
@@ -44,7 +44,7 @@ function mockFetch(
 
 describe('DataSourcesResource.triggerSync', () => {
   it('returns the queued-sync response on 202', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -67,7 +67,7 @@ describe('DataSourcesResource.triggerSync', () => {
   })
 
   it('throws ConflictError when the source is already syncing', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -107,7 +107,7 @@ describe('DataSourcesResource.triggerSync', () => {
   })
 
   it('throws ServiceUnavailableError when connector-runner is down', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -122,7 +122,7 @@ describe('DataSourcesResource.triggerSync', () => {
   })
 
   it('throws NotFoundError when the data source does not exist', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -139,7 +139,7 @@ describe('DataSourcesResource.triggerSync', () => {
 
   it('throws BadRequestError on a malformed data source id', async () => {
     const malformedId = 'not-a-uuid'
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       fetch: mockFetch({
@@ -156,7 +156,7 @@ describe('DataSourcesResource.triggerSync', () => {
   })
 
   it('throws RateLimitError when the per-API-key write limit is exceeded', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: TEST_WORKSPACE_ID,
       // Disable retries so the 429 surfaces immediately instead of waiting

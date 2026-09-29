@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { AmigoClient } from '../../src/index.js'
+import { ConcurrenceClient } from '../../src/index.js'
 
 const TEST_API_KEY = 'test-api-key'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
@@ -24,7 +24,7 @@ const EXPORT_RESULT = {
 
 function createRecordingClient() {
   const requests: { method: string; url: URL }[] = []
-  const client = new AmigoClient({
+  const client = new ConcurrenceClient({
     apiKey: TEST_API_KEY,
     workspaceId: TEST_WORKSPACE_ID,
     fetch: async (input: string | URL | Request, init?: RequestInit) => {

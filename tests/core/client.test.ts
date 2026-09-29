@@ -1,15 +1,17 @@
 import { describe, expect, it, vi } from 'vitest'
-import { AmigoClient, ConfigurationError, RequestTimeoutError } from '../../src/index.js'
+import { ConcurrenceClient, ConfigurationError, RequestTimeoutError } from '../../src/index.js'
 import { withResponse } from '../../src/core/utils.js'
 import { TEST_API_KEY, fixtures } from '../test-helpers.js'
 
-describe('AmigoClient configuration', () => {
+describe('ConcurrenceClient configuration', () => {
   it('throws on missing apiKey', () => {
-    expect(() => new AmigoClient({ apiKey: '', workspaceId: 'ws-001' })).toThrow(ConfigurationError)
+    expect(() => new ConcurrenceClient({ apiKey: '', workspaceId: 'ws-001' })).toThrow(
+      ConfigurationError,
+    )
   })
 
   it('throws on missing workspaceId', () => {
-    expect(() => new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: '' })).toThrow(
+    expect(() => new ConcurrenceClient({ apiKey: TEST_API_KEY, workspaceId: '' })).toThrow(
       ConfigurationError,
     )
   })
@@ -21,7 +23,7 @@ describe('AmigoClient configuration', () => {
       return Response.json(fixtures.paginatedList([]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com/',
@@ -35,7 +37,7 @@ describe('AmigoClient configuration', () => {
   it('forwards requests through the provided fetch implementation', async () => {
     const mockFetch = vi.fn(async () => Response.json(fixtures.paginatedList([fixtures.agent()])))
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       fetch: mockFetch as typeof fetch,
@@ -48,7 +50,7 @@ describe('AmigoClient configuration', () => {
   })
 
   it('initializes the public resource surface', () => {
-    const client = new AmigoClient({ apiKey: TEST_API_KEY, workspaceId: 'ws-001' })
+    const client = new ConcurrenceClient({ apiKey: TEST_API_KEY, workspaceId: 'ws-001' })
 
     expect(client.workspaces).toBeDefined()
     expect(client.agents).toBeDefined()
@@ -60,7 +62,7 @@ describe('AmigoClient configuration', () => {
   })
 
   it('attaches response metadata to object results', async () => {
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       fetch: vi.fn(async () =>
@@ -95,7 +97,7 @@ describe('AmigoClient configuration', () => {
       })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -124,7 +126,7 @@ describe('AmigoClient configuration', () => {
       })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -181,7 +183,7 @@ describe('AmigoClient configuration', () => {
       return Response.json(fixtures.paginatedList([]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       baseUrl: 'https://api.example.com',
@@ -205,7 +207,7 @@ describe('AmigoClient configuration', () => {
       })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       headers: { 'X-SDK-Test': 'enabled' },
@@ -233,7 +235,7 @@ describe('AmigoClient configuration', () => {
       return Response.json(fixtures.paginatedList([fixtures.agent()]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       fetch: mockFetch as typeof fetch,
@@ -262,7 +264,7 @@ describe('AmigoClient configuration', () => {
       return Response.json(fixtures.paginatedList([fixtures.agent()]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       retry: { maxAttempts: 1 },
@@ -295,7 +297,7 @@ describe('AmigoClient configuration', () => {
       return Response.json(fixtures.paginatedList([fixtures.agent()]))
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       retry: { maxAttempts: 1 },
@@ -321,7 +323,7 @@ describe('AmigoClient configuration', () => {
       })
     })
 
-    const client = new AmigoClient({
+    const client = new ConcurrenceClient({
       apiKey: TEST_API_KEY,
       workspaceId: 'ws-001',
       fetch: mockFetch as typeof fetch,
