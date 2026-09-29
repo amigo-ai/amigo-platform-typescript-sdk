@@ -25,7 +25,7 @@ cat > "$OUT/package.json" << 'PKGJSON'
     "demo": "tsx demo.ts"
   },
   "dependencies": {
-    "@amigo-ai/platform-sdk": "latest",
+    "@concurrence-hq/platform-sdk": "latest",
     "ws": "^8.18.0"
   },
   "devDependencies": {
@@ -101,7 +101,7 @@ cat > "$OUT/demo.ts" << 'DEMO'
  *   AMIGO_API_KEY=<key> AMIGO_WORKSPACE_ID=<ws> AMIGO_SERVICE_ID=<svc> npm run demo
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 import * as readline from 'readline'
 
 function requireEnv(name: string): string {

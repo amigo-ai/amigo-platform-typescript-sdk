@@ -1,11 +1,11 @@
 /**
- * @amigo-ai/platform-sdk
+ * @concurrence-hq/platform-sdk
  *
  * Official TypeScript SDK for the Amigo Platform API.
  *
  * @example
  * ```typescript
- * import { AmigoClient } from '@amigo-ai/platform-sdk'
+ * import { AmigoClient } from '@concurrence-hq/platform-sdk'
  *
  * const client = new AmigoClient({
  *   apiKey: 'your-api-key',
@@ -15,6 +15,8 @@
  * const agents = await client.agents.list()
  * console.log(agents.items)
  * ```
+ *
+ * Source: https://github.com/concurrence-hq/concurrence-platform-typescript-sdk
  */
 
 import type { FetchResponse, HeadersOptions } from 'openapi-fetch'

@@ -9,7 +9,7 @@
  *     npx tsx examples/auth/external-user-session.ts
  */
 
-import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 function requireEnv(name: string): string {
   const value = process.env[name]

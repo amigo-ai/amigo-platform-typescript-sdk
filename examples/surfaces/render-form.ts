@@ -1,5 +1,5 @@
 import createClient from 'openapi-fetch'
-import type { paths } from '@amigo-ai/platform-sdk'
+import type { paths } from '@concurrence-hq/platform-sdk'
 import { requireEnv } from '../shared.js'
 
 // Surface spec shape returned by /s/{token}/spec (untyped in the OpenAPI spec)

@@ -17,7 +17,7 @@ import {
   formatDeviceCodeInstructions,
   TokenManager,
   FileTokenStorage,
-} from '@amigo-ai/platform-sdk'
+} from '@concurrence-hq/platform-sdk'
 
 async function main() {
   // The CLI must know which workspace to authenticate for — there is no

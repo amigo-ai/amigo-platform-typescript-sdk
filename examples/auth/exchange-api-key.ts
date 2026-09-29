@@ -12,7 +12,7 @@
  * example a browser, a BFF proxy, or a background worker).
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 async function main() {
   const apiKey = process.env.AMIGO_API_KEY

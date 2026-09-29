@@ -1,4 +1,4 @@
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 export function requireEnv(name: string): string {
   const value = process.env[name]

@@ -27,7 +27,7 @@ After every turn, the conversation freezes. The next message thaws it. This is i
 Use the SDK to create a conversation. This gives you a `conversation_id` for the WebSocket connection.
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 const client = new AmigoClient({
   apiKey: process.env.AMIGO_API_KEY!,
@@ -49,7 +49,7 @@ The SDK provides `textStreamUrl()` and `textStreamAuthProtocols()` helpers.
 ### Browser
 
 ```typescript
-import { AmigoClient, textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
+import { AmigoClient, textStreamAuthProtocols } from '@concurrence-hq/platform-sdk'
 
 const client = new AmigoClient({
   apiKey: API_KEY,

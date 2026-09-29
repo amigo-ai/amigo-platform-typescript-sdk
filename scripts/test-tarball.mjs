@@ -42,8 +42,8 @@ try {
     fixtureDir: path.join(tempRoot, 'esm-fixture'),
     entryFile: 'index.mjs',
     source: [
-      "import * as sdk from '@amigo-ai/platform-sdk'",
-      "import { AmigoClient, parseRateLimitHeaders } from '@amigo-ai/platform-sdk'",
+      "import * as sdk from '@concurrence-hq/platform-sdk'",
+      "import { AmigoClient, parseRateLimitHeaders } from '@concurrence-hq/platform-sdk'",
       '',
       "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       '',
@@ -66,7 +66,7 @@ try {
     packageJson: { type: 'commonjs' },
     entryFile: 'index.cjs',
     source: [
-      "const sdk = require('@amigo-ai/platform-sdk')",
+      "const sdk = require('@concurrence-hq/platform-sdk')",
       'const { AmigoClient, parseRateLimitHeaders } = sdk',
       '',
       "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
@@ -89,7 +89,7 @@ try {
     fixtureDir: path.join(tempRoot, 'esm-types-fixture'),
     packageJson: { type: 'module' },
     source: [
-      "import { AmigoClient, parseRateLimitHeaders, type paths } from '@amigo-ai/platform-sdk'",
+      "import { AmigoClient, parseRateLimitHeaders, type paths } from '@concurrence-hq/platform-sdk'",
       '',
       "const client = new AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       "const path: keyof paths = '/v1/{workspace_id}/agents'",
@@ -106,7 +106,7 @@ try {
     fixtureDir: path.join(tempRoot, 'cjs-types-fixture'),
     packageJson: { type: 'commonjs' },
     source: [
-      "import sdk = require('@amigo-ai/platform-sdk')",
+      "import sdk = require('@concurrence-hq/platform-sdk')",
       '',
       "const client = new sdk.AmigoClient({ apiKey: 'test-key', workspaceId: 'ws-001' })",
       'const parseRateLimitHeaders: typeof sdk.parseRateLimitHeaders = sdk.parseRateLimitHeaders',
@@ -295,7 +295,7 @@ function runTypeFixture({ packageDir, fixtureDir, packageJson, source }) {
 }
 
 function setupFixturePackage({ packageDir, fixtureDir, packageJson }) {
-  const sdkDir = path.join(fixtureDir, 'node_modules/@amigo-ai/platform-sdk')
+  const sdkDir = path.join(fixtureDir, 'node_modules/@concurrence-hq/platform-sdk')
   const nodeModulesDir = path.join(fixtureDir, 'node_modules')
 
   fs.mkdirSync(path.dirname(sdkDir), { recursive: true })

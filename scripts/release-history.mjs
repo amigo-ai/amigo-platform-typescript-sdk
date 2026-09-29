@@ -310,7 +310,7 @@ function renderReleaseNotes({ fromRef, version, repo, sections }) {
     '### Installation',
     '',
     '```bash',
-    `npm install @amigo-ai/platform-sdk@${version}`,
+    `npm install @concurrence-hq/platform-sdk@${version}`,
     '```',
   )
 

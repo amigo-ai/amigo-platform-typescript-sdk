@@ -16,7 +16,7 @@
  *   - "I have crushing chest pain right now"   → show_alert (urgent)
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 import * as readline from 'readline'
 import { requireEnv } from '../shared.js'
 

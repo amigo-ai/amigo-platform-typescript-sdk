@@ -12,7 +12,7 @@ subject and service, and then uses that child token for conversation routes.
 ## 1. Install and configure
 
 ```bash
-npm install @amigo-ai/platform-sdk
+npm install @concurrence-hq/platform-sdk
 ```
 
 Set these values on your backend:
@@ -34,7 +34,7 @@ Run this from an admin/owner backend or setup job. Save the returned
 secret again.
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 const workspaceId = process.env.AMIGO_WORKSPACE_ID!
 const serviceId = process.env.AMIGO_SERVICE_ID!
@@ -72,7 +72,7 @@ roles.
 Use the external integration credential from your customer backend:
 
 ```typescript
-import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+import { AmigoClient, EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 const workspaceId = process.env.AMIGO_WORKSPACE_ID!
 const serviceId = process.env.AMIGO_SERVICE_ID!

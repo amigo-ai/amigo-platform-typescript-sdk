@@ -8,7 +8,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@amigo-ai/platform-sdk": ["../src/index.ts"]
+      "@concurrence-hq/platform-sdk": ["../src/index.ts"]
     }
   },
   "include": ["./**/*.ts"]

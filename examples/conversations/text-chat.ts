@@ -9,7 +9,7 @@
  *     npx tsx examples/conversations/text-chat.ts
  */
 
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 import * as readline from 'readline'
 import WebSocket from 'ws'
 import { requireEnv } from '../shared.js'

@@ -2,7 +2,7 @@
   <img src="./assets/readme/amigo-banner.png" alt="Amigo banner" width="100%" />
 </p>
 
-<h1 align="center">@amigo-ai/platform-sdk</h1>
+<h1 align="center">@concurrence-hq/platform-sdk</h1>
 
 <p align="center">Official TypeScript SDK for the <a href="https://api.platform.amigo.ai/v1/docs">Amigo Platform API</a>.</p>
 
@@ -21,12 +21,27 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/@amigo-ai/platform-sdk"><img src="https://img.shields.io/npm/v/@amigo-ai/platform-sdk.svg" alt="npm version" /></a>
-  <a href="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml"><img src="https://github.com/amigo-ai/amigo-platform-typescript-sdk/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
+  <a href="https://www.npmjs.com/package/@concurrence-hq/platform-sdk"><img src="https://img.shields.io/npm/v/@concurrence-hq/platform-sdk.svg" alt="npm version" /></a>
+  <a href="https://github.com/concurrence-hq/concurrence-platform-typescript-sdk/actions/workflows/test.yml"><img src="https://github.com/concurrence-hq/concurrence-platform-typescript-sdk/actions/workflows/test.yml/badge.svg" alt="CI" /></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License" /></a>
 </p>
 
 Typed from the committed `openapi.json` snapshot, validated on active LTS Node releases (20, 22, and 24), and tested as packaged ESM and CommonJS tarballs before release.
+
+> **Moved from `@amigo-ai/platform-sdk`.** This SDK was previously published as
+> `@amigo-ai/platform-sdk` (last version `0.108.1`). That name is deprecated and
+> receives no further releases; existing installs keep working at their pinned
+> versions. To migrate, swap the install and update your imports. The API is
+> unchanged.
+>
+> ```bash
+> npm uninstall @amigo-ai/platform-sdk && npm install @concurrence-hq/platform-sdk
+> ```
+>
+> ```diff
+> - import { AmigoClient } from '@amigo-ai/platform-sdk'
+> + import { AmigoClient } from '@concurrence-hq/platform-sdk'
+> ```
 
 ## Platform context
 
@@ -56,13 +71,13 @@ The docs site remains the primary reference. The repo-local examples stay close 
 ## Installation
 
 ```bash
-npm install @amigo-ai/platform-sdk
+npm install @concurrence-hq/platform-sdk
 ```
 
 ## Quick start
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 const client = new AmigoClient({
   apiKey: 'your-api-key',
@@ -103,7 +118,7 @@ import {
   formatDeviceCodeInstructions,
   TokenManager,
   FileTokenStorage,
-} from '@amigo-ai/platform-sdk'
+} from '@concurrence-hq/platform-sdk'
 
 const result = await loginWithDeviceCode({
   onCode: async (issuance) => {
@@ -143,7 +158,7 @@ as the `api_key` form field, so the configured client key is never sent over
 the wire on the exchange call.
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 const apiKey = process.env.AMIGO_API_KEY
 const workspaceId = process.env.AMIGO_WORKSPACE_ID
@@ -190,7 +205,7 @@ Create a parent external-integration credential from an admin/owner backend.
 The plaintext `client_secret` is returned only once, from create or rotate:
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 const admin = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
 
@@ -222,7 +237,7 @@ At runtime, the backend sequence is:
 5. Rotate the refresh token before the access token expires.
 
 ```typescript
-import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 const backend = new AmigoClient({ apiKey: process.env.AMIGO_API_KEY!, workspaceId })
 
@@ -312,7 +327,7 @@ CI currently validates active LTS Node releases. Standards-based edge/server run
 The SDK ships with generated OpenAPI types and re-exports them for direct use:
 
 ```typescript
-import type { components, operations, paths } from '@amigo-ai/platform-sdk'
+import type { components, operations, paths } from '@concurrence-hq/platform-sdk'
 
 type Agent = components['schemas']['AgentResponse']
 type ListAgentsQuery = operations['list_agents_v1__workspace_id__agents_get']['parameters']['query']
@@ -429,7 +444,7 @@ external-user session tokens for customer text chat. See
 under Authentication for the full walkthroughs.
 
 ```typescript
-import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@amigo-ai/platform-sdk'
+import { EXTERNAL_USER_SESSION_CREATE_SCOPE } from '@concurrence-hq/platform-sdk'
 
 const { access_token, expires_in } = await client.tokens.exchangeApiKey({
   apiKey: process.env.AMIGO_API_KEY!,
@@ -446,7 +461,7 @@ const parent = await client.tokens.exchangeClientCredentials({
 ### Agents
 
 ```typescript
-import type { VoiceSessionProvider } from '@amigo-ai/platform-sdk'
+import type { VoiceSessionProvider } from '@concurrence-hq/platform-sdk'
 
 // Create an agent
 const agent = await client.agents.create({
@@ -512,7 +527,7 @@ console.log(result.result, result.duration_ms)
 Services wire together an agent + context graph + phone channel.
 
 ```typescript
-import type { VoiceSessionProvider } from '@amigo-ai/platform-sdk'
+import type { VoiceSessionProvider } from '@concurrence-hq/platform-sdk'
 
 const { items: services } = await client.services.list()
 const service = await client.services.get('service-id')
@@ -616,7 +631,7 @@ For real-time browser clients, build the text-stream URL and use WebSocket
 subprotocol auth so the token is not placed in the URL:
 
 ```typescript
-import { textStreamAuthProtocols } from '@amigo-ai/platform-sdk'
+import { textStreamAuthProtocols } from '@concurrence-hq/platform-sdk'
 
 const apiKey = process.env.AMIGO_API_KEY!
 const url = client.conversations.textStreamUrl({ serviceId: 'service-id' })
@@ -666,7 +681,7 @@ dispatch. Server emits a structured `error` frame with a stable `code` on
 terminal failures — narrow with the typed error guard:
 
 ```typescript
-import { isWorkspaceEventStreamError } from '@amigo-ai/platform-sdk'
+import { isWorkspaceEventStreamError } from '@concurrence-hq/platform-sdk'
 
 onError: (err) => {
   if (isWorkspaceEventStreamError(err)) {
@@ -753,7 +768,7 @@ console.log(source.source_type, source.health_status, source.last_sync_at)
 ### Settings
 
 ```typescript
-import type { SttProvider, TtsProvider } from '@amigo-ai/platform-sdk'
+import type { SttProvider, TtsProvider } from '@concurrence-hq/platform-sdk'
 
 // Voice
 const voice = await client.settings.voice.get()
@@ -888,7 +903,7 @@ const result = await client.workspaceDataQueries.invoke(query.id, {
 Use the raw request body when verifying webhook deliveries. Timestamped signatures are replay-protected by default.
 
 ```typescript
-import { parseWebhookEvent, WebhookVerificationError } from '@amigo-ai/platform-sdk'
+import { parseWebhookEvent, WebhookVerificationError } from '@concurrence-hq/platform-sdk'
 
 const body = await request.text()
 
@@ -913,7 +928,7 @@ try {
 If your delivery channel only provides a legacy HMAC without a timestamp, the original helper signature still works:
 
 ```typescript
-import { parseWebhookEvent } from '@amigo-ai/platform-sdk'
+import { parseWebhookEvent } from '@concurrence-hq/platform-sdk'
 
 const event = await parseWebhookEvent(rawBody, signature, secret)
 ```
@@ -936,7 +951,7 @@ const client = new AmigoClient({
 The SDK now exposes first-class async auto-pagination helpers on collection resources:
 
 ```typescript
-import { AmigoClient } from '@amigo-ai/platform-sdk'
+import { AmigoClient } from '@concurrence-hq/platform-sdk'
 
 for await (const agent of client.agents.listAutoPaging({ limit: 100 })) {
   console.log(agent.name)
@@ -960,7 +975,7 @@ import {
   isNotFoundError,
   isRateLimitError,
   isAuthenticationError,
-} from '@amigo-ai/platform-sdk'
+} from '@concurrence-hq/platform-sdk'
 
 try {
   await client.agents.get('agent-id')
@@ -998,7 +1013,7 @@ Webhook verification errors are separate from API transport errors and throw `We
 ## CommonJS (CJS) usage
 
 ```javascript
-const { AmigoClient } = require('@amigo-ai/platform-sdk')
+const { AmigoClient } = require('@concurrence-hq/platform-sdk')
 ```
 
 ## License
