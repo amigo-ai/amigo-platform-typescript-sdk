@@ -14,13 +14,13 @@
     "voice",
     "world-model"
   ],
-  "homepage": "https://github.com/amigo-ai/amigo-platform-typescript-sdk",
+  "homepage": "https://github.com/concurrence-hq/concurrence-platform-typescript-sdk",
   "bugs": {
-    "url": "https://github.com/amigo-ai/amigo-platform-typescript-sdk/issues"
+    "url": "https://github.com/concurrence-hq/concurrence-platform-typescript-sdk/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/amigo-ai/amigo-platform-typescript-sdk.git"
+    "url": "git+https://github.com/concurrence-hq/concurrence-platform-typescript-sdk.git"
   },
   "license": "MIT",
   "author": "Amigo Inc.",
