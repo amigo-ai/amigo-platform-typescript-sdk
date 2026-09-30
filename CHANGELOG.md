@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.109.0] - 2026-09-30
+
+### Improvements
+
+- fix!: sync SDK types to platform main + remove post-call accuracy fields (#458)
+- fix!: sync SDK types to platform main (bbfd1e26) (#456)
+
 ## [0.108.1] - 2026-09-08
 
 ### Security
