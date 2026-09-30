@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.109.1] - 2026-09-30
+
+### Bug Fixes
+
+- align npm repository metadata with renamed SDK repository (#462)
+
 ## [0.109.0] - 2026-09-30
 
 ### Improvements
