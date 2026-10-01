@@ -526,6 +526,34 @@ await client.services.update(service.id, {
 })
 ```
 
+### Runs
+
+List conversation and framework runs with optional service, kind, channel, and status filters.
+Values within a filter match any selected value; different filters combine. Omitted or empty
+filters leave that dimension unfiltered.
+
+```typescript
+const runs = await client.runs.list({
+  serviceId: ['00000000-0000-0000-0000-000000000101'],
+  kind: ['conversation'],
+  channel: ['voice'],
+  status: ['live', 'completed'],
+  limit: 25,
+})
+
+// Keep the service filter when requesting the next page.
+if (runs.has_more) {
+  const nextPage = await client.runs.list({
+    serviceId: ['00000000-0000-0000-0000-000000000101'],
+    kind: ['conversation'],
+    channel: ['voice'],
+    status: ['live', 'completed'],
+    continuationToken: runs.continuation_token,
+  })
+  console.log(nextPage.items)
+}
+```
+
 ### World Model
 
 The world model tracks entities (patients, contacts, appointments) and the events that flow through them.

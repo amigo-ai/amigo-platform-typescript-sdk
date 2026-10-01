@@ -4671,7 +4671,7 @@ export interface paths {
         };
         /**
          * List runs (framework + conversation)
-         * @description Paginated, newest-first list of runs for the workspace behind the unified ``Run`` contract. Federates framework runs (Delta ``world.runs`` MV) and conversation runs (Lakebase ``world.conversations``) at read time. Filter by ``kind`` (conversation / framework), ``channel`` (voice/text/sms/email/web — conversation runs only), and ``status`` (``live`` expands to running + paused). ``continuation_token`` is an opaque page cursor.
+         * @description Paginated, newest-first list of runs for the workspace behind the unified ``Run`` contract. Federates framework runs (Delta ``world.runs`` MV) and conversation runs (Lakebase ``world.conversations``) at read time. Filter by ``kind`` (conversation / framework), ``channel`` (voice/text/sms/email/web — conversation runs only), ``status`` (``live`` expands to running + paused), and ``service_id`` (service UUIDs). Repeated filter values are ORed within each axis; axes combine with AND. Service filtering includes framework, conversation, and live voice runs before pagination. ``continuation_token`` is an opaque page cursor.
          */
         get: operations["list_runs_v1__workspace_id__runs_get"];
         put?: never;
@@ -39613,6 +39613,8 @@ export interface operations {
                 status?: ("live" | "running" | "paused" | "completed" | "failed" | "timed_out")[];
                 kind?: ("conversation" | "framework")[];
                 channel?: ("voice" | "text" | "sms" | "email" | "web")[];
+                /** @description Filter by service IDs. Repeated values are ORed; combines with other filters using AND. */
+                service_id?: string[];
             };
             header?: never;
             path: {

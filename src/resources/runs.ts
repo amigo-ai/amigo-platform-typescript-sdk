@@ -19,8 +19,9 @@ import { WorkspaceScopedResource, extractData } from './base.js'
  */
 export class RunsResource extends WorkspaceScopedResource {
   /**
-   * Paginated, newest-first list of runs. `kind` / `channel` / `status` are
-   * multi-value OR-filters (repeat within an axis, AND across axes); `status`
+   * Paginated, newest-first list of runs. `kind` / `channel` / `status` /
+   * `serviceId` are multi-value OR-filters (repeat within an axis, AND across
+   * axes); omitted or empty filters leave that axis unfiltered. `status`
    * accepts the virtual `live` (running + paused). `continuationToken` is the
    * opaque cursor from a prior page — round-trip it verbatim.
    */
@@ -30,6 +31,7 @@ export class RunsResource extends WorkspaceScopedResource {
     kind?: ('conversation' | 'framework')[]
     channel?: ('voice' | 'text' | 'sms' | 'email' | 'web')[]
     status?: ('live' | 'running' | 'paused' | 'completed' | 'failed' | 'timed_out')[]
+    serviceId?: string[]
     sortBy?: string[]
   }) {
     return extractData(
@@ -42,6 +44,7 @@ export class RunsResource extends WorkspaceScopedResource {
             kind: params?.kind,
             channel: params?.channel,
             status: params?.status,
+            service_id: params?.serviceId,
             sort_by: params?.sortBy,
           },
         },
