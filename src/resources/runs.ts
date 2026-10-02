@@ -21,7 +21,10 @@ export class RunsResource extends WorkspaceScopedResource {
   /**
    * Paginated, newest-first list of runs. `kind` / `channel` / `status` /
    * `serviceId` are multi-value OR-filters (repeat within an axis, AND across
-   * axes); omitted or empty filters leave that axis unfiltered. `status`
+   * axes); omitted or empty filters leave that axis unfiltered. The API accepts
+   * up to 100 service IDs and filters conversations and live voice runs before
+   * pagination. Historical framework runs have no stored service attribution
+   * and are excluded when a service is selected. `status`
    * accepts the virtual `live` (running + paused). `continuationToken` is the
    * opaque cursor from a prior page — round-trip it verbatim.
    */
