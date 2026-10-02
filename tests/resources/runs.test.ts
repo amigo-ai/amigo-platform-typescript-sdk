@@ -4,6 +4,7 @@ import { AmigoClient } from '../../src/index.js'
 const TEST_API_KEY = 'test-api-key-abc123'
 const TEST_WORKSPACE_ID = 'ws-00000000-0000-0000-0000-000000000001'
 const RUN_ID = 'run-00000000-0000-0000-0000-000000000001'
+const SERVICE_IDS = ['00000000-0000-0000-0000-000000000101', '00000000-0000-0000-0000-000000000102']
 const BASE = `/v1/${TEST_WORKSPACE_ID}`
 
 function mockFetch(
@@ -108,10 +109,56 @@ describe('RunsResource', () => {
         return Response.json({ items: [], has_more: false, continuation_token: null })
       },
     })
-    await capturing.runs.list({ status: ['live', 'completed'], channel: ['voice'] })
+    await capturing.runs.list({
+      serviceId: SERVICE_IDS,
+      kind: ['conversation', 'framework'],
+      status: ['live', 'completed'],
+      channel: ['voice'],
+      limit: 25,
+      continuationToken: 'next-page',
+    })
     const query = new URL(capturedUrl).searchParams
+    expect(query.getAll('service_id')).toEqual(SERVICE_IDS)
+    expect(query.has('serviceId')).toBe(false)
+    expect(query.getAll('kind')).toEqual(['conversation', 'framework'])
     expect(query.getAll('status')).toEqual(['live', 'completed'])
     expect(query.getAll('channel')).toEqual(['voice'])
+    expect(query.get('limit')).toBe('25')
+    expect(query.get('continuation_token')).toBe('next-page')
+  })
+
+  it.each([undefined, { serviceId: [] }])('list(%j) leaves services unfiltered', async (params) => {
+    let capturedUrl = ''
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request): Promise<Response> => {
+        capturedUrl = input instanceof Request ? input.url : input.toString()
+        return Response.json({ items: [], has_more: false, continuation_token: null })
+      },
+    })
+
+    await capturing.runs.list(params)
+
+    expect(new URL(capturedUrl).searchParams.has('service_id')).toBe(false)
+  })
+
+  it('list() accepts one service alongside a page cursor', async () => {
+    let capturedUrl = ''
+    const capturing = new AmigoClient({
+      apiKey: TEST_API_KEY,
+      workspaceId: TEST_WORKSPACE_ID,
+      fetch: async (input: string | URL | Request): Promise<Response> => {
+        capturedUrl = input instanceof Request ? input.url : input.toString()
+        return Response.json({ items: [], has_more: false, continuation_token: null })
+      },
+    })
+
+    await capturing.runs.list({ serviceId: [SERVICE_IDS[0]!], continuationToken: 'next-page' })
+
+    const query = new URL(capturedUrl).searchParams
+    expect(query.getAll('service_id')).toEqual([SERVICE_IDS[0]])
+    expect(query.get('continuation_token')).toBe('next-page')
   })
 
   it('summary() returns aggregate counts', async () => {
