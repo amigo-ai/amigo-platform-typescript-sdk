@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.110.0] - 2026-10-03
+
+### Features
+
+- expose service filters in the SDK (#463)
+
+### Maintenance
+
+- add ccrowley96 as SDK code owner (#464)
+
 ## [0.109.1] - 2026-09-30
 
 ### Bug Fixes
