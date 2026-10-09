@@ -648,18 +648,22 @@ function parseSSEBlock(block: string): SSEFrame | null {
 // known union members.
 // ---------------------------------------------------------------------------
 
-const KNOWN_TURN_STREAM_EVENTS: ReadonlySet<TurnStreamEvent['event']> = new Set([
-  'token',
-  'thinking',
-  'tool_call_started',
-  'tool_call_completed',
-  'message',
-  'done',
-  'error',
-])
+// Keyed by the generated union, so a spec regen that adds or removes a
+// `TurnStreamEvent` member fails typecheck here instead of silently dropping
+// the new frame.
+const KNOWN_TURN_STREAM_EVENTS = {
+  token: true,
+  artifact: true,
+  thinking: true,
+  tool_call_started: true,
+  tool_call_completed: true,
+  message: true,
+  done: true,
+  error: true,
+} as const satisfies Record<TurnStreamEvent['event'], true>
 
 function parseTurnStreamFrame(eventName: string, dataJson: string): TurnStreamEvent | null {
-  if (!(KNOWN_TURN_STREAM_EVENTS as ReadonlySet<string>).has(eventName)) return null
+  if (!Object.hasOwn(KNOWN_TURN_STREAM_EVENTS, eventName)) return null
   let payload: unknown
   try {
     payload = JSON.parse(dataJson)
