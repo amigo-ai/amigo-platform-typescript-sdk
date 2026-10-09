@@ -1086,6 +1086,7 @@ describe('ConversationsResource', () => {
       'event: token\ndata: {"text":" "}\n\n',
       'event: token\ndata: {"text":"world"}\n\n',
       'event: thinking\ndata: {"tier":1,"tier_name":"fast"}\n\n',
+      'event: artifact\ndata: {"type":"surface.link","schema_version":"1","payload":{"url":"https://example.test/s/abc"}}\n\n',
       'event: tool_call_started\ndata: {"tool_name":"lookup","call_id":"call-1","input":"{}"}\n\n',
       'event: tool_call_completed\ndata: {"tool_name":"lookup","call_id":"call-1","result":"ok","succeeded":true}\n\n',
       'event: message\ndata: {"role":"agent","text":"Hello world"}\n\n',
@@ -1114,11 +1115,19 @@ describe('ConversationsResource', () => {
       'token',
       'token',
       'thinking',
+      'artifact',
       'tool_call_started',
       'tool_call_completed',
       'message',
       'done',
     ])
+    const artifact = events.find((e) => e.event === 'artifact')
+    expect(artifact).toEqual({
+      event: 'artifact',
+      type: 'surface.link',
+      schema_version: '1',
+      payload: { url: 'https://example.test/s/abc' },
+    })
     // Spot-check payloads to confirm the JSON body's fields land on the
     // typed union member alongside the discriminator.
     const tokens = events.filter((e) => e.event === 'token')
@@ -1170,6 +1179,8 @@ describe('ConversationsResource', () => {
     const stream = sseStream([
       // Unknown event discriminator — drift-tolerant skip.
       'event: future_variant\ndata: {"foo":"bar"}\n\n',
+      // Object.prototype keys are not event names.
+      'event: constructor\ndata: {"foo":"bar"}\n\n',
       // Bad JSON — drop, do not throw.
       'event: token\ndata: not-json\n\n',
       // No `data:` field — drop.
