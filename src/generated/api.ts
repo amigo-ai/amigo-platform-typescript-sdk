@@ -2483,26 +2483,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/{workspace_id}/fhir/build-bundle": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Build a FHIR Patient Bundle from user records
-         * @description Expand a flat list of user records (external_id / email / name) into a FHIR collection Bundle, ready to POST to /fhir/import under its `bundle` field. Pure transformation — does NOT import; no entities or events are created. Every Patient gets an MR identifier (external_id when present, else a deterministic derived id — never the raw email) so a later import resolves a stable canonical_id and re-imports stay idempotent at the entity level; external_id also becomes the resource id when spec-valid.
-         */
-        post: operations["fhir-build-user-bundle"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/{workspace_id}/fhir/import": {
         parameters: {
             query?: never;
@@ -3771,6 +3751,23 @@ export interface paths {
         get: operations["list_stratified_fits_v1__workspace_id__m42_stratified_fits_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/v1/{workspace_id}/memory/dimensions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Memory Dimension */
+        post: operations["create-memory-dimension"];
         delete?: never;
         options?: never;
         head?: never;
@@ -8352,6 +8349,8 @@ export interface components {
         Body_upload_intake_file_v1__workspace_id__intake_files_post: {
             /** Dataset */
             dataset: string;
+            /** Doc Metadata */
+            doc_metadata?: string | null;
             /** Document Id */
             document_id?: string | null;
             /** File */
@@ -12624,7 +12623,7 @@ export interface components {
             description: string;
             /**
              * Headers
-             * @description Static request headers.
+             * @description Static headers or exact ``$param.<name>`` input-parameter bindings.
              */
             headers?: {
                 [key: string]: string;
@@ -14283,33 +14282,6 @@ export interface components {
             /** Status */
             status?: string | null;
         };
-        /**
-         * FhirBuildBundleRequest
-         * @description Request body for ``POST /fhir/build-bundle``.
-         *
-         *     Bundle building is a pure transformation, so this carries only the user
-         *     rows — provenance/dedup options (``source``, ``dedup``, …) belong to the
-         *     downstream ``POST /fhir/import`` call, not to bundle construction.
-         */
-        FhirBuildBundleRequest: {
-            /** Users */
-            users: components["schemas"]["FhirPatientUser"][];
-        };
-        /**
-         * FhirBundleResponse
-         * @description Response for ``POST /fhir/build-bundle`` — the built FHIR Bundle.
-         *
-         *     ``bundle`` is the exact value ``POST /fhir/import`` expects nested under its
-         *     ``bundle`` field; ``patient_count`` echoes how many Patients were built.
-         */
-        FhirBundleResponse: {
-            /** Bundle */
-            bundle: {
-                [key: string]: unknown;
-            };
-            /** Patient Count */
-            patient_count: number;
-        };
         /** FhirImportRequest */
         FhirImportRequest: {
             /** Bundle */
@@ -14515,38 +14487,6 @@ export interface components {
             patients: components["schemas"]["FhirPatientView"][];
             /** Total */
             total: number;
-        };
-        /**
-         * FhirPatientUser
-         * @description One caller-friendly user row for ``POST /fhir/build-bundle``.
-         *
-         *     A flat identity shape (email / name / external id) that the server expands
-         *     into a FHIR Patient resource, so integrators onboarding users don't have to
-         *     hand-author FHIR. ``external_id`` becomes the Patient MR identifier (and,
-         *     when spec-valid, the FHIR resource id) — the anchor a later import uses for
-         *     the entity's canonical id / source-system binding (e.g. the FAM user UUID).
-         *     Supply either ``name`` (full) or ``first_name`` / ``last_name``.
-         */
-        FhirPatientUser: {
-            /**
-             * Email
-             * @description Validated email; becomes an email telecom on the Patient.
-             */
-            email?: string | null;
-            /**
-             * External Id
-             * @description Stable source-system id (e.g. FAM user UUID). Becomes the Patient MR identifier and, when it satisfies the FHIR id grammar, the resource id. Capped at 64 to match the FHIR Resource.id length.
-             */
-            external_id?: string | null;
-            /** First Name */
-            first_name?: string | null;
-            /** Last Name */
-            last_name?: string | null;
-            /**
-             * Name
-             * @description Full name; used when first_name/last_name are not supplied.
-             */
-            name?: string | null;
         };
         /** FhirPatientView */
         FhirPatientView: {
@@ -15650,6 +15590,15 @@ export interface components {
              */
             dataset: string;
             /**
+             * Doc Metadata
+             * @description Caller-supplied tags linking the document to a real-world subject (V385) —
+             *     e.g. ``{"patient_id": "…"}``. Set at upload for the whole document version
+             *     chain. ``{}`` for a document with no tags; null only for snapshot/CSV rows.
+             */
+            doc_metadata?: {
+                [key: string]: string;
+            } | null;
+            /**
              * Document Id
              * @description The document this version belongs to (§5.9). Null for snapshot/CSV rows;
              *     set for documents — the console groups versions by it and the version chain.
@@ -15797,6 +15746,13 @@ export interface components {
             endpoint: string;
             /** Integration */
             integration: string;
+            /**
+             * Skill Input Bindings
+             * @description Endpoint parameter -> parent skill input mappings injected at dispatch.
+             */
+            skill_input_bindings?: {
+                [key: string]: string;
+            };
         };
         /**
          * InteractionDynamics
@@ -19126,7 +19082,7 @@ export interface components {
             /** Max Output Tokens */
             max_output_tokens?: number | "inf" | null;
             /** Model */
-            model?: ("gpt-realtime-1.5" | "gpt-realtime-2" | "gpt-realtime-2.1" | "gpt-realtime-2.1-mini") | null;
+            model?: ("gpt-realtime-2.1" | "gpt-realtime-2.1-mini") | null;
             /**
              * Noise Reduction
              * @description Input noise reduction. Omit or set null to use the Platform default; set 'off' to disable it.
@@ -19157,10 +19113,10 @@ export interface components {
             language?: string | null;
             /**
              * Model
-             * @default gpt-4o-transcribe
-             * @enum {string}
+             * @default gpt-transcribe
+             * @constant
              */
-            model?: "whisper-1" | "gpt-4o-mini-transcribe" | "gpt-4o-transcribe";
+            model?: "gpt-transcribe";
             /** Prompt */
             prompt?: string | null;
         };
@@ -20699,8 +20655,6 @@ export interface components {
             tts_config?: {
                 [key: string]: unknown;
             } | null;
-            /** Tts Model */
-            tts_model?: ("sonic-turbo" | "sonic-3") | null;
             /** Tts Provider */
             tts_provider?: ("cartesia" | "elevenlabs") | null;
         };
@@ -20771,8 +20725,6 @@ export interface components {
             tts_config?: {
                 [key: string]: unknown;
             } | null;
-            /** Tts Model */
-            tts_model?: ("sonic-turbo" | "sonic-3") | null;
             /** Tts Provider */
             tts_provider?: ("cartesia" | "elevenlabs") | null;
         };
@@ -23502,7 +23454,7 @@ export interface components {
          *     ``error`` so the DC can render the executor's failure detail inline
          *     rather than a generic "Invocation failed." The underlying invoke
          *     uses the same path; ``status`` / ``error`` are filled in by
-         *     ``service.test`` after catching any ``HTTPException`` (503) from the
+         *     ``service.test`` after catching an ``HTTPException`` (503 or 422) from the
          *     executor, so the route never bubbles a 5xx for a logical SQL
          *     failure — it's still a 200 with ``status=fail`` so the caller can
          *     show the message.
@@ -24037,6 +23989,10 @@ export interface components {
             audio_filler_triggered_after?: number | null;
             /** Audio Fillers */
             audio_fillers?: string[] | null;
+            /** Context Binding Aliases */
+            context_binding_aliases?: {
+                [key: string]: components["schemas"]["SlugString"];
+            };
             /** Context Bindings */
             context_bindings?: string[];
             /**
@@ -27112,6 +27068,13 @@ export interface components {
             endpoint: string;
             /** Integration */
             integration: string;
+            /**
+             * Skill Input Bindings
+             * @description Endpoint parameter -> parent skill input mappings injected at dispatch.
+             */
+            skill_input_bindings?: {
+                [key: string]: string;
+            };
         };
         /**
          * StaticToolDef
@@ -27291,7 +27254,7 @@ export interface components {
             description: string;
             /**
              * Headers
-             * @description Static headers merged into every request.
+             * @description Request headers. An exact ``$param.<name>`` value binds and consumes an input parameter.
              */
             headers?: {
                 [key: string]: string;
@@ -27639,6 +27602,13 @@ export interface components {
             endpoint: string;
             /** Integration */
             integration: string;
+            /**
+             * Skill Input Bindings
+             * @default {}
+             */
+            skill_input_bindings?: {
+                [key: string]: string;
+            };
         };
         /** StaticToolDef */
         src__routes__internal_skills__StaticToolDef: {
@@ -27650,6 +27620,18 @@ export interface components {
             };
             /** Name */
             name: string;
+        };
+        /** Request */
+        src__routes__memory_dimensions__create_memory_dimension__Request: {
+            /** Description */
+            description: string;
+            /** Key */
+            key: string;
+            /**
+             * Service Id
+             * Format: uuid
+             */
+            service_id: string;
         };
         /** AuditEventResponse */
         src__routes__operators_models__AuditEventResponse: {
@@ -31207,6 +31189,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description A call with this idempotency_key is still being placed (retry shortly), or the key was used for a different call */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
             /** @description Validation Error */
             422: {
                 headers: {
@@ -31230,7 +31219,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Voice agent, outbound calls, or channel manager not configured */
+            /** @description The call could not be placed; retry with the same idempotency_key */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -34706,39 +34695,6 @@ export interface operations {
             };
         };
     };
-    "fhir-build-user-bundle": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                workspace_id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["FhirBuildBundleRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FhirBundleResponse"];
-                };
-            };
-            /** @description Invalid user list. */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     "fhir-import": {
         parameters: {
             query?: never;
@@ -37671,6 +37627,39 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["StratifiedFitsResponse"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    "create-memory-dimension": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workspace_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["src__routes__memory_dimensions__create_memory_dimension__Request"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {
